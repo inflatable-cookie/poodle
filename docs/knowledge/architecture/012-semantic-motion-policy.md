@@ -109,11 +109,14 @@ and rotation. Layout, blur, path drawing, gradients, filters, canvas, and 3D
 effects need a separate role-specific decision and a static or reduced
 fallback.
 
-GPUI 0.2.2 realizes a smaller subset: generic opacity and SVG rotation.
-Translation and scale may use a named bounded opacity approximation, or the
-static endpoint when opacity would mislead. Every approximation is recorded by
-role and remains an active-cohort visual capability gap. It is never reported
-as exact visual parity.
+GPUI 0.2.2 realizes generic opacity, SVG rotation, and translation.
+Translation is applied as a relative-position inset: taffy offsets the element
+visually without reflowing siblings and the hitbox follows, so a translated
+element really moves rather than being reported as an approximation. Scale
+has no channel: it may use the named bounded opacity approximation, or the
+static endpoint when opacity would mislead. Every remaining approximation is
+recorded by role and stays an active-cohort visual capability gap. It is
+never reported as exact visual parity.
 
 Disclosure height interpolation is the first pilot's one named layout-motion
 exception. Full web mode may animate the clipped block axis; reduced and

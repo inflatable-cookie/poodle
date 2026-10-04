@@ -130,12 +130,23 @@ pub fn filter_motion_properties(
     }
 }
 
+/// Which properties GPUI 0.2.2 actually realizes, and what it approximates.
+///
+/// Opacity paints directly, SVG rotation rides the SVG transform channel, and
+/// translation is realized as a relative-position inset (the backend applies
+/// the sampled offset as `top`/`left`, so a translated element really moves
+/// without reflowing siblings). Scale has no channel: when opacity is also
+/// declared it stays the named bounded opacity stand-in, and a layout
+/// property (height) falls back to the static endpoint.
 pub fn gpui_motion_plan(properties: &[MotionProperty]) -> GpuiMotionPlan {
     let mut applied = Vec::new();
     let mut dropped = Vec::new();
     for property in properties {
         match property {
-            MotionProperty::Opacity | MotionProperty::Rotate => applied.push(*property),
+            MotionProperty::Opacity
+            | MotionProperty::Rotate
+            | MotionProperty::TranslateX
+            | MotionProperty::TranslateY => applied.push(*property),
             other => dropped.push(*other),
         }
     }
@@ -784,9 +795,20 @@ mod tests {
         let height = gpui_motion_plan(&[MotionProperty::Height]);
         assert_eq!(height.approximation, GpuiApproximation::StaticEndpoint);
         assert!(height.applied.is_empty());
+        // Translation is realized (relative inset), so a toast enter needs no
+        // approximation at all.
         let toast = gpui_motion_plan(&[MotionProperty::Opacity, MotionProperty::TranslateY]);
-        assert_eq!(toast.approximation, GpuiApproximation::OpacityStandIn);
-        assert_eq!(toast.applied, vec![MotionProperty::Opacity]);
+        assert_eq!(toast.approximation, GpuiApproximation::None);
+        assert_eq!(
+            toast.applied,
+            vec![MotionProperty::Opacity, MotionProperty::TranslateY]
+        );
+        assert!(toast.dropped.is_empty());
+        // Scale still has no channel and keeps the named opacity stand-in.
+        let scaled = gpui_motion_plan(&[MotionProperty::Opacity, MotionProperty::ScaleX]);
+        assert_eq!(scaled.approximation, GpuiApproximation::OpacityStandIn);
+        assert_eq!(scaled.applied, vec![MotionProperty::Opacity]);
+        assert_eq!(scaled.dropped, vec![MotionProperty::ScaleX]);
         let spin = gpui_motion_plan(&[MotionProperty::Rotate]);
         assert_eq!(spin.approximation, GpuiApproximation::None);
     }

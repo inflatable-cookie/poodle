@@ -1230,19 +1230,38 @@ where
         return el.into_any_element();
     };
     record_probe_channel("surface.animation.scheduled");
-    if sample_property(anim, AnimProperty::TranslateX, 0.0).is_some()
-        || sample_property(anim, AnimProperty::TranslateY, 0.0).is_some()
-        || sample_property(anim, AnimProperty::ScaleX, 0.0).is_some()
-        || sample_property(anim, AnimProperty::ScaleY, 0.0).is_some()
-    {
+    // Translation is realized as a relative-position inset. Taffy applies a
+    // relative inset as a visual offset that leaves sibling layout alone —
+    // the same displacement a paint transform would produce, with the hitbox
+    // following — so a translated row really moves. Scale still has no
+    // channel, so an opacity-bearing scale animation keeps the named opacity
+    // stand-in. An absolute node keeps its authored insets: its translation
+    // has nowhere safe to land without moving the anchor.
+    let translated = sample_property(anim, AnimProperty::TranslateX, 0.0).is_some()
+        || sample_property(anim, AnimProperty::TranslateY, 0.0).is_some();
+    let scaled = sample_property(anim, AnimProperty::ScaleX, 0.0).is_some()
+        || sample_property(anim, AnimProperty::ScaleY, 0.0).is_some();
+    if translated {
+        record_probe_channel("surface.animation.applied.translation");
+    }
+    if scaled && sample_property(anim, AnimProperty::Opacity, 0.0).is_some() {
         record_probe_channel("surface.animation.approximation.opacity-stand-in");
     }
+    let anchored = matches!(node.position, NodePosition::Absolute { .. });
     let anim = anim.clone();
     let id = element_id(node);
     el.with_animation(id, gpui_animation(&anim), move |el, t| {
         let mut el = el;
         if let Some(v) = sample_property(&anim, AnimProperty::Opacity, t) {
             el = el.opacity(v);
+        }
+        if !anchored {
+            if let Some(x) = sample_property(&anim, AnimProperty::TranslateX, t) {
+                el = el.left(px(x));
+            }
+            if let Some(y) = sample_property(&anim, AnimProperty::TranslateY, t) {
+                el = el.top(px(y));
+            }
         }
         el
     })

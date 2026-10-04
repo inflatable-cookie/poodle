@@ -382,8 +382,10 @@ ordinary host focus order. Only then retain any inert visual remnant.
   same-id replacement keeps its row and phase, a new row enters, and a removed
   row leaves an exit remnant at the tail.
 - the enter and leave treatments are bounded opacity/translation clocks under
-  `full`, opacity only under `reduced`, and nothing under `frozen` (the
-  endpoint paints immediately and a removed row drops with no remnant).
+  `full`; GPUI applies the translation as a relative-position inset, so the
+  row really moves. Under `reduced` the translation is dropped and only the
+  short opacity phase remains; under `frozen` nothing runs (the endpoint
+  paints immediately and a removed row drops with no remnant).
 - the exit remnant is inert paint: it declares `NodeA11y::hidden`, owns no
   focus stop, cursor, hover/active restyle, or activation, and drops its
   semantic id, so it leaves live-region, accessibility, focus, and hit-test

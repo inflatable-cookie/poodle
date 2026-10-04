@@ -34941,7 +34941,7 @@ fn markdown_editor_bounded_preview_scrolls_under_host_height() {
 
 /// g16.034. Construction-time motion: loops wait for a committed first frame,
 /// preloaded toasts paint the endpoint, underline is one paint-only indicator,
-/// and unsupported translation is a named GPUI approximation.
+/// and translation is applied as a real relative-position inset.
 #[test]
 fn mounted_motion_policy_construction_does_not_invent_clocks() {
     run_headless(|cx| {
@@ -35039,29 +35039,51 @@ fn mounted_motion_policy_construction_does_not_invent_clocks() {
         assert_eq!(selected.style.border_bottom_width, None);
         assert_eq!(selected.style.border_color_bottom, None);
 
-        let mut translated = Node::container();
-        translated.style.animation = Some(NodeAnimation {
-            key: "g16-034-translate".into(),
-            keyframes: vec![
-                AnimKeyframe {
-                    at: 0.0,
-                    values: vec![(AnimProperty::TranslateY, 8.0)],
-                },
-                AnimKeyframe {
-                    at: 1.0,
-                    values: vec![(AnimProperty::TranslateY, 0.0)],
-                },
-            ],
-            duration_secs: 0.18,
-            easing: AnimEasing::EaseOut,
-            loop_mode: AnimLoop::Once,
-        });
-        *tree.lock().expect("tree lock") = translated;
+        let translated_node = |animated: bool| {
+            let mut node = Node::container();
+            node.id = Some("g16-034-translate".into());
+            node.style.descriptor.layout.width = LayoutSizing::Fixed(40.0);
+            node.style.descriptor.layout.height = LayoutSizing::Fixed(20.0);
+            if animated {
+                node.style.animation = Some(NodeAnimation {
+                    key: "g16-034-translate".into(),
+                    keyframes: vec![
+                        AnimKeyframe {
+                            at: 0.0,
+                            values: vec![(AnimProperty::TranslateY, 8.0)],
+                        },
+                        AnimKeyframe {
+                            at: 1.0,
+                            values: vec![(AnimProperty::TranslateY, 0.0)],
+                        },
+                    ],
+                    duration_secs: 0.18,
+                    easing: AnimEasing::EaseOut,
+                    loop_mode: AnimLoop::Once,
+                });
+            }
+            node
+        };
+        *tree.lock().expect("tree lock") = translated_node(true);
         driver.draw_frame();
+        let animated = poodle_gpui_node_backend::bounds_for("g16-034-translate")
+            .expect("translated node paints");
         let channels = capture.lock().expect("capture lock").clone();
         assert!(
-            channels.contains(&"surface.animation.approximation.opacity-stand-in"),
-            "unsupported translation must stay a named approximation: {channels:?}"
+            channels.contains(&"surface.animation.applied.translation"),
+            "translation is applied as a relative inset: {channels:?}"
+        );
+        assert!(
+            !channels.contains(&"surface.animation.approximation.opacity-stand-in"),
+            "an applied translation is no longer an opacity stand-in: {channels:?}"
+        );
+        *tree.lock().expect("tree lock") = translated_node(false);
+        driver.draw_frame();
+        let rested =
+            poodle_gpui_node_backend::bounds_for("g16-034-translate").expect("rested node paints");
+        assert!(
+            f32::from(animated.origin.y) > f32::from(rested.origin.y) + 1.0,
+            "the enter treatment really displaces the row: {animated:?} vs {rested:?}"
         );
     });
 }
@@ -48686,17 +48708,24 @@ fn toast_stack_renderer_owned_presence_phases_and_inert_remnant() {
             late.a11y_hidden, None,
             "a live entering row keeps its semantics"
         );
+        let entering_bounds = poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:late")
+            .expect("entering row paints");
         let channels = poodle_gpui_node_backend::take_probe_capture();
         assert!(
             channels.contains(&"surface.animation.scheduled"),
             "the entering row runs a bounded clock"
         );
         assert!(
-            channels.contains(&"surface.animation.approximation.opacity-stand-in"),
-            "full translation is named as the opacity stand-in"
+            channels.contains(&"surface.animation.applied.translation"),
+            "full motion applies the declared translation: {channels:?}"
+        );
+        assert!(
+            !channels.contains(&"surface.animation.approximation.opacity-stand-in"),
+            "an applied translation is not an opacity stand-in: {channels:?}"
         );
 
-        // The host reports the enter finished: the settled repaint has no clock.
+        // The host reports the enter finished: the settled repaint has no clock,
+        // and the translated paint has moved to the settled endpoint.
         presence.lock().expect("presence ledger").settle("late");
         poodle_gpui_node_backend::begin_probe_capture();
         driver.draw_frame();
@@ -48707,6 +48736,13 @@ fn toast_stack_renderer_owned_presence_phases_and_inert_remnant() {
                 .get("phase")
                 .map(String::as_str),
             Some("settled")
+        );
+        let settled_bounds = poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:late")
+            .expect("settled row paints");
+        assert!(
+            f32::from(entering_bounds.origin.y) > f32::from(settled_bounds.origin.y) + 1.0,
+            "the full-motion enter translates the row before it settles: \
+             {entering_bounds:?} vs {settled_bounds:?}"
         );
         assert!(
             !poodle_gpui_node_backend::take_probe_capture()
@@ -48733,7 +48769,7 @@ fn toast_stack_renderer_owned_presence_phases_and_inert_remnant() {
         let channels = poodle_gpui_node_backend::take_probe_capture();
         assert!(channels.contains(&"surface.animation.scheduled"));
         assert!(
-            !channels.contains(&"surface.animation.approximation.opacity-stand-in"),
+            !channels.contains(&"surface.animation.applied.translation"),
             "reduced drops translation"
         );
         presence.lock().expect("presence ledger").settle("reduced");

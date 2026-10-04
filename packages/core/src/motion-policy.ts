@@ -116,7 +116,12 @@ export function gpuiMotionPlan(properties: readonly MotionProperty[]): {
   const applied: MotionProperty[] = [];
   const dropped: MotionProperty[] = [];
   for (const property of properties) {
-    if (property === "opacity" || property === "rotate") {
+    if (
+      property === "opacity" ||
+      property === "rotate" ||
+      property === "translateX" ||
+      property === "translateY"
+    ) {
       applied.push(property);
     } else {
       dropped.push(property);
