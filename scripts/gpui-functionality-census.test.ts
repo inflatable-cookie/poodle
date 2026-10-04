@@ -12,6 +12,7 @@ import {
   admitReceiptTextAxes,
   admitTestAxes,
   CENSUS_JSON_PATH,
+  deriveCapabilityManifest,
   expectedTestReceiptContent,
   extractTestBody,
   loadExecutionRecord,
@@ -35,6 +36,7 @@ import {
 } from "./component-denominator";
 
 const axes = [...CENSUS_AXES];
+const repositoryRoot = path.resolve(import.meta.dir, "..");
 
 function manifestEntry(overrides: Partial<ManifestEntry> = {}): ManifestEntry {
   return {
@@ -173,6 +175,37 @@ describe("g18.001 census oracles", () => {
     const admission = admitTestAxes(body);
     expect(admission.production).toBe(false);
     expect(admission.axes).toEqual([]);
+  });
+
+  it("production-mount oracle: imported node-compat components mount through the renderer", () => {
+    const source = readFileSync(path.join(repositoryRoot, "packages/gpui/preview/tests/headless_regressions.rs"), "utf8");
+    const cases = [
+      "gpui_mounted_selection_summary_split_actions_and_accessible_names",
+      "gpui_mounted_nav_card_link_button_actions_and_accessibility",
+    ];
+    for (const name of cases) {
+      const body = extractTestBody(repositoryRoot, name);
+      expect(body, name).toBeDefined();
+      const admission = admitTestAxes(body!, source, name);
+      expect(admission.production, name).toBe(true);
+      expect(admission.axes, name).toContain("semantic");
+      expect(observedRenderer(body!, source, name), name).toMatch(/^node_compat-import:/);
+    }
+  });
+
+  it("manifest oracle: callbacks and static summaries follow their contract surfaces", () => {
+    const manifest = deriveCapabilityManifest(repositoryRoot);
+    const pill = manifest.find((entry) => entry.component === "Pill");
+    const paginationSummary = manifest.find((entry) => entry.component === "PaginationSummary");
+    expect(pill?.required).toEqual(axes);
+    expect(pill?.notApplicable).toEqual([]);
+    expect(paginationSummary?.required).toEqual(["semantic", "accessibility", "visual"]);
+    expect(paginationSummary?.notApplicable.map((item) => item.axis)).toEqual([
+      "events",
+      "pointer",
+      "keyboard_focus",
+    ]);
+    expect(paginationSummary?.notApplicable.every((item) => item.contractRef.includes("pagination-summary.md#"))).toBe(true);
   });
 
   it("widened-A2 oracle: platform language can never justify not-applicable", () => {
