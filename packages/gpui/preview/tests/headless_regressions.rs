@@ -43188,7 +43188,10 @@ fn first_mounted_parity_theme_select() {
         driver.pointer_activate_id(MIDNIGHT);
         {
             let host = host.lock().expect("theme host");
-            assert_eq!(host.value, "midnight");
+            assert_eq!(
+                host.value, "midnight",
+                "the change callback carries the chosen theme value"
+            );
             assert!(!host.open, "choosing a theme closes the popover");
             assert_eq!(
                 host.calls,
@@ -43389,7 +43392,10 @@ fn first_mounted_parity_ref_select() {
         driver.pointer_activate_id(TAG);
         {
             let host = host.lock().expect("ref host");
-            assert_eq!(host.value, "v1");
+            assert_eq!(
+                host.value, "v1",
+                "the change callback carries the chosen ref value"
+            );
             assert!(!host.open, "choosing a ref closes the popover");
             assert!(host.calls.contains(&"value:v1".to_owned()));
         }
@@ -43612,7 +43618,8 @@ fn first_mounted_parity_relation_picker() {
         driver.pointer_activate_id(BETA);
         assert_eq!(
             host.lock().expect("relation host").selected,
-            vec!["beta".to_owned()]
+            vec!["beta".to_owned()],
+            "the select callback payload carries the candidate id"
         );
         let border_of = |id: &str| {
             poodle_gpui_node_backend::painted_node_for(id)
