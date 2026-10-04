@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `f548373b78aeaae5286c15f2643f507b33a2c488`
+Evidence commit (execution identity from the execution record, not the checkout): `b0ce71cc7a597137953177b6ada51d56dc51d821`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
@@ -15,9 +15,9 @@ Construction is not functional completion. A passing route, a test name, or one 
 ## Summary
 
 Rows with at least one admitted capability: **84**/175.
-Fully admitted rows: **58**/175.
-Missing by axis: semantic 91; events 82; pointer 91; keyboard_focus 84; accessibility 99; visual 113.
-Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **165**.
+Fully admitted rows: **61**/175.
+Missing by axis: semantic 91; events 79; pointer 88; keyboard_focus 84; accessibility 97; visual 110.
+Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **154**.
 
 ## Rows
 
@@ -177,8 +177,8 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **165**.
 | ModelCatalogueEditor | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); keyboard_focus (expected-test); accessibility (expected-test) | pointer; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ModelCatalogueEditor--model-catalogue-editor-grabs-moves-and-cancels-in-a-mounted-window.json` |
 | MessageCenter | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | — |
 | HistoryCenter | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
-| UpdateStatus | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); keyboard_focus (expected-test) | events; pointer; accessibility; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/UpdateStatus--update-status-confirm-then-install-through-the-real-tree.json` |
-| UpdateCenter | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); keyboard_focus (expected-test); accessibility (expected-test) | events; pointer; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/UpdateCenter--update-center-hidden-presence-mounts-nothing-and-open-shows-status.json` |
+| UpdateStatus | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/UpdateStatus--update-status-confirm-then-install-through-the-real-tree.json` |
+| UpdateCenter | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/UpdateCenter--update-center-hidden-presence-mounts-nothing-and-open-shows-status.json` |
 | ToastStack | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | ToastHost | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | — |
 | AudioMeter | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
@@ -196,7 +196,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **165**.
 | XYPad | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test) | visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/XYPad--xy-pad-mounted-parity-through-production-dispatch.json` |
 | AgentMessage | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | AgentPlan | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-a1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/AgentPlan--agent-plan-decisions-rebuild-the-host-spec-through-mounted-input.json` |
-| AgentPlanRecord | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); keyboard_focus (expected-test) | events; pointer; accessibility; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/AgentPlanRecord--agent-plan-record-disclosure-rebuilds-the-host-spec-through-mounted-input.json` |
+| AgentPlanRecord | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/AgentPlanRecord--agent-plan-record-disclosure-rebuilds-the-host-spec-through-mounted-input.json` |
 | AgentTranscript | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | events | accessibility (A2-platform-hold) | — |
 | MarkdownEditor | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 
@@ -341,13 +341,6 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **165**.
 - ModelCatalogueEditor: Expected test model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window proves no pointer claim; pointer stays missing.
 - ModelCatalogueEditor: Expected test model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window proves no visual claim; visual stays missing.
 - HistoryCenter: No validated receipt and no retained expected test for HistoryCenter; every required capability stays missing.
-- UpdateStatus: Expected test update_status_confirm_then_install_through_the_real_tree proves no events claim; events stays missing.
-- UpdateStatus: Expected test update_status_confirm_then_install_through_the_real_tree proves no pointer claim; pointer stays missing.
-- UpdateStatus: Expected test update_status_confirm_then_install_through_the_real_tree proves no accessibility claim; accessibility stays missing.
-- UpdateStatus: Expected test update_status_confirm_then_install_through_the_real_tree proves no visual claim; visual stays missing.
-- UpdateCenter: Expected test update_center_hidden_presence_mounts_nothing_and_open_shows_status proves no events claim; events stays missing.
-- UpdateCenter: Expected test update_center_hidden_presence_mounts_nothing_and_open_shows_status proves no pointer claim; pointer stays missing.
-- UpdateCenter: Expected test update_center_hidden_presence_mounts_nothing_and_open_shows_status proves no visual claim; visual stays missing.
 - ToastStack: No validated receipt and no retained expected test for ToastStack; every required capability stays missing.
 - AudioMeter: No validated receipt and no retained expected test for AudioMeter; every required capability stays missing.
 - AudioSwitch: No validated receipt and no retained expected test for AudioSwitch; every required capability stays missing.
@@ -363,17 +356,13 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **165**.
 - WaveformDisplay: No validated receipt and no retained expected test for WaveformDisplay; every required capability stays missing.
 - XYPad: Expected test xy_pad_mounted_parity_through_production_dispatch proves no visual claim; visual stays missing.
 - AgentMessage: No validated receipt and no retained expected test for AgentMessage; every required capability stays missing.
-- AgentPlanRecord: Expected test agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input proves no events claim; events stays missing.
-- AgentPlanRecord: Expected test agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input proves no pointer claim; pointer stays missing.
-- AgentPlanRecord: Expected test agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input proves no accessibility claim; accessibility stays missing.
-- AgentPlanRecord: Expected test agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input proves no visual claim; visual stays missing.
 - MarkdownEditor: No validated receipt and no retained expected test for MarkdownEditor; every required capability stays missing.
 
 ## Missing-capability groups
 
 Shared-substrate groupings for repair-tranche compilation. Grouping only; no tranche is planned here.
 
-- overlay-dismissal: 35 components (AgentPlanRecord, AlertDialog, ColorPicker, ContextMenu, DataTable, DatePicker, DateRangePicker, DateTimePicker, DateTimeRangePicker, DateTimeZonePicker, DebugDialog, Drawer, Field, FilterBuilder, FilterToolbar, FormDialog, HistoryCenter, HoverCard, ListCardCounter, MediaBrowsePanel, MediaPicker, MediaThumbnail, Menubar, NavigationMenu, PageLoading, PickerShell, RefSelect, RelationPicker, SplitButton, ThemeSelect, ToastStack, Toolbar, UpdateCenter, UpdateStatus, VideoPlayer); missing semantic 32; events 32; pointer 35; keyboard_focus 32; accessibility 34; visual 35
+- overlay-dismissal: 32 components (AlertDialog, ColorPicker, ContextMenu, DataTable, DatePicker, DateRangePicker, DateTimePicker, DateTimeRangePicker, DateTimeZonePicker, DebugDialog, Drawer, Field, FilterBuilder, FilterToolbar, FormDialog, HistoryCenter, HoverCard, ListCardCounter, MediaBrowsePanel, MediaPicker, MediaThumbnail, Menubar, NavigationMenu, PageLoading, PickerShell, RefSelect, RelationPicker, SplitButton, ThemeSelect, ToastStack, Toolbar, VideoPlayer); missing semantic 32; events 29; pointer 32; keyboard_focus 32; accessibility 32; visual 32
 - feedback-status: 21 components (ActionDiscoveryPanel, AgentSubagent, AgentTranscript, Avatar, DetailSectionGroup, DetailShell, EmbedPreview, EmptyState, ErrorBoundary, InlineListSection, LicenceSeats, MetaBar, MetaItem, Meter, PageHeader, PasswordRequirements, Progress, Region, Spinner, StatusBar, ToolCall); missing semantic 16; events 16; pointer 16; keyboard_focus 12; accessibility 19; visual 20
 - drag-resize-reorder: 15 components (AppHeader, BlockEditor, Card, CardRadioGroup, CardToggleGroup, DockRegion, DragNumberField, EditableList, FileUpload, ListCard, MarkdownEditor, ModelCatalogueEditor, Separator, SplitView, TokenInput); missing semantic 8; events 7; pointer 10; keyboard_focus 9; accessibility 10; visual 13
 - form-editing: 13 components (AgentQuestionRecord, Calendar, EmbedInput, Fader, FormActions, FormLayout, Keyboard, Knob, LicenceActivation, NumberInput, Rating, Stepper, ValidationSummary); missing semantic 7; events 6; pointer 8; keyboard_focus 7; accessibility 8; visual 13
