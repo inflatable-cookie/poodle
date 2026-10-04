@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "c01b5010f5c41f64107641c92a30e9a3e28b031b",
+  "source_commit": "3f07f93a400db494be74a0496cace80e9af389c5",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -2088,15 +2088,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_nav_card_link_button_actions_and_accessibility"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_nav_card_link_button_actions_and_accessibility"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_nav_card_link_button_actions_and_accessibility"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_nav_card_link_button_actions_and_accessibility"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_nav_card_link_button_actions_and_accessibility"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_nav_card_link_button_actions_and_accessibility"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2105,10 +2129,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for NavCard; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/NavCard--gpui-mounted-nav-card-link-button-actions-and-accessibility.json"
+      ],
+      "refusals": []
     },
     {
       "component": "NavigationMenu",
@@ -2152,15 +2176,45 @@
       "substrate": "selection-navigation",
       "required": [
         "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_pill_dismiss_actions_are_instance_scoped_and_retain_focus_after_rebuild"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_pill_dismiss_actions_are_instance_scoped_and_retain_focus_after_rebuild"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_pill_dismiss_actions_are_instance_scoped_and_retain_focus_after_rebuild"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_pill_dismiss_actions_are_instance_scoped_and_retain_focus_after_rebuild"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_pill_dismiss_actions_are_instance_scoped_and_retain_focus_after_rebuild"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_pill_dismiss_actions_are_instance_scoped_and_retain_focus_after_rebuild"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2169,10 +2223,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for Pill; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Pill--gpui-mounted-pill-dismiss-actions-are-instance-scoped-and-retain-focus-after-rebuild.json"
+      ],
+      "refusals": []
     },
     {
       "component": "CodeInput",
@@ -2358,21 +2412,27 @@
       "substrate": "selection-navigation",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_pagination_summary_range_live_name_and_geometry"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_pagination_summary_range_live_name_and_geometry"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_pagination_summary_range_live_name_and_geometry"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2381,10 +2441,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for PaginationSummary; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/PaginationSummary--gpui-mounted-pagination-summary-range-live-name-and-geometry.json"
+      ],
+      "refusals": []
     },
     {
       "component": "PasswordRequirements",
@@ -5956,15 +6016,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_selection_summary_split_actions_and_accessible_names"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_selection_summary_split_actions_and_accessible_names"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_selection_summary_split_actions_and_accessible_names"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_selection_summary_split_actions_and_accessible_names"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_selection_summary_split_actions_and_accessible_names"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_selection_summary_split_actions_and_accessible_names"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -5973,10 +6057,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for SelectionSummary; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/SelectionSummary--gpui-mounted-selection-summary-split-actions-and-accessible-names.json"
+      ],
+      "refusals": []
     },
     {
       "component": "SettingsShell",
@@ -7609,18 +7693,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 74,
-    "fullyAdmittedRows": 36,
+    "admittedRows": 78,
+    "fullyAdmittedRows": 40,
     "missingTally": {
-      "semantic": 101,
-      "events": 97,
-      "pointer": 108,
-      "keyboard_focus": 95,
-      "accessibility": 117,
-      "visual": 133
+      "semantic": 97,
+      "events": 94,
+      "pointer": 105,
+      "keyboard_focus": 92,
+      "accessibility": 113,
+      "visual": 129
     },
     "holdCount": 175,
-    "refusalCount": 213
+    "refusalCount": 209
   },
   "groups": [
     {
@@ -7829,47 +7913,6 @@
       ]
     },
     {
-      "substrate": "selection-navigation",
-      "components": [
-        "AudioPlayer",
-        "BulkActionBar",
-        "ChangedFiles",
-        "ListContainer",
-        "LogList",
-        "ModelConnectionPicker",
-        "NavCard",
-        "PaginationSummary",
-        "Pill",
-        "SelectionSummary",
-        "Table",
-        "TimeZoneSelect",
-        "ToolCallGroup"
-      ],
-      "missingTally": {
-        "semantic": 10,
-        "events": 11,
-        "pointer": 12,
-        "keyboard_focus": 9,
-        "accessibility": 13,
-        "visual": 13
-      },
-      "contracts": [
-        "docs/contracts/components/audio-player.md",
-        "docs/contracts/components/bulk-action-bar.md",
-        "docs/contracts/components/changed-files.md",
-        "docs/contracts/components/list-container.md",
-        "docs/contracts/components/log-list.md",
-        "docs/contracts/components/model-connection-picker.md",
-        "docs/contracts/components/nav-card.md",
-        "docs/contracts/components/pagination-summary.md",
-        "docs/contracts/components/pill.md",
-        "docs/contracts/components/selection-summary.md",
-        "docs/contracts/components/table.md",
-        "docs/contracts/components/time-zone-select.md",
-        "docs/contracts/components/tool-call-group.md"
-      ]
-    },
-    {
       "substrate": "form-editing",
       "components": [
         "AgentQuestionRecord",
@@ -7908,6 +7951,39 @@
         "docs/contracts/components/rating.md",
         "docs/contracts/components/stepper.md",
         "docs/contracts/components/validation-summary.md"
+      ]
+    },
+    {
+      "substrate": "selection-navigation",
+      "components": [
+        "AudioPlayer",
+        "BulkActionBar",
+        "ChangedFiles",
+        "ListContainer",
+        "LogList",
+        "ModelConnectionPicker",
+        "Table",
+        "TimeZoneSelect",
+        "ToolCallGroup"
+      ],
+      "missingTally": {
+        "semantic": 6,
+        "events": 8,
+        "pointer": 9,
+        "keyboard_focus": 6,
+        "accessibility": 9,
+        "visual": 9
+      },
+      "contracts": [
+        "docs/contracts/components/audio-player.md",
+        "docs/contracts/components/bulk-action-bar.md",
+        "docs/contracts/components/changed-files.md",
+        "docs/contracts/components/list-container.md",
+        "docs/contracts/components/log-list.md",
+        "docs/contracts/components/model-connection-picker.md",
+        "docs/contracts/components/table.md",
+        "docs/contracts/components/time-zone-select.md",
+        "docs/contracts/components/tool-call-group.md"
       ]
     },
     {

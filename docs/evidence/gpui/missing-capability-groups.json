@@ -208,47 +208,6 @@
       ]
     },
     {
-      "substrate": "selection-navigation",
-      "components": [
-        "AudioPlayer",
-        "BulkActionBar",
-        "ChangedFiles",
-        "ListContainer",
-        "LogList",
-        "ModelConnectionPicker",
-        "NavCard",
-        "PaginationSummary",
-        "Pill",
-        "SelectionSummary",
-        "Table",
-        "TimeZoneSelect",
-        "ToolCallGroup"
-      ],
-      "missingTally": {
-        "semantic": 10,
-        "events": 11,
-        "pointer": 12,
-        "keyboard_focus": 9,
-        "accessibility": 13,
-        "visual": 13
-      },
-      "contracts": [
-        "docs/contracts/components/audio-player.md",
-        "docs/contracts/components/bulk-action-bar.md",
-        "docs/contracts/components/changed-files.md",
-        "docs/contracts/components/list-container.md",
-        "docs/contracts/components/log-list.md",
-        "docs/contracts/components/model-connection-picker.md",
-        "docs/contracts/components/nav-card.md",
-        "docs/contracts/components/pagination-summary.md",
-        "docs/contracts/components/pill.md",
-        "docs/contracts/components/selection-summary.md",
-        "docs/contracts/components/table.md",
-        "docs/contracts/components/time-zone-select.md",
-        "docs/contracts/components/tool-call-group.md"
-      ]
-    },
-    {
       "substrate": "form-editing",
       "components": [
         "AgentQuestionRecord",
@@ -287,6 +246,39 @@
         "docs/contracts/components/rating.md",
         "docs/contracts/components/stepper.md",
         "docs/contracts/components/validation-summary.md"
+      ]
+    },
+    {
+      "substrate": "selection-navigation",
+      "components": [
+        "AudioPlayer",
+        "BulkActionBar",
+        "ChangedFiles",
+        "ListContainer",
+        "LogList",
+        "ModelConnectionPicker",
+        "Table",
+        "TimeZoneSelect",
+        "ToolCallGroup"
+      ],
+      "missingTally": {
+        "semantic": 6,
+        "events": 8,
+        "pointer": 9,
+        "keyboard_focus": 6,
+        "accessibility": 9,
+        "visual": 9
+      },
+      "contracts": [
+        "docs/contracts/components/audio-player.md",
+        "docs/contracts/components/bulk-action-bar.md",
+        "docs/contracts/components/changed-files.md",
+        "docs/contracts/components/list-container.md",
+        "docs/contracts/components/log-list.md",
+        "docs/contracts/components/model-connection-picker.md",
+        "docs/contracts/components/table.md",
+        "docs/contracts/components/time-zone-select.md",
+        "docs/contracts/components/tool-call-group.md"
       ]
     },
     {
