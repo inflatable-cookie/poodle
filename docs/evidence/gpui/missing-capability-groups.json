@@ -60,51 +60,6 @@
       ]
     },
     {
-      "substrate": "drag-resize-reorder",
-      "components": [
-        "AppHeader",
-        "BlockEditor",
-        "Card",
-        "CardRadioGroup",
-        "CardToggleGroup",
-        "DockRegion",
-        "DragNumberField",
-        "EditableList",
-        "FileUpload",
-        "ListCard",
-        "MarkdownEditor",
-        "ModelCatalogueEditor",
-        "Separator",
-        "SplitView",
-        "TokenInput"
-      ],
-      "missingTally": {
-        "semantic": 8,
-        "events": 7,
-        "pointer": 10,
-        "keyboard_focus": 9,
-        "accessibility": 10,
-        "visual": 13
-      },
-      "contracts": [
-        "docs/contracts/components/app-header.md",
-        "docs/contracts/components/block-editor.md",
-        "docs/contracts/components/card-radio-group.md",
-        "docs/contracts/components/card-toggle-group.md",
-        "docs/contracts/components/card.md",
-        "docs/contracts/components/dock-region.md",
-        "docs/contracts/components/drag-number-field.md",
-        "docs/contracts/components/editable-list.md",
-        "docs/contracts/components/file-upload.md",
-        "docs/contracts/components/list-card.md",
-        "docs/contracts/components/markdown-editor.md",
-        "docs/contracts/components/model-catalogue-editor.md",
-        "docs/contracts/components/separator.md",
-        "docs/contracts/components/split-view.md",
-        "docs/contracts/components/token-input.md"
-      ]
-    },
-    {
       "substrate": "form-editing",
       "components": [
         "AgentQuestionRecord",
@@ -143,6 +98,41 @@
         "docs/contracts/components/rating.md",
         "docs/contracts/components/stepper.md",
         "docs/contracts/components/validation-summary.md"
+      ]
+    },
+    {
+      "substrate": "drag-resize-reorder",
+      "components": [
+        "Card",
+        "CardRadioGroup",
+        "CardToggleGroup",
+        "DockRegion",
+        "DragNumberField",
+        "FileUpload",
+        "ListCard",
+        "MarkdownEditor",
+        "Separator",
+        "TokenInput"
+      ],
+      "missingTally": {
+        "semantic": 8,
+        "events": 6,
+        "pointer": 8,
+        "keyboard_focus": 9,
+        "accessibility": 10,
+        "visual": 10
+      },
+      "contracts": [
+        "docs/contracts/components/card-radio-group.md",
+        "docs/contracts/components/card-toggle-group.md",
+        "docs/contracts/components/card.md",
+        "docs/contracts/components/dock-region.md",
+        "docs/contracts/components/drag-number-field.md",
+        "docs/contracts/components/file-upload.md",
+        "docs/contracts/components/list-card.md",
+        "docs/contracts/components/markdown-editor.md",
+        "docs/contracts/components/separator.md",
+        "docs/contracts/components/token-input.md"
       ]
     },
     {

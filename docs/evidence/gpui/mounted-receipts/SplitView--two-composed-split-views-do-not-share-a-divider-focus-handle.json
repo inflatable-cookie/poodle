@@ -8,6 +8,7 @@
   "contract_claims": [
     "semantic",
     "events",
+    "pointer",
     "keyboard_focus",
     "accessibility",
     "visual"
@@ -18,7 +19,11 @@
       "production-mount"
     ],
     "events": [
+      "assert_eq!(\n            pointer_events\n                .iter()\n                .filter(|(phase, _)| *phase == ResizePhase::End)\n                .count(),\n            1,\n            \"pointer release emit",
       "assert_eq!(\n            subject_resizes.lock().unwrap().len(),\n            12,\n            \"Subject split handler count must remain unchange"
+    ],
+    "pointer": [
+      "pointer_press"
     ],
     "keyboard_focus": [
       "focus_state_for",
@@ -46,19 +51,20 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "b52c628399b8a3fcddd39b221ddbb850efed1988",
+  "source_commit": "c97c5f1302011d7dfa387d18d3703979e9c83ff1",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "d179a29f-5d82-416e-b0d8-85bf1cbfc16d",
+    "run_id": "0ed8bc80-40db-47b7-85f6-a2810015da15",
     "outcome": "passed",
-    "body_sha256": "77576583bdcc4960ebb0adff047ce610d2416994093f9d328760bb605cf86f77"
+    "body_sha256": "2d2165ba5ea6c8fca3a230c0646b4b5d404f176ae6cc72dbadcb6662a0454771"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
     "asserted emitted payloads or handler delivery through mounted input",
+    "drove real pointer activation through the mounted GPUI node backend",
     "drove real keyboard input or backend focus through the mounted tree",
     "asserted node-level role, label, state, or focusability in the mounted tree",
     "asserted resolved token values or mounted geometry"

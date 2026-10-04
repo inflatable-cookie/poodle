@@ -29,6 +29,21 @@ thread_local! {
     static DRAG_SESSION: RefCell<Option<DragSession>> = const { RefCell::new(None) };
 }
 
+fn take_drag_session(gesture_id: &str) -> bool {
+    DRAG_SESSION.with(|session| {
+        let mut session = session.borrow_mut();
+        if session
+            .as_ref()
+            .is_some_and(|state| state.gesture_id == gesture_id)
+        {
+            *session = None;
+            true
+        } else {
+            false
+        }
+    })
+}
+
 pub(crate) fn reset_continuous_value_session() {
     CONTINUOUS_VALUE.with(|slot| *slot.borrow_mut() = None);
 }
@@ -833,19 +848,23 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
         // and then stopped. `on_drag_move` keeps receiving moves anywhere in the
         // window as long as the gesture started here, which is what a drag is.
         //
-        // gpui 0.2.2 has no mouse-up listener on this surface, so
-        // NodeDragPhase::End is still never emitted. Deltas remain per-frame
-        // from the last reported position — the vocabulary's contract. That
-        // baseline lives in a thread-local keyed by the gesture id, because the
-        // listener is rebuilt on every render: per-render state reset the
-        // baseline each frame and every move restarted the gesture at delta 0,
-        // so the host saw no movement at all.
+        // Deltas remain per-frame from the last reported position — the
+        // vocabulary's contract. That baseline lives in a thread-local keyed
+        // by the gesture id, because the listener is rebuilt on every render:
+        // per-render state reset the baseline each frame and every move
+        // restarted the gesture at delta 0, so the host saw no movement at
+        // all. Mouse-up listeners on both sides close the gesture because a
+        // captured drag can end outside its originating hitbox.
         // Registering `on_drag` makes gpui swallow this element's mouse-down, so
         // Start cannot come from a down listener: the first move of a gesture
         // emits it, then reports deltas.
         let mv = handler.clone();
+        let end = handler.clone();
+        let end_out = handler.clone();
         let gesture_id = next_gesture_id();
         let started = gesture_id.clone();
+        let ended = gesture_id.clone();
+        let ended_out = gesture_id.clone();
         el = el
             .on_drag(
                 NodeGestureDrag(gesture_id.clone()),
@@ -896,7 +915,33 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                     });
                 });
                 cx.refresh_windows();
-            });
+            })
+            .on_mouse_up(
+                MouseButton::Left,
+                move |_event: &MouseUpEvent, _window, cx| {
+                    if take_drag_session(&ended) {
+                        end(&NodeDragEvent {
+                            phase: NodeDragPhase::End,
+                            delta_x: 0.0,
+                            delta_y: 0.0,
+                        });
+                        cx.refresh_windows();
+                    }
+                },
+            )
+            .on_mouse_up_out(
+                MouseButton::Left,
+                move |_event: &MouseUpEvent, _window, cx| {
+                    if take_drag_session(&ended_out) {
+                        end_out(&NodeDragEvent {
+                            phase: NodeDragPhase::End,
+                            delta_x: 0.0,
+                            delta_y: 0.0,
+                        });
+                        cx.refresh_windows();
+                    }
+                },
+            );
     }
 
     if let Some(handler) = &node.interaction.on_scrub {

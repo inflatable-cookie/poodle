@@ -197,6 +197,7 @@ describe("g18.001 census oracles", () => {
     const manifest = deriveCapabilityManifest(repositoryRoot);
     const pill = manifest.find((entry) => entry.component === "Pill");
     const audioPlayer = manifest.find((entry) => entry.component === "AudioPlayer");
+    const appHeader = manifest.find((entry) => entry.component === "AppHeader");
     const paginationSummary = manifest.find((entry) => entry.component === "PaginationSummary");
     expect(pill?.required).toEqual(axes);
     expect(pill?.notApplicable).toEqual([]);
@@ -218,6 +219,14 @@ describe("g18.001 census oracles", () => {
     expect(audioPlayer?.notApplicable[0]?.contractRef).toBe(
       "docs/contracts/components/audio-player.md#5. Events",
     );
+    expect(appHeader?.required).toEqual(["semantic", "pointer", "keyboard_focus", "accessibility", "visual"]);
+    expect(appHeader?.notApplicable).toEqual([
+      {
+        axis: "events",
+        reason: "Contract declares no component callbacks or events.",
+        contractRef: "docs/contracts/components/app-header.md#6. Events",
+      },
+    ]);
   });
 
   it("widened-A2 oracle: platform language can never justify not-applicable", () => {

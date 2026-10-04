@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "b52c628399b8a3fcddd39b221ddbb850efed1988",
+  "source_commit": "c97c5f1302011d7dfa387d18d3703979e9c83ff1",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -5238,7 +5238,6 @@
       "substrate": "drag-resize-reorder",
       "required": [
         "semantic",
-        "events",
         "pointer",
         "keyboard_focus",
         "accessibility",
@@ -5271,9 +5270,7 @@
           "ref": "docs/evidence/nucleus/nucleus-parity-receipts/appheader--nucleus-shell-app-header.json#proof_level"
         }
       ],
-      "missing": [
-        "events"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -5323,11 +5320,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#editable_list_substrate_reorder_rebuilds_the_host_spec"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#editable_list_substrate_reorder_rebuilds_the_host_spec"
         }
       ],
-      "missing": [
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -5339,9 +5339,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/EditableList--editable-list-substrate-reorder-rebuilds-the-host-spec.json"
       ],
-      "refusals": [
-        "Expected test editable_list_substrate_reorder_rebuilds_the_host_spec proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "ErrorBoundary",
@@ -5416,11 +5414,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#block_editor_grip_drag_and_move_controls_rebuild_the_host_spec"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#block_editor_grip_drag_and_move_controls_rebuild_the_host_spec"
         }
       ],
-      "missing": [
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -5432,9 +5433,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/BlockEditor--block-editor-grip-drag-and-move-controls-rebuild-the-host-spec.json"
       ],
-      "refusals": [
-        "Expected test block_editor_grip_drag_and_move_controls_rebuild_the_host_spec proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "CardRadioGroup",
@@ -7157,6 +7156,11 @@
           "ref": "docs/evidence/nucleus/nucleus-parity-receipts/splitview--nucleus-shell-split-view.json#proof_level"
         },
         {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#two_composed_split_views_do_not_share_a_divider_focus_handle"
+        },
+        {
           "axis": "keyboard_focus",
           "via": "nucleus-m1",
           "ref": "docs/evidence/nucleus/nucleus-parity-receipts/splitview--nucleus-shell-split-view.json#proof_level"
@@ -7172,9 +7176,7 @@
           "ref": "docs/evidence/nucleus/nucleus-parity-receipts/splitview--nucleus-shell-split-view.json#proof_level"
         }
       ],
-      "missing": [
-        "pointer"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -7186,9 +7188,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/SplitView--two-composed-split-views-do-not-share-a-divider-focus-handle.json"
       ],
-      "refusals": [
-        "Expected test two_composed_split_views_do_not_share_a_divider_focus_handle proves no pointer claim; pointer stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "MetricTile",
@@ -7548,6 +7548,11 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window"
         },
         {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window"
+        },
+        {
           "axis": "keyboard_focus",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window"
@@ -7556,12 +7561,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window"
         }
       ],
-      "missing": [
-        "pointer",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -7573,10 +7580,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/ModelCatalogueEditor--model-catalogue-editor-grabs-moves-and-cancels-in-a-mounted-window.json"
       ],
-      "refusals": [
-        "Expected test model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window proves no pointer claim; pointer stays missing.",
-        "Expected test model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "MessageCenter",
@@ -8647,17 +8651,17 @@
   ],
   "summary": {
     "admittedRows": 115,
-    "fullyAdmittedRows": 91,
+    "fullyAdmittedRows": 96,
     "missingTally": {
       "semantic": 60,
-      "events": 51,
-      "pointer": 57,
+      "events": 50,
+      "pointer": 55,
       "keyboard_focus": 53,
       "accessibility": 67,
-      "visual": 79
+      "visual": 76
     },
     "holdCount": 175,
-    "refusalCount": 125
+    "refusalCount": 120
   },
   "groups": [
     {
@@ -8718,51 +8722,6 @@
       ]
     },
     {
-      "substrate": "drag-resize-reorder",
-      "components": [
-        "AppHeader",
-        "BlockEditor",
-        "Card",
-        "CardRadioGroup",
-        "CardToggleGroup",
-        "DockRegion",
-        "DragNumberField",
-        "EditableList",
-        "FileUpload",
-        "ListCard",
-        "MarkdownEditor",
-        "ModelCatalogueEditor",
-        "Separator",
-        "SplitView",
-        "TokenInput"
-      ],
-      "missingTally": {
-        "semantic": 8,
-        "events": 7,
-        "pointer": 10,
-        "keyboard_focus": 9,
-        "accessibility": 10,
-        "visual": 13
-      },
-      "contracts": [
-        "docs/contracts/components/app-header.md",
-        "docs/contracts/components/block-editor.md",
-        "docs/contracts/components/card-radio-group.md",
-        "docs/contracts/components/card-toggle-group.md",
-        "docs/contracts/components/card.md",
-        "docs/contracts/components/dock-region.md",
-        "docs/contracts/components/drag-number-field.md",
-        "docs/contracts/components/editable-list.md",
-        "docs/contracts/components/file-upload.md",
-        "docs/contracts/components/list-card.md",
-        "docs/contracts/components/markdown-editor.md",
-        "docs/contracts/components/model-catalogue-editor.md",
-        "docs/contracts/components/separator.md",
-        "docs/contracts/components/split-view.md",
-        "docs/contracts/components/token-input.md"
-      ]
-    },
-    {
       "substrate": "form-editing",
       "components": [
         "AgentQuestionRecord",
@@ -8801,6 +8760,41 @@
         "docs/contracts/components/rating.md",
         "docs/contracts/components/stepper.md",
         "docs/contracts/components/validation-summary.md"
+      ]
+    },
+    {
+      "substrate": "drag-resize-reorder",
+      "components": [
+        "Card",
+        "CardRadioGroup",
+        "CardToggleGroup",
+        "DockRegion",
+        "DragNumberField",
+        "FileUpload",
+        "ListCard",
+        "MarkdownEditor",
+        "Separator",
+        "TokenInput"
+      ],
+      "missingTally": {
+        "semantic": 8,
+        "events": 6,
+        "pointer": 8,
+        "keyboard_focus": 9,
+        "accessibility": 10,
+        "visual": 10
+      },
+      "contracts": [
+        "docs/contracts/components/card-radio-group.md",
+        "docs/contracts/components/card-toggle-group.md",
+        "docs/contracts/components/card.md",
+        "docs/contracts/components/dock-region.md",
+        "docs/contracts/components/drag-number-field.md",
+        "docs/contracts/components/file-upload.md",
+        "docs/contracts/components/list-card.md",
+        "docs/contracts/components/markdown-editor.md",
+        "docs/contracts/components/separator.md",
+        "docs/contracts/components/token-input.md"
       ]
     },
     {

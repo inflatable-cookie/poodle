@@ -174,13 +174,18 @@
       "substrate": "drag-resize-reorder",
       "required": [
         "semantic",
-        "events",
         "pointer",
         "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no component callbacks or events.",
+          "contractRef": "docs/contracts/components/app-header.md#6. Events"
+        }
+      ]
     },
     {
       "component": "AudioMeter",
