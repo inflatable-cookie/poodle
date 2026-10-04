@@ -10,7 +10,8 @@
     "events",
     "pointer",
     "keyboard_focus",
-    "accessibility"
+    "accessibility",
+    "visual"
   ],
   "signals": {
     "semantic": [
@@ -31,6 +32,11 @@
       "assert_eq!(\n            controller.announcements().len(),\n            spoken.len(),\n            \"a move control is not a substrate session, so it adds no announcement: {:?}\",\n            controller.announce",
       "assert_eq!(\n            drops.len(),\n            1,\n            \"one drop, one terminal announce",
       "announcements()"
+    ],
+    "visual": [
+      "resolve_radius",
+      "resolve_color",
+      "dimensions"
     ]
   },
   "production_path_observation": {
@@ -38,27 +44,28 @@
     "mount": "HeadlessDriver",
     "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render-import:block_editor",
+    "renderer": "poodle_render::presentation",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "b52c628399b8a3fcddd39b221ddbb850efed1988",
+  "source_commit": "c97c5f1302011d7dfa387d18d3703979e9c83ff1",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "d179a29f-5d82-416e-b0d8-85bf1cbfc16d",
+    "run_id": "0ed8bc80-40db-47b7-85f6-a2810015da15",
     "outcome": "passed",
-    "body_sha256": "c41885e192f6eaddb02cf992bf4587d0a84db7a9260cccc99383a9add162d412"
+    "body_sha256": "04a6ff70e05987b43260fe00ea6103f2dfe438da3f5d218895edb3eb654634a8"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
     "asserted emitted payloads or handler delivery through mounted input",
     "drove real pointer activation through the mounted GPUI node backend",
     "drove real keyboard input or backend focus through the mounted tree",
-    "asserted node-level role, label, state, or focusability in the mounted tree"
+    "asserted node-level role, label, state, or focusability in the mounted tree",
+    "asserted resolved token values or mounted geometry"
   ],
   "outcome": "passed"
 }
