@@ -259,7 +259,7 @@ pub use confirm_action::{confirm_action, confirm_action_with_slots, ConfirmActio
 pub use context::{
     motion_policy_provider, ui_presentation_provider, BlockTextMeasure, RenderContext, SlotBuilder,
 };
-pub use context_menu::context_menu;
+pub use context_menu::{context_menu, ContextMenuHandlers};
 pub use data_table::{data_table, data_table_loading, DataTableHandlers};
 pub use date_picker::{
     date_picker, date_picker_with_callbacks, DatePickerCallbacks, DatePickerHandlers,
@@ -332,7 +332,7 @@ pub use media_picker::{media_picker, MediaPickerHandlers};
 pub use media_preview::{media_preview, media_preview_with_content};
 pub use media_thumbnail::{media_thumbnail, media_thumbnail_with_content};
 pub use menu::menu;
-pub use menubar::menubar;
+pub use menubar::{menubar, MenubarHandlers};
 pub use message_center::{message_center, MessageCenterHandlers};
 pub use meta_bar::{meta_bar, meta_bar_sep};
 pub use meta_item::meta_item;
@@ -358,7 +358,7 @@ pub use model_connection_setup::{
 };
 pub use model_picker::model_picker;
 pub use nav_card::{nav_card, nav_card_with_icon};
-pub use navigation_menu::navigation_menu;
+pub use navigation_menu::{navigation_menu, NavigationMenuHandlers};
 pub use number_input::{number_input, NumberInputHandlers};
 pub use order_by::{order_by, OrderByHandlers};
 pub use page_header::page_header;

@@ -47,6 +47,9 @@ pub struct LayerRecord {
     pub id: String,
     /// The layer's reason handler (the first node with the id carries it).
     pub handler: Option<DismissHandler>,
+    /// The handler-carrying node refuses outside dismissal
+    /// (`dismissOnOutsideInteract: false`): outside presses never dismiss it.
+    pub refuses_outside: bool,
     /// Rendered bounds of every node sharing this id (the containment set).
     pub bounds: Vec<Bounds<Pixels>>,
     /// The innermost layer this one sits inside, when any (tree ancestry).
@@ -201,12 +204,20 @@ pub fn collect_layers(node: &poodle_node::Node, innermost: Option<&str>) {
     if let Some(id) = node.interaction.dismiss_layer.as_deref() {
         LAYERS.with(|layers| {
             let mut layers = layers.borrow_mut();
-            if layers.iter().any(|record| record.id == id) {
+            // One layer can span nodes that only partly carry the handler
+            // (a menubar's triggers join the overlay's layer); the first
+            // node to bring one supplies it.
+            if let Some(record) = layers.iter_mut().find(|record| record.id == id) {
+                if record.handler.is_none() {
+                    record.handler = node.interaction.on_dismiss.clone();
+                    record.refuses_outside = node.interaction.refuses_outside_dismiss;
+                }
                 return;
             }
             layers.push(LayerRecord {
                 id: id.to_owned(),
                 handler: node.interaction.on_dismiss.clone(),
+                refuses_outside: node.interaction.refuses_outside_dismiss,
                 bounds: Vec::new(),
                 parent: innermost.filter(|parent| *parent != id).map(str::to_owned),
                 trap_focus: node.interaction.trap_focus,
@@ -362,7 +373,7 @@ pub fn dismiss_layers_at(position: Point<Pixels>, cx: &mut App) {
         let mut index = layers.len();
         while index > 0 {
             index -= 1;
-            if !spared.contains(&layers[index].id) {
+            if !spared.contains(&layers[index].id) && !layers[index].refuses_outside {
                 handlers.push(layers.remove(index).handler);
             }
         }
@@ -402,6 +413,11 @@ where
                 dismiss_layers_at(event.position, cx);
             },
         )
+        .capture_key_up(move |event: &gpui::KeyUpEvent, window, _cx| {
+            if crate::interaction::suppress_key_activation_click(event.keystroke.key.as_str()) {
+                window.prevent_default();
+            }
+        })
         .on_key_down(
             move |event: &KeyDownEvent, window, cx| match event.keystroke.key.as_str() {
                 "escape" => {

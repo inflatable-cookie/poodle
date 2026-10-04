@@ -103,6 +103,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 });
                             })
                         }),
+                        ..SplitButtonHandlers::default()
                     },
                 )),
         )
@@ -130,6 +131,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         on_click: Some(action_handler(state, "Export")),
                         on_dropdown: Some(action_handler(state, "dropdown: toggle")),
                         on_action: None,
+                        ..SplitButtonHandlers::default()
                     },
                 )),
         )
@@ -162,6 +164,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 on_click: Some(action_handler(state, "Delete")),
                                 on_dropdown: None,
                                 on_action: None,
+
+                                ..SplitButtonHandlers::default()
                             },
                         ))
                         .child(node_split_button(
@@ -178,6 +182,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 on_click: Some(action_handler(state, "Publish")),
                                 on_dropdown: None,
                                 on_action: None,
+
+                                ..SplitButtonHandlers::default()
                             },
                         ))
                         .child(node_split_button(
@@ -194,6 +200,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 on_click: Some(action_handler(state, "Archive")),
                                 on_dropdown: None,
                                 on_action: None,
+
+                                ..SplitButtonHandlers::default()
                             },
                         )),
                 ),

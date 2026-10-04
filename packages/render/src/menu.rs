@@ -291,6 +291,7 @@ pub fn menu(
     // layer's `dismissOnOutsideInteract: false`).
     if !spec.dismiss_on_outside_interact {
         el.interaction.on_activate = Some(Arc::new(|| {}));
+        el.interaction.refuses_outside_dismiss = true;
     }
 
     if let Some(label) = spec.aria_label.as_deref() {

@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "XYPad",
-  "test": "xy_pad_mounted_parity_through_production_dispatch",
+  "component": "Menubar",
+  "test": "menubar_trigger_open_select_and_dismissal_through_mounted_backend",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -10,7 +10,8 @@
     "events",
     "pointer",
     "keyboard_focus",
-    "accessibility"
+    "accessibility",
+    "visual"
   ],
   "signals": {
     "semantic": [
@@ -18,18 +19,28 @@
       "production-mount"
     ],
     "events": [
-      "assert!(log.contains(&\"valueChange",
-      "assert!(log.contains(&\"valueCommit"
+      "payloads.lock",
+      "assert_eq!(\n            host.select_payloads\n                .lock()\n                .expect(\"keyboard payloads\")\n                .as_slice(),\n            [\"open\", \"copy\"],\n            \"keyboard activation emits the focused row payload",
+      "assert_eq!(\n            host.select_payloads\n                .lock()\n                .expect(\"select payloads\")\n                .as_slice(),\n            [\"open\"],\n            \"item activation emits the exact committed payload"
     ],
     "pointer": [
+      "pointer_activate",
       "pointer_press"
     ],
     "keyboard_focus": [
+      "focus_state_for",
+      "focus_element",
       "dispatch_key"
     ],
     "accessibility": [
+      "a11y\n                    .",
       "NodeRole",
       "a11y."
+    ],
+    "visual": [
+      "resolve_opacity",
+      "resolve_radius",
+      "resolve_color"
     ]
   },
   "production_path_observation": {
@@ -37,7 +48,7 @@
     "mount": "HeadlessDriver",
     "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render-import:xy_pad_with_handlers",
+    "renderer": "poodle_render::presentation",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -50,14 +61,15 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-089-first-proofs",
     "outcome": "passed",
-    "body_sha256": "9716c4c119a459be548d56baa1dc66fdc5a030e9f4e07b3f8544f1e4d199dde7"
+    "body_sha256": "1f828ae73232149e44620625a994993fbe622cb637163532c44de3acbee1f933"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
     "asserted emitted payloads or handler delivery through mounted input",
     "drove real pointer activation through the mounted GPUI node backend",
     "drove real keyboard input or backend focus through the mounted tree",
-    "asserted node-level role, label, state, or focusability in the mounted tree"
+    "asserted node-level role, label, state, or focusability in the mounted tree",
+    "asserted resolved token values or mounted geometry"
   ],
   "outcome": "passed"
 }

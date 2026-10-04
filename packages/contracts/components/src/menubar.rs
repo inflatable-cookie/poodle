@@ -11,6 +11,10 @@ pub struct MenubarSpec {
     /// Refuses outside-interact dismissal when false. Matches Svelte
     /// `dismissOnOutsideInteract` (default `true`).
     pub dismiss_on_outside_interact: bool,
+    /// Host-tracked keyboard focus (Svelte `focusIndex`): which trigger the
+    /// tab stop sits on. `None` falls back to the open trigger, then the
+    /// first enabled trigger.
+    pub focused_value: Option<String>,
     pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
     pub density: Option<ControlDensity>,
@@ -24,6 +28,7 @@ impl Default for MenubarSpec {
             default_value: None,
             aria_label: None,
             dismiss_on_outside_interact: true,
+            focused_value: None,
             size: None,
             size_role: SemanticControlSizeRole::Chrome,
             density: None,
@@ -59,16 +64,18 @@ impl MenubarSpec {
         self
     }
 
+    /// Set the host-tracked focus value for roving-tab sync.
+    pub fn with_focused_value(mut self, focused_value: impl Into<String>) -> Self {
+        self.focused_value = Some(focused_value.into());
+        self
+    }
+
     pub fn current_value(&self) -> Option<&str> {
-        self.value
-            .as_deref()
-            .or(self.default_value.as_deref())
-            .or_else(|| {
-                self.items
-                    .iter()
-                    .find(|item| !item.is_disabled)
-                    .map(|item| item.value.as_str())
-            })
+        // No first-enabled fallback: Svelte defaults to all closed
+        // (`value ?? uncontrolledValue`, both null), so an unset spec
+        // mounts no open menu. Focus still starts at the first enabled
+        // trigger; only the open value stays empty.
+        self.value.as_deref().or(self.default_value.as_deref())
     }
 
     pub fn current_menu(&self) -> Option<&MenubarEntry> {

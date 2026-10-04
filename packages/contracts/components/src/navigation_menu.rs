@@ -19,6 +19,11 @@ pub struct NavigationMenuSpec {
     /// Refuses outside-interact dismissal when false. Matches Svelte
     /// `dismissOnOutsideInteract` (default `true`).
     pub dismiss_on_outside_interact: bool,
+    /// Host-tracked keyboard focus (Svelte `focusIndex`): which trigger the
+    /// tab stop sits on. `None` falls back to the active item, then the
+    /// first enabled trigger. The host updates it on focus and arrow-key
+    /// movement so the roving tab stop follows real focus.
+    pub focused_value: Option<String>,
     pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
     pub density: Option<ControlDensity>,
@@ -34,6 +39,7 @@ impl Default for NavigationMenuSpec {
             active_edge: ActiveEdge::None,
             active_fill: ActiveFill::Tint,
             dismiss_on_outside_interact: true,
+            focused_value: None,
             size: None,
             size_role: SemanticControlSizeRole::Chrome,
             density: None,
@@ -69,6 +75,12 @@ impl NavigationMenuSpec {
         self
     }
 
+    /// Set the host-tracked focus value for roving-tab sync.
+    pub fn with_focused_value(mut self, focused_value: impl Into<String>) -> Self {
+        self.focused_value = Some(focused_value.into());
+        self
+    }
+
     /// Set the selection edge on the open trigger (none, outline, or underline).
     pub fn with_active_edge(mut self, active_edge: ActiveEdge) -> Self {
         self.active_edge = active_edge;
@@ -82,15 +94,10 @@ impl NavigationMenuSpec {
     }
 
     pub fn current_value(&self) -> Option<&str> {
-        self.value
-            .as_deref()
-            .or(self.default_value.as_deref())
-            .or_else(|| {
-                self.items
-                    .iter()
-                    .find(|item| !item.is_disabled)
-                    .map(|item| item.value.as_str())
-            })
+        // No first-enabled fallback: Svelte defaults to no active item
+        // (uncontrolled null), so an unset spec mounts no viewport. Only
+        // keyboard focus starts at the first enabled trigger.
+        self.value.as_deref().or(self.default_value.as_deref())
     }
 
     pub fn current_item(&self) -> Option<&NavigationMenuEntry> {

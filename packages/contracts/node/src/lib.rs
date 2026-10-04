@@ -793,6 +793,9 @@ pub struct Interaction {
     /// the backend records their rendered bounds for outside-interaction
     /// checks and orders layers by tree position.
     pub dismiss_layer: Option<String>,
+    /// The layer's own `dismissOnOutsideInteract: false`: an outside pointer
+    /// press never dismisses it (Escape still does).
+    pub refuses_outside_dismiss: bool,
     /// Trap Tab/Shift+Tab inside this node's layer while it is the innermost
     /// open one, wrapping first-last (the web surface's `trapFocusKeydown`).
     /// Opt-in per surface: the component's contract decides (a trapped
@@ -805,6 +808,11 @@ pub struct Interaction {
     /// component chooses the semantic destination; the backend owns the
     /// actual platform focus operation.
     pub on_key: Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>>,
+    /// Keyboard activation (Enter or Space) that differs from a click. When
+    /// present the backend runs it on key-down and suppresses the Enter/Space
+    /// click synthesis, so the component can open idempotently where a click
+    /// toggles. Returning an element id asks the backend to move focus there.
+    pub on_key_activate: Option<Arc<dyn Fn() -> Option<String> + Send + Sync>>,
     /// Registers this node as a semantic drag source with the runtime's drag
     /// controller. Identity, subject, allowed operations, accessible name, and
     /// the start/terminal callbacks live in the registration; the gesture that
@@ -957,6 +965,14 @@ pub enum NodeToggled {
     Mixed,
 }
 
+/// The popup a control owns (`aria-haspopup`). Today only menus travel this
+/// channel; the backend records the relationship on the node like the other
+/// unprojected properties (expanded, controls) until a platform API exists.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum HasPopup {
+    Menu,
+}
+
 /// What the node declares about itself to assistive technology.
 #[derive(Clone, Default)]
 pub struct NodeA11y {
@@ -973,6 +989,8 @@ pub struct NodeA11y {
     pub tab_index: Option<i32>,
     /// Semantic part relationships, normalized before backend projection.
     pub controls: Option<String>,
+    /// The popup this control owns, when any (menu triggers, dropdowns).
+    pub has_popup: Option<HasPopup>,
     pub labelled_by: Option<String>,
     pub orientation: Option<String>,
     pub toggled: Option<NodeToggled>,
