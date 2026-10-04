@@ -44349,3 +44349,774 @@ fn first_mounted_parity_relation_picker() {
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }
+
+/// ColorPicker mounts its trigger, opens its dialog surface, and commits
+/// swatch selection through mounted GPUI input: the trigger toggles open by
+/// pointer and by keyboard, a swatch press commits the preset hex, and the
+/// open surface paints the dialog/listbox/option/slider semantics with
+/// token-resolved chrome. Svelte parity authority:
+/// `packages/svelte/components/src/ColorPicker.svelte` (trigger button with
+/// aria-haspopup, aria-expanded and aria-controls; surface dialog; swatch
+/// option select; Escape and outside-click dismissal; gradient arrows).
+/// Escape dismissal and gradient drag stay host-owned; this proof covers
+/// trigger toggle, swatch commit, and surface semantics.
+#[test]
+fn first_mounted_parity_color_picker() {
+    use gpui::{AnyElement, IntoElement};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::ColorPickerSpec;
+
+    const SWATCHES: [&str; 4] = ["#ef4444", "#f97316", "#22c55e", "#3b82f6"];
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let swatches = SWATCHES
+        .iter()
+        .map(|swatch| swatch.to_string())
+        .collect::<Vec<_>>();
+    let spec = ColorPickerSpec::new()
+        .with_value("#6366f1")
+        .with_open(true)
+        .with_swatches(swatches.clone())
+        .with_aria_label("Color picker");
+
+    // ── Witness: production renderer structure, no mount ───────────────
+    let witness = poodle_render::color_picker(
+        &spec,
+        &ctx,
+        "witness",
+        poodle_render::ColorPickerHandlers::default(),
+    );
+    assert_eq!(witness.a11y.label.as_deref(), Some("Color picker"));
+    let trigger = witness
+        .find(&|node| node.id.as_deref() == Some("color-picker-trigger"))
+        .expect("trigger");
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(
+        trigger.a11y.controls.as_deref(),
+        Some("color-picker-surface")
+    );
+    assert!(trigger.interaction.focusable);
+    assert_eq!(trigger.a11y.tab_index, Some(0));
+    assert!(trigger.style.focus_ring.is_some());
+    assert_eq!(
+        trigger.style.descriptor.layout.width,
+        LayoutSizing::Fixed(rem_to_px(2.25)),
+        "trigger keeps the 2.25rem square"
+    );
+    let surface = witness
+        .find(&|node| node.id.as_deref() == Some("color-picker-surface"))
+        .expect("surface");
+    assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+    assert_eq!(surface.a11y.label.as_deref(), Some("Color picker"));
+    assert_eq!(
+        surface.style.descriptor.layout.width,
+        LayoutSizing::Fixed(rem_to_px(24.0)),
+        "surface keeps the 24rem popover width"
+    );
+    let gradient = witness
+        .find(&|node| node.id.as_deref() == Some("color-picker-gradient"))
+        .expect("gradient pad");
+    assert_eq!(
+        gradient.children.len(),
+        3,
+        "gradient pad layers the white overlay, the black overlay, and the thumb"
+    );
+    let hue = witness
+        .find(&|node| node.a11y.role == Some(NodeRole::Slider))
+        .expect("hue channel slider");
+    assert_eq!(hue.a11y.label.as_deref(), Some("Hue"));
+    let grid = witness
+        .find(&|node| node.id.as_deref() == Some("color-picker-swatches"))
+        .expect("swatch grid");
+    assert_eq!(grid.a11y.role, Some(NodeRole::ListBox));
+    assert_eq!(grid.children.len(), SWATCHES.len());
+    for (index, hex) in SWATCHES.iter().enumerate() {
+        let want = format!("color-picker-swatch-{index}");
+        let swatch = witness
+            .find(&|node| node.id.as_deref() == Some(want.as_str()))
+            .unwrap_or_else(|| panic!("swatch {index}"));
+        assert_eq!(swatch.a11y.role, Some(NodeRole::ListBoxOption));
+        assert_eq!(swatch.a11y.label.as_deref(), Some(*hex));
+        assert!(swatch.interaction.focusable);
+        assert_eq!(swatch.a11y.tab_index, Some(0));
+        assert!(swatch.style.focus_ring.is_some());
+    }
+    assert!(witness.has_text("#6366f1"));
+
+    // A disabled picker keeps its chrome but takes no focus and wires no
+    // surface, matching the Svelte reduced-opacity, no-pointer-events state.
+    let disabled = poodle_render::color_picker(
+        &ColorPickerSpec::new()
+            .with_value("#22c55e")
+            .with_disabled(true),
+        &ctx,
+        "disabled",
+        poodle_render::ColorPickerHandlers::default(),
+    );
+    assert!(disabled.interaction.disabled);
+    let disabled_trigger = disabled
+        .find(&|node| node.id.as_deref() == Some("color-picker-trigger"))
+        .expect("disabled trigger");
+    assert!(!disabled_trigger.interaction.focusable);
+    assert_eq!(disabled_trigger.a11y.tab_index, None);
+    assert!(disabled_trigger.style.focus_ring.is_none());
+    assert!(disabled
+        .find(&|node| node.id.as_deref() == Some("color-picker-surface"))
+        .is_none());
+
+    // ── Mounted: toggle, select, focus, geometry ────────────────────────
+    #[derive(Default)]
+    struct ColorHost {
+        open: bool,
+        value: String,
+    }
+    let host = Arc::new(Mutex::new(ColorHost {
+        open: false,
+        value: "#6366f1".to_owned(),
+    }));
+    let toggles = Arc::new(Mutex::new(0_usize));
+    let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let host = Arc::clone(&host);
+        let toggles = Arc::clone(&toggles);
+        let payloads = Arc::clone(&payloads);
+        let theme_provider = theme_provider.clone();
+        let swatches = swatches.clone();
+        Rc::new(move || {
+            let (open, value) = {
+                let host = host.lock().expect("color host");
+                (host.open, host.value.clone())
+            };
+            let toggle_host = Arc::clone(&host);
+            let toggle_count = Arc::clone(&toggles);
+            let change_host = Arc::clone(&host);
+            let change_payloads = Arc::clone(&payloads);
+            node_compat::ColorPicker::from_spec(
+                ColorPickerSpec::new()
+                    .with_value(&value)
+                    .with_open(open)
+                    .with_swatches(swatches.clone())
+                    .with_aria_label("Color picker"),
+                &theme_provider,
+                "proof",
+            )
+            .with_id("proof")
+            .on_toggle(Arc::new(move || {
+                let mut host = toggle_host.lock().expect("color host");
+                *toggle_count.lock().expect("toggle count") += 1;
+                host.open = !host.open;
+            }))
+            .on_change(Arc::new(move |hex: &str| {
+                let mut host = change_host.lock().expect("color host");
+                change_payloads
+                    .lock()
+                    .expect("change payloads")
+                    .push(hex.to_owned());
+                host.value = hex.to_owned();
+            }))
+            .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 560.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("color-picker-trigger").is_some(),
+            "pointer proof needs a real hit target"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("color-picker-surface").is_none(),
+            "the surface stays unmounted while closed"
+        );
+
+        // Keyboard opens: the trigger is a real tab stop and Enter toggles it.
+        driver.wait_for_focus_handle("color-picker-trigger");
+        driver.focus_element("color-picker-trigger");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("color-picker-trigger"),
+            Some(true),
+            "focus lands on the trigger, not the mount host"
+        );
+        driver.keyboard_activate("color-picker-trigger");
+        assert!(
+            host.lock().expect("color host").open,
+            "toggle callback opens the surface"
+        );
+        assert_eq!(*toggles.lock().expect("toggle count"), 1);
+        driver.draw_frame();
+        let surface_bounds = poodle_gpui_node_backend::bounds_for("color-picker-surface")
+            .expect("open surface geometry");
+        assert!(
+            f32::from(surface_bounds.size.width) > 0.0
+                && f32::from(surface_bounds.size.height) > 0.0,
+            "the open surface paints positive dimensions"
+        );
+        let painted = poodle_gpui_node_backend::painted_node_for("color-picker-surface")
+            .expect("surface reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Dialog));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Color picker"));
+        assert_eq!(
+            painted.style.background,
+            Some(theme_provider.resolve_color("color.background.elevated"))
+        );
+
+        // Pointer selects: the swatch press commits the preset hex.
+        driver.pointer_activate_id("color-picker-swatch-0");
+        assert_eq!(
+            payloads.lock().expect("change payloads").as_slice(),
+            ["#ef4444"],
+            "swatch select callback payload carries the preset hex"
+        );
+        let text_primary = theme_provider.resolve_color("color.text.primary");
+        let border_of = |id: &str| {
+            poodle_gpui_node_backend::painted_node_for(id)
+                .expect("swatch repaint")
+                .style
+                .border
+                .color
+        };
+        assert_eq!(
+            border_of("color-picker-swatch-0"),
+            text_primary,
+            "the chosen swatch repaints with the active border"
+        );
+        assert_ne!(
+            border_of("color-picker-swatch-0"),
+            border_of("color-picker-swatch-1"),
+            "only the chosen swatch carries the active border"
+        );
+
+        // Keyboard selects: Enter on a swatch commits, like Space/Enter in Svelte.
+        driver.wait_for_focus_handle("color-picker-swatch-1");
+        driver.focus_element("color-picker-swatch-1");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("color-picker-swatch-1"),
+            Some(true)
+        );
+        driver.keyboard_activate("color-picker-swatch-1");
+        assert_eq!(
+            payloads.lock().expect("change payloads").as_slice(),
+            ["#ef4444", "#f97316"],
+            "keyboard select callback payload carries the second preset hex"
+        );
+        assert_eq!(
+            border_of("color-picker-swatch-1"),
+            text_primary,
+            "the active border follows the latest selection"
+        );
+
+        assert!(theme_provider.resolve_color("color.accent.focusRing").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// HoverCard mounts its trigger, opens its dialog surface on hover intent,
+/// and dismisses on hover leave through mounted GPUI input: the trigger hover
+/// reaches the host open-change handler, the open surface paints the dialog
+/// semantics, and the trigger and preview controls take real focus, pointer
+/// presses, and keyboard activation. Svelte parity authority:
+/// `packages/svelte/components/src/HoverCard.svelte` (delayed open and close,
+/// surface continuity, dialog surface, Escape dismissal). The open/close
+/// delays stay host-owned per the hover-intent machine (the adapter owns the
+/// timer handle); surface-hover continuity (Svelte: entering the surface
+/// cancels the close timer) does not hold yet because the deferred overlay
+/// surface paints outside the trigger wrapper's hover containment, so this
+/// proof reaches the preview action by keyboard and reports that gap
+/// separately. This proof covers intent delivery, surface semantics, and
+/// dismissal.
+#[test]
+fn first_mounted_parity_hover_card() {
+    use gpui::{AnyElement, IntoElement};
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{ButtonSpec, HoverCardSpec};
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let spec = HoverCardSpec::new().with_aria_label("User preview");
+    assert_eq!(spec.open_delay_ms, 180);
+    assert_eq!(spec.close_delay_ms, 120);
+
+    // ── Witness: production renderer structure, no mount ───────────────
+    let mut plain_content = Node::container();
+    plain_content = plain_content
+        .child(Node::text("Clay"))
+        .child(Node::text("Design systems engineer"));
+    let witness = poodle_render::hover_card(&spec, &ctx, Some(plain_content));
+    assert_eq!(witness.a11y.role, Some(NodeRole::Dialog));
+    assert_eq!(witness.a11y.label.as_deref(), Some("User preview"));
+    assert!(witness.has_text("Clay"));
+    assert!(witness.has_text("Design systems engineer"));
+    assert_eq!(
+        witness.style.min_width,
+        Some(ctx.theme().resolve_space("size.menu.minWidth"))
+    );
+    assert_eq!(
+        witness.style.max_width,
+        Some(ctx.theme().resolve_space("size.hoverCard.maxWidth"))
+    );
+
+    // ── Mounted: hover intent, continuity, focus, dismissal ─────────────
+    #[derive(Default)]
+    struct HoverHost {
+        open: bool,
+    }
+    let host = Arc::new(Mutex::new(HoverHost::default()));
+    let intents = Arc::new(Mutex::new(Vec::<bool>::new()));
+    let actions = Arc::new(Mutex::new(Vec::<String>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let host = Arc::clone(&host);
+        let intents = Arc::clone(&intents);
+        let actions = Arc::clone(&actions);
+        let theme_provider = theme_provider.clone();
+        let spec = spec.clone();
+        Rc::new(move || {
+            let open = host.lock().expect("hover host").open;
+            let intent_host = Arc::clone(&host);
+            let intent_sink = Arc::clone(&intents);
+            let action_sink = Arc::clone(&actions);
+            let mut trigger = poodle_render::button(
+                &ButtonSpec::new().with_label("@clay"),
+                &RenderContext::new(&theme_provider),
+                None,
+            );
+            trigger.id = Some("hover-proof-trigger".to_owned());
+            let mut action = poodle_render::button(
+                &ButtonSpec::new().with_label("Read more"),
+                &RenderContext::new(&theme_provider),
+                Some(Arc::new(move || {
+                    action_sink
+                        .lock()
+                        .expect("hover actions")
+                        .push("read-more".to_owned());
+                })),
+            );
+            action.id = Some("hover-proof-action".to_owned());
+            let mut content = Node::container();
+            content.id = Some("hover-proof-surface".to_owned());
+            content = content
+                .child(Node::text("Clay"))
+                .child(Node::text("Design systems engineer"))
+                .child(action);
+            node_compat::HoverCard::from_spec(spec.clone().with_open(open), &theme_provider)
+                .with_trigger(poodle_gpui_node_backend::to_gpui(&trigger))
+                .with_content(content)
+                .on_open_change(
+                    move |open: bool, _window: &mut gpui::Window, _cx: &mut gpui::App| {
+                        intent_sink.lock().expect("hover intents").push(open);
+                        intent_host.lock().expect("hover host").open = open;
+                    },
+                )
+                .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 480.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("hover-proof-trigger").is_some(),
+            "pointer proof needs a real hit target"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("hover-card-surface").is_none(),
+            "the surface stays unmounted while closed"
+        );
+
+        // Hover intent opens: the trigger hover reaches the host handler.
+        driver.pointer_hover(payload_frac("hover-proof-trigger", 0.5, 0.5));
+        assert_eq!(
+            intents.lock().expect("hover intents").as_slice(),
+            [true],
+            "hover intent callback emits the open change"
+        );
+        let surface_bounds = poodle_gpui_node_backend::bounds_for("hover-card-surface")
+            .expect("open surface geometry");
+        assert!(
+            f32::from(surface_bounds.size.width) > 0.0
+                && f32::from(surface_bounds.size.height) > 0.0,
+            "the open surface paints positive dimensions"
+        );
+        let painted = poodle_gpui_node_backend::painted_node_for("hover-card-surface")
+            .expect("preview dialog reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Dialog));
+        assert_eq!(painted.a11y_label.as_deref(), Some("User preview"));
+        assert!(
+            painted
+                .texts
+                .iter()
+                .any(|text| text == "Design systems engineer"),
+            "the preview copy paints inside the dialog"
+        );
+
+        // Pointer reaches the trigger: a press focuses its control.
+        driver.pointer_activate_id("hover-proof-trigger");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("hover-proof-trigger"),
+            Some(true),
+            "pointer press focuses the trigger control"
+        );
+
+        // Keyboard reaches the trigger and the preview action.
+        driver.wait_for_focus_handle("hover-proof-trigger");
+        driver.focus_element("hover-proof-trigger");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("hover-proof-trigger"),
+            Some(true),
+            "focus lands on the trigger control"
+        );
+        driver.wait_for_focus_handle("hover-proof-action");
+        driver.focus_element("hover-proof-action");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("hover-proof-action"),
+            Some(true),
+            "focus lands inside the preview surface"
+        );
+        driver.keyboard_activate("hover-proof-action");
+        assert_eq!(
+            actions.lock().expect("hover actions").as_slice(),
+            ["read-more"],
+            "preview action callback fires through mounted keyboard"
+        );
+
+        // Hover leave dismisses: the close intent unmounts the surface.
+        driver.pointer_hover(point(px(8.0), px(8.0)));
+        assert_eq!(
+            intents.lock().expect("hover intents").as_slice(),
+            [true, false],
+            "hover leave callback emits the close change"
+        );
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("hover-card-surface").is_none(),
+            "the surface unmounts after dismissal"
+        );
+
+        assert!(theme_provider.resolve_color("color.background.elevated").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Field mounts its label, control, and validation message as one wired unit:
+/// the slotted control takes the field label as its accessible name, the
+/// description and message ids join its described-by relationship, the info
+/// icon and the message paint with token-resolved chrome, and the control
+/// takes pointer focus and real keystrokes through the mounted tree. Svelte
+/// parity authority: `packages/svelte/components/src/Field.svelte` (label
+/// for-association, info popover for the description, error/pending
+/// precedence, required/optional markers). Field fires no events of its own
+/// (contract §5); the info popover open state stays host-owned.
+#[test]
+fn first_mounted_parity_field() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{FieldSpec, TextInputSpec, ValidationState};
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let spec = FieldSpec::new("proof-contact", "Display name")
+        .with_description("Shown on your public profile.")
+        .with_required(true)
+        .with_validation_state(ValidationState::Invalid)
+        .with_error("This username is already taken.");
+
+    // ── Witness: production renderer structure, no mount ───────────────
+    let witness = {
+        let input_spec = TextInputSpec::new().with_id("proof-contact").with_value("");
+        poodle_render::field(
+            &spec,
+            &ctx,
+            Some(Box::new(move |control_ctx: &RenderContext<'_>| {
+                poodle_render::text_input_with_handlers(
+                    &input_spec,
+                    control_ctx,
+                    poodle_render::TextInputHandlers::default(),
+                )
+            })),
+        )
+    };
+    assert!(witness.has_text("Display name"));
+    assert!(witness.has_text("*"));
+    assert!(witness.has_text("This username is already taken."));
+    assert!(witness.has_text("Shown on your public profile."));
+    assert!(
+        witness
+            .find(&|node| matches!(&node.kind, NodeKind::Icon { name, .. } if name == "info"))
+            .is_some(),
+        "the info icon affords the description popover"
+    );
+    let control = witness
+        .find(&|node| node.id.as_deref() == Some("poodle-input-proof-contact"))
+        .expect("slotted control");
+    assert_eq!(control.a11y.role, Some(NodeRole::TextInput));
+    assert_eq!(
+        control.a11y.label.as_deref(),
+        Some("Display name"),
+        "the field names an unnamed control from its label"
+    );
+    assert_eq!(
+        control.a11y.described_by.as_deref(),
+        Some("proof-contact-description proof-contact-error"),
+        "description and message ids join the control relationship"
+    );
+    let description = witness
+        .find(&|node| node.id.as_deref() == Some("proof-contact-description"))
+        .expect("description element");
+    assert!(description.has_text("Shown on your public profile."));
+    let error = witness
+        .find(&|node| node.id.as_deref() == Some("proof-contact-error"))
+        .expect("error message");
+    assert_eq!(
+        error.style.descriptor.text_color,
+        Some(theme_provider.resolve_color(spec.error_color_token()))
+    );
+
+    // ── Mounted: naming, relationship, focus, typing, geometry ──────────
+    const CONTROL: &str = "poodle-input-proof-contact";
+    #[derive(Default)]
+    struct FieldHost {
+        value: String,
+    }
+    let host = Arc::new(Mutex::new(FieldHost::default()));
+    let edits = Arc::new(Mutex::new(Vec::<String>::new()));
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        // The host rebuilds the field tree around the controlled draft after
+        // every keystroke, the same division the Svelte field keeps between
+        // chrome (field-owned) and editing (control-owned).
+        let build_node = || {
+            let value = host.lock().expect("field host").value.clone();
+            let edit_host = Arc::clone(&host);
+            let edit_sink = Arc::clone(&edits);
+            let input_spec = TextInputSpec::new()
+                .with_id("proof-contact")
+                .with_value(value);
+            let mut root = poodle_render::field(
+                &spec,
+                &ctx,
+                Some(Box::new(move |control_ctx: &RenderContext<'_>| {
+                    poodle_render::text_input_with_handlers(
+                        &input_spec,
+                        control_ctx,
+                        poodle_render::TextInputHandlers {
+                            on_change: Some(Arc::new(move |text: &str| {
+                                let mut host = edit_host.lock().expect("field host");
+                                edit_sink.lock().expect("field edits").push(text.to_owned());
+                                host.value = text.to_owned();
+                            })),
+                            ..poodle_render::TextInputHandlers::default()
+                        },
+                    )
+                })),
+            );
+            root.id = Some(FIXTURE_ID.to_owned());
+            root
+        };
+        let node = Arc::new(Mutex::new(build_node()));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        assert!(
+            poodle_gpui_node_backend::bounds_for(CONTROL).is_some(),
+            "pointer proof needs a real hit target"
+        );
+
+        // The label naming and the described-by relationship reach GPUI.
+        let mounted = driver
+            .accessibility_nodes()
+            .into_iter()
+            .find(|node| node.element_id == CONTROL)
+            .expect("control in the mounted accessibility tree");
+        assert_eq!(mounted.label.as_deref(), Some("Display name"));
+        assert_eq!(
+            mounted.described_by.as_deref(),
+            Some("proof-contact-description proof-contact-error")
+        );
+        let error_painted = poodle_gpui_node_backend::painted_node_for("proof-contact-error")
+            .expect("error message reached GPUI paint");
+        assert!(
+            error_painted
+                .texts
+                .iter()
+                .any(|text| text == "This username is already taken."),
+            "the error copy paints in the mounted tree"
+        );
+
+        // Pointer focuses the slotted control through the field.
+        driver.wait_for_focus_handle(CONTROL);
+        driver.pointer_activate_id(CONTROL);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(CONTROL),
+            Some(true),
+            "pointer press focuses the field control"
+        );
+
+        // Keyboard types into the control through the field.
+        driver.dispatch_key_raw("a");
+        assert_eq!(
+            edits.lock().expect("field edits").as_slice(),
+            ["a"],
+            "typed keystroke reaches the slotted control with the field value"
+        );
+        assert_eq!(host.lock().expect("field host").value, "a");
+        *node.lock().expect("field node") = build_node();
+        driver.draw_frame();
+        let control_bounds =
+            poodle_gpui_node_backend::bounds_for(CONTROL).expect("control geometry");
+        assert!(
+            f32::from(control_bounds.size.width) > 0.0
+                && f32::from(control_bounds.size.height) > 0.0,
+            "the control paints positive dimensions"
+        );
+
+        assert!(theme_provider.resolve_color("color.text.primary").3 > 0.0);
+        assert!(theme_provider.resolve_space("space.stack.sm") > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// ListCardCounter mounts its linked variant as a keyboard-reachable link:
+/// pointer activation fires the link handler, Enter fires it too, the row
+/// keeps the link role with the secondary tone and the primary hover tone,
+/// and the tooltip text paints on hover after the backend delay. The static
+/// variant stays an inert statistic. Svelte parity authority:
+/// `packages/svelte/components/src/ListCardCounter.svelte` (icon plus count,
+/// linked `<a>` rendering with hover tone and click stopPropagation, tooltip
+/// wrapping, tabular numerals, link focus ring).
+#[test]
+fn first_mounted_parity_list_card_counter() {
+    use gpui::{AnyElement, IntoElement};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::ListCardCounterSpec;
+
+    const ROW: &str = "poodle-lcc-file-text-24";
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let spec = ListCardCounterSpec::new("file-text", 24)
+        .with_tooltip("24 documents")
+        .with_href("#documents");
+
+    // ── Witness: production renderer structure, no mount ───────────────
+    let witness = poodle_render::list_card_counter(&spec, &ctx, None);
+    assert_eq!(witness.id.as_deref(), Some(ROW));
+    assert_eq!(witness.a11y.role, Some(NodeRole::Link));
+    assert!(witness.interaction.focusable);
+    assert_eq!(witness.a11y.tab_index, Some(0));
+    assert!(witness.style.focus_ring.is_some());
+    assert_eq!(witness.tooltip.as_deref(), Some("24 documents"));
+    assert!(witness.has_text("24"));
+    assert_eq!(
+        witness.style.descriptor.text_color,
+        Some(theme_provider.resolve_color("color.text.secondary"))
+    );
+    assert_eq!(
+        witness
+            .style
+            .hover
+            .as_ref()
+            .and_then(|patch| patch.text_color),
+        Some(theme_provider.resolve_color("color.text.primary"))
+    );
+    assert_eq!(witness.style.text_size, Some(rem_to_px(0.75)));
+
+    // The static variant stays an inert statistic: no identity, no focus,
+    // no activation, matching the Svelte plain `<span>`.
+    let plain = poodle_render::list_card_counter(&ListCardCounterSpec::new("image", 8), &ctx, None);
+    assert!(plain.id.is_none());
+    assert!(!plain.interaction.focusable);
+    assert!(plain.style.focus_ring.is_none());
+    assert!(plain.a11y.role.is_none());
+    assert!(plain.interaction.on_activate.is_none());
+    assert!(plain.has_text("8"));
+
+    // ── Mounted: link activation, keyboard, tooltip, geometry ───────────
+    let clicks = Arc::new(Mutex::new(0_usize));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let clicks = Arc::clone(&clicks);
+        let theme_provider = theme_provider.clone();
+        let spec = spec.clone();
+        Rc::new(move || {
+            let click_sink = Arc::clone(&clicks);
+            node_compat::ListCardCounter::from_spec(spec.clone(), &theme_provider)
+                .on_link_click(move || {
+                    *click_sink.lock().expect("counter clicks") += 1;
+                })
+                .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 480.0, 160.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for(ROW).is_some(),
+            "pointer proof needs a real hit target"
+        );
+        driver.wait_for_focus_handle(ROW);
+
+        // Pointer activates the linked counter.
+        driver.pointer_activate_id(ROW);
+        assert_eq!(
+            *clicks.lock().expect("counter clicks"),
+            1,
+            "linked counter click callback fires through mounted pointer"
+        );
+
+        // Keyboard activates it too, like Enter on the Svelte anchor.
+        driver.focus_element(ROW);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(ROW),
+            Some(true),
+            "focus lands on the linked counter"
+        );
+        driver.keyboard_activate(ROW);
+        assert_eq!(
+            *clicks.lock().expect("counter clicks"),
+            2,
+            "linked counter click callback fires through mounted keyboard"
+        );
+        let painted =
+            poodle_gpui_node_backend::painted_node_for(ROW).expect("counter reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Link));
+
+        // Tooltip lifecycle: hover starts the timer, the text paints at the
+        // backend delay, and pointer leave hides it again.
+        driver.pointer_hover(payload_frac(ROW, 0.5, 0.5));
+        assert!(
+            poodle_gpui_node_backend::is_tooltip_pending(ROW),
+            "hover must start a pending tooltip timer"
+        );
+        driver.advance_clock(poodle_gpui_node_backend::TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::is_tooltip_visible(ROW),
+            "tooltip must paint at the delay"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::painted_tooltip()
+                .map(|tooltip| tooltip.text)
+                .as_deref(),
+            Some("24 documents")
+        );
+        driver.pointer_hover(point(px(8.0), px(8.0)));
+        driver.draw_frame();
+        assert!(
+            !poodle_gpui_node_backend::is_tooltip_visible(ROW),
+            "pointer leave must hide the tooltip"
+        );
+
+        let row_bounds = poodle_gpui_node_backend::bounds_for(ROW).expect("row geometry");
+        assert!(
+            f32::from(row_bounds.size.width) > 0.0 && f32::from(row_bounds.size.height) > 0.0,
+            "the counter paints positive dimensions"
+        );
+        assert!(theme_provider.resolve_color("color.text.secondary").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}

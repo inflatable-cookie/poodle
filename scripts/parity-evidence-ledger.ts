@@ -145,6 +145,9 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   Accordion: "accordion_result_disclosure_focus_identity_and_disabled_paths",
   TriStateSwitch: "tri_state_switch_value_focus_identity_and_disabled_paths",
   Popover: "a_nested_popover_paints_without_nesting_deferred_draws",
+  ColorPicker: "first_mounted_parity_color_picker",
+  HoverCard: "first_mounted_parity_hover_card",
+  Field: "first_mounted_parity_field",
   CodeInput: "a_grouped_code_input_types_and_completes_through_the_real_tree",
   FileUpload: "a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam",
   LicenceActivation: [
@@ -187,6 +190,7 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
     "stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring",
   ],
   BulkActionBar: "gpui_mounted_bulk_action_bar_actions_clear_and_select_all",
+  ListCardCounter: "first_mounted_parity_list_card_counter",
   ListContainer: "gpui_mounted_list_container_state_pagination_and_accessible_name",
   LogList: "gpui_mounted_log_list_stream_audit_and_clear_filters",
   AlertDialog: "first_mounted_parity_alert_dialog",
