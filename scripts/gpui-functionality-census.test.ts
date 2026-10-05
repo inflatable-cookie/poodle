@@ -300,6 +300,25 @@ describe("g18.001 census oracles", () => {
     }
   });
 
+  it("manifest oracle: feedback states keep only their delegated-events axis not applicable", () => {
+    const manifest = deriveCapabilityManifest(repositoryRoot);
+    for (const [component, contract, required] of [
+      ["EmptyState", "empty-state.md", ["semantic", "pointer", "keyboard_focus", "accessibility", "visual"]],
+      ["ErrorBoundary", "error-boundary.md", ["semantic", "pointer", "keyboard_focus", "accessibility", "visual"]],
+      ["EmbedPreview", "embed-preview.md", ["semantic", "pointer", "keyboard_focus", "accessibility", "visual"]],
+      ["InlineListSection", "inline-list-section.md", ["semantic", "pointer", "keyboard_focus", "accessibility", "visual"]],
+      ["PasswordRequirements", "password-requirements.md", ["semantic", "accessibility", "visual"]],
+    ]) {
+      const entry = manifest.find((candidate) => candidate.component === component);
+      expect(entry?.required).toEqual(required);
+      expect(entry?.notApplicable.map((item) => item.axis)).toEqual(
+        component === "PasswordRequirements" ? ["events", "pointer", "keyboard_focus"] : ["events"],
+      );
+      expect(entry?.notApplicable.every((item) => item.contractRef.includes(contract as string))).toBe(true);
+      expect(entry?.notApplicable.every((item) => item.reason.length > 0)).toBe(true);
+    }
+  });
+
   it("widened-A2 oracle: platform language can never justify not-applicable", () => {
     const entry = manifestEntry({
       component: "Checkbox",

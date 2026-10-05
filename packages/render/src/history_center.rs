@@ -34,7 +34,7 @@ use poodle_specs::{
 
 use crate::alert_dialog::{alert_dialog, AlertDialogHandlers, DEFAULT_WORKING_LABEL};
 use crate::context::RenderContext;
-use crate::empty_state::empty_state;
+use crate::empty_state::{empty_state, EmptyStateHandlers};
 use crate::floating_overlay::floating_overlay;
 use crate::icon_button::icon_button;
 use crate::popover::popover_surface;
@@ -454,6 +454,7 @@ fn surface_content(
                 .with_size(EmptyStateSize::Compact)
                 .with_density(density),
             ctx,
+            EmptyStateHandlers::default(),
         );
         empty.id = Some(HISTORY_CENTER_EMPTY_ID.to_owned());
         empty.runtime_id = part_id(instance, HISTORY_CENTER_EMPTY_ID);

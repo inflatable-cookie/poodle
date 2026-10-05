@@ -8,7 +8,8 @@
 //! contract-sanctioned placeholder panel honoring the effective aspect ratio.
 
 use poodle_node::{
-    CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
+    CrossAxisAlignment, FocusRing, LayoutDirection, LayoutOverflow, LayoutSizing,
+    MainAxisAlignment, Node,
 };
 use poodle_specs::{EmbedPreviewSpec, SkeletonSpec, TextLinkSpec};
 
@@ -17,7 +18,29 @@ use crate::presentation::rem_to_px;
 use crate::skeleton::skeleton;
 use crate::text_link::text_link;
 
-pub fn embed_preview(spec: &EmbedPreviewSpec, ctx: &RenderContext<'_>) -> Node {
+/// Host callbacks for the embed preview. The fallback link is a real anchor
+/// in Svelte (`target="_blank"`) when an original URL exists; without one
+/// Svelte renders a no-navigation button, so the fallback carries no press
+/// callback — only the stable instance scope for its link id.
+#[derive(Default, Clone)]
+pub struct EmbedPreviewHandlers {
+    /// Stable native instance scope for the fallback link id.
+    pub instance_id: Option<String>,
+}
+
+/// The backend-state id of the fallback link.
+pub fn embed_preview_fallback_link_id(instance_id: Option<&str>) -> String {
+    match instance_id {
+        Some(scope) => format!("embed-preview:{scope}:fallback-link"),
+        None => String::from("embed-preview-fallback-link"),
+    }
+}
+
+pub fn embed_preview(
+    spec: &EmbedPreviewSpec,
+    ctx: &RenderContext<'_>,
+    handlers: EmbedPreviewHandlers,
+) -> Node {
     let panel_bg = ctx.theme().resolve_color(spec.fill_token()); // background-panel
     let radius = ctx.theme().resolve_radius("radius.surface");
     let text_secondary = ctx.theme().resolve_color("color.text.secondary");
@@ -203,12 +226,22 @@ pub fn embed_preview(spec: &EmbedPreviewSpec, ctx: &RenderContext<'_>) -> Node {
         return root().child(container(padded_grow().child(label(html, text_secondary))));
     }
 
-    // Fallback: real TextLink to the original URL.
-    let href = spec
+    // Fallback: the parsed reference stays visible when no embed URL
+    // exists. Svelte hands TextLink the bare originalUrl (not the id
+    // fallback): with a URL it renders an anchor, without one it renders a
+    // no-navigation button. A fallback runs only when no embed URL
+    // derived, so no original URL exists here — the native control is
+    // always Svelte's inert button: named, focusable, nothing to activate.
+    let display = spec
         .parsed
         .as_ref()
-        .and_then(|p| p.original_url.clone().or_else(|| Some(p.id.clone())))
-        .unwrap_or_default();
+        .and_then(|parsed| parsed.original_url.clone())
+        .unwrap_or_else(|| {
+            spec.parsed
+                .as_ref()
+                .map(|parsed| parsed.id.clone())
+                .unwrap_or_default()
+        });
     let mut fallback = Node::container();
     {
         let s = &mut fallback.style;
@@ -222,9 +255,28 @@ pub fn embed_preview(spec: &EmbedPreviewSpec, ctx: &RenderContext<'_>) -> Node {
         pad.bottom = fallback_pad_y;
     }
     all_radius(&mut fallback, radius);
-    root().child(fallback.child(text_link(
-        &TextLinkSpec::new(href.clone()).with_href(href),
+    // No press callback by construction: without an original URL there is
+    // nothing to open, exactly like Svelte's no-navigation button.
+    let mut link = text_link(
+        &TextLinkSpec::new(display.clone()).with_href(display),
         ctx,
         None,
-    )))
+    );
+    link.id = Some(embed_preview_fallback_link_id(
+        handlers.instance_id.as_deref(),
+    ));
+    // The no-URL fallback is Svelte's no-navigation <button>: named and
+    // focusable, but with nothing to activate.
+    link.a11y.role = Some(poodle_node::NodeRole::Button);
+    link.a11y.tab_index = Some(0);
+    link.interaction.focusable = true;
+    // A bare focusable stays untracked by the backend; the focus-visible
+    // ring both paints Svelte's link outline and mints the tracked handle
+    // keyboard input needs (mirrors validation_summary's entry link).
+    link.style.focus_ring = Some(FocusRing {
+        color: ctx.theme().resolve_color("color.accent.focusRing"),
+        width: ctx.theme().resolve_border_width("border.width.focus"),
+        offset: rem_to_px(0.125),
+    });
+    root().child(fallback.child(link))
 }

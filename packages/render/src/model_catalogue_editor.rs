@@ -42,7 +42,7 @@ use poodle_specs::{
 use crate::callout::{callout, CalloutHandlers};
 use crate::collapsible::{collapsible_with_handlers, CollapsibleHandlers};
 use crate::context::RenderContext;
-use crate::empty_state::empty_state;
+use crate::empty_state::{empty_state, EmptyStateHandlers};
 use crate::icon_button::icon_button;
 use crate::pill::pill;
 use crate::presentation::rem_to_px;
@@ -403,7 +403,7 @@ fn state_region(
     if !message.is_empty() {
         state_spec = state_spec.with_message(message);
     }
-    empty_state(&state_spec, ctx)
+    empty_state(&state_spec, ctx, EmptyStateHandlers::default())
 }
 
 #[allow(clippy::too_many_arguments)]

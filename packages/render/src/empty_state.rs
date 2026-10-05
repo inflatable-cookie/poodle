@@ -4,6 +4,8 @@
 //! Ported from: `packages/jetstream/components/src/empty_state.rs`. Actions
 //! compose [`crate::button::button`].
 
+use std::sync::Arc;
+
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
 use poodle_specs::{
     ButtonSpec, ControlDensity, ControlSize, EmptyStateSize, EmptyStateSpec, EmptyStateVariant,
@@ -15,7 +17,34 @@ use crate::color::with_alpha;
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn empty_state(spec: &EmptyStateSpec, ctx: &RenderContext<'_>) -> Node {
+/// Host callbacks for an empty state's slotted actions. Svelte renders the
+/// `actions` snippet as live host buttons; the spec-driven native action
+/// list needs the same seam or every action paints inert.
+#[derive(Default, Clone)]
+pub struct EmptyStateHandlers {
+    pub on_action: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Stable native instance scope. Two empty states with the same action
+    /// ids would otherwise share one backend focus handle.
+    pub instance_id: Option<String>,
+}
+
+/// The backend-state id of one empty-state action.
+pub fn empty_state_action_focus_id(instance_id: Option<&str>, action: &str) -> String {
+    match instance_id {
+        Some(scope) => format!("empty-state:{scope}:action:{action}"),
+        None => format!("empty-state-action-{action}"),
+    }
+}
+
+fn scoped(instance_id: Option<&str>, part: &str) -> Option<String> {
+    instance_id.map(|scope| format!("empty-state:{scope}:{part}"))
+}
+
+pub fn empty_state(
+    spec: &EmptyStateSpec,
+    ctx: &RenderContext<'_>,
+    handlers: EmptyStateHandlers,
+) -> Node {
     let density = ctx.resolve_density(spec.density);
     let text_primary = ctx.theme().resolve_color("color.text.primary");
     let text_secondary = ctx.theme().resolve_color("color.text.secondary");
@@ -82,8 +111,10 @@ pub fn empty_state(spec: &EmptyStateSpec, ctx: &RenderContext<'_>) -> Node {
     };
     let horiz_padding = ctx.theme().resolve_space("space.panel.x");
 
-    // Circular visual affordance.
+    // Circular visual affordance. Decorative: hidden from the accessibility
+    // tree while still painted (contract §6, Svelte `aria-hidden="true"`).
     let mut visual = Node::container();
+    visual.a11y.hidden = Some(true);
     {
         let s = &mut visual.style;
         s.descriptor.layout.width = LayoutSizing::Fixed(icon_container);
@@ -133,6 +164,8 @@ pub fn empty_state(spec: &EmptyStateSpec, ctx: &RenderContext<'_>) -> Node {
         s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
     }
     let mut title = Node::text(&spec.title);
+    title.a11y.role = Some(poodle_node::NodeRole::Heading);
+    title.a11y.level = Some(3);
     title.style.descriptor.text_color = Some(text_primary);
     title.style.text_size = Some(title_font);
     title.style.text_weight = Some(600);
@@ -149,7 +182,9 @@ pub fn empty_state(spec: &EmptyStateSpec, ctx: &RenderContext<'_>) -> Node {
     }
     el = el.child(copy);
 
-    // Actions compose the ported button.
+    // Actions compose the ported button. Each action carries its spec id so
+    // the host can address it, and the host callback so a press reaches the
+    // same behavior the Svelte snippet button owns.
     if spec.action_count() > 0 {
         let mut actions = Node::container();
         {
@@ -159,20 +194,40 @@ pub fn empty_state(spec: &EmptyStateSpec, ctx: &RenderContext<'_>) -> Node {
             s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
         }
         for action in &spec.actions {
+            let on_click = handlers.on_action.as_ref().map(|handler| {
+                let handler = Arc::clone(handler);
+                let id = action.id.clone();
+                Arc::new(move || handler(&id)) as Arc<dyn Fn() + Send + Sync>
+            });
             let btn_spec = ButtonSpec::new()
                 .with_label(&action.label)
                 .with_variant(action.variant)
                 .with_disabled(action.is_disabled)
                 .with_size(effective_size)
                 .with_size_role(SemanticControlSizeRole::Control);
-            actions = actions.child(button(&btn_spec, ctx, None));
+            let mut btn = button(&btn_spec, ctx, on_click);
+            btn.id = Some(empty_state_action_focus_id(
+                handlers.instance_id.as_deref(),
+                &action.id,
+            ));
+            btn.runtime_id = scoped(
+                handlers.instance_id.as_deref(),
+                &format!("action:{}", action.id),
+            );
+            actions = actions.child(btn);
         }
         el = el.child(actions);
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        el.a11y.label = Some(label.to_string());
-    }
+    // Contract §6: the section carries an accessible name, falling back to
+    // the title exactly like Svelte's `aria-label={ariaLabel ?? title}`.
+    el.a11y.role = Some(poodle_node::NodeRole::Region);
+    el.a11y.label = Some(
+        spec.aria_label
+            .as_deref()
+            .unwrap_or(spec.title.as_str())
+            .to_string(),
+    );
     el
 }
 
@@ -236,10 +291,15 @@ mod tests {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
         let ctx = RenderContext::new(&theme);
-        let default = empty_state(&EmptyStateSpec::new("No projects yet"), &ctx);
+        let default = empty_state(
+            &EmptyStateSpec::new("No projects yet"),
+            &ctx,
+            EmptyStateHandlers::default(),
+        );
         let compact = empty_state(
             &EmptyStateSpec::new("No projects yet").with_size(EmptyStateSize::Compact),
             &ctx,
+            EmptyStateHandlers::default(),
         );
 
         let default_title = title_text_size(&default).expect("default title size");

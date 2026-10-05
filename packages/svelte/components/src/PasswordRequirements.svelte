@@ -44,22 +44,43 @@
   {:else if effectiveRequirements}
     <p class="poodle-password-requirements__title">{title}:</p>
     <ul class="poodle-password-requirements__list">
-      <li class:poodle-password-requirements__item--met={lengthMet}>
-        At least {effectiveRequirements.minLength} characters
+      {#snippet statusIcon(met: boolean)}
+        <span class="poodle-password-requirements__item-icon" aria-hidden="true">
+          {#if met}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"><path d="M4.5 12.5l5 5L19.5 7" /></svg>
+          {:else}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          {/if}
+        </span>
+      {/snippet}
+      <li
+        class:poodle-password-requirements__item--met={lengthMet}
+        aria-label={`At least ${effectiveRequirements.minLength} characters — ${lengthMet ? "met" : "not met"}`}
+      >
+        {@render statusIcon(lengthMet)}At least {effectiveRequirements.minLength} characters
       </li>
       {#if effectiveRequirements.requireMixedCase}
-        <li class:poodle-password-requirements__item--met={mixedCaseMet}>
-          Mix of uppercase and lowercase letters
+        <li
+          class:poodle-password-requirements__item--met={mixedCaseMet}
+          aria-label={`Mix of uppercase and lowercase letters — ${mixedCaseMet ? "met" : "not met"}`}
+        >
+          {@render statusIcon(mixedCaseMet)}Mix of uppercase and lowercase letters
         </li>
       {/if}
       {#if effectiveRequirements.requireDigit}
-        <li class:poodle-password-requirements__item--met={digitMet}>
-          At least one number
+        <li
+          class:poodle-password-requirements__item--met={digitMet}
+          aria-label={`At least one number — ${digitMet ? "met" : "not met"}`}
+        >
+          {@render statusIcon(digitMet)}At least one number
         </li>
       {/if}
       {#if effectiveRequirements.requireSpecial}
-        <li class:poodle-password-requirements__item--met={specialMet}>
-          At least one special character
+        <li
+          class:poodle-password-requirements__item--met={specialMet}
+          aria-label={`At least one special character — ${specialMet ? "met" : "not met"}`}
+        >
+          {@render statusIcon(specialMet)}At least one special character
         </li>
       {/if}
     </ul>
@@ -70,7 +91,7 @@
       <p class="poodle-password-requirements__hint">{hint}</p>
     {/if}
   {:else if error}
-    <p class="poodle-password-requirements__error">{error}</p>
+    <p class="poodle-password-requirements__error" role="alert">{error}</p>
   {/if}
 </div>
 

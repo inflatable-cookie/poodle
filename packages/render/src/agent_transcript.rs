@@ -164,6 +164,7 @@ pub fn agent_transcript(
                 .with_aria_label(spec.empty_label.clone())
                 .with_density(density),
             ctx,
+            crate::empty_state::EmptyStateHandlers::default(),
         );
         empty.runtime_id = Some(format!(
             "{}:empty-state",

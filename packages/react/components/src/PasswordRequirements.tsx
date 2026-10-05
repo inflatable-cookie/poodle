@@ -33,8 +33,31 @@ export function PasswordRequirements({
   const digitMet = !requirements?.requireDigit || /\d/.test(password);
   const specialMet = !requirements?.requireSpecial || /[^a-zA-Z0-9]/.test(password);
 
+  const statusIcon = (met: boolean) => (
+    <span className="poodle-password-requirements__item-icon" aria-hidden="true">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        width="1em"
+        height="1em"
+      >
+        {met ? <path d="M4.5 12.5l5 5L19.5 7" /> : <path d="M6 6l12 12M18 6L6 18" />}
+      </svg>
+    </span>
+  );
+
   const item = (met: boolean, text: string) => (
-    <li className={met ? "poodle-password-requirements__item--met" : undefined}>{text}</li>
+    <li
+      aria-label={`${text} — ${met ? "met" : "not met"}`}
+      className={met ? "poodle-password-requirements__item--met" : undefined}
+    >
+      {statusIcon(met)}
+      {text}
+    </li>
   );
 
   return (
@@ -56,7 +79,9 @@ export function PasswordRequirements({
           {hint ? <p className="poodle-password-requirements__hint">{hint}</p> : null}
         </>
       ) : error ? (
-        <p className="poodle-password-requirements__error">{error}</p>
+        <p className="poodle-password-requirements__error" role="alert">
+          {error}
+        </p>
       ) : null}
     </div>
   );

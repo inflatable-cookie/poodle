@@ -23,6 +23,18 @@ fn requirement_item(
     let indicator_color = if is_met { met_color } else { unmet_color };
 
     let mut row = Node::container();
+    // Svelte renders a real `ul`/`li` checklist: each row is a list item
+    // whose check/cross indicator plus wording carries the pass/fail state.
+    // Contract §6 additionally requires the state as accessible text, which
+    // Svelte's class-only treatment omits: the row name reads
+    // "{rule} — met" / "{rule} — not met" so status never rides on
+    // color or glyph alone.
+    row.a11y.role = Some(poodle_node::NodeRole::ListItem);
+    row.a11y.label = Some(format!(
+        "{} \u{2014} {}",
+        label_text,
+        if is_met { "met" } else { "not met" }
+    ));
     {
         let s = &mut row.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
@@ -92,10 +104,14 @@ pub fn password_requirements(spec: &PasswordRequirementsSpec, ctx: &RenderContex
     };
 
     // ── Loading state (no title — matches the reference) ──
+    // Svelte marks the panel aria-live="polite"; natively the polite
+    // live region is a Status, never an Alert.
     if spec.is_loading {
         let mut loading = text(&spec.loading_label, body_size, text_color);
         loading.style.line_height = Some(1.5);
-        return root.child(loading);
+        let mut panel = root.child(loading);
+        panel.a11y.role = Some(NodeRole::Status);
+        return panel;
     }
 
     // ── Requirements checklist (title lives only in this branch) ──
@@ -106,6 +122,7 @@ pub fn password_requirements(spec: &PasswordRequirementsSpec, ctx: &RenderContex
         root = root.child(title);
 
         let mut list = Node::container();
+        list.a11y.role = Some(poodle_node::NodeRole::List);
         list.style.descriptor.layout.direction = LayoutDirection::Column;
         list.style.descriptor.layout.spacing.gap = rem_to_px(0.125);
         list = list.child(requirement_item(
@@ -172,11 +189,17 @@ pub fn password_requirements(spec: &PasswordRequirementsSpec, ctx: &RenderContex
         }
     } else if let Some(ref error) = spec.error {
         // ── Error state (no requirements, no title) ──
+        // Contract §6: the error announces assertively — the one state
+        // that owns the Alert role.
         let mut e = text(error.as_str(), body_size, error_color);
         e.style.line_height = Some(1.5);
         root = root.child(e);
+        root.a11y.role = Some(NodeRole::Alert);
+        return root;
     }
 
-    root.a11y.role = Some(NodeRole::Alert);
+    // The ordinary checklist (and the empty panel) stays a polite live
+    // region like Svelte's aria-live="polite" panel: Status, not Alert.
+    root.a11y.role = Some(NodeRole::Status);
     root
 }
