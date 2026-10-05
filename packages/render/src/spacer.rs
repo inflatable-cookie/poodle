@@ -13,6 +13,7 @@ use crate::context::RenderContext;
 /// context is accepted and unused.
 pub fn spacer(spec: &SpacerSpec, _ctx: &RenderContext<'_>) -> Node {
     let mut el = Node::container();
+    el.a11y.hidden = Some(true);
     // Explicit Row (see switch.rs).
     el.style.descriptor.layout.direction = LayoutDirection::Row;
     if spec.grow > 0.0 {

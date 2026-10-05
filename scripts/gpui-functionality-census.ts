@@ -154,6 +154,20 @@ export type CensusDoc = {
  * to composed children. These contract-backed boundaries stay local so they
  * do not relax the census rules for other styled-only components. */
 const STATIC_DISPLAY_NOT_APPLICABLE: Record<string, ManifestNotApplicable[]> = {
+  Spacer: [
+    {
+      axis: "keyboard_focus",
+      reason: "The contract defines Spacer as decorative layout scaffolding that is never focusable and has no keyboard behavior.",
+      contractRef: "docs/contracts/components/spacer.md#6. Accessibility",
+    },
+  ],
+  Skeleton: [
+    {
+      axis: "keyboard_focus",
+      reason: "The contract defines Skeleton placeholders as decorative and never focusable, with no keyboard interaction.",
+      contractRef: "docs/contracts/components/skeleton.md#6. Accessibility",
+    },
+  ],
   Avatar: [
     {
       axis: "events",

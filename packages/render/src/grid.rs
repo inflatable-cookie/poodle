@@ -4,7 +4,7 @@
 //! Ported from: `packages/jetstream/components/src/grid.rs`.
 //!
 //! Column tracks drive per-child flex:
-//!   - `Fr` tracks → each child grows by its declared track weight.
+//!   - `Fr` tracks → zero-basis children divide free space by declared weight.
 //!   - `AutoFit { min_rem }` → each child is at least `min_rem` wide and grows
 //!     to fill, wrapping like `repeat(auto-fit, minmax(min_rem, 1fr))`.
 //!   - `Rem` fixed track → child takes that exact width, no grow/shrink.
@@ -12,7 +12,7 @@
 //! DELTAS vs CSS grid: explicit `rows` tracks are not honored (rows emerge
 //! from flex-wrap); `gap` is one value on both axes.
 
-use poodle_node::{LayoutDirection, LayoutSizing, Node};
+use poodle_node::{LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::{GridColumns, GridSpec, GridTrack};
 
 use crate::context::RenderContext;
@@ -21,18 +21,6 @@ use crate::presentation::rem_to_px;
 pub fn grid(spec: &GridSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> Node {
     let padding = spec.resolved_padding();
     let columns = spec.parsed_columns();
-    let fr_total = match &columns {
-        GridColumns::Tracks(tracks) => tracks
-            .iter()
-            .filter_map(|track| match track {
-                GridTrack::Fr(weight) => Some(*weight),
-                GridTrack::Rem(_) => None,
-            })
-            .sum::<f32>()
-            .max(1.0),
-        GridColumns::AutoFit { .. } => 1.0,
-    };
-
     let mut el = Node::container();
     {
         let s = &mut el.style;
@@ -75,7 +63,7 @@ pub fn grid(spec: &GridSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> No
                     match tracks[i % tracks.len()] {
                         GridTrack::Fr(weight) => {
                             s.flex_grow = Some(weight);
-                            s.width_pct = Some(weight / fr_total - 0.001);
+                            s.flex_basis = Some(0.0);
                             s.min_width = Some(0.0);
                             s.flex_shrink_zero = true;
                         }
@@ -99,6 +87,7 @@ pub fn grid(spec: &GridSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> No
             el.a11y.label = Some(label.to_string());
         }
     }
+    el.a11y.role = spec.role.as_deref().and_then(NodeRole::from_aria_role);
     el
 }
 
@@ -119,6 +108,7 @@ mod tests {
 
         assert_eq!(node.children[0].style.flex_grow, Some(1.0));
         assert_eq!(node.children[1].style.flex_grow, Some(2.0));
-        assert!(node.children[0].style.width_pct < node.children[1].style.width_pct);
+        assert_eq!(node.children[0].style.flex_basis, Some(0.0));
+        assert_eq!(node.children[1].style.flex_basis, Some(0.0));
     }
 }

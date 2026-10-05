@@ -10,6 +10,8 @@
 //! tiers here after proving the node vocabulary against `Select`. Migration
 //! history lives in git; parity evidence lives with each backend.
 
+mod layout_utils;
+
 pub mod accordion;
 pub mod action_discovery_panel;
 pub mod agent_chat_input;

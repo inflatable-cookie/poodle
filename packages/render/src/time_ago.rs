@@ -23,8 +23,12 @@ pub fn time_ago(spec: &TimeAgoSpec, ctx: &RenderContext<'_>) -> Node {
         relative_time(spec, &spec.timestamp).unwrap_or_else(|| spec.timestamp.clone())
     };
 
-    let mut label = Node::text(display);
+    let mut label = Node::text(display.clone());
     label.style.descriptor.text_color = Some(text_color);
+    if !spec.timestamp.is_empty() {
+        label.datetime = Some(spec.timestamp.clone());
+        label.tooltip = Some(spec.timestamp.clone());
+    }
 
     if !spec.inherits_typography() {
         // Contract §8: font-size = typography.body.size. Token-resolved.
@@ -34,6 +38,8 @@ pub fn time_ago(spec: &TimeAgoSpec, ctx: &RenderContext<'_>) -> Node {
         if !aria.is_empty() {
             label.a11y.label = Some(aria.to_string());
         }
+    } else if !spec.timestamp.is_empty() {
+        label.a11y.label = Some(format!("{display} ({})", spec.timestamp));
     }
     label
 }

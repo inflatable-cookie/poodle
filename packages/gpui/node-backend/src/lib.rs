@@ -98,6 +98,7 @@ pub struct PaintedNodeSnapshot {
     /// `aria-hidden` declaration: the node paints but is out of accessibility
     /// ownership (an exit remnant). `None` means the component said nothing.
     pub a11y_hidden: Option<bool>,
+    pub datetime: Option<String>,
     pub style: StyleDescriptor,
     pub shadow_layers: Vec<ShadowLayer>,
     pub border_dashed: bool,
@@ -120,6 +121,7 @@ impl PaintedNodeSnapshot {
             a11y_role: node.a11y.role,
             a11y_label: node.a11y.label.clone(),
             a11y_hidden: node.a11y.hidden,
+            datetime: node.datetime.clone(),
             style: node.style.descriptor.clone(),
             shadow_layers: node.style.shadow_layers.clone(),
             border_dashed: node.style.border_dashed,

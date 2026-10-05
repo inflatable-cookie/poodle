@@ -3,7 +3,7 @@
 //! Contract: `docs/contracts/components/stack.md`
 //! Ported from: `packages/jetstream/components/src/stack.rs`.
 
-use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node, NodeRole};
 use poodle_specs::{Alignment, LayoutJustify, StackDirection, StackSpec};
 
 use crate::context::RenderContext;
@@ -59,6 +59,19 @@ pub fn stack(spec: &StackSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> 
         }
     }
 
+    crate::layout_utils::apply_dimensions(
+        &mut el,
+        spec.width.as_ref(),
+        spec.height.as_ref(),
+        spec.min_width.as_ref(),
+        spec.min_height.as_ref(),
+    );
+    if let Some(overflow) = spec.overflow.as_ref() {
+        let overflow = crate::layout_utils::overflow(overflow);
+        el.style.descriptor.layout.overflow_x = overflow;
+        el.style.descriptor.layout.overflow_y = overflow;
+    }
+
     for child in children {
         el = el.child(child);
     }
@@ -68,5 +81,6 @@ pub fn stack(spec: &StackSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> 
             el.a11y.label = Some(label.to_string());
         }
     }
+    el.a11y.role = spec.role.as_deref().and_then(NodeRole::from_aria_role);
     el
 }

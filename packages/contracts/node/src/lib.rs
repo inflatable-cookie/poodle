@@ -78,6 +78,9 @@ pub struct Node {
     /// Hover tooltip text. Backends project this as native tooltip chrome
     /// (HTML `title`, GPUI `.tooltip()`). Not the Tooltip overlay component.
     pub tooltip: Option<String>,
+    /// Machine-readable ISO 8601 value for semantic time text, matching the
+    /// web `<time datetime>` attribute. It does not change the visible text.
+    pub datetime: Option<String>,
     /// Semantic token roles the component projects onto this node — the
     /// native counterpart of web `data-*` recipe attributes (e.g.
     /// `variant: primary`). Observers read these; nothing executes them.
@@ -900,6 +903,68 @@ pub enum NodeRole {
     Tooltip,
     Tree,
     TreeItem,
+}
+
+impl NodeRole {
+    /// Map a web ARIA role name to the equivalent shared native role when this
+    /// node vocabulary has one. Unknown names remain unmapped rather than
+    /// being assigned a misleading role.
+    pub fn from_aria_role(role: &str) -> Option<Self> {
+        Some(match role.trim().to_ascii_lowercase().as_str() {
+            "alert" => Self::Alert,
+            "alertdialog" => Self::AlertDialog,
+            "banner" => Self::Banner,
+            "button" => Self::Button,
+            "cell" => Self::Cell,
+            "checkbox" => Self::CheckBox,
+            "columnheader" => Self::ColumnHeader,
+            "combobox" => Self::ComboBox,
+            "contentinfo" => Self::ContentInfo,
+            "dialog" => Self::Dialog,
+            "figure" => Self::Figure,
+            "grid" => Self::Grid,
+            "group" => Self::Group,
+            "heading" => Self::Heading,
+            "searchbox" => Self::SearchBox,
+            "label" => Self::Label,
+            "link" => Self::Link,
+            "list" => Self::List,
+            "listitem" => Self::ListItem,
+            "listbox" => Self::ListBox,
+            "option" => Self::ListBoxOption,
+            "log" => Self::Log,
+            "img" | "image" => Self::Image,
+            "menu" => Self::Menu,
+            "menubar" => Self::MenuBar,
+            "menuitem" => Self::MenuItem,
+            "menuitemcheckbox" => Self::MenuItemCheckBox,
+            "menuitemradio" => Self::MenuItemRadio,
+            "meter" => Self::Meter,
+            "navigation" => Self::Navigation,
+            "none" | "presentation" => Self::Presentation,
+            "separator" => Self::Splitter,
+            "slider" => Self::Slider,
+            "progressbar" => Self::ProgressIndicator,
+            "radiogroup" => Self::RadioGroup,
+            "radio" => Self::RadioButton,
+            "region" => Self::Region,
+            "row" => Self::Row,
+            "spinbutton" => Self::SpinButton,
+            "status" => Self::Status,
+            "switch" => Self::Switch,
+            "table" => Self::Table,
+            "rowheader" => Self::RowHeader,
+            "tab" => Self::Tab,
+            "tablist" => Self::TabList,
+            "tabpanel" => Self::TabPanel,
+            "textbox" => Self::TextInput,
+            "toolbar" => Self::Toolbar,
+            "tooltip" => Self::Tooltip,
+            "tree" => Self::Tree,
+            "treeitem" => Self::TreeItem,
+            _ => return None,
+        })
+    }
 }
 
 /// A property an animation may drive. Backends map to their own channels.

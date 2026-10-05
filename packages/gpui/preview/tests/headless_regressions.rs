@@ -56328,6 +56328,405 @@ fn first_mounted_parity_gain_reduction_meter() {
     });
 }
 
+/// Box parity: role opt-in preserves the named region, while resolved padding,
+/// explicit bounds, and overflow reach the mounted GPUI node.
+#[test]
+fn first_mounted_parity_box() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{LayoutOverflow, LayoutSizing};
+    use poodle_specs::{BoxSpec, Overflow, PaddingScale};
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+
+        let plain = poodle_render::bx(&BoxSpec::new(), &ctx, Vec::new());
+        assert_eq!(plain.a11y.role, None, "Box stays neutral by default");
+
+        let spec = BoxSpec::new()
+            .with_padding(PaddingScale::Lg)
+            .with_width("12rem")
+            .with_height("6rem")
+            .with_min_width("8rem")
+            .with_min_height("4rem")
+            .with_overflow(Overflow::Hidden)
+            .with_role("region")
+            .with_aria_label("Tools");
+        let mut node = poodle_render::bx(&spec, &ctx, vec![Node::text("content")]);
+        node.id = Some("mounted-box-region".to_owned());
+        assert_eq!(node.a11y.role, Some(NodeRole::Region));
+        assert_eq!(node.a11y.label.as_deref(), Some("Tools"));
+        assert_eq!(
+            node.style.descriptor.layout.spacing.padding.left,
+            theme_provider.resolve_space("space.panel.x")
+        );
+        assert_eq!(
+            node.style.descriptor.layout.width,
+            LayoutSizing::Fixed(192.0)
+        );
+        assert_eq!(
+            node.style.descriptor.layout.height,
+            LayoutSizing::Fixed(96.0)
+        );
+        assert_eq!(node.style.min_width, Some(128.0));
+        assert_eq!(node.style.min_height, Some(64.0));
+        assert_eq!(
+            node.style.descriptor.layout.overflow_x,
+            LayoutOverflow::Hidden
+        );
+
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 220.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-box-region")
+            .expect("Box reached the production GPUI paint pass");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Region));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Tools"));
+        assert!(driver.accessibility_nodes().iter().any(|entry| {
+            entry.semantic_id.as_deref() == Some("mounted-box-region")
+                && entry.role == NodeRole::Region
+                && entry.label.as_deref() == Some("Tools")
+        }));
+        let bounds = poodle_gpui_node_backend::bounds_for("mounted-box-region")
+            .expect("mounted Box geometry");
+        assert!(f32::from(bounds.size.width) > 0.0);
+        assert!(f32::from(bounds.size.height) > 0.0);
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Grid parity: opt-in landmark semantics and token spacing survive mounting,
+/// and the declared fractional columns produce their relative track widths.
+#[test]
+fn first_mounted_parity_grid() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::LayoutSizing;
+    use poodle_specs::{GridSpec, PaddingScale};
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+
+        let plain = poodle_render::grid(&GridSpec::new(), &ctx, Vec::new());
+        assert_eq!(
+            plain.a11y.role, None,
+            "visual Grid has no implicit grid role"
+        );
+
+        let spec = GridSpec::new()
+            .with_columns("1fr 2fr")
+            .with_gap(PaddingScale::Md)
+            .with_padding(PaddingScale::Sm)
+            .with_role("region")
+            .with_aria_label("Cards");
+        let mut node = poodle_render::grid(&spec, &ctx, vec![Node::text("one"), Node::text("two")]);
+        node.id = Some("mounted-grid-region".to_owned());
+        node.style.descriptor.layout.width = LayoutSizing::Fixed(320.0);
+        node.style.descriptor.layout.height = LayoutSizing::Fixed(100.0);
+        node.children[0].id = Some("mounted-grid-track-one".to_owned());
+        node.children[1].id = Some("mounted-grid-track-two".to_owned());
+        assert_eq!(node.a11y.role, Some(NodeRole::Region));
+        assert_eq!(node.a11y.label.as_deref(), Some("Cards"));
+        assert_eq!(
+            node.style.descriptor.layout.spacing.gap,
+            theme_provider.resolve_space("space.panel.y")
+        );
+        assert_eq!(
+            node.children[0].style.flex_grow,
+            Some(1.0),
+            "the first 1fr track keeps its declared weight"
+        );
+        assert_eq!(
+            node.children[1].style.flex_grow,
+            Some(2.0),
+            "the second 2fr track keeps its declared weight"
+        );
+
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 160.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-grid-region")
+            .expect("Grid reached the production GPUI paint pass");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Region));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Cards"));
+        assert!(driver.accessibility_nodes().iter().any(|entry| {
+            entry.semantic_id.as_deref() == Some("mounted-grid-region")
+                && entry.role == NodeRole::Region
+                && entry.label.as_deref() == Some("Cards")
+        }));
+        let first = poodle_gpui_node_backend::bounds_for("mounted-grid-track-one")
+            .expect("first grid track geometry");
+        let second = poodle_gpui_node_backend::bounds_for("mounted-grid-track-two")
+            .expect("second grid track geometry");
+        let first_width = f32::from(first.size.width);
+        let second_width = f32::from(second.size.width);
+        assert!(second_width > first_width);
+        assert!((second_width - 2.0 * first_width).abs() < 2.0);
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Stack parity: direction, cross-axis alignment, wrapping, and spacing use
+/// the same resolved layout inputs and geometry as the Svelte primitive.
+#[test]
+fn first_mounted_parity_stack() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{
+        CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment,
+    };
+    use poodle_specs::{
+        Alignment, LayoutJustify, Overflow, PaddingScale, StackDirection, StackSpec,
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let spec = StackSpec::new()
+            .with_direction(StackDirection::Row)
+            .with_gap(PaddingScale::Sm)
+            .with_align(Alignment::Center)
+            .with_justify(LayoutJustify::Start)
+            .with_wrap(true)
+            .with_padding(PaddingScale::Md)
+            .with_box(Some("220px".into()), Some("80px".into()))
+            .with_min_box(Some("200px".into()), Some("60px".into()))
+            .with_overflow(Overflow::Hidden)
+            .with_role("region")
+            .with_aria_label("Toolbar");
+
+        let mut first_child = Node::container();
+        first_child.id = Some("mounted-stack-first".to_owned());
+        first_child.style.descriptor.layout.width = LayoutSizing::Fixed(32.0);
+        first_child.style.descriptor.layout.height = LayoutSizing::Fixed(20.0);
+        let mut second_child = Node::container();
+        second_child.id = Some("mounted-stack-second".to_owned());
+        second_child.style.descriptor.layout.width = LayoutSizing::Fixed(32.0);
+        second_child.style.descriptor.layout.height = LayoutSizing::Fixed(20.0);
+
+        let mut node = poodle_render::stack(&spec, &ctx, vec![first_child, second_child]);
+        node.id = Some("mounted-stack-region".to_owned());
+        assert_eq!(node.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert_eq!(
+            node.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Center
+        );
+        assert_eq!(
+            node.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::Start
+        );
+        assert!(node.style.flex_wrap);
+        assert_eq!(
+            node.style.descriptor.layout.width,
+            LayoutSizing::Fixed(220.0)
+        );
+        assert_eq!(
+            node.style.descriptor.layout.height,
+            LayoutSizing::Fixed(80.0)
+        );
+        assert_eq!(node.style.min_width, Some(200.0));
+        assert_eq!(node.style.min_height, Some(60.0));
+        assert_eq!(
+            node.style.descriptor.layout.overflow_x,
+            LayoutOverflow::Hidden
+        );
+        assert_eq!(
+            node.style.descriptor.layout.spacing.gap,
+            theme_provider.resolve_space("space.inline.sm")
+        );
+        assert_eq!(
+            node.style.descriptor.layout.spacing.padding.top,
+            theme_provider.resolve_space("space.panel.y")
+        );
+        assert_eq!(node.a11y.role, Some(NodeRole::Region));
+        assert_eq!(node.a11y.label.as_deref(), Some("Toolbar"));
+
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 260.0, 120.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-stack-region")
+            .expect("Stack reached the production GPUI paint pass");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Region));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Toolbar"));
+        assert!(driver.accessibility_nodes().iter().any(|entry| {
+            entry.semantic_id.as_deref() == Some("mounted-stack-region")
+                && entry.role == NodeRole::Region
+                && entry.label.as_deref() == Some("Toolbar")
+        }));
+        let first = poodle_gpui_node_backend::bounds_for("mounted-stack-first")
+            .expect("first Stack child geometry");
+        let second = poodle_gpui_node_backend::bounds_for("mounted-stack-second")
+            .expect("second Stack child geometry");
+        let gap = theme_provider.resolve_space("space.inline.sm");
+        let actual_gap = f32::from(second.origin.x - first.origin.x - first.size.width);
+        assert!((actual_gap - gap).abs() < 1.0);
+        assert!((f32::from(first.origin.y) - f32::from(second.origin.y)).abs() < 1.0);
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Spacer parity: it expands between siblings, keeps its minimum size, and
+/// remains hidden from the accessibility projection while it paints.
+#[test]
+fn first_mounted_parity_spacer() {
+    use poodle_node::{LayoutDirection, LayoutSizing};
+    use poodle_specs::SpacerSpec;
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let mut row = Node::container();
+        row.id = Some("mounted-spacer-row".to_owned());
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.width = LayoutSizing::Fixed(240.0);
+        row.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+
+        let mut before = Node::container();
+        before.id = Some("mounted-spacer-before".to_owned());
+        before.style.descriptor.layout.width = LayoutSizing::Fixed(40.0);
+        before.style.descriptor.layout.height = LayoutSizing::Fixed(20.0);
+        let mut spacer = poodle_render::spacer(&SpacerSpec::new().with_min_size(12.0), &ctx);
+        spacer.id = Some("mounted-spacer".to_owned());
+        let mut after = Node::container();
+        after.id = Some("mounted-spacer-after".to_owned());
+        after.style.descriptor.layout.width = LayoutSizing::Fixed(40.0);
+        after.style.descriptor.layout.height = LayoutSizing::Fixed(20.0);
+        row = row.child(before).child(spacer).child(after);
+
+        let spacer = row
+            .find(&|node| node.id.as_deref() == Some("mounted-spacer"))
+            .expect("rendered Spacer child");
+        assert!(spacer.style.flex_fill);
+        assert_eq!(spacer.style.min_width, Some(12.0));
+        assert_eq!(spacer.a11y.role, None);
+        assert_eq!(spacer.a11y.hidden, Some(true));
+
+        let mounted = Arc::new(Mutex::new(row));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 280.0, 100.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-spacer")
+            .expect("Spacer reached the production GPUI paint pass");
+        assert_eq!(painted.a11y_hidden, Some(true));
+        assert_eq!(painted.a11y_role, None);
+        let bounds = poodle_gpui_node_backend::bounds_for("mounted-spacer")
+            .expect("mounted Spacer geometry");
+        assert!(f32::from(bounds.size.width) > 100.0);
+        assert!(driver
+            .accessibility_nodes()
+            .iter()
+            .all(|node| node.semantic_id.as_deref() != Some("mounted-spacer")));
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Skeleton parity: the placeholder is decorative, token-filled, and only
+/// schedules its opacity pulse under full motion after the first frame.
+#[test]
+fn first_mounted_parity_skeleton() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_headless::motion_policy::MotionPolicy;
+    use poodle_node::LayoutSizing;
+    use poodle_specs::SkeletonSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let full_ctx = ctx.with_first_frame_committed(true);
+        let spec = SkeletonSpec::new()
+            .with_shape("block")
+            .with_width("12rem")
+            .with_height("3rem");
+        let mut full = poodle_render::skeleton(&spec, &full_ctx);
+        assert!(full.style.animation.is_some());
+        assert_eq!(full.a11y.hidden, Some(true));
+        assert_eq!(
+            full.style.descriptor.background,
+            Some(poodle_render::skeleton::shimmer_fill(&spec, &ctx))
+        );
+        assert_eq!(
+            full.style.descriptor.layout.width,
+            LayoutSizing::Fixed(192.0)
+        );
+        assert_eq!(
+            full.style.descriptor.layout.height,
+            LayoutSizing::Fixed(48.0)
+        );
+
+        for policy in [MotionPolicy::Reduced, MotionPolicy::Frozen] {
+            let static_frame = poodle_render::skeleton(&spec, &full_ctx.with_motion_policy(policy));
+            assert!(static_frame.style.animation.is_none());
+            assert_eq!(static_frame.a11y.hidden, Some(true));
+        }
+
+        full.id = Some("mounted-skeleton".to_owned());
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(full));
+        let _driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 260.0, 100.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-skeleton")
+            .expect("Skeleton reached the production GPUI paint pass");
+        assert_eq!(painted.a11y_hidden, Some(true));
+        assert_eq!(
+            painted.style.background,
+            Some(poodle_render::skeleton::shimmer_fill(&spec, &ctx))
+        );
+        let bounds = poodle_gpui_node_backend::bounds_for("mounted-skeleton")
+            .expect("mounted Skeleton geometry");
+        assert!((f32::from(bounds.size.width) - 192.0).abs() < 1.0);
+        assert!((f32::from(bounds.size.height) - 48.0).abs() < 1.0);
+        let channels = poodle_gpui_node_backend::take_probe_capture();
+        assert!(channels.contains(&"surface.animation.scheduled"));
+    });
+}
+
+/// TimeAgo parity: the mounted native node preserves a machine-readable
+/// timestamp, relative copy, accessible name, and token-resolved text style.
+#[test]
+fn first_mounted_parity_time_ago() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::TimeAgoSpec;
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let timestamp = "2000-01-01T00:00:00Z";
+        let spec = TimeAgoSpec::new()
+            .with_timestamp(timestamp)
+            .with_live(false);
+        let mut node = poodle_render::time_ago(&spec, &ctx);
+        node.id = Some("mounted-time-ago".to_owned());
+        let relative = match &node.kind {
+            NodeKind::Text { content } => content.clone(),
+            _ => panic!("TimeAgo renders text"),
+        };
+        let expected_name = format!("{relative} ({timestamp})");
+        assert!(relative.ends_with("y ago"), "relative text: {relative}");
+        assert_eq!(node.datetime.as_deref(), Some(timestamp));
+        assert_eq!(node.tooltip.as_deref(), Some(timestamp));
+        assert_eq!(node.a11y.label.as_deref(), Some(expected_name.as_str()));
+        assert_eq!(
+            node.style.descriptor.text_color,
+            Some(theme_provider.resolve_color("color.text.primary"))
+        );
+        assert_eq!(
+            node.style.text_size,
+            Some(theme_provider.resolve_space("typography.body.size"))
+        );
+
+        let mounted = Arc::new(Mutex::new(node));
+        let _driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 80.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-time-ago")
+            .expect("TimeAgo reached the production GPUI paint pass");
+        assert_eq!(painted.datetime.as_deref(), Some(timestamp));
+        assert_eq!(painted.a11y_label.as_deref(), Some(expected_name.as_str()));
+        assert_eq!(painted.texts, vec![relative]);
+        let bounds = poodle_gpui_node_backend::bounds_for("mounted-time-ago")
+            .expect("mounted TimeAgo geometry");
+        assert!(f32::from(bounds.size.width) > 0.0);
+        assert!(f32::from(bounds.size.height) > 0.0);
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
 #[test]
 fn first_mounted_parity_value_readout() {
     use poodle_adapter::ThemeProvider;
