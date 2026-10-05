@@ -14380,7 +14380,7 @@ fn model_connection_card_closes_and_returns_real_focus_to_the_disclosure() {
         assert_eq!(
             opens.lock().unwrap().as_slice(),
             [false],
-            "the mounted disclosure event reports its requested open state"
+            "the mounted onOpenChange callback reports its requested open state"
         );
         assert!(
             enables.lock().unwrap().is_empty(),
