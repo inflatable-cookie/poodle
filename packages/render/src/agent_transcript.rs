@@ -258,7 +258,12 @@ pub fn agent_transcript(
                     let outcome = answer.outcome.as_str().to_owned();
                     let card = AgentQuestionRecordSpec::new(record.question.clone(), answer)
                         .with_size(base_size)
-                        .with_density(density);
+                        .with_density(density)
+                        .with_instance_id(agent_transcript_block_id(
+                            handlers.instance_id.as_deref(),
+                            block_kind,
+                            &block_id,
+                        ));
                     let mut child = agent_question_record(&card, ctx);
                     child.runtime_id = Some(agent_transcript_block_id(
                         handlers.instance_id.as_deref(),

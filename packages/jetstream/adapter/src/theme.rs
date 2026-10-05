@@ -82,22 +82,24 @@ impl JetstreamThemeProvider {
     }
 
     fn resolve_color_raw(&self, token: &str) -> ColorValue {
+        self.try_resolve_color_raw(token)
+            .unwrap_or(ColorValue(0.0, 0.0, 0.0, 1.0))
+    }
+
+    fn try_resolve_color_raw(&self, token: &str) -> Option<ColorValue> {
         if let Some(hex) = token.strip_prefix('#') {
-            return parse_hex_color(hex);
+            return Some(parse_hex_color(hex));
         }
         if let Some(inner) = token
             .strip_prefix("rgba(")
             .and_then(|s| s.strip_suffix(')'))
         {
-            return parse_rgba(inner);
+            return Some(parse_rgba(inner));
         }
         if let Some(color) = self.match_override(token) {
-            return color;
+            return Some(color);
         }
-        if let Some(color) = match_semantic_color(token) {
-            return color;
-        }
-        ColorValue(0.0, 0.0, 0.0, 1.0)
+        match_semantic_color(token)
     }
 
     pub fn with_scale_factor(mut self, factor: f32) -> Self {
@@ -175,6 +177,24 @@ impl ThemeProvider for JetstreamThemeProvider {
         ColorValue(r as f32, g as f32, b as f32, a as f32)
     }
 
+    fn try_resolve_color(&self, token: &str) -> Option<ColorValue> {
+        let raw = self.try_resolve_color_raw(token)?;
+        if (self.contrast - 1.0).abs() < f32::EPSILON
+            || !poodle_headless::color::is_contrast_scaled_token(token)
+        {
+            return Some(raw);
+        }
+        let (r, g, b, a) = poodle_headless::color::apply_neutral_contrast(
+            raw.0 as f64,
+            raw.1 as f64,
+            raw.2 as f64,
+            raw.3 as f64,
+            self.contrast_anchor_l,
+            self.contrast as f64,
+        );
+        Some(ColorValue(r as f32, g as f32, b as f32, a as f32))
+    }
+
     fn resolve_space(&self, token: &str) -> f32 {
         // Strategy 0: Check density/control-size overrides first (highest priority)
         if let Some(value) = self.space_overrides.get(token) {
@@ -229,14 +249,14 @@ impl ThemeProvider for JetstreamThemeProvider {
     }
 
     fn resolve_opacity(&self, token: &str) -> f32 {
-        // Look up semantic tokens first
+        self.try_resolve_opacity(token).unwrap_or(1.0)
+    }
+
+    fn try_resolve_opacity(&self, token: &str) -> Option<f32> {
         if let Some(val) = match_semantic_space(token) {
-            return val;
+            return Some(val);
         }
-        if let Ok(val) = token.parse::<f32>() {
-            return val;
-        }
-        1.0
+        token.parse::<f32>().ok()
     }
 }
 

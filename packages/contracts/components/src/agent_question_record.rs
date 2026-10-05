@@ -24,6 +24,10 @@ pub struct AgentQuestionRecordSpec {
     pub size_role: SemanticControlSizeRole,
     /// `None` inherits from the presentation context; an explicit value always wins.
     pub density: Option<ControlDensity>,
+    /// Stable native instance scope for option-row ids. Two records can share
+    /// a question id and option values; unscoped ids are unique only under the
+    /// one-unscoped-record-per-window rule.
+    pub instance_id: Option<String>,
 }
 
 impl AgentQuestionRecordSpec {
@@ -36,7 +40,13 @@ impl AgentQuestionRecordSpec {
             size: None,
             size_role: SemanticControlSizeRole::Control,
             density: None,
+            instance_id: None,
         }
+    }
+
+    pub fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.instance_id = Some(instance_id.into());
+        self
     }
 
     pub fn with_show_options(mut self, show: bool) -> Self {

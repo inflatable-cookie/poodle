@@ -175,49 +175,54 @@ impl GpuiThemeProvider {
     }
 
     fn resolve_color_value_raw(&self, token: &str) -> ColorValue {
+        self.try_resolve_color_value_raw(token)
+            .unwrap_or(ColorValue(0.0, 0.0, 0.0, 1.0))
+    }
+
+    fn try_resolve_color_value_raw(&self, token: &str) -> Option<ColorValue> {
         // 1. Check theme overrides (token is a semantic path like "color.accent.base")
         for &(path, value) in &self.overrides {
             if path == token {
                 if let Some(color) = Self::parse_hex_color(value) {
-                    return color;
+                    return Some(color);
                 }
                 if let Some(color) = Self::parse_rgba_color(value) {
-                    return color;
+                    return Some(color);
                 }
             }
         }
         // 2. Fall back to typed constant defaults (light theme baseline)
         match token {
-            "color.background.canvas" => typed::semantic::COLOR_BACKGROUND_CANVAS,
-            "color.background.surface" => typed::semantic::COLOR_BACKGROUND_SURFACE,
-            "color.background.panel" => typed::semantic::COLOR_BACKGROUND_PANEL,
-            "color.background.elevated" => typed::semantic::COLOR_BACKGROUND_ELEVATED,
-            "color.background.overlay" => typed::semantic::COLOR_BACKGROUND_OVERLAY,
-            "color.text.primary" => typed::semantic::COLOR_TEXT_PRIMARY,
-            "color.text.secondary" => typed::semantic::COLOR_TEXT_SECONDARY,
-            "color.text.tertiary" => typed::semantic::COLOR_TEXT_TERTIARY,
-            "color.text.inverse" => typed::semantic::COLOR_TEXT_INVERSE,
-            "color.border.subtle" => typed::semantic::COLOR_BORDER_SUBTLE,
-            "color.border.default" => typed::semantic::COLOR_BORDER_DEFAULT,
-            "color.border.strong" => typed::semantic::COLOR_BORDER_STRONG,
-            "color.accent.base" => typed::semantic::COLOR_ACCENT_BASE,
-            "color.accent.hover" => typed::semantic::COLOR_ACCENT_HOVER,
-            "color.accent.focusRing" => typed::semantic::COLOR_ACCENT_FOCUS_RING,
-            "color.status.success" => typed::semantic::COLOR_STATUS_SUCCESS,
-            "color.status.warning" => typed::semantic::COLOR_STATUS_WARNING,
-            "color.status.danger" => typed::semantic::COLOR_STATUS_DANGER,
-            "color.status.info" => typed::semantic::COLOR_STATUS_INFO,
-            "color.icon.primary" => typed::semantic::COLOR_ICON_PRIMARY,
-            "color.icon.muted" => typed::semantic::COLOR_ICON_MUTED,
+            "color.background.canvas" => Some(typed::semantic::COLOR_BACKGROUND_CANVAS),
+            "color.background.surface" => Some(typed::semantic::COLOR_BACKGROUND_SURFACE),
+            "color.background.panel" => Some(typed::semantic::COLOR_BACKGROUND_PANEL),
+            "color.background.elevated" => Some(typed::semantic::COLOR_BACKGROUND_ELEVATED),
+            "color.background.overlay" => Some(typed::semantic::COLOR_BACKGROUND_OVERLAY),
+            "color.text.primary" => Some(typed::semantic::COLOR_TEXT_PRIMARY),
+            "color.text.secondary" => Some(typed::semantic::COLOR_TEXT_SECONDARY),
+            "color.text.tertiary" => Some(typed::semantic::COLOR_TEXT_TERTIARY),
+            "color.text.inverse" => Some(typed::semantic::COLOR_TEXT_INVERSE),
+            "color.border.subtle" => Some(typed::semantic::COLOR_BORDER_SUBTLE),
+            "color.border.default" => Some(typed::semantic::COLOR_BORDER_DEFAULT),
+            "color.border.strong" => Some(typed::semantic::COLOR_BORDER_STRONG),
+            "color.accent.base" => Some(typed::semantic::COLOR_ACCENT_BASE),
+            "color.accent.hover" => Some(typed::semantic::COLOR_ACCENT_HOVER),
+            "color.accent.focusRing" => Some(typed::semantic::COLOR_ACCENT_FOCUS_RING),
+            "color.status.success" => Some(typed::semantic::COLOR_STATUS_SUCCESS),
+            "color.status.warning" => Some(typed::semantic::COLOR_STATUS_WARNING),
+            "color.status.danger" => Some(typed::semantic::COLOR_STATUS_DANGER),
+            "color.status.info" => Some(typed::semantic::COLOR_STATUS_INFO),
+            "color.icon.primary" => Some(typed::semantic::COLOR_ICON_PRIMARY),
+            "color.icon.muted" => Some(typed::semantic::COLOR_ICON_MUTED),
             // 3. Direct hex/rgba parsing (for inline color values)
             _ => {
                 if let Some(color) = Self::parse_hex_color(token) {
-                    return color;
+                    return Some(color);
                 }
                 if let Some(color) = Self::parse_rgba_color(token) {
-                    return color;
+                    return Some(color);
                 }
-                ColorValue(0.0, 0.0, 0.0, 1.0)
+                None
             }
         }
     }
@@ -296,6 +301,24 @@ impl ThemeProvider for GpuiThemeProvider {
         self.resolve_color_value(token)
     }
 
+    fn try_resolve_color(&self, token: &str) -> Option<ColorValue> {
+        let raw = self.try_resolve_color_value_raw(token)?;
+        if (self.contrast - 1.0).abs() < f32::EPSILON
+            || !poodle_headless::color::is_contrast_scaled_token(token)
+        {
+            return Some(raw);
+        }
+        let (r, g, b, a) = poodle_headless::color::apply_neutral_contrast(
+            raw.0 as f64,
+            raw.1 as f64,
+            raw.2 as f64,
+            raw.3 as f64,
+            self.contrast_anchor_l,
+            self.contrast as f64,
+        );
+        Some(ColorValue(r as f32, g as f32, b as f32, a as f32))
+    }
+
     fn resolve_space(&self, token: &str) -> f32 {
         self.resolve_space_value(token)
     }
@@ -334,18 +357,21 @@ impl ThemeProvider for GpuiThemeProvider {
     }
 
     fn resolve_opacity(&self, token: &str) -> f32 {
-        // Check overrides
+        self.try_resolve_opacity(token).unwrap_or(1.0)
+    }
+
+    fn try_resolve_opacity(&self, token: &str) -> Option<f32> {
         for &(path, value) in &self.overrides {
             if path == token {
                 if let Ok(v) = value.parse::<f32>() {
-                    return v;
+                    return Some(v);
                 }
             }
         }
         match token {
-            "state.opacity.disabled" => typed::semantic::STATE_OPACITY_DISABLED,
-            "state.opacity.muted" => typed::semantic::STATE_OPACITY_MUTED,
-            _ => token.parse::<f32>().unwrap_or(1.0),
+            "state.opacity.disabled" => Some(typed::semantic::STATE_OPACITY_DISABLED),
+            "state.opacity.muted" => Some(typed::semantic::STATE_OPACITY_MUTED),
+            _ => token.parse::<f32>().ok(),
         }
     }
 }

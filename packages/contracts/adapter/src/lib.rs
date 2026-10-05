@@ -26,6 +26,20 @@ pub trait ThemeProvider {
     /// Resolve a color token path to an RGBA color value.
     fn resolve_color(&self, token: &str) -> ColorValue;
 
+    /// Resolve a color token when the theme defines it.
+    ///
+    /// `None` means the token is missing. A defined black is
+    /// `Some(ColorValue(0.0, 0.0, 0.0, 1.0))`, distinct from a missing token.
+    /// The default treats the `resolve_color` black fallback as missing.
+    fn try_resolve_color(&self, token: &str) -> Option<ColorValue> {
+        let resolved = self.resolve_color(token);
+        if resolved == ColorValue(0.0, 0.0, 0.0, 1.0) {
+            None
+        } else {
+            Some(resolved)
+        }
+    }
+
     /// Resolve a space/size token path to a pixel value.
     fn resolve_space(&self, token: &str) -> f32;
 
@@ -37,6 +51,20 @@ pub trait ThemeProvider {
 
     /// Resolve an opacity token path to a 0.0–1.0 value.
     fn resolve_opacity(&self, token: &str) -> f32;
+
+    /// Resolve an opacity token when the theme defines it.
+    ///
+    /// `None` means the token is missing. A defined fully-opaque value is
+    /// `Some(1.0)`, distinct from a missing token. The default treats the
+    /// `resolve_opacity` 1.0 fallback as missing.
+    fn try_resolve_opacity(&self, token: &str) -> Option<f32> {
+        let resolved = self.resolve_opacity(token);
+        if (resolved - 1.0).abs() < f32::EPSILON {
+            None
+        } else {
+            Some(resolved)
+        }
+    }
 }
 
 /// Receives semantic events emitted by rendered components.

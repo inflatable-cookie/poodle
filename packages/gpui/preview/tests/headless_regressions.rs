@@ -2549,8 +2549,10 @@ fn a_continuous_value_gesture_releases_once_and_cancels_on_lost_host() {
         );
         let released = last.lock().expect("event lock").expect("release event");
         assert_eq!(released.phase, ContinuousValuePhase::Release);
-        assert!(released.x >= 0.0 && released.x <= 1.0);
-        assert!(released.y >= 0.0 && released.y <= 1.0);
+        assert!(
+            released.x > 1.0 || released.x < 0.0 || released.y > 1.0 || released.y < 0.0,
+            "captured release outside the node keeps unclamped local coords: {released:?}"
+        );
 
         trace.lock().expect("trace lock").clear();
         driver.pointer_press(center);
@@ -53936,6 +53938,1019 @@ fn first_mounted_parity_validation_summary() {
             Some(true),
             "Enter activation emits the same native field-focus navigation"
         );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
+fn embed_input_url_entry_validation_and_preview_rebuild_the_host_spec() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::EmbedInputSpec;
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    const DEFAULT_FIELD: &str = "poodle-input-embed-input";
+    const FIELD: &str = "poodle-input-embed-custom";
+    const ROOT: &str = "mounted-embed-input";
+
+    let youtube = "https://youtu.be/dQw4w9WgXcQ";
+    let idle = poodle_render::embed_input(&EmbedInputSpec::new(), &ctx);
+    assert!(
+        idle.find(&|node| node.id.as_deref() == Some(DEFAULT_FIELD))
+            .is_some(),
+        "the nested TextInput keeps the contract id"
+    );
+    let custom = poodle_render::embed_input(&EmbedInputSpec::new().with_id("embed-custom"), &ctx);
+    assert!(
+        custom
+            .find(&|node| node.id.as_deref() == Some(FIELD))
+            .is_some(),
+        "a caller-supplied id reaches the nested TextInput"
+    );
+    assert!(
+        !idle.has_text("Embed detected"),
+        "an empty field has no preview"
+    );
+    assert!(
+        !idle.has_text("Could not parse embed source"),
+        "an empty field is not an error"
+    );
+    let detected = poodle_render::embed_input(
+        &EmbedInputSpec::new()
+            .with_value(youtube)
+            .with_detected_parse(),
+        &ctx,
+    );
+    assert!(detected.has_text("youtube"));
+    assert!(detected.has_text("Embed detected"));
+    let garbage = poodle_render::embed_input(
+        &EmbedInputSpec::new()
+            .with_value("not-a-url")
+            .with_detected_parse(),
+        &ctx,
+    );
+    assert!(garbage.has_text("Could not parse embed source"));
+    assert_eq!(
+        garbage
+            .find(&|node| matches!(
+                &node.kind,
+                NodeKind::Text { content } if content == "Could not parse embed source"
+            ))
+            .and_then(|node| node.style.descriptor.text_color),
+        Some(theme_provider.resolve_color("color.status.danger"))
+    );
+    assert!(rem_to_px(0.25) > 0.0);
+
+    #[derive(Default)]
+    struct Host {
+        value: String,
+    }
+    let host = Arc::new(Mutex::new(Host::default()));
+    let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let build_node = || {
+            let value = host.lock().expect("embed host").value.clone();
+            let edit_host = Arc::clone(&host);
+            let edit_payloads = Arc::clone(&payloads);
+            let spec = EmbedInputSpec::new()
+                .with_id("embed-custom")
+                .with_value(value)
+                .with_detected_parse();
+            let mut node = poodle_render::embed_input_with_handlers(
+                &spec,
+                &RenderContext::new(&theme_provider),
+                poodle_render::EmbedInputHandlers {
+                    on_value_change: Some(Arc::new(move |text: &str| {
+                        edit_payloads
+                            .lock()
+                            .expect("payloads lock")
+                            .push(text.to_owned());
+                        edit_host.lock().expect("embed host").value = text.to_owned();
+                    })),
+                },
+            );
+            node.id = Some(ROOT.to_owned());
+            node
+        };
+        let node = Arc::new(Mutex::new(build_node()));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 360.0, 180.0);
+        driver.wait_for_focus_handle(FIELD);
+        driver.pointer_activate_id(FIELD);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(FIELD),
+            Some(true),
+            "pointer press focuses the URL field"
+        );
+        driver.dispatch_key_raw("n");
+        assert_eq!(
+            payloads.lock().expect("payloads lock").as_slice(),
+            ["n"],
+            "a typed keystroke emits on_value_change"
+        );
+        *node.lock().expect("embed node") = build_node();
+        driver.draw_frame();
+        host.lock().expect("embed host").value = "not-a-url".into();
+        *node.lock().expect("embed node") = build_node();
+        driver.draw_frame();
+        let error = poodle_gpui_node_backend::painted_node_for(ROOT)
+            .expect("embed input reached GPUI paint");
+        assert!(
+            error
+                .texts
+                .iter()
+                .any(|text| text == "Could not parse embed source"),
+            "undetected input paints the parse error"
+        );
+        host.lock().expect("embed host").value = youtube.into();
+        *node.lock().expect("embed node") = build_node();
+        driver.draw_frame();
+        let painted = poodle_gpui_node_backend::painted_node_for(ROOT).expect("preview paint");
+        assert!(
+            painted.texts.iter().any(|text| text == "youtube"),
+            "the provider pill paints the detected name"
+        );
+        assert!(
+            painted.texts.iter().any(|text| text == "Embed detected"),
+            "a valid URL paints the success preview"
+        );
+        let field = driver
+            .accessibility_nodes()
+            .into_iter()
+            .find(|node| node.element_id == FIELD)
+            .expect("field in the mounted accessibility tree");
+        assert_eq!(field.role, NodeRole::TextInput);
+        let geometry = poodle_gpui_node_backend::bounds_for(ROOT).expect("mounted embed geometry");
+        assert!(f32::from(geometry.size.width) > 0.0);
+        assert!(f32::from(geometry.size.height) > 0.0);
+        assert!(theme_provider.resolve_color("color.status.success").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
+fn agent_question_record_answer_display_rebuilds_the_host_spec() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_headless::agent_question::{
+        AgentQuestionAnswer, AgentQuestionItem, AgentQuestionOption, AgentQuestionOutcome,
+    };
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::AgentQuestionRecordSpec;
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    fn option(value: &str, label: &str) -> AgentQuestionOption {
+        AgentQuestionOption {
+            value: value.to_owned(),
+            label: label.to_owned(),
+            description: None,
+        }
+    }
+    fn question() -> AgentQuestionItem {
+        AgentQuestionItem {
+            id: "placement".to_owned(),
+            header: Some("Placement".to_owned()),
+            prompt: "Where should the question appear?".to_owned(),
+            options: vec![option("inline", "Inline"), option("composer", "Composer")],
+            allow_multiple: false,
+        }
+    }
+    let selected = AgentQuestionRecordSpec::new(
+        question(),
+        AgentQuestionAnswer {
+            question_id: "placement".to_owned(),
+            outcome: AgentQuestionOutcome::Selected,
+            values: vec!["composer".to_owned()],
+            text: String::new(),
+        },
+    );
+    let witness = poodle_render::agent_question_record(&selected, &ctx);
+    assert_eq!(witness.a11y.role, Some(NodeRole::Region));
+    assert!(
+        !witness.interaction.focusable,
+        "the record itself is never a focus stop"
+    );
+    assert!(
+        witness.interaction.on_activate.is_none(),
+        "the record exposes no callback"
+    );
+    assert!(witness.has_text("Where should the question appear?"));
+    assert!(witness.has_text("Inline"));
+    assert!(witness.has_text("Composer"));
+    let chosen = witness
+        .find(&|node| node.a11y.label.as_deref() == Some("chosen: Composer"))
+        .expect("chosen option names itself");
+    assert_eq!(chosen.a11y.role, Some(NodeRole::ListItem));
+    assert!(!chosen.interaction.focusable);
+    let unchosen = witness
+        .find(&|node| node.a11y.label.as_deref() == Some("Inline"))
+        .expect("unchosen option stays");
+    assert_eq!(unchosen.a11y.role, Some(NodeRole::ListItem));
+    let list = witness
+        .find(&|node| node.a11y.role == Some(NodeRole::List))
+        .expect("options wrap a list");
+    assert_eq!(
+        list.children
+            .iter()
+            .filter(|child| child.a11y.role == Some(NodeRole::ListItem))
+            .count(),
+        2
+    );
+    let override_spec = AgentQuestionRecordSpec::new(
+        question(),
+        AgentQuestionAnswer {
+            question_id: "placement".to_owned(),
+            outcome: AgentQuestionOutcome::Override,
+            values: vec![],
+            text: "somewhere else".to_owned(),
+        },
+    );
+    let override_node = poodle_render::agent_question_record(&override_spec, &ctx);
+    assert!(override_node.has_text("somewhere else"));
+    assert!(override_node
+        .find(&|node| node.a11y.role == Some(NodeRole::List))
+        .is_none());
+    let declined = poodle_render::agent_question_record(
+        &AgentQuestionRecordSpec::new(
+            question(),
+            AgentQuestionAnswer {
+                question_id: "placement".to_owned(),
+                outcome: AgentQuestionOutcome::Declined,
+                values: vec![],
+                text: String::new(),
+            },
+        ),
+        &ctx,
+    );
+    assert!(declined.has_text("Declined"));
+    assert_eq!(
+        witness.style.descriptor.background,
+        Some(theme_provider.resolve_color("color.background.surface"))
+    );
+    assert!(rem_to_px(0.75) > 0.0);
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let (handler, clicks) = counting_handler();
+        let mut before = poodle_render::button(
+            &poodle_specs::ButtonSpec::new().with_label("Before"),
+            &RenderContext::new(&theme_provider),
+            Some(handler),
+        );
+        before.id = Some("record-before".to_owned());
+        let mut record =
+            poodle_render::agent_question_record(&selected, &RenderContext::new(&theme_provider));
+        record.id = Some("mounted-agent-question-record".to_owned());
+        let mut after = poodle_render::button(
+            &poodle_specs::ButtonSpec::new().with_label("After"),
+            &RenderContext::new(&theme_provider),
+            None,
+        );
+        after.id = Some("record-after".to_owned());
+        let mut column = Node::container();
+        column.style.descriptor.layout.direction = LayoutDirection::Column;
+        let node = Arc::new(Mutex::new(column.child(before).child(record).child(after)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 360.0, 280.0);
+
+        driver.focus_element("record-before");
+        driver.focus_next_tab_stop();
+        driver.dispatch_key_raw("tab");
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for("mounted-agent-question-record").is_none(),
+            "the record never becomes a focus target"
+        );
+        assert_ne!(
+            poodle_gpui_node_backend::focus_state_for("mounted-agent-question-record"),
+            Some(true)
+        );
+
+        driver.pointer_activate_id("mounted-agent-question-record");
+        assert_eq!(
+            *clicks.lock().expect("click tally"),
+            0,
+            "pointer on the record does not fire a sibling callback"
+        );
+        assert!(
+            payloads.lock().expect("payloads lock").is_empty(),
+            "the record emits no callback"
+        );
+
+        let tree = driver.accessibility_nodes();
+        assert!(tree.iter().any(|node| {
+            node.role == NodeRole::Region && node.element_id == "mounted-agent-question-record"
+        }));
+        let chosen = tree
+            .iter()
+            .find(|node| node.label.as_deref() == Some("chosen: Composer"))
+            .expect("chosen option in the mounted tree");
+        assert_eq!(chosen.role, NodeRole::ListItem);
+        assert!(!chosen.focusable);
+        assert!(tree.iter().any(|node| {
+            node.role == NodeRole::ListItem && node.label.as_deref() == Some("Inline")
+        }));
+        let geometry = poodle_gpui_node_backend::bounds_for("mounted-agent-question-record")
+            .expect("mounted record geometry");
+        assert!(f32::from(geometry.size.width) > 0.0);
+        assert!(f32::from(geometry.size.height) > 0.0);
+        assert!(theme_provider.resolve_color("color.text.primary").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+
+    fn yes_no(id: &str, prompt: &str) -> AgentQuestionItem {
+        AgentQuestionItem {
+            id: id.to_owned(),
+            header: None,
+            prompt: prompt.to_owned(),
+            options: vec![option("yes", "Yes"), option("no", "No")],
+            allow_multiple: false,
+        }
+    }
+    fn selected_yes(question_id: &str) -> AgentQuestionAnswer {
+        AgentQuestionAnswer {
+            question_id: question_id.to_owned(),
+            outcome: AgentQuestionOutcome::Selected,
+            values: vec!["yes".to_owned()],
+            text: String::new(),
+        }
+    }
+    let shared = yes_no("confirm", "Confirm the draft?");
+    let delete_spec = AgentQuestionRecordSpec::new(shared.clone(), selected_yes("confirm"))
+        .with_instance_id("delete");
+    let save_spec =
+        AgentQuestionRecordSpec::new(shared, selected_yes("confirm")).with_instance_id("save");
+    fn option_row_ids(node: &Node, out: &mut Vec<String>) {
+        if node.a11y.role == Some(NodeRole::ListItem) {
+            if let Some(id) = &node.id {
+                out.push(id.clone());
+            }
+        }
+        for child in &node.children {
+            option_row_ids(child, out);
+        }
+    }
+    let expected_ids = [
+        poodle_render::agent_question_record_option_id(Some("delete"), 0, "yes"),
+        poodle_render::agent_question_record_option_id(Some("delete"), 1, "no"),
+        poodle_render::agent_question_record_option_id(Some("save"), 0, "yes"),
+        poodle_render::agent_question_record_option_id(Some("save"), 1, "no"),
+    ];
+    let mut unmounted_ids = Vec::new();
+    option_row_ids(
+        &poodle_render::agent_question_record(&delete_spec, &ctx),
+        &mut unmounted_ids,
+    );
+    option_row_ids(
+        &poodle_render::agent_question_record(&save_spec, &ctx),
+        &mut unmounted_ids,
+    );
+    assert_eq!(unmounted_ids, expected_ids);
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut delete = poodle_render::agent_question_record(
+            &delete_spec,
+            &RenderContext::new(&theme_provider),
+        );
+        delete.id = Some("record-confirm-delete".to_owned());
+        let mut save =
+            poodle_render::agent_question_record(&save_spec, &RenderContext::new(&theme_provider));
+        save.id = Some("record-confirm-save".to_owned());
+        let mut column = Node::container();
+        column.style.descriptor.layout.direction = LayoutDirection::Column;
+        let node = Arc::new(Mutex::new(column.child(delete).child(save)));
+        let mut driver = HeadlessDriver::new_in_box(cx, node, 360.0, 360.0);
+        driver.wait_for_element("record-confirm-delete");
+        driver.wait_for_element("record-confirm-save");
+        driver.pointer_activate_id("record-confirm-delete");
+        let tree = driver.accessibility_nodes();
+        let items: Vec<_> = tree
+            .iter()
+            .filter(|node| node.role == NodeRole::ListItem)
+            .collect();
+        assert_eq!(items.len(), 4, "two records, two options each");
+        let semantic: Vec<_> = items
+            .iter()
+            .filter_map(|node| node.semantic_id.as_deref())
+            .collect();
+        let unique_semantic = semantic
+            .iter()
+            .copied()
+            .collect::<std::collections::HashSet<_>>();
+        assert_eq!(
+            unique_semantic.len(),
+            semantic.len(),
+            "option rows share a semantic id: {semantic:?}"
+        );
+        let element: Vec<_> = items.iter().map(|node| node.element_id.as_str()).collect();
+        let unique_element = element
+            .iter()
+            .copied()
+            .collect::<std::collections::HashSet<_>>();
+        assert_eq!(
+            unique_element.len(),
+            element.len(),
+            "option rows share a backend element id: {element:?}"
+        );
+        for id in &expected_ids {
+            assert!(
+                unique_semantic.contains(id.as_str()),
+                "missing scoped option identity {id}; have {semantic:?}"
+            );
+        }
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
+fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_headless::audio::{
+        format_value, merge_computer_key_map, AudioValueFormat, KeyboardContext,
+        KeyboardOrientation,
+    };
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{ControlDensity, ControlSize, KeyboardSpec};
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    const ROOT: &str = "keyboard-main";
+    let c4 = format_value(60.0, AudioValueFormat::Note);
+    assert_eq!(c4, "C4");
+
+    let spec = KeyboardSpec::new(poodle_headless::audio::keyboard_visual_state(
+        &KeyboardContext::default(),
+    ));
+    let live = Arc::new(Mutex::new(poodle_render::KeyboardLive::from_context(
+        KeyboardContext::default(),
+    )));
+    let node = poodle_render::keyboard_with_handlers(
+        &spec,
+        &ctx,
+        &poodle_render::KeyboardHandlers::new(ROOT),
+        &live,
+    );
+    assert_eq!(node.a11y.role, Some(NodeRole::Toolbar));
+    assert_eq!(node.a11y.label.as_deref(), Some("Keyboard"));
+    assert_eq!(node.a11y.orientation.as_deref(), Some("horizontal"));
+    assert_eq!(
+        node.style.descriptor.layout.width,
+        LayoutSizing::Fixed(rem_to_px(22.0))
+    );
+    assert_eq!(
+        node.style.descriptor.layout.height,
+        LayoutSizing::Fixed(rem_to_px(7.0))
+    );
+    let c4_key = node
+        .find(&|child| child.a11y.label.as_deref() == Some("C4"))
+        .expect("note names use the shared formatter");
+    assert_eq!(c4_key.a11y.role, Some(NodeRole::Button));
+    assert_eq!(c4_key.a11y.toggled, Some(poodle_node::NodeToggled::False));
+    assert_eq!(c4_key.id.as_deref(), Some("keyboard-main:note-60"));
+    let mut xs = spec.clone();
+    xs.size = Some(ControlSize::Xs);
+    let xs_node = poodle_render::keyboard(&xs, &ctx);
+    assert_eq!(
+        xs_node.style.descriptor.layout.width,
+        LayoutSizing::Fixed(rem_to_px(14.0))
+    );
+    let mut compact = spec.clone();
+    compact.density = Some(ControlDensity::Compact);
+    let compact_node = poodle_render::keyboard(&compact, &ctx);
+    assert_eq!(compact_node.style.descriptor.border.width, 0.5);
+    let white_idle = poodle_tokens::typed::primitives::COLOR_NEUTRAL_25;
+    let visual_c4 = node
+        .children
+        .iter()
+        .find(|child| {
+            child.a11y.role.is_none() && child.style.descriptor.background == Some(white_idle)
+        })
+        .expect("idle white keys use the recipe fill");
+    assert_eq!(visual_c4.style.descriptor.background, Some(white_idle));
+
+    let recipe_white = ColorValue(0.11, 0.72, 0.44, 1.0);
+    let recipe_black = ColorValue(0.0, 0.0, 0.0, 1.0);
+    struct KeyboardRecipeTheme {
+        inner: GpuiThemeProvider,
+        white_key: ColorValue,
+        black_key: ColorValue,
+        disabled_opacity: f32,
+    }
+    impl ThemeProvider for KeyboardRecipeTheme {
+        fn resolve_color(&self, token: &str) -> ColorValue {
+            self.try_resolve_color(token)
+                .unwrap_or_else(|| self.inner.resolve_color(token))
+        }
+        fn try_resolve_color(&self, token: &str) -> Option<ColorValue> {
+            match token {
+                "recipe.keyboard.white-key" => Some(self.white_key),
+                "recipe.keyboard.black-key" => Some(self.black_key),
+                _ => self.inner.try_resolve_color(token),
+            }
+        }
+        fn resolve_space(&self, token: &str) -> f32 {
+            self.inner.resolve_space(token)
+        }
+        fn resolve_border_width(&self, token: &str) -> f32 {
+            self.inner.resolve_border_width(token)
+        }
+        fn resolve_radius(&self, token: &str) -> f32 {
+            self.inner.resolve_radius(token)
+        }
+        fn resolve_opacity(&self, token: &str) -> f32 {
+            self.try_resolve_opacity(token)
+                .unwrap_or_else(|| self.inner.resolve_opacity(token))
+        }
+        fn try_resolve_opacity(&self, token: &str) -> Option<f32> {
+            if token == "recipe.keyboard.disabled-opacity" {
+                Some(self.disabled_opacity)
+            } else {
+                self.inner.try_resolve_opacity(token)
+            }
+        }
+    }
+    let recipe_theme = KeyboardRecipeTheme {
+        inner: theme_provider.clone(),
+        white_key: recipe_white,
+        black_key: recipe_black,
+        disabled_opacity: 1.0,
+    };
+    let recipe_node = poodle_render::keyboard(&spec, &RenderContext::new(&recipe_theme));
+    assert!(
+        recipe_node.children.iter().any(|child| {
+            child.a11y.role.is_none() && child.style.descriptor.background == Some(recipe_white)
+        }),
+        "recipe.keyboard.white-key override paints idle white keys"
+    );
+    assert!(
+        recipe_node.children.iter().any(|child| {
+            child.a11y.role.is_none() && child.style.descriptor.background == Some(recipe_black)
+        }),
+        "recipe.keyboard.black-key override paints idle black keys, including a valid black"
+    );
+    let mut disabled_spec = spec.clone();
+    disabled_spec.visual_state.enabled = false;
+    let disabled_fallback = poodle_render::keyboard(&disabled_spec, &ctx);
+    assert_eq!(
+        disabled_fallback.style.descriptor.opacity,
+        theme_provider.resolve_opacity("state.opacity.disabled")
+    );
+    let disabled_recipe =
+        poodle_render::keyboard(&disabled_spec, &RenderContext::new(&recipe_theme));
+    assert_eq!(
+        disabled_recipe.style.descriptor.opacity, 1.0,
+        "recipe.keyboard.disabled-opacity override of 1.0 is kept, not treated as missing"
+    );
+
+    let mut focused_machine = KeyboardContext::default();
+    focused_machine.focused_note = Some(60);
+    let focused_node = poodle_render::keyboard(
+        &KeyboardSpec::new(poodle_headless::audio::keyboard_visual_state(
+            &focused_machine,
+        )),
+        &ctx,
+    );
+    let focused_visual = focused_node
+        .children
+        .iter()
+        .find(|child| child.a11y.role.is_none() && child.style.focus_ring.is_some())
+        .expect("visible key carries the contract focus ring");
+    assert!(
+        focused_visual.style.focus_ring_within,
+        "visual ring paints from the nested note button's focus"
+    );
+    let ring = focused_visual
+        .style
+        .focus_ring
+        .expect("focused visual key ring");
+    assert_eq!(ring.width, rem_to_px(0.125));
+    assert_eq!(ring.offset, rem_to_px(-0.1875));
+    assert_eq!(
+        ring.color,
+        theme_provider.resolve_color("color.accent.focusRing")
+    );
+    let focused_control = focused_node
+        .find(&|child| child.id.as_deref() == Some("keyboard-root:note-60"))
+        .expect("C4 control");
+    assert!(
+        focused_control.style.focus_ring.is_none(),
+        "1px key control stays outline-none like Svelte"
+    );
+    assert_eq!(
+        focused_visual
+            .children
+            .first()
+            .map(|child| child.id.as_deref()),
+        Some(Some("keyboard-root:note-60")),
+        "note button is nested under the visual key it focuses"
+    );
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let live = Arc::new(Mutex::new(poodle_render::KeyboardLive::from_context(
+            KeyboardContext::default(),
+        )));
+        let build_from = |spec: KeyboardSpec| {
+            let events = Arc::clone(&payloads);
+            let off_events = Arc::clone(&payloads);
+            poodle_render::keyboard_with_handlers(
+                &spec,
+                &RenderContext::new(&theme_provider),
+                &poodle_render::KeyboardHandlers::new(ROOT)
+                    .on_note_on(Arc::new(move |note, velocity| {
+                        events
+                            .lock()
+                            .expect("payloads lock")
+                            .push(format!("noteOn:{note}:{velocity}"));
+                    }))
+                    .on_note_off(Arc::new(move |note| {
+                        off_events
+                            .lock()
+                            .expect("payloads lock")
+                            .push(format!("noteOff:{note}"));
+                    })),
+                &live,
+            )
+        };
+        let build = || {
+            let spec = poodle_render::keyboard_spec_from_context(
+                &live.lock().expect("keyboard machine").machine,
+                "Keyboard",
+            );
+            build_from(spec)
+        };
+        let mounted = Arc::new(Mutex::new(build()));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 200.0);
+        driver.wait_for_focus_handle(ROOT);
+        let bounds = poodle_gpui_node_backend::bounds_for(ROOT).expect("keyboard geometry");
+        assert!(f32::from(bounds.size.width) > 0.0);
+        assert!(f32::from(bounds.size.height) > 0.0);
+        let press_at = |x_frac: f32, y_from_top: f32| {
+            point(
+                px(f32::from(bounds.origin.x) + f32::from(bounds.size.width) * x_frac),
+                px(f32::from(bounds.origin.y) + f32::from(bounds.size.height) * y_from_top),
+            )
+        };
+        driver.pointer_press(press_at(0.5, 0.85));
+        {
+            let machine = live.lock().expect("keyboard machine").machine.clone();
+            assert!(
+                machine.active_inputs.iter().any(|active| active.1 == 60),
+                "pointer press plays C4: {:?}",
+                machine.active_inputs
+            );
+        }
+        *mounted.lock().expect("keyboard node") = build();
+        driver.draw_frame();
+        let held = driver
+            .accessibility_nodes()
+            .into_iter()
+            .find(|node| node.element_id == "keyboard-main:note-60")
+            .expect("C4 key in the mounted tree");
+        assert_eq!(held.toggled, Some(poodle_node::NodeToggled::True));
+        assert_eq!(held.label.as_deref(), Some("C4"));
+        let leave_at = point(
+            px(f32::from(bounds.origin.x) + f32::from(bounds.size.width) * 0.5),
+            px(f32::from(bounds.origin.y) - 40.0),
+        );
+        // GPUI arms `on_drag` after the movement threshold; the first held
+        // move establishes the payload, the second is the captured Move.
+        driver.pointer_drag(leave_at);
+        driver.pointer_drag(leave_at);
+        {
+            let machine = live.lock().expect("keyboard machine").machine.clone();
+            assert!(
+                machine.active_inputs.is_empty(),
+                "leaving all keys releases the captured pointer note: {:?}",
+                machine.active_inputs
+            );
+        }
+        assert!(
+            payloads
+                .lock()
+                .expect("payloads lock")
+                .iter()
+                .any(|entry| entry == "noteOff:60"),
+            "leave emits noteOff for the edge note"
+        );
+        driver.pointer_drag(press_at(0.5, 0.85));
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.1 == 60),
+            "re-entry presses the newly resolved key"
+        );
+        driver.pointer_release(press_at(0.5, 0.85));
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .is_empty(),
+            "pointer release ends the held note"
+        );
+        *mounted.lock().expect("keyboard node") = build();
+        driver.draw_frame();
+
+        driver.focus_element(ROOT);
+        driver.dispatch_key_press("a");
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.1 == 60),
+            "computer key A plays computerBaseNote C4"
+        );
+        driver.dispatch_key_release("a");
+        assert!(live
+            .lock()
+            .expect("keyboard machine")
+            .machine
+            .active_inputs
+            .is_empty());
+
+        driver.focus_element(ROOT);
+        driver.dispatch_key_press("a");
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.0 == "key:a" && active.1 == 60),
+            "computer key A is held before the host octave prop"
+        );
+        {
+            let mut host = poodle_render::keyboard_spec_from_context(
+                &live.lock().expect("keyboard machine").machine,
+                "Keyboard",
+            );
+            host.visual_state.octave_shift = 1;
+            *mounted.lock().expect("keyboard node") = build_from(host);
+        }
+        driver.draw_frame();
+        {
+            let machine = live.lock().expect("keyboard machine").machine.clone();
+            assert_eq!(machine.octave_shift, 1);
+            assert!(
+                machine.active_inputs.is_empty(),
+                "SET_OCTAVE_SHIFT releases computer-key inputs: {:?}",
+                machine.active_inputs
+            );
+        }
+        assert!(
+            payloads
+                .lock()
+                .expect("payloads lock")
+                .iter()
+                .any(|entry| entry == "noteOff:60"),
+            "host octaveShift emits noteOff for the held computer key"
+        );
+        driver.dispatch_key_release("a");
+        live.lock().expect("keyboard machine").machine.octave_shift = 0;
+        *mounted.lock().expect("keyboard node") = build();
+        driver.draw_frame();
+
+        driver.pointer_press(press_at(0.5, 0.85));
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.1 == 60),
+            "pointer holds C4 before the host range prop"
+        );
+        {
+            let mut host = poodle_render::keyboard_spec_from_context(
+                &live.lock().expect("keyboard machine").machine,
+                "Keyboard",
+            );
+            host.visual_state.first_note = 61;
+            *mounted.lock().expect("keyboard node") = build_from(host);
+        }
+        driver.draw_frame();
+        {
+            let machine = live.lock().expect("keyboard machine").machine.clone();
+            assert_eq!(machine.first_note, 61);
+            assert!(
+                !machine.active_inputs.iter().any(|active| active.1 == 60),
+                "SET_RANGE releases notes outside the new bounds: {:?}",
+                machine.active_inputs
+            );
+        }
+        driver.pointer_release(press_at(0.5, 0.85));
+        live.lock().expect("keyboard machine").machine.first_note = 48;
+        *mounted.lock().expect("keyboard node") = build();
+        driver.draw_frame();
+
+        driver.focus_element(ROOT);
+        driver.dispatch_key_press("a");
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.1 == 60),
+            "computer key A is held before the host disabled prop"
+        );
+        {
+            let mut host = poodle_render::keyboard_spec_from_context(
+                &live.lock().expect("keyboard machine").machine,
+                "Keyboard",
+            );
+            host.visual_state.enabled = false;
+            *mounted.lock().expect("keyboard node") = build_from(host);
+        }
+        driver.draw_frame();
+        {
+            let machine = live.lock().expect("keyboard machine").machine.clone();
+            assert!(machine.disabled);
+            assert!(
+                machine.active_inputs.is_empty(),
+                "SET_DISABLED releases held notes: {:?}",
+                machine.active_inputs
+            );
+        }
+        assert!(
+            payloads
+                .lock()
+                .expect("payloads lock")
+                .iter()
+                .any(|entry| entry == "noteOff:60"),
+            "host disabled emits noteOff"
+        );
+        driver.dispatch_key_release("a");
+        live.lock().expect("keyboard machine").machine.disabled = false;
+        *mounted.lock().expect("keyboard node") = build();
+        driver.draw_frame();
+
+        live.lock().expect("keyboard machine").machine.octave_shift = 1;
+        *mounted.lock().expect("keyboard node") = build();
+        driver.draw_frame();
+        driver.focus_element(ROOT);
+        driver.dispatch_key_press("a");
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.1 == 72),
+            "octaveShift 1 plays C5 from A"
+        );
+        driver.dispatch_key_release("a");
+
+        {
+            let mut runtime = live.lock().expect("keyboard machine");
+            runtime.machine.octave_shift = 0;
+            runtime.machine.computer_key_map = merge_computer_key_map([("a", 5)]);
+        }
+        *mounted.lock().expect("keyboard node") = build();
+        driver.draw_frame();
+        driver.focus_element(ROOT);
+        driver.dispatch_key_press("a");
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.1 == 65),
+            "computerKeyMap overlay remaps A to F4"
+        );
+        driver.dispatch_key_release("a");
+        driver.dispatch_key_press("s");
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.0 == "key:s" && active.1 == 62),
+            "unoverridden default S stays D4 while A is remapped"
+        );
+        driver.dispatch_key_release("s");
+
+        {
+            let mut runtime = live.lock().expect("keyboard machine");
+            runtime.machine.computer_key_map = merge_computer_key_map([] as [(&str, i16); 0]);
+            runtime.machine.computer_base_note = 48;
+        }
+        *mounted.lock().expect("keyboard node") = build();
+        driver.draw_frame();
+        driver.focus_element(ROOT);
+        driver.dispatch_key_press("a");
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.0 == "key:a" && active.1 == 48),
+            "non-default computerBaseNote 48 plays C3 from A"
+        );
+        assert!(
+            payloads
+                .lock()
+                .expect("payloads lock")
+                .iter()
+                .any(|entry| entry.starts_with("noteOn:48:")),
+            "mounted computer-key path emits noteOn for the configured base"
+        );
+        driver.dispatch_key_release("a");
+        live.lock()
+            .expect("keyboard machine")
+            .machine
+            .computer_base_note = 60;
+        *mounted.lock().expect("keyboard node") = build();
+        driver.draw_frame();
+        driver.wait_for_focus_handle("keyboard-main:note-60");
+        driver.focus_element("keyboard-main:note-60");
+        driver.dispatch_key_press("space");
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.0 == "a11y:60"),
+            "Space presses the focused note"
+        );
+        driver.dispatch_key_release("space");
+        assert!(live
+            .lock()
+            .expect("keyboard machine")
+            .machine
+            .active_inputs
+            .is_empty());
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            live.lock().expect("keyboard machine").machine.focused_note,
+            Some(61),
+            "ArrowRight steps pitch"
+        );
+        *mounted.lock().expect("keyboard node") = build();
+        driver.draw_frame();
+        let focused_tree = mounted.lock().expect("keyboard node").clone();
+        let mounted_visual = focused_tree
+            .children
+            .iter()
+            .find(|child| child.a11y.role.is_none() && child.style.focus_ring.is_some())
+            .expect("mounted focused key paints the visible ring");
+        assert!(mounted_visual.style.focus_ring_within);
+        let mounted_ring = mounted_visual
+            .style
+            .focus_ring
+            .expect("mounted visible focus ring");
+        assert_eq!(mounted_ring.width, rem_to_px(0.125));
+        assert_eq!(mounted_ring.offset, rem_to_px(-0.1875));
+        let mounted_control = focused_tree
+            .find(&|child| child.id.as_deref() == Some("keyboard-main:note-61"))
+            .expect("C#4 control after ArrowRight");
+        assert!(
+            mounted_control.style.focus_ring.is_none(),
+            "mounted 1px control does not carry the visible focus ring"
+        );
+        driver.wait_for_focus_handle("keyboard-main:note-61");
+        driver.focus_element("keyboard-main:note-61");
+        driver.draw_frame();
+        let painted = poodle_gpui_node_backend::painted_ring_for("keyboard-main:visual-61")
+            .expect("focused visual key paints a ring while the note button holds focus");
+        assert_eq!(painted.ring.width, rem_to_px(0.125));
+        assert_eq!(painted.ring.offset, rem_to_px(-0.1875));
+        assert!(
+            poodle_gpui_node_backend::painted_ring_for("keyboard-main:note-61").is_none(),
+            "1px key control stays outline-none like Svelte"
+        );
+
+        let log = payloads.lock().expect("payloads lock").clone();
+        assert!(
+            log.iter().any(|entry| entry.starts_with("noteOn:60:")),
+            "noteOn callback fires: {log:?}"
+        );
+        assert!(
+            log.iter().any(|entry| entry == "noteOff:60"),
+            "noteOff callback fires: {log:?}"
+        );
+        assert_eq!(
+            KeyboardOrientation::Horizontal,
+            live.lock().expect("keyboard machine").machine.orientation
+        );
+        assert!(theme_provider.resolve_color("color.accent.base").3 > 0.0);
         assert!(driver.mounted_observation().is_valid());
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });

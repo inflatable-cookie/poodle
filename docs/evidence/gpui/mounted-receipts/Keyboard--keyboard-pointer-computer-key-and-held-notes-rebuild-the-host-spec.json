@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "ChangedFiles",
-  "test": "changed_files_disclosure_and_selection_rebuild_the_host_spec",
+  "component": "Keyboard",
+  "test": "keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -19,23 +19,27 @@
       "production-mount"
     ],
     "events": [
-      "assert_eq!(\n            events.lock().unwrap().as_slice(),\n            [\n                \"toggle:worked\",\n                \"select:cp-api/Cargo.toml\",\n                \"select:cp-docs/notes.md\"\n            ],\n            \"mounted keyboard and pointer callback",
-      "assert_eq!(\n            events.lock().unwrap().as_slice(),\n            [\"toggle:worked\"],\n            \"the mounted toggle callback",
-      "assert!(\n            dimensions.size.width > px(0.0) && dimensions.size.height > px(0.0),\n            \"Change"
+      "payloads.lock",
+      "assert!(\n            payloads\n                .lock()\n                .expect(\"payloads lock\")\n                .iter()\n                .any(|entry| entry.starts_with(\"noteOn:48:\")),\n            \"mounted computer-key path emit",
+      "assert!(\n            payloads\n                .lock()\n                .expect(\"payloads lock\")\n                .iter()\n                .any(|entry| entry == \"noteOff:60\"),\n            \"host octaveShift emit"
     ],
     "pointer": [
-      "pointer_activate"
+      "pointer_press"
     ],
     "keyboard_focus": [
+      "focus_element",
+      "dispatch_key",
       "keyboard_"
     ],
     "accessibility": [
+      "NodeToggled",
       "NodeRole",
       "a11y."
     ],
     "visual": [
-      "resolve_color",
-      "dimensions"
+      "resolve_opacity",
+      "resolve_radius",
+      "resolve_color"
     ]
   },
   "production_path_observation": {
@@ -43,7 +47,7 @@
     "mount": "HeadlessDriver",
     "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::changed_files",
+    "renderer": "poodle_render::presentation",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -56,7 +60,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-05-poodle-106-rebase-onto-c88949d1b",
     "outcome": "passed",
-    "body_sha256": "b2bfb4291b47758efa149cd846f7f44a62e5e4860516f396baf068d567de6f47"
+    "body_sha256": "9ce0eb619759ef1c410657eb17be8dee0fe20f693cca73e5baa88abc4711b7dd"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
