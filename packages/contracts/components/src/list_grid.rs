@@ -16,6 +16,13 @@ pub struct ListGridSpec {
     pub variant: ListGridVariant,
     /// When set, minimum column width in `em` (web contract: numeric `minItemWidth`).
     pub min_item_width_em: Option<f32>,
+    /// Upper bound on auto-fill columns (default variant only); `None` removes
+    /// the cap. Contract default is `3`; values clamp to a minimum of `1`,
+    /// mirroring the Svelte floor-and-clamp.
+    pub max_columns: Option<u8>,
+    /// Grid gap in `px` (web contract: numeric `gap`). `None` keeps the
+    /// variant default; the header margin follows the resolved gap.
+    pub gap_px: Option<f32>,
 }
 
 impl Default for ListGridSpec {
@@ -23,6 +30,8 @@ impl Default for ListGridSpec {
         Self {
             variant: ListGridVariant::Default,
             min_item_width_em: None,
+            max_columns: Some(3),
+            gap_px: None,
         }
     }
 }
@@ -39,6 +48,22 @@ impl ListGridSpec {
 
     pub fn with_min_item_width_em(mut self, em: f32) -> Self {
         self.min_item_width_em = Some(em);
+        self
+    }
+
+    pub fn with_max_columns(mut self, max_columns: u8) -> Self {
+        self.max_columns = Some(max_columns.max(1));
+        self
+    }
+
+    /// Remove the column cap (web contract: `maxColumns = null`).
+    pub fn with_uncapped_columns(mut self) -> Self {
+        self.max_columns = None;
+        self
+    }
+
+    pub fn with_gap_px(mut self, px: f32) -> Self {
+        self.gap_px = Some(px);
         self
     }
 

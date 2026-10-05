@@ -60054,9 +60054,10 @@ fn first_mounted_parity_media_preview() {
             frames.contains(&"Empty folder".to_owned()),
             "empty frame projects its title: {frames:?}"
 /// ListGrid parity: the responsive tile layout resolves the contract gap and
-/// tile floor, stacks the compact variant in one column, and renders the
-/// header row only when actions are supplied — neutral semantics throughout,
-/// matching the Svelte auto-fill grid, gaps, and header rule.
+/// tile floor, caps columns at the contracted default of three, stacks the
+/// compact variant in one column, and renders the header row only when actions
+/// are supplied — neutral semantics throughout, matching the Svelte auto-fill
+/// grid, cap, gaps, and header rule.
 #[test]
 fn first_mounted_parity_list_grid() {
     use poodle_adapter::ThemeProvider;
@@ -60087,6 +60088,10 @@ fn first_mounted_parity_list_grid() {
             "the default gap matches the 1.25rem Svelte token"
         );
         assert_eq!(grid.children.len(), 2);
+        // The contracted default caps columns at three: each cell seeds just
+        // under one column share while the min-width floor still collapses
+        // narrow containers, the flex projection of the Svelte track floor.
+        assert_eq!(ListGridSpec::new().max_columns, Some(3));
         for cell in &grid.children {
             assert_eq!(
                 cell.style.min_width,
@@ -60094,10 +60099,49 @@ fn first_mounted_parity_list_grid() {
                 "each tile keeps the 12em floor"
             );
             assert_eq!(cell.style.flex_grow, Some(1.0));
-            assert_eq!(cell.style.flex_basis, Some(0.0));
+            assert_eq!(cell.style.flex_basis, None);
+            assert_eq!(
+                cell.style.flex_basis_pct,
+                Some(1.0 / 3.0 - 0.03),
+                "capped cells seed one column share"
+            );
         }
         assert!(node.has_text("tile one"));
         assert!(node.has_text("tile two"));
+
+        // Removing the cap restores zero-basis growth from the bare floor.
+        let uncapped = poodle_render::list_grid(
+            &ListGridSpec::new().with_uncapped_columns(),
+            &ctx,
+            None,
+            vec![Node::text("tile")],
+        );
+        let free_cell = &uncapped.children[0].children[0];
+        assert_eq!(free_cell.style.flex_basis, Some(0.0));
+        assert_eq!(free_cell.style.flex_basis_pct, None);
+
+        // A numeric gap resolves to px and moves the header with the tiles.
+        let gapped = poodle_render::list_grid(
+            &ListGridSpec::new().with_gap_px(16.0),
+            &ctx,
+            Some(Node::text("Toolbar")),
+            vec![Node::text("tile")],
+        );
+        assert_eq!(
+            gapped.children[1].style.descriptor.layout.spacing.gap, 16.0,
+            "a numeric gap resolves to px like Svelte"
+        );
+        assert_eq!(
+            gapped.children[0]
+                .style
+                .descriptor
+                .layout
+                .spacing
+                .padding
+                .bottom,
+            16.0,
+            "the header follows the resolved grid gap"
+        );
 
         // The default floor falls back to the 360px contract token.
         let fallback =
@@ -60186,6 +60230,55 @@ fn first_mounted_parity_list_grid() {
             "tiles never overlap"
         );
         let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+
+    // ── Mounted: the fourth tile wraps past the three-column cap ───────
+    // Svelte's capped floor at 560px is max(6em, (560 - 2 * 20) / 3), so
+    // three tiles share the row and the fourth wraps; the mounted grid must
+    // agree instead of fitting all four in one row.
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let tiles: Vec<Node> = ["one", "two", "three", "four"]
+            .iter()
+            .map(|name| {
+                let mut tile = Node::text(format!("tile {name}"));
+                tile.id = Some(format!("mounted-list-grid-cap-{name}"));
+                tile
+            })
+            .collect();
+        let mut capped = poodle_render::list_grid(
+            &ListGridSpec::new().with_min_item_width_em(6.0),
+            &ctx,
+            None,
+            tiles,
+        );
+        capped.id = Some("mounted-list-grid-capped".to_owned());
+        // Width-dependent geometry needs a fixed host width: the mount box
+        // centers intrinsic content, so the grid takes the Svelte viewport
+        // width explicitly, the same Fixed pattern the Grid parity test uses.
+        capped.style.descriptor.layout.width = LayoutSizing::Fixed(560.0);
+        let _driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(capped)), 560.0, 280.0);
+        let row: Vec<_> = ["one", "two", "three", "four"]
+            .iter()
+            .map(|name| {
+                poodle_gpui_node_backend::bounds_for(&format!("mounted-list-grid-cap-{name}"))
+                    .unwrap_or_else(|| panic!("capped tile {name} geometry"))
+            })
+            .collect();
+        let tops: Vec<f32> = row.iter().map(|b| f32::from(b.origin.y)).collect();
+        assert!(
+            (tops[0] - tops[1]).abs() < 2.0 && (tops[1] - tops[2]).abs() < 2.0,
+            "three tiles share the first row under the cap"
+        );
+        assert!(
+            tops[3] >= tops[0] + f32::from(row[0].size.height) - 1.0,
+            "the fourth tile wraps past the three-column cap"
+        );
+        assert!(
+            (f32::from(row[3].origin.x) - f32::from(row[0].origin.x)).abs() < 8.0,
+            "the wrapped tile restarts at the row edge"
+        );
     });
 
     run_headless(|cx| {
@@ -60335,7 +60428,11 @@ fn first_mounted_parity_field_set() {
             Some("span 3")
         );
 
-        // ── Mounted: group semantics and stacking survive ────────────────
+        // ── Mounted: group semantics, description, and stacking survive ──
+        // Neither the contract nor Svelte declares a `disabled` prop: controls
+        // own their disabled state and the group preserves it, so the
+        // disabled scope below is proved through host-owned control state
+        // with no new component API.
         let mut first = Node::text("Field A");
         first.id = Some("mounted-field-set-field-a".to_owned());
         let mut second = Node::text("Field B");
@@ -60343,12 +60440,15 @@ fn first_mounted_parity_field_set() {
         let mut root = poodle_render::field_set(
             &FieldSetSpec::new()
                 .with_legend("Contact details")
+                .with_description("Used for invoices.")
                 .with_columns(1),
             &ctx,
             vec![first, second],
         );
         root.id = Some("mounted-field-set".to_owned());
-        let _driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(root)), 400.0, 220.0);
+        root.children[0].id = Some("mounted-field-set-legend".to_owned());
+        root.children[1].id = Some("mounted-field-set-description".to_owned());
+        let _driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(root)), 400.0, 260.0);
         let painted = poodle_gpui_node_backend::painted_node_for("mounted-field-set")
             .expect("FieldSet reaches the production GPUI paint pass");
         assert_eq!(
@@ -60372,13 +60472,87 @@ fn first_mounted_parity_field_set() {
                 >= f32::from(above.origin.y) + f32::from(above.size.height) - 1.0,
             "single-column fields stack vertically"
         );
+        // The description paints between legend and fields.
+        assert!(
+            painted.texts.contains(&"Used for invoices.".to_owned()),
+            "the mounted group carries its description text"
+        );
+        let legend_box = poodle_gpui_node_backend::bounds_for("mounted-field-set-legend")
+            .expect("legend geometry");
+        let description_box = poodle_gpui_node_backend::bounds_for("mounted-field-set-description")
+            .expect("description geometry");
+        assert!(
+            f32::from(description_box.size.height) > 0.0,
+            "the description paints"
+        );
+        assert!(
+            legend_box.bottom() <= description_box.top(),
+            "the description sits under the legend"
+        );
+        assert!(
+            description_box.bottom() <= above.top(),
+            "fields start below the description"
+        );
         let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+
+    // ── Mounted: grouped controls keep their own disabled state ─────────
+    // Svelte leaves `disabled` on the controls themselves; the group adds no
+    // propagation of its own, so a disabled grouped control stays inert while
+    // its sibling still activates and the group keeps its semantics.
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let (fire, count) = counting_handler();
+        let mut live = poodle_render::button(
+            &poodle_specs::ButtonSpec::new().with_label("Save"),
+            &RenderContext::new(&theme()),
+            Some(fire),
+        );
+        live.id = Some("mounted-field-set-live".to_owned());
+        let mut blocked = poodle_render::button(
+            &poodle_specs::ButtonSpec::new()
+                .with_label("Blocked")
+                .with_disabled(true),
+            &RenderContext::new(&theme()),
+            Some(Arc::new(|| {
+                panic!("a disabled grouped control never fires")
+            })),
+        );
+        blocked.id = Some("mounted-field-set-blocked".to_owned());
+        assert!(blocked.interaction.disabled);
+        let mut root = poodle_render::field_set(
+            &FieldSetSpec::new().with_legend("Actions"),
+            &ctx,
+            vec![live, blocked],
+        );
+        root.id = Some("mounted-field-set-disabled".to_owned());
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(root)), 400.0, 220.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-field-set-disabled")
+            .expect("disabled group reaches the paint pass");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Group));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Actions"));
+        driver.pointer_activate_id("mounted-field-set-live");
+        assert_eq!(
+            *count.lock().expect("activation count"),
+            1,
+            "the enabled grouped control still activates"
+        );
+        driver.pointer_activate_id("mounted-field-set-blocked");
+        assert_eq!(
+            *count.lock().expect("activation count"),
+            1,
+            "the disabled grouped control stays inert"
+        );
+        assert!(driver.mounted_observation().is_valid());
     });
 }
 
-/// Tooltip parity: hover and focus open through the 300ms contract delay,
-/// leave, blur, and Escape dismiss, the anchor keeps its name and activation,
-/// and the bubble resolves the contract tokens with tooltip semantics.
+/// Tooltip parity: the rendered bubble mounts with tooltip role and the
+/// anchor relationship, the bubble resolves the contract tokens, and hover
+/// and focus open through the 300ms contract delay while leave, blur, and
+/// Escape dismiss — the anchor keeps its name and activation throughout.
 #[test]
 fn tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui() {
     use poodle_adapter::ThemeProvider;
@@ -60389,17 +60563,7 @@ fn tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui() {
     use std::time::Duration;
 
     const ANCHOR: &str = "tooltip-proof-anchor";
-
-    fn anchor(handler: Option<Arc<dyn Fn() + Send + Sync>>) -> Node {
-        let mut node = poodle_render::button(
-            &ButtonSpec::new().with_label("Save"),
-            &RenderContext::new(&theme()),
-            handler,
-        );
-        node.id = Some(ANCHOR.to_owned());
-        node.tooltip = Some("Save document".to_owned());
-        node
-    }
+    const BUBBLE: &str = "tooltip-proof-bubble";
 
     // The tooltip supplements the trigger name instead of replacing it.
     let vocabulary = anchor(None);
@@ -60483,6 +60647,71 @@ fn tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui() {
         Some(poodle_render::presentation::rem_to_px(0.6875))
     );
     assert_eq!(label.style.line_height, Some(1.35));
+
+    fn anchor(handler: Option<Arc<dyn Fn() + Send + Sync>>) -> Node {
+        let mut node = poodle_render::button(
+            &ButtonSpec::new().with_label("Save"),
+            &RenderContext::new(&theme()),
+            handler,
+        );
+        node.id = Some(ANCHOR.to_owned());
+        node.tooltip = Some("Save document".to_owned());
+        node
+    }
+
+    // ── Mounted: the rendered bubble carries role and anchor link ───────
+    // The production Tooltip composition is the rendered bubble mounted
+    // beside its anchor with the describedby relationship, the static form
+    // of Svelte's `open` bubble and aria-describedby wiring.
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let mut trigger = poodle_render::button(&ButtonSpec::new().with_label("Save"), &ctx, None);
+        trigger.id = Some("tooltip-proof-trigger".to_owned());
+        trigger.a11y.described_by = Some(BUBBLE.to_owned());
+        let mut bubble =
+            poodle_render::tooltip(&TooltipSpec::new().with_content("Save document"), &ctx);
+        bubble.id = Some(BUBBLE.to_owned());
+        let mut root = Node::container();
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+        root.id = Some("tooltip-proof-composition".to_owned());
+        root = root.child(trigger).child(bubble);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(root)), 420.0, 160.0);
+        let painted = poodle_gpui_node_backend::painted_node_for(BUBBLE)
+            .expect("the Tooltip bubble reaches the paint pass");
+        assert_eq!(
+            painted.a11y_role,
+            Some(NodeRole::Tooltip),
+            "the mounted bubble keeps tooltip role"
+        );
+        assert!(
+            painted.texts.contains(&"Save document".to_owned()),
+            "the mounted bubble carries its content"
+        );
+        let geometry = poodle_gpui_node_backend::bounds_for(BUBBLE).expect("bubble geometry");
+        assert!(f32::from(geometry.size.width) > 0.0);
+        assert!(f32::from(geometry.size.height) > 0.0);
+        let mounted = driver.accessibility_nodes();
+        let anchor_entry = mounted
+            .iter()
+            .find(|entry| entry.element_id == "tooltip-proof-trigger")
+            .expect("mounted anchor");
+        assert_eq!(
+            anchor_entry.described_by.as_deref(),
+            Some(BUBBLE),
+            "the mounted anchor names its bubble"
+        );
+        let bubble_entry = mounted
+            .iter()
+            .find(|entry| entry.semantic_id.as_deref() == Some(BUBBLE))
+            .expect("mounted bubble");
+        assert_eq!(
+            bubble_entry.role,
+            NodeRole::Tooltip,
+            "the accessibility tree exposes the tooltip"
+        );
+    });
 
     // ── Mounted: hover opens through the delay; leave dismisses ─────────
     run_headless(|cx| {
