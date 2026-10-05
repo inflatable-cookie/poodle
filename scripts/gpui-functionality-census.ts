@@ -313,6 +313,27 @@ function testSourceAtCommit(root: string, commit: string): string | undefined {
   }
 }
 
+function executionBodyHashMatches(
+  root: string,
+  testName: string,
+  expectedHash: string,
+  baselineSource: string | undefined,
+): boolean {
+  const currentBody = extractTestBody(root, testName);
+  if (currentBody === undefined) return false;
+  const currentHash = sha256Hex(currentBody);
+  if (currentHash === expectedHash) return true;
+  if (baselineSource === undefined) return false;
+  const legacyBaseline = extractLegacyTestBody(baselineSource, testName);
+  const canonicalBaseline = extractTestBodyFromSource(baselineSource, testName);
+  return (
+    legacyBaseline !== undefined &&
+    canonicalBaseline !== undefined &&
+    sha256Hex(legacyBaseline) === expectedHash &&
+    sha256Hex(canonicalBaseline) === currentHash
+  );
+}
+
 type TopLevelFn = { name: string; test: boolean; body: string };
 
 function topLevelFns(source: string): TopLevelFn[] {
@@ -717,18 +738,7 @@ export function validateExecutionRecord(record: ExecutionRecord, root: string): 
     const current = testBodySha256(root, test);
     if (current === undefined) throw new Error(`Expected test ${test} is stale: it no longer exists in ${HEADLESS_TEST_FILE}.`);
     if (testIsIgnored(root, test)) throw new Error(`Expected test ${test} is ignored and never executes.`);
-    const legacyBaseline = baselineSource === undefined
-      ? undefined
-      : extractLegacyTestBody(baselineSource, test);
-    const canonicalBaseline = baselineSource === undefined
-      ? undefined
-      : extractTestBodyFromSource(baselineSource, test);
-    const legacyHashMatches =
-      legacyBaseline !== undefined &&
-      canonicalBaseline !== undefined &&
-      sha256Hex(legacyBaseline) === entry.body_sha256 &&
-      sha256Hex(canonicalBaseline) === current;
-    if (current !== entry.body_sha256 && !legacyHashMatches) {
+    if (!executionBodyHashMatches(root, test, entry.body_sha256, baselineSource)) {
       throw new Error(`Expected test ${test} changed since the recorded execution; re-run it before admitting claims.`);
     }
   }
@@ -1207,7 +1217,7 @@ export function writeCensusArtifacts(root = ROOT): { rows: number; admitted: num
   return { rows: doc.rows.length, admitted: doc.summary.admittedRows, receipts: receipts.length };
 }
 
-function validateReceiptFile(content: string, root: string): void {
+function validateReceiptFile(content: string, root: string, baselineSource: string | undefined): void {
   const receipt = JSON.parse(content) as {
     schema?: string;
     component?: string;
@@ -1252,7 +1262,7 @@ function validateReceiptFile(content: string, root: string): void {
       throw new Error(`Mounted receipt for ${receipt.component} claims ${axis} its test body does not show.`);
     }
   }
-  if (sha256Hex(body) !== receipt.execution.body_sha256) {
+  if (!executionBodyHashMatches(root, receipt.test, receipt.execution.body_sha256, baselineSource)) {
     throw new Error(`Mounted receipt test ${receipt.test} changed since its recorded execution.`);
   }
 }
@@ -1292,6 +1302,9 @@ export function checkCensusArtifacts(root = ROOT): void {
   const expectedJson = `${JSON.stringify({ ...doc, manifest: undefined }, null, 2)}\n`;
   const expectedMd = censusMarkdown(doc);
   const expectedGroups = `${JSON.stringify({ schema: "poodle.g18-missing-capability-groups.v1", task: "g18.001", groups: doc.groups }, null, 2)}\n`;
+  const record = loadExecutionRecord(root);
+  const baselineCommit = record.body_hash_baseline_commit ?? record.source_commit;
+  const baselineSource = testSourceAtCommit(root, baselineCommit);
   const compare = (relativePath: string, expected: string): void => {
     const actual = read(root, relativePath);
     if (actual !== expected) throw new Error(`Checked-in ${relativePath} disagrees with the generator; regenerate.`);
@@ -1309,7 +1322,7 @@ export function checkCensusArtifacts(root = ROOT): void {
     const actual = read(root, receipt.file);
     // Validate the checked-in receipt first so a stale package version fails
     // with its own provenance message, not only a generic byte mismatch.
-    validateReceiptFile(actual, root);
+    validateReceiptFile(actual, root, baselineSource);
     if (actual !== receipt.content) throw new Error(`Checked-in ${receipt.file} disagrees with the generator; regenerate.`);
   }
   validateManifestRefs(doc.manifest, root);
