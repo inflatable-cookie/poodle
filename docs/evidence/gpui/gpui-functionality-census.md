@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `e761a5fe1f6d8d2971cc5ed42e66f2f9ebd5f984`
+Evidence commit (execution identity from the execution record, not the checkout): `72b195e32c4a49fef4d34cc0dbd6914253f3283f`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
@@ -14,10 +14,10 @@ Construction is not functional completion. A passing route, a test name, or one 
 <!-- g18-census-summary -->
 ## Summary
 
-Rows with at least one admitted capability: **152**/175.
-Fully admitted rows: **151**/175.
-Missing by axis: semantic 23; events 19; pointer 22; keyboard_focus 20; accessibility 23; visual 24.
-Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **41**.
+Rows with at least one admitted capability: **157**/175.
+Fully admitted rows: **156**/175.
+Missing by axis: semantic 18; events 14; pointer 17; keyboard_focus 16; accessibility 18; visual 19.
+Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **36**.
 
 ## Rows
 
@@ -78,7 +78,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **41**.
 | Popover | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Popover--a-nested-popover-paints-without-nesting-deferred-draws.json` |
 | Pagination | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Pagination--pagination-navigation-limit-and-loading-through-mounted-pointer-and-keyboard.json` |
 | PaginationSummary | semantic; accessibility; visual | semantic (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/PaginationSummary--gpui-mounted-pagination-summary-range-live-name-and-geometry.json` |
-| PasswordRequirements | semantic; events; pointer; accessibility; visual | — | semantic; events; pointer; accessibility; visual | accessibility (A2-platform-hold) | — |
+| PasswordRequirements | semantic; accessibility; visual | semantic (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/PasswordRequirements--first-mounted-parity-password-requirements.json` |
 | Progress | semantic; accessibility; visual | semantic (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Progress--first-mounted-parity-progress.json` |
 | Radio | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Radio--radio-selects-on-activate-and-does-not-uncheck-itself.json` |
 | RefSelect | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/RefSelect--first-mounted-parity-ref-select.json` |
@@ -130,7 +130,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **41**.
 | ActionDiscoveryPanel | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ActionDiscoveryPanel--action-discovery-selection-rebuilds-the-host-spec-through-mounted-input.json` |
 | AppHeader | semantic; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | — |
 | EditableList | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/EditableList--editable-list-substrate-reorder-rebuilds-the-host-spec.json` |
-| ErrorBoundary | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
+| ErrorBoundary | semantic; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ErrorBoundary--first-mounted-parity-error-boundary.json` |
 | BlockEditor | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/BlockEditor--block-editor-grip-drag-and-move-controls-rebuild-the-host-spec.json` |
 | CardRadioGroup | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/CardRadioGroup--first-mounted-parity-card-radio-group.json` |
 | CardToggleGroup | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test) | visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/CardToggleGroup--first-mounted-parity-card-toggle-group.json` |
@@ -142,12 +142,12 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **41**.
 | DockRegion | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/DockRegion--dock-region-tab-and-collapse-rebuild-the-host-spec-through-mounted-input.json` |
 | DetailShell | semantic; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/DetailShell--first-mounted-parity-detail-shell.json` |
 | EmbedInput | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/EmbedInput--embed-input-url-entry-validation-and-preview-rebuild-the-host-spec.json` |
-| EmbedPreview | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
-| EmptyState | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
+| EmbedPreview | semantic; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/EmbedPreview--first-mounted-parity-embed-preview.json` |
+| EmptyState | semantic; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/EmptyState--first-mounted-parity-empty-state.json` |
 | FilterToolbar | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/FilterToolbar--first-mounted-parity-filter-toolbar.json` |
 | FormDialog | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/FormDialog--first-mounted-parity-form-dialog.json` |
 | FormLayout | semantic; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/FormLayout--first-mounted-parity-form-layout.json` |
-| InlineListSection | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
+| InlineListSection | semantic; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/InlineListSection--first-mounted-parity-inline-list-section.json` |
 | DebugDialog | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/DebugDialog--first-mounted-parity-debug-dialog.json` |
 | LicenceActivation | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/LicenceActivation--licence-activation-key-entry-types-and-emits-through-the-real-tree.json`; `docs/evidence/gpui/mounted-receipts/LicenceActivation--licence-activation-machine-name-enter-and-escape-restore-display-focus.json` |
 | LicenceSeats | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/LicenceSeats--licence-seats-release-flows-through-confirm-in-a-mounted-window.json`; `docs/evidence/gpui/mounted-receipts/LicenceSeats--licence-seats-seat-row-enter-and-escape-restore-display-focus.json` |
@@ -210,19 +210,14 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **41**.
 - ListGrid: No validated receipt and no retained expected test for ListGrid; every required capability stays missing.
 - NumberInput: Expected test number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value proves no pointer claim; pointer stays missing.
 - NumberInput: Expected test number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value proves no visual claim; visual stays missing.
-- PasswordRequirements: No validated receipt and no retained expected test for PasswordRequirements; every required capability stays missing.
 - ScrollShell: No validated receipt and no retained expected test for ScrollShell; every required capability stays missing.
 - TextLink: No validated receipt and no retained expected test for TextLink; every required capability stays missing.
 - Tooltip: No validated receipt and no retained expected test for Tooltip; every required capability stays missing.
 - UiPresentationProvider: No validated receipt and no retained expected test for UiPresentationProvider; every required capability stays missing.
 - MotionPolicyProvider: No validated receipt and no retained expected test for MotionPolicyProvider; every required capability stays missing.
-- ErrorBoundary: No validated receipt and no retained expected test for ErrorBoundary; every required capability stays missing.
 - CardToggleGroup: Expected test first_mounted_parity_card_toggle_group shows visual signals, but visual is withheld: narrow-container clamp needs a shared min(100%, max(…)) layout capability.
 - CardToggleGroup: Expected test first_mounted_parity_card_toggle_group proves no visual claim; visual stays missing.
 - DetailSection: No validated receipt and no retained expected test for DetailSection; every required capability stays missing.
-- EmbedPreview: No validated receipt and no retained expected test for EmbedPreview; every required capability stays missing.
-- EmptyState: No validated receipt and no retained expected test for EmptyState; every required capability stays missing.
-- InlineListSection: No validated receipt and no retained expected test for InlineListSection; every required capability stays missing.
 - LicenceSeats: Expected test licence_seats_release_flows_through_confirm_in_a_mounted_window proves no events claim; events stays missing.
 - LicenceSeats: Expected test licence_seats_release_flows_through_confirm_in_a_mounted_window proves no keyboard_focus claim; keyboard_focus stays missing.
 - MediaPreview: No validated receipt and no retained expected test for MediaPreview; every required capability stays missing.
@@ -250,7 +245,6 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **41**.
 Shared-substrate groupings for repair-tranche compilation. Grouping only; no tranche is planned here.
 
 - text-display: 7 components (Code, Eyebrow, IconProvider, MediaPreview, MetricTile, StateTile, TextLink); missing semantic 7; events 4; pointer 6; keyboard_focus 5; accessibility 7; visual 7
-- feedback-status: 5 components (EmbedPreview, EmptyState, ErrorBoundary, InlineListSection, PasswordRequirements); missing semantic 5; events 5; pointer 5; keyboard_focus 4; accessibility 5; visual 5
 - general-composite: 4 components (EnvelopeEditor, FieldSet, ModMatrixGrid, WaveformDisplay); missing semantic 4; events 4; pointer 4; keyboard_focus 4; accessibility 4; visual 4
 - workstation-shell: 3 components (DetailSection, ScrollShell, UiPresentationProvider); missing semantic 3; events 2; pointer 3; keyboard_focus 3; accessibility 3; visual 3
 - layout-primitive: 2 components (ListGrid, Tooltip); missing semantic 2; events 2; pointer 2; keyboard_focus 2; accessibility 2; visual 2
