@@ -244,21 +244,25 @@ function validatePinAncestry(sourceCommit: string, root: string): void {
   }
 }
 
-/** Extract the top-level test function body, or undefined when the test is absent (renamed/stale). */
+/** Extract a top-level test through its own closing brace, or undefined when absent/stale. */
 export function extractTestBody(root: string, testName: string): string | undefined {
   const file = path.join(root, HEADLESS_TEST_FILE);
   if (!fs.existsSync(file)) return undefined;
   const lines = fs.readFileSync(file, "utf8").split("\n");
   const start = lines.findIndex((line) => line.startsWith(`fn ${testName}(`));
   if (start < 0) return undefined;
-  let end = lines.length;
-  for (let i = start + 1; i < lines.length; i++) {
-    if (lines[i].startsWith("#[test]") || lines[i].startsWith("fn ")) {
-      end = i;
-      break;
+  for (let end = start + 1; end < lines.length; end++) {
+    // Rustfmt puts a top-level function's closing brace at column zero.
+    // Stop here so comments for a following test (or appended tests at EOF)
+    // do not become part of this test's evidence hash.
+    if (lines[end] === "}") {
+      // Preserve trailing blank lines: the old EOF extraction included the
+      // file's final newline, and those existing execution hashes stay stable.
+      while (end + 1 < lines.length && lines[end + 1].trim() === "") end++;
+      return lines.slice(start, end + 1).join("\n");
     }
   }
-  return lines.slice(start, end).join("\n");
+  return undefined;
 }
 
 /** True when the test carries #[ignore]: it never executes, so it can never admit evidence. */
@@ -274,6 +278,25 @@ export function testIsIgnored(root: string, testName: string): boolean {
 export function testBodySha256(root: string, testName: string): string | undefined {
   const body = extractTestBody(root, testName);
   return body === undefined ? undefined : sha256Hex(body);
+}
+
+/** Hash the pre-g18.108 extraction span so existing execution receipts remain
+ * valid when the current function body is unchanged but trailing test docs are
+ * no longer part of that body. New executions record the brace-bounded hash. */
+function legacyTestBodySha256(root: string, testName: string): string | undefined {
+  const file = path.join(root, HEADLESS_TEST_FILE);
+  if (!fs.existsSync(file)) return undefined;
+  const lines = fs.readFileSync(file, "utf8").split("\n");
+  const start = lines.findIndex((line) => line.startsWith(`fn ${testName}(`));
+  if (start < 0) return undefined;
+  let end = lines.length;
+  for (let i = start + 1; i < lines.length; i++) {
+    if (lines[i].startsWith("#[test]") || lines[i].startsWith("fn ")) {
+      end = i;
+      break;
+    }
+  }
+  return sha256Hex(lines.slice(start, end).join("\n"));
 }
 
 type TopLevelFn = { name: string; test: boolean; body: string };
@@ -674,7 +697,8 @@ export function validateExecutionRecord(record: ExecutionRecord, root: string): 
     const current = testBodySha256(root, test);
     if (current === undefined) throw new Error(`Expected test ${test} is stale: it no longer exists in ${HEADLESS_TEST_FILE}.`);
     if (testIsIgnored(root, test)) throw new Error(`Expected test ${test} is ignored and never executes.`);
-    if (current !== entry.body_sha256) {
+    const legacy = legacyTestBodySha256(root, test);
+    if (current !== entry.body_sha256 && legacy !== entry.body_sha256) {
       throw new Error(`Expected test ${test} changed since the recorded execution; re-run it before admitting claims.`);
     }
   }
