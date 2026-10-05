@@ -208,7 +208,7 @@ pub fn agent_subagent(
         } else {
             spec.expand_label.clone()
         };
-        let toggle = action(
+        let mut toggle = action(
             "toggle",
             toggle_label,
             handlers.on_toggle.as_ref().map(|handler| {
@@ -216,6 +216,7 @@ pub fn agent_subagent(
                 Arc::new(move || handler(next)) as Arc<dyn Fn() + Send + Sync>
             }),
         );
+        toggle.a11y.expanded = Some(spec.is_expanded);
         actions = actions.child(toggle);
     }
 

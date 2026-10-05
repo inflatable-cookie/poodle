@@ -8452,7 +8452,9 @@ fn overlay_layers_survive_independent_conversions_within_one_frame() {
 /// platform; a source token or specimen counter cannot satisfy it.
 #[test]
 fn agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport() {
-    use poodle_headless::agent_transcript::{TranscriptItem, TranscriptMessage};
+    use poodle_headless::agent_transcript::{
+        ToolCallStatus, TranscriptItem, TranscriptMessage, TranscriptToolCall,
+    };
 
     fn message(index: usize) -> TranscriptItem {
         TranscriptItem::Message(TranscriptMessage {
@@ -8466,6 +8468,18 @@ fn agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport() {
 
     run_headless(|cx| {
         let items = Rc::new(RefCell::new((0..24).map(message).collect::<Vec<_>>()));
+        items
+            .borrow_mut()
+            .push(TranscriptItem::ToolCall(TranscriptToolCall {
+                id: "transcript-output".to_string(),
+                label: "Ran command".to_string(),
+                detail: Some("bun test".to_string()),
+                status: ToolCallStatus::Success,
+                icon: None,
+                output: Some("272 pass".to_string()),
+            }));
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let build_payloads = Arc::clone(&payloads);
         let scroll = poodle_gpui_node_backend::TrackedScrollState::new();
         let build_items = Rc::clone(&items);
         let build_scroll = scroll.clone();
@@ -8473,10 +8487,16 @@ fn agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport() {
         let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
             let spec = AgentTranscriptSpec::new(build_items.borrow().clone());
             let ctx = RenderContext::new(&build_theme);
+            let call_payloads = Arc::clone(&build_payloads);
             let content = poodle_render::agent_transcript(
                 &spec,
                 &ctx,
-                poodle_render::AgentTranscriptHandlers::default(),
+                poodle_render::AgentTranscriptHandlers {
+                    on_tool_call_toggle: Some(Arc::new(move |id| {
+                        call_payloads.lock().unwrap().push(id.to_string());
+                    })),
+                    ..poodle_render::AgentTranscriptHandlers::default()
+                },
             );
             let mut jump = poodle_render::agent_transcript::agent_transcript_jump(
                 &spec,
@@ -8506,6 +8526,16 @@ fn agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport() {
             "initial render follows the latest block"
         );
         assert!(scroll.remaining_to_bottom() <= 0.5);
+
+        let output_focus_id =
+            poodle_render::tool_call_focus_id(Some("transcript-output"), "transcript-output");
+        driver.wait_for_focus_handle(&output_focus_id);
+        driver.keyboard_activate(&output_focus_id);
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            ["transcript-output"],
+            "the mounted transcript forwards the output disclosure id",
+        );
 
         driver.scroll_vertical(240.0);
         assert!(!scroll.is_pinned(), "scrolling up detaches the reader");
@@ -13113,6 +13143,8 @@ fn licence_seats_release_flows_through_confirm_in_a_mounted_window() {
     run_headless(|cx| {
         let released = Arc::new(Mutex::new(Vec::new()));
         let sink = Arc::clone(&released);
+        let provider = theme();
+        let ctx = RenderContext::new(&provider);
         let mut node = poodle_render::licence_seats(
             &LicenceSeatsSpec::new()
                 .with_seats(vec![
@@ -13136,6 +13168,30 @@ fn licence_seats_release_flows_through_confirm_in_a_mounted_window() {
                 ..poodle_render::LicenceSeatsHandlers::default()
             },
         );
+        {
+            let section = node
+                .find(&|candidate| candidate.a11y.role == Some(NodeRole::Region))
+                .expect("mounted LicenceSeats section");
+            assert_eq!(section.a11y.label.as_deref(), Some("Activated machines"));
+            assert_eq!(
+                section.style.descriptor.layout.spacing.gap,
+                ctx.theme().resolve_space("space.stack.sm"),
+                "the section uses the contract's resolved stack spacing"
+            );
+            assert_eq!(
+                section.children[0].style.descriptor.text_color,
+                Some(ctx.theme().resolve_color("color.text.primary"))
+            );
+            let list = &section.children[1];
+            assert_eq!(
+                list.style.descriptor.layout.spacing.gap,
+                ctx.theme().resolve_space("space.stack.xs")
+            );
+            assert_eq!(
+                list.children[0].style.descriptor.layout.spacing.gap,
+                ctx.theme().resolve_space("space.inline.md")
+            );
+        }
         // The confirm dialog is open (spec state), so its confirm button —
         // labelled with the release label — is the release affordance.
         assert!(give_first_id(
@@ -13146,6 +13202,12 @@ fn licence_seats_release_flows_through_confirm_in_a_mounted_window() {
         node.id = Some(FIXTURE_ID.to_owned());
         let node = Arc::new(Mutex::new(node));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        let dimensions = poodle_gpui_node_backend::bounds_for(FIXTURE_ID)
+            .expect("mounted LicenceSeats dimensions");
+        assert!(
+            dimensions.size.width > px(0.0) && dimensions.size.height > px(0.0),
+            "LicenceSeats paints positive mounted dimensions"
+        );
 
         driver.pointer_activate_id("seats-confirm");
         assert_eq!(
@@ -16903,7 +16965,11 @@ fn action_discovery_selection_rebuilds_the_host_spec_through_mounted_input() {
     use poodle_specs::{ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem};
 
     run_headless(|cx| {
-        fn build(active: String, mounted: Arc<Mutex<Node>>) -> Node {
+        fn build(
+            active: String,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<String>>>,
+        ) -> Node {
             let spec = ActionDiscoveryPanelSpec::new(vec![ActionDiscoverySection::new(
                 "file",
                 "File",
@@ -16914,12 +16980,19 @@ fn action_discovery_selection_rebuilds_the_host_spec_through_mounted_input() {
             )])
             .with_active_id(&active);
             let mount = Arc::clone(&mounted);
+            let select_payloads = Arc::clone(&payloads);
+            let rebuild_payloads = Arc::clone(&payloads);
             let panel = poodle_render::action_discovery_panel(
                 &spec,
                 &RenderContext::new(&theme()),
                 poodle_render::ActionDiscoveryPanelHandlers {
                     on_select: Some(Arc::new(move |id| {
-                        *mount.lock().unwrap() = build(id.to_string(), Arc::clone(&mount));
+                        select_payloads.lock().unwrap().push(id.to_string());
+                        *mount.lock().unwrap() = build(
+                            id.to_string(),
+                            Arc::clone(&mount),
+                            Arc::clone(&rebuild_payloads),
+                        );
                     })),
                     ..poodle_render::ActionDiscoveryPanelHandlers::default()
                 },
@@ -16930,11 +17003,59 @@ fn action_discovery_selection_rebuilds_the_host_spec_through_mounted_input() {
         }
 
         let mounted = Arc::new(Mutex::new(Node::container()));
-        *mounted.lock().unwrap() = build("save".to_string(), Arc::clone(&mounted));
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        *mounted.lock().unwrap() = build(
+            "save".to_string(),
+            Arc::clone(&mounted),
+            Arc::clone(&payloads),
+        );
+        let provider = theme();
+        let ctx = RenderContext::new(&provider);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 360.0);
+        {
+            let root = mounted.lock().unwrap();
+            let panel = root
+                .find(&|node| node.a11y.role == Some(NodeRole::ListBox))
+                .expect("mounted ActionDiscoveryPanel listbox");
+            assert_eq!(panel.a11y.label.as_deref(), Some("Actions"));
+            let option = root
+                .find(&|node| node.a11y.role == Some(NodeRole::ListBoxOption))
+                .expect("active action option");
+            assert_eq!(option.a11y.label.as_deref(), Some("Save"));
+            assert_eq!(option.a11y.selected, Some(true));
+            let button = root
+                .find(&|node| node.id.as_deref() == Some("save"))
+                .expect("active action button");
+            assert_eq!(button.a11y.role, Some(NodeRole::Button));
+            assert_eq!(button.a11y.label.as_deref(), Some("Save"));
+            let accent = ctx.theme().resolve_color("color.accent.base");
+            let elevated = ctx.theme().resolve_color("color.background.elevated");
+            let active_background = ColorValue(
+                accent.0 * 0.18 + elevated.0 * 0.82,
+                accent.1 * 0.18 + elevated.1 * 0.82,
+                accent.2 * 0.18 + elevated.2 * 0.82,
+                accent.3 * 0.18 + elevated.3 * 0.82,
+            );
+            assert_eq!(
+                button.style.descriptor.background,
+                Some(active_background),
+                "the active action resolves Svelte's 18% accent mix"
+            );
+        }
+        let dimensions =
+            poodle_gpui_node_backend::bounds_for("save").expect("mounted active action dimensions");
+        assert!(
+            dimensions.size.width > px(0.0) && dimensions.size.height > px(0.0),
+            "active action paints positive mounted dimensions"
+        );
 
         driver.wait_for_focus_handle("open-file");
         driver.keyboard_activate("open-file");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            ["open-file"],
+            "keyboard activation emits the selected action id"
+        );
         assert!(
             mounted
                 .lock()
@@ -16944,6 +17065,14 @@ fn action_discovery_selection_rebuilds_the_host_spec_through_mounted_input() {
                 .any(|t| *t == "Active: open-file"),
             "the next spec reflects the host-owned active action"
         );
+
+        driver.pointer_activate_id("save");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            ["open-file", "save"],
+            "pointer activation emits the selected action id"
+        );
+        assert!(mounted.lock().unwrap().has_text("Active: save"));
     });
 }
 
@@ -18712,7 +18841,12 @@ fn agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input() {
     use poodle_specs::AgentSubagentSpec;
 
     run_headless(|cx| {
-        fn build(expanded: bool, mounted: Arc<Mutex<Node>>) -> Node {
+        fn build(
+            expanded: bool,
+            child_open: bool,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<String>>>,
+        ) -> Node {
             let spec = AgentSubagentSpec::new(AgentSubagentItem {
                 id: "scout-running".to_string(),
                 label: "Scout".to_string(),
@@ -18722,30 +18856,112 @@ fn agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input() {
             })
             .with_detail_lines(vec!["Matched 41 of 44 vectors".to_string()])
             .with_expanded(expanded);
-            let mount = Arc::clone(&mounted);
-            let node = poodle_render::agent_subagent(
+            let toggle_mount = Arc::clone(&mounted);
+            let open_mount = Arc::clone(&mounted);
+            let toggle_payloads = Arc::clone(&payloads);
+            let open_payloads = Arc::clone(&payloads);
+            let toggle_rebuild_payloads = Arc::clone(&payloads);
+            let open_rebuild_payloads = Arc::clone(&payloads);
+            let mut node = poodle_render::agent_subagent(
                 &spec,
                 &RenderContext::new(&theme()),
                 poodle_render::AgentSubagentHandlers {
                     on_toggle: Some(Arc::new(move |next| {
-                        *mount.lock().unwrap() = build(next, Arc::clone(&mount));
+                        toggle_payloads
+                            .lock()
+                            .unwrap()
+                            .push(format!("toggle:{next}"));
+                        *toggle_mount.lock().unwrap() = build(
+                            next,
+                            child_open,
+                            Arc::clone(&toggle_mount),
+                            Arc::clone(&toggle_rebuild_payloads),
+                        );
                     })),
-                    on_open_child: None,
+                    on_open_child: Some(Arc::new(move || {
+                        open_payloads.lock().unwrap().push("open".to_string());
+                        *open_mount.lock().unwrap() = build(
+                            expanded,
+                            true,
+                            Arc::clone(&open_mount),
+                            Arc::clone(&open_rebuild_payloads),
+                        );
+                    })),
                     instance_id: None,
                 },
             );
-            Node::container().child(node).child(Node::text(if expanded {
-                "Child: open"
-            } else {
-                "Child: shut"
-            }))
+            node.id = Some("agent-subagent-card".to_string());
+            Node::container()
+                .child(node)
+                .child(Node::text(if expanded {
+                    "Child: open"
+                } else {
+                    "Child: shut"
+                }))
+                .child(Node::text(if child_open {
+                    "Child work: open"
+                } else {
+                    "Child work: shut"
+                }))
         }
 
         let mounted = Arc::new(Mutex::new(Node::container()));
-        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted));
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        *mounted.lock().unwrap() = build(false, false, Arc::clone(&mounted), Arc::clone(&payloads));
+        let provider = theme();
+        let ctx = RenderContext::new(&provider);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 360.0);
+        {
+            let root = mounted.lock().unwrap();
+            let card = root
+                .find(&|node| node.id.as_deref() == Some("agent-subagent-card"))
+                .expect("mounted AgentSubagent card");
+            assert_eq!(
+                card.style.descriptor.background,
+                Some(ctx.theme().resolve_color("color.background.surface"))
+            );
+            assert_eq!(
+                card.style.descriptor.border.color,
+                ctx.theme().resolve_color("color.border.subtle")
+            );
+            assert_eq!(
+                card.style.descriptor.corner_radii.top_left,
+                ctx.theme().resolve_radius("radius.control")
+            );
+            assert_eq!(
+                card.children[0].children[1].style.descriptor.text_color,
+                Some(ctx.theme().resolve_color("color.accent.base")),
+                "running status uses the accent token, matching Svelte"
+            );
+            let toggle = root
+                .find(&|node| node.id.as_deref() == Some("agent-subagent-toggle-scout-running"))
+                .expect("activity disclosure");
+            assert_eq!(toggle.a11y.role, Some(NodeRole::Button));
+            assert_eq!(toggle.a11y.label.as_deref(), Some("Show activity"));
+            assert_eq!(toggle.a11y.expanded, Some(false));
+            assert!(toggle.interaction.focusable);
+            let open = root
+                .find(&|node| node.id.as_deref() == Some("agent-subagent-open-scout-running"))
+                .expect("child work action");
+            assert_eq!(open.a11y.role, Some(NodeRole::Button));
+            assert_eq!(open.a11y.label.as_deref(), Some("Open child work"));
+            assert!(root.texts().iter().any(|text| *text == "Running"));
+            assert!(root.texts().iter().any(|text| *text == "Searching"));
+        }
+        let dimensions = poodle_gpui_node_backend::bounds_for("agent-subagent-card")
+            .expect("mounted AgentSubagent dimensions");
+        assert!(
+            dimensions.size.width > px(0.0) && dimensions.size.height > px(0.0),
+            "AgentSubagent paints positive mounted dimensions"
+        );
+
         driver.wait_for_focus_handle("agent-subagent-toggle-scout-running");
         driver.keyboard_activate("agent-subagent-toggle-scout-running");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            ["toggle:true"],
+            "keyboard activation sends the next disclosure state to the host"
+        );
         assert!(
             mounted
                 .lock()
@@ -18755,6 +18971,22 @@ fn agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input() {
                 .any(|t| *t == "Child: open"),
             "disclosure reached the host and painted the next spec"
         );
+        {
+            let root = mounted.lock().unwrap();
+            let toggle = root
+                .find(&|node| node.id.as_deref() == Some("agent-subagent-toggle-scout-running"))
+                .expect("expanded activity disclosure");
+            assert_eq!(toggle.a11y.expanded, Some(true));
+        }
+
+        driver.pointer_activate_id("agent-subagent-toggle-scout-running");
+        driver.pointer_activate_id("agent-subagent-open-scout-running");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            ["toggle:true", "toggle:false", "open"],
+            "pointer activation reaches the disclosure and child work callbacks"
+        );
+        assert!(mounted.lock().unwrap().has_text("Child work: open"));
     });
 }
 
@@ -18958,34 +19190,122 @@ fn tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input() {
     use poodle_specs::ToolCallSpec;
 
     run_headless(|cx| {
-        fn build(expanded: bool, mounted: Arc<Mutex<Node>>) -> Node {
+        fn build(
+            expanded: bool,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<String>>>,
+        ) -> Node {
             let spec = ToolCallSpec::new("with-output", "Ran command")
                 .with_detail("bun test")
                 .with_output("272 pass\n0 fail")
                 .with_expanded(expanded);
             let mount = Arc::clone(&mounted);
+            let toggle_payloads = Arc::clone(&payloads);
+            let rebuild_payloads = Arc::clone(&payloads);
             let node = poodle_render::tool_call(
                 &spec,
                 &RenderContext::new(&theme()),
                 poodle_render::ToolCallHandlers {
-                    on_toggle: Some(Arc::new(move |_| {
-                        *mount.lock().unwrap() = build(!expanded, Arc::clone(&mount));
+                    on_toggle: Some(Arc::new(move |id| {
+                        toggle_payloads.lock().unwrap().push(id.to_string());
+                        *mount.lock().unwrap() =
+                            build(!expanded, Arc::clone(&mount), Arc::clone(&rebuild_payloads));
                     })),
                     ..poodle_render::ToolCallHandlers::default()
                 },
             );
-            Node::container().child(node).child(Node::text(if expanded {
-                "Output: open"
-            } else {
-                "Output: shut"
-            }))
+            let error_spec = ToolCallSpec::new("failed", "Ran command")
+                .with_detail("cargo check")
+                .with_status(poodle_headless::agent_transcript::ToolCallStatus::Error)
+                .with_output("type mismatch");
+            let error_call = poodle_render::tool_call(
+                &error_spec,
+                &RenderContext::new(&theme()),
+                poodle_render::ToolCallHandlers::default(),
+            );
+            Node::container()
+                .child(node)
+                .child(error_call)
+                .child(Node::text(if expanded {
+                    "Output: open"
+                } else {
+                    "Output: shut"
+                }))
         }
 
         let mounted = Arc::new(Mutex::new(Node::container()));
-        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted));
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted), Arc::clone(&payloads));
+        let provider = theme();
+        let ctx = RenderContext::new(&provider);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 360.0);
+        {
+            let root = mounted.lock().unwrap();
+            let call = root
+                .find(&|node| node.id.as_deref() == Some("with-output"))
+                .expect("mounted ToolCall");
+            assert_eq!(call.a11y.role, Some(NodeRole::Button));
+            assert_eq!(call.a11y.label.as_deref(), Some("Ran command: bun test"));
+            assert_eq!(call.a11y.expanded, Some(false));
+            assert_eq!(call.a11y.controls.as_deref(), Some("with-output-output"));
+            assert!(call.interaction.focusable);
+            assert_eq!(
+                call.style.hover.as_ref().and_then(|patch| patch.background),
+                Some(ctx.theme().resolve_color("color.background.elevated")),
+                "interactive-row hover uses the elevated token"
+            );
+            assert_eq!(
+                call.style.descriptor.corner_radii.top_left,
+                ctx.theme().resolve_radius("radius.control")
+            );
+            assert_eq!(
+                call.children[1].style.descriptor.text_color,
+                Some(ctx.theme().resolve_color("color.text.secondary"))
+            );
+            assert_eq!(
+                call.children[2].style.descriptor.text_color,
+                Some(ctx.theme().resolve_color("color.text.tertiary"))
+            );
+            assert_eq!(
+                call.children[2].style.descriptor.opacity,
+                ctx.theme().resolve_opacity("state.opacity.muted")
+            );
+            assert_eq!(
+                call.children.last().unwrap().style.descriptor.text_color,
+                Some(ctx.theme().resolve_color("color.status.success"))
+            );
+            let failed = root
+                .find(&|node| node.id.as_deref() == Some("failed"))
+                .expect("mounted failed ToolCall");
+            assert_eq!(
+                failed.a11y.label.as_deref(),
+                Some("Ran command: cargo check, error"),
+                "the error status is announced in the accessible name"
+            );
+            assert_eq!(
+                failed.children[1].style.descriptor.text_color,
+                Some(ctx.theme().resolve_color("color.status.danger"))
+            );
+            assert_eq!(
+                failed.children[2].style.descriptor.text_color,
+                Some(ctx.theme().resolve_color("color.text.tertiary")),
+                "the already-muted detail stays tertiary when the call failed"
+            );
+        }
+        let dimensions = poodle_gpui_node_backend::bounds_for("with-output")
+            .expect("mounted ToolCall dimensions");
+        assert!(
+            dimensions.size.width > px(0.0) && dimensions.size.height > px(0.0),
+            "ToolCall paints positive mounted dimensions"
+        );
+
         driver.wait_for_focus_handle("with-output");
         driver.keyboard_activate("with-output");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            ["with-output"],
+            "keyboard activation emits the call id"
+        );
         assert!(
             mounted
                 .lock()
@@ -18995,6 +19315,25 @@ fn tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input() {
                 .any(|t| *t == "Output: open"),
             "disclosure reached the host and painted the next spec"
         );
+        {
+            let root = mounted.lock().unwrap();
+            let call = root
+                .find(&|node| node.id.as_deref() == Some("with-output"))
+                .expect("expanded ToolCall");
+            assert_eq!(call.a11y.expanded, Some(true));
+            assert!(
+                root.find(&|node| node.id.as_deref() == Some("with-output-output"))
+                    .is_some(),
+                "the expanded output is the target named by aria-controls"
+            );
+        }
+        driver.pointer_activate_id("with-output");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            ["with-output", "with-output"],
+            "pointer activation also emits the call id"
+        );
+        assert!(mounted.lock().unwrap().has_text("Output: shut"));
     });
 }
 
