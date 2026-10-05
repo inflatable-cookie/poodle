@@ -284,6 +284,9 @@ describe("g18.001 census oracles", () => {
       ["Avatar", "avatar.md"],
       ["MetaBar", "meta-bar.md"],
       ["MetaItem", "meta-item.md"],
+      ["AudioMeter", "audio-meter.md"],
+      ["GainReductionMeter", "gain-reduction-meter.md"],
+      ["ValueReadout", "value-readout.md"],
     ]) {
       const entry = manifest.find((candidate) => candidate.component === component);
       expect(entry?.required).toEqual(["semantic", "accessibility", "visual"]);

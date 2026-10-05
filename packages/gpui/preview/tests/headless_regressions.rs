@@ -55801,3 +55801,626 @@ fn first_mounted_parity_region() {
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }
+
+#[test]
+fn first_mounted_parity_audio_meter() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_headless::audio::AudioMeterContext;
+    use poodle_headless::motion_policy::MotionPolicy;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{AudioMeterSpec, AudioMeterStyle, ControlSize};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let accent = theme_provider.resolve_color("color.status.success");
+        let idle = theme_provider.resolve_color("color.border.subtle");
+
+        let mut mid_ctx = AudioMeterContext::default();
+        mid_ctx.ballistic_db = -12.0;
+        let mut mid_spec = AudioMeterSpec::new(mid_ctx.visual_state());
+        mid_spec.aria_label = "Output".into();
+        mid_spec.value_text = "-12.0 dB".into();
+        mid_spec.size = Some(ControlSize::Md);
+        let mut mid = poodle_render::audio_meter(&mid_spec, &ctx);
+        mid.id = Some("audio-meter-mid".to_owned());
+        assert_eq!(mid.a11y.role, Some(NodeRole::Meter));
+        assert_eq!(mid.a11y.label.as_deref(), Some("Output"));
+        assert_eq!(mid.a11y.value, Some(-12.0));
+        assert_eq!(mid.a11y.value_min, Some(-60.0));
+        assert_eq!(mid.a11y.value_max, Some(0.0));
+        assert_eq!(mid.a11y.value_text.as_deref(), Some("-12.0 dB"));
+        assert!(!mid.interaction.focusable);
+        assert_eq!(mid.children.len(), 1);
+        assert_eq!(mid.children[0].a11y.hidden, Some(true));
+        assert_eq!(mid.children[0].children.len(), 20);
+        assert_eq!(
+            mid.children[0].children[0].style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(0.75))
+        );
+        assert_eq!(
+            mid.children[0].children[0].style.descriptor.background,
+            Some(idle),
+            "the top vertical segment is the unlit clip end"
+        );
+        assert_eq!(
+            mid.children[0].children[19].style.descriptor.background,
+            Some(accent),
+            "the bottom vertical segment is lit at -12 dB"
+        );
+        assert!(mid.style.animation.is_none());
+        assert!(mid
+            .children
+            .iter()
+            .all(|child| child.style.animation.is_none()));
+
+        let mut right_ctx = AudioMeterContext::default();
+        right_ctx.ballistic_db = -12.0;
+        let mut stereo_spec = AudioMeterSpec::new(AudioMeterContext::default().visual_state());
+        stereo_spec.channels.push(right_ctx.visual_state());
+        stereo_spec.aria_label = "Master".into();
+        stereo_spec.value_text = "Left -60 dB, right -12 dB".into();
+        let mut stereo = poodle_render::audio_meter(&stereo_spec, &ctx);
+        stereo.id = Some("audio-meter-stereo".to_owned());
+        assert_eq!(stereo.children.len(), 2);
+        assert_eq!(stereo.a11y.value, Some(-60.0));
+        assert!(stereo
+            .children
+            .iter()
+            .all(|child| child.a11y.hidden == Some(true)));
+
+        let mut bar_spec = AudioMeterSpec::new(mid_ctx.visual_state());
+        bar_spec.style = AudioMeterStyle::Bar;
+        bar_spec.orientation = Orientation::Horizontal;
+        bar_spec.size = Some(ControlSize::Md);
+        bar_spec.aria_label = "Bar".into();
+        let mut bar = poodle_render::audio_meter(&bar_spec, &ctx);
+        bar.id = Some("audio-meter-bar".to_owned());
+        assert!(matches!(
+            &bar.children[0].kind,
+            NodeKind::Progress { fraction } if (*fraction - 0.8).abs() < f32::EPSILON
+        ));
+        assert_eq!(
+            bar.children[0].style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(10.0))
+        );
+        assert_eq!(
+            bar.children[0].style.descriptor.layout.height,
+            LayoutSizing::Fixed(rem_to_px(0.75))
+        );
+
+        let mut disabled_ctx = AudioMeterContext::default();
+        disabled_ctx.enabled = false;
+        let disabled =
+            poodle_render::audio_meter(&AudioMeterSpec::new(disabled_ctx.visual_state()), &ctx);
+        assert_eq!(
+            disabled.style.descriptor.opacity,
+            theme_provider.resolve_opacity("state.opacity.disabled")
+        );
+
+        for policy in [MotionPolicy::Reduced, MotionPolicy::Frozen] {
+            let static_meter =
+                poodle_render::audio_meter(&mid_spec, &ctx.with_motion_policy(policy));
+            assert!(
+                static_meter.style.animation.is_none(),
+                "ballistics live in the machine; {policy:?} attaches no fill animation"
+            );
+        }
+
+        let mounted = Arc::new(Mutex::new(
+            Node::container().child(mid).child(stereo).child(bar),
+        ));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 240.0, 220.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let mounted_a11y = driver.accessibility_nodes();
+        let mid_a11y = mounted_a11y
+            .iter()
+            .find(|node| node.element_id == "audio-meter-mid")
+            .expect("audio meter is in the mounted accessibility projection");
+        assert_eq!(mid_a11y.role, NodeRole::Meter);
+        assert_eq!(mid_a11y.label.as_deref(), Some("Output"));
+        assert_eq!(mid_a11y.value, Some(-12.0));
+        assert_eq!(mid_a11y.value_text.as_deref(), Some("-12.0 dB"));
+        for id in ["audio-meter-mid", "audio-meter-stereo", "audio-meter-bar"] {
+            let painted = poodle_gpui_node_backend::painted_node_for(id)
+                .expect("audio meter reaches the GPUI paint pass");
+            assert_eq!(painted.a11y_role, Some(NodeRole::Meter));
+            let bounds =
+                poodle_gpui_node_backend::bounds_for(id).expect("audio meter has mounted geometry");
+            assert!(bounds.size.width > px(0.0));
+            assert!(bounds.size.height > px(0.0));
+        }
+        let mounted_tree = mounted.lock().expect("mounted audio meter tree");
+        assert_eq!(mounted_tree.children[0].a11y.value_min, Some(-60.0));
+        assert_eq!(mounted_tree.children[0].a11y.value_max, Some(0.0));
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
+fn first_mounted_parity_audio_switch() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_headless::audio::{switch_visual_state, AudioSwitchMode};
+    use poodle_node::NodeToggled;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{AudioSwitchSpec, ControlSize};
+
+    fn handlers(
+        id: &str,
+        payloads: &Arc<Mutex<Vec<String>>>,
+    ) -> poodle_render::AudioSwitchHandlers {
+        let change = Arc::clone(payloads);
+        let commit = Arc::clone(payloads);
+        poodle_render::AudioSwitchHandlers::new(id)
+            .on_state_change(Arc::new(move |state| {
+                change
+                    .lock()
+                    .expect("switch payloads")
+                    .push(format!("change:{state}"));
+            }))
+            .on_state_commit(Arc::new(move |state| {
+                commit
+                    .lock()
+                    .expect("switch payloads")
+                    .push(format!("commit:{state}"));
+            }))
+    }
+
+    fn live_from(spec: &AudioSwitchSpec) -> Arc<Mutex<poodle_render::AudioSwitchLive>> {
+        Arc::new(Mutex::new(poodle_render::AudioSwitchLive::from_spec(spec)))
+    }
+
+    {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let ladder = [
+            (ControlSize::Xs, 2.25_f32, 1.5_f32),
+            (ControlSize::Sm, 2.625, 1.75),
+            (ControlSize::Md, 3.0, 2.0),
+            (ControlSize::Lg, 3.375, 2.25),
+            (ControlSize::Xl, 3.75, 2.5),
+        ];
+        for (size, width_rem, height_rem) in ladder {
+            let mut spec = AudioSwitchSpec::new(
+                switch_visual_state(AudioSwitchMode::Latch, 0, 2, false, None, true),
+                AudioSwitchMode::Latch,
+            );
+            spec.size = Some(size);
+            let node = poodle_render::audio_switch(&spec, &ctx);
+            assert_eq!(
+                node.style.descriptor.layout.width,
+                LayoutSizing::Fixed(rem_to_px(width_rem)),
+                "{size:?} width"
+            );
+            assert_eq!(
+                node.style.descriptor.layout.height,
+                LayoutSizing::Fixed(rem_to_px(height_rem)),
+                "{size:?} height"
+            );
+        }
+        let off = poodle_render::audio_switch(
+            &AudioSwitchSpec::new(
+                switch_visual_state(AudioSwitchMode::Latch, 0, 2, false, Some(true), true),
+                AudioSwitchMode::Latch,
+            ),
+            &ctx,
+        );
+        assert_eq!(off.a11y.role, Some(NodeRole::Switch));
+        assert_eq!(off.a11y.toggled, Some(NodeToggled::False));
+        assert_eq!(
+            off.style.descriptor.background,
+            Some(theme_provider.resolve_color("color.background.surface"))
+        );
+        assert_eq!(
+            off.children[0].style.descriptor.background,
+            Some(theme_provider.resolve_color("color.status.success")),
+            "an explicit lamp stays on while the latch is off"
+        );
+        let mut disabled_spec = AudioSwitchSpec::new(
+            switch_visual_state(AudioSwitchMode::Latch, 0, 2, false, None, false),
+            AudioSwitchMode::Latch,
+        );
+        disabled_spec.aria_label = "Mute".into();
+        let disabled = poodle_render::audio_switch(&disabled_spec, &ctx);
+        assert_eq!(
+            disabled.style.descriptor.opacity,
+            theme_provider.resolve_opacity("state.opacity.disabled")
+        );
+        assert!(!disabled.interaction.focusable);
+        let multi = poodle_render::audio_switch(
+            &{
+                let mut spec = AudioSwitchSpec::new(
+                    switch_visual_state(AudioSwitchMode::Multi, 1, 3, false, None, true),
+                    AudioSwitchMode::Multi,
+                );
+                spec.aria_label = "Mode".into();
+                spec
+            },
+            &ctx,
+        );
+        assert_eq!(multi.a11y.toggled, None);
+        assert_eq!(multi.a11y.label.as_deref(), Some("Mode, State 2 of 3"));
+    }
+
+    run_headless(|cx| {
+        let id = "audio-switch-latch";
+        let mut spec = AudioSwitchSpec::new(
+            switch_visual_state(AudioSwitchMode::Latch, 0, 2, false, Some(true), true),
+            AudioSwitchMode::Latch,
+        );
+        spec.aria_label = "Bypass".into();
+        let live = live_from(&spec);
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(poodle_render::audio_switch_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            &handlers(id, &payloads),
+            &live,
+        )));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle(id);
+        driver.pointer_activate();
+        assert_eq!(
+            *payloads.lock().expect("switch payloads"),
+            ["change:1".to_owned(), "commit:1".to_owned()]
+        );
+        assert_eq!(live.lock().expect("switch machine").machine.state, 1);
+        spec = poodle_render::audio_switch_spec_from_context(
+            &live.lock().expect("switch machine").machine,
+            "Bypass",
+        );
+        *mounted.lock().expect("mount lock") = poodle_render::audio_switch_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            &handlers(id, &payloads),
+            &live,
+        );
+        driver.draw_frame();
+        let rebuilt = mounted.lock().expect("mount lock");
+        assert_eq!(rebuilt.a11y.role, Some(NodeRole::Switch));
+        assert_eq!(rebuilt.a11y.toggled, Some(NodeToggled::True));
+        assert_eq!(
+            rebuilt.children[0].style.descriptor.background,
+            Some(theme().resolve_color("color.status.success")),
+            "lamp stays independently on after the latch commits"
+        );
+        assert_eq!(
+            rebuilt.style.descriptor.background,
+            Some(theme().resolve_color("color.accent.base"))
+        );
+        drop(rebuilt);
+        driver.wait_for_focus_handle(id);
+        driver.focus_element(id);
+        driver.dispatch_key_press("space");
+        driver.dispatch_key_release("space");
+        assert_eq!(
+            *payloads.lock().expect("switch payloads"),
+            [
+                "change:1".to_owned(),
+                "commit:1".to_owned(),
+                "change:0".to_owned(),
+                "commit:0".to_owned()
+            ]
+        );
+    });
+
+    run_headless(|cx| {
+        let id = "audio-switch-momentary";
+        let mut spec = AudioSwitchSpec::new(
+            switch_visual_state(AudioSwitchMode::Momentary, 0, 2, false, None, true),
+            AudioSwitchMode::Momentary,
+        );
+        spec.aria_label = "Talk".into();
+        let live = live_from(&spec);
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(poodle_render::audio_switch_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            &handlers(id, &payloads),
+            &live,
+        )));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle(id);
+        driver.focus_element(id);
+        driver.dispatch_key_press("enter");
+        assert_eq!(
+            *payloads.lock().expect("switch payloads"),
+            ["change:1".to_owned()]
+        );
+        assert_eq!(live.lock().expect("switch machine").machine.state, 1);
+        driver.dispatch_key_release("enter");
+        assert_eq!(
+            *payloads.lock().expect("switch payloads"),
+            [
+                "change:1".to_owned(),
+                "change:0".to_owned(),
+                "commit:0".to_owned()
+            ]
+        );
+        assert_eq!(live.lock().expect("switch machine").machine.state, 0);
+    });
+
+    run_headless(|cx| {
+        let id = "audio-switch-multi";
+        let mut spec = AudioSwitchSpec::new(
+            switch_visual_state(AudioSwitchMode::Multi, 0, 3, false, None, true),
+            AudioSwitchMode::Multi,
+        );
+        spec.aria_label = "Mode".into();
+        let live = live_from(&spec);
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(poodle_render::audio_switch_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            &handlers(id, &payloads),
+            &live,
+        )));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle(id);
+        driver.pointer_activate();
+        assert_eq!(
+            *payloads.lock().expect("switch payloads"),
+            ["change:1".to_owned(), "commit:1".to_owned()]
+        );
+        spec = poodle_render::audio_switch_spec_from_context(
+            &live.lock().expect("switch machine").machine,
+            "Mode",
+        );
+        *mounted.lock().expect("mount lock") = poodle_render::audio_switch_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            &handlers(id, &payloads),
+            &live,
+        );
+        driver.draw_frame();
+        let rebuilt = mounted.lock().expect("mount lock");
+        assert_eq!(rebuilt.a11y.toggled, None);
+        assert_eq!(rebuilt.a11y.label.as_deref(), Some("Mode, State 2 of 3"));
+    });
+
+    run_headless(|cx| {
+        let id = "audio-switch-disabled";
+        let mut spec = AudioSwitchSpec::new(
+            switch_visual_state(AudioSwitchMode::Latch, 0, 2, false, None, false),
+            AudioSwitchMode::Latch,
+        );
+        spec.aria_label = "Mute".into();
+        let live = live_from(&spec);
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(poodle_render::audio_switch_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            &handlers(id, &payloads),
+            &live,
+        )));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(id).is_none(),
+            "disabled audio switch does not accept focus"
+        );
+        driver.pointer_activate();
+        assert!(
+            payloads.lock().expect("switch payloads").is_empty(),
+            "disabled audio switch emits no change or commit"
+        );
+    });
+}
+
+#[test]
+fn first_mounted_parity_gain_reduction_meter() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_headless::audio::GainReductionContext;
+    use poodle_headless::motion_policy::MotionPolicy;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{ControlSize, GainReductionMeterSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let accent = theme_provider.resolve_color("color.status.success");
+        let idle = theme_provider.resolve_color("color.border.subtle");
+
+        let visual = GainReductionContext {
+            max_reduction_db: 30.0,
+            enabled: true,
+            last_at_ms: None,
+            reduction_db: 12.0,
+            ballistic_db: 12.0,
+        }
+        .visual_state();
+        let mut spec = GainReductionMeterSpec::new(visual, 30.0);
+        spec.aria_label = "Compression".into();
+        spec.size = Some(ControlSize::Md);
+        let mut meter = poodle_render::gain_reduction_meter(&spec, &ctx);
+        meter.id = Some("gain-reduction-meter".to_owned());
+        assert_eq!(meter.a11y.role, Some(NodeRole::Meter));
+        assert_eq!(meter.a11y.label.as_deref(), Some("Compression"));
+        assert_eq!(meter.a11y.value, Some(12.0));
+        assert_eq!(meter.a11y.value_min, Some(0.0));
+        assert_eq!(meter.a11y.value_max, Some(30.0));
+        assert_eq!(meter.a11y.value_text.as_deref(), Some("12 dB reduction"));
+        assert!(!meter.interaction.focusable);
+        assert_eq!(meter.children.len(), 20);
+        assert!(meter
+            .children
+            .iter()
+            .all(|child| child.a11y.hidden == Some(true)));
+        assert_eq!(
+            meter.children[0].style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(0.75))
+        );
+        assert_eq!(
+            meter.children[0].style.descriptor.background,
+            Some(idle),
+            "the inverted clip end stays unlit at 12 dB of 30"
+        );
+        assert_eq!(meter.children[19].style.descriptor.background, Some(accent));
+        assert!(meter.style.animation.is_none());
+
+        let mut bar_spec = spec.clone();
+        bar_spec.style = poodle_specs::AudioMeterStyle::Bar;
+        let bar = poodle_render::gain_reduction_meter(&bar_spec, &ctx);
+        assert_eq!(
+            bar.style.descriptor.layout.height,
+            LayoutSizing::Fixed(rem_to_px(8.0)),
+            "gain-reduction length is the shorter ladder, not the audio-meter one"
+        );
+        assert_eq!(
+            bar.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(0.75))
+        );
+        let mut xs = bar_spec.clone();
+        xs.size = Some(ControlSize::Xs);
+        let xs_meter = poodle_render::gain_reduction_meter(&xs, &ctx);
+        assert_eq!(
+            xs_meter.style.descriptor.layout.height,
+            LayoutSizing::Fixed(rem_to_px(5.5))
+        );
+
+        let disabled_visual = GainReductionContext {
+            max_reduction_db: 30.0,
+            enabled: false,
+            last_at_ms: None,
+            reduction_db: 0.0,
+            ballistic_db: 0.0,
+        }
+        .visual_state();
+        let disabled = poodle_render::gain_reduction_meter(
+            &GainReductionMeterSpec::new(disabled_visual, 30.0),
+            &ctx,
+        );
+        assert_eq!(
+            disabled.style.descriptor.opacity,
+            theme_provider.resolve_opacity("state.opacity.disabled")
+        );
+
+        for policy in [MotionPolicy::Reduced, MotionPolicy::Frozen] {
+            let static_meter =
+                poodle_render::gain_reduction_meter(&spec, &ctx.with_motion_policy(policy));
+            assert!(static_meter.style.animation.is_none());
+        }
+
+        let mounted = Arc::new(Mutex::new(meter));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 240.0, 180.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let mounted_a11y = driver.accessibility_nodes();
+        let a11y = mounted_a11y
+            .iter()
+            .find(|node| node.element_id == "gain-reduction-meter")
+            .expect("gain reduction meter is in the mounted accessibility projection");
+        assert_eq!(a11y.role, NodeRole::Meter);
+        assert_eq!(a11y.value, Some(12.0));
+        assert_eq!(a11y.value_text.as_deref(), Some("12 dB reduction"));
+        let painted = poodle_gpui_node_backend::painted_node_for("gain-reduction-meter")
+            .expect("gain reduction meter reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Meter));
+        let bounds = poodle_gpui_node_backend::bounds_for("gain-reduction-meter")
+            .expect("gain reduction meter has mounted geometry");
+        assert!(bounds.size.width > px(0.0));
+        assert!(bounds.size.height > px(0.0));
+        let mounted_tree = mounted.lock().expect("mounted gain reduction tree");
+        assert_eq!(mounted_tree.a11y.value_min, Some(0.0));
+        assert_eq!(mounted_tree.a11y.value_max, Some(30.0));
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
+fn first_mounted_parity_value_readout() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_headless::audio::AudioControlVisualState;
+    use poodle_render::presentation::{rem_to_px, size_font_rem};
+    use poodle_specs::{ControlDensity, ControlSize, ValueReadoutSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let mut spec = ValueReadoutSpec::new(
+            AudioControlVisualState::from_value(440.0, 20.0, 20_000.0, AudioValueLaw::Linear, true),
+            "440 Hz",
+        );
+        spec.aria_label = Some("Frequency".into());
+        spec.size = Some(ControlSize::Md);
+        spec.density = Some(ControlDensity::Default);
+        let mut readout = poodle_render::value_readout(&spec, &ctx);
+        readout.id = Some("value-readout".to_owned());
+        assert_eq!(readout.a11y.role, Some(NodeRole::Status));
+        assert_eq!(readout.a11y.label.as_deref(), Some("Frequency"));
+        assert_eq!(readout.intrinsic_text(), Some("440 Hz"));
+        assert!(!readout.interaction.focusable);
+        assert_eq!(
+            readout.style.text_size,
+            Some(rem_to_px(size_font_rem(ControlSize::Md)))
+        );
+        assert_eq!(readout.style.descriptor.layout.spacing.padding.left, 6.0);
+        assert_eq!(readout.style.descriptor.layout.spacing.padding.top, 4.0);
+        assert_eq!(
+            readout.style.descriptor.background,
+            Some(theme_provider.resolve_color("color.background.surface"))
+        );
+        assert_eq!(
+            readout.style.descriptor.text_color,
+            Some(theme_provider.resolve_color("color.text.primary"))
+        );
+        assert_eq!(
+            readout.style.descriptor.border.color,
+            theme_provider.resolve_color("color.border.default")
+        );
+
+        let unlabeled = poodle_render::value_readout(
+            &ValueReadoutSpec::new(
+                AudioControlVisualState::from_value(
+                    440.0,
+                    20.0,
+                    20_000.0,
+                    AudioValueLaw::Linear,
+                    true,
+                ),
+                "440 Hz",
+            ),
+            &ctx,
+        );
+        assert_eq!(unlabeled.a11y.role, Some(NodeRole::Status));
+        assert_eq!(unlabeled.a11y.label, None);
+        assert_eq!(unlabeled.intrinsic_text(), Some("440 Hz"));
+
+        let disabled = poodle_render::value_readout(
+            &ValueReadoutSpec::new(
+                AudioControlVisualState::from_value(
+                    440.0,
+                    20.0,
+                    20_000.0,
+                    AudioValueLaw::Linear,
+                    false,
+                ),
+                "440 Hz",
+            ),
+            &ctx,
+        );
+        assert_eq!(disabled.style.descriptor.opacity, 0.48);
+
+        let mounted = Arc::new(Mutex::new(readout));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 220.0, 80.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let mounted_a11y = driver.accessibility_nodes();
+        let a11y = mounted_a11y
+            .iter()
+            .find(|node| node.element_id == "value-readout")
+            .expect("value readout is in the mounted accessibility projection");
+        assert_eq!(a11y.role, NodeRole::Status);
+        assert_eq!(a11y.label.as_deref(), Some("Frequency"));
+        assert!(a11y.text_content.iter().any(|text| text == "440 Hz"));
+        let painted = poodle_gpui_node_backend::painted_node_for("value-readout")
+            .expect("value readout reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Status));
+        let bounds = poodle_gpui_node_backend::bounds_for("value-readout")
+            .expect("value readout has mounted geometry");
+        assert!(bounds.size.width > px(0.0));
+        assert!(bounds.size.height > px(0.0));
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}

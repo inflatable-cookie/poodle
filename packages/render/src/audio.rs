@@ -4,7 +4,7 @@
 //! component contracts under `docs/contracts/components/`.
 
 use poodle_adapter::ThemeProvider as _;
-use poodle_headless::audio::{format_value, AudioValueFormat};
+use poodle_headless::audio::{format_value, AudioSwitchMode, AudioValueFormat};
 use poodle_node::{
     ColorValue, CrossAxisAlignment, FocusRing, LayoutDirection, LayoutSizing, MainAxisAlignment,
     Node, NodeKind, NodePosition, NodeRole, NodeToggled,
@@ -59,6 +59,24 @@ fn absolute(node: &mut Node, left: f32, top: f32) {
 fn a11y_value(node: &mut Node, role: NodeRole, label: &str, value_text: &str) {
     node.a11y.role = Some(role);
     node.a11y.label = Some(format!("{label}: {value_text}"));
+}
+
+fn meter_semantics(node: &mut Node, label: &str, value: f64, min: f64, max: f64, value_text: &str) {
+    node.a11y.role = Some(NodeRole::Meter);
+    if !label.is_empty() {
+        node.a11y.label = Some(label.to_owned());
+    }
+    node.a11y.value = Some(value);
+    node.a11y.value_min = Some(min);
+    node.a11y.value_max = Some(max);
+    node.a11y.value_text = Some(value_text.to_owned());
+}
+
+fn meter_now_db(spec: &AudioMeterSpec) -> f64 {
+    let Some(channel) = spec.channels.first() else {
+        return spec.min_db;
+    };
+    spec.min_db + channel.ballistic_value.clamp(0.0, 1.0) * (spec.max_db - spec.min_db)
 }
 
 pub fn knob(spec: &KnobSpec, ctx: &RenderContext<'_>) -> Node {
@@ -323,14 +341,26 @@ pub fn audio_meter(spec: &AudioMeterSpec, ctx: &RenderContext<'_>) -> Node {
         LayoutDirection::Column
     };
     root.style.descriptor.layout.spacing.gap = density_metric(density, [2.0, 4.0, 6.0]);
-    a11y_value(
+    let enabled = spec
+        .channels
+        .first()
+        .map(|channel| channel.control.enabled)
+        .unwrap_or(true);
+    root.style.descriptor.opacity = if enabled {
+        1.0
+    } else {
+        ctx.theme().resolve_opacity("state.opacity.disabled")
+    };
+    meter_semantics(
         &mut root,
-        NodeRole::ProgressIndicator,
         &spec.aria_label,
+        meter_now_db(spec),
+        spec.min_db,
+        spec.max_db,
         &spec.value_text,
     );
     for channel in &spec.channels {
-        root = root.child(meter_channel(
+        let mut visual = meter_channel(
             channel.ballistic_value,
             spec.segments,
             spec.style,
@@ -339,7 +369,9 @@ pub fn audio_meter(spec: &AudioMeterSpec, ctx: &RenderContext<'_>) -> Node {
             density,
             false,
             ctx,
-        ));
+        );
+        visual.a11y.hidden = Some(true);
+        root = root.child(visual);
     }
     root
 }
@@ -380,7 +412,7 @@ fn readout(
 pub fn value_readout(spec: &ValueReadoutSpec, ctx: &RenderContext<'_>) -> Node {
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
-    readout(
+    let mut root = readout(
         &spec.text,
         spec.aria_label.as_deref(),
         false,
@@ -388,7 +420,13 @@ pub fn value_readout(spec: &ValueReadoutSpec, ctx: &RenderContext<'_>) -> Node {
         effective_size,
         density,
         ctx,
-    )
+    );
+    root.id = Some("value-readout-root".into());
+    // Svelte `<output>`: optional accessible name, formatted text announced
+    // once. The shared readout helper concatenates for drag-number; override.
+    root.a11y.role = Some(NodeRole::Status);
+    root.a11y.label = spec.aria_label.clone();
+    root
 }
 
 pub fn drag_number_field(spec: &DragNumberFieldSpec, ctx: &RenderContext<'_>) -> Node {
@@ -575,6 +613,17 @@ pub fn drag_number_field_with_handlers(
     node
 }
 
+pub fn audio_switch_with_handlers(
+    spec: &AudioSwitchSpec,
+    ctx: &RenderContext<'_>,
+    handlers: &crate::audio_handlers::AudioSwitchHandlers,
+    live: &std::sync::Arc<std::sync::Mutex<crate::audio_handlers::AudioSwitchLive>>,
+) -> Node {
+    let mut node = audio_switch(spec, ctx);
+    crate::audio_handlers::bind_audio_switch(&mut node, spec, ctx, handlers, live);
+    node
+}
+
 pub fn audio_switch(spec: &AudioSwitchSpec, ctx: &RenderContext<'_>) -> Node {
     let state = &spec.visual_state;
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
@@ -600,15 +649,27 @@ pub fn audio_switch(spec: &AudioSwitchSpec, ctx: &RenderContext<'_>) -> Node {
     }));
     root.style.descriptor.border.width = 1.0;
     root.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
+    root.style.descriptor.opacity = if state.enabled {
+        1.0
+    } else {
+        ctx.theme().resolve_opacity("state.opacity.disabled")
+    };
     root.interaction.focusable = state.enabled;
     root.interaction.disabled = !state.enabled;
     root.a11y.role = Some(NodeRole::Switch);
-    root.a11y.label = Some(spec.aria_label.clone());
-    root.a11y.toggled = Some(if state.state > 0 {
-        NodeToggled::True
+    let state_text = format!("State {} of {}", state.state + 1, state.state_count);
+    root.a11y.label = Some(if spec.mode == AudioSwitchMode::Multi {
+        format!("{}, {state_text}", spec.aria_label)
     } else {
-        NodeToggled::False
+        spec.aria_label.clone()
     });
+    root.a11y.toggled = if spec.mode == AudioSwitchMode::Multi {
+        None
+    } else if state.state > 0 {
+        Some(NodeToggled::True)
+    } else {
+        Some(NodeToggled::False)
+    };
     let mut lamp = Node::container();
     circle(&mut lamp, 10.0);
     lamp.style.descriptor.background = Some(ctx.theme().resolve_color(if state.lamp_on {
@@ -616,7 +677,9 @@ pub fn audio_switch(spec: &AudioSwitchSpec, ctx: &RenderContext<'_>) -> Node {
     } else {
         "color.border.subtle"
     }));
-    let label = Node::text(format!("{} / {}", state.state + 1, state.state_count));
+    lamp.a11y.hidden = Some(true);
+    let mut label = Node::text(format!("{} / {}", state.state + 1, state.state_count));
+    label.a11y.hidden = Some(true);
     root.child(lamp).child(label)
 }
 
@@ -634,12 +697,24 @@ pub fn gain_reduction_meter(spec: &GainReductionMeterSpec, ctx: &RenderContext<'
         ctx,
     );
     root.id = Some("gain-reduction-meter-root".into());
-    a11y_value(
+    root.style.descriptor.opacity = if spec.visual_state.meter.control.enabled {
+        1.0
+    } else {
+        ctx.theme().resolve_opacity("state.opacity.disabled")
+    };
+    let ballistic_db =
+        spec.visual_state.meter.ballistic_value.clamp(0.0, 1.0) * spec.max_reduction_db;
+    meter_semantics(
         &mut root,
-        NodeRole::ProgressIndicator,
         &spec.aria_label,
+        ballistic_db,
+        0.0,
+        spec.max_reduction_db,
         &spec.value_text,
     );
+    for child in &mut root.children {
+        child.a11y.hidden = Some(true);
+    }
     root
 }
 
@@ -1027,6 +1102,38 @@ mod tests {
             &ctx,
         );
         assert_eq!(switch.a11y.toggled, Some(NodeToggled::True));
+        let meter = audio_meter(
+            &AudioMeterSpec::new(AudioMeterContext::default().visual_state()),
+            &ctx,
+        );
+        assert_eq!(meter.a11y.role, Some(NodeRole::Meter));
+        assert_eq!(meter.a11y.value_min, Some(-60.0));
+        assert_eq!(meter.a11y.value_max, Some(0.0));
+        let reduction = gain_reduction_meter(
+            &GainReductionMeterSpec::new(
+                poodle_headless::audio::GainReductionContext::default().visual_state(),
+                30.0,
+            ),
+            &ctx,
+        );
+        assert_eq!(reduction.a11y.role, Some(NodeRole::Meter));
+        assert_eq!(reduction.a11y.value_min, Some(0.0));
+        assert_eq!(reduction.a11y.value_max, Some(30.0));
+        let readout = value_readout(
+            &ValueReadoutSpec::new(
+                poodle_headless::audio::AudioControlVisualState::from_value(
+                    440.0,
+                    20.0,
+                    20_000.0,
+                    AudioValueLaw::Linear,
+                    true,
+                ),
+                "440 Hz",
+            ),
+            &ctx,
+        );
+        assert_eq!(readout.a11y.role, Some(NodeRole::Status));
+        assert_eq!(readout.intrinsic_text(), Some("440 Hz"));
     }
 
     #[test]

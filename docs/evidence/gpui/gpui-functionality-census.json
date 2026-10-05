@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "0f4b7a0a0a4286e89ff4d942b43a57da3b0266d2",
+  "source_commit": "1b7152a5446debec370846c8c31b234cff8d888f",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -8374,21 +8374,27 @@
       "substrate": "media-data",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_audio_meter"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_audio_meter"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_audio_meter"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -8397,10 +8403,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for AudioMeter; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/AudioMeter--first-mounted-parity-audio-meter.json"
+      ],
+      "refusals": []
     },
     {
       "component": "MeterSurface",
@@ -8427,15 +8433,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_audio_switch"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_audio_switch"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_audio_switch"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_audio_switch"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_audio_switch"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_audio_switch"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -8444,10 +8474,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for AudioSwitch; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/AudioSwitch--first-mounted-parity-audio-switch.json"
+      ],
+      "refusals": []
     },
     {
       "component": "DragNumberField",
@@ -8609,21 +8639,27 @@
       "substrate": "media-data",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_gain_reduction_meter"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_gain_reduction_meter"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_gain_reduction_meter"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -8632,10 +8668,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for GainReductionMeter; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/GainReductionMeter--first-mounted-parity-gain-reduction-meter.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Keyboard",
@@ -8797,21 +8833,27 @@
       "substrate": "media-data",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_value_readout"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_value_readout"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_value_readout"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -8820,10 +8862,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for ValueReadout; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/ValueReadout--first-mounted-parity-value-readout.json"
+      ],
+      "refusals": []
     },
     {
       "component": "WaveformDisplay",
@@ -9192,18 +9234,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 142,
-    "fullyAdmittedRows": 141,
+    "admittedRows": 146,
+    "fullyAdmittedRows": 145,
     "missingTally": {
-      "semantic": 33,
-      "events": 23,
-      "pointer": 26,
-      "keyboard_focus": 26,
-      "accessibility": 33,
-      "visual": 34
+      "semantic": 29,
+      "events": 19,
+      "pointer": 22,
+      "keyboard_focus": 22,
+      "accessibility": 29,
+      "visual": 30
     },
     "holdCount": 175,
-    "refusalCount": 51
+    "refusalCount": 47
   },
   "groups": [
     {
@@ -9312,29 +9354,6 @@
         "docs/contracts/components/error-boundary.md",
         "docs/contracts/components/inline-list-section.md",
         "docs/contracts/components/password-requirements.md"
-      ]
-    },
-    {
-      "substrate": "media-data",
-      "components": [
-        "AudioMeter",
-        "AudioSwitch",
-        "GainReductionMeter",
-        "ValueReadout"
-      ],
-      "missingTally": {
-        "semantic": 4,
-        "events": 4,
-        "pointer": 4,
-        "keyboard_focus": 4,
-        "accessibility": 4,
-        "visual": 4
-      },
-      "contracts": [
-        "docs/contracts/components/audio-meter.md",
-        "docs/contracts/components/audio-switch.md",
-        "docs/contracts/components/gain-reduction-meter.md",
-        "docs/contracts/components/value-readout.md"
       ]
     },
     {

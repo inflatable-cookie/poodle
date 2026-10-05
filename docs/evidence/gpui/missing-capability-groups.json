@@ -111,29 +111,6 @@
       ]
     },
     {
-      "substrate": "media-data",
-      "components": [
-        "AudioMeter",
-        "AudioSwitch",
-        "GainReductionMeter",
-        "ValueReadout"
-      ],
-      "missingTally": {
-        "semantic": 4,
-        "events": 4,
-        "pointer": 4,
-        "keyboard_focus": 4,
-        "accessibility": 4,
-        "visual": 4
-      },
-      "contracts": [
-        "docs/contracts/components/audio-meter.md",
-        "docs/contracts/components/audio-switch.md",
-        "docs/contracts/components/gain-reduction-meter.md",
-        "docs/contracts/components/value-readout.md"
-      ]
-    },
-    {
       "substrate": "workstation-shell",
       "components": [
         "DetailSection",

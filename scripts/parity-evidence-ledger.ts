@@ -232,6 +232,10 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   Spinner: "first_mounted_parity_spinner",
   Progress: "first_mounted_parity_progress",
   Meter: "first_mounted_parity_meter",
+  AudioMeter: "first_mounted_parity_audio_meter",
+  AudioSwitch: "first_mounted_parity_audio_switch",
+  GainReductionMeter: "first_mounted_parity_gain_reduction_meter",
+  ValueReadout: "first_mounted_parity_value_readout",
   StatusBar: "first_mounted_parity_status_bar",
   ToastStack: [
     "first_mounted_parity_toast_stack",

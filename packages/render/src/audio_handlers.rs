@@ -1,27 +1,29 @@
-//! Handler-backed Knob, Fader, and XYPad.
+//! Handler-backed Knob, Fader, XYPad, and AudioSwitch.
 //!
-//! Handler structs expose the four contract effects plus a required
+//! Handler structs expose the contract effects plus a required
 //! lifetime-stable `instance_id`. Machine state lives in host-owned
-//! `AudioLive` / `XYPadLive` values the adapter passes into each bind.
+//! `AudioLive` / `XYPadLive` / `AudioSwitchLive` values the adapter passes
+//! into each bind.
 
 use std::sync::{Arc, Mutex};
 
 use poodle_headless::audio::{
-    drag_number_transition, fader_transition, format_value, keyboard_computer_key_down,
-    keyboard_computer_key_up, keyboard_focus_note, keyboard_hit_test, keyboard_move_focus,
-    keyboard_press, keyboard_release, keyboard_retarget, keyboard_set_disabled,
-    keyboard_set_octave_shift, keyboard_set_range, keyboard_velocity_at_point,
-    keyboard_visual_state, knob_point_to_norm, knob_transition, xy_pad_transition, AudioPoint,
-    AudioRect, AudioValueContext, AudioValueEffect, AudioValueEvent, DragNumberContext,
-    FaderContext, FaderOrientation, KeyboardContext, KeyboardEffect, KnobContext, KnobDragMode,
-    ValueBound, XYPadAxis, XYPadContext, XYPadEffect, XYPadEvent,
+    audio_switch_transition, drag_number_transition, fader_transition, format_value,
+    keyboard_computer_key_down, keyboard_computer_key_up, keyboard_focus_note, keyboard_hit_test,
+    keyboard_move_focus, keyboard_press, keyboard_release, keyboard_retarget,
+    keyboard_set_disabled, keyboard_set_octave_shift, keyboard_set_range,
+    keyboard_velocity_at_point, keyboard_visual_state, knob_point_to_norm, knob_transition,
+    switch_visual_state, xy_pad_transition, AudioPoint, AudioRect, AudioSwitchContext,
+    AudioSwitchEffect, AudioSwitchEvent, AudioValueContext, AudioValueEffect, AudioValueEvent,
+    DragNumberContext, FaderContext, FaderOrientation, KeyboardContext, KeyboardEffect,
+    KnobContext, KnobDragMode, ValueBound, XYPadAxis, XYPadContext, XYPadEffect, XYPadEvent,
 };
 use poodle_node::{
     ContinuousValuePhase, FocusRing, Node, NodeContinuousValueEvent, NodeKey, NodeRole,
     NodeWheelEvent,
 };
 use poodle_specs::{
-    DragNumberFieldSpec, FaderSpec, KeyboardSpec, KnobSpec, Orientation, XYPadSpec,
+    AudioSwitchSpec, DragNumberFieldSpec, FaderSpec, KeyboardSpec, KnobSpec, Orientation, XYPadSpec,
 };
 
 use crate::color::with_alpha;
@@ -2163,6 +2165,194 @@ fn bind_key_control(
             |context| keyboard_computer_key_up(context, key),
             &up_handlers,
         );
+    }));
+}
+
+/// Host-owned adapter state for one AudioSwitch instance.
+pub struct AudioSwitchLive {
+    pub machine: AudioSwitchContext,
+}
+
+impl AudioSwitchLive {
+    pub fn from_spec(spec: &AudioSwitchSpec) -> Self {
+        Self {
+            machine: audio_switch_context_from_spec(spec),
+        }
+    }
+}
+
+/// Contract effects plus a required lifetime-stable instance scope.
+#[derive(Clone)]
+pub struct AudioSwitchHandlers {
+    pub instance_id: String,
+    pub on_state_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
+    pub on_state_commit: Option<Arc<dyn Fn(usize) + Send + Sync>>,
+}
+
+impl AudioSwitchHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.is_empty(),
+            "native audio instance_id must be non-empty and lifetime-stable"
+        );
+        Self {
+            instance_id,
+            on_state_change: None,
+            on_state_commit: None,
+        }
+    }
+
+    pub fn on_state_change(mut self, handler: Arc<dyn Fn(usize) + Send + Sync>) -> Self {
+        self.on_state_change = Some(handler);
+        self
+    }
+
+    pub fn on_state_commit(mut self, handler: Arc<dyn Fn(usize) + Send + Sync>) -> Self {
+        self.on_state_commit = Some(handler);
+        self
+    }
+}
+
+pub fn audio_switch_context_from_spec(spec: &AudioSwitchSpec) -> AudioSwitchContext {
+    let follow = spec.visual_state.state > 0;
+    AudioSwitchContext {
+        mode: spec.mode,
+        state: spec.visual_state.state,
+        state_count: spec.visual_state.state_count,
+        lamp_on: if spec.visual_state.lamp_on == follow {
+            None
+        } else {
+            Some(spec.visual_state.lamp_on)
+        },
+        pressed: spec.visual_state.pressed,
+        disabled: !spec.visual_state.enabled,
+    }
+}
+
+pub fn audio_switch_spec_from_context(
+    context: &AudioSwitchContext,
+    aria_label: impl Into<String>,
+) -> AudioSwitchSpec {
+    let mut spec = AudioSwitchSpec::new(
+        switch_visual_state(
+            context.mode,
+            context.state,
+            context.state_count,
+            context.pressed,
+            context.lamp_on,
+            !context.disabled,
+        ),
+        context.mode,
+    );
+    spec.aria_label = aria_label.into();
+    spec
+}
+
+fn apply_host_switch(machine: &mut AudioSwitchContext, spec: &AudioSwitchSpec) {
+    *machine = audio_switch_context_from_spec(spec);
+}
+
+fn run_switch(
+    live: &Arc<Mutex<AudioSwitchLive>>,
+    event: AudioSwitchEvent,
+    handlers: &AudioSwitchHandlers,
+) {
+    let effects = {
+        let mut runtime = live.lock().expect("audio switch machine");
+        let (next, effects) = audio_switch_transition(runtime.machine.clone(), event);
+        runtime.machine = next;
+        effects
+    };
+    for effect in effects {
+        match effect {
+            AudioSwitchEffect::StateChange(state) => {
+                if let Some(handler) = &handlers.on_state_change {
+                    handler(state);
+                }
+            }
+            AudioSwitchEffect::StateCommit(state) => {
+                if let Some(handler) = &handlers.on_state_commit {
+                    handler(state);
+                }
+            }
+        }
+    }
+}
+
+pub fn bind_audio_switch(
+    node: &mut Node,
+    spec: &AudioSwitchSpec,
+    ctx: &RenderContext<'_>,
+    handlers: &AudioSwitchHandlers,
+    live: &Arc<Mutex<AudioSwitchLive>>,
+) {
+    node.id = Some(handlers.instance_id.clone());
+    {
+        let mut runtime = live.lock().expect("audio switch machine");
+        apply_host_switch(&mut runtime.machine, spec);
+    }
+    if spec.visual_state.enabled {
+        node.interaction.focusable = true;
+        node.a11y.tab_index = Some(0);
+        node.style.focus_ring = Some(audio_focus_ring(ctx));
+        bind_switch_pointer(node, Arc::clone(live), handlers.clone());
+        bind_switch_keys(node, Arc::clone(live), handlers.clone());
+        bind_switch_blur(node, Arc::clone(live), handlers.clone());
+    } else {
+        node.interaction.focusable = false;
+        node.interaction.disabled = true;
+    }
+}
+
+fn bind_switch_pointer(
+    node: &mut Node,
+    live: Arc<Mutex<AudioSwitchLive>>,
+    handlers: AudioSwitchHandlers,
+) {
+    node.interaction.on_continuous_value = Some(Arc::new(
+        move |event: &NodeContinuousValueEvent| match event.phase {
+            ContinuousValuePhase::Press => {
+                run_switch(&live, AudioSwitchEvent::Press, &handlers);
+            }
+            ContinuousValuePhase::Release => {
+                run_switch(&live, AudioSwitchEvent::Release, &handlers);
+            }
+            ContinuousValuePhase::Cancel => {
+                run_switch(&live, AudioSwitchEvent::Cancel, &handlers);
+            }
+            ContinuousValuePhase::Move => {}
+        },
+    ));
+}
+
+fn bind_switch_keys(
+    node: &mut Node,
+    live: Arc<Mutex<AudioSwitchLive>>,
+    handlers: AudioSwitchHandlers,
+) {
+    let press_live = Arc::clone(&live);
+    let press_handlers = handlers.clone();
+    node.interaction.on_key_activate = Some(Arc::new(move || {
+        run_switch(&press_live, AudioSwitchEvent::Press, &press_handlers);
+        None
+    }));
+    node.interaction.on_key_up = Some(Arc::new(move |key, _mods| {
+        if matches!(key, "space" | "enter") {
+            run_switch(&live, AudioSwitchEvent::Release, &handlers);
+        }
+    }));
+}
+
+fn bind_switch_blur(
+    node: &mut Node,
+    live: Arc<Mutex<AudioSwitchLive>>,
+    handlers: AudioSwitchHandlers,
+) {
+    node.interaction.on_focus_change = Some(Arc::new(move |focused| {
+        if !focused {
+            run_switch(&live, AudioSwitchEvent::Cancel, &handlers);
+        }
     }));
 }
 
