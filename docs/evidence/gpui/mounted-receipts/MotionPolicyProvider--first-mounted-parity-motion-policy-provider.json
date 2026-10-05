@@ -41,7 +41,7 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "1e0cd79e1ee0a5383da5bac84f696abe7043fb20",
+  "source_commit": "34289c94198b8349faac997d396f5520ed8790bf",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
