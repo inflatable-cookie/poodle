@@ -1085,13 +1085,18 @@
       "substrate": "form-editing",
       "required": [
         "semantic",
-        "events",
         "pointer",
         "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no component callbacks or events.",
+          "contractRef": "docs/contracts/components/form-layout.md#5. Events"
+        }
+      ]
     },
     {
       "component": "GainReductionMeter",

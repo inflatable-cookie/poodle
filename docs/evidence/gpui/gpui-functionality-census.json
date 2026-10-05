@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "6e6cc532144a0ca1308fb3eaafc45b32eecc1fff",
+  "source_commit": "8ed0b1dae0907a3a71262a9ba6c0122422170217",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -822,15 +822,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_calendar"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_calendar"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_calendar"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_calendar"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_calendar"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_calendar"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -839,10 +863,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for Calendar; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Calendar--first-mounted-parity-calendar.json"
+      ],
+      "refusals": []
     },
     {
       "component": "ContextMenu",
@@ -1792,14 +1816,34 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_form_actions"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_form_actions"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_form_actions"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_form_actions"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_form_actions"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -1808,10 +1852,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for FormActions; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/FormActions--first-mounted-parity-form-actions.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Grid",
@@ -6214,21 +6258,39 @@
       "substrate": "form-editing",
       "required": [
         "semantic",
-        "events",
         "pointer",
         "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_form_layout"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_form_layout"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_form_layout"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_form_layout"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_form_layout"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6237,10 +6299,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for FormLayout; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/FormLayout--first-mounted-parity-form-layout.json"
+      ],
+      "refusals": []
     },
     {
       "component": "InlineListSection",
@@ -7420,15 +7482,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_validation_summary"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_validation_summary"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_validation_summary"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_validation_summary"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_validation_summary"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_validation_summary"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -7437,10 +7523,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for ValidationSummary; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/ValidationSummary--first-mounted-parity-validation-summary.json"
+      ],
+      "refusals": []
     },
     {
       "component": "ModelPicker",
@@ -8878,18 +8964,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 124,
-    "fullyAdmittedRows": 112,
+    "admittedRows": 128,
+    "fullyAdmittedRows": 116,
     "missingTally": {
-      "semantic": 51,
-      "events": 43,
-      "pointer": 45,
-      "keyboard_focus": 43,
-      "accessibility": 55,
-      "visual": 60
+      "semantic": 47,
+      "events": 40,
+      "pointer": 41,
+      "keyboard_focus": 39,
+      "accessibility": 51,
+      "visual": 56
     },
     "holdCount": 175,
-    "refusalCount": 94
+    "refusalCount": 90
   },
   "groups": [
     {
@@ -9014,35 +9100,6 @@
       ]
     },
     {
-      "substrate": "form-editing",
-      "components": [
-        "AgentQuestionRecord",
-        "Calendar",
-        "EmbedInput",
-        "FormActions",
-        "FormLayout",
-        "Keyboard",
-        "ValidationSummary"
-      ],
-      "missingTally": {
-        "semantic": 7,
-        "events": 6,
-        "pointer": 7,
-        "keyboard_focus": 7,
-        "accessibility": 7,
-        "visual": 7
-      },
-      "contracts": [
-        "docs/contracts/components/agent-question-record.md",
-        "docs/contracts/components/calendar.md",
-        "docs/contracts/components/embed-input.md",
-        "docs/contracts/components/form-actions.md",
-        "docs/contracts/components/form-layout.md",
-        "docs/contracts/components/keyboard.md",
-        "docs/contracts/components/validation-summary.md"
-      ]
-    },
-    {
       "substrate": "layout-primitive",
       "components": [
         "Box",
@@ -9113,6 +9170,27 @@
         "docs/contracts/components/detail-section.md",
         "docs/contracts/components/scroll-shell.md",
         "docs/contracts/components/ui-presentation-provider.md"
+      ]
+    },
+    {
+      "substrate": "form-editing",
+      "components": [
+        "AgentQuestionRecord",
+        "EmbedInput",
+        "Keyboard"
+      ],
+      "missingTally": {
+        "semantic": 3,
+        "events": 3,
+        "pointer": 3,
+        "keyboard_focus": 3,
+        "accessibility": 3,
+        "visual": 3
+      },
+      "contracts": [
+        "docs/contracts/components/agent-question-record.md",
+        "docs/contracts/components/embed-input.md",
+        "docs/contracts/components/keyboard.md"
       ]
     },
     {

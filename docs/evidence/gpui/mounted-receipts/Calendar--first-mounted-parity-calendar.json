@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "EditableList",
-  "test": "editable_list_substrate_reorder_rebuilds_the_host_spec",
+  "component": "Calendar",
+  "test": "first_mounted_parity_calendar",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -19,12 +19,12 @@
       "production-mount"
     ],
     "events": [
-      "assert_eq!(\n            host.lock().expect(\"host lock\").orders.len(),\n            2,\n            \"Escape commit",
-      "assert!(\n            host.lock().expect(\"host lock\").orders.is_empty(),\n            \"a cross-list drop commit",
-      "assert_eq!(host.orders.len(), 2, \"one keystroke pair, one commit"
+      "assert_eq!(\n            host.lock().expect(\"Calendar host\").selections,\n            [\"2026-03-16\", \"2026-03-15\"],\n            \"keyboard selection emit",
+      "assert_eq!(\n            host.lock().expect(\"Calendar host\").selections,\n            [\"2026-03-16\"],\n            \"on_select callback emit",
+      "assert_eq!(\n            host.lock().expect(\"Calendar host\").navigations,\n            [\"2026-04\"],\n            \"on_navigate callback emit"
     ],
     "pointer": [
-      "pointer_press"
+      "pointer_activate"
     ],
     "keyboard_focus": [
       "focus_state_for",
@@ -32,20 +32,21 @@
       "dispatch_key"
     ],
     "accessibility": [
-      "announcements()"
+      "NodeRole",
+      "a11y."
     ],
     "visual": [
-      "resolve_radius",
+      "resolve_color",
       "rem_to_px",
-      "_geometry"
+      "geometry"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "HeadlessDriver::new_in_box",
+    "driver": "HeadlessDriver::new_element_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::presentation",
+    "renderer": "poodle_render::calendar",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -58,7 +59,7 @@
     "command": "effigy regressions:native",
     "run_id": "d7f6535c-8e82-4829-8237-41ad4b1c9225",
     "outcome": "passed",
-    "body_sha256": "82d78ffeaa2248c549f1b013d4cbdb43b04aea7241164c19c1d42ab8df7cf0a3"
+    "body_sha256": "c2d6dacafd38a45d09d53c1ec89104ffc0a8c894498751ae9e5253a7baff4203"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
