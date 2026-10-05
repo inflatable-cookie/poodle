@@ -81,6 +81,12 @@ const AUDIO_RENDER_COMPONENTS = new Set([
 // receipts only.
 export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
   Avatar: "first_mounted_parity_avatar",
+  Box: "first_mounted_parity_box",
+  Grid: "first_mounted_parity_grid",
+  Stack: "first_mounted_parity_stack",
+  Spacer: "first_mounted_parity_spacer",
+  Skeleton: "first_mounted_parity_skeleton",
+  TimeAgo: "first_mounted_parity_time_ago",
   MetaBar: "first_mounted_parity_meta_bar",
   MetaItem: "first_mounted_parity_meta_item",
   AudioPlayer: "first_mounted_parity_audio_player",

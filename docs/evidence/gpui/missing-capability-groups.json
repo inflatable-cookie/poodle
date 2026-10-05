@@ -32,60 +32,6 @@
       ]
     },
     {
-      "substrate": "layout-primitive",
-      "components": [
-        "Box",
-        "Grid",
-        "ListGrid",
-        "Skeleton",
-        "TimeAgo",
-        "Tooltip"
-      ],
-      "missingTally": {
-        "semantic": 6,
-        "events": 2,
-        "pointer": 2,
-        "keyboard_focus": 3,
-        "accessibility": 6,
-        "visual": 6
-      },
-      "contracts": [
-        "docs/contracts/components/box.md",
-        "docs/contracts/components/grid.md",
-        "docs/contracts/components/list-grid.md",
-        "docs/contracts/components/skeleton.md",
-        "docs/contracts/components/time-ago.md",
-        "docs/contracts/components/tooltip.md"
-      ]
-    },
-    {
-      "substrate": "general-composite",
-      "components": [
-        "EnvelopeEditor",
-        "FieldSet",
-        "ModMatrixGrid",
-        "Spacer",
-        "Stack",
-        "WaveformDisplay"
-      ],
-      "missingTally": {
-        "semantic": 6,
-        "events": 4,
-        "pointer": 4,
-        "keyboard_focus": 5,
-        "accessibility": 6,
-        "visual": 6
-      },
-      "contracts": [
-        "docs/contracts/components/envelope-editor.md",
-        "docs/contracts/components/field-set.md",
-        "docs/contracts/components/mod-matrix-grid.md",
-        "docs/contracts/components/spacer.md",
-        "docs/contracts/components/stack.md",
-        "docs/contracts/components/waveform-display.md"
-      ]
-    },
-    {
       "substrate": "feedback-status",
       "components": [
         "EmbedPreview",
@@ -111,6 +57,29 @@
       ]
     },
     {
+      "substrate": "general-composite",
+      "components": [
+        "EnvelopeEditor",
+        "FieldSet",
+        "ModMatrixGrid",
+        "WaveformDisplay"
+      ],
+      "missingTally": {
+        "semantic": 4,
+        "events": 4,
+        "pointer": 4,
+        "keyboard_focus": 4,
+        "accessibility": 4,
+        "visual": 4
+      },
+      "contracts": [
+        "docs/contracts/components/envelope-editor.md",
+        "docs/contracts/components/field-set.md",
+        "docs/contracts/components/mod-matrix-grid.md",
+        "docs/contracts/components/waveform-display.md"
+      ]
+    },
+    {
       "substrate": "workstation-shell",
       "components": [
         "DetailSection",
@@ -129,6 +98,25 @@
         "docs/contracts/components/detail-section.md",
         "docs/contracts/components/scroll-shell.md",
         "docs/contracts/components/ui-presentation-provider.md"
+      ]
+    },
+    {
+      "substrate": "layout-primitive",
+      "components": [
+        "ListGrid",
+        "Tooltip"
+      ],
+      "missingTally": {
+        "semantic": 2,
+        "events": 2,
+        "pointer": 2,
+        "keyboard_focus": 2,
+        "accessibility": 2,
+        "visual": 2
+      },
+      "contracts": [
+        "docs/contracts/components/list-grid.md",
+        "docs/contracts/components/tooltip.md"
       ]
     },
     {

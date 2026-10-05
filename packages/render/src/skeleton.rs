@@ -172,6 +172,7 @@ pub fn skeleton(spec: &SkeletonSpec, ctx: &RenderContext<'_>) -> Node {
                 ctx.first_frame_committed(),
             );
         }
+        el.a11y.hidden = Some(true);
         return el;
     };
 
@@ -269,6 +270,7 @@ pub fn skeleton(spec: &SkeletonSpec, ctx: &RenderContext<'_>) -> Node {
             ctx.first_frame_committed(),
         );
     }
+    built.a11y.hidden = Some(true);
     built
 }
 
