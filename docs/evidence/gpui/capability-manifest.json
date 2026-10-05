@@ -1833,7 +1833,6 @@
       "substrate": "agent-composites",
       "required": [
         "semantic",
-        "pointer",
         "keyboard_focus",
         "accessibility",
         "visual"
@@ -1843,6 +1842,11 @@
           "axis": "events",
           "reason": "The provider emits no component event; changing the policy rebuilds descendants without a semantic callback.",
           "contractRef": "docs/contracts/components/motion-policy-provider.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "The provider adds no hit target; descendants keep their own pointer behavior.",
+          "contractRef": "docs/contracts/components/motion-policy-provider.md#7. Layout And Composition"
         }
       ]
     },
@@ -2945,7 +2949,6 @@
       "substrate": "workstation-shell",
       "required": [
         "semantic",
-        "pointer",
         "keyboard_focus",
         "accessibility",
         "visual"
@@ -2955,6 +2958,11 @@
           "axis": "events",
           "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/ui-presentation-provider.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "The provider is not a hit target and intercepts no input; descendants own their pointer behavior.",
+          "contractRef": "docs/contracts/components/ui-presentation-provider.md#7. Layout"
         }
       ]
     },

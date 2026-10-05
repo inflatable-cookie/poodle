@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "515b749726eb5742add241d02c847998bbb2c44c",
+  "source_commit": "f0ba457e6e514a569a39b262343300253db97e97",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -5348,7 +5348,6 @@
       "substrate": "workstation-shell",
       "required": [
         "semantic",
-        "pointer",
         "keyboard_focus",
         "accessibility",
         "visual"
@@ -5356,11 +5355,6 @@
       "admitted": [
         {
           "axis": "semantic",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_ui_presentation_provider"
-        },
-        {
-          "axis": "pointer",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_ui_presentation_provider"
         },
@@ -5401,7 +5395,6 @@
       "substrate": "agent-composites",
       "required": [
         "semantic",
-        "pointer",
         "keyboard_focus",
         "accessibility",
         "visual"
@@ -5409,11 +5402,6 @@
       "admitted": [
         {
           "axis": "semantic",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_motion_policy_provider"
-        },
-        {
-          "axis": "pointer",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_motion_policy_provider"
         },
