@@ -1,0 +1,52 @@
+{
+  "schema": "poodle.g18-gpui-mounted-receipt.v1",
+  "component": "DetailSectionGroup",
+  "test": "first_mounted_parity_detail_section_group",
+  "selector": "effigy regressions:native",
+  "scenario_id": null,
+  "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
+  "contract_claims": [
+    "semantic",
+    "accessibility",
+    "visual"
+  ],
+  "signals": {
+    "semantic": [
+      "assert",
+      "production-mount"
+    ],
+    "accessibility": [
+      "a11y."
+    ],
+    "visual": [
+      "rem_to_px",
+      "geometry"
+    ]
+  },
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new_in_box",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "poodle_render::presentation",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "package": "poodle-gpui-preview",
+  "package_version": "0.4.0",
+  "source_commit": "00f043b8eff92bbcb57b1cdfb7da007cb664cadd",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
+  "distribution": "workspace",
+  "execution": {
+    "command": "effigy regressions:native",
+    "run_id": "2026-10-05-poodle-111-mounted-parity",
+    "outcome": "passed",
+    "body_sha256": "23d159a7be75cfad4522b693711bad13bfd2cf2373cf8ef65f7d4723f0f88247"
+  },
+  "observed": [
+    "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
+    "asserted node-level role, label, state, or focusability in the mounted tree",
+    "asserted resolved token values or mounted geometry"
+  ],
+  "outcome": "passed"
+}

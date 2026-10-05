@@ -743,13 +743,26 @@
       "substrate": "feedback-status",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract assigns only responsive section layout to this group; child sections own any callbacks or events.",
+          "contractRef": "docs/contracts/components/detail-section-group.md#4. Behavior Rules"
+        },
+        {
+          "axis": "pointer",
+          "reason": "The contract assigns only section layout to this plain container; pointer interactions belong to its children.",
+          "contractRef": "docs/contracts/components/detail-section-group.md#4. Behavior Rules"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "The contract defines a plain layout container, not a focus stop; child controls own keyboard behavior.",
+          "contractRef": "docs/contracts/components/detail-section-group.md#6. Accessibility"
+        }
+      ]
     },
     {
       "component": "DetailShell",
@@ -758,13 +771,18 @@
       "substrate": "feedback-status",
       "required": [
         "semantic",
-        "events",
         "pointer",
         "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no component callbacks or events.",
+          "contractRef": "docs/contracts/components/detail-shell.md#6. Events"
+        }
+      ]
     },
     {
       "component": "Dialog",
@@ -1826,13 +1844,18 @@
       "substrate": "feedback-status",
       "required": [
         "semantic",
-        "events",
         "pointer",
         "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no component callbacks or events.",
+          "contractRef": "docs/contracts/components/page-header.md#5. Events"
+        }
+      ]
     },
     {
       "component": "PageLoading",
@@ -2072,13 +2095,26 @@
       "substrate": "feedback-status",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract defines a decorative placeholder with no child content or component callbacks.",
+          "contractRef": "docs/contracts/components/region.md#3. Composition"
+        },
+        {
+          "axis": "pointer",
+          "reason": "The contract defines a decorative placeholder with no child content, so it has no pointer interaction to prove.",
+          "contractRef": "docs/contracts/components/region.md#6. Accessibility"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "The contract states the decorative placeholder is non-interactive and not keyboard-focusable.",
+          "contractRef": "docs/contracts/components/region.md#6. Accessibility"
+        }
+      ]
     },
     {
       "component": "RelationPicker",
