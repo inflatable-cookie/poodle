@@ -52457,11 +52457,13 @@ fn first_mounted_parity_calendar() {
             "on_navigate callback emits the ISO month"
         );
         driver.draw_frame();
-        assert!(poodle_gpui_node_backend::painted_node_for("poodle-calendar")
-            .expect("updated Calendar reaches GPUI paint")
-            .texts
-            .iter()
-            .any(|text| text == "April"));
+        assert!(
+            poodle_gpui_node_backend::painted_node_for("poodle-calendar")
+                .expect("updated Calendar reaches GPUI paint")
+                .texts
+                .iter()
+                .any(|text| text == "April")
+        );
         assert!(driver.mounted_observation().is_valid());
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
@@ -52546,10 +52548,10 @@ fn first_mounted_parity_form_actions() {
     run_headless(|cx| {
         poodle_gpui_node_backend::begin_probe_capture();
         let mut driver = HeadlessDriver::new_element_in_box(cx, build, 460.0, 220.0);
-        let cancel_node = poodle_gpui_node_backend::painted_node_for(CANCEL)
-            .expect("Cancel reaches GPUI paint");
-        let save_node = poodle_gpui_node_backend::painted_node_for(SAVE)
-            .expect("Save reaches GPUI paint");
+        let cancel_node =
+            poodle_gpui_node_backend::painted_node_for(CANCEL).expect("Cancel reaches GPUI paint");
+        let save_node =
+            poodle_gpui_node_backend::painted_node_for(SAVE).expect("Save reaches GPUI paint");
         let root_node = poodle_gpui_node_backend::painted_node_for(ROOT)
             .expect("FormActions reaches GPUI paint");
         assert_eq!(cancel_node.a11y_role, Some(NodeRole::Button));
@@ -52562,12 +52564,10 @@ fn first_mounted_parity_form_actions() {
         let save = poodle_gpui_node_backend::bounds_for(SAVE).expect("Save geometry");
         let cancel_border = cancel_node.style.border.width;
         let save_border = save_node.style.border.width;
-        let top_separation = f32::from(cancel.origin.y)
-            - f32::from(root.origin.y)
-            - cancel_border;
+        let top_separation = f32::from(cancel.origin.y) - f32::from(root.origin.y) - cancel_border;
         let minimum_gap = theme_provider.resolve_space("space.inline.md");
-        let action_gap = f32::from(save.origin.x)
-            - (f32::from(cancel.origin.x) + f32::from(cancel.size.width));
+        let action_gap =
+            f32::from(save.origin.x) - (f32::from(cancel.origin.x) + f32::from(cancel.size.width));
         assert!(root.size.width > px(0.0) && root.size.height > px(0.0));
         assert!((root_node.style.layout.spacing.gap - minimum_gap).abs() < 0.01);
         assert!(
@@ -52576,8 +52576,7 @@ fn first_mounted_parity_form_actions() {
             theme_provider.resolve_space("space.stack.sm")
         );
         let leading_inset = f32::from(cancel.origin.x) - f32::from(root.origin.x) - cancel_border;
-        let trailing_inset = f32::from(root.origin.x)
-            + f32::from(root.size.width)
+        let trailing_inset = f32::from(root.origin.x) + f32::from(root.size.width)
             - f32::from(save.origin.x)
             - f32::from(save.size.width)
             - save_border;
@@ -52588,7 +52587,10 @@ fn first_mounted_parity_form_actions() {
         driver.pointer_activate_id(CANCEL);
         driver.keyboard_activate(SAVE);
         assert_eq!(
-            activations.lock().expect("FormActions activations").as_slice(),
+            activations
+                .lock()
+                .expect("FormActions activations")
+                .as_slice(),
             ["cancel", "save"]
         );
         assert!(driver.mounted_observation().is_valid());
@@ -52714,20 +52716,20 @@ fn first_mounted_parity_form_layout() {
             poodle_gpui_node_backend::painted_node_for(INPUT).expect("email control paint");
         assert_eq!(mounted_input.a11y_role, Some(NodeRole::TextInput));
         assert_eq!(mounted_input.a11y_label.as_deref(), Some("Email"));
-        assert!(poodle_gpui_node_backend::painted_node_for(
-            "mounted-form-layout-error-callout"
-        )
-        .expect("form error Callout paint")
-        .texts
-        .iter()
-        .any(|text| text.contains("Could not save")));
-        assert!(poodle_gpui_node_backend::painted_node_for(
-            "mounted-form-layout-field-errors"
-        )
-        .expect("field error summary paint")
-        .texts
-        .iter()
-        .any(|text| text.contains("Email: is required")));
+        assert!(
+            poodle_gpui_node_backend::painted_node_for("mounted-form-layout-error-callout")
+                .expect("form error Callout paint")
+                .texts
+                .iter()
+                .any(|text| text.contains("Could not save"))
+        );
+        assert!(
+            poodle_gpui_node_backend::painted_node_for("mounted-form-layout-field-errors")
+                .expect("field error summary paint")
+                .texts
+                .iter()
+                .any(|text| text.contains("Email: is required"))
+        );
 
         let form_bounds = poodle_gpui_node_backend::bounds_for(ROOT).expect("FormLayout bounds");
         let input_bounds = poodle_gpui_node_backend::bounds_for(INPUT).expect("email bounds");
@@ -52752,7 +52754,10 @@ fn first_mounted_parity_form_layout() {
         );
         driver.keyboard_activate(SAVE);
         assert_eq!(
-            activations.lock().expect("FormLayout activations").as_slice(),
+            activations
+                .lock()
+                .expect("FormLayout activations")
+                .as_slice(),
             ["submit", "submit"]
         );
         assert!(driver.mounted_observation().is_valid());
@@ -52846,8 +52851,8 @@ fn first_mounted_parity_validation_summary() {
     run_headless(|cx| {
         poodle_gpui_node_backend::begin_probe_capture();
         let mut driver = HeadlessDriver::new_element_in_box(cx, build, 560.0, 420.0);
-        let mounted_summary = poodle_gpui_node_backend::painted_node_for(ROOT)
-            .expect("summary reaches GPUI paint");
+        let mounted_summary =
+            poodle_gpui_node_backend::painted_node_for(ROOT).expect("summary reaches GPUI paint");
         assert_eq!(mounted_summary.a11y_role, Some(NodeRole::Status));
         let mounted_link = poodle_gpui_node_backend::painted_node_for(LINK)
             .expect("field link reaches GPUI paint");
@@ -52857,11 +52862,10 @@ fn first_mounted_parity_validation_summary() {
             .expect("linked field reaches GPUI paint");
         assert_eq!(field_control.a11y_role, Some(NodeRole::TextInput));
 
-        let summary_bounds =
-            poodle_gpui_node_backend::bounds_for(ROOT).expect("summary geometry");
+        let summary_bounds = poodle_gpui_node_backend::bounds_for(ROOT).expect("summary geometry");
         assert!(summary_bounds.size.width > px(0.0) && summary_bounds.size.height > px(0.0));
-        let painted_summary = poodle_gpui_node_backend::painted_node_for(ROOT)
-            .expect("summary reaches GPUI paint");
+        let painted_summary =
+            poodle_gpui_node_backend::painted_node_for(ROOT).expect("summary reaches GPUI paint");
         assert_eq!(painted_summary.a11y_role, Some(NodeRole::Status));
         assert_eq!(
             painted_summary.style.background,
