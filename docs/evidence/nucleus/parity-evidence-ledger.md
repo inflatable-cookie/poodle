@@ -295,8 +295,8 @@ receipt does not claim publication.
 
 ## Historical mounted expectation map
 
-Before g16.062, the generator promoted **112
-component entries across 128 named tests** to
+Before g16.062, the generator promoted **113
+component entries across 129 named tests** to
 `mounted`. The map remains planning input and is shown for traceability only;
 the current component ledger consumes validated receipts, so expected-without-
 receipt remains `missing`.
@@ -393,6 +393,7 @@ receipt remains `missing`.
 | ChangedFiles | `packages/gpui/preview/tests/headless_regressions.rs#changed_files_disclosure_and_selection_rebuild_the_host_spec` | expected only |
 | ToolCall | `packages/gpui/preview/tests/headless_regressions.rs#tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input` | expected only |
 | ToolCallGroup | `packages/gpui/preview/tests/headless_regressions.rs#tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input` | expected only |
+| AgentTranscript | `packages/gpui/preview/tests/headless_regressions.rs#agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport` | expected only |
 | Stepper | `packages/gpui/preview/tests/headless_regressions.rs#stepper_selection_and_rerun_reach_separate_mounted_controls`; `packages/gpui/preview/tests/headless_regressions.rs#stepper_collapse_stays_independent_in_a_mounted_window`; `packages/gpui/preview/tests/headless_regressions.rs#stepper_keyboard_entry_focuses_and_activates_without_a_pointer_press`; `packages/gpui/preview/tests/headless_regressions.rs#stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring` | expected only |
 | BulkActionBar | `packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_bulk_action_bar_actions_clear_and_select_all` | expected only |
 | ListCardCounter | `packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_list_card_counter` | expected only |
