@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "fa32bb0b041f0d0ef98c9392b5c2ab7678baf155",
+  "source_commit": "c511c8337fd50a1ec80421a0120a3635602dcfd5",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -2102,14 +2102,17 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_meter"
         },
         {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_meter"
+        },
+        {
           "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_meter"
         }
       ],
-      "missing": [
-        "accessibility"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2121,10 +2124,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Meter--first-mounted-parity-meter.json"
       ],
-      "refusals": [
-        "Expected test first_mounted_parity_meter shows accessibility signals, but accessibility is withheld: needs a Meter / content-info node role (planned).",
-        "Expected test first_mounted_parity_meter proves no accessibility claim; accessibility stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "ListCard",
@@ -2622,14 +2622,17 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend"
         },
         {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend"
+        },
+        {
           "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend"
         }
       ],
-      "missing": [
-        "accessibility"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2641,10 +2644,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/NavigationMenu--navigation-menu-disclosure-viewport-roving-and-dismissal-through-mounted-backend.json"
       ],
-      "refusals": [
-        "Expected test navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend shows accessibility signals, but accessibility is withheld: the contract requires a named <nav> landmark, and the node vocabulary has no navigation NodeRole yet; the mounted tree exposes only a roleless labelled container.",
-        "Expected test navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend proves no accessibility claim; accessibility stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "Pill",
@@ -4256,14 +4256,17 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_status_bar"
         },
         {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_status_bar"
+        },
+        {
           "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_status_bar"
         }
       ],
-      "missing": [
-        "accessibility"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -4275,10 +4278,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/StatusBar--first-mounted-parity-status-bar.json"
       ],
-      "refusals": [
-        "Expected test first_mounted_parity_status_bar shows accessibility signals, but accessibility is withheld: needs a Meter / content-info node role (planned).",
-        "Expected test first_mounted_parity_status_bar proves no accessibility claim; accessibility stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "StatusIndicator",
@@ -9056,17 +9056,17 @@
   ],
   "summary": {
     "admittedRows": 132,
-    "fullyAdmittedRows": 122,
+    "fullyAdmittedRows": 125,
     "missingTally": {
       "semantic": 43,
       "events": 36,
       "pointer": 37,
       "keyboard_focus": 38,
-      "accessibility": 46,
+      "accessibility": 43,
       "visual": 49
     },
     "holdCount": 175,
-    "refusalCount": 77
+    "refusalCount": 71
   },
   "groups": [
     {
@@ -9081,18 +9081,16 @@
         "InlineListSection",
         "MetaBar",
         "MetaItem",
-        "Meter",
         "PageHeader",
         "PasswordRequirements",
-        "Region",
-        "StatusBar"
+        "Region"
       ],
       "missingTally": {
         "semantic": 12,
         "events": 12,
         "pointer": 12,
         "keyboard_focus": 11,
-        "accessibility": 14,
+        "accessibility": 12,
         "visual": 12
       },
       "contracts": [
@@ -9105,11 +9103,9 @@
         "docs/contracts/components/inline-list-section.md",
         "docs/contracts/components/meta-bar.md",
         "docs/contracts/components/meta-item.md",
-        "docs/contracts/components/meter.md",
         "docs/contracts/components/page-header.md",
         "docs/contracts/components/password-requirements.md",
-        "docs/contracts/components/region.md",
-        "docs/contracts/components/status-bar.md"
+        "docs/contracts/components/region.md"
       ]
     },
     {
@@ -9271,25 +9267,6 @@
       ]
     },
     {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "ModelConnectionSetup",
-        "NavigationMenu"
-      ],
-      "missingTally": {
-        "semantic": 0,
-        "events": 0,
-        "pointer": 0,
-        "keyboard_focus": 0,
-        "accessibility": 1,
-        "visual": 1
-      },
-      "contracts": [
-        "docs/contracts/components/model-connection-setup.md",
-        "docs/contracts/components/navigation-menu.md"
-      ]
-    },
-    {
       "substrate": "agent-composites",
       "components": [
         "AgentMessage",
@@ -9323,6 +9300,23 @@
       },
       "contracts": [
         "docs/contracts/components/card-toggle-group.md"
+      ]
+    },
+    {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ModelConnectionSetup"
+      ],
+      "missingTally": {
+        "semantic": 0,
+        "events": 0,
+        "pointer": 0,
+        "keyboard_focus": 0,
+        "accessibility": 0,
+        "visual": 1
+      },
+      "contracts": [
+        "docs/contracts/components/model-connection-setup.md"
       ]
     }
   ],

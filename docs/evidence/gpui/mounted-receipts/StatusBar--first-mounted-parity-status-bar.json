@@ -9,6 +9,7 @@
     "semantic",
     "pointer",
     "keyboard_focus",
+    "accessibility",
     "visual"
   ],
   "signals": {
@@ -23,6 +24,11 @@
       "focus_state_for",
       "focus_element",
       "keyboard_"
+    ],
+    "accessibility": [
+      "accessible",
+      "NodeRole",
+      "a11y."
     ],
     "visual": [
       "resolve_color",
@@ -40,20 +46,21 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "fa32bb0b041f0d0ef98c9392b5c2ab7678baf155",
+  "source_commit": "c511c8337fd50a1ec80421a0120a3635602dcfd5",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "74CB8B1B-B7B4-403F-BB61-33703A050E8B",
+    "run_id": "29F8BA43-9446-4029-A3C8-31218AFF6FD6",
     "outcome": "passed",
-    "body_sha256": "be1d9bd55acc02e114fc85fe50f75106202099dd3194c4b4270e2d9c8ba91177"
+    "body_sha256": "dd18529222bce9a1dd615cd4db84000006006ab6ac3af761060594bb41df9668"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
     "drove real pointer activation through the mounted GPUI node backend",
     "drove real keyboard input or backend focus through the mounted tree",
+    "asserted node-level role, label, state, or focusability in the mounted tree",
     "asserted resolved token values or mounted geometry"
   ],
   "outcome": "passed"

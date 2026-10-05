@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g18-expected-test-execution.v1",
   "command": "effigy regressions:native",
-  "run_id": "74CB8B1B-B7B4-403F-BB61-33703A050E8B",
-  "source_commit": "fa32bb0b041f0d0ef98c9392b5c2ab7678baf155",
+  "run_id": "29F8BA43-9446-4029-A3C8-31218AFF6FD6",
+  "source_commit": "c511c8337fd50a1ec80421a0120a3635602dcfd5",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "results": {
@@ -456,7 +456,7 @@
     },
     "navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend": {
       "outcome": "passed",
-      "body_sha256": "cf6a47159fdddf30f7e779020256fac611be3c3505150db41780e610dead2ee3"
+      "body_sha256": "7f0ed39b3abfad3e5bc9d7444859fc022d0e1ef4dd9e0712b8bacb6fe3f73086"
     },
     "split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend": {
       "outcome": "passed",
@@ -532,11 +532,11 @@
     },
     "first_mounted_parity_meter": {
       "outcome": "passed",
-      "body_sha256": "700b8a3235e2022d3c8558cebb9baf201b9713ffba65d890073463fe42892195"
+      "body_sha256": "f506442b125d7729c3d80333df3c763bc4ab3f6cedbbdc91aec0dfc6d60eb469"
     },
     "first_mounted_parity_status_bar": {
       "outcome": "passed",
-      "body_sha256": "be1d9bd55acc02e114fc85fe50f75106202099dd3194c4b4270e2d9c8ba91177"
+      "body_sha256": "dd18529222bce9a1dd615cd4db84000006006ab6ac3af761060594bb41df9668"
     }
   },
   "body_hash_baseline_commit": "539057155aa20e720e9e4d60fe97a8afa58f69b6"

@@ -14,18 +14,16 @@
         "InlineListSection",
         "MetaBar",
         "MetaItem",
-        "Meter",
         "PageHeader",
         "PasswordRequirements",
-        "Region",
-        "StatusBar"
+        "Region"
       ],
       "missingTally": {
         "semantic": 12,
         "events": 12,
         "pointer": 12,
         "keyboard_focus": 11,
-        "accessibility": 14,
+        "accessibility": 12,
         "visual": 12
       },
       "contracts": [
@@ -38,11 +36,9 @@
         "docs/contracts/components/inline-list-section.md",
         "docs/contracts/components/meta-bar.md",
         "docs/contracts/components/meta-item.md",
-        "docs/contracts/components/meter.md",
         "docs/contracts/components/page-header.md",
         "docs/contracts/components/password-requirements.md",
-        "docs/contracts/components/region.md",
-        "docs/contracts/components/status-bar.md"
+        "docs/contracts/components/region.md"
       ]
     },
     {
@@ -204,25 +200,6 @@
       ]
     },
     {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "ModelConnectionSetup",
-        "NavigationMenu"
-      ],
-      "missingTally": {
-        "semantic": 0,
-        "events": 0,
-        "pointer": 0,
-        "keyboard_focus": 0,
-        "accessibility": 1,
-        "visual": 1
-      },
-      "contracts": [
-        "docs/contracts/components/model-connection-setup.md",
-        "docs/contracts/components/navigation-menu.md"
-      ]
-    },
-    {
       "substrate": "agent-composites",
       "components": [
         "AgentMessage",
@@ -256,6 +233,23 @@
       },
       "contracts": [
         "docs/contracts/components/card-toggle-group.md"
+      ]
+    },
+    {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ModelConnectionSetup"
+      ],
+      "missingTally": {
+        "semantic": 0,
+        "events": 0,
+        "pointer": 0,
+        "keyboard_focus": 0,
+        "accessibility": 0,
+        "visual": 1
+      },
+      "contracts": [
+        "docs/contracts/components/model-connection-setup.md"
       ]
     }
   ]
