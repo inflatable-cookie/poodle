@@ -3480,6 +3480,8 @@ fn knob_mounted_parity_through_production_dispatch() {
 /// g16.032. XYPad atomic pair.
 #[test]
 fn xy_pad_mounted_parity_through_production_dispatch() {
+    use poodle_adapter::ThemeProvider;
+
     fn seed(x: f64, y: f64) -> XYPadSpec {
         let mut spec = XYPadSpec::new(XYPadVisualState {
             x_norm: x,
@@ -3500,13 +3502,16 @@ fn xy_pad_mounted_parity_through_production_dispatch() {
 
     run_headless(|cx| {
         let id = "xy-main";
-        let spec0 = seed(0.2, 0.3);
+        let mut spec0 = seed(0.2, 0.3);
+        spec0.size = Some(ControlSize::Md);
         let live = xy_live(&spec0);
+        let theme_provider = theme();
+        let render_context = RenderContext::new(&theme_provider);
         let trace = Arc::new(Mutex::new(Vec::new()));
         let events = Arc::clone(&trace);
         let node = xy_pad_with_handlers(
             &spec0,
-            &RenderContext::new(&theme()),
+            &render_context,
             &XYPadHandlers::new(id)
                 .on_value_change({
                     let events = Arc::clone(&events);
@@ -3547,6 +3552,34 @@ fn xy_pad_mounted_parity_through_production_dispatch() {
         let y_id = xy_pad_y_id(id);
         let mounted = Arc::new(Mutex::new(node));
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 200.0, 200.0);
+        driver.draw_frame();
+        let expected_pad_size = poodle_render::presentation::rem_to_px(10.0);
+        let initial_pad = mounted.lock().expect("mounted XY pad");
+        assert_eq!(
+            initial_pad.style.descriptor.background,
+            Some(theme_provider.resolve_color("color.background.surface")),
+            "the mounted XYPad uses the contract surface token"
+        );
+        assert_eq!(
+            initial_pad.style.descriptor.border.color,
+            theme_provider.resolve_color("color.border.default"),
+            "the mounted XYPad uses the contract border token"
+        );
+        assert!(matches!(
+            initial_pad.style.descriptor.layout.width,
+            LayoutSizing::Fixed(size) if size == expected_pad_size
+        ));
+        assert!(matches!(
+            initial_pad.style.descriptor.layout.height,
+            LayoutSizing::Fixed(size) if size == expected_pad_size
+        ));
+        let expected_content_size =
+            expected_pad_size - 2.0 * initial_pad.style.descriptor.border.width;
+        let mounted_geometry = poodle_gpui_node_backend::bounds_for(id)
+            .expect("mounted XYPad geometry");
+        assert_eq!(f32::from(mounted_geometry.size.width), expected_content_size);
+        assert_eq!(f32::from(mounted_geometry.size.height), expected_content_size);
+        drop(initial_pad);
         driver.wait_for_focus_handle(&x_id);
         driver.pointer_scrub_at(0.8, "press");
         driver.pointer_scrub_at(0.82, "drag");
@@ -3589,6 +3622,10 @@ fn xy_pad_mounted_parity_through_production_dispatch() {
         assert!(log.contains(&"gestureBegin".to_string()));
         assert!(log.contains(&"valueChange".to_string()));
         assert!(log.contains(&"valueCommit".to_string()));
+        assert!(
+            log.contains(&"gestureBegin".to_string()) && log.contains(&"gestureEnd".to_string()),
+            "the mounted event callbacks bracket one accepted drag gesture"
+        );
         driver.pointer_press_details(headless_driver::mount_box_center(), 2, Modifiers::none());
         let reset = xy_now(&live, "Pad");
         assert!((reset.visual_state.raw_x - 0.5).abs() < 1e-9);
@@ -13234,10 +13271,38 @@ fn licence_seats_release_flows_through_confirm_in_a_mounted_window() {
 /// data-state roles that gate nothing.
 #[test]
 fn licence_status_renders_state_and_authority_reads_in_a_mounted_window() {
+    use poodle_adapter::ThemeProvider;
     use poodle_headless::licence::{LicenceTrustBasis, LicenceUsability};
     use poodle_specs::LicenceStatusSpec;
 
+    fn is_inert_display(node: &Node) -> bool {
+        !node.interaction.focusable
+            && node.interaction.on_activate.is_none()
+            && node.interaction.on_activate_modified.is_none()
+            && node.interaction.on_continuous_value.is_none()
+            && node.interaction.on_scrub.is_none()
+            && node.interaction.on_double_activate.is_none()
+            && node.interaction.on_context.is_none()
+            && node.interaction.on_drag.is_none()
+            && node.interaction.on_wheel.is_none()
+            && node.interaction.on_text_change.is_none()
+            && node.interaction.on_submit.is_none()
+            && node.interaction.on_cancel.is_none()
+            && node.interaction.on_select_range.is_none()
+            && node.interaction.on_edit_key.is_none()
+            && node.interaction.on_edit_insert.is_none()
+            && node.interaction.on_focus_change.is_none()
+            && node.interaction.on_dismiss.is_none()
+            && node.interaction.on_key.is_none()
+            && node.interaction.on_key_activate.is_none()
+            && node.interaction.on_key_up.is_none()
+            && node.interaction.drag_source.is_none()
+            && node.interaction.drop_target.is_none()
+            && node.children.iter().all(is_inert_display)
+    }
+
     run_headless(|cx| {
+        let theme_provider = theme();
         let now = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_secs() as i64)
@@ -13251,12 +13316,42 @@ fn licence_status_renders_state_and_authority_reads_in_a_mounted_window() {
                 .with_use_until(Some(now + 86_400))
                 .with_update_until(None)
                 .with_usable(true),
-            &RenderContext::new(&theme()),
+            &RenderContext::new(&theme_provider),
         );
         node.id = Some(FIXTURE_ID.to_owned());
         let node = Arc::new(Mutex::new(node));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
         driver.draw_frame();
+
+        {
+            let tree = node.lock().expect("mounted licence status");
+            assert!(
+                is_inert_display(&tree),
+                "the mounted status has no pointer, keyboard, or event callbacks"
+            );
+            assert_eq!(
+                tree.style.descriptor.layout.spacing.gap,
+                theme_provider.resolve_space("space.stack.sm"),
+                "the mounted section uses the shared stack spacing token"
+            );
+            let title_color = theme_provider.resolve_color("color.text.primary");
+            assert!(tree.find(&|candidate| {
+                candidate.style.descriptor.text_color == Some(title_color)
+                    && candidate.style.text_size
+                        == Some(theme_provider.resolve_space("typography.body.size"))
+            }).is_some(), "the mounted text resolves its primary colour and body-size tokens");
+        }
+        let mounted_geometry = poodle_gpui_node_backend::bounds_for(FIXTURE_ID)
+            .expect("mounted licence status geometry");
+        assert!(
+            mounted_geometry.size.width > px(0.0) && mounted_geometry.size.height > px(0.0),
+            "the token-spaced status section paints a non-empty box"
+        );
+        driver.pointer_activate_id(FIXTURE_ID);
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(FIXTURE_ID).is_none(),
+            "the non-interactive status section creates no keyboard focus handle"
+        );
 
         let node = node.lock().unwrap();
         let texts = node.texts();
@@ -14086,12 +14181,14 @@ fn model_connection_picker_ignores_a_click_on_an_unsupported_route() {
 /// a configure stage.
 #[test]
 fn model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window() {
+    use poodle_adapter::ThemeProvider;
     use poodle_headless::model_connection::{
         model_connection_picker_fixtures, ModelConnectionAvailability,
     };
     use poodle_specs::ModelConnectionSetupSpec;
 
     run_headless(|cx| {
+        let theme_provider = theme();
         let submits = Arc::new(Mutex::new(Vec::new()));
         let stages = Arc::new(Mutex::new(Vec::new()));
         let submit_sink = Arc::clone(&submits);
@@ -14113,7 +14210,7 @@ fn model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window() {
                 .with_options(options)
                 .with_value(Some("codex-app".to_string()))
                 .with_can_submit(true),
-            &RenderContext::new(&theme()),
+            &RenderContext::new(&theme_provider),
             poodle_render::ModelConnectionSetupHandlers {
                 on_submit: Some(Arc::new(move |id: &str| {
                     submit_sink.lock().unwrap().push(id.to_string())
@@ -14132,6 +14229,34 @@ fn model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window() {
         node.id = Some(FIXTURE_ID.to_owned());
         let node = Arc::new(Mutex::new(node));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        driver.draw_frame();
+
+        {
+            let tree = node.lock().expect("mounted model connection setup");
+            assert_eq!(
+                tree.style.descriptor.layout.spacing.gap,
+                theme_provider.resolve_space("space.stack.md"),
+                "the workflow root uses the shared stack rhythm"
+            );
+            let actions = tree
+                .find(&|candidate| candidate.style.border_top_width.is_some())
+                .expect("the mounted workflow action separator");
+            assert_eq!(
+                actions.style.border_top_width,
+                Some(poodle_render::presentation::rem_to_px(0.0625))
+            );
+            assert_eq!(
+                actions.style.border_color_top,
+                Some(theme_provider.resolve_color("color.border.subtle")),
+                "the workflow separator uses the contract border token"
+            );
+        }
+        let mounted_geometry = poodle_gpui_node_backend::bounds_for(FIXTURE_ID)
+            .expect("mounted model connection setup geometry");
+        assert!(
+            mounted_geometry.size.width > px(0.0) && mounted_geometry.size.height > px(0.0),
+            "the token-spaced setup paints a non-empty workflow box"
+        );
 
         // ── Contract §8 semantics on the mounted projection ──
         {
@@ -14146,7 +14271,11 @@ fn model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window() {
         // Pointer activation submits the direct route, and so does the
         // keyboard route through the Add control's own focus handle.
         driver.pointer_activate_id("setup-add");
-        assert_eq!(submits.lock().unwrap().as_slice(), ["codex-app"]);
+        assert_eq!(
+            submits.lock().unwrap().as_slice(),
+            ["codex-app"],
+            "the mounted onSubmit event carries the selected route id"
+        );
         assert!(
             stages.lock().unwrap().is_empty(),
             "a direct route emits no stage-change callback"
@@ -14170,10 +14299,12 @@ fn model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window() {
 /// disclosure control.
 #[test]
 fn model_connection_card_closes_and_returns_real_focus_to_the_disclosure() {
+    use poodle_adapter::ThemeProvider;
     use poodle_headless::model_connection::ModelConnectionReadiness;
     use poodle_specs::ModelConnectionCardSpec;
 
     run_headless(|cx| {
+        let theme_provider = theme();
         let opens = Arc::new(Mutex::new(Vec::new()));
         let enables = Arc::new(Mutex::new(Vec::new()));
         let open_sink = Arc::clone(&opens);
@@ -14186,7 +14317,7 @@ fn model_connection_card_closes_and_returns_real_focus_to_the_disclosure() {
         let disclosure_id = spec.disclosure_id();
         let mut node = poodle_render::model_connection_card_with_slots(
             &spec,
-            &RenderContext::new(&theme()),
+            &RenderContext::new(&theme_provider),
             poodle_render::ModelConnectionCardSlots {
                 details: Some(poodle_node::Node::text("Host details")),
                 ..poodle_render::ModelConnectionCardSlots::default()
@@ -14212,9 +14343,45 @@ fn model_connection_card_closes_and_returns_real_focus_to_the_disclosure() {
         node.id = Some(FIXTURE_ID.to_owned());
         let node = Arc::new(Mutex::new(node));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        driver.draw_frame();
+        {
+            let tree = node.lock().expect("mounted model connection card");
+            assert_eq!(
+                tree.style.descriptor.background,
+                Some(theme_provider.resolve_color("color.background.panel"))
+            );
+            assert_eq!(
+                tree.style.descriptor.border.color,
+                theme_provider.resolve_color("color.border.subtle")
+            );
+            assert_eq!(
+                tree.style.descriptor.corner_radii.top_left,
+                theme_provider.resolve_radius("radius.surface"),
+                "the mounted card resolves its surface radius token"
+            );
+            let summary = tree.children.first().expect("mounted card summary");
+            assert_eq!(
+                summary.style.descriptor.layout.spacing.padding.left,
+                theme_provider.resolve_space("space.inline.md")
+            );
+            assert_eq!(
+                summary.style.descriptor.layout.spacing.padding.top,
+                theme_provider.resolve_space("space.stack.sm")
+            );
+        }
+        let mounted_geometry = poodle_gpui_node_backend::bounds_for(FIXTURE_ID)
+            .expect("mounted model connection card geometry");
+        assert!(
+            mounted_geometry.size.width > px(0.0) && mounted_geometry.size.height > px(0.0),
+            "the token-styled card paints a non-empty surface"
+        );
 
         driver.pointer_activate_id(&disclosure_id);
-        assert_eq!(opens.lock().unwrap().as_slice(), [false]);
+        assert_eq!(
+            opens.lock().unwrap().as_slice(),
+            [false],
+            "the mounted disclosure event reports its requested open state"
+        );
         assert!(
             enables.lock().unwrap().is_empty(),
             "disclosing never touches the enable preference"
@@ -29421,6 +29588,7 @@ fn icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboar
 /// comparison, or Jetstream admission.
 #[test]
 fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
+    use poodle_adapter::ThemeProvider;
     use poodle_render::{
         collapsible_content_focus_id, collapsible_trigger_focus_id, collapsible_with_handlers,
         CollapsibleHandlers,
@@ -29554,9 +29722,10 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
         fn build(open: bool, mounted: Arc<Mutex<Node>>, events: Arc<Mutex<Vec<String>>>) -> Node {
             let event_sink = Arc::clone(&events);
             let mount = Arc::clone(&mounted);
-            collapsible_with_handlers(
+            let mut node = collapsible_with_handlers(
                 &CollapsibleSpec::new()
                     .with_title("Advanced options")
+                    .with_density(ControlDensity::Compact)
                     .with_open(open),
                 &RenderContext::new(&theme()),
                 Some(Node::text(if open { "Cache TTL: 3600s" } else { "hidden" })),
@@ -29571,7 +29740,9 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
                             build(next, Arc::clone(&mount), Arc::clone(&event_sink));
                     })),
                 },
-            )
+            );
+            node.id = Some("controlled-collapsible-root".to_string());
+            node
         }
 
         let events = Arc::new(Mutex::new(Vec::<String>::new()));
@@ -29592,12 +29763,63 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
         }
 
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.draw_frame();
+        let theme_provider = theme();
+        let closed_bounds = poodle_gpui_node_backend::bounds_for("controlled-collapsible-root")
+            .expect("mounted closed Collapsible geometry");
+        assert!(
+            closed_bounds.size.width > px(0.0) && closed_bounds.size.height > px(0.0),
+            "the token-padded disclosure paints a non-empty box"
+        );
+        {
+            let tree = mounted.lock().expect("mount lock");
+            assert_eq!(tree.style.descriptor.layout.spacing.gap, 0.0);
+            assert_eq!(
+                tree.style.descriptor.layout.spacing.padding.top,
+                poodle_render::presentation::rem_to_px(0.625)
+            );
+            assert_eq!(
+                tree.style.descriptor.layout.spacing.padding.left,
+                poodle_render::presentation::rem_to_px(0.5),
+                "compact density resolves the horizontal padding"
+            );
+            assert_eq!(
+                tree.style.descriptor.background,
+                Some(poodle_render::color::mix_srgb(
+                    theme_provider.resolve_color("color.background.elevated"),
+                    theme_provider.resolve_color("color.background.panel"),
+                    0.40,
+                ))
+            );
+            let border = theme_provider.resolve_color("color.border.subtle");
+            assert_eq!(
+                tree.style.descriptor.border.color,
+                poodle_render::color::with_alpha(border, border.3 * 0.36),
+                "the mounted disclosure resolves the subtle border recipe"
+            );
+            let closed_indicator = tree
+                .find(&|candidate| {
+                    matches!(
+                        &candidate.kind,
+                        NodeKind::Icon { name, size }
+                            if name == "chevron-down"
+                                && (*size - poodle_render::presentation::rem_to_px(0.75)).abs() < 0.001
+                    )
+                })
+                .expect("closed disclosure points down at the contract icon size");
+            assert_eq!(
+                closed_indicator.style.descriptor.text_color,
+                Some(theme_provider.resolve_color("color.text.secondary"))
+            );
+        }
         driver.wait_for_focus_handle(&trigger);
         driver.pointer_activate_id(&trigger);
         assert_eq!(
             *events.lock().expect("event lock"),
-            ["open:true".to_string()]
+            ["open:true".to_string()],
+            "the mounted open-change callback reports the requested event payload"
         );
+        driver.draw_frame();
         assert_eq!(
             mounted
                 .lock()
@@ -29608,12 +29830,24 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
                 .expanded,
             Some(true)
         );
-        assert!(mounted
-            .lock()
-            .expect("mount lock")
-            .find(&|n| n.runtime_id.as_deref()
-                == Some(collapsible_content_focus_id("controlled").as_str()))
-            .is_some());
+        {
+            let tree = mounted.lock().expect("mount lock");
+            assert_eq!(
+                tree.style.descriptor.layout.spacing.gap,
+                theme_provider.resolve_space("space.stack.md"),
+                "the open disclosure restores the shared stack gap"
+            );
+            assert!(tree
+                .find(&|n| n.runtime_id.as_deref()
+                    == Some(collapsible_content_focus_id("controlled").as_str()))
+                .is_some());
+            assert!(tree
+                .find(&|candidate| matches!(
+                    &candidate.kind,
+                    NodeKind::Icon { name, .. } if name == "chevron-up"
+                ))
+                .is_some(), "the open icon matches Svelte's rotated-up indicator");
+        }
 
         driver.wait_for_focus_handle(&trigger);
         driver.focus_element(&trigger);

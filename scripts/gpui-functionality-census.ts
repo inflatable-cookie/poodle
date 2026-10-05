@@ -171,6 +171,13 @@ const STATIC_DISPLAY_NOT_APPLICABLE: Record<string, ManifestNotApplicable[]> = {
       contractRef: "docs/contracts/components/avatar.md#Behavior Machine",
     },
   ],
+  Icon: [
+    {
+      axis: "keyboard_focus",
+      reason: "Icon is not focusable; it is visual content announced through its parent context.",
+      contractRef: "docs/contracts/components/icon.md#6. Accessibility",
+    },
+  ],
   MetaBar: [
     {
       axis: "events",
