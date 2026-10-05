@@ -60054,6 +60054,7 @@ fn first_mounted_parity_media_preview() {
             frames.contains(&"Empty folder".to_owned()),
             "empty frame projects its title: {frames:?}"
         );
+        let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }
 
