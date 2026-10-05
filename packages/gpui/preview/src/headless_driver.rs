@@ -428,7 +428,7 @@ impl<'a> HeadlessDriver<'a> {
     }
 
     /// Close this window through GPUI's production removal path. Fires the
-    /// backend's window-closed tooltip teardown; does not call
+    /// backend's per-window close teardowns; does not call
     /// `reset_focus_registry`.
     pub fn close_window(&mut self) {
         let _wait = WaitScope::push("window close to park");

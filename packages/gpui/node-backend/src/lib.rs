@@ -56,7 +56,7 @@ mod tracked_scroll;
 
 pub mod file_capability;
 
-pub use scroll::{scroll_extent_for, scroll_offset_for};
+pub use scroll::{scroll_extent_for, scroll_offset_for, scroll_state_counts_for_window};
 pub use tooltip::{
     is_tooltip_pending, is_tooltip_visible, painted_tooltip, painted_tooltip_for,
     reset_tooltip_registry, teardown_window_tooltips, tooltip_runtime_owns_window,
