@@ -67,7 +67,7 @@ fn field_errors_summary(spec: &FormLayoutSpec, ctx: &RenderContext<'_>) -> Node 
     heading.style.text_size = Some(font_size);
     // Heading is semibold (contract §8 field-errors p font-weight: 600).
     heading.style.text_weight = Some(600);
-    let block = block.child(heading);
+    let mut block = block.child(heading);
 
     let mut list = Node::container();
     {
