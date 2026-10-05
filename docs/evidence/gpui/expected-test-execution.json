@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g18-expected-test-execution.v1",
   "command": "effigy regressions:native",
-  "run_id": "8e7431f9-0aab-45aa-a44c-c51b687e1b84",
-  "source_commit": "539057155aa20e720e9e4d60fe97a8afa58f69b6",
+  "run_id": "8d673a86-839e-4346-a4d4-8e54a477cb9d",
+  "source_commit": "a89a2034f836362ec1af9f59f34a469e8e0e29e7",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "results": {
@@ -521,6 +521,23 @@
     "agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport": {
       "outcome": "passed",
       "body_sha256": "24e2e0f57dcd19da324cc83bb3e17463bee4d056bd167d9b2d362a93eb488b93"
+    },
+    "first_mounted_parity_spinner": {
+      "outcome": "passed",
+      "body_sha256": "a49650a30f5148c1dcadf2b1b5cc7627ba0896fea8b54632b5301cab82edc292"
+    },
+    "first_mounted_parity_progress": {
+      "outcome": "passed",
+      "body_sha256": "e1cd2deb0be2a4ece02183a1e60745a405abfbc68fe7627ec4675141b3bb30b2"
+    },
+    "first_mounted_parity_meter": {
+      "outcome": "passed",
+      "body_sha256": "5d487e126ae8108c20d9282bf4f1862bd5ea8198e66c5b9f02ca7eb142c094f1"
+    },
+    "first_mounted_parity_status_bar": {
+      "outcome": "passed",
+      "body_sha256": "be1d9bd55acc02e114fc85fe50f75106202099dd3194c4b4270e2d9c8ba91177"
     }
-  }
+  },
+  "body_hash_baseline_commit": "539057155aa20e720e9e4d60fe97a8afa58f69b6"
 }
