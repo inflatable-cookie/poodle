@@ -122,6 +122,9 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   OrderBy: "order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec",
   BlockEditor: "block_editor_grip_drag_and_move_controls_rebuild_the_host_spec",
   TextInput: "text_input_controlled_editing_and_identity_rebuild_the_host_spec",
+  TokenInput: "token_input_entry_removal_and_keyboard_rebuild_the_host_spec",
+  DragNumberField:
+    "drag_number_field_scrub_keyboard_bounds_and_entry_rebuild_the_host_spec",
   DurationInput: "duration_input_segments_edit_and_rebuild_the_host_spec",
   TimeInput: "time_input_segmented_editor_commits_drafts_and_bounds",
   NumberInput: [

@@ -7,16 +7,16 @@
 use std::sync::{Arc, Mutex};
 
 use poodle_headless::audio::{
-    fader_transition, format_value, knob_point_to_norm, knob_transition, xy_pad_transition,
-    AudioPoint, AudioRect, AudioValueContext, AudioValueEffect, AudioValueEvent, FaderContext,
-    FaderOrientation, KnobContext, KnobDragMode, ValueBound, XYPadAxis, XYPadContext, XYPadEffect,
-    XYPadEvent,
+    drag_number_transition, fader_transition, format_value, knob_point_to_norm, knob_transition,
+    xy_pad_transition, AudioPoint, AudioRect, AudioValueContext, AudioValueEffect, AudioValueEvent,
+    DragNumberContext, FaderContext, FaderOrientation, KnobContext, KnobDragMode, ValueBound,
+    XYPadAxis, XYPadContext, XYPadEffect, XYPadEvent,
 };
 use poodle_node::{
     ContinuousValuePhase, FocusRing, Node, NodeContinuousValueEvent, NodeKey, NodeRole,
     NodeWheelEvent,
 };
-use poodle_specs::{FaderSpec, KnobSpec, Orientation, XYPadSpec};
+use poodle_specs::{DragNumberFieldSpec, FaderSpec, KnobSpec, Orientation, XYPadSpec};
 
 use crate::color::with_alpha;
 use crate::context::RenderContext;
@@ -1406,6 +1406,438 @@ fn bind_xy_axis_keys(
         run_xy(&live, event, &handlers);
         None
     }));
+}
+
+// ── DragNumberField ────────────────────────────────────────────────────────
+
+/// Host-owned adapter state for one DragNumberField instance.
+pub type DragNumberLive = AudioLive<DragNumberContext>;
+
+impl DragNumberLive {
+    pub fn from_spec(spec: &DragNumberFieldSpec) -> Self {
+        Self {
+            machine: drag_number_context_from_spec(spec),
+            draft: spec.entry_draft.clone(),
+            draft_replace: true,
+            pointer: 0.0,
+            pending_focus: PendingFocus::None,
+        }
+    }
+}
+
+/// Contract effects plus a required lifetime-stable instance scope.
+#[derive(Clone)]
+pub struct DragNumberHandlers {
+    pub instance_id: String,
+    pub on_value_change: Option<Arc<dyn Fn(f64) + Send + Sync>>,
+    pub on_value_commit: Option<Arc<dyn Fn(f64) + Send + Sync>>,
+    pub on_gesture_begin: Option<Arc<dyn Fn() + Send + Sync>>,
+    pub on_gesture_end: Option<Arc<dyn Fn() + Send + Sync>>,
+}
+
+impl DragNumberHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.is_empty(),
+            "native audio instance_id must be non-empty and lifetime-stable"
+        );
+        Self {
+            instance_id,
+            on_value_change: None,
+            on_value_commit: None,
+            on_gesture_begin: None,
+            on_gesture_end: None,
+        }
+    }
+
+    pub fn on_value_change(mut self, handler: Arc<dyn Fn(f64) + Send + Sync>) -> Self {
+        self.on_value_change = Some(handler);
+        self
+    }
+
+    pub fn on_value_commit(mut self, handler: Arc<dyn Fn(f64) + Send + Sync>) -> Self {
+        self.on_value_commit = Some(handler);
+        self
+    }
+
+    pub fn on_gesture_begin(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.on_gesture_begin = Some(handler);
+        self
+    }
+
+    pub fn on_gesture_end(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.on_gesture_end = Some(handler);
+        self
+    }
+}
+
+pub fn drag_number_context_from_spec(spec: &DragNumberFieldSpec) -> DragNumberContext {
+    DragNumberContext {
+        base: AudioValueContext {
+            value: spec.visual_state.raw_value,
+            min: spec.min,
+            max: spec.max,
+            law: spec.law(),
+            default_value: spec.default_value,
+            keyboard_step: spec.step,
+            format: spec.format,
+            hover: spec.visual_state.hover,
+            focus: spec.visual_state.focus,
+            drag: spec.visual_state.drag,
+            automation: spec.visual_state.automation,
+            entry_open: spec.entry_open,
+            drag_start_value: spec.drag_start_value,
+            drag_start_position: spec.drag_start_position,
+            disabled: !spec.visual_state.enabled,
+        },
+        drag_sensitivity: spec.drag_sensitivity,
+    }
+}
+
+pub fn drag_number_spec_from_context(
+    context: &DragNumberContext,
+    aria_label: impl Into<String>,
+) -> DragNumberFieldSpec {
+    let value = context.base.value;
+    let mut spec = DragNumberFieldSpec::new(
+        value,
+        context.base.min,
+        context.base.max,
+        context.base.keyboard_step,
+        format_value(value, context.base.format),
+    );
+    spec.visual_state = context.visual_state();
+    spec.drag_sensitivity = context.drag_sensitivity;
+    spec.default_value = context.base.default_value;
+    spec.format = context.base.format;
+    spec.entry_open = context.base.entry_open;
+    spec.entry_draft = String::new();
+    spec.drag_start_value = context.base.drag_start_value;
+    spec.drag_start_position = context.base.drag_start_position;
+    spec.text = format_value(value, context.base.format);
+    spec.aria_label = aria_label.into();
+    spec
+}
+
+fn apply_host_drag_number(machine: &mut DragNumberContext, spec: &DragNumberFieldSpec) {
+    machine.drag_sensitivity = spec.drag_sensitivity;
+    machine.base.min = spec.min;
+    machine.base.max = spec.max;
+    machine.base.law = spec.law();
+    machine.base.default_value = spec.default_value;
+    machine.base.keyboard_step = spec.step;
+    machine.base.format = spec.format;
+    machine.base.disabled = !spec.visual_state.enabled;
+    machine.base.hover = spec.visual_state.hover;
+    machine.base.automation = spec.visual_state.automation;
+}
+
+fn run_drag_number(
+    live: &Mutex<DragNumberLive>,
+    event: AudioValueEvent,
+    handlers: &ScalarHandlers,
+) {
+    let current = live.lock().expect("drag number machine").machine.clone();
+    let (next, effects) = drag_number_transition(current, event.clone());
+    {
+        let mut runtime = live.lock().expect("drag number machine");
+        runtime.machine = next;
+        if effects
+            .iter()
+            .any(|effect| matches!(effect, AudioValueEffect::RequestEntryFocus))
+        {
+            runtime.pending_focus = PendingFocus::Entry;
+            runtime.draft = format_value(runtime.machine.base.value, runtime.machine.base.format);
+            runtime.draft_replace = true;
+        }
+        if matches!(
+            event,
+            AudioValueEvent::EntryCancel | AudioValueEvent::EntryCommit { .. }
+        ) {
+            runtime.pending_focus = PendingFocus::Root;
+            runtime.draft.clear();
+        }
+    }
+    apply_scalar_effects(&effects, handlers);
+}
+
+/// Bind the scalar channels, a11y surface, and pointer/keyboard/entry routes
+/// for a handler-backed DragNumberField.
+pub fn bind_drag_number(
+    node: &mut Node,
+    spec: &DragNumberFieldSpec,
+    ctx: &RenderContext<'_>,
+    handlers: &DragNumberHandlers,
+    live: &Arc<Mutex<DragNumberLive>>,
+) {
+    let instance_id = handlers.instance_id.as_str();
+    node.id = Some(audio_root_id(instance_id));
+    {
+        let mut runtime = live.lock().expect("drag number machine");
+        apply_host_drag_number(&mut runtime.machine, spec);
+    }
+    run_drag_number(
+        live,
+        AudioValueEvent::SetValue {
+            value: spec.visual_state.raw_value,
+        },
+        &ScalarHandlers::default(),
+    );
+    let live = Arc::clone(live);
+    let (enabled, value, min, max, value_text, entry_open, pending) = {
+        let runtime = live.lock().expect("drag number machine");
+        let base = &runtime.machine.base;
+        (
+            !base.disabled,
+            base.value,
+            base.min,
+            base.max,
+            base.value_text(),
+            base.entry_open,
+            runtime.pending_focus,
+        )
+    };
+
+    node.a11y.role = Some(NodeRole::SpinButton);
+    node.a11y.label = Some(spec.aria_label.clone());
+    node.a11y.value = Some(value);
+    node.a11y.value_text = Some(value_text);
+    node.a11y.value_min = Some(min);
+    node.a11y.value_max = Some(max);
+    node.interaction.disabled = !enabled;
+    if enabled {
+        node.interaction.focusable = true;
+        node.a11y.tab_index = Some(0);
+        node.style.focus_ring = Some(audio_focus_ring(ctx));
+    } else {
+        node.interaction.focusable = false;
+        node.a11y.tab_index = None;
+        node.style.focus_ring = None;
+    }
+    if entry_open {
+        node.a11y.tab_index = Some(-1);
+    }
+    if pending == PendingFocus::Root {
+        node.interaction.request_focus = true;
+        live.lock().expect("drag number machine").pending_focus = PendingFocus::None;
+    }
+
+    let scalar = ScalarHandlers {
+        on_value_change: handlers.on_value_change.clone(),
+        on_value_commit: handlers.on_value_commit.clone(),
+        on_gesture_begin: handlers.on_gesture_begin.clone(),
+        on_gesture_end: handlers.on_gesture_end.clone(),
+    };
+    bind_drag_number_pointer(node, Arc::clone(&live), scalar.clone());
+    bind_drag_number_keys(node, Arc::clone(&live), scalar.clone(), entry_open);
+    bind_drag_number_focus(node, Arc::clone(&live), scalar.clone());
+    if entry_open {
+        bind_drag_number_entry(
+            node,
+            spec,
+            live,
+            scalar,
+            ctx,
+            pending == PendingFocus::Entry,
+        );
+    }
+}
+
+fn bind_drag_number_pointer(
+    node: &mut Node,
+    live: Arc<Mutex<DragNumberLive>>,
+    handlers: ScalarHandlers,
+) {
+    node.interaction.on_continuous_value =
+        Some(Arc::new(move |event: &NodeContinuousValueEvent| {
+            let fine = event.modifiers.shift;
+            match event.phase {
+                ContinuousValuePhase::Press => {
+                    // A press may become a click; the drag is announced on the
+                    // first move, exactly as the web adapter waits for travel.
+                    live.lock().expect("drag number machine").pointer = 0.0;
+                }
+                ContinuousValuePhase::Move => {
+                    let position = {
+                        let mut runtime = live.lock().expect("drag number machine");
+                        runtime.pointer += event.delta_x as f64;
+                        runtime.pointer
+                    };
+                    let dragging = live.lock().expect("drag number machine").machine.base.drag
+                        != poodle_headless::audio::DragState::None;
+                    if !dragging {
+                        run_drag_number(
+                            &live,
+                            AudioValueEvent::DragBegin {
+                                position: 0.0,
+                                fine,
+                            },
+                            &handlers,
+                        );
+                    }
+                    run_drag_number(
+                        &live,
+                        AudioValueEvent::DragMove { position, fine },
+                        &handlers,
+                    );
+                }
+                ContinuousValuePhase::Release | ContinuousValuePhase::Cancel => {
+                    let dragging = live.lock().expect("drag number machine").machine.base.drag
+                        != poodle_headless::audio::DragState::None;
+                    if dragging {
+                        run_drag_number(&live, AudioValueEvent::DragEnd, &handlers);
+                    } else if event.phase == ContinuousValuePhase::Release {
+                        run_drag_number(&live, AudioValueEvent::EntryOpen, &handlers);
+                    }
+                }
+            }
+        }));
+}
+
+fn bind_drag_number_keys(
+    node: &mut Node,
+    live: Arc<Mutex<DragNumberLive>>,
+    handlers: ScalarHandlers,
+    entry_open: bool,
+) {
+    let key_live = Arc::clone(&live);
+    let key_handlers = handlers.clone();
+    node.interaction.on_key = Some(Arc::new(move |key, mods| {
+        let event = if let Some((direction, multiplier)) = audio_nudge(key) {
+            AudioValueEvent::KeyNudge {
+                direction,
+                multiplier,
+                fine: mods.shift,
+            }
+        } else if key == NodeKey::Home {
+            AudioValueEvent::KeyBound {
+                bound: ValueBound::Min,
+            }
+        } else if key == NodeKey::End {
+            AudioValueEvent::KeyBound {
+                bound: ValueBound::Max,
+            }
+        } else {
+            return None;
+        };
+        run_drag_number(&key_live, event, &key_handlers);
+        None
+    }));
+    if !entry_open {
+        node.interaction.on_submit = Some(Arc::new(move || {
+            run_drag_number(&live, AudioValueEvent::EntryOpen, &handlers);
+        }));
+    }
+}
+
+fn bind_drag_number_focus(
+    node: &mut Node,
+    live: Arc<Mutex<DragNumberLive>>,
+    handlers: ScalarHandlers,
+) {
+    node.interaction.on_focus_change = Some(Arc::new(move |focused| {
+        run_drag_number(&live, AudioValueEvent::Focus { value: focused }, &handlers);
+    }));
+}
+
+fn bind_drag_number_entry(
+    node: &mut Node,
+    spec: &DragNumberFieldSpec,
+    live: Arc<Mutex<DragNumberLive>>,
+    handlers: ScalarHandlers,
+    ctx: &RenderContext<'_>,
+    request_focus: bool,
+) {
+    let (text, instance_id) = {
+        let runtime = live.lock().expect("drag number machine");
+        let text = if runtime.draft.is_empty() {
+            format_value(runtime.machine.base.value, runtime.machine.base.format)
+        } else {
+            runtime.draft.clone()
+        };
+        (text, node.id.clone().unwrap_or_default())
+    };
+    let mut entry = Node::input(text, "");
+    entry.id = Some(audio_entry_id(&instance_id));
+    entry.interaction.focusable = true;
+    entry.a11y.role = Some(NodeRole::TextInput);
+    entry.a11y.label = Some(format!("{} value", spec.aria_label));
+    entry.a11y.tab_index = Some(0);
+    entry.style.descriptor.layout.width = poodle_node::LayoutSizing::Fixed(rem_to_px(4.5));
+    entry.style.descriptor.layout.height = poodle_node::LayoutSizing::Fixed(rem_to_px(1.5));
+    entry.style.focus_ring = Some(entry_focus_ring(ctx));
+    entry.interaction.request_focus = request_focus;
+    if request_focus {
+        live.lock().expect("drag number machine").pending_focus = PendingFocus::None;
+    }
+    let edit_live = Arc::clone(&live);
+    entry.interaction.on_text_change = Some(Arc::new(move |value: &str| {
+        let mut runtime = edit_live.lock().expect("drag number machine");
+        runtime.draft = value.to_owned();
+        runtime.draft_replace = false;
+    }));
+    let key_live = Arc::clone(&live);
+    entry.interaction.on_edit_key = Some(Arc::new(move |key, mods| {
+        let mut runtime = key_live.lock().expect("drag number machine");
+        let mut draft = std::mem::take(&mut runtime.draft);
+        let mut replace = runtime.draft_replace;
+        apply_draft_key(&mut draft, &mut replace, key, mods.accel);
+        runtime.draft = draft;
+        runtime.draft_replace = replace;
+    }));
+    let insert_live = Arc::clone(&live);
+    entry.interaction.on_edit_insert = Some(Arc::new(move |text: &str| {
+        let mut runtime = insert_live.lock().expect("drag number machine");
+        let mut draft = std::mem::take(&mut runtime.draft);
+        let mut replace = runtime.draft_replace;
+        apply_draft_insert(&mut draft, &mut replace, text);
+        runtime.draft = draft;
+        runtime.draft_replace = replace;
+    }));
+    let commit_live = Arc::clone(&live);
+    let commit_handlers = handlers.clone();
+    entry.interaction.on_submit = Some(Arc::new(move || {
+        let text = commit_live
+            .lock()
+            .expect("drag number machine")
+            .draft
+            .clone();
+        run_drag_number(
+            &commit_live,
+            AudioValueEvent::EntryCommit { text },
+            &commit_handlers,
+        );
+    }));
+    let cancel_live = Arc::clone(&live);
+    entry.interaction.on_cancel = Some(Arc::new(move || {
+        run_drag_number(
+            &cancel_live,
+            AudioValueEvent::EntryCancel,
+            &ScalarHandlers::default(),
+        );
+    }));
+    let blur_live = Arc::clone(&live);
+    let blur_handlers = handlers;
+    entry.interaction.on_focus_change = Some(Arc::new(move |focused| {
+        if focused
+            || !blur_live
+                .lock()
+                .expect("drag number machine")
+                .machine
+                .base
+                .entry_open
+        {
+            return;
+        }
+        let text = blur_live.lock().expect("drag number machine").draft.clone();
+        run_drag_number(
+            &blur_live,
+            AudioValueEvent::EntryCommit { text },
+            &blur_handlers,
+        );
+    }));
+    *node = std::mem::take(node).child(entry);
 }
 
 #[cfg(test)]

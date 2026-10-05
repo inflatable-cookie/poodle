@@ -218,14 +218,15 @@ pub use alert_dialog::{
 };
 pub use app_header::app_header;
 pub use audio::{
-    audio_meter, audio_switch, drag_number_field, envelope_editor, fader, fader_with_handlers,
-    gain_reduction_meter, keyboard, knob, knob_with_handlers, mod_matrix_grid, value_readout,
-    waveform_display, xy_pad, xy_pad_with_handlers,
+    audio_meter, audio_switch, drag_number_field, drag_number_field_with_handlers, envelope_editor,
+    fader, fader_with_handlers, gain_reduction_meter, keyboard, knob, knob_with_handlers,
+    mod_matrix_grid, value_readout, waveform_display, xy_pad, xy_pad_with_handlers,
 };
 pub use audio_handlers::{
-    audio_entry_id, audio_root_id, fader_context_from_spec, fader_spec_from_context,
-    knob_context_from_spec, knob_spec_from_context, xy_pad_context_from_spec,
-    xy_pad_spec_from_context, xy_pad_x_id, xy_pad_y_id, FaderHandlers, FaderLive, KnobHandlers,
+    audio_entry_id, audio_root_id, drag_number_context_from_spec, drag_number_spec_from_context,
+    fader_context_from_spec, fader_spec_from_context, knob_context_from_spec,
+    knob_spec_from_context, xy_pad_context_from_spec, xy_pad_spec_from_context, xy_pad_x_id,
+    xy_pad_y_id, DragNumberHandlers, DragNumberLive, FaderHandlers, FaderLive, KnobHandlers,
     KnobLive, XYPadHandlers, XYPadLive,
 };
 pub use audio_player::{audio_player, audio_player_with_handlers, AudioPlayerHandlers};
@@ -441,7 +442,10 @@ pub use toast_stack::{
     ToastStackHandlers, ToastStackPresence, ToastVisual, ToastVisualPhase,
 };
 pub use toggle_group::{toggle_group, ToggleGroupHandlers};
-pub use token_input::token_input;
+pub use token_input::{
+    token_input, token_input_draft_id, token_input_with_handlers, TokenInputHandlers,
+    TokenInputLive,
+};
 pub use tool_call::{tool_call, tool_call_focus_id, ToolCallHandlers};
 pub use tool_call_group::{tool_call_group, ToolCallGroupHandlers};
 pub use toolbar::toolbar;

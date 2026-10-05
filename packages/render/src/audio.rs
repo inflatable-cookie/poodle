@@ -557,6 +557,17 @@ pub fn xy_pad_with_handlers(
     node
 }
 
+pub fn drag_number_field_with_handlers(
+    spec: &DragNumberFieldSpec,
+    ctx: &RenderContext<'_>,
+    handlers: &crate::audio_handlers::DragNumberHandlers,
+    live: &std::sync::Arc<std::sync::Mutex<crate::audio_handlers::DragNumberLive>>,
+) -> Node {
+    let mut node = drag_number_field(spec, ctx);
+    crate::audio_handlers::bind_drag_number(&mut node, spec, ctx, handlers, live);
+    node
+}
+
 pub fn audio_switch(spec: &AudioSwitchSpec, ctx: &RenderContext<'_>) -> Node {
     let state = &spec.visual_state;
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);

@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "SplitView",
-  "test": "two_composed_split_views_do_not_share_a_divider_focus_handle",
+  "component": "DragNumberField",
+  "test": "drag_number_field_scrub_keyboard_bounds_and_entry_rebuild_the_host_spec",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -19,8 +19,9 @@
       "production-mount"
     ],
     "events": [
-      "assert_eq!(\n            pointer_events\n                .iter()\n                .filter(|(phase, _)| *phase == ResizePhase::End)\n                .count(),\n            1,\n            \"pointer release emit",
-      "assert_eq!(\n            subject_resizes.lock().unwrap().len(),\n            12,\n            \"Subject split handler count must remain unchange"
+      "assert_eq!(\n            *commits\n                .lock()\n                .expect(\"commits\")\n                .last()\n                .expect(\"a drag commit",
+      "assert_eq!(\n            *commits\n                .lock()\n                .expect(\"commits\")\n                .last()\n                .expect(\"entry commit",
+      "assert_eq!(\n            live.lock().expect(\"machine\").machine.base.value,\n            7.0,\n            \"typed text commit"
     ],
     "pointer": [
       "pointer_press"
@@ -32,21 +33,19 @@
     ],
     "accessibility": [
       "NodeRole",
-      "a11y.",
-      "aria"
+      "a11y."
     ],
     "visual": [
       "resolve_color",
-      "Dimensions",
-      "dimensions"
+      "rem_to_px"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "HeadlessDriver::new_in_box",
+    "driver": "HeadlessDriver::new",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render-import:resize_handle_focus_id",
+    "renderer": "poodle_render::DragNumberLive",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -59,7 +58,7 @@
     "command": "effigy regressions:native",
     "run_id": "2b3d81ea-4801-4284-b2f8-5611d6a49ed2",
     "outcome": "passed",
-    "body_sha256": "2d2165ba5ea6c8fca3a230c0646b4b5d404f176ae6cc72dbadcb6662a0454771"
+    "body_sha256": "b59d9b0b2169b8c775a5eeb2691a1a82b6ec1e3ddf394bf154ac6ea96b0cb2fb"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

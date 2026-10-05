@@ -42,5 +42,6 @@ pub mod tabs;
 pub mod text_input;
 pub mod time_input;
 pub mod toggle_group;
+pub mod token;
 pub mod tree;
 pub mod update;
