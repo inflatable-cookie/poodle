@@ -308,6 +308,35 @@ const STATIC_DISPLAY_NOT_APPLICABLE: Record<string, ManifestNotApplicable[]> = {
       contractRef: "docs/contracts/components/inline-list-section.md#Rules",
     },
   ],
+  DetailSection: [
+    {
+      axis: "events",
+      reason: "DetailSection is a grouping composite with no component-owned events; slotted actions own theirs.",
+      contractRef: "docs/contracts/components/detail-section.md#5. Events",
+    },
+  ],
+  MotionPolicyProvider: [
+    {
+      axis: "events",
+      reason:
+        "The provider emits no component event; changing the policy rebuilds descendants without a semantic callback.",
+      contractRef: "docs/contracts/components/motion-policy-provider.md#5. Events",
+    },
+  ],
+  AgentMessage: [
+    {
+      axis: "events",
+      reason:
+        "The only declared event, onLinkClick, has no native element to attach to: inline nodes flatten to text, a recorded accepted delta.",
+      contractRef: "docs/contracts/components/agent-message.md#12. Known Deltas",
+    },
+    {
+      axis: "pointer",
+      reason:
+        "Link activation is the message's only pointer interaction and the natives draw no link, a recorded accepted delta.",
+      contractRef: "docs/contracts/components/agent-message.md#12. Known Deltas",
+    },
+  ],
   PasswordRequirements: [
     {
       axis: "events",

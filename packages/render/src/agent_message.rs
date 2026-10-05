@@ -12,7 +12,7 @@
 //! this shape exists to prevent.
 
 use poodle_markdown::{parse_markdown, MdBlock, MdInline};
-use poodle_node::{ColorValue, LayoutDirection, LayoutSizing, Node};
+use poodle_node::{ColorValue, LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::{AgentMessageSpec, PaddingScale, SurfaceBorder, SurfaceSpec};
 
 use crate::context::RenderContext;
@@ -80,6 +80,9 @@ fn render_blocks(blocks: &[MdBlock], s: &Style) -> Node {
                 let mut h = Node::text(line(children));
                 h.style.text_size = Some(s.font_size * scale);
                 h.style.text_weight = Some(600);
+                // Real heading semantics: the message is navigable by heading.
+                h.a11y.role = Some(NodeRole::Heading);
+                h.a11y.level = Some(usize::from(*level));
                 h.style.descriptor.text_color = Some(s.text);
                 body = body.child(h);
             }
@@ -115,6 +118,8 @@ fn render_blocks(blocks: &[MdBlock], s: &Style) -> Node {
                     st.descriptor.layout.spacing.padding.left = s.indent;
                     st.descriptor.layout.spacing.gap = rem_to_px(0.125);
                 }
+                // Real list semantics, so item counts are announced.
+                list.a11y.role = Some(NodeRole::List);
                 for (index, item) in items.iter().enumerate() {
                     let marker = if *ordered {
                         format!("{}.", *start as usize + index)
@@ -130,6 +135,7 @@ fn render_blocks(blocks: &[MdBlock], s: &Style) -> Node {
                     row.style.descriptor.layout.direction = LayoutDirection::Row;
                     row.style.fill_width = true;
                     row.style.descriptor.layout.spacing.gap = rem_to_px(0.375);
+                    row.a11y.role = Some(NodeRole::ListItem);
                     list = list.child(row.child(m).child(render_blocks(item, s)));
                 }
                 body = body.child(list);

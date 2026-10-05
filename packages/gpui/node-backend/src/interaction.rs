@@ -208,7 +208,8 @@ fn should_focus_initial_overlay_node(node: &Node, id: &str) -> bool {
         && super::claim_initial_focus(id)
 }
 
-pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> Stateful<Div> {
+pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> Stateful<Div> {
+    let mut el = super::scroll::apply_scroll(el, node, id);
     if node.interaction.request_focus {
         super::layers::request_focus(id);
     } else if should_focus_initial_overlay_node(node, id) {

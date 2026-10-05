@@ -178,6 +178,7 @@ fn nav_rail(
         &ScrollShellSpec::new().with_direction(Direction::Vertical),
         ctx,
         vec![inner],
+        None,
     );
     let surface_node = surface(
         &SurfaceSpec::new()
@@ -238,6 +239,7 @@ fn page_column(spec: &SettingsShellSpec, ctx: &RenderContext<'_>, page: Option<N
             .with_padding(PaddingScale::Md),
         ctx,
         page.into_iter().collect(),
+        None,
     );
     col.child(stack.child(scroller))
 }

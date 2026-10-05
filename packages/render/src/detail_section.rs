@@ -7,7 +7,9 @@
 //! density-driven spacing, and a multi-column body (flex-wrap approximation of
 //! the Svelte grid).
 
-use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
+use poodle_node::{
+    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeRole,
+};
 use poodle_specs::DetailSectionSpec;
 
 use crate::context::RenderContext;
@@ -88,6 +90,9 @@ pub fn detail_section(
             t.style.descriptor.text_color = Some(text_primary);
             t.style.text_size = Some(title_font);
             t.style.text_weight = Some(700);
+            // The contract's `<h3>`: the title is the section's heading.
+            t.a11y.role = Some(NodeRole::Heading);
+            t.a11y.level = Some(3);
             title_block = title_block.child(t);
         }
 
@@ -137,6 +142,8 @@ pub fn detail_section(
 
     if let Some(label) = spec.aria_label.as_deref() {
         if !label.is_empty() {
+            // A `<section>` with a name is a region landmark; unnamed it is not.
+            el.a11y.role = Some(NodeRole::Region);
             el.a11y.label = Some(label.to_string());
         }
     }
