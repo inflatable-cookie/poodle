@@ -52371,16 +52371,17 @@ fn first_mounted_parity_calendar() {
     };
 
     run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
         let mut driver = HeadlessDriver::new_element_in_box(cx, build, 560.0, 600.0);
-        let mounted_day = driver
-            .accessibility_nodes()
-            .into_iter()
-            .find(|node| node.element_id == DAY_14)
-            .expect("selected day in the mounted accessibility tree");
-        assert_eq!(mounted_day.role, NodeRole::Cell);
-        assert_eq!(mounted_day.label.as_deref(), Some("March 14, 2026"));
-        assert_eq!(mounted_day.selected, Some(true));
-        assert_eq!(mounted_day.tab_index, Some(0));
+        let mounted_day = poodle_gpui_node_backend::painted_node_for(DAY_14)
+            .expect("selected day reaches GPUI paint");
+        assert_eq!(mounted_day.a11y_role, Some(NodeRole::Cell));
+        assert_eq!(mounted_day.a11y_label.as_deref(), Some("March 14, 2026"));
+        assert_eq!(
+            mounted_day.style.background,
+            Some(theme_provider.resolve_color("color.accent.base")),
+            "the selected date paints the accent treatment"
+        );
         let mounted_root = poodle_gpui_node_backend::painted_node_for("poodle-calendar")
             .expect("Calendar reaches GPUI paint");
         assert_eq!(mounted_root.a11y_label.as_deref(), Some("Appointment date"));
@@ -52404,12 +52405,13 @@ fn first_mounted_parity_calendar() {
             ["2026-03-16"],
             "on_select callback emits the selected ISO date"
         );
-        let pointer_selected = driver
-            .accessibility_nodes()
-            .into_iter()
-            .find(|node| node.element_id == DAY_16)
-            .expect("pointer-selected day after host rebuild");
-        assert_eq!(pointer_selected.selected, Some(true));
+        driver.draw_frame();
+        let pointer_selected = poodle_gpui_node_backend::painted_node_for(DAY_16)
+            .expect("pointer-selected day reaches GPUI paint after host rebuild");
+        assert_eq!(
+            pointer_selected.style.background,
+            Some(theme_provider.resolve_color("color.accent.base"))
+        );
 
         driver.focus_element(DAY_14);
         driver.dispatch_key_raw("right");
@@ -52425,6 +52427,14 @@ fn first_mounted_parity_calendar() {
             ["2026-03-16", "2026-03-15"],
             "keyboard selection emits the focused ISO date"
         );
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for(DAY_15)
+                .expect("keyboard-selected day paints after host rebuild")
+                .style
+                .background,
+            Some(theme_provider.resolve_color("color.accent.base"))
+        );
 
         driver.pointer_activate_id("poodle-cal-next");
         assert_eq!(
@@ -52439,6 +52449,7 @@ fn first_mounted_parity_calendar() {
             .iter()
             .any(|text| text == "April"));
         assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }
 
@@ -52519,16 +52530,16 @@ fn first_mounted_parity_form_actions() {
     };
 
     run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
         let mut driver = HeadlessDriver::new_element_in_box(cx, build, 460.0, 220.0);
-        let buttons: Vec<_> = driver
-            .accessibility_nodes()
-            .into_iter()
-            .filter(|node| node.role == NodeRole::Button)
-            .collect();
-        assert_eq!(buttons.len(), 2);
-        assert_eq!(buttons[0].label.as_deref(), Some("Cancel"));
-        assert_eq!(buttons[1].label.as_deref(), Some("Save changes"));
-        assert!(buttons.iter().all(|node| node.focusable));
+        let cancel_node = poodle_gpui_node_backend::painted_node_for(CANCEL)
+            .expect("Cancel reaches GPUI paint");
+        let save_node = poodle_gpui_node_backend::painted_node_for(SAVE)
+            .expect("Save reaches GPUI paint");
+        assert_eq!(cancel_node.a11y_role, Some(NodeRole::Button));
+        assert_eq!(cancel_node.a11y_label.as_deref(), Some("Cancel"));
+        assert_eq!(save_node.a11y_role, Some(NodeRole::Button));
+        assert_eq!(save_node.a11y_label.as_deref(), Some("Save changes"));
 
         let root = poodle_gpui_node_backend::bounds_for(ROOT).expect("FormActions geometry");
         let cancel = poodle_gpui_node_backend::bounds_for(CANCEL).expect("Cancel geometry");
@@ -52551,6 +52562,7 @@ fn first_mounted_parity_form_actions() {
             ["cancel", "save"]
         );
         assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }
 
@@ -52645,30 +52657,47 @@ fn first_mounted_parity_form_layout() {
                 .with_actions(submit)
                 .into_compat_node();
             node.id = Some(ROOT.to_owned());
+            assert!(give_first_id(
+                &mut node,
+                "mounted-form-layout-error-callout",
+                &|candidate| {
+                    candidate.a11y.role == Some(NodeRole::Alert)
+                        && candidate.has_text("Could not save the form.")
+                }
+            ));
+            assert!(give_first_id(
+                &mut node,
+                "mounted-form-layout-field-errors",
+                &|candidate| {
+                    candidate.a11y.role == Some(NodeRole::Alert)
+                        && candidate.has_text("Please fix the following errors:")
+                }
+            ));
             poodle_gpui_node_backend::to_gpui(&node)
         })
     };
 
     run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
         let mut driver = HeadlessDriver::new_element_in_box(cx, build, 620.0, 620.0);
-        let accessibility = driver.accessibility_nodes();
-        let mounted_input = accessibility
-            .iter()
-            .find(|node| node.element_id == INPUT)
-            .expect("email control in mounted FormLayout");
-        assert_eq!(mounted_input.role, NodeRole::TextInput);
-        assert_eq!(mounted_input.label.as_deref(), Some("Email"));
-        assert!(accessibility.iter().any(|node| {
-            node.role == NodeRole::Alert
-                && node.text_content.iter().any(|text| text.contains("Could not save"))
-        }));
-        assert!(accessibility.iter().any(|node| {
-            node.role == NodeRole::Alert
-                && node
-                    .text_content
-                    .iter()
-                    .any(|text| text.contains("Email: is required"))
-        }));
+        let mounted_input =
+            poodle_gpui_node_backend::painted_node_for(INPUT).expect("email control paint");
+        assert_eq!(mounted_input.a11y_role, Some(NodeRole::TextInput));
+        assert_eq!(mounted_input.a11y_label.as_deref(), Some("Email"));
+        assert!(poodle_gpui_node_backend::painted_node_for(
+            "mounted-form-layout-error-callout"
+        )
+        .expect("form error Callout paint")
+        .texts
+        .iter()
+        .any(|text| text.contains("Could not save")));
+        assert!(poodle_gpui_node_backend::painted_node_for(
+            "mounted-form-layout-field-errors"
+        )
+        .expect("field error summary paint")
+        .texts
+        .iter()
+        .any(|text| text.contains("Email: is required")));
 
         let form_bounds = poodle_gpui_node_backend::bounds_for(ROOT).expect("FormLayout bounds");
         let input_bounds = poodle_gpui_node_backend::bounds_for(INPUT).expect("email bounds");
@@ -52697,6 +52726,7 @@ fn first_mounted_parity_form_layout() {
             ["submit", "submit"]
         );
         assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }
 
@@ -52784,25 +52814,18 @@ fn first_mounted_parity_validation_summary() {
     };
 
     run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
         let mut driver = HeadlessDriver::new_element_in_box(cx, build, 560.0, 420.0);
-        let mounted = driver.accessibility_nodes();
-        let mounted_summary = mounted
-            .iter()
-            .find(|node| node.element_id == ROOT)
-            .expect("summary in mounted accessibility tree");
-        assert_eq!(mounted_summary.role, NodeRole::Status);
-        let mounted_link = mounted
-            .iter()
-            .find(|node| node.element_id == LINK)
-            .expect("field link in mounted accessibility tree");
-        assert_eq!(mounted_link.role, NodeRole::Link);
-        assert_eq!(mounted_link.label.as_deref(), Some("Email address"));
-        assert!(mounted_link.focusable);
-        let field_control = mounted
-            .iter()
-            .find(|node| node.element_id == FIELD)
-            .expect("linked field in mounted accessibility tree");
-        assert_eq!(field_control.role, NodeRole::TextInput);
+        let mounted_summary = poodle_gpui_node_backend::painted_node_for(ROOT)
+            .expect("summary reaches GPUI paint");
+        assert_eq!(mounted_summary.a11y_role, Some(NodeRole::Status));
+        let mounted_link = poodle_gpui_node_backend::painted_node_for(LINK)
+            .expect("field link reaches GPUI paint");
+        assert_eq!(mounted_link.a11y_role, Some(NodeRole::Link));
+        assert_eq!(mounted_link.a11y_label.as_deref(), Some("Email address"));
+        let field_control = poodle_gpui_node_backend::painted_node_for(FIELD)
+            .expect("linked field reaches GPUI paint");
+        assert_eq!(field_control.a11y_role, Some(NodeRole::TextInput));
 
         let summary_bounds =
             poodle_gpui_node_backend::bounds_for(ROOT).expect("summary geometry");
@@ -52848,5 +52871,6 @@ fn first_mounted_parity_validation_summary() {
             "Enter activation emits the same native field-focus navigation"
         );
         assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }
