@@ -164,6 +164,8 @@ export type ExecutionRecord = {
   schema: string;
   command: string;
   source_commit: string;
+  /** Commit that first recorded the legacy test-body hashes. */
+  body_hash_baseline_commit?: string;
   lockfile: string;
   lockfile_sha256: string;
   run_id: string;
@@ -245,10 +247,8 @@ function validatePinAncestry(sourceCommit: string, root: string): void {
 }
 
 /** Extract a top-level test through its own closing brace, or undefined when absent/stale. */
-export function extractTestBody(root: string, testName: string): string | undefined {
-  const file = path.join(root, HEADLESS_TEST_FILE);
-  if (!fs.existsSync(file)) return undefined;
-  const lines = fs.readFileSync(file, "utf8").split("\n");
+function extractTestBodyFromSource(source: string, testName: string): string | undefined {
+  const lines = source.split("\n");
   const start = lines.findIndex((line) => line.startsWith(`fn ${testName}(`));
   if (start < 0) return undefined;
   for (let end = start + 1; end < lines.length; end++) {
@@ -263,6 +263,12 @@ export function extractTestBody(root: string, testName: string): string | undefi
     }
   }
   return undefined;
+}
+
+export function extractTestBody(root: string, testName: string): string | undefined {
+  const file = path.join(root, HEADLESS_TEST_FILE);
+  if (!fs.existsSync(file)) return undefined;
+  return extractTestBodyFromSource(fs.readFileSync(file, "utf8"), testName);
 }
 
 /** True when the test carries #[ignore]: it never executes, so it can never admit evidence. */
@@ -280,13 +286,9 @@ export function testBodySha256(root: string, testName: string): string | undefin
   return body === undefined ? undefined : sha256Hex(body);
 }
 
-/** Hash the pre-g18.108 extraction span so existing execution receipts remain
- * valid when the current function body is unchanged but trailing test docs are
- * no longer part of that body. New executions record the brace-bounded hash. */
-function legacyTestBodySha256(root: string, testName: string): string | undefined {
-  const file = path.join(root, HEADLESS_TEST_FILE);
-  if (!fs.existsSync(file)) return undefined;
-  const lines = fs.readFileSync(file, "utf8").split("\n");
+/** Previous extraction retained text through the next test/function boundary. */
+function extractLegacyTestBody(source: string, testName: string): string | undefined {
+  const lines = source.split("\n");
   const start = lines.findIndex((line) => line.startsWith(`fn ${testName}(`));
   if (start < 0) return undefined;
   let end = lines.length;
@@ -296,7 +298,19 @@ function legacyTestBodySha256(root: string, testName: string): string | undefine
       break;
     }
   }
-  return sha256Hex(lines.slice(start, end).join("\n"));
+  return lines.slice(start, end).join("\n");
+}
+
+function testSourceAtCommit(root: string, commit: string): string | undefined {
+  try {
+    return execSync(`git show ${commit}:${HEADLESS_TEST_FILE}`, {
+      cwd: root,
+      encoding: "utf8",
+      maxBuffer: 32 * 1024 * 1024,
+    });
+  } catch {
+    return undefined;
+  }
 }
 
 type TopLevelFn = { name: string; test: boolean; body: string };
@@ -683,6 +697,12 @@ export function validateExecutionRecord(record: ExecutionRecord, root: string): 
   if (!/^[0-9a-f]{40}$/.test(record.source_commit)) throw new Error("Execution record needs a 40-hex source commit.");
   if (record.command !== NATIVE_SELECTOR) throw new Error(`Execution record must cite ${NATIVE_SELECTOR}.`);
   validatePinAncestry(record.source_commit, root);
+  const bodyHashBaselineCommit = record.body_hash_baseline_commit ?? record.source_commit;
+  if (!/^[0-9a-f]{40}$/.test(bodyHashBaselineCommit)) {
+    throw new Error("Execution record needs a 40-hex body-hash baseline commit.");
+  }
+  validatePinAncestry(bodyHashBaselineCommit, root);
+  const baselineSource = testSourceAtCommit(root, bodyHashBaselineCommit);
   const lockfile = read(root, record.lockfile);
   if (sha256Hex(lockfile) !== record.lockfile_sha256) {
     throw new Error("GPUI lockfile changed since the recorded execution; re-run the expected tests and regenerate the census.");
@@ -697,8 +717,18 @@ export function validateExecutionRecord(record: ExecutionRecord, root: string): 
     const current = testBodySha256(root, test);
     if (current === undefined) throw new Error(`Expected test ${test} is stale: it no longer exists in ${HEADLESS_TEST_FILE}.`);
     if (testIsIgnored(root, test)) throw new Error(`Expected test ${test} is ignored and never executes.`);
-    const legacy = legacyTestBodySha256(root, test);
-    if (current !== entry.body_sha256 && legacy !== entry.body_sha256) {
+    const legacyBaseline = baselineSource === undefined
+      ? undefined
+      : extractLegacyTestBody(baselineSource, test);
+    const canonicalBaseline = baselineSource === undefined
+      ? undefined
+      : extractTestBodyFromSource(baselineSource, test);
+    const legacyHashMatches =
+      legacyBaseline !== undefined &&
+      canonicalBaseline !== undefined &&
+      sha256Hex(legacyBaseline) === entry.body_sha256 &&
+      sha256Hex(canonicalBaseline) === current;
+    if (current !== entry.body_sha256 && !legacyHashMatches) {
       throw new Error(`Expected test ${test} changed since the recorded execution; re-run it before admitting claims.`);
     }
   }
@@ -728,6 +758,7 @@ export function recordExpectedTestExecution(testNames: string[], runId: string, 
   const record = loadExecutionRecord(root);
   const sourceCommit = execSync("git rev-parse HEAD", { cwd: root, encoding: "utf8" }).trim();
   const lockfile = read(root, GPUI_LOCKFILE);
+  record.body_hash_baseline_commit ??= record.source_commit;
   record.source_commit = sourceCommit;
   record.lockfile_sha256 = sha256Hex(lockfile);
   record.run_id = runId;
