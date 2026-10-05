@@ -132,20 +132,46 @@ pub fn tool_call(spec: &ToolCallSpec, ctx: &RenderContext<'_>, handlers: ToolCal
     status.style.flex_shrink_zero = true;
     row = row.child(status);
 
-    // Status reaches assistive technology through the name; colour and glyph do
-    // not.
+    // The visible row is the trigger, matching Svelte's button around the row;
+    // the outer node only groups the trigger with its optional output.
+    row.id = Some(spec.id.clone());
+    row.runtime_id = scoped(handlers.instance_id.as_deref(), &spec.id);
+    if spec.has_output() {
+        row.a11y.role = Some(NodeRole::Button);
+        row.a11y.label = Some(spec.accessible_name());
+        row.a11y.expanded = Some(spec.is_expanded);
+        row.a11y.controls = Some(format!("{}-output", spec.id));
+        row.interaction.focusable = true;
+        row.style.focus = Some(StylePatch {
+            background: None,
+            border_color: Some(ctx.theme().resolve_color(spec.focus_ring_token())),
+            text_color: None,
+            opacity: None,
+        });
+        row.style.hover = Some(StylePatch {
+            background: Some(ctx.theme().resolve_color(spec.hover_fill_token())),
+            border_color: None,
+            text_color: None,
+            opacity: None,
+        });
+        if let Some(handler) = handlers.on_toggle {
+            let id = spec.id.clone();
+            row.style.descriptor.cursor = CursorHint::Pointer;
+            row.interaction.on_activate = Some(Arc::new(move || handler(&id)));
+        }
+    }
+
+    // The outer node is only a layout wrapper; ToolCallGroup owns list-item
+    // semantics for its own list rather than making standalone calls list items.
     let mut root = Node::container();
-    root.id = Some(spec.id.clone());
-    root.runtime_id = scoped(handlers.instance_id.as_deref(), &spec.id);
     root.style.descriptor.layout.direction = LayoutDirection::Column;
     root.style.fill_width = true;
-    root.a11y.role = Some(NodeRole::ListItem);
-    root.a11y.label = Some(spec.accessible_name());
     let mut root = root.child(row);
 
     if spec.has_output() && spec.is_expanded {
         if let Some(output) = &spec.output {
             let mut out = Node::text(output.clone());
+            out.id = Some(format!("{}-output", spec.id));
             {
                 let s = &mut out.style;
                 s.text_size = Some(font_size);
@@ -153,22 +179,6 @@ pub fn tool_call(spec: &ToolCallSpec, ctx: &RenderContext<'_>, handlers: ToolCal
                 s.descriptor.layout.spacing.padding.left = pad_x + icon_size + gap;
             }
             root = root.child(out);
-        }
-    }
-
-    // Only a row with output can be opened, so only that row is clickable.
-    if spec.has_output() {
-        root.interaction.focusable = true;
-        root.style.focus = Some(StylePatch {
-            background: None,
-            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
-            text_color: None,
-            opacity: None,
-        });
-        if let Some(handler) = handlers.on_toggle {
-            let id = spec.id.clone();
-            root.style.descriptor.cursor = CursorHint::Pointer;
-            root.interaction.on_activate = Some(Arc::new(move || handler(&id)));
         }
     }
 
@@ -208,8 +218,12 @@ mod tests {
             },
         );
         let expected = tool_call_focus_id(Some("first"), "with-output");
-        assert_eq!(first.runtime_id.as_deref(), Some(expected.as_str()));
-        assert_ne!(first.runtime_id, second.runtime_id);
-        assert_eq!(first.id.as_deref(), Some("with-output"));
+        let first_trigger = first
+            .find(&|node| node.runtime_id.as_deref() == Some(expected.as_str()))
+            .expect("interactive row carries the instance-scoped focus identity");
+        assert!(second
+            .find(&|node| node.runtime_id.as_deref() == Some(expected.as_str()))
+            .is_none());
+        assert_eq!(first_trigger.id.as_deref(), Some("with-output"));
     }
 }

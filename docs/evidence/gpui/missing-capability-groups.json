@@ -5,9 +5,6 @@
     {
       "substrate": "feedback-status",
       "components": [
-        "ActionDiscoveryPanel",
-        "AgentSubagent",
-        "AgentTranscript",
         "Avatar",
         "DetailSectionGroup",
         "DetailShell",
@@ -15,7 +12,6 @@
         "EmptyState",
         "ErrorBoundary",
         "InlineListSection",
-        "LicenceSeats",
         "MetaBar",
         "MetaItem",
         "Meter",
@@ -24,21 +20,17 @@
         "Progress",
         "Region",
         "Spinner",
-        "StatusBar",
-        "ToolCall"
+        "StatusBar"
       ],
       "missingTally": {
         "semantic": 16,
-        "events": 16,
-        "pointer": 16,
+        "events": 12,
+        "pointer": 13,
         "keyboard_focus": 12,
-        "accessibility": 19,
-        "visual": 20
+        "accessibility": 16,
+        "visual": 16
       },
       "contracts": [
-        "docs/contracts/components/action-discovery-panel.md",
-        "docs/contracts/components/agent-subagent.md",
-        "docs/contracts/components/agent-transcript.md",
         "docs/contracts/components/avatar.md",
         "docs/contracts/components/detail-section-group.md",
         "docs/contracts/components/detail-shell.md",
@@ -46,7 +38,6 @@
         "docs/contracts/components/empty-state.md",
         "docs/contracts/components/error-boundary.md",
         "docs/contracts/components/inline-list-section.md",
-        "docs/contracts/components/licence-seats.md",
         "docs/contracts/components/meta-bar.md",
         "docs/contracts/components/meta-item.md",
         "docs/contracts/components/meter.md",
@@ -55,8 +46,7 @@
         "docs/contracts/components/progress.md",
         "docs/contracts/components/region.md",
         "docs/contracts/components/spinner.md",
-        "docs/contracts/components/status-bar.md",
-        "docs/contracts/components/tool-call.md"
+        "docs/contracts/components/status-bar.md"
       ]
     },
     {

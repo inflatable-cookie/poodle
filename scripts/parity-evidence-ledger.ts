@@ -194,6 +194,7 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   ChangedFiles: "changed_files_disclosure_and_selection_rebuild_the_host_spec",
   ToolCall: "tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input",
   ToolCallGroup: "tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input",
+  AgentTranscript: "agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport",
   Stepper: [
     "stepper_selection_and_rerun_reach_separate_mounted_controls",
     "stepper_collapse_stays_independent_in_a_mounted_window",
