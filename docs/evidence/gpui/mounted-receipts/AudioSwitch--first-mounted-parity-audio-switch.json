@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "IconButton",
-  "test": "icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboard",
+  "component": "AudioSwitch",
+  "test": "first_mounted_parity_audio_switch",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -10,7 +10,8 @@
     "events",
     "pointer",
     "keyboard_focus",
-    "accessibility"
+    "accessibility",
+    "visual"
   ],
   "signals": {
     "semantic": [
@@ -18,28 +19,35 @@
       "production-mount"
     ],
     "events": [
-      "assert!(\n            pressed.lock().expect(\"pressed lock\").is_empty(),\n            \"command-only activation must not manufacture a pressed change"
+      "payloads.lock",
+      "assert_eq!(\n            *payloads.lock().expect(\"switch payloads\"),\n            [\n                \"change:1\".to_owned(),\n                \"commit:1\".to_owned(),\n                \"change:0\".to_owned(),\n                \"commit",
+      "assert_eq!(\n            rebuilt.children[0].style.descriptor.background,\n            Some(theme().resolve_color(\"color.status.success\")),\n            \"lamp stays independently on after the latch commit"
     ],
     "pointer": [
       "pointer_activate"
     ],
     "keyboard_focus": [
       "focus_handle_for",
-      "focus_state_for",
-      "focus_element"
+      "focus_element",
+      "dispatch_key"
     ],
     "accessibility": [
       "NodeToggled",
       "NodeRole",
       "a11y."
+    ],
+    "visual": [
+      "resolve_opacity",
+      "resolve_color",
+      "rem_to_px"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "HeadlessDriver::new_in_box",
+    "driver": "HeadlessDriver::new",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::IconButtonHandlers",
+    "renderer": "poodle_render::presentation",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -52,14 +60,15 @@
     "command": "effigy regressions:native",
     "run_id": "poodle-114-fbefd1bc",
     "outcome": "passed",
-    "body_sha256": "225c36282e319e5744b73cafd22ed56102cd42d1012315810b3b08856a33f645"
+    "body_sha256": "0290fddcd400eb7c659707e070b68efd234bad1c3e42ce86cc2c4fe9db059886"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
     "asserted emitted payloads or handler delivery through mounted input",
     "drove real pointer activation through the mounted GPUI node backend",
     "drove real keyboard input or backend focus through the mounted tree",
-    "asserted node-level role, label, state, or focusability in the mounted tree"
+    "asserted node-level role, label, state, or focusability in the mounted tree",
+    "asserted resolved token values or mounted geometry"
   ],
   "outcome": "passed"
 }

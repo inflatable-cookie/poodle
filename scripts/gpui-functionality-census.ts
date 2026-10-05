@@ -212,6 +212,57 @@ const STATIC_DISPLAY_NOT_APPLICABLE: Record<string, ManifestNotApplicable[]> = {
       contractRef: "docs/contracts/components/meta-item.md#9. Keyboard",
     },
   ],
+  AudioMeter: [
+    {
+      axis: "events",
+      reason: "The display emits no user events; hosts advance contexts with PUSH_FRAME.",
+      contractRef: "docs/contracts/components/audio-meter.md#5. Events",
+    },
+    {
+      axis: "pointer",
+      reason: "AudioMeter is a temporal level display with no pointer interaction; clip reset is host-owned.",
+      contractRef: "docs/contracts/components/audio-meter.md#6. Accessibility",
+    },
+    {
+      axis: "keyboard_focus",
+      reason: "The root exposes meter semantics and is not keyboard-focusable.",
+      contractRef: "docs/contracts/components/audio-meter.md#6. Accessibility",
+    },
+  ],
+  GainReductionMeter: [
+    {
+      axis: "events",
+      reason: "Hosts own feed cadence and bindable context observation; the meter has no callbacks.",
+      contractRef: "docs/contracts/components/gain-reduction-meter.md#5. Callbacks",
+    },
+    {
+      axis: "pointer",
+      reason: "GainReductionMeter is an inverted level display with no pointer interaction.",
+      contractRef: "docs/contracts/components/gain-reduction-meter.md#6. Accessibility",
+    },
+    {
+      axis: "keyboard_focus",
+      reason: "The root exposes meter semantics from zero to maximum reduction and is not a focus stop.",
+      contractRef: "docs/contracts/components/gain-reduction-meter.md#6. Accessibility",
+    },
+  ],
+  ValueReadout: [
+    {
+      axis: "events",
+      reason: "ValueReadout is display-only and emits no component events.",
+      contractRef: "docs/contracts/components/value-readout.md#5. Events",
+    },
+    {
+      axis: "pointer",
+      reason: "ValueReadout is a formatted read-only output with no pointer interaction.",
+      contractRef: "docs/contracts/components/value-readout.md#5. Events",
+    },
+    {
+      axis: "keyboard_focus",
+      reason: "The output carries an optional accessible name and is not a keyboard focus stop.",
+      contractRef: "docs/contracts/components/value-readout.md#6. Accessibility",
+    },
+  ],
 };
 
 export type ExecutionRecord = {
