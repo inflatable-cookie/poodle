@@ -52521,7 +52521,7 @@ fn first_mounted_parity_form_actions() {
                     node_compat::Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Primary)
-                            .with_label("Save changes"),
+                            .with_label("Save"),
                         &theme_provider,
                     )
                     .with_id("form-save")
@@ -52555,7 +52555,7 @@ fn first_mounted_parity_form_actions() {
         assert_eq!(cancel_node.a11y_role, Some(NodeRole::Button));
         assert_eq!(cancel_node.a11y_label.as_deref(), Some("Cancel"));
         assert_eq!(save_node.a11y_role, Some(NodeRole::Button));
-        assert_eq!(save_node.a11y_label.as_deref(), Some("Save changes"));
+        assert_eq!(save_node.a11y_label.as_deref(), Some("Save"));
 
         let root = poodle_gpui_node_backend::bounds_for(ROOT).expect("FormActions geometry");
         let cancel = poodle_gpui_node_backend::bounds_for(CANCEL).expect("Cancel geometry");
