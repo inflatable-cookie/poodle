@@ -49761,3 +49761,395 @@ fn first_mounted_parity_card() {
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }
+
+#[test]
+/// poodle#102. DragNumberField's first mounted parity proof: the shared
+/// drag-number machine through real pointer scrub (with the pointer's own
+/// deltas), keyboard stepping and Home/End bounds, direct text entry, and the
+/// spinbutton surface the contract declares.
+fn drag_number_field_scrub_keyboard_bounds_and_entry_rebuild_the_host_spec() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::SemanticControlSizeRole;
+
+    fn node_for(
+        id: &str,
+        live: &Arc<Mutex<poodle_render::DragNumberLive>>,
+        changes: &Arc<Mutex<Vec<f64>>>,
+        commits: &Arc<Mutex<Vec<f64>>>,
+        gestures: &Arc<Mutex<Vec<String>>>,
+    ) -> Node {
+        let spec = poodle_render::drag_number_spec_from_context(
+            &live.lock().expect("drag number machine").machine,
+            "Gain",
+        );
+        let handlers = poodle_render::DragNumberHandlers::new(id)
+            .on_value_change({
+                let changes = Arc::clone(changes);
+                Arc::new(move |value| changes.lock().expect("changes").push(value))
+            })
+            .on_value_commit({
+                let commits = Arc::clone(commits);
+                Arc::new(move |value| commits.lock().expect("commits").push(value))
+            })
+            .on_gesture_begin({
+                let gestures = Arc::clone(gestures);
+                Arc::new(move || gestures.lock().expect("gestures").push("begin".into()))
+            })
+            .on_gesture_end({
+                let gestures = Arc::clone(gestures);
+                Arc::new(move || gestures.lock().expect("gestures").push("end".into()))
+            });
+        poodle_render::drag_number_field_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            &handlers,
+            live,
+        )
+    }
+
+    run_headless(|cx| {
+        let id = "drag-number-main";
+        let spec0 = poodle_specs::DragNumberFieldSpec::new(50.0, 0.0, 100.0, 1.0, "50");
+        let live = Arc::new(Mutex::new(poodle_render::DragNumberLive::from_spec(&spec0)));
+        let changes: Arc<Mutex<Vec<f64>>> = Arc::new(Mutex::new(Vec::new()));
+        let commits: Arc<Mutex<Vec<f64>>> = Arc::new(Mutex::new(Vec::new()));
+        let gestures: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(node_for(
+            id, &live, &changes, &commits, &gestures,
+        )));
+
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle(id);
+
+        // Semantic, accessibility and visual: the spinbutton surface and its
+        // resolved tokens reach the mounted tree before any input.
+        {
+            let theme = theme();
+            let ctx = RenderContext::new(&theme);
+            let tree = mounted.lock().expect("mount");
+            assert_eq!(tree.a11y.role, Some(NodeRole::SpinButton));
+            assert_eq!(tree.a11y.label.as_deref(), Some("Gain"));
+            assert_eq!(tree.a11y.value, Some(50.0));
+            assert_eq!(tree.a11y.value_min, Some(0.0));
+            assert_eq!(tree.a11y.value_max, Some(100.0));
+            assert_eq!(tree.a11y.value_text.as_deref(), Some("50"));
+            assert!(tree.interaction.focusable);
+            assert_eq!(tree.a11y.tab_index, Some(0));
+            assert!(tree.style.focus_ring.is_some());
+
+            assert_eq!(
+                tree.style.descriptor.background,
+                Some(theme.resolve_color("color.background.surface"))
+            );
+            assert_eq!(
+                tree.style.descriptor.border.color,
+                theme.resolve_color("color.border.default")
+            );
+            assert_eq!(
+                tree.style.descriptor.text_color,
+                Some(theme.resolve_color("color.text.primary"))
+            );
+            let size = ctx.resolve_size(None, SemanticControlSizeRole::Control);
+            assert_eq!(
+                tree.style.text_size,
+                Some(poodle_render::presentation::rem_to_px(
+                    poodle_render::presentation::size_font_rem(size)
+                ))
+            );
+            assert!(
+                tree.style.descriptor.layout.spacing.padding.left
+                    >= poodle_render::presentation::rem_to_px(0.25)
+            );
+        }
+
+        // Keyboard focus and bounds: arrows step by the declared step, Home and
+        // End saturate to the spec's bounds through the real focus chain.
+        driver.focus_element(id);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(id),
+            Some(true),
+            "the spinbutton is a real focus target"
+        );
+        driver.dispatch_key_raw("right");
+        assert_eq!(live.lock().expect("machine").machine.base.value, 51.0);
+        driver.dispatch_key_raw("down");
+        assert_eq!(live.lock().expect("machine").machine.base.value, 50.0);
+        driver.dispatch_key_raw("end");
+        assert_eq!(live.lock().expect("machine").machine.base.value, 100.0);
+        driver.dispatch_key_raw("home");
+        assert_eq!(live.lock().expect("machine").machine.base.value, 0.0);
+
+        // Pointer scrub: a held drag reports live change from the real pointer
+        // deltas, then commits exactly once at release and pairs one gesture.
+        let center = headless_driver::mount_box_center();
+        driver.pointer_press(center);
+        driver.pointer_drag(point(center.x + px(10.0), center.y));
+        driver.pointer_drag(point(center.x + px(20.0), center.y));
+        driver.pointer_release(point(center.x + px(20.0), center.y));
+        let dragged = *changes
+            .lock()
+            .expect("changes")
+            .last()
+            .expect("a drag change");
+        assert!(
+            (dragged - 2.0).abs() < 1e-9,
+            "20px at 0.1 units/px snaps to 2 with step 1: {dragged}"
+        );
+        assert_eq!(
+            *commits
+                .lock()
+                .expect("commits")
+                .last()
+                .expect("a drag commit"),
+            2.0
+        );
+        assert_eq!(
+            gestures.lock().expect("gestures").as_slice(),
+            ["begin", "end"],
+            "one begin and one end for one gesture"
+        );
+        // Rebuild from the committed machine value and re-read the surface.
+        *mounted.lock().expect("mount") = node_for(id, &live, &changes, &commits, &gestures);
+        assert_eq!(
+            mounted.lock().expect("mount").a11y.value,
+            Some(2.0),
+            "the mounted spinbutton projects the scrubbed value"
+        );
+
+        // Direct entry: a click opens the labelled entry, and Enter commits the
+        // parsed draft through the shared formatter.
+        driver.pointer_press(center);
+        driver.pointer_release(center);
+        *mounted.lock().expect("mount") = node_for(id, &live, &changes, &commits, &gestures);
+        let entry_id = audio_entry_id(id);
+        driver.wait_for_element(&entry_id);
+        driver.focus_element(&entry_id);
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("7");
+        driver.dispatch_key_raw("enter");
+        assert_eq!(
+            live.lock().expect("machine").machine.base.value,
+            7.0,
+            "typed text commits through parse + clamp"
+        );
+        assert_eq!(
+            *commits
+                .lock()
+                .expect("commits")
+                .last()
+                .expect("entry commit"),
+            7.0
+        );
+        *mounted.lock().expect("mount") = node_for(id, &live, &changes, &commits, &gestures);
+        {
+            let tree = mounted.lock().expect("mount");
+            assert_eq!(tree.a11y.value, Some(7.0));
+            assert_eq!(tree.a11y.value_text.as_deref(), Some("7"));
+        }
+
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+/// poodle#102. TokenInput's first mounted parity proof: committed pills and
+/// their scoped, keyboard-reachable remove affordances, pointer removal, live
+/// draft entry with separator commit, Enter commit, and empty-draft Backspace
+/// removal — every one through the real mounted node backend.
+#[test]
+fn token_input_entry_removal_and_keyboard_rebuild_the_host_spec() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::SemanticControlSizeRole;
+
+    fn spec_for(values: &[String]) -> poodle_specs::TokenInputSpec {
+        let mut spec = poodle_specs::TokenInputSpec::new().with_values(values.to_vec());
+        spec.id = "tags".into();
+        spec.aria_label = Some("Tags".into());
+        spec.separators = vec![",".into()];
+        spec.dedupe = true;
+        spec.commit_on_blur = true;
+        spec
+    }
+
+    run_headless(|cx| {
+        let values: Arc<Mutex<Vec<String>>> =
+            Arc::new(Mutex::new(vec!["alpha".to_string(), "beta".to_string()]));
+        let live = Arc::new(Mutex::new(poodle_render::TokenInputLive::new()));
+        let log: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+
+        let rebuild = {
+            let values = Arc::clone(&values);
+            let live = Arc::clone(&live);
+            let log = Arc::clone(&log);
+            let mounted = Arc::clone(&mounted);
+            move || {
+                let spec = spec_for(&values.lock().expect("values"));
+                let remove_log = Arc::clone(&log);
+                let remove_values = Arc::clone(&values);
+                let change_log = Arc::clone(&log);
+                let change_values = Arc::clone(&values);
+                let handlers = poodle_render::TokenInputHandlers {
+                    on_remove: Some(Arc::new(move |token: &str| {
+                        remove_log
+                            .lock()
+                            .expect("log")
+                            .push(format!("remove:{token}"));
+                        remove_values
+                            .lock()
+                            .expect("values")
+                            .retain(|value| value != token);
+                    })),
+                    on_values_change: Some(Arc::new(move |next: Vec<String>| {
+                        change_log
+                            .lock()
+                            .expect("log")
+                            .push(format!("values:{}", next.join("|")));
+                        *change_values.lock().expect("values") = next;
+                    })),
+                    on_token_reject: None,
+                };
+                *mounted.lock().expect("mount") = poodle_render::token_input_with_handlers(
+                    &spec,
+                    &RenderContext::new(&theme()),
+                    handlers,
+                    &live,
+                );
+            }
+        };
+        rebuild();
+
+        let draft_id = poodle_render::token_input_draft_id(&spec_for(&values.lock().unwrap()));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle(&draft_id);
+
+        // Semantic, accessibility and visual: the field chrome, the committed
+        // pills, and the removable scoped controls all mount together.
+        {
+            let theme = theme();
+            let ctx = RenderContext::new(&theme);
+            let tree = mounted.lock().expect("mount");
+            assert_eq!(tree.id.as_deref(), Some("poodle-token-input-tags"));
+            assert_eq!(tree.a11y.label.as_deref(), Some("Tags"));
+            assert_eq!(
+                tree.style.descriptor.background,
+                Some(poodle_render::color::mix_srgb(
+                    theme.resolve_color("color.background.surface"),
+                    poodle_render::color::TRANSPARENT,
+                    0.96
+                ))
+            );
+            let border = theme.resolve_color("color.border.subtle");
+            assert_eq!(
+                tree.style.descriptor.border.color,
+                poodle_render::color::with_alpha(border, border.3 * 0.76)
+            );
+            let size = ctx.resolve_size(None, SemanticControlSizeRole::Control);
+            let _ = size;
+            let row = tree.children.first().expect("the token row");
+            assert!(
+                row.style.descriptor.layout.spacing.padding.left
+                    >= poodle_render::presentation::rem_to_px(0.25),
+                "size/density padding resolves above zero"
+            );
+
+            for (index, token) in ["alpha", "beta"].iter().enumerate() {
+                let scope = format!("pill:tags:{index}:{token}");
+                assert!(
+                    tree.find(&|n| n.runtime_id.as_deref() == Some(scope.as_str()))
+                        .is_some(),
+                    "committed token {token} paints as a pill"
+                );
+                let remove_id = format!("{scope}:remove");
+                let remove = tree
+                    .find(&|n| n.id.as_deref() == Some(remove_id.as_str()))
+                    .expect("a remove affordance per token");
+                assert_eq!(remove.a11y.role, Some(NodeRole::Button));
+                assert_eq!(
+                    remove.a11y.label.as_deref(),
+                    Some(format!("Remove {token}").as_str())
+                );
+                assert!(
+                    remove.interaction.focusable,
+                    "the token remove affordance is keyboard reachable"
+                );
+                assert_eq!(remove.a11y.tab_index, Some(0));
+            }
+
+            let draft = tree
+                .find(&|n| n.id.as_deref() == Some(draft_id.as_str()))
+                .expect("the live draft control");
+            assert_eq!(draft.a11y.role, Some(NodeRole::TextInput));
+            assert_eq!(draft.a11y.label.as_deref(), Some("Tags"));
+            assert!(draft.interaction.focusable);
+            assert_eq!(draft.style.descriptor.border.width, 0.0);
+        }
+
+        // Pointer + events: activating a token's remove control reports the
+        // token text (never an index) and drops exactly that token.
+        driver.pointer_activate_id("pill:tags:0:alpha:remove");
+        assert!(
+            log.lock()
+                .expect("log")
+                .iter()
+                .any(|entry| entry == "remove:alpha"),
+            "remove carries the token text: {:?}",
+            log.lock().expect("log")
+        );
+        rebuild();
+        driver.draw_frame();
+        assert_eq!(
+            *values.lock().expect("values"),
+            vec!["beta".to_string()],
+            "pointer removal drops the named token"
+        );
+
+        // Keyboard entry and commit: focus the live draft, type a token, and
+        // Enter commits it into the controlled value.
+        driver.focus_element(&draft_id);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&draft_id),
+            Some(true),
+            "the live draft is a real focus target"
+        );
+        for key in ["g", "a", "m", "m", "a"] {
+            driver.dispatch_key_raw(key);
+            rebuild();
+            driver.draw_frame();
+        }
+        assert_eq!(live.lock().expect("live").draft, "gamma");
+        driver.dispatch_key_raw("enter");
+        assert_eq!(
+            *values.lock().expect("values"),
+            vec!["beta".to_string(), "gamma".to_string()],
+            "Enter commits the draft through the shared token machine"
+        );
+        rebuild();
+        driver.draw_frame();
+
+        // Separator entry: a typed separator commits the completed part and
+        // leaves the remainder in the draft.
+        for key in ["d", "e", "l", "t", "a", ","] {
+            driver.dispatch_key_raw(key);
+            rebuild();
+            driver.draw_frame();
+        }
+        assert_eq!(
+            *values.lock().expect("values"),
+            vec!["beta".to_string(), "gamma".to_string(), "delta".to_string()],
+            "the separator commits the completed token"
+        );
+        assert_eq!(live.lock().expect("live").draft, "");
+
+        // Removal semantics: Backspace on an empty draft removes the last chip
+        // and is disabled once the list is empty.
+        rebuild();
+        driver.draw_frame();
+        driver.dispatch_key_raw("backspace");
+        assert_eq!(
+            *values.lock().expect("values"),
+            vec!["beta".to_string(), "gamma".to_string()],
+            "empty-draft Backspace removes the last token"
+        );
+        assert!(driver.mounted_observation().is_valid());
+    });
+}

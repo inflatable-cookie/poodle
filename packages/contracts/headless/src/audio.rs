@@ -314,6 +314,33 @@ impl FaderContext {
     }
 }
 
+/// DragNumberField scalar context: the shared scalar base plus the
+/// plain-units-per-pixel drag sensitivity. Mirrors the TypeScript
+/// `DragNumberContext` (`packages/core/src/audio/value-controls.ts`).
+#[derive(Clone, Debug, PartialEq)]
+pub struct DragNumberContext {
+    pub base: AudioValueContext,
+    pub drag_sensitivity: f64,
+}
+
+impl Default for DragNumberContext {
+    fn default() -> Self {
+        Self {
+            base: AudioValueContext {
+                keyboard_step: 1.0,
+                ..AudioValueContext::default()
+            },
+            drag_sensitivity: 0.1,
+        }
+    }
+}
+
+impl DragNumberContext {
+    pub fn visual_state(&self) -> AudioControlVisualState {
+        self.base.visual_state()
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum AudioValueEvent {
     Hover {
@@ -629,6 +656,59 @@ pub fn fader_transition(
             vec![AudioValueEffect::ValueChange(value)]
         }
         AudioValueEvent::DragEnd | AudioValueEvent::DragCancel => end_drag(&mut context.base),
+        _ => vec![],
+    };
+    (context, effects)
+}
+
+/// DragNumberField keeps the pre-`g16.031` lifecycle on purpose, exactly as
+/// the TypeScript `dragNumberTransition` does: a second `DragBegin` re-anchors
+/// and announces another gesture, and only `DragEnd` closes it. `DragCancel`
+/// is deliberately inert here; the adapters route a lost-host terminal as
+/// `DragEnd` (the web `pointercancel` path does the same).
+pub fn drag_number_transition(
+    mut context: DragNumberContext,
+    event: AudioValueEvent,
+) -> (DragNumberContext, Vec<AudioValueEffect>) {
+    if let Some(effects) = common_value_transition(&mut context.base, &event) {
+        return (context, effects);
+    }
+    let effects = match event {
+        AudioValueEvent::DragBegin { position, fine } => {
+            if context.base.disabled {
+                vec![]
+            } else {
+                context.base.drag = if fine {
+                    DragState::Fine
+                } else {
+                    DragState::Coarse
+                };
+                context.base.drag_start_value = context.base.value;
+                context.base.drag_start_position = position;
+                vec![AudioValueEffect::GestureBegin]
+            }
+        }
+        AudioValueEvent::DragMove { position, fine } => {
+            if !dragging(&context.base) {
+                return (context, vec![]);
+            }
+            if rebase_drag(&mut context.base, position, fine) {
+                return (context, vec![]);
+            }
+            let scale = if fine { 0.1 } else { 1.0 };
+            let base = &context.base;
+            let target = base.drag_start_value
+                + (position - base.drag_start_position) * context.drag_sensitivity * scale;
+            let value = constrain_value(target, base.min, base.max, base.law);
+            context.base.value = value;
+            context.base.drag = if fine {
+                DragState::Fine
+            } else {
+                DragState::Coarse
+            };
+            vec![AudioValueEffect::ValueChange(value)]
+        }
+        AudioValueEvent::DragEnd => end_drag(&mut context.base),
         _ => vec![],
     };
     (context, effects)

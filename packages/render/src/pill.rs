@@ -231,7 +231,10 @@ fn pill_inner(
 
     if spec.is_removable {
         let mut remove = Node::container();
-        remove.id = Some("poodle-pill-remove".to_string());
+        remove.id = Some(match instance_id {
+            Some(instance_id) => format!("pill:{instance_id}:remove"),
+            None => "poodle-pill-remove".to_string(),
+        });
         remove.a11y.role = Some(NodeRole::Button);
         remove.a11y.label = Some(format!("Remove {}", spec.label));
         remove.style.descriptor.layout.direction = LayoutDirection::Row;
@@ -247,6 +250,18 @@ fn pill_inner(
         let mut remove = remove.child(icon);
         if let Some(handler) = on_remove {
             remove.interaction.on_activate = Some(handler);
+            // A scoped removable affordance (TokenInput's token remove) is a
+            // real keyboard target: the token contract keeps remove reachable
+            // by keyboard while the field is editable.
+            if instance_id.is_some() && !spec.is_disabled {
+                remove.interaction.focusable = true;
+                remove.a11y.tab_index = Some(0);
+                remove.style.focus_ring = Some(FocusRing {
+                    color: ctx.theme().resolve_color("color.accent.focusRing"),
+                    width: ctx.theme().resolve_border_width("border.width.focus"),
+                    offset: rem_to_px(0.125),
+                });
+            }
         }
         el = el.child(remove);
     }

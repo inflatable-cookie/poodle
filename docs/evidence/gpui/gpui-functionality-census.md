@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `170ab06a21fe0b667a3f1f3ff2414d0bdb92a0e1`
+Evidence commit (execution identity from the execution record, not the checkout): `8d97a5b2a6ecf6d9a86fafd993f9357905838d45`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
@@ -14,10 +14,10 @@ Construction is not functional completion. A passing route, a test name, or one 
 <!-- g18-census-summary -->
 ## Summary
 
-Rows with at least one admitted capability: **118**/175.
-Fully admitted rows: **101**/175.
-Missing by axis: semantic 57; events 49; pointer 52; keyboard_focus 49; accessibility 62; visual 71.
-Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **111**.
+Rows with at least one admitted capability: **120**/175.
+Fully admitted rows: **103**/175.
+Missing by axis: semantic 55; events 47; pointer 50; keyboard_focus 47; accessibility 60; visual 69.
+Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **109**.
 
 ## Rows
 
@@ -114,7 +114,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **111**.
 | Table | semantic; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Table--first-mounted-parity-table.json` |
 | TimeAgo | semantic; accessibility; visual | — | semantic; accessibility; visual | accessibility (A2-platform-hold) | — |
 | TextInput | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/TextInput--text-input-controlled-editing-and-identity-rebuild-the-host-spec.json` |
-| TokenInput | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
+| TokenInput | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/TokenInput--token-input-entry-removal-and-keyboard-rebuild-the-host-spec.json` |
 | TimeInput | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/TimeInput--time-input-segmented-editor-commits-drafts-and-bounds.json` |
 | TimeZoneSelect | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/TimeZoneSelect--first-mounted-parity-time-zone-select.json` |
 | ThemeSelect | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ThemeSelect--first-mounted-parity-theme-select.json` |
@@ -184,7 +184,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **111**.
 | AudioMeter | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | MeterSurface | not-applicable (web-only) | — | — | — | — |
 | AudioSwitch | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
-| DragNumberField | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
+| DragNumberField | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/DragNumberField--drag-number-field-scrub-keyboard-bounds-and-entry-rebuild-the-host-spec.json` |
 | EnvelopeEditor | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | Fader | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test) | visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Fader--fader-mounted-parity-through-production-dispatch.json` |
 | GainReductionMeter | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
@@ -251,7 +251,6 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **111**.
 - StatusBar: No validated receipt and no retained expected test for StatusBar; every required capability stays missing.
 - TextLink: No validated receipt and no retained expected test for TextLink; every required capability stays missing.
 - TimeAgo: No validated receipt and no retained expected test for TimeAgo; every required capability stays missing.
-- TokenInput: No validated receipt and no retained expected test for TokenInput; every required capability stays missing.
 - Tooltip: No validated receipt and no retained expected test for Tooltip; every required capability stays missing.
 - UiPresentationProvider: No validated receipt and no retained expected test for UiPresentationProvider; every required capability stays missing.
 - MotionPolicyProvider: No validated receipt and no retained expected test for MotionPolicyProvider; every required capability stays missing.
@@ -301,7 +300,6 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **111**.
 - ModelConnectionCard: Expected test model_connection_card_closes_and_returns_real_focus_to_the_disclosure proves no visual claim; visual stays missing.
 - AudioMeter: No validated receipt and no retained expected test for AudioMeter; every required capability stays missing.
 - AudioSwitch: No validated receipt and no retained expected test for AudioSwitch; every required capability stays missing.
-- DragNumberField: No validated receipt and no retained expected test for DragNumberField; every required capability stays missing.
 - EnvelopeEditor: No validated receipt and no retained expected test for EnvelopeEditor; every required capability stays missing.
 - Fader: Expected test fader_mounted_parity_through_production_dispatch proves no visual claim; visual stays missing.
 - GainReductionMeter: No validated receipt and no retained expected test for GainReductionMeter; every required capability stays missing.
@@ -324,8 +322,8 @@ Shared-substrate groupings for repair-tranche compilation. Grouping only; no tra
 - general-composite: 9 components (Collapsible, EnvelopeEditor, FieldSet, LicenceStatus, ModMatrixGrid, ModelConnectionCard, Spacer, Stack, WaveformDisplay); missing semantic 6; events 7; pointer 5; keyboard_focus 6; accessibility 6; visual 9
 - text-display: 8 components (Code, Eyebrow, Icon, IconProvider, MediaPreview, MetricTile, StateTile, TextLink); missing semantic 7; events 4; pointer 6; keyboard_focus 6; accessibility 7; visual 7
 - layout-primitive: 6 components (Box, Grid, ListGrid, Skeleton, TimeAgo, Tooltip); missing semantic 6; events 2; pointer 2; keyboard_focus 3; accessibility 6; visual 6
-- drag-resize-reorder: 6 components (CardRadioGroup, CardToggleGroup, DragNumberField, ListCard, MarkdownEditor, TokenInput); missing semantic 6; events 6; pointer 6; keyboard_focus 6; accessibility 6; visual 6
 - media-data: 5 components (AudioMeter, AudioSwitch, GainReductionMeter, ValueReadout, XYPad); missing semantic 4; events 4; pointer 4; keyboard_focus 4; accessibility 4; visual 5
+- drag-resize-reorder: 4 components (CardRadioGroup, CardToggleGroup, ListCard, MarkdownEditor); missing semantic 4; events 4; pointer 4; keyboard_focus 4; accessibility 4; visual 4
 - workstation-shell: 3 components (DetailSection, ScrollShell, UiPresentationProvider); missing semantic 3; events 2; pointer 3; keyboard_focus 3; accessibility 3; visual 3
 - agent-composites: 2 components (AgentMessage, MotionPolicyProvider); missing semantic 2; events 2; pointer 2; keyboard_focus 2; accessibility 2; visual 2
 - overlay-dismissal: 1 components (NavigationMenu); missing semantic 0; events 0; pointer 0; keyboard_focus 0; accessibility 1; visual 0

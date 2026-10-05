@@ -185,6 +185,14 @@ pub struct DragNumberFieldSpec {
     pub min: f64,
     pub max: f64,
     pub step: f64,
+    /// Plain units per pixel for the pointer drag.
+    pub drag_sensitivity: f64,
+    pub default_value: f64,
+    pub format: AudioValueFormat,
+    pub entry_open: bool,
+    pub entry_draft: String,
+    pub drag_start_value: f64,
+    pub drag_start_position: f64,
     pub text: String,
     pub aria_label: String,
 }
@@ -207,8 +215,23 @@ impl DragNumberFieldSpec {
             min,
             max,
             step,
+            drag_sensitivity: 0.1,
+            default_value: value,
+            format: AudioValueFormat::Number { decimals: 2 },
+            entry_open: false,
+            entry_draft: String::new(),
+            drag_start_value: value,
+            drag_start_position: 0.0,
             text: text.into(),
             aria_label: "Value".into(),
+        }
+    }
+
+    /// The value law the machine runs: the visible `step` snapped linearly.
+    pub fn law(&self) -> AudioValueLaw {
+        AudioValueLaw::Stepped {
+            step: self.step,
+            law: poodle_headless::audio::ContinuousAudioValueLaw::Linear,
         }
     }
 }
