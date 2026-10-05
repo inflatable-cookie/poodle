@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `2048728c8d1dc3da66e1853f551c7d545999ab82`
+Evidence commit (execution identity from the execution record, not the checkout): `3b312d87787941f9c2a07154771522c10f0a519c`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
@@ -14,10 +14,10 @@ Construction is not functional completion. A passing route, a test name, or one 
 <!-- g18-census-summary -->
 ## Summary
 
-Rows with at least one admitted capability: **123**/175.
-Fully admitted rows: **105**/175.
-Missing by axis: semantic 52; events 44; pointer 47; keyboard_focus 44; accessibility 57; visual 67.
-Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **108**.
+Rows with at least one admitted capability: **124**/175.
+Fully admitted rows: **106**/175.
+Missing by axis: semantic 51; events 43; pointer 46; keyboard_focus 43; accessibility 56; visual 66.
+Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **107**.
 
 ## Rows
 
@@ -198,7 +198,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **108**.
 | AgentPlan | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-a1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/AgentPlan--agent-plan-decisions-rebuild-the-host-spec-through-mounted-input.json` |
 | AgentPlanRecord | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/AgentPlanRecord--agent-plan-record-disclosure-rebuilds-the-host-spec-through-mounted-input.json` |
 | AgentTranscript | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | events | accessibility (A2-platform-hold) | — |
-| MarkdownEditor | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
+| MarkdownEditor | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/MarkdownEditor--markdown-editor-mode-toolbar-and-edit-rebuild-the-host-spec.json` |
 
 <!-- g18-census-refusals -->
 ## Refusals
@@ -310,7 +310,6 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **108**.
 - WaveformDisplay: No validated receipt and no retained expected test for WaveformDisplay; every required capability stays missing.
 - XYPad: Expected test xy_pad_mounted_parity_through_production_dispatch proves no visual claim; visual stays missing.
 - AgentMessage: No validated receipt and no retained expected test for AgentMessage; every required capability stays missing.
-- MarkdownEditor: No validated receipt and no retained expected test for MarkdownEditor; every required capability stays missing.
 
 ## Missing-capability groups
 
@@ -324,5 +323,5 @@ Shared-substrate groupings for repair-tranche compilation. Grouping only; no tra
 - media-data: 5 components (AudioMeter, AudioSwitch, GainReductionMeter, ValueReadout, XYPad); missing semantic 4; events 4; pointer 4; keyboard_focus 4; accessibility 4; visual 5
 - workstation-shell: 3 components (DetailSection, ScrollShell, UiPresentationProvider); missing semantic 3; events 2; pointer 3; keyboard_focus 3; accessibility 3; visual 3
 - agent-composites: 2 components (AgentMessage, MotionPolicyProvider); missing semantic 2; events 2; pointer 2; keyboard_focus 2; accessibility 2; visual 2
-- drag-resize-reorder: 2 components (CardToggleGroup, MarkdownEditor); missing semantic 1; events 1; pointer 1; keyboard_focus 1; accessibility 1; visual 2
 - overlay-dismissal: 1 components (NavigationMenu); missing semantic 0; events 0; pointer 0; keyboard_focus 0; accessibility 1; visual 0
+- drag-resize-reorder: 1 components (CardToggleGroup); missing semantic 0; events 0; pointer 0; keyboard_focus 0; accessibility 0; visual 1
