@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "7485fd5615da97de581acba64ba16c4658152e5e",
+  "source_commit": "f30dedaabdcdcfbea39ff27217ba171a4930a01a",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -253,21 +253,27 @@
       "substrate": "feedback-status",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_avatar"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_avatar"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_avatar"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -276,10 +282,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for Avatar; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Avatar--first-mounted-parity-avatar.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Box",
@@ -2343,21 +2349,27 @@
       "substrate": "feedback-status",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_meta_bar"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_meta_bar"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_meta_bar"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2366,10 +2378,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for MetaBar; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/MetaBar--first-mounted-parity-meta-bar.json"
+      ],
+      "refusals": []
     },
     {
       "component": "MetaItem",
@@ -2378,21 +2390,27 @@
       "substrate": "feedback-status",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_meta_item"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_meta_item"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_meta_item"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2401,10 +2419,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for MetaItem; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/MetaItem--first-mounted-parity-meta-item.json"
+      ],
+      "refusals": []
     },
     {
       "component": "NumberInput",
@@ -9109,59 +9127,20 @@
     }
   ],
   "summary": {
-    "admittedRows": 135,
-    "fullyAdmittedRows": 128,
+    "admittedRows": 138,
+    "fullyAdmittedRows": 131,
     "missingTally": {
-      "semantic": 40,
-      "events": 33,
-      "pointer": 34,
-      "keyboard_focus": 35,
-      "accessibility": 40,
-      "visual": 46
+      "semantic": 37,
+      "events": 30,
+      "pointer": 31,
+      "keyboard_focus": 32,
+      "accessibility": 37,
+      "visual": 43
     },
     "holdCount": 175,
-    "refusalCount": 68
+    "refusalCount": 65
   },
   "groups": [
-    {
-      "substrate": "feedback-status",
-      "components": [
-        "Avatar",
-        "DetailSectionGroup",
-        "DetailShell",
-        "EmbedPreview",
-        "EmptyState",
-        "ErrorBoundary",
-        "InlineListSection",
-        "MetaBar",
-        "MetaItem",
-        "PageHeader",
-        "PasswordRequirements",
-        "Region"
-      ],
-      "missingTally": {
-        "semantic": 12,
-        "events": 12,
-        "pointer": 12,
-        "keyboard_focus": 11,
-        "accessibility": 12,
-        "visual": 12
-      },
-      "contracts": [
-        "docs/contracts/components/avatar.md",
-        "docs/contracts/components/detail-section-group.md",
-        "docs/contracts/components/detail-shell.md",
-        "docs/contracts/components/embed-preview.md",
-        "docs/contracts/components/empty-state.md",
-        "docs/contracts/components/error-boundary.md",
-        "docs/contracts/components/inline-list-section.md",
-        "docs/contracts/components/meta-bar.md",
-        "docs/contracts/components/meta-item.md",
-        "docs/contracts/components/page-header.md",
-        "docs/contracts/components/password-requirements.md",
-        "docs/contracts/components/region.md"
-      ]
-    },
     {
       "substrate": "general-composite",
       "components": [
@@ -9193,6 +9172,39 @@
         "docs/contracts/components/spacer.md",
         "docs/contracts/components/stack.md",
         "docs/contracts/components/waveform-display.md"
+      ]
+    },
+    {
+      "substrate": "feedback-status",
+      "components": [
+        "DetailSectionGroup",
+        "DetailShell",
+        "EmbedPreview",
+        "EmptyState",
+        "ErrorBoundary",
+        "InlineListSection",
+        "PageHeader",
+        "PasswordRequirements",
+        "Region"
+      ],
+      "missingTally": {
+        "semantic": 9,
+        "events": 9,
+        "pointer": 9,
+        "keyboard_focus": 8,
+        "accessibility": 9,
+        "visual": 9
+      },
+      "contracts": [
+        "docs/contracts/components/detail-section-group.md",
+        "docs/contracts/components/detail-shell.md",
+        "docs/contracts/components/embed-preview.md",
+        "docs/contracts/components/empty-state.md",
+        "docs/contracts/components/error-boundary.md",
+        "docs/contracts/components/inline-list-section.md",
+        "docs/contracts/components/page-header.md",
+        "docs/contracts/components/password-requirements.md",
+        "docs/contracts/components/region.md"
       ]
     },
     {

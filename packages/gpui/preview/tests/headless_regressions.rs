@@ -50532,6 +50532,115 @@ fn toast_stack_action_removal_hands_focus_on_or_leaves_it_alone() {
     });
 }
 
+/// Avatar parity against Svelte: initials and image names, decorative hiding,
+/// token styling, and square geometry survive the mounted GPUI backend.
+#[test]
+fn first_mounted_parity_avatar() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{AvatarShape, AvatarSize, AvatarSpec, AvatarTone};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let mut initials = poodle_render::avatar(
+            &AvatarSpec::new()
+                .with_initials("tomasz")
+                .with_size(AvatarSize::Lg)
+                .with_shape(AvatarShape::Rounded)
+                .with_tone(AvatarTone::Accent),
+            &ctx,
+        );
+        initials.id = Some("avatar-initials".to_owned());
+        assert_eq!(initials.a11y.role, Some(NodeRole::Image));
+        assert_eq!(initials.a11y.label.as_deref(), Some("tomasz"));
+        assert!(matches!(
+            &initials.children[0].kind,
+            NodeKind::Text { content } if content == "TOM"
+        ));
+        assert_eq!(
+            initials.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(4.5))
+        );
+        assert_eq!(
+            initials.style.descriptor.corner_radii.top_left,
+            theme_provider.resolve_radius("radius.control")
+        );
+        assert_eq!(
+            initials.style.descriptor.background,
+            Some(poodle_render::color::mix_srgb(
+                theme_provider.resolve_color("color.accent.base"),
+                theme_provider.resolve_color("color.background.surface"),
+                0.76,
+            ))
+        );
+
+        let mut image = poodle_render::avatar(
+            &AvatarSpec::new()
+                .with_src("fixture-media-preview.png")
+                .with_alt("Jane Doe")
+                .with_aria_label("Alternate name")
+                .with_size(AvatarSize::Sm),
+            &ctx,
+        );
+        image.id = Some("avatar-image".to_owned());
+        assert_eq!(image.a11y.role, Some(NodeRole::Image));
+        assert_eq!(image.a11y.label.as_deref(), Some("Jane Doe"));
+        assert!(matches!(
+            &image.children[0].kind,
+            NodeKind::Image { source } if source == "fixture-media-preview.png"
+        ));
+
+        let mut decorative = poodle_render::avatar(
+            &AvatarSpec::new()
+                .with_src("fixture-media-preview.png")
+                .with_alt("Ignored name")
+                .with_decorative(true),
+            &ctx,
+        );
+        decorative.id = Some("avatar-decorative".to_owned());
+        assert_eq!(decorative.a11y.role, None);
+        assert_eq!(decorative.a11y.label, None);
+        assert_eq!(decorative.a11y.hidden, Some(true));
+
+        let mounted = Arc::new(Mutex::new(
+            Node::container()
+                .child(initials)
+                .child(image)
+                .child(decorative),
+        ));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 220.0, 260.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let accessibility = driver.accessibility_nodes();
+        assert_eq!(accessibility.len(), 2);
+        assert!(accessibility.iter().any(|node| {
+            node.element_id == "avatar-initials"
+                && node.role == NodeRole::Image
+                && node.label.as_deref() == Some("tomasz")
+        }));
+        assert!(accessibility.iter().any(|node| {
+            node.element_id == "avatar-image"
+                && node.role == NodeRole::Image
+                && node.label.as_deref() == Some("Jane Doe")
+        }));
+        assert!(!accessibility
+            .iter()
+            .any(|node| node.element_id == "avatar-decorative"));
+        let painted = poodle_gpui_node_backend::painted_node_for("avatar-decorative")
+            .expect("decorative avatar reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_role, None);
+        assert_eq!(painted.a11y_hidden, Some(true));
+        let bounds = poodle_gpui_node_backend::bounds_for("avatar-initials")
+            .expect("initials avatar has mounted geometry");
+        assert!((f32::from(bounds.size.width) - rem_to_px(4.5)).abs() < 1.0);
+        let image_bounds = poodle_gpui_node_backend::bounds_for("avatar-image")
+            .expect("image avatar has mounted geometry");
+        assert!((f32::from(image_bounds.size.width) - rem_to_px(2.0)).abs() < 1.0);
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
 /// Spinner parity against the Svelte contract: decorative and announced
 /// semantics, size/tone geometry, and all three motion-policy paths.
 #[test]
@@ -51057,6 +51166,163 @@ fn first_mounted_parity_meter() {
             Some("38%")
         );
         assert_eq!(mounted_tree.children[3].a11y.value_max, Some(21.0));
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// MetaBar parity against Svelte: named grouping, per-child separators,
+/// wrapping metadata rows, token spacing, and mounted geometry.
+#[test]
+fn first_mounted_parity_meta_bar() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{MetaBarSpec, MetaItemSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let id_spec = MetaItemSpec::new().with_label("ID");
+        let owner_spec = MetaItemSpec::new()
+            .with_label("Owner")
+            .with_separator(false);
+        let updated_spec = MetaItemSpec::new().with_label("Updated");
+        let mut id = poodle_render::meta_item(&id_spec, &ctx, Some(Node::text("42")));
+        id.id = Some("meta-item-id".to_owned());
+        let mut owner = poodle_render::meta_item(&owner_spec, &ctx, Some(Node::text("Clay")));
+        owner.id = Some("meta-item-owner".to_owned());
+        let mut updated = poodle_render::meta_item(&updated_spec, &ctx, Some(Node::text("Today")));
+        updated.id = Some("meta-item-updated".to_owned());
+
+        let mut bar = poodle_render::meta_bar_sep(
+            &MetaBarSpec::new().with_aria_label("Project metadata"),
+            &ctx,
+            vec![
+                (id, id_spec.separator),
+                (owner, owner_spec.separator),
+                (updated, updated_spec.separator),
+            ],
+        );
+        bar.id = Some("meta-bar".to_owned());
+        assert_eq!(bar.a11y.label.as_deref(), Some("Project metadata"));
+        assert!(bar.style.flex_wrap);
+        assert_eq!(
+            bar.style.descriptor.layout.spacing.gap,
+            theme_provider.resolve_space("space.inline.sm")
+        );
+        let secondary = theme_provider.resolve_color("color.text.secondary");
+        let separator_color = poodle_render::color::with_alpha(secondary, secondary.3 * 0.72);
+        let separator_dots = bar
+            .children
+            .iter()
+            .filter(|child| {
+                child.style.descriptor.background == Some(separator_color)
+                    && child.style.descriptor.layout.width == LayoutSizing::Fixed(rem_to_px(0.25))
+                    && child.style.descriptor.layout.height == LayoutSizing::Fixed(rem_to_px(0.25))
+            })
+            .count();
+        assert_eq!(
+            separator_dots, 1,
+            "the opted-out MetaItem has no leading dot"
+        );
+
+        let mut quiet = poodle_render::meta_bar_sep(
+            &MetaBarSpec::new().with_show_separators(false),
+            &ctx,
+            vec![(Node::text("Type"), true), (Node::text("Media"), true)],
+        );
+        quiet.id = Some("meta-bar-no-separators".to_owned());
+        assert_eq!(quiet.children.len(), 2);
+
+        let mut constrained = Node::container().child(bar).child(quiet);
+        constrained.style.descriptor.layout.direction = LayoutDirection::Column;
+        constrained.style.descriptor.layout.width = LayoutSizing::Fixed(160.0);
+        constrained.style.descriptor.layout.spacing.gap = rem_to_px(0.5);
+        let mounted = Arc::new(Mutex::new(Node::container().child(constrained)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 220.0, 180.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let painted = poodle_gpui_node_backend::painted_node_for("meta-bar")
+            .expect("MetaBar reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_label.as_deref(), Some("Project metadata"));
+        let first_bounds = poodle_gpui_node_backend::bounds_for("meta-item-id")
+            .expect("first metadata item has mounted geometry");
+        let last_bounds = poodle_gpui_node_backend::bounds_for("meta-item-updated")
+            .expect("last metadata item has mounted geometry");
+        assert!(f32::from(last_bounds.origin.y) > f32::from(first_bounds.origin.y));
+        let bar_bounds = poodle_gpui_node_backend::bounds_for("meta-bar")
+            .expect("metadata row has mounted geometry");
+        assert!(bar_bounds.size.width > px(0.0));
+        assert!(bar_bounds.size.height > px(0.0));
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// MetaItem parity against Svelte: uppercase labels, optional labels, aria
+/// naming, inherited typography ratios, token values, and mounted geometry.
+#[test]
+fn first_mounted_parity_meta_item() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{InlineTypographyMode, MetaItemSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let mut value = Node::text("Clay");
+        value.id = Some("meta-item-owner-value".to_owned());
+        let mut labeled = poodle_render::meta_item(
+            &MetaItemSpec::new()
+                .with_label("Owner")
+                .with_aria_label("Project owner")
+                .with_typography(InlineTypographyMode::Inherit),
+            &ctx,
+            Some(value),
+        );
+        labeled.id = Some("meta-item-owner".to_owned());
+        assert_eq!(labeled.a11y.label.as_deref(), Some("Project owner"));
+        assert_eq!(labeled.children.len(), 2);
+        assert!(matches!(
+            &labeled.children[0].kind,
+            NodeKind::Text { content } if content == "OWNER"
+        ));
+        assert_eq!(
+            labeled.children[0].style.descriptor.text_color,
+            Some(theme_provider.resolve_color("color.text.secondary"))
+        );
+        assert_eq!(labeled.children[0].style.text_size, Some(rem_to_px(0.6875)));
+        assert_eq!(labeled.children[0].style.letter_spacing_em, Some(0.08));
+        assert_eq!(labeled.children[1].style.text_size, Some(rem_to_px(1.0)));
+        assert_eq!(
+            labeled.children[1].style.descriptor.layout.spacing.gap,
+            rem_to_px(0.375)
+        );
+        assert!(matches!(
+            &labeled.children[1].children[0].kind,
+            NodeKind::Text { content } if content == "Clay"
+        ));
+
+        let mut unlabelled =
+            poodle_render::meta_item(&MetaItemSpec::new(), &ctx, Some(Node::text("1920 x 1080")));
+        unlabelled.id = Some("meta-item-unlabelled".to_owned());
+        assert_eq!(unlabelled.children.len(), 1);
+        assert!(matches!(
+            &unlabelled.children[0].children[0].kind,
+            NodeKind::Text { content } if content == "1920 x 1080"
+        ));
+
+        let mounted = Arc::new(Mutex::new(
+            Node::container().child(labeled).child(unlabelled),
+        ));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 240.0, 100.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let painted = poodle_gpui_node_backend::painted_node_for("meta-item-owner")
+            .expect("MetaItem reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_label.as_deref(), Some("Project owner"));
+        let bounds = poodle_gpui_node_backend::bounds_for("meta-item-owner")
+            .expect("labelled metadata has mounted geometry");
+        assert!(bounds.size.width > px(0.0));
+        assert!(bounds.size.height > px(0.0));
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }

@@ -256,6 +256,25 @@ describe("g18.001 census oracles", () => {
     ]);
   });
 
+  it("manifest oracle: static metadata leaves only its interaction axes not applicable", () => {
+    const manifest = deriveCapabilityManifest(repositoryRoot);
+    for (const [component, contract] of [
+      ["Avatar", "avatar.md"],
+      ["MetaBar", "meta-bar.md"],
+      ["MetaItem", "meta-item.md"],
+    ]) {
+      const entry = manifest.find((candidate) => candidate.component === component);
+      expect(entry?.required).toEqual(["semantic", "accessibility", "visual"]);
+      expect(entry?.notApplicable.map((item) => item.axis)).toEqual([
+        "events",
+        "pointer",
+        "keyboard_focus",
+      ]);
+      expect(entry?.notApplicable.every((item) => item.contractRef.includes(contract))).toBe(true);
+      expect(entry?.notApplicable.every((item) => item.reason.length > 0)).toBe(true);
+    }
+  });
+
   it("widened-A2 oracle: platform language can never justify not-applicable", () => {
     const entry = manifestEntry({
       component: "Checkbox",
