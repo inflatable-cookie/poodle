@@ -38,10 +38,14 @@ pub fn shell_status_bar(
     {
         let s = &mut el.style;
         s.fill_width = true;
+        s.flex_wrap = true;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
         s.descriptor.layout.spacing.gap = root_gap;
+        s.descriptor.text_color = Some(text_color);
+        s.text_size = Some(font_size);
+        s.line_height = Some(1.5);
         let pad = &mut s.descriptor.layout.spacing.padding;
         pad.left = pad_inline;
         pad.right = pad_inline;
@@ -72,6 +76,7 @@ pub fn shell_status_bar(
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             s.descriptor.layout.spacing.gap = inner_gap;
+            s.flex_wrap = true;
         }
         let mut row = row;
         for item in items {
@@ -98,10 +103,6 @@ pub fn shell_status_bar(
         el = el.child(region(trailing));
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            el.a11y.label = Some(label.to_string());
-        }
-    }
+    el.a11y.label = Some(spec.resolved_aria_label().to_owned());
     el
 }

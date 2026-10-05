@@ -463,11 +463,13 @@ fn to_gpui_impl(node: &Node) -> AnyElement {
         }
         NodeKind::Progress { fraction } => {
             record_probe_channel("structure.identity.progress");
+            // The component renderer supplies an explicit fill child so its
+            // gradient and animated widths use ordinary node channels.
+            // Existing progress nodes keep the backend-owned fill path below.
+            if !node.children.is_empty() {
+                return build_box(node, div());
+            }
             // The node styles the track; the backend fills `fraction` of it.
-            // Fill colour comes from `text_color` when the component set one —
-            // the vocabulary carries no dedicated fill channel (Jetstream's
-            // progress widget supplies its own). UNPROVEN: no gated specimen
-            // exercises this yet (progress is skipped as non-deterministic).
             let fill_color = node
                 .style
                 .descriptor
@@ -1250,6 +1252,9 @@ where
     {
         record_probe_channel("surface.animation.approximation.opacity-stand-in");
     }
+    // The Progress indicator keyframes express their TranslateX values as
+    // fractions of the containing track width; other translations stay in px.
+    let progress_percent_translation = anim.key == "poodle-progress-indeterminate";
     let anim = anim.clone();
     let id = element_id(node);
     el.with_animation(id, gpui_animation(&anim), move |el, t| {
@@ -1259,7 +1264,11 @@ where
         }
         if !anchored {
             if let Some(x) = sample_property(&anim, AnimProperty::TranslateX, t) {
-                el = el.left(px(x));
+                el = if progress_percent_translation {
+                    el.left(relative(x))
+                } else {
+                    el.left(px(x))
+                };
             }
             if let Some(y) = sample_property(&anim, AnimProperty::TranslateY, t) {
                 el = el.top(px(y));

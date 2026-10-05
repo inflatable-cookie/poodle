@@ -151,12 +151,12 @@ impl MeterSpec {
     }
 
     pub fn normalized_progress(&self) -> f64 {
-        let range = self.max - self.min;
-        if range <= 0.0 {
-            0.0
+        let safe_max = if self.max <= self.min {
+            self.min + 1.0
         } else {
-            ((self.value - self.min) / range).clamp(0.0, 1.0)
-        }
+            self.max
+        };
+        ((self.safe_value() - self.min) / (safe_max - self.min)).clamp(0.0, 1.0)
     }
 
     /// Clamped value inside `[min, safe_max]` (contract §3 `safeValue`).
