@@ -52446,7 +52446,7 @@ fn first_mounted_parity_calendar() {
 /// and token-resolved separation when its root is mounted in GPUI.
 #[test]
 fn first_mounted_parity_form_actions() {
-    use gpui::{div, px, AnyElement, IntoElement, Styled};
+    use gpui::{div, px, AnyElement, IntoElement, ParentElement, Styled};
     use node_compat::IntoCompatNode;
     use poodle_adapter::ThemeProvider;
     use poodle_node::MainAxisAlignment;
@@ -52704,7 +52704,7 @@ fn first_mounted_parity_form_layout() {
 /// entries whose pointer and keyboard activation focus the matching field.
 #[test]
 fn first_mounted_parity_validation_summary() {
-    use gpui::{div, px, AnyElement, IntoElement, Styled};
+    use gpui::{div, px, AnyElement, IntoElement, ParentElement, Styled};
     use node_compat::IntoCompatNode;
     use poodle_adapter::ThemeProvider;
     use poodle_specs::{
