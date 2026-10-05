@@ -54728,7 +54728,49 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
             "computerKeyMap overlay remaps A to F4"
         );
         driver.dispatch_key_release("a");
+        driver.dispatch_key_press("s");
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.0 == "key:s" && active.1 == 62),
+            "unoverridden default S stays D4 while A is remapped"
+        );
+        driver.dispatch_key_release("s");
 
+        {
+            let mut runtime = live.lock().expect("keyboard machine");
+            runtime.machine.computer_key_map = merge_computer_key_map([] as [(&str, i16); 0]);
+            runtime.machine.computer_base_note = 48;
+        }
+        *mounted.lock().expect("keyboard node") = build();
+        driver.draw_frame();
+        driver.focus_element(ROOT);
+        driver.dispatch_key_press("a");
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.0 == "key:a" && active.1 == 48),
+            "non-default computerBaseNote 48 plays C3 from A"
+        );
+        assert!(
+            payloads
+                .lock()
+                .expect("payloads lock")
+                .iter()
+                .any(|entry| entry.starts_with("noteOn:48:")),
+            "mounted computer-key path emits noteOn for the configured base"
+        );
+        driver.dispatch_key_release("a");
+        live.lock()
+            .expect("keyboard machine")
+            .machine
+            .computer_base_note = 60;
         *mounted.lock().expect("keyboard node") = build();
         driver.draw_frame();
         driver.wait_for_focus_handle("keyboard-main:note-60");
