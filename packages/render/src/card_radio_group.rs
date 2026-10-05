@@ -112,7 +112,6 @@ fn roving_key_handler(
 ) -> Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>> {
     let index = roving.iter().position(|candidate| candidate == value)?;
     let ids = roving.to_vec();
-    let current = value.to_string();
     Some(Arc::new(move |key, _modifiers| {
         if ids.is_empty() {
             return None;
@@ -136,9 +135,10 @@ fn roving_key_handler(
             _ => return None,
         };
         let target = ids[next].clone();
-        if target == current {
-            return None;
-        }
+        // A single enabled option wraps to itself. Svelte's `menuListNavigate`
+        // returns index 0 there and still calls `select`, so the same target
+        // must run the selection machine rather than short-circuiting; focus
+        // stays on that option.
         if let Some(handler) = &on_change {
             handler(&target);
         }

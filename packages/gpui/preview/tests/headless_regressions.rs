@@ -50771,6 +50771,40 @@ fn first_mounted_parity_card_radio_group() {
         );
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
+
+    // Contract §6: arrow navigation on a single enabled option wraps to the
+    // same option and still runs the selection machine. Svelte's
+    // `menuListNavigate` returns index 0 there and still calls `select`, so an
+    // unselected one-option group selects on the first arrow.
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let payloads: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let solo = card_radio_group_with_handlers(
+            &CardRadioGroupSpec::new(vec![ChoiceOption::new("solo", "Solo")]),
+            &ctx,
+            CardRadioGroupHandlers::new("solo-group").on_change(Arc::new(move |value: &str| {
+                sink.lock().expect("payloads").push(value.to_string());
+            })),
+        );
+        let mounted = Arc::new(Mutex::new(solo));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 160.0);
+        let solo_id = "card-radio:solo-group:option:solo";
+        driver.wait_for_focus_handle(solo_id);
+        driver.focus_element(solo_id);
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            payloads.lock().expect("payloads").as_slice(),
+            ["solo"],
+            "arrow navigation on a one-option group still selects it"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(solo_id),
+            Some(true),
+            "focus stays on the wrapped option"
+        );
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
 }
 
 /// CardToggleGroup mounts a real group of pressed-state buttons: selection
@@ -51104,4 +51138,43 @@ fn first_mounted_parity_card_toggle_group() {
         [None],
         "re-pressing the selected card under allowDeactivation emits null"
     );
+
+    // Contract §4: arrow navigation on a single selected option with
+    // allowDeactivation wraps to itself and still runs the toggle machine, so
+    // it clears the active value rather than short-circuiting.
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let payloads: Arc<Mutex<Vec<Option<String>>>> = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let solo = card_toggle_group_with_handlers(
+            &CardToggleGroupSpec::new(vec![CardToggleOption::new("solo", "Solo")])
+                .with_values(vec!["solo".to_string()])
+                .with_allow_deactivation(true),
+            &ctx,
+            CardToggleGroupHandlers::new("solo-toggle").on_value_change(Arc::new(
+                move |value: Option<&str>| {
+                    sink.lock()
+                        .expect("payloads")
+                        .push(value.map(str::to_owned));
+                },
+            )),
+        );
+        let mounted = Arc::new(Mutex::new(solo));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 160.0);
+        let solo_id = "card-toggle:solo-toggle:option:solo";
+        driver.wait_for_focus_handle(solo_id);
+        driver.focus_element(solo_id);
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            payloads.lock().expect("payloads").as_slice(),
+            [None],
+            "arrow navigation on a one-option toggle group clears the active value"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(solo_id),
+            Some(true),
+            "focus stays on the wrapped option"
+        );
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
 }
