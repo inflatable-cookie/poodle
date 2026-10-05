@@ -50929,6 +50929,28 @@ fn first_mounted_parity_meter() {
         );
         linear.children[0].children[0].id = Some("meter-linear-indicator".to_owned());
 
+        // The contract repairs an invalid range to [min, min + 1], rather
+        // than collapsing its visual percentage to zero.
+        let degenerate_spec = MeterSpec::new()
+            .with_value(20.5)
+            .with_min(20.0)
+            .with_max(20.0)
+            .with_show_value(true)
+            .with_aria_label("Degenerate range");
+        assert_eq!(degenerate_spec.normalized_progress(), 0.5);
+        let mut degenerate = poodle_render::meter(&degenerate_spec, &ctx);
+        degenerate.id = Some("meter-degenerate".to_owned());
+        assert_eq!(degenerate.a11y.value, Some(20.5));
+        assert_eq!(degenerate.a11y.value_min, Some(20.0));
+        assert_eq!(degenerate.a11y.value_max, Some(21.0));
+        assert_eq!(degenerate.a11y.value_text.as_deref(), Some("50%"));
+        assert_eq!(degenerate.children[0].children[0].style.width_pct, Some(0.5));
+        assert!(matches!(
+            &degenerate.children[1].kind,
+            NodeKind::Text { content } if content == "50%"
+        ));
+        degenerate.children[0].children[0].id = Some("meter-degenerate-indicator".to_owned());
+
         let mut high = poodle_render::meter(
             &MeterSpec::new()
                 .with_value(90.0)
@@ -50970,12 +50992,16 @@ fn first_mounted_parity_meter() {
         }));
 
         let mounted = Arc::new(Mutex::new(
-            Node::container().child(linear).child(high).child(ring),
+            Node::container()
+                .child(linear)
+                .child(high)
+                .child(ring)
+                .child(degenerate),
         ));
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 240.0, 128.0);
         poodle_gpui_node_backend::begin_probe_capture();
         driver.draw_frame();
-        for id in ["meter-linear", "meter-high", "meter-ring"] {
+        for id in ["meter-linear", "meter-high", "meter-ring", "meter-degenerate"] {
             let painted = poodle_gpui_node_backend::painted_node_for(id)
                 .expect("meter reaches the GPUI paint pass");
             assert_eq!(painted.a11y_role, None);
@@ -50994,6 +51020,17 @@ fn first_mounted_parity_meter() {
                 < 1.0,
             "mounted meter fill reflects its 50% range value"
         );
+        let degenerate_bounds =
+            poodle_gpui_node_backend::bounds_for("meter-degenerate").expect("fallback range bounds");
+        let degenerate_fill = poodle_gpui_node_backend::bounds_for("meter-degenerate-indicator")
+            .expect("fallback range fill bounds");
+        assert!(
+            (f32::from(degenerate_fill.size.width)
+                - f32::from(degenerate_bounds.size.width) * 0.5)
+                .abs()
+                < 1.0,
+            "mounted fallback range uses contract min + 1 normalization"
+        );
         let mounted_tree = mounted.lock().expect("mounted meter tree");
         assert_eq!(mounted_tree.children[0].a11y.value, Some(40.0));
         assert_eq!(mounted_tree.children[0].a11y.value_min, Some(20.0));
@@ -51002,6 +51039,7 @@ fn first_mounted_parity_meter() {
             mounted_tree.children[2].a11y.value_text.as_deref(),
             Some("38%")
         );
+        assert_eq!(mounted_tree.children[3].a11y.value_max, Some(21.0));
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }
