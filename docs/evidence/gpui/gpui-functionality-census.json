@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "8d97a5b2a6ecf6d9a86fafd993f9357905838d45",
+  "source_commit": "2048728c8d1dc3da66e1853f551c7d545999ab82",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -2083,15 +2083,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_list_card"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_list_card"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_list_card"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_list_card"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_list_card"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_list_card"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2100,10 +2124,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for ListCard; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/ListCard--first-mounted-parity-list-card.json"
+      ],
+      "refusals": []
     },
     {
       "component": "ListCardCounter",
@@ -5515,15 +5539,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_card_radio_group"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_card_radio_group"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_card_radio_group"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_card_radio_group"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_card_radio_group"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_card_radio_group"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -5532,10 +5580,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for CardRadioGroup; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/CardRadioGroup--first-mounted-parity-card-radio-group.json"
+      ],
+      "refusals": []
     },
     {
       "component": "CardToggleGroup",
@@ -5550,13 +5598,34 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_card_toggle_group"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_card_toggle_group"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_card_toggle_group"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_card_toggle_group"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_card_toggle_group"
+        }
+      ],
       "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
         "visual"
       ],
       "holds": [
@@ -5567,9 +5636,12 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/CardToggleGroup--first-mounted-parity-card-toggle-group.json"
+      ],
       "refusals": [
-        "No validated receipt and no retained expected test for CardToggleGroup; every required capability stays missing."
+        "Expected test first_mounted_parity_card_toggle_group shows visual signals, but visual is withheld: narrow-container clamp needs a shared min(100%, max(…)) layout capability.",
+        "Expected test first_mounted_parity_card_toggle_group proves no visual claim; visual stays missing."
       ]
     },
     {
@@ -8774,18 +8846,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 120,
-    "fullyAdmittedRows": 103,
+    "admittedRows": 123,
+    "fullyAdmittedRows": 105,
     "missingTally": {
-      "semantic": 55,
-      "events": 47,
-      "pointer": 50,
-      "keyboard_focus": 47,
-      "accessibility": 60,
-      "visual": 69
+      "semantic": 52,
+      "events": 44,
+      "pointer": 47,
+      "keyboard_focus": 44,
+      "accessibility": 57,
+      "visual": 67
     },
     "holdCount": 175,
-    "refusalCount": 109
+    "refusalCount": 108
   },
   "groups": [
     {
@@ -9003,29 +9075,6 @@
       ]
     },
     {
-      "substrate": "drag-resize-reorder",
-      "components": [
-        "CardRadioGroup",
-        "CardToggleGroup",
-        "ListCard",
-        "MarkdownEditor"
-      ],
-      "missingTally": {
-        "semantic": 4,
-        "events": 4,
-        "pointer": 4,
-        "keyboard_focus": 4,
-        "accessibility": 4,
-        "visual": 4
-      },
-      "contracts": [
-        "docs/contracts/components/card-radio-group.md",
-        "docs/contracts/components/card-toggle-group.md",
-        "docs/contracts/components/list-card.md",
-        "docs/contracts/components/markdown-editor.md"
-      ]
-    },
-    {
       "substrate": "workstation-shell",
       "components": [
         "DetailSection",
@@ -9063,6 +9112,25 @@
       "contracts": [
         "docs/contracts/components/agent-message.md",
         "docs/contracts/components/motion-policy-provider.md"
+      ]
+    },
+    {
+      "substrate": "drag-resize-reorder",
+      "components": [
+        "CardToggleGroup",
+        "MarkdownEditor"
+      ],
+      "missingTally": {
+        "semantic": 1,
+        "events": 1,
+        "pointer": 1,
+        "keyboard_focus": 1,
+        "accessibility": 1,
+        "visual": 2
+      },
+      "contracts": [
+        "docs/contracts/components/card-toggle-group.md",
+        "docs/contracts/components/markdown-editor.md"
       ]
     },
     {

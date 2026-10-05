@@ -134,37 +134,6 @@
       ]
     },
     {
-      "substrate": "drag-resize-reorder",
-      "components": [
-        "Card",
-        "CardToggleGroup",
-        "DockRegion",
-        "DragNumberField",
-        "FileUpload",
-        "MarkdownEditor",
-        "Separator",
-        "TokenInput"
-      ],
-      "missingTally": {
-        "semantic": 5,
-        "events": 3,
-        "pointer": 5,
-        "keyboard_focus": 6,
-        "accessibility": 7,
-        "visual": 8
-      },
-      "contracts": [
-        "docs/contracts/components/card-toggle-group.md",
-        "docs/contracts/components/card.md",
-        "docs/contracts/components/dock-region.md",
-        "docs/contracts/components/drag-number-field.md",
-        "docs/contracts/components/file-upload.md",
-        "docs/contracts/components/markdown-editor.md",
-        "docs/contracts/components/separator.md",
-        "docs/contracts/components/token-input.md"
-      ]
-    },
-    {
       "substrate": "text-display",
       "components": [
         "Code",
@@ -248,29 +217,6 @@
       ]
     },
     {
-      "substrate": "drag-resize-reorder",
-      "components": [
-        "CardRadioGroup",
-        "CardToggleGroup",
-        "ListCard",
-        "MarkdownEditor"
-      ],
-      "missingTally": {
-        "semantic": 4,
-        "events": 4,
-        "pointer": 4,
-        "keyboard_focus": 4,
-        "accessibility": 4,
-        "visual": 4
-      },
-      "contracts": [
-        "docs/contracts/components/card-radio-group.md",
-        "docs/contracts/components/card-toggle-group.md",
-        "docs/contracts/components/list-card.md",
-        "docs/contracts/components/markdown-editor.md"
-      ]
-    },
-    {
       "substrate": "workstation-shell",
       "components": [
         "DetailSection",
@@ -308,6 +254,25 @@
       "contracts": [
         "docs/contracts/components/agent-message.md",
         "docs/contracts/components/motion-policy-provider.md"
+      ]
+    },
+    {
+      "substrate": "drag-resize-reorder",
+      "components": [
+        "CardToggleGroup",
+        "MarkdownEditor"
+      ],
+      "missingTally": {
+        "semantic": 1,
+        "events": 1,
+        "pointer": 1,
+        "keyboard_focus": 1,
+        "accessibility": 1,
+        "visual": 2
+      },
+      "contracts": [
+        "docs/contracts/components/card-toggle-group.md",
+        "docs/contracts/components/markdown-editor.md"
       ]
     },
     {
