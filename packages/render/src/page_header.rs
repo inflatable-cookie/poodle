@@ -305,9 +305,9 @@ pub fn page_header(
         }
     }
 
+    outer.a11y.role = Some(NodeRole::Banner);
     if let Some(label) = spec.aria_label.as_deref() {
         if !label.is_empty() {
-            outer.a11y.role = Some(NodeRole::Banner);
             outer.a11y.label = Some(label.to_string());
         }
     }

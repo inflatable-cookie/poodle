@@ -63,7 +63,7 @@ pub fn detail_shell(
         }
     }
 
-    // ── Header region (title OR header slot) ─────────────────────
+    // ── Header region (header slot OR title fallback) ─────────────
     if spec.title.is_some() || header.is_some() {
         let mut header_region = Node::container();
         {
@@ -81,14 +81,16 @@ pub fn detail_shell(
             pad.bottom = panel_y;
         }
 
-        if let Some(ref title) = spec.title {
-            let mut t = Node::text(title);
-            t.a11y.role = Some(NodeRole::Heading);
-            t.a11y.level = Some(2);
-            t.style.descriptor.text_color = Some(header_text);
-            t.style.text_size = Some(heading_size);
-            t.style.text_weight = Some(600);
-            header_region = header_region.child(t);
+        if header.is_none() {
+            if let Some(ref title) = spec.title {
+                let mut t = Node::text(title);
+                t.a11y.role = Some(NodeRole::Heading);
+                t.a11y.level = Some(2);
+                t.style.descriptor.text_color = Some(header_text);
+                t.style.text_size = Some(heading_size);
+                t.style.text_weight = Some(600);
+                header_region = header_region.child(t);
+            }
         }
         if let Some(h) = header {
             header_region = header_region.child(h);

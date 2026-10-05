@@ -55222,8 +55222,8 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
     });
 }
 
-/// DetailShell keeps its named section and h2 semantics, resolves its spacing
-/// tokens, and leaves header actions usable through mounted keyboard/pointer input.
+/// DetailShell keeps its named section, renders the title only as a header-slot
+/// fallback, resolves spacing tokens, and mounts usable header actions.
 #[test]
 fn first_mounted_parity_detail_shell() {
     use poodle_adapter::ThemeProvider;
@@ -55261,11 +55261,27 @@ fn first_mounted_parity_detail_shell() {
         shell.id = Some("detail-shell-proof".into());
         assert_eq!(shell.a11y.role, Some(NodeRole::Region));
         assert_eq!(shell.a11y.label.as_deref(), Some("Profile details"));
-        let heading = shell
+        assert!(
+            shell
+                .find(&|node| node.a11y.role == Some(NodeRole::Heading))
+                .is_none(),
+            "a supplied header slot replaces the title fallback"
+        );
+        assert!(shell.has_text("Refresh"));
+        let fallback_spec = DetailShellSpec::new().with_title("Audit history");
+        let mut fallback = poodle_render::detail_shell(
+            &fallback_spec,
+            &ctx,
+            None,
+            Some(Node::text("Three recent changes")),
+            None,
+        );
+        fallback.id = Some("detail-shell-fallback-proof".into());
+        let heading = fallback
             .find(&|node| node.a11y.role == Some(NodeRole::Heading))
-            .expect("title uses the contract h2 semantics");
+            .expect("title uses the contract h2 semantics when no header slot is supplied");
         assert_eq!(heading.a11y.level, Some(2));
-        assert!(heading.has_text("Profile"));
+        assert!(heading.has_text("Audit history"));
         assert!(shell.children[1].has_text("Owner: Ada"));
         assert_eq!(
             shell.style.descriptor.layout.spacing.gap,
@@ -55276,7 +55292,7 @@ fn first_mounted_parity_detail_shell() {
             theme_provider.resolve_space("space.panel.y")
         );
 
-        let mounted = Arc::new(Mutex::new(shell));
+        let mounted = Arc::new(Mutex::new(Node::container().child(shell).child(fallback)));
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 320.0);
         poodle_gpui_node_backend::begin_probe_capture();
         driver.draw_frame();
@@ -55284,6 +55300,8 @@ fn first_mounted_parity_detail_shell() {
             .expect("DetailShell reaches the GPUI paint pass");
         assert_eq!(painted.a11y_role, Some(NodeRole::Region));
         assert_eq!(painted.a11y_label.as_deref(), Some("Profile details"));
+        poodle_gpui_node_backend::painted_node_for("detail-shell-fallback-proof")
+            .expect("the title-fallback DetailShell reaches the GPUI paint pass");
         driver.wait_for_focus_handle("detail-shell-refresh");
         driver.focus_element("detail-shell-refresh");
         driver.keyboard_activate("detail-shell-refresh");
@@ -55402,8 +55420,7 @@ fn first_mounted_parity_page_header() {
         let spec = PageHeaderSpec::new("Assets")
             .with_subtitle("Shared files")
             .with_count(12)
-            .with_level(3)
-            .with_aria_label("Assets page heading");
+            .with_level(3);
         let mut header = poodle_render::page_header(
             &spec,
             &ctx,
@@ -55429,7 +55446,7 @@ fn first_mounted_parity_page_header() {
         header.id = Some("page-header-proof".into());
 
         assert_eq!(header.a11y.role, Some(NodeRole::Banner));
-        assert_eq!(header.a11y.label.as_deref(), Some("Assets page heading"));
+        assert_eq!(header.a11y.label, None);
         let heading = header
             .find(&|node| node.a11y.role == Some(NodeRole::Heading))
             .expect("PageHeader title has heading semantics");
@@ -55449,7 +55466,7 @@ fn first_mounted_parity_page_header() {
         let painted = poodle_gpui_node_backend::painted_node_for("page-header-proof")
             .expect("PageHeader reaches the GPUI paint pass");
         assert_eq!(painted.a11y_role, Some(NodeRole::Banner));
-        assert_eq!(painted.a11y_label.as_deref(), Some("Assets page heading"));
+        assert_eq!(painted.a11y_label, None);
         driver.wait_for_focus_handle("page-header-create");
         driver.focus_element("page-header-create");
         driver.keyboard_activate("page-header-create");
