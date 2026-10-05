@@ -2312,7 +2312,6 @@
       "substrate": "layout-primitive",
       "required": [
         "semantic",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
@@ -2326,6 +2325,11 @@
           "axis": "pointer",
           "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
           "contractRef": "docs/contracts/components/skeleton.md#Keyboard"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "The contract defines Skeleton placeholders as decorative and never focusable, with no keyboard interaction.",
+          "contractRef": "docs/contracts/components/skeleton.md#6. Accessibility"
         }
       ]
     },
@@ -2351,7 +2355,6 @@
       "substrate": "general-composite",
       "required": [
         "semantic",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
@@ -2365,6 +2368,11 @@
           "axis": "pointer",
           "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
           "contractRef": "docs/contracts/components/spacer.md#Keyboard"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "The contract defines Spacer as decorative layout scaffolding that is never focusable and has no keyboard behavior.",
+          "contractRef": "docs/contracts/components/spacer.md#6. Accessibility"
         }
       ]
     },
