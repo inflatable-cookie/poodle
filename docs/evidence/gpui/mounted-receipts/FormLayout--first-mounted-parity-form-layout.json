@@ -1,13 +1,12 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "DateRangePicker",
-  "test": "first_mounted_parity_date_range_picker",
+  "component": "FormLayout",
+  "test": "first_mounted_parity_form_layout",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
     "semantic",
-    "events",
     "pointer",
     "keyboard_focus",
     "accessibility",
@@ -18,10 +17,6 @@
       "assert",
       "production-mount"
     ],
-    "events": [
-      "assert_eq!(\n            payloads.len(),\n            1,\n            \"range change callback",
-      "assert_eq!(payload"
-    ],
     "pointer": [
       "pointer_activate"
     ],
@@ -31,9 +26,8 @@
       "dispatch_key"
     ],
     "accessibility": [
-      "a11y\n            .",
-      "accessible",
-      "NodeRole"
+      "NodeRole",
+      "a11y."
     ],
     "visual": [
       "resolve_space"
@@ -44,7 +38,7 @@
     "mount": "HeadlessDriver",
     "driver": "HeadlessDriver::new_element_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::date_range_picker_with_callbacks",
+    "renderer": "node_compat::IntoCompatNode",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -57,11 +51,10 @@
     "command": "effigy regressions:native",
     "run_id": "b075945a-7948-44b3-9204-bcd031c390a3",
     "outcome": "passed",
-    "body_sha256": "a427926aa518c25b865748d66db5f1a4cfd88c0c1a4f6b40a0d2c099c6af8683"
+    "body_sha256": "cf074c97ca9571fc3bfa10b6e78e45563e529f3c6c852c22a800dce3b517b073"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
-    "asserted emitted payloads or handler delivery through mounted input",
     "drove real pointer activation through the mounted GPUI node backend",
     "drove real keyboard input or backend focus through the mounted tree",
     "asserted node-level role, label, state, or focusability in the mounted tree",

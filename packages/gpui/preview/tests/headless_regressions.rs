@@ -52283,3 +52283,628 @@ fn markdown_editor_mode_toolbar_and_edit_rebuild_the_host_spec() {
         assert!(driver.mounted_observation().is_valid());
     });
 }
+
+/// Calendar keeps the mounted grid's date semantics, focus movement, selection
+/// callbacks, month callbacks, and token-sized cells aligned with Svelte.
+#[test]
+fn first_mounted_parity_calendar() {
+    use gpui::{AnyElement, IntoElement};
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{CalendarSpec, ControlSize};
+
+    const DAY_14: &str = "poodle-cal:day:2026-03-14";
+    const DAY_15: &str = "poodle-cal:day:2026-03-15";
+    const DAY_16: &str = "poodle-cal:day:2026-03-16";
+
+    #[derive(Clone)]
+    struct CalendarHost {
+        value: String,
+        month: String,
+        selections: Vec<String>,
+        navigations: Vec<String>,
+    }
+
+    let host = Arc::new(Mutex::new(CalendarHost {
+        value: "2026-03-14".to_owned(),
+        month: "2026-03".to_owned(),
+        selections: Vec::new(),
+        navigations: Vec::new(),
+    }));
+    let theme_provider = theme();
+    let mut witness_spec = CalendarSpec::new()
+        .with_today("2026-03-12")
+        .with_size(ControlSize::Md);
+    witness_spec.default_value = Some("2026-03-14".to_owned());
+    witness_spec.visible_month = Some("2026-03".to_owned());
+    witness_spec.aria_label = Some("Appointment date".to_owned());
+    let witness = poodle_render::calendar(
+        &witness_spec,
+        &RenderContext::new(&theme_provider),
+        poodle_render::CalendarHandlers::default(),
+    );
+    assert_eq!(witness.a11y.label.as_deref(), Some("Appointment date"));
+    let grid = witness
+        .find(&|node| node.a11y.role == Some(NodeRole::Grid))
+        .expect("production Calendar grid");
+    assert!(grid.children.len() >= 4);
+    assert!(grid
+        .children
+        .iter()
+        .all(|row| row.a11y.role == Some(NodeRole::Row)));
+    let selected = witness
+        .find(&|node| node.id.as_deref() == Some(DAY_14))
+        .expect("selected date cell");
+    assert_eq!(selected.a11y.role, Some(NodeRole::Cell));
+    assert_eq!(selected.a11y.label.as_deref(), Some("March 14, 2026"));
+    assert_eq!(selected.a11y.selected, Some(true));
+    assert_eq!(selected.a11y.tab_index, Some(0));
+
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let host = Arc::clone(&host);
+        let theme_provider = theme_provider.clone();
+        Rc::new(move || {
+            let (value, month) = {
+                let host = host.lock().expect("Calendar host");
+                (host.value.clone(), host.month.clone())
+            };
+            let mut spec = CalendarSpec::new()
+                .with_today("2026-03-12")
+                .with_size(ControlSize::Md)
+                .with_visible_month(month)
+                .with_value(value);
+            spec.aria_label = Some("Appointment date".to_owned());
+            let selection_host = Arc::clone(&host);
+            let navigation_host = Arc::clone(&host);
+            node_compat::Calendar::from_spec(spec, &theme_provider)
+                .on_select(Arc::new(move |date| {
+                    let mut host = selection_host.lock().expect("Calendar host");
+                    host.value = date.to_owned();
+                    host.selections.push(date.to_owned());
+                }))
+                .on_navigate(Arc::new(move |month| {
+                    let mut host = navigation_host.lock().expect("Calendar host");
+                    host.month = month.to_owned();
+                    host.navigations.push(month.to_owned());
+                }))
+                .into_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 560.0, 600.0);
+        let mounted_day = poodle_gpui_node_backend::painted_node_for(DAY_14)
+            .expect("selected day reaches GPUI paint");
+        assert_eq!(mounted_day.a11y_role, Some(NodeRole::Cell));
+        assert_eq!(mounted_day.a11y_label.as_deref(), Some("March 14, 2026"));
+        assert_eq!(
+            mounted_day.style.background,
+            Some(theme_provider.resolve_color("color.accent.base")),
+            "the selected date paints the accent treatment"
+        );
+        let mounted_root = poodle_gpui_node_backend::painted_node_for("poodle-calendar")
+            .expect("Calendar reaches GPUI paint");
+        assert_eq!(mounted_root.a11y_label.as_deref(), Some("Appointment date"));
+
+        let day_bounds = poodle_gpui_node_backend::bounds_for(DAY_14).expect("day geometry");
+        let nav_bounds = poodle_gpui_node_backend::bounds_for("poodle-cal-next")
+            .expect("next-month button geometry");
+        let cell_size = poodle_render::presentation::rem_to_px(
+            poodle_render::presentation::calendar_cell_size_rem(ControlSize::Md),
+        );
+        let nav_size = poodle_render::presentation::rem_to_px(
+            poodle_render::presentation::calendar_nav_size_rem(ControlSize::Md),
+        );
+        // The backend records the nav button's padding box, one border inward
+        // from its token-sized outer box.
+        let nav_border = 1.0_f32;
+        assert!((f32::from(day_bounds.size.width) - cell_size).abs() < 0.5);
+        assert!((f32::from(day_bounds.size.height) - cell_size).abs() < 0.5);
+        assert!(
+            (f32::from(nav_bounds.size.width) + 2.0 * nav_border - nav_size).abs() < 0.5,
+            "mounted next-month border-box width should match the {:?}px metric",
+            nav_size
+        );
+        assert!(
+            (f32::from(nav_bounds.size.height) + 2.0 * nav_border - nav_size).abs() < 0.5,
+            "mounted next-month border-box height should match the {:?}px metric",
+            nav_size
+        );
+        assert!(theme_provider.resolve_color("color.accent.base").3 > 0.0);
+
+        driver.pointer_activate_id(DAY_16);
+        assert_eq!(host.lock().expect("Calendar host").value, "2026-03-16");
+        assert_eq!(
+            host.lock().expect("Calendar host").selections,
+            ["2026-03-16"],
+            "on_select callback emits the selected ISO date"
+        );
+        driver.draw_frame();
+        let pointer_selected = poodle_gpui_node_backend::painted_node_for(DAY_16)
+            .expect("pointer-selected day reaches GPUI paint after host rebuild");
+        assert_eq!(
+            pointer_selected.style.background,
+            Some(theme_provider.resolve_color("color.accent.base"))
+        );
+
+        driver.focus_element(DAY_14);
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(DAY_15),
+            Some(true),
+            "Arrow Right moves real focus to the next calendar date"
+        );
+        driver.keyboard_activate(DAY_15);
+        assert_eq!(host.lock().expect("Calendar host").value, "2026-03-15");
+        assert_eq!(
+            host.lock().expect("Calendar host").selections,
+            ["2026-03-16", "2026-03-15"],
+            "keyboard selection emits the focused ISO date"
+        );
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for(DAY_15)
+                .expect("keyboard-selected day paints after host rebuild")
+                .style
+                .background,
+            Some(theme_provider.resolve_color("color.accent.base"))
+        );
+
+        driver.pointer_activate_id("poodle-cal-next");
+        assert_eq!(
+            host.lock().expect("Calendar host").navigations,
+            ["2026-04"],
+            "on_navigate callback emits the ISO month"
+        );
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::painted_node_for("poodle-calendar")
+                .expect("updated Calendar reaches GPUI paint")
+                .texts
+                .iter()
+                .any(|text| text == "April")
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// FormActions keeps its action order, delegated button activation, alignment,
+/// and token-resolved separation when its root is mounted in GPUI.
+#[test]
+fn first_mounted_parity_form_actions() {
+    use gpui::{div, px, AnyElement, IntoElement, ParentElement, Styled};
+    use node_compat::IntoCompatNode;
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::MainAxisAlignment;
+    use poodle_specs::{ButtonSpec, ButtonVariant, FormActionAlign, FormActionsSpec};
+
+    const ROOT: &str = "mounted-form-actions";
+    const CANCEL: &str = "poodle-btn-form-cancel";
+    const SAVE: &str = "poodle-btn-form-save";
+    let theme_provider = theme();
+    let spec = FormActionsSpec::new().with_align(FormActionAlign::Between);
+    let witness = poodle_render::form_actions(
+        &spec,
+        &RenderContext::new(&theme_provider),
+        vec![Node::button("Cancel"), Node::button("Save")],
+    );
+    assert_eq!(
+        witness.style.descriptor.layout.alignment.main,
+        MainAxisAlignment::SpaceBetween
+    );
+    assert!(witness.a11y.role.is_none());
+
+    let activations = Arc::new(Mutex::new(Vec::<String>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let activations = Arc::clone(&activations);
+        let theme_provider = theme_provider.clone();
+        let spec = spec.clone();
+        Rc::new(move || {
+            let cancel_activations = Arc::clone(&activations);
+            let save_activations = Arc::clone(&activations);
+            let mut node = node_compat::FormActions::from_spec(spec.clone(), &theme_provider)
+                .with_action(
+                    node_compat::Button::from_spec(
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Ghost)
+                            .with_label("Cancel"),
+                        &theme_provider,
+                    )
+                    .with_id("form-cancel")
+                    .on_click(Arc::new(move || {
+                        cancel_activations
+                            .lock()
+                            .expect("FormActions activations")
+                            .push("cancel".to_owned());
+                    })),
+                )
+                .with_action(
+                    node_compat::Button::from_spec(
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Primary)
+                            .with_label("Save"),
+                        &theme_provider,
+                    )
+                    .with_id("form-save")
+                    .on_click(Arc::new(move || {
+                        save_activations
+                            .lock()
+                            .expect("FormActions activations")
+                            .push("save".to_owned());
+                    })),
+                )
+                .into_compat_node();
+            node.id = Some(ROOT.to_owned());
+            div()
+                .w(px(420.0))
+                .flex()
+                .flex_col()
+                .child(poodle_gpui_node_backend::to_gpui(&node))
+                .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 460.0, 220.0);
+        let cancel_node =
+            poodle_gpui_node_backend::painted_node_for(CANCEL).expect("Cancel reaches GPUI paint");
+        let save_node =
+            poodle_gpui_node_backend::painted_node_for(SAVE).expect("Save reaches GPUI paint");
+        let root_node = poodle_gpui_node_backend::painted_node_for(ROOT)
+            .expect("FormActions reaches GPUI paint");
+        assert_eq!(cancel_node.a11y_role, Some(NodeRole::Button));
+        assert_eq!(cancel_node.a11y_label.as_deref(), Some("Cancel"));
+        assert_eq!(save_node.a11y_role, Some(NodeRole::Button));
+        assert_eq!(save_node.a11y_label.as_deref(), Some("Save"));
+
+        let root = poodle_gpui_node_backend::bounds_for(ROOT).expect("FormActions geometry");
+        let cancel = poodle_gpui_node_backend::bounds_for(CANCEL).expect("Cancel geometry");
+        let save = poodle_gpui_node_backend::bounds_for(SAVE).expect("Save geometry");
+        let cancel_border = cancel_node.style.border.width;
+        let save_border = save_node.style.border.width;
+        let top_separation = f32::from(cancel.origin.y) - f32::from(root.origin.y) - cancel_border;
+        let minimum_gap = theme_provider.resolve_space("space.inline.md");
+        let action_gap =
+            f32::from(save.origin.x) - (f32::from(cancel.origin.x) + f32::from(cancel.size.width));
+        assert!(root.size.width > px(0.0) && root.size.height > px(0.0));
+        assert!((root_node.style.layout.spacing.gap - minimum_gap).abs() < 0.01);
+        assert!(
+            (top_separation - theme_provider.resolve_space("space.stack.sm")).abs() < 0.5,
+            "FormActions top separation {top_separation}px should resolve to {:?}px from the stack spacing token",
+            theme_provider.resolve_space("space.stack.sm")
+        );
+        let leading_inset = f32::from(cancel.origin.x) - f32::from(root.origin.x) - cancel_border;
+        let trailing_inset = f32::from(root.origin.x) + f32::from(root.size.width)
+            - f32::from(save.origin.x)
+            - f32::from(save.size.width)
+            - save_border;
+        assert!(action_gap >= minimum_gap - 0.5);
+        assert!(leading_inset.abs() < 1.0);
+        assert!(trailing_inset.abs() < 1.0);
+
+        driver.pointer_activate_id(CANCEL);
+        driver.keyboard_activate(SAVE);
+        assert_eq!(
+            activations
+                .lock()
+                .expect("FormActions activations")
+                .as_slice(),
+            ["cancel", "save"]
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// FormLayout mounts its alert summaries and leaves input/button behavior in
+/// document order with the composed child controls.
+#[test]
+fn first_mounted_parity_form_layout() {
+    use gpui::AnyElement;
+    use node_compat::IntoCompatNode;
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{ButtonSpec, ButtonVariant, TextInputSpec};
+
+    const ROOT: &str = "mounted-form-layout";
+    const INPUT: &str = "poodle-input-form-email";
+    const SAVE: &str = "poodle-btn-form-submit";
+    let theme_provider = theme();
+
+    let witness = node_compat::FormLayout::new(&theme_provider)
+        .description("Create a contact record.")
+        .error("Could not save the form.")
+        .success("The previous record was saved.")
+        .with_field_error("Email", "is required")
+        .columns(1)
+        .with_child(Node::text("Email field"))
+        .into_compat_node();
+    let error_callout = witness
+        .find(&|node| {
+            node.a11y.role == Some(NodeRole::Alert) && node.has_text("Could not save the form.")
+        })
+        .expect("form-level error Callout is an alert");
+    assert_eq!(error_callout.a11y.role, Some(NodeRole::Alert));
+    let field_errors = witness
+        .find(&|node| {
+            node.a11y.role == Some(NodeRole::Alert)
+                && node.has_text("Please fix the following errors:")
+        })
+        .expect("field-error summary is a polite alert");
+    assert_eq!(field_errors.a11y.role, Some(NodeRole::Alert));
+    assert!(witness.has_text("Email: is required"));
+    assert!(witness.has_text("Create a contact record."));
+    assert!(witness.a11y.role.is_none());
+
+    let value = Arc::new(Mutex::new(String::new()));
+    let edits = Arc::new(Mutex::new(Vec::<String>::new()));
+    let activations = Arc::new(Mutex::new(Vec::<String>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let value = Arc::clone(&value);
+        let edits = Arc::clone(&edits);
+        let activations = Arc::clone(&activations);
+        let theme_provider = theme_provider.clone();
+        Rc::new(move || {
+            let current_value = value.lock().expect("FormLayout value").clone();
+            let edit_value = Arc::clone(&value);
+            let edit_events = Arc::clone(&edits);
+            let submit_events = Arc::clone(&activations);
+            let input = node_compat::TextInput::from_spec(
+                TextInputSpec::new()
+                    .with_placeholder("jane@example.com")
+                    .with_value(current_value),
+                &theme_provider,
+            )
+            .with_id("form-email")
+            .on_change(move |next| {
+                *edit_value.lock().expect("FormLayout value") = next.to_owned();
+                edit_events
+                    .lock()
+                    .expect("FormLayout edits")
+                    .push(next.to_owned());
+            });
+            let field = node_compat::Field::new("form-email", "Email", &theme_provider)
+                .with_control(input.into_slot());
+            let submit = node_compat::Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Primary)
+                    .with_label("Create contact"),
+                &theme_provider,
+            )
+            .with_id("form-submit")
+            .on_click(Arc::new(move || {
+                submit_events
+                    .lock()
+                    .expect("FormLayout activations")
+                    .push("submit".to_owned());
+            }));
+            let mut node = node_compat::FormLayout::new(&theme_provider)
+                .description("Create a contact record.")
+                .error("Could not save the form.")
+                .success("The previous record was saved.")
+                .with_field_error("Email", "is required")
+                .columns(1)
+                .with_child(field)
+                .with_actions(submit)
+                .into_compat_node();
+            node.id = Some(ROOT.to_owned());
+            assert!(give_first_id(
+                &mut node,
+                "mounted-form-layout-error-callout",
+                &|candidate| {
+                    candidate.a11y.role == Some(NodeRole::Alert)
+                        && candidate.has_text("Could not save the form.")
+                }
+            ));
+            assert!(give_first_id(
+                &mut node,
+                "mounted-form-layout-field-errors",
+                &|candidate| {
+                    candidate.a11y.role == Some(NodeRole::Alert)
+                        && candidate.has_text("Please fix the following errors:")
+                }
+            ));
+            poodle_gpui_node_backend::to_gpui(&node)
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 620.0, 620.0);
+        let mounted_input =
+            poodle_gpui_node_backend::painted_node_for(INPUT).expect("email control paint");
+        assert_eq!(mounted_input.a11y_role, Some(NodeRole::TextInput));
+        assert_eq!(mounted_input.a11y_label.as_deref(), Some("Email"));
+        assert!(
+            poodle_gpui_node_backend::painted_node_for("mounted-form-layout-error-callout")
+                .expect("form error Callout paint")
+                .texts
+                .iter()
+                .any(|text| text.contains("Could not save"))
+        );
+        assert!(
+            poodle_gpui_node_backend::painted_node_for("mounted-form-layout-field-errors")
+                .expect("field error summary paint")
+                .texts
+                .iter()
+                .any(|text| text.contains("Email: is required"))
+        );
+
+        let form_bounds = poodle_gpui_node_backend::bounds_for(ROOT).expect("FormLayout bounds");
+        let input_bounds = poodle_gpui_node_backend::bounds_for(INPUT).expect("email bounds");
+        let save_bounds = poodle_gpui_node_backend::bounds_for(SAVE).expect("submit bounds");
+        assert!(bounds_contain(form_bounds, input_bounds));
+        assert!(bounds_contain(form_bounds, save_bounds));
+        assert!(theme_provider.resolve_space("space.stack.lg") > 0.0);
+
+        driver.pointer_activate_id(INPUT);
+        driver.dispatch_key_raw("a");
+        assert_eq!(value.lock().expect("FormLayout value").as_str(), "a");
+        assert_eq!(edits.lock().expect("FormLayout edits").as_slice(), ["a"]);
+        driver.draw_frame();
+
+        driver.pointer_activate_id(SAVE);
+        driver.focus_element(INPUT);
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(SAVE),
+            Some(true),
+            "Tab follows the field-to-action order inside FormLayout"
+        );
+        driver.keyboard_activate(SAVE);
+        assert_eq!(
+            activations
+                .lock()
+                .expect("FormLayout activations")
+                .as_slice(),
+            ["submit", "submit"]
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// ValidationSummary exposes Svelte-equivalent announcement roles and linked
+/// entries whose pointer and keyboard activation focus the matching field.
+#[test]
+fn first_mounted_parity_validation_summary() {
+    use gpui::{div, px, AnyElement, IntoElement, ParentElement, Styled};
+    use node_compat::IntoCompatNode;
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{
+        AnnouncementMode, TextInputSpec, ValidationState, ValidationSummaryEntry,
+        ValidationSummarySpec,
+    };
+
+    const ROOT: &str = "mounted-validation-summary";
+    const LINK: &str = "validation-summary-link:email";
+    const FIELD: &str = "email";
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let spec = ValidationSummarySpec::new(vec![ValidationSummaryEntry::new(
+        FIELD,
+        "Email address",
+        "Enter a valid email address",
+        ValidationState::Invalid,
+    )])
+    .with_title("Please correct this field");
+
+    let witness = poodle_render::validation_summary(&spec, &ctx);
+    assert_eq!(witness.a11y.role, Some(NodeRole::Status));
+    let link = witness
+        .find(&|node| node.id.as_deref() == Some(LINK))
+        .expect("validation entry link");
+    assert_eq!(link.a11y.role, Some(NodeRole::Link));
+    assert_eq!(link.a11y.label.as_deref(), Some("Email address"));
+    assert!(link.interaction.focusable);
+    assert!(link.interaction.on_activate.is_some());
+    assert!(link.style.focus_ring.is_some());
+    assert_eq!(
+        poodle_render::validation_summary(
+            &spec.clone().with_announce_mode(AnnouncementMode::Assertive),
+            &ctx,
+        )
+        .a11y
+        .role,
+        Some(NodeRole::Alert)
+    );
+    assert_eq!(
+        poodle_render::validation_summary(
+            &spec.clone().with_announce_mode(AnnouncementMode::None),
+            &ctx,
+        )
+        .a11y
+        .role,
+        None
+    );
+
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let theme_provider = theme_provider.clone();
+        let spec = spec.clone();
+        Rc::new(move || {
+            let mut summary =
+                poodle_render::validation_summary(&spec, &RenderContext::new(&theme_provider));
+            summary.id = Some(ROOT.to_owned());
+            let mut field = node_compat::TextInput::from_spec(
+                TextInputSpec::new()
+                    .with_placeholder("name@example.com")
+                    .with_value(""),
+                &theme_provider,
+            )
+            .with_id(FIELD)
+            .into_compat_node();
+            // The contract's fieldId is the native focus target, matching the
+            // href fragment that Svelte emits for this control.
+            field.id = Some(FIELD.to_owned());
+            div()
+                .w(px(520.0))
+                .flex()
+                .flex_col()
+                .gap(px(12.0))
+                .child(poodle_gpui_node_backend::to_gpui(&summary))
+                .child(poodle_gpui_node_backend::to_gpui(&field))
+                .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 560.0, 420.0);
+        let mounted_summary =
+            poodle_gpui_node_backend::painted_node_for(ROOT).expect("summary reaches GPUI paint");
+        assert_eq!(mounted_summary.a11y_role, Some(NodeRole::Status));
+        let mounted_link = poodle_gpui_node_backend::painted_node_for(LINK)
+            .expect("field link reaches GPUI paint");
+        assert_eq!(mounted_link.a11y_role, Some(NodeRole::Link));
+        assert_eq!(mounted_link.a11y_label.as_deref(), Some("Email address"));
+        let field_control = poodle_gpui_node_backend::painted_node_for(FIELD)
+            .expect("linked field reaches GPUI paint");
+        assert_eq!(field_control.a11y_role, Some(NodeRole::TextInput));
+
+        let summary_bounds = poodle_gpui_node_backend::bounds_for(ROOT).expect("summary geometry");
+        assert!(summary_bounds.size.width > px(0.0) && summary_bounds.size.height > px(0.0));
+        let painted_summary =
+            poodle_gpui_node_backend::painted_node_for(ROOT).expect("summary reaches GPUI paint");
+        assert_eq!(painted_summary.a11y_role, Some(NodeRole::Status));
+        assert_eq!(
+            painted_summary.style.background,
+            Some(theme_provider.resolve_color("color.background.panel"))
+        );
+        assert_eq!(
+            painted_summary.style.border.color,
+            theme_provider.resolve_color("color.status.danger")
+        );
+        assert!(theme_provider.resolve_space("space.panel.x") > 0.0);
+
+        driver.focus_element(LINK);
+        driver.draw_frame();
+        let ring = poodle_gpui_node_backend::painted_ring_for(LINK)
+            .expect("focused field link paints its focus ring");
+        assert_eq!(
+            ring.ring.color,
+            theme_provider.resolve_color("color.accent.focusRing")
+        );
+        assert_eq!(
+            ring.ring.width,
+            theme_provider.resolve_border_width("border.width.focus")
+        );
+
+        driver.pointer_activate_id(LINK);
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(FIELD),
+            Some(true),
+            "link activation emits native focus navigation to its field target"
+        );
+        driver.keyboard_activate(LINK);
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(FIELD),
+            Some(true),
+            "Enter activation emits the same native field-focus navigation"
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}

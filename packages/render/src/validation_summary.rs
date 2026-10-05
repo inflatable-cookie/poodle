@@ -3,19 +3,19 @@
 //! Contract: `docs/contracts/components/validation-summary.md`
 //! Ported from: `packages/jetstream/components/src/validation_summary.rs`.
 //!
-//! Empty state (no active entries) renders nothing per contract §4. The
-//! `<a href="#field-id">` focus-jump (contract §5) is web-only; the field id
-//! is carried as an interaction id on each entry so the host can emulate
-//! focus imperatively.
+//! Empty state (no active entries) renders nothing per contract §4. Entry
+//! labels are links whose activation queues focus to the matching field id;
+//! each backend applies that request through its native focus machinery.
 
-use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node, NodeRole};
+use poodle_node::{
+    CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, Node, NodeRole,
+};
 use poodle_specs::ValidationSummarySpec;
 
 use crate::context::RenderContext;
 
 /// Semibold label weight (typography constant; see form_shell).
 const SEMIBOLD: u16 = 600;
-const MEDIUM: u16 = 500;
 
 pub fn validation_summary(spec: &ValidationSummarySpec, ctx: &RenderContext<'_>) -> Node {
     let entries = spec.active_entries();
@@ -126,9 +126,29 @@ pub fn validation_summary(spec: &ValidationSummarySpec, ctx: &RenderContext<'_>)
             s.descriptor.layout.spacing.gap = entry_text_gap;
         }
         let mut label = Node::text(&entry.label);
-        label.style.descriptor.text_color = Some(text_primary);
+        label.id = Some(format!("validation-summary-link:{}", entry.field_id));
+        label.a11y.role = Some(NodeRole::Link);
+        label.a11y.label = Some(entry.label.clone());
+        label.a11y.tab_index = Some(0);
+        label.interaction.focusable = true;
+        let target_id = entry.field_id.clone();
+        label.interaction.on_activate = Some(std::sync::Arc::new(move || {
+            poodle_node::queue_focus_request(&target_id);
+        }));
+        label.style.descriptor.cursor = CursorHint::Pointer;
+        label.style.descriptor.text_color = Some(if entry.is_blocking() {
+            danger_color
+        } else {
+            text_secondary
+        });
         label.style.text_size = Some(entry_size);
-        label.style.text_weight = Some(MEDIUM);
+        label.style.text_weight = Some(SEMIBOLD);
+        label.style.text_underline = true;
+        label.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color("color.accent.focusRing"),
+            width: ctx.theme().resolve_border_width("border.width.focus"),
+            offset: crate::presentation::rem_to_px(0.125),
+        });
         let mut message = Node::text(&entry.message);
         message.style.descriptor.text_color = Some(text_secondary);
         message.style.text_size = Some(entry_size);
@@ -138,6 +158,10 @@ pub fn validation_summary(spec: &ValidationSummarySpec, ctx: &RenderContext<'_>)
     }
     let mut el = el.child(list);
 
-    el.a11y.role = Some(NodeRole::Alert);
+    el.a11y.role = match spec.accessibility_role() {
+        Some("alert") => Some(NodeRole::Alert),
+        Some("status") => Some(NodeRole::Status),
+        _ => None,
+    };
     el
 }

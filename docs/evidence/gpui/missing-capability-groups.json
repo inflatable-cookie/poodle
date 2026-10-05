@@ -124,35 +124,6 @@
       ]
     },
     {
-      "substrate": "form-editing",
-      "components": [
-        "AgentQuestionRecord",
-        "Calendar",
-        "EmbedInput",
-        "FormActions",
-        "FormLayout",
-        "Keyboard",
-        "ValidationSummary"
-      ],
-      "missingTally": {
-        "semantic": 7,
-        "events": 6,
-        "pointer": 7,
-        "keyboard_focus": 7,
-        "accessibility": 7,
-        "visual": 7
-      },
-      "contracts": [
-        "docs/contracts/components/agent-question-record.md",
-        "docs/contracts/components/calendar.md",
-        "docs/contracts/components/embed-input.md",
-        "docs/contracts/components/form-actions.md",
-        "docs/contracts/components/form-layout.md",
-        "docs/contracts/components/keyboard.md",
-        "docs/contracts/components/validation-summary.md"
-      ]
-    },
-    {
       "substrate": "layout-primitive",
       "components": [
         "Box",
@@ -223,6 +194,27 @@
         "docs/contracts/components/detail-section.md",
         "docs/contracts/components/scroll-shell.md",
         "docs/contracts/components/ui-presentation-provider.md"
+      ]
+    },
+    {
+      "substrate": "form-editing",
+      "components": [
+        "AgentQuestionRecord",
+        "EmbedInput",
+        "Keyboard"
+      ],
+      "missingTally": {
+        "semantic": 3,
+        "events": 3,
+        "pointer": 3,
+        "keyboard_focus": 3,
+        "accessibility": 3,
+        "visual": 3
+      },
+      "contracts": [
+        "docs/contracts/components/agent-question-record.md",
+        "docs/contracts/components/embed-input.md",
+        "docs/contracts/components/keyboard.md"
       ]
     },
     {
