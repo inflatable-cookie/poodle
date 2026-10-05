@@ -52392,10 +52392,24 @@ fn first_mounted_parity_calendar() {
         let cell_size = poodle_render::presentation::rem_to_px(
             poodle_render::presentation::calendar_cell_size_rem(ControlSize::Md),
         );
-        let nav_size = poodle_render::presentation::rem_to_px(2.0);
+        let nav_size = poodle_render::presentation::rem_to_px(
+            poodle_render::presentation::calendar_nav_size_rem(ControlSize::Md),
+        );
+        // The backend records the nav button's padding box, one border inward
+        // from its token-sized outer box.
+        let nav_border = 1.0_f32;
         assert!((f32::from(day_bounds.size.width) - cell_size).abs() < 0.5);
         assert!((f32::from(day_bounds.size.height) - cell_size).abs() < 0.5);
-        assert!((f32::from(nav_bounds.size.width) - nav_size).abs() < 0.5);
+        assert!(
+            (f32::from(nav_bounds.size.width) + 2.0 * nav_border - nav_size).abs() < 0.5,
+            "mounted next-month border-box width should match the {:?}px metric",
+            nav_size
+        );
+        assert!(
+            (f32::from(nav_bounds.size.height) + 2.0 * nav_border - nav_size).abs() < 0.5,
+            "mounted next-month border-box height should match the {:?}px metric",
+            nav_size
+        );
         assert!(theme_provider.resolve_color("color.accent.base").3 > 0.0);
 
         driver.pointer_activate_id(DAY_16);
