@@ -52550,6 +52550,8 @@ fn first_mounted_parity_form_actions() {
             .expect("Cancel reaches GPUI paint");
         let save_node = poodle_gpui_node_backend::painted_node_for(SAVE)
             .expect("Save reaches GPUI paint");
+        let root_node = poodle_gpui_node_backend::painted_node_for(ROOT)
+            .expect("FormActions reaches GPUI paint");
         assert_eq!(cancel_node.a11y_role, Some(NodeRole::Button));
         assert_eq!(cancel_node.a11y_label.as_deref(), Some("Cancel"));
         assert_eq!(save_node.a11y_role, Some(NodeRole::Button));
@@ -52558,16 +52560,30 @@ fn first_mounted_parity_form_actions() {
         let root = poodle_gpui_node_backend::bounds_for(ROOT).expect("FormActions geometry");
         let cancel = poodle_gpui_node_backend::bounds_for(CANCEL).expect("Cancel geometry");
         let save = poodle_gpui_node_backend::bounds_for(SAVE).expect("Save geometry");
-        let top_separation = f32::from(cancel.origin.y) - f32::from(root.origin.y);
+        let cancel_border = cancel_node.style.border.width;
+        let save_border = save_node.style.border.width;
+        let top_separation = f32::from(cancel.origin.y)
+            - f32::from(root.origin.y)
+            - cancel_border;
         let minimum_gap = theme_provider.resolve_space("space.inline.md");
         let action_gap = f32::from(save.origin.x)
             - (f32::from(cancel.origin.x) + f32::from(cancel.size.width));
         assert!(root.size.width > px(0.0) && root.size.height > px(0.0));
+        assert!((root_node.style.layout.spacing.gap - minimum_gap).abs() < 0.01);
         assert!(
-            (top_separation - theme_provider.resolve_space("space.stack.sm")).abs() < 1.0,
-            "FormActions top separation resolves from the stack spacing token"
+            (top_separation - theme_provider.resolve_space("space.stack.sm")).abs() < 0.5,
+            "FormActions top separation {top_separation}px should resolve to {:?}px from the stack spacing token",
+            theme_provider.resolve_space("space.stack.sm")
         );
+        let leading_inset = f32::from(cancel.origin.x) - f32::from(root.origin.x) - cancel_border;
+        let trailing_inset = f32::from(root.origin.x)
+            + f32::from(root.size.width)
+            - f32::from(save.origin.x)
+            - f32::from(save.size.width)
+            - save_border;
         assert!(action_gap >= minimum_gap - 0.5);
+        assert!(leading_inset.abs() < 1.0);
+        assert!(trailing_inset.abs() < 1.0);
 
         driver.pointer_activate_id(CANCEL);
         driver.keyboard_activate(SAVE);
