@@ -55288,7 +55288,13 @@ fn first_mounted_parity_detail_shell() {
             theme_provider.resolve_space(spec.stack_gap_token())
         );
         assert_eq!(
-            shell.children[1].style.descriptor.layout.spacing.padding.top,
+            shell.children[1]
+                .style
+                .descriptor
+                .layout
+                .spacing
+                .padding
+                .top,
             theme_provider.resolve_space("space.panel.y")
         );
 
@@ -55307,7 +55313,10 @@ fn first_mounted_parity_detail_shell() {
         driver.keyboard_activate("detail-shell-refresh");
         driver.pointer_activate_id("detail-shell-refresh");
         assert_eq!(
-            activations.lock().expect("detail-shell callback payloads").as_slice(),
+            activations
+                .lock()
+                .expect("detail-shell callback payloads")
+                .as_slice(),
             ["refresh", "refresh"],
             "the header action callback fires from mounted keyboard and pointer input"
         );
@@ -55357,11 +55366,8 @@ fn first_mounted_parity_detail_section_group() {
             .with_max_columns(2)
             .with_min_column_width("8rem")
             .with_aria_label("Project metadata");
-        let mut group = poodle_render::detail_section_group(
-            &spec,
-            &ctx,
-            vec![identity, connections, activity],
-        );
+        let mut group =
+            poodle_render::detail_section_group(&spec, &ctx, vec![identity, connections, activity]);
         group.id = Some("detail-section-group-proof".into());
 
         assert_eq!(group.a11y.label.as_deref(), Some("Project metadata"));
@@ -55472,7 +55478,10 @@ fn first_mounted_parity_page_header() {
         driver.keyboard_activate("page-header-create");
         driver.pointer_activate_id("page-header-create");
         assert_eq!(
-            activations.lock().expect("page-header callback payloads").as_slice(),
+            activations
+                .lock()
+                .expect("page-header callback payloads")
+                .as_slice(),
             ["create", "create"],
             "the host action fires for keyboard and pointer activation"
         );
@@ -55510,7 +55519,10 @@ fn first_mounted_parity_region() {
         assert_eq!(region.style.min_height, Some(96.0));
         assert!(region.style.border_dashed);
         assert_eq!(region.style.descriptor.border.width, 2.0);
-        assert_eq!(region.style.descriptor.border.color, hex_color("#ff00aa").unwrap());
+        assert_eq!(
+            region.style.descriptor.border.color,
+            hex_color("#ff00aa").unwrap()
+        );
         assert_eq!(
             region.style.descriptor.corner_radii.top_left,
             theme_provider.resolve_radius(spec.radius_token())
