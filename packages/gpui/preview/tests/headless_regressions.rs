@@ -58165,6 +58165,60 @@ fn first_mounted_parity_scroll_shell() {
     });
 
     run_headless(|cx| {
+        // Lifecycle: scroll state belongs to the mounted scope. Unmounting
+        // drops it, so remounting the same id starts at the initial offset
+        // and reports from there.
+        let reports = Arc::new(Mutex::new(Vec::<(f32, f32)>::new()));
+        let build = || {
+            let sink = Arc::clone(&reports);
+            let mut shell = poodle_render::scroll_shell(
+                &ScrollShellSpec::new().with_focusable(true),
+                &ctx,
+                scroll_rows(12),
+                Some(Arc::new(move |event: &NodeScrollEvent| {
+                    sink.lock()
+                        .expect("scroll payloads")
+                        .push((event.x, event.y));
+                })),
+            );
+            shell.children[0].id = Some("remount-viewport".into());
+            Arc::new(Mutex::new(scroll_frame(shell, None)))
+        };
+        let mut driver = HeadlessDriver::new_in_box(cx, build(), 320.0, 220.0);
+        driver.draw_frame();
+        driver.wait_for_focus_handle("remount-viewport");
+        driver.keyboard_key("remount-viewport", "end");
+        let scrolled = poodle_gpui_node_backend::scroll_offset_for("remount-viewport")
+            .expect("mounted viewport offset")
+            .1;
+        assert!(scrolled > 0.0);
+
+        driver.mount_node(Arc::new(Mutex::new(Node::container())));
+        driver.draw_frame();
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::scroll_offset_for("remount-viewport").is_none(),
+            "an unmounted scope keeps no scroll state"
+        );
+
+        reports.lock().expect("scroll payloads").clear();
+        driver.mount_node(build());
+        driver.draw_frame();
+        driver.wait_for_focus_handle("remount-viewport");
+        assert_eq!(
+            poodle_gpui_node_backend::scroll_offset_for("remount-viewport"),
+            Some((0.0, 0.0)),
+            "a remounted scope starts at the initial offset"
+        );
+        driver.keyboard_key("remount-viewport", "down");
+        assert_eq!(
+            reports.lock().expect("scroll payloads").as_slice(),
+            [(0.0, 40.0)],
+            "the first report after a remount is relative to the initial offset"
+        );
+    });
+
+    run_headless(|cx| {
         // Not focusable: no tab stop, no keyboard scrolling, wheel still works.
         let mut plain =
             poodle_render::scroll_shell(&ScrollShellSpec::new(), &ctx, scroll_rows(12), None);

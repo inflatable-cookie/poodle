@@ -31,12 +31,36 @@ thread_local! {
         RefCell::new(std::collections::HashMap::new());
     static REPORTED: RefCell<std::collections::HashMap<ScrollKey, (f32, f32)>> =
         RefCell::new(std::collections::HashMap::new());
+    /// Scopes that painted in the current frame. A scope whose key is absent
+    /// at frame end has unmounted (or its window closed), and its scroll
+    /// state goes with it, so a remount starts at the initial offset.
+    static PAINTED: RefCell<std::collections::HashSet<ScrollKey>> =
+        RefCell::new(std::collections::HashSet::new());
     /// The handle the enclosing [`ScrollScope`] resolved for the node being
     /// built, consumed by [`apply_scroll`].
     static INJECTED: RefCell<Option<(ScrollKey, ScrollHandle)>> = const { RefCell::new(None) };
     /// Set while a scope builds its own node, so `build_box` does not wrap it
     /// a second time.
     static BUILDING_SCOPE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
+/// Begin a frame: forget which scopes painted (for one window, or all).
+pub(crate) fn begin_frame(window: Option<AnyWindowHandle>) {
+    PAINTED.with(|painted| {
+        painted
+            .borrow_mut()
+            .retain(|(owner, _)| window.is_some() && *owner != window);
+    });
+}
+
+/// End a frame: drop scroll state for scopes that did not paint in it.
+pub(crate) fn sweep_unpainted(window: Option<AnyWindowHandle>) {
+    let live = PAINTED.with(|painted| painted.borrow().clone());
+    let keep = |key: &ScrollKey| {
+        key.0.is_none() || (window.is_some() && key.0 != window) || live.contains(key)
+    };
+    SCROLL_HANDLES.with(|handles| handles.borrow_mut().retain(|key, _| keep(key)));
+    REPORTED.with(|reported| reported.borrow_mut().retain(|key, _| keep(key)));
 }
 
 fn find(id: &str) -> Option<ScrollHandle> {
@@ -189,6 +213,8 @@ impl Element for ScrollScope {
         window: &mut Window,
         cx: &mut App,
     ) {
+        let key = (Some(window.window_handle()), self.id.clone());
+        PAINTED.with(|painted| painted.borrow_mut().insert(key));
         if let Some(child) = self.child.as_mut() {
             child.paint(window, cx);
         }

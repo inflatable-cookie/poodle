@@ -122,6 +122,7 @@ fn overlay_frame_begin_common() {
 pub fn overlay_frame_begin() {
     overlay_frame_begin_common();
     crate::prepare_focus_identity_frame();
+    crate::scroll::begin_frame(None);
 }
 
 /// Begin a rendered frame for one window. Production roots call this instead
@@ -130,6 +131,7 @@ pub fn overlay_frame_begin() {
 pub fn overlay_frame_begin_for(handle: AnyWindowHandle, cx: &mut App) {
     overlay_frame_begin_common();
     crate::prepare_focus_identity_frame_for(handle);
+    crate::scroll::begin_frame(Some(handle));
     crate::tooltip::prepare_tooltip_frame(handle);
     crate::tooltip::bind_window_teardown(handle, cx);
 }
@@ -146,6 +148,7 @@ fn overlay_frame_end_common() {
 
 pub fn overlay_frame_end() {
     crate::sweep_unpainted_focus_identities();
+    crate::scroll::sweep_unpainted(None);
     overlay_frame_end_common();
 }
 
@@ -153,6 +156,7 @@ pub fn overlay_frame_end() {
 /// tooltip so another window's pending or visible state survives this paint.
 pub fn overlay_frame_end_for(handle: AnyWindowHandle) {
     crate::sweep_unpainted_focus_identities_for(handle);
+    crate::scroll::sweep_unpainted(Some(handle));
     overlay_frame_end_common();
     crate::tooltip::sweep_unpainted_tooltips(handle);
 }
