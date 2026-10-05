@@ -58219,6 +58219,55 @@ fn first_mounted_parity_scroll_shell() {
     });
 
     run_headless(|cx| {
+        // Two live windows mounting the same ID-less shell keep separate
+        // scroll state: both build the same generated element id, so only the
+        // per-window key keeps the second window from inheriting the first's
+        // offset.
+        let build = |reports: &Arc<Mutex<Vec<(f32, f32)>>>| {
+            let sink = Arc::clone(reports);
+            let shell = poodle_render::scroll_shell(
+                &ScrollShellSpec::new(),
+                &ctx,
+                scroll_rows(12),
+                Some(Arc::new(move |event: &NodeScrollEvent| {
+                    sink.lock()
+                        .expect("scroll payloads")
+                        .push((event.x, event.y));
+                })),
+            );
+            Arc::new(Mutex::new(scroll_frame(shell, None)))
+        };
+        let first = Arc::new(Mutex::new(Vec::<(f32, f32)>::new()));
+        let second = Arc::new(Mutex::new(Vec::<(f32, f32)>::new()));
+        {
+            let mut driver = HeadlessDriver::new_in_box(cx, build(&first), 320.0, 220.0);
+            driver.draw_frame();
+            driver.scroll_vertical(-60.0);
+            driver.scroll_vertical(-60.0);
+        }
+        let first_offset = first.lock().expect("scroll payloads").last().copied();
+        assert!(
+            first_offset.is_some_and(|(_, y)| y > 0.0),
+            "the first window scrolled: {first_offset:?}"
+        );
+        {
+            let mut driver = HeadlessDriver::new_in_box(cx, build(&second), 320.0, 220.0);
+            driver.draw_frame();
+            driver.scroll_vertical(-60.0);
+        }
+        let second_offsets = second.lock().expect("scroll payloads").clone();
+        assert_eq!(
+            second_offsets.len(),
+            1,
+            "one wheel step in the second window reports once: {second_offsets:?}"
+        );
+        assert!(
+            second_offsets[0].1 > 0.0 && second_offsets[0].1 < first_offset.expect("offset").1,
+            "the second window starts from the top, not the first window's offset: {second_offsets:?} vs {first_offset:?}"
+        );
+    });
+
+    run_headless(|cx| {
         // Not focusable: no tab stop, no keyboard scrolling, wheel still works.
         let mut plain =
             poodle_render::scroll_shell(&ScrollShellSpec::new(), &ctx, scroll_rows(12), None);
