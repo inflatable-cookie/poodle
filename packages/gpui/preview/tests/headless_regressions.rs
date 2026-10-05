@@ -51178,3 +51178,234 @@ fn first_mounted_parity_card_toggle_group() {
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }
+
+#[test]
+fn markdown_editor_mode_toolbar_and_edit_rebuild_the_host_spec() {
+    // poodle#103. MarkdownEditor's first mounted parity proof: labelled tools
+    // and textarea, token-resolved toolbar geometry, mode switching through
+    // pointer and keyboard, toolbar wrap through the real activate path, and
+    // append editing through the shared text-input model — every one through
+    // the production renderer and the mounted GPUI node backend.
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::MarkdownEditorSpec;
+
+    #[derive(Clone)]
+    struct EditorHost {
+        value: String,
+        mode: String,
+    }
+
+    fn stamp_ids(node: &mut Node) {
+        if node
+            .find(&|child| child.a11y.role == Some(NodeRole::TextInput))
+            .is_some()
+        {
+            assert!(give_first_id(node, "markdown-editor-textarea", &|child| {
+                child.a11y.role == Some(NodeRole::TextInput)
+            }));
+        }
+        assert!(give_first_id(node, "markdown-editor-tool-bold", &|child| {
+            child.a11y.label.as_deref() == Some("Bold")
+        }));
+        assert!(give_first_id(
+            node,
+            "markdown-editor-mode-split",
+            &|child| { child.a11y.label.as_deref() == Some("Split") }
+        ));
+        assert!(give_first_id(
+            node,
+            "markdown-editor-mode-preview",
+            &|child| {
+                child.a11y.role == Some(NodeRole::Button)
+                    && child.a11y.label.as_deref() == Some("Preview")
+            }
+        ));
+        if node
+            .find(&|child| {
+                child.a11y.label.as_deref() == Some("Preview")
+                    && child.a11y.role != Some(NodeRole::Button)
+            })
+            .is_some()
+        {
+            assert!(give_first_id(node, "markdown-editor-preview", &|child| {
+                child.a11y.label.as_deref() == Some("Preview")
+                    && child.a11y.role != Some(NodeRole::Button)
+            }));
+        }
+    }
+
+    fn build(host: &Arc<Mutex<EditorHost>>, mounted: &Arc<Mutex<Node>>) -> Node {
+        let rebuild = {
+            let host = Arc::clone(host);
+            let mounted = Arc::clone(mounted);
+            Arc::new(move || {
+                let next = build(&host, &mounted);
+                *mounted.lock().expect("mount lock") = next;
+            }) as Arc<dyn Fn() + Send + Sync>
+        };
+        let current = host.lock().expect("host lock").clone();
+        let value_sink = Arc::clone(host);
+        let mode_sink = Arc::clone(host);
+        let rebuild_value = Arc::clone(&rebuild);
+        let rebuild_mode = rebuild;
+        let mut node = poodle_render::markdown_editor_with_handlers(
+            &MarkdownEditorSpec::new()
+                .with_value(&current.value)
+                .with_mode(&current.mode)
+                .with_aria_label("Notes")
+                .with_size(ControlSize::Md)
+                .with_density(ControlDensity::Default),
+            &RenderContext::new(&theme()),
+            poodle_render::MarkdownEditorHandlers {
+                on_change: Some(Arc::new(move |value: &str| {
+                    value_sink.lock().expect("host lock").value = value.to_string();
+                    rebuild_value();
+                })),
+                on_mode_change: Some(Arc::new(move |mode: &str| {
+                    mode_sink.lock().expect("host lock").mode = mode.to_string();
+                    rebuild_mode();
+                })),
+            },
+        );
+        stamp_ids(&mut node);
+        node
+    }
+
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(EditorHost {
+            value: "hello".to_string(),
+            mode: "edit".to_string(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 640.0, 480.0);
+        driver.draw_frame();
+
+        // Semantic, accessibility, visual: labels, roles, token geometry.
+        {
+            let theme = theme();
+            let tree = mounted.lock().expect("mount lock");
+            let input = tree
+                .find(&|node| node.id.as_deref() == Some("markdown-editor-textarea"))
+                .expect("mounted textarea");
+            assert_eq!(input.a11y.role, Some(NodeRole::TextInput));
+            assert_eq!(input.a11y.label.as_deref(), Some("Notes"));
+            assert_eq!(input.a11y.value_text.as_deref(), Some("hello"));
+            assert!(input.interaction.focusable);
+            let bold = tree
+                .find(&|node| node.id.as_deref() == Some("markdown-editor-tool-bold"))
+                .expect("mounted Bold tool");
+            assert_eq!(bold.a11y.role, Some(NodeRole::Button));
+            assert_eq!(bold.a11y.label.as_deref(), Some("Bold"));
+            assert_eq!(bold.tooltip.as_deref(), Some("Bold"));
+            assert!(bold.interaction.focusable);
+            assert_eq!(
+                bold.style.descriptor.layout.width,
+                LayoutSizing::Fixed(poodle_render::presentation::rem_to_px(2.0))
+            );
+            assert_eq!(
+                tree.style.descriptor.background,
+                Some(theme.resolve_color("color.background.surface"))
+            );
+            assert_eq!(
+                tree.style.descriptor.border.color,
+                theme.resolve_color("color.border.default")
+            );
+        }
+        let textarea_bounds = poodle_gpui_node_backend::bounds_for("markdown-editor-textarea")
+            .expect("textarea geometry");
+        assert!(
+            f32::from(textarea_bounds.size.width) > 0.0
+                && f32::from(textarea_bounds.size.height) > 0.0,
+            "the edit pane paints positive dimensions: {textarea_bounds:?}"
+        );
+        let bold_bounds = poodle_gpui_node_backend::bounds_for("markdown-editor-tool-bold")
+            .expect("Bold geometry");
+        assert!(
+            (f32::from(bold_bounds.size.width) - poodle_render::presentation::rem_to_px(2.0)).abs()
+                < 1.0,
+            "md tool buttons keep the contract 2rem square: {bold_bounds:?}"
+        );
+
+        // Keyboard: focus the textarea and append through the real key path.
+        driver.wait_for_focus_handle("markdown-editor-textarea");
+        driver.focus_element("markdown-editor-textarea");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("markdown-editor-textarea"),
+            Some(true),
+            "the edit pane is a real focus target"
+        );
+        driver.dispatch_key_raw("x");
+        assert_eq!(
+            host.lock().expect("host lock").value,
+            "hellox",
+            "a printable key appends through on_change"
+        );
+
+        // Pointer: Bold wraps the current source the way Svelte wraps a
+        // whole-value selection.
+        driver.pointer_activate_id("markdown-editor-tool-bold");
+        assert_eq!(
+            host.lock().expect("host lock").value,
+            "**hellox**",
+            "Bold emits the wrapped markdown payload"
+        );
+
+        // Pointer: Split shows both panes; the preview is a labelled region.
+        driver.pointer_activate_id("markdown-editor-mode-split");
+        assert_eq!(host.lock().expect("host lock").mode, "split");
+        driver.draw_frame();
+        {
+            let tree = mounted.lock().expect("mount lock");
+            assert!(tree
+                .find(&|node| node.id.as_deref() == Some("markdown-editor-textarea"))
+                .is_some());
+            let preview = tree
+                .find(&|node| node.id.as_deref() == Some("markdown-editor-preview"))
+                .expect("split preview pane");
+            assert_eq!(preview.a11y.label.as_deref(), Some("Preview"));
+            assert!(preview.has_text("**hellox**"));
+        }
+
+        // Keyboard: Preview mode disables tools and hides the textarea.
+        driver.wait_for_focus_handle("markdown-editor-mode-preview");
+        driver.keyboard_activate("markdown-editor-mode-preview");
+        assert_eq!(host.lock().expect("host lock").mode, "preview");
+        driver.draw_frame();
+        {
+            let tree = mounted.lock().expect("mount lock");
+            assert!(tree
+                .find(&|node| node.a11y.role == Some(NodeRole::TextInput))
+                .is_none());
+            let bold = tree
+                .find(&|node| node.a11y.label.as_deref() == Some("Bold"))
+                .expect("preview Bold tool");
+            assert!(bold.interaction.disabled);
+            assert!(!bold.interaction.focusable);
+            assert!(bold.interaction.on_activate.is_none());
+        }
+
+        // Disabled: tools and mode controls take no activation.
+        {
+            let theme = theme();
+            let disabled = poodle_render::markdown_editor(
+                &MarkdownEditorSpec::new()
+                    .with_value("locked")
+                    .with_disabled(true),
+                &RenderContext::new(&theme),
+            );
+            let bold = disabled
+                .find(&|node| node.a11y.label.as_deref() == Some("Bold"))
+                .expect("disabled Bold");
+            assert!(bold.interaction.disabled);
+            let input = disabled
+                .find(&|node| node.a11y.role == Some(NodeRole::TextInput))
+                .expect("disabled textarea");
+            assert!(input.interaction.disabled);
+            assert!(!input.interaction.focusable);
+            assert!(input.interaction.on_edit_key.is_none());
+        }
+
+        assert!(driver.mounted_observation().is_valid());
+    });
+}

@@ -3,15 +3,17 @@
 //! Contract: `docs/contracts/components/markdown-editor.md`
 //! Ported from: `packages/jetstream/components/src/markdown_editor.rs`.
 //!
-//! Real text editing + toolbar markdown insertion live in the host event loop
-//! (Tier-3), so the edit pane is an Input node (placeholder + current value)
-//! and the preview shows source text.
+//! The edit pane is a backend Input node. Keystrokes go through the shared
+//! text-input edit model and report via `on_change`. Toolbar tools apply the
+//! same markdown syntax as Svelte (wrap or line-prefix the current value;
+//! selection is Tier-3) and report the next source through `on_change`. Preview
+//! still shows source text until a renderer is plugged (Tier-3).
 
 use std::sync::Arc;
 
 use poodle_node::{
     CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
-    MainAxisAlignment, Node, TextChangeHandler,
+    MainAxisAlignment, Node, NodeRole, StylePatch, TextChangeHandler,
 };
 use poodle_specs::{ButtonVariant, IconButtonSpec, MarkdownEditorSpec};
 
@@ -36,6 +38,23 @@ const TOOLS: [(&str, &str); 7] = [
 pub struct MarkdownEditorHandlers {
     pub on_change: Option<TextChangeHandler>,
     pub on_mode_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+}
+
+/// Svelte `insertMarkdown` / `insertLine` against the whole current value.
+/// Native has no textarea selection, so wrap/prefix the source the host holds
+/// (contract §11 Tier-3 insertion mechanics).
+fn apply_toolbar_tool(value: &str, label: &str) -> String {
+    let selected = if value.is_empty() { "text" } else { value };
+    match label {
+        "Bold" => format!("**{selected}**"),
+        "Italic" => format!("*{selected}*"),
+        "Heading" => format!("## {value}"),
+        "Link" => format!("[{selected}](url)"),
+        "Code" => format!("`{selected}`"),
+        "Quote" => format!("> {value}"),
+        "List" => format!("- {value}"),
+        _ => value.to_string(),
+    }
 }
 
 pub fn markdown_editor(spec: &MarkdownEditorSpec, ctx: &RenderContext<'_>) -> Node {
@@ -145,6 +164,8 @@ pub fn markdown_editor_with_handlers(
         // TOOLS already pairs each glyph with its name; rendering the tool
         // icon-only discarded it and left a row of unnamed buttons.
         btn.a11y.label = Some((*label).to_string());
+        btn.a11y.role = Some(NodeRole::Button);
+        btn.tooltip = Some((*label).to_string());
         {
             let s = &mut btn.style;
             s.descriptor.layout.width = LayoutSizing::Fixed(tool_size);
@@ -156,9 +177,17 @@ pub fn markdown_editor_with_handlers(
         all_radius(&mut btn, ctrl_radius);
         if tools_disabled {
             btn.style.descriptor.opacity = 0.4; // contract tool `:disabled` opacity
+            btn.interaction.disabled = true;
         } else {
             btn.interaction.focusable = true;
             btn.style.descriptor.cursor = CursorHint::Pointer;
+            if let Some(on_change) = handlers.on_change.clone() {
+                let current = spec.value.clone();
+                let label = (*label).to_string();
+                btn.interaction.on_activate = Some(Arc::new(move || {
+                    on_change(&apply_toolbar_tool(&current, &label));
+                }));
+            }
         }
         let mut glyph = Node::icon(*icon_name, tool_font);
         glyph.style.descriptor.text_color = Some(tool_color);
@@ -188,7 +217,8 @@ pub fn markdown_editor_with_handlers(
                 })
                 .with_size(base_size)
                 .with_size_role(spec.size_role)
-                .with_density(density),
+                .with_density(density)
+                .with_disabled(spec.is_disabled),
             ctx,
             on_activate,
         )
@@ -240,9 +270,71 @@ pub fn markdown_editor_with_handlers(
         } else {
             spec.aria_label.clone()
         });
+        input.a11y.role = Some(NodeRole::TextInput);
+        if !spec.value.is_empty() {
+            input.a11y.value_text = Some(spec.value.clone());
+        }
         input.interaction.focusable = !spec.is_disabled;
         input.interaction.disabled = spec.is_disabled;
         if !spec.is_disabled {
+            input.a11y.tab_index = Some(0);
+            // Contract §6 suppresses the textarea outline; an empty focus
+            // patch still opts the backend into a tracked handle so keys
+            // reach on_edit_key (bare `focusable` stays untracked).
+            input.style.focus = Some(StylePatch {
+                background: None,
+                border_color: None,
+                text_color: None,
+                opacity: None,
+            });
+            // Keys go through the shared editing model. Native has no stored
+            // caret on this spec, so the caret sits at the end of the current
+            // value (Tier-3). Printable keys append; Backspace deletes the
+            // last character.
+            let value = spec.value.clone();
+            let on_change = handlers.on_change.clone();
+            input.interaction.on_edit_key = Some(Arc::new(move |key, mods| {
+                let len = value.chars().count();
+                let state = poodle_headless::text_input::EditState {
+                    anchor: len,
+                    head: len,
+                };
+                let Some(outcome) = poodle_headless::text_input::edit_transition(
+                    &value, state, key, mods.shift, mods.accel, None,
+                ) else {
+                    return;
+                };
+                if let Some(next) = outcome.value {
+                    if next != value {
+                        if let Some(on_change) = &on_change {
+                            on_change(&next);
+                        }
+                    }
+                }
+            }));
+            {
+                let value = spec.value.clone();
+                let on_change = handlers.on_change.clone();
+                input.interaction.on_edit_insert = Some(Arc::new(move |text: &str| {
+                    let len = value.chars().count();
+                    let outcome = poodle_headless::text_input::insert_transition(
+                        &value,
+                        poodle_headless::text_input::EditState {
+                            anchor: len,
+                            head: len,
+                        },
+                        text,
+                        None,
+                    );
+                    if let Some(next) = outcome.value {
+                        if next != value {
+                            if let Some(on_change) = &on_change {
+                                on_change(&next);
+                            }
+                        }
+                    }
+                }));
+            }
             input.interaction.on_text_change = handlers.on_change.clone();
         }
         {
@@ -343,6 +435,97 @@ mod tests {
             .iter()
             .find(|child| child.a11y.label.as_deref() == Some("Preview"))
             .expect("preview pane carries aria-label Preview")
+    }
+
+    fn tool<'a>(node: &'a Node, label: &str) -> &'a Node {
+        node.find(&|child| {
+            child.a11y.role == Some(poodle_node::NodeRole::Button)
+                && child.a11y.label.as_deref() == Some(label)
+        })
+        .unwrap_or_else(|| panic!("missing {label} tool"))
+    }
+
+    fn textarea(node: &Node) -> &Node {
+        node.find(&|child| child.a11y.role == Some(poodle_node::NodeRole::TextInput))
+            .expect("edit pane is a labelled text input")
+    }
+
+    #[test]
+    fn apply_toolbar_tool_matches_svelte_syntax() {
+        assert_eq!(apply_toolbar_tool("hello", "Bold"), "**hello**");
+        assert_eq!(apply_toolbar_tool("", "Bold"), "**text**");
+        assert_eq!(apply_toolbar_tool("hello", "Heading"), "## hello");
+        assert_eq!(apply_toolbar_tool("", "Heading"), "## ");
+        assert_eq!(apply_toolbar_tool("hello", "Link"), "[hello](url)");
+        assert_eq!(apply_toolbar_tool("hello", "List"), "- hello");
+    }
+
+    #[test]
+    fn toolbar_bold_wraps_the_current_value_through_on_change() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let received = std::sync::Arc::new(std::sync::Mutex::new(None));
+        let sink = std::sync::Arc::clone(&received);
+        let node = markdown_editor_with_handlers(
+            &MarkdownEditorSpec::new().with_value("hello"),
+            &ctx,
+            MarkdownEditorHandlers {
+                on_change: Some(std::sync::Arc::new(move |value: &str| {
+                    *sink.lock().expect("change") = Some(value.to_string());
+                })),
+                ..MarkdownEditorHandlers::default()
+            },
+        );
+        let bold = tool(&node, "Bold");
+        assert!(bold.interaction.focusable);
+        assert!(!bold.interaction.disabled);
+        (bold
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("bold activate"))();
+        assert_eq!(
+            received.lock().expect("change").as_deref(),
+            Some("**hello**")
+        );
+    }
+
+    #[test]
+    fn preview_mode_disables_tool_buttons() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = markdown_editor(
+            &MarkdownEditorSpec::new()
+                .with_mode("preview")
+                .with_value("# Hello"),
+            &ctx,
+        );
+        let bold = tool(&node, "Bold");
+        assert!(bold.interaction.disabled);
+        assert!(!bold.interaction.focusable);
+        assert!(bold.interaction.on_activate.is_none());
+    }
+
+    #[test]
+    fn edit_pane_is_a_labelled_text_input() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = markdown_editor_with_handlers(
+            &MarkdownEditorSpec::new()
+                .with_value("hello")
+                .with_aria_label("Notes"),
+            &ctx,
+            MarkdownEditorHandlers {
+                on_change: Some(std::sync::Arc::new(|_: &str| {})),
+                ..MarkdownEditorHandlers::default()
+            },
+        );
+        let input = textarea(&node);
+        assert_eq!(input.a11y.label.as_deref(), Some("Notes"));
+        assert_eq!(input.a11y.value_text.as_deref(), Some("hello"));
+        assert!(input.interaction.on_edit_key.is_some());
+        assert!(input.interaction.on_text_change.is_some());
+        assert!(input.style.focus.is_some());
     }
 
     #[test]

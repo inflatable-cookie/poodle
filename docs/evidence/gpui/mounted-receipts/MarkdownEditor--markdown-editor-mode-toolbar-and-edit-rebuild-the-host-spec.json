@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "Rating",
-  "test": "rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboard",
+  "component": "MarkdownEditor",
+  "test": "markdown_editor_mode_toolbar_and_edit_rebuild_the_host_spec",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -10,7 +10,8 @@
     "events",
     "pointer",
     "keyboard_focus",
-    "accessibility"
+    "accessibility",
+    "visual"
   ],
   "signals": {
     "semantic": [
@@ -18,9 +19,8 @@
       "production-mount"
     ],
     "events": [
-      "assert_eq!(\n            host.lock().expect(\"host lock\").payload",
-      "assert!(\n            host.lock().expect(\"host lock\").payload",
-      "assert_eq!(host.lock().expect(\"host lock\").payload"
+      "assert_eq!(\n            host.lock().expect(\"host lock\").value,\n            \"**hellox**\",\n            \"Bold emits the wrapped markdown payload",
+      "assert_eq!(\n            host.lock().expect(\"host lock\").value,\n            \"hellox\",\n            \"a printable key appends through on_change"
     ],
     "pointer": [
       "pointer_activate"
@@ -31,9 +31,13 @@
       "dispatch_key"
     ],
     "accessibility": [
-      "a11y\n                .",
       "NodeRole",
       "a11y."
+    ],
+    "visual": [
+      "resolve_color",
+      "dimensions",
+      "rem_to_px"
     ]
   },
   "production_path_observation": {
@@ -41,7 +45,7 @@
     "mount": "HeadlessDriver",
     "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::rating",
+    "renderer": "poodle_render::markdown_editor_with_handlers",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -54,14 +58,15 @@
     "command": "effigy regressions:native",
     "run_id": "711a768d-be9e-4ab1-893b-07e5822162ee",
     "outcome": "passed",
-    "body_sha256": "f1df3179aa70532e063c340c86b5eb8113361b8e480112ad45f54b188a5246c9"
+    "body_sha256": "c9a355337027be019e6996eb769cfadf7251a3d79ef5e06dfce50f4adb366737"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
     "asserted emitted payloads or handler delivery through mounted input",
     "drove real pointer activation through the mounted GPUI node backend",
     "drove real keyboard input or backend focus through the mounted tree",
-    "asserted node-level role, label, state, or focusability in the mounted tree"
+    "asserted node-level role, label, state, or focusability in the mounted tree",
+    "asserted resolved token values or mounted geometry"
   ],
   "outcome": "passed"
 }

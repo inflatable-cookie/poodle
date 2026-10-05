@@ -124,6 +124,7 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   EditableList: "editable_list_substrate_reorder_rebuilds_the_host_spec",
   OrderBy: "order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec",
   BlockEditor: "block_editor_grip_drag_and_move_controls_rebuild_the_host_spec",
+  MarkdownEditor: "markdown_editor_mode_toolbar_and_edit_rebuild_the_host_spec",
   TextInput: "text_input_controlled_editing_and_identity_rebuild_the_host_spec",
   TokenInput: "token_input_entry_removal_and_keyboard_rebuild_the_host_spec",
   DragNumberField:
