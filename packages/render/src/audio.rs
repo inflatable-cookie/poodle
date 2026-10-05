@@ -546,7 +546,9 @@ pub fn envelope_editor_with_handlers(
 ) -> Node {
     let (width, height, _) = envelope_geometry(spec, ctx);
     let mut node = envelope_editor(spec, ctx);
-    crate::audio_handlers::bind_envelope_editor(&mut node, spec, ctx, handlers, live, width, height);
+    crate::audio_handlers::bind_envelope_editor(
+        &mut node, spec, ctx, handlers, live, width, height,
+    );
     node
 }
 
@@ -935,16 +937,14 @@ pub fn waveform_display(spec: &WaveformDisplaySpec, ctx: &RenderContext<'_>) -> 
         summary.push_str(&format!(", cursor {cursor}"));
     }
     if let Some(selection) = state.selection {
-        summary.push_str(&format!(", selection {} to {}", selection.start, selection.end));
+        summary.push_str(&format!(
+            ", selection {} to {}",
+            selection.start, selection.end
+        ));
     }
     root.a11y.label = Some(summary.clone());
     root.a11y.value_min = Some(state.visible_start as f64);
-    root.a11y.value_max = Some(
-        state
-            .visible_end
-            .saturating_sub(1)
-            .max(state.visible_start) as f64,
-    );
+    root.a11y.value_max = Some(state.visible_end.saturating_sub(1).max(state.visible_start) as f64);
     root.a11y.value = Some(state.cursor_sample.unwrap_or(state.visible_start) as f64);
     root.a11y.value_text = Some(summary);
     root.interaction.focusable = state.enabled;
@@ -1061,7 +1061,11 @@ pub fn mod_matrix_grid(spec: &ModMatrixGridSpec, ctx: &RenderContext<'_>) -> Nod
                 "{} to {}, {}, {:.2}, range {:.2} to {:.2}",
                 source.label,
                 destination_label,
-                if cell.cell.enabled { "enabled" } else { "disabled" },
+                if cell.cell.enabled {
+                    "enabled"
+                } else {
+                    "disabled"
+                },
                 cell.cell.amount,
                 cell.cell.parameters.min,
                 cell.cell.parameters.max

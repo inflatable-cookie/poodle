@@ -20,7 +20,7 @@
     ],
     "events": [
       "assert_eq!(\n            selection_commits\n                .lock()\n                .expect(\"commits lock\")\n                .last()\n                .expect(\"an extended commit\"),\n            &Some(extended),\n            \"an extending move commit",
-      "assert_eq!(\n            selection_commits.lock().expect(\"commits lock\").as_slice(),\n            &[Some(WaveformSelection { start: 1024, end: 2048 })],\n            \"one drag commit",
+      "assert_eq!(\n            selection_commits.lock().expect(\"commits lock\").as_slice(),\n            &[Some(WaveformSelection {\n                start: 1024,\n                end: 2048\n            })],\n            \"one drag commit",
       "assert_eq!(\n            selection_changes\n                .lock()\n                .expect(\"selection lock\")\n                .last()\n                .expect(\"an extended change"
     ],
     "pointer": [
@@ -52,7 +52,7 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "869c45e9cc0a32bb51e59222ddf17e0d2fc0f918",
+  "source_commit": "f9e0c22a701f14fdc1d2bb54dd76b721a4ad1f8b",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
@@ -60,7 +60,7 @@
     "command": "effigy regressions:native",
     "run_id": "poodle-122-869c45e",
     "outcome": "passed",
-    "body_sha256": "78e25aa11048c0ac61a13fde18f39425af2ddbc117571cac0b4f83e3728a4cca"
+    "body_sha256": "149919e4fcdaca00c4ef504df87da488936d956464811ee96bed56b53dcb0242"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

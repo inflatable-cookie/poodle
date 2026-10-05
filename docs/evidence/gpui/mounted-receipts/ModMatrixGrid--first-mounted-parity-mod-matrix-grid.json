@@ -20,8 +20,8 @@
     ],
     "events": [
       "counting_handler",
-      "assert_eq!(\n            commits.lock().expect(\"commits lock\").last().expect(\"a toggle commit\").enabled,\n            false,\n            \"an atomic toggle reports change and commit",
-      "assert_eq!(\n            changes.lock().expect(\"changes lock\").last().expect(\"a toggle change"
+      "assert_eq!(\n            commits\n                .lock()\n                .expect(\"commits lock\")\n                .last()\n                .expect(\"a toggle commit\")\n                .enabled,\n            false,\n            \"an atomic toggle reports change and commit",
+      "assert_eq!(\n            changes\n                .lock()\n                .expect(\"changes lock\")\n                .last()\n                .expect(\"a toggle change"
     ],
     "pointer": [
       "pointer_activate",
@@ -53,7 +53,7 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "869c45e9cc0a32bb51e59222ddf17e0d2fc0f918",
+  "source_commit": "f9e0c22a701f14fdc1d2bb54dd76b721a4ad1f8b",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
@@ -61,7 +61,7 @@
     "command": "effigy regressions:native",
     "run_id": "poodle-122-869c45e",
     "outcome": "passed",
-    "body_sha256": "5b28eeaa491c38d5d3015457ffa0e17e3951c540dbf64017631672ae1f5de1d9"
+    "body_sha256": "273121e4e986a97839964dc342a340ea540850e74fcf8a32a6cfa69c82562bec"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

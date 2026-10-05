@@ -50,10 +50,10 @@ use poodle_render::{
     ui_presentation_provider, waveform_display_with_handlers, waveform_spec_from_context,
     xy_pad_spec_from_context, xy_pad_with_handlers, xy_pad_x_id, xy_pad_y_id, CollapsibleHandlers,
     EnvelopeHandlers, EnvelopeLive, FaderHandlers, FaderLive, HistoryCenterHandlers,
-    HistoryCenterView, KnobHandlers, KnobLive, ModMatrixHandlers, ModMatrixLive, RadioGroupHandlers,
-    RatingHandlers, RenderContext, SliderHandlers, TabsHandlers, ToastStackHandlers,
-    ToastStackPresence, ToggleGroupHandlers, TriStateSwitchHandlers, WaveformHandlers, XYPadHandlers,
-    XYPadLive,
+    HistoryCenterView, KnobHandlers, KnobLive, ModMatrixHandlers, ModMatrixLive,
+    RadioGroupHandlers, RatingHandlers, RenderContext, SliderHandlers, TabsHandlers,
+    ToastStackHandlers, ToastStackPresence, ToggleGroupHandlers, TriStateSwitchHandlers,
+    WaveformHandlers, XYPadHandlers, XYPadLive,
 };
 use poodle_specs::{
     AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ChoiceOption, CodeSpec, CodeWrap,
@@ -61067,8 +61067,8 @@ fn first_mounted_parity_envelope_editor() {
         // Pointer drag with real deltas: the pointer-derived position moves
         // the hit point live, then commits exactly once bracketed by one
         // gesture pair.
-        let handle_bounds = poodle_gpui_node_backend::bounds_for(&handle_id)
-            .expect("decay handle geometry");
+        let handle_bounds =
+            poodle_gpui_node_backend::bounds_for(&handle_id).expect("decay handle geometry");
         let press = handle_bounds.center();
         // Two moves like the drag-number proof: the first move opens the
         // native drag session, the second delivers through it.
@@ -61102,8 +61102,7 @@ fn first_mounted_parity_envelope_editor() {
         );
         assert_eq!(*begin_count.lock().expect("begin lock"), 1);
         assert_eq!(*end_count.lock().expect("end lock"), 1);
-        *mounted.lock().expect("mount") =
-            node_for(id, &live, &changes, &commits, &begin, &end);
+        *mounted.lock().expect("mount") = node_for(id, &live, &changes, &commits, &begin, &end);
         let rebuilt_label = mounted
             .lock()
             .expect("mount")
@@ -61220,12 +61219,8 @@ fn first_mounted_parity_envelope_editor() {
             }));
         let mut spec = envelope_spec_from_live(&live.lock().expect("envelope machine"));
         spec.size = Some(ControlSize::Md);
-        let node = envelope_editor_with_handlers(
-            &spec,
-            &RenderContext::new(&theme()),
-            &handlers,
-            &live,
-        );
+        let node =
+            envelope_editor_with_handlers(&spec, &RenderContext::new(&theme()), &handlers, &live);
         let mounted = Arc::new(Mutex::new(node));
         poodle_gpui_node_backend::begin_probe_capture();
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 360.0);
@@ -61310,7 +61305,6 @@ fn first_mounted_parity_envelope_editor() {
     });
 }
 
-
 /// WaveformDisplay proves its mounted GPUI parity: pyramid validation with
 /// viewport-driven level choice and the 4,096-column ceiling, cursor and
 /// ordered-selection pointer mapping with real scrub fractions, keyboard
@@ -61385,13 +61379,19 @@ fn first_mounted_parity_waveform_display() {
             .on_selection_change({
                 let selection_changes = Arc::clone(selection_changes);
                 Arc::new(move |selection: Option<WaveformSelection>| {
-                    selection_changes.lock().expect("selection lock").push(selection);
+                    selection_changes
+                        .lock()
+                        .expect("selection lock")
+                        .push(selection);
                 })
             })
             .on_selection_commit({
                 let selection_commits = Arc::clone(selection_commits);
                 Arc::new(move |selection: Option<WaveformSelection>| {
-                    selection_commits.lock().expect("commits lock").push(selection);
+                    selection_commits
+                        .lock()
+                        .expect("commits lock")
+                        .push(selection);
                 })
             });
         let live = Arc::new(Mutex::new(context.clone()));
@@ -61463,7 +61463,10 @@ fn first_mounted_parity_waveform_display() {
         assert_eq!(full.visual_state().columns.len(), 64);
         assert_eq!(
             full.visual_state().columns[0],
-            WaveformPeakPair { min: -0.0, max: 0.0 },
+            WaveformPeakPair {
+                min: -0.0,
+                max: 0.0
+            },
             "the full range aggregates the coarse level"
         );
         let mut zoomed = seed_context();
@@ -61531,13 +61534,19 @@ fn first_mounted_parity_waveform_display() {
             .on_selection_change({
                 let selection_changes = Arc::clone(&selection_changes);
                 Arc::new(move |selection: Option<WaveformSelection>| {
-                    selection_changes.lock().expect("selection lock").push(selection);
+                    selection_changes
+                        .lock()
+                        .expect("selection lock")
+                        .push(selection);
                 })
             })
             .on_selection_commit({
                 let selection_commits = Arc::clone(&selection_commits);
                 Arc::new(move |selection: Option<WaveformSelection>| {
-                    selection_commits.lock().expect("commits lock").push(selection);
+                    selection_commits
+                        .lock()
+                        .expect("commits lock")
+                        .push(selection);
                 })
             });
         let rebuild = |live: &Arc<Mutex<WaveformContext>>| {
@@ -61551,13 +61560,19 @@ fn first_mounted_parity_waveform_display() {
                 .on_selection_change({
                     let selection_changes = Arc::clone(&selection_changes);
                     Arc::new(move |selection: Option<WaveformSelection>| {
-                        selection_changes.lock().expect("selection lock").push(selection);
+                        selection_changes
+                            .lock()
+                            .expect("selection lock")
+                            .push(selection);
                     })
                 })
                 .on_selection_commit({
                     let selection_commits = Arc::clone(&selection_commits);
                     Arc::new(move |selection: Option<WaveformSelection>| {
-                        selection_commits.lock().expect("commits lock").push(selection);
+                        selection_commits
+                            .lock()
+                            .expect("commits lock")
+                            .push(selection);
                     })
                 });
             let mut spec =
@@ -61619,13 +61634,22 @@ fn first_mounted_parity_waveform_display() {
         assert_eq!(
             selection_changes.lock().expect("selection lock").as_slice(),
             &[
-                Some(WaveformSelection { start: 1024, end: 1024 }),
-                Some(WaveformSelection { start: 1024, end: 2048 }),
+                Some(WaveformSelection {
+                    start: 1024,
+                    end: 1024
+                }),
+                Some(WaveformSelection {
+                    start: 1024,
+                    end: 2048
+                }),
             ]
         );
         assert_eq!(
             selection_commits.lock().expect("commits lock").as_slice(),
-            &[Some(WaveformSelection { start: 1024, end: 2048 })],
+            &[Some(WaveformSelection {
+                start: 1024,
+                end: 2048
+            })],
             "one drag commits once at release"
         );
         *mounted.lock().expect("mount") = rebuild(&live);
@@ -61635,7 +61659,11 @@ fn first_mounted_parity_waveform_display() {
             Some("Lead vocal, samples 0 to 4096, cursor 2048, selection 1024 to 2048")
         );
         assert_eq!(rebuilt.a11y.value, Some(2048.0));
-        assert_eq!(rebuilt.children.len(), 66, "columns plus selection and cursor");
+        assert_eq!(
+            rebuilt.children.len(),
+            66,
+            "columns plus selection and cursor"
+        );
         let overlay = rebuilt
             .children
             .iter()
@@ -61712,10 +61740,18 @@ fn first_mounted_parity_waveform_display() {
             "the display is a real focus target"
         );
         let commits_before = selection_commits.lock().expect("commits lock").len();
-        let drag_end_cursor = *cursor_changes.lock().expect("cursor lock").last().expect("a cursor");
+        let drag_end_cursor = *cursor_changes
+            .lock()
+            .expect("cursor lock")
+            .last()
+            .expect("a cursor");
         driver.keyboard_key(id, "left");
         assert_eq!(
-            *cursor_changes.lock().expect("cursor lock").last().expect("a cursor change"),
+            *cursor_changes
+                .lock()
+                .expect("cursor lock")
+                .last()
+                .expect("a cursor change"),
             drag_end_cursor - 1,
             "arrows move the cursor one sample from the drag end"
         );
@@ -61748,12 +61784,20 @@ fn first_mounted_parity_waveform_display() {
         );
         driver.keyboard_key(id, "home");
         assert_eq!(
-            *cursor_changes.lock().expect("cursor lock").last().expect("a home change"),
+            *cursor_changes
+                .lock()
+                .expect("cursor lock")
+                .last()
+                .expect("a home change"),
             0
         );
         driver.keyboard_key(id, "end");
         assert_eq!(
-            *cursor_changes.lock().expect("cursor lock").last().expect("an end change"),
+            *cursor_changes
+                .lock()
+                .expect("cursor lock")
+                .last()
+                .expect("an end change"),
             4095
         );
         driver.keyboard_key(id, "escape");
@@ -61805,7 +61849,10 @@ fn first_mounted_parity_waveform_display() {
         let geometry_y: f32 = geometry.origin.y.into();
         let geometry_w: f32 = geometry.size.width.into();
         let geometry_h: f32 = geometry.size.height.into();
-        let middle = point(px(geometry_x + geometry_w * 0.5), px(geometry_y + geometry_h * 0.5));
+        let middle = point(
+            px(geometry_x + geometry_w * 0.5),
+            px(geometry_y + geometry_h * 0.5),
+        );
         driver.pointer_press(middle);
         driver.pointer_drag(middle);
         driver.pointer_drag(middle);
@@ -61958,16 +62005,17 @@ fn first_mounted_parity_mod_matrix_grid() {
             node.style.descriptor.border.color,
             theme_provider.resolve_color("color.border.default")
         );
-        assert_eq!(node.children.len(), 3, "column headers plus two source rows");
+        assert_eq!(
+            node.children.len(),
+            3,
+            "column headers plus two source rows"
+        );
         assert_eq!(
             node.children[0].children.len(),
             3,
             "corner plus two destination headers"
         );
-        assert_eq!(
-            node.children[0].children[1].intrinsic_text(),
-            Some("Pitch")
-        );
+        assert_eq!(node.children[0].children[1].intrinsic_text(), Some("Pitch"));
         assert_eq!(
             node.children[0].children[2].intrinsic_text(),
             Some("Cutoff")
@@ -61978,7 +62026,9 @@ fn first_mounted_parity_mod_matrix_grid() {
         }
         let cells = cells_of(&node);
         assert_eq!(cells.len(), 4);
-        assert!(cells.iter().all(|cell| cell.a11y.role == Some(NodeRole::Cell)));
+        assert!(cells
+            .iter()
+            .all(|cell| cell.a11y.role == Some(NodeRole::Cell)));
         assert_eq!(
             cells[0].a11y.label.as_deref(),
             Some("LFO to Pitch, enabled, 0.50, range -1.00 to 1.00")
@@ -62017,12 +62067,12 @@ fn first_mounted_parity_mod_matrix_grid() {
             let zero = cell
                 .children
                 .iter()
-                .find(|child| {
-                    child.style.descriptor.layout.width == LayoutSizing::Fixed(1.0)
-                })
+                .find(|child| child.style.descriptor.layout.width == LayoutSizing::Fixed(1.0))
                 .expect("zero anchor bar");
             match zero.position {
-                NodePosition::Absolute { left: Some(left), .. } => left,
+                NodePosition::Absolute {
+                    left: Some(left), ..
+                } => left,
                 ref other => panic!("zero anchor is positioned: {other:?}"),
             }
         }
@@ -62065,8 +62115,8 @@ fn first_mounted_parity_mod_matrix_grid() {
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 240.0);
         driver.draw_frame();
 
-        let painted_root = poodle_gpui_node_backend::painted_node_for(id)
-            .expect("matrix root reached GPUI paint");
+        let painted_root =
+            poodle_gpui_node_backend::painted_node_for(id).expect("matrix root reached GPUI paint");
         assert_eq!(painted_root.a11y_role, Some(NodeRole::Grid));
         assert_eq!(painted_root.a11y_label.as_deref(), Some("Matrix"));
         let painted_cutoff = poodle_gpui_node_backend::painted_node_for(&cutoff_id)
@@ -62096,8 +62146,8 @@ fn first_mounted_parity_mod_matrix_grid() {
         // horizontal scrub drag through the mounted backend: the embedded
         // slider machine reports live change plus one release commit
         // bracketed by gestures.
-        let cell_geometry = poodle_gpui_node_backend::bounds_for(&cutoff_id)
-            .expect("mounted cutoff cell geometry");
+        let cell_geometry =
+            poodle_gpui_node_backend::bounds_for(&cutoff_id).expect("mounted cutoff cell geometry");
         let cell_x: f32 = cell_geometry.origin.x.into();
         let cell_y: f32 = cell_geometry.origin.y.into();
         let cell_w: f32 = cell_geometry.size.width.into();
@@ -62128,7 +62178,12 @@ fn first_mounted_parity_mod_matrix_grid() {
             dragged.amount
         );
         assert_eq!(
-            commits.lock().expect("commits lock").last().expect("a drag commit").amount,
+            commits
+                .lock()
+                .expect("commits lock")
+                .last()
+                .expect("a drag commit")
+                .amount,
             dragged.amount
         );
         assert_eq!(*begin_count.lock().expect("begin lock"), 1);
@@ -62209,11 +62264,21 @@ fn first_mounted_parity_mod_matrix_grid() {
             .clone();
         assert!(!toggled.enabled);
         assert_eq!(
-            changes.lock().expect("changes lock").last().expect("a toggle change").enabled,
+            changes
+                .lock()
+                .expect("changes lock")
+                .last()
+                .expect("a toggle change")
+                .enabled,
             false
         );
         assert_eq!(
-            commits.lock().expect("commits lock").last().expect("a toggle commit").enabled,
+            commits
+                .lock()
+                .expect("commits lock")
+                .last()
+                .expect("a toggle commit")
+                .enabled,
             false,
             "an atomic toggle reports change and commit together"
         );
@@ -62292,7 +62357,11 @@ fn first_mounted_parity_mod_matrix_grid() {
         assert!(commits.lock().expect("commits lock").is_empty());
         assert_eq!(*begin_count.lock().expect("begin lock"), 0);
         assert!(
-            live.lock().expect("matrix machine").machine.focus_row.is_none(),
+            live.lock()
+                .expect("matrix machine")
+                .machine
+                .focus_row
+                .is_none(),
             "disabled activation never focuses"
         );
     });
