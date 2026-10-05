@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "c511c8337fd50a1ec80421a0120a3635602dcfd5",
+  "source_commit": "7485fd5615da97de581acba64ba16c4658152e5e",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -3963,21 +3963,27 @@
       "substrate": "form-editing",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#agent_question_record_answer_display_rebuilds_the_host_spec"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#agent_question_record_answer_display_rebuilds_the_host_spec"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#agent_question_record_answer_display_rebuilds_the_host_spec"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -3986,10 +3992,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for AgentQuestionRecord; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/AgentQuestionRecord--agent-question-record-answer-display-rebuilds-the-host-spec.json"
+      ],
+      "refusals": []
     },
     {
       "component": "AgentSubagent",
@@ -6127,15 +6133,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#embed_input_url_entry_validation_and_preview_rebuild_the_host_spec"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#embed_input_url_entry_validation_and_preview_rebuild_the_host_spec"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#embed_input_url_entry_validation_and_preview_rebuild_the_host_spec"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#embed_input_url_entry_validation_and_preview_rebuild_the_host_spec"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#embed_input_url_entry_validation_and_preview_rebuild_the_host_spec"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#embed_input_url_entry_validation_and_preview_rebuild_the_host_spec"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6144,10 +6174,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for EmbedInput; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/EmbedInput--embed-input-url-entry-validation-and-preview-rebuild-the-host-spec.json"
+      ],
+      "refusals": []
     },
     {
       "component": "EmbedPreview",
@@ -8538,15 +8568,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -8555,10 +8609,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for Keyboard; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Keyboard--keyboard-pointer-computer-key-and-held-notes-rebuild-the-host-spec.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Knob",
@@ -9055,18 +9109,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 132,
-    "fullyAdmittedRows": 125,
+    "admittedRows": 135,
+    "fullyAdmittedRows": 128,
     "missingTally": {
-      "semantic": 43,
-      "events": 36,
-      "pointer": 37,
-      "keyboard_focus": 38,
-      "accessibility": 43,
-      "visual": 49
+      "semantic": 40,
+      "events": 33,
+      "pointer": 34,
+      "keyboard_focus": 35,
+      "accessibility": 40,
+      "visual": 46
     },
     "holdCount": 175,
-    "refusalCount": 71
+    "refusalCount": 68
   },
   "groups": [
     {
@@ -9243,27 +9297,6 @@
         "docs/contracts/components/detail-section.md",
         "docs/contracts/components/scroll-shell.md",
         "docs/contracts/components/ui-presentation-provider.md"
-      ]
-    },
-    {
-      "substrate": "form-editing",
-      "components": [
-        "AgentQuestionRecord",
-        "EmbedInput",
-        "Keyboard"
-      ],
-      "missingTally": {
-        "semantic": 3,
-        "events": 3,
-        "pointer": 3,
-        "keyboard_focus": 3,
-        "accessibility": 3,
-        "visual": 3
-      },
-      "contracts": [
-        "docs/contracts/components/agent-question-record.md",
-        "docs/contracts/components/embed-input.md",
-        "docs/contracts/components/keyboard.md"
       ]
     },
     {

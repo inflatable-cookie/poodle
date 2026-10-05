@@ -179,27 +179,6 @@
       ]
     },
     {
-      "substrate": "form-editing",
-      "components": [
-        "AgentQuestionRecord",
-        "EmbedInput",
-        "Keyboard"
-      ],
-      "missingTally": {
-        "semantic": 3,
-        "events": 3,
-        "pointer": 3,
-        "keyboard_focus": 3,
-        "accessibility": 3,
-        "visual": 3
-      },
-      "contracts": [
-        "docs/contracts/components/agent-question-record.md",
-        "docs/contracts/components/embed-input.md",
-        "docs/contracts/components/keyboard.md"
-      ]
-    },
-    {
       "substrate": "agent-composites",
       "components": [
         "AgentMessage",
