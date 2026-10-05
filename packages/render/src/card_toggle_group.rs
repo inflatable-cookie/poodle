@@ -3,8 +3,10 @@
 //! Contract: `docs/contracts/components/card-toggle-group.md`
 //! Ported from: `packages/jetstream/components/src/card_toggle_group.rs`.
 //!
-//! Options lay out in rows of `column_count()` cells (1–4); a short final
-//! row is padded with flex spacers so card widths stay aligned across rows.
+//! Options lay out in a responsive auto-fit grid: each cell seeds just under
+//! a `1/columns` share of the row, grows to fill it, and wraps onto the next
+//! row once the size-adjusted minimum width no longer fits. `columns` (1–4) is
+//! the row's upper bound, not a fixed count.
 //! Recipe reconciled to the old GPUI tier
 //! (`packages/gpui/components/src/composites/card_toggle_group.rs`): the
 //! density-table grid gap, spec-helper fonts, Card-composed selection
@@ -82,6 +84,15 @@ fn flex1_cell() -> Node {
     s.flex_basis = Some(0.0);
     n
 }
+
+/// Share of a row reserved from each cell's `1/columns` seed so the flex line
+/// breaker accounts for the inter-column gaps the CSS `calc()` track subtracts.
+/// The flex algorithm breaks a line on the unscaled base size, so an exact
+/// `1/columns` seed plus a gap can never fit `columns` cells in one row. The
+/// reservation covers the largest density gap at the smallest size floor
+/// (2 columns × xs 9.5rem with comfortable 1rem gaps) and `flex_grow` fills
+/// the slack, so the configured column count still bounds a row.
+const GRID_GAP_SHARE: f32 = 0.03;
 
 fn toggle_context(spec: &CardToggleGroupSpec) -> ToggleGroupContext {
     ToggleGroupContext {
@@ -263,8 +274,12 @@ fn render_card_toggle_group(
     let roving = roving_values(spec);
     let tab_stop = tab_stop_value(spec, &roving);
 
-    // Contract §6: rows of `column_count()` cells.
+    // Contract §6: responsive auto-fit grid. The `columns` prop is an upper
+    // bound, not a fixed count; each card seeds at `1/columns` of the row and
+    // grows to fill it, wrapping onto the next row once its size-adjusted
+    // minimum width can no longer fit. Baseline root gap is the grid gap.
     let cols = spec.column_count();
+    let min_width = rem_to_px(CardToggleGroupSpec::min_width_rem(effective_size));
     let mut cells: Vec<Node> = Vec::new();
 
     for option in &spec.options {
@@ -367,7 +382,12 @@ fn render_card_toggle_group(
         } else {
             NodeToggled::False
         });
-        option_el.style.min_width = Some(0.0);
+        option_el.style.min_width = Some(min_width);
+        // Seed just under one column share so the gap reservation keeps the
+        // configured column count as the row's upper bound; `flex_grow` then
+        // fills the row and `flex_basis_pct` wins over the zero pixel basis.
+        option_el.style.flex_basis_pct = Some(1.0 / cols as f32 - GRID_GAP_SHARE);
+        option_el.style.flex_basis = None;
         option_el.interaction.focusable = true;
         let mut option_el = option_el.child(option_card);
         if is_option_disabled {
@@ -404,33 +424,20 @@ fn render_card_toggle_group(
         cells.push(option_el);
     }
 
-    // Assemble rows; pad a short final row with flex spacers.
+    // Responsive root: one wrapping row of column-share cells. Cards in a row
+    // share the stretch cross size, so equal-height cards follow from the
+    // Card's own height.
     let mut root = Node::container();
     {
         let s = &mut root.style;
-        s.descriptor.layout.direction = LayoutDirection::Column;
+        s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Stretch;
+        s.flex_wrap = true;
+        s.fill_width = true;
         s.descriptor.layout.spacing.gap = grid_gap;
     }
-    let mut iter = cells.into_iter();
-    let mut remaining = spec.options.len();
-    while remaining > 0 {
-        let take = cols.min(remaining);
-        let mut row = Node::container();
-        {
-            let s = &mut row.style;
-            s.descriptor.layout.direction = LayoutDirection::Row;
-            s.descriptor.layout.spacing.gap = grid_gap;
-        }
-        for _ in 0..take {
-            if let Some(cell) = iter.next() {
-                row = row.child(cell);
-            }
-        }
-        for _ in take..cols {
-            row = row.child(flex1_cell());
-        }
-        root = root.child(row);
-        remaining -= take;
+    for cell in cells {
+        root = root.child(cell);
     }
 
     // Group-level disabled reaches every option through `is_option_disabled`;
@@ -501,10 +508,6 @@ mod tests {
             assert_eq!(
                 node.style.descriptor.layout.spacing.gap, expected,
                 "root gap for {density:?}"
-            );
-            assert_eq!(
-                node.children[0].style.descriptor.layout.spacing.gap, expected,
-                "row gap for {density:?}"
             );
         }
     }
@@ -810,17 +813,39 @@ mod tests {
     }
 
     #[test]
-    fn a_short_final_row_is_padded_with_spacers() {
-        // 3 options in 2 columns: rows of 2 and 1, the short row padded so
-        // card widths stay aligned across rows.
-        let spec = CardToggleGroupSpec::new(options()).with_columns(2);
+    fn responsive_cells_seed_at_a_column_share_and_wrap_at_the_minimum() {
+        // Contract §6: the root is a responsive auto-fit grid. `columns` is an
+        // upper bound, so each cell seeds at `1/columns` and the size-adjusted
+        // minimum width is what forces a wrap; there is no fixed row scaffold.
         let theme = theme();
         let ctx = RenderContext::new(&theme);
+        let spec = CardToggleGroupSpec::new(options()).with_columns(3);
         let node = card_toggle_group(&spec, &ctx, None);
-        assert_eq!(node.children.len(), 2, "two rows");
-        assert_eq!(node.children[0].children.len(), 2, "full first row");
-        assert_eq!(node.children[1].children.len(), 2, "padded second row");
-        // The spacer carries no card.
-        assert!(!node.children[1].children[1].has_text("Gamma"));
+        assert_eq!(node.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert!(
+            node.style.flex_wrap,
+            "the grid wraps when cards hit the floor"
+        );
+        assert!(node.style.fill_width);
+        assert_eq!(node.children.len(), 3, "one wrapping row holds every cell");
+        let min_width = rem_to_px(CardToggleGroupSpec::min_width_rem(
+            ctx.resolve_size(spec.size, spec.size_role),
+        ));
+        for cell in &node.children {
+            assert_eq!(cell.style.flex_basis_pct, Some(1.0 / 3.0 - GRID_GAP_SHARE));
+            assert_eq!(cell.style.flex_grow, Some(1.0));
+            assert_eq!(cell.style.min_width, Some(min_width));
+        }
+
+        // The 1–4 clamp still bounds the share.
+        let clamped = card_toggle_group(
+            &CardToggleGroupSpec::new(options()).with_columns(9),
+            &ctx,
+            None,
+        );
+        assert_eq!(
+            clamped.children[0].style.flex_basis_pct,
+            Some(1.0 / 4.0 - GRID_GAP_SHARE)
+        );
     }
 }

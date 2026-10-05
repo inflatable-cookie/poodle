@@ -175,4 +175,16 @@ impl CardToggleGroupSpec {
             ControlSize::Xl => 0.875,
         }
     }
+
+    /// Minimum card width in rem before the responsive grid wraps.
+    /// Contract §7 Size Adjustments (base 12rem).
+    pub fn min_width_rem(size: ControlSize) -> f32 {
+        match size {
+            ControlSize::Xs => 9.5,
+            ControlSize::Sm => 10.5,
+            ControlSize::Md => 11.25,
+            ControlSize::Lg => 11.75,
+            ControlSize::Xl => 12.0,
+        }
+    }
 }
