@@ -263,7 +263,13 @@ pub(super) fn apply_scroll(mut el: Stateful<Div>, node: &Node, id: &str) -> Stat
     if keyboard {
         let keys = handle.clone();
         let owner = key.clone();
+        let focus_id = id.to_owned();
         el = el.on_key_down(move |event: &KeyDownEvent, window, cx| {
+            // Keys bubble from focused descendants; only the viewport's own
+            // focus scrolls it, and a descendant keeps its key behaviour.
+            if !focus_handle_for(&focus_id).is_some_and(|handle| handle.is_focused(window)) {
+                return;
+            }
             let m = &event.keystroke.modifiers;
             if m.platform || m.control || m.alt || m.shift {
                 return;

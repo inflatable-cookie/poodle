@@ -58151,6 +58151,17 @@ fn first_mounted_parity_scroll_shell() {
             1,
             "a pointer press reaches a control scrolled into view"
         );
+
+        // Keys from a focused descendant are the descendant's: they bubble to
+        // the viewport but must not scroll it.
+        let resting = poodle_gpui_node_backend::scroll_offset_for("action-viewport")
+            .expect("viewport offset");
+        driver.keyboard_key("scroll-action", "home");
+        assert_eq!(
+            poodle_gpui_node_backend::scroll_offset_for("action-viewport"),
+            Some(resting),
+            "a bubbled key from a focused descendant does not scroll the viewport"
+        );
     });
 
     run_headless(|cx| {
