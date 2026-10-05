@@ -58121,6 +58121,39 @@ fn first_mounted_parity_scroll_shell() {
     });
 
     run_headless(|cx| {
+        // Pointer: a control inside the viewport is hit-tested at its scrolled
+        // position, so a press after scrolling lands on it exactly once.
+        let presses = Arc::new(Mutex::new(0usize));
+        let sink = Arc::clone(&presses);
+        let mut rows = scroll_rows(12);
+        let mut action = poodle_render::button(
+            &poodle_specs::ButtonSpec::new().with_label("Last"),
+            &ctx,
+            Some(Arc::new(move || *sink.lock().expect("presses") += 1)),
+        );
+        action.id = Some("scroll-action".into());
+        rows.push(action);
+        let mut shell = poodle_render::scroll_shell(
+            &ScrollShellSpec::new().with_focusable(true),
+            &ctx,
+            rows,
+            None,
+        );
+        shell.children[0].id = Some("action-viewport".into());
+        let node = Arc::new(Mutex::new(scroll_frame(shell, None)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 320.0, 220.0);
+        driver.draw_frame();
+        driver.wait_for_focus_handle("action-viewport");
+        driver.keyboard_key("action-viewport", "end");
+        driver.pointer_activate_id("scroll-action");
+        assert_eq!(
+            *presses.lock().expect("presses"),
+            1,
+            "a pointer press reaches a control scrolled into view"
+        );
+    });
+
+    run_headless(|cx| {
         // Not focusable: no tab stop, no keyboard scrolling, wheel still works.
         let mut plain =
             poodle_render::scroll_shell(&ScrollShellSpec::new(), &ctx, scroll_rows(12), None);
@@ -58568,6 +58601,31 @@ fn first_mounted_parity_motion_policy_provider() {
         });
     assert!(matches!(wrapped.kind, NodeKind::Button { .. }));
     assert_eq!(wrapped.a11y.role, Some(NodeRole::Button));
+
+    run_headless(|cx| {
+        // The provider adds no dimensions: a scoped child lays out exactly as
+        // the same child does with no provider.
+        let build = |id: &str, ctx: &RenderContext<'_>| {
+            let mut button = poodle_render::button(&ButtonSpec::new().with_label("Go"), ctx, None);
+            button.id = Some(id.to_owned());
+            button
+        };
+        let bare = build("motion-bare", &committed);
+        let mut scoped = poodle_render::motion_policy_provider(
+            &spec(MotionPolicy::Frozen),
+            &committed,
+            |inner| build("motion-scoped", inner),
+        );
+        scoped.id = Some("motion-scoped".to_owned());
+        let node = Arc::new(Mutex::new(Node::container().child(bare).child(scoped)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 240.0, 160.0);
+        driver.draw_frame();
+        let bare_geometry =
+            poodle_gpui_node_backend::bounds_for("motion-bare").expect("bare geometry");
+        let scoped_geometry =
+            poodle_gpui_node_backend::bounds_for("motion-scoped").expect("scoped geometry");
+        assert_eq!(bare_geometry.size, scoped_geometry.size);
+    });
 
     run_headless(|cx| {
         poodle_gpui_node_backend::begin_probe_capture();
