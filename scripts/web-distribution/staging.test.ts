@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import {
-  existsSync,
   mkdirSync,
   mkdtempSync,
   readdirSync,
@@ -14,7 +13,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { buildPackage } from "./driver";
-import { createStagingDir, discardStaging, publishStaging } from "./staging";
+import {
+  createStagingDir,
+  directoryExchangeAvailable,
+  discardStaging,
+  exchangeDirectories,
+  publishStaging,
+} from "./staging";
 import type { PackageBuildSpec } from "./types";
 
 type Fixture = {
@@ -92,52 +97,117 @@ function makeFixture(name: string): Fixture {
   return { repoRoot, packageRoot, spec, publicFiles: ["dist/index.js", "dist/index.d.ts"] };
 }
 
-const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+const READER_SCRIPT = `
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { join } from "node:path";
+const [distDir, donePath, resultPath] = process.argv.slice(2);
+let reads = 0;
+const violations = [];
+function checkOnce() {
+  const compiled = readFileSync(join(distDir, "index.js"), "utf8");
+  if (!compiled.includes("ok")) throw new Error("dist/index.js lost its export");
+  const receipt = JSON.parse(readFileSync(join(distDir, ".poodle-build.json"), "utf8"));
+  const entry = receipt.outputs.find((o) => o.path === "dist/index.js");
+  if (!entry) throw new Error("receipt omits dist/index.js");
+  const digest = createHash("sha256").update(readFileSync(join(distDir, "index.js"))).digest("hex");
+  if (digest !== entry.sha256) throw new Error("receipt sha disagrees with dist/index.js");
+  for (const output of receipt.outputs) {
+    if (!existsSync(join(distDir, "..", output.path))) {
+      throw new Error(\`receipt lists missing file \${output.path}\`);
+    }
+  }
+}
+while (!existsSync(donePath)) {
+  reads += 1;
+  try {
+    checkOnce();
+  } catch (error) {
+    const first = error instanceof Error ? error.message : String(error);
+    try {
+      checkOnce();
+    } catch (retry) {
+      const second = retry instanceof Error ? retry.message : String(retry);
+      if (violations.length < 5) violations.push(\`\${first} (retry: \${second})\`);
+    }
+  }
+}
+writeFileSync(resultPath, JSON.stringify({ reads, violations }));
+`;
+
+function waitForExit(child: ReturnType<typeof spawn>, timeoutMs: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      child.kill();
+      reject(new Error("reader child did not exit in time"));
+    }, timeoutMs);
+    child.on("error", (error) => {
+      clearTimeout(timer);
+      reject(error);
+    });
+    child.on("exit", (code) => {
+      clearTimeout(timer);
+      if (code === 0) resolve();
+      else reject(new Error(`reader child exited with code ${code}`));
+    });
+  });
+}
 
 describe("atomic web distribution staging", () => {
-  test("concurrent readers never see a half-built dist during a rebuild", async () => {
-    const fixture = makeFixture("read");
+  test("a child process never sees a half-built dist during rebuilds", async () => {
+    const fixture = makeFixture("child");
+    let child: ReturnType<typeof spawn> | undefined;
     try {
+      // Without the exchange call the cross-process proof below is vacuous:
+      // fail loudly instead of passing weakly on the two-rename fallback.
+      expect(directoryExchangeAvailable(fixture.packageRoot)).toBe(true);
       await buildPackage(fixture.repoRoot, fixture.spec, fixture.publicFiles);
-      let finished = false;
-      let reads = 0;
-      const violations: string[] = [];
-      const rebuild = buildPackage(fixture.repoRoot, fixture.spec, fixture.publicFiles).finally(
-        () => {
-          finished = true;
-        },
-      );
-      while (!finished) {
-        reads += 1;
-        try {
-          const compiled = readFileSync(
-            join(fixture.packageRoot, "dist", "index.js"),
-            "utf8",
-          );
-          if (!compiled.includes("ok")) violations.push("dist/index.js lost its export");
-          const receipt = JSON.parse(
-            readFileSync(join(fixture.packageRoot, "dist", ".poodle-build.json"), "utf8"),
-          ) as { outputs: { path: string }[] };
-          for (const output of receipt.outputs) {
-            if (!existsSync(join(fixture.packageRoot, output.path))) {
-              violations.push(`receipt lists missing file ${output.path}`);
-              break;
-            }
-          }
-        } catch (error) {
-          violations.push(
-            `read failed: ${error instanceof Error ? error.message : String(error)}`,
-          );
-        }
-        await tick();
+      const dist = join(fixture.packageRoot, "dist");
+      const readerPath = join(fixture.repoRoot, "reader.mjs");
+      const donePath = join(fixture.repoRoot, "reader.done");
+      const resultPath = join(fixture.repoRoot, "reader.result.json");
+      writeFileSync(readerPath, READER_SCRIPT);
+      child = spawn(process.execPath, [readerPath, dist, donePath, resultPath], {
+        stdio: "ignore",
+      });
+      const closed = waitForExit(child, 90_000);
+      for (let generation = 1; generation <= 3; generation += 1) {
+        writeFileSync(
+          join(fixture.packageRoot, "src", "index.ts"),
+          `export const ok = ${generation};\n`,
+        );
+        await buildPackage(fixture.repoRoot, fixture.spec, fixture.publicFiles);
       }
-      await rebuild;
+      writeFileSync(donePath, "done\n");
+      await closed;
+      const { reads, violations } = JSON.parse(readFileSync(resultPath, "utf8")) as {
+        reads: number;
+        violations: string[];
+      };
       expect(reads).toBeGreaterThan(0);
       expect(violations).toEqual([]);
     } finally {
+      child?.kill();
       rmSync(fixture.repoRoot, { recursive: true, force: true });
     }
   }, 120_000);
+
+  test("exchangeDirectories swaps two directories with one rename", () => {
+    const root = mkdtempSync(join(tmpdir(), "poodle-exchange-"));
+    try {
+      const first = join(root, "first");
+      const second = join(root, "second");
+      mkdirSync(first);
+      mkdirSync(second);
+      writeFileSync(join(first, "f.txt"), "first");
+      writeFileSync(join(second, "f.txt"), "second");
+      exchangeDirectories(first, second);
+      expect(readFileSync(join(first, "f.txt"), "utf8")).toBe("second");
+      expect(readFileSync(join(second, "f.txt"), "utf8")).toBe("first");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
 
   test("a planted build failure leaves the previous dist intact", async () => {
     const fixture = makeFixture("failure");
