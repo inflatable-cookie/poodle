@@ -381,6 +381,11 @@ impl PreviewRoot {
         self.first_frame_commit_scheduled = false;
         cx.notify();
     }
+
+    /// Generation-guarded copy-feedback clear for [`AppState::start_copy_resets`].
+    fn apply_copy_reset(&mut self, key: &str, generation: u64) -> bool {
+        self.state.clear_copy_if_current(key, generation)
+    }
 }
 
 fn sidebar_nav_density(density: Density) -> SpecControlDensity {
@@ -432,7 +437,8 @@ impl Render for PreviewRoot {
         self.state.start_file_picks(window, cx, &root_weak);
         // Latch-clearing timers for code-copy feedback (contract §4). Like
         // the file-pick tasks above, each press schedules its own reset.
-        self.state.start_copy_resets(window, cx, &root_weak);
+        self.state
+            .start_copy_resets(window, cx, &root_weak, PreviewRoot::apply_copy_reset);
         // Restart the backend's generated-id counter so a node that declares no
         // id keeps the same ElementId between frames. gpui keys a click's
         // pending mouse-down by element id, and a real click spans frames.
