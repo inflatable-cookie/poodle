@@ -114,13 +114,26 @@
       "substrate": "form-editing",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares the record has no interactive parts and no inputs, so it has no callbacks or events to prove.",
+          "contractRef": "docs/contracts/components/agent-question-record.md#2. Read-Only By Construction"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract declares the record has no interactive parts, so it has no pointer interaction to prove.",
+          "contractRef": "docs/contracts/components/agent-question-record.md#2. Read-Only By Construction"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "Contract states nothing inside is focusable, so the record never appears in the tab order.",
+          "contractRef": "docs/contracts/components/agent-question-record.md#6. Accessibility"
+        }
+      ]
     },
     {
       "component": "AgentSubagent",

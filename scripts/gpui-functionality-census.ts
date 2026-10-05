@@ -560,6 +560,13 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
       component.name === "MediaThumbnail" &&
       /\[Root\].*<figure>/.test(contract) &&
       /No component-owned events\./.test(contract);
+    // AgentQuestionRecord has no Events/Keyboard headings. §2 and §6 declare
+    // the answered record read-only and never a focus stop — the same N/A
+    // partition #81 recorded for PaginationSummary, citing this contract.
+    const readOnlyRecordWithoutInteraction =
+      component.name === "AgentQuestionRecord" &&
+      /This component has no interactive parts\./.test(contract) &&
+      /Nothing inside is\s+focusable/.test(contract);
     const events = headingBody(
       contract,
       staticFigureWithoutEvents || component.name === "AppHeader" ? /^## 6\. Events/ : /^## 5\. /,
@@ -573,13 +580,14 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
       .filter((key) => key.length > 0 && !/^:?-{2,}:?$/.test(key));
     const hasDeclaredEvents = eventTableKeys.some((key) => !/^(event|callback|none|[-—–])$/i.test(key));
     const eventsNone =
-      !hasDeclaredEvents &&
-      (/^\|\s*none\s*\|/m.test(events.body) ||
-        /^\s*None\.\s*$/m.test(events.body) ||
-        /^No component-owned events are dispatched\./m.test(events.body) ||
-        (component.name === "AppHeader" && /^No component-owned events\./m.test(events.body)) ||
-        /layout primitive only|no events/i.test(events.body) ||
-        staticFigureWithoutEvents);
+      readOnlyRecordWithoutInteraction ||
+      (!hasDeclaredEvents &&
+        (/^\|\s*none\s*\|/m.test(events.body) ||
+          /^\s*None\.\s*$/m.test(events.body) ||
+          /^No component-owned events are dispatched\./m.test(events.body) ||
+          (component.name === "AppHeader" && /^No component-owned events\./m.test(events.body)) ||
+          /layout primitive only|no events/i.test(events.body) ||
+          staticFigureWithoutEvents));
     const keyboardRows = keyboard.body
       .split("\n")
       .filter((line) => /^\s*\|/.test(line))
@@ -594,19 +602,25 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
       ({ key, behavior }) => !/^none$/i.test(key) && !/not focusable|host focus behavior is unaffected/i.test(behavior),
     );
     const keyboardNone =
-      !hasKeyboardBehavior &&
-      (keyboardRows.some(({ key }) => /^none$/i.test(key)) ||
-        tabNotFocusable ||
-        /no keyboard behavior/i.test(keyboard.body) ||
-        staticFigureWithoutEvents);
-    const focusNeutral = /not focusable/i.test(focus.body) || staticFigureWithoutEvents;
+      readOnlyRecordWithoutInteraction ||
+      (!hasKeyboardBehavior &&
+        (keyboardRows.some(({ key }) => /^none$/i.test(key)) ||
+          tabNotFocusable ||
+          /no keyboard behavior/i.test(keyboard.body) ||
+          staticFigureWithoutEvents));
+    const focusNeutral =
+      /not focusable/i.test(focus.body) || staticFigureWithoutEvents || readOnlyRecordWithoutInteraction;
     const required: CensusAxis[] = ["semantic", "accessibility", "visual"];
     const notApplicable: ManifestNotApplicable[] = [];
     if (eventsNone) {
       notApplicable.push({
         axis: "events",
-        reason: "Contract declares no component callbacks or events.",
-        contractRef: `${contractPath}#${events.heading || "5. Events"}`,
+        reason: readOnlyRecordWithoutInteraction
+          ? "Contract declares the record has no interactive parts and no inputs, so it has no callbacks or events to prove."
+          : "Contract declares no component callbacks or events.",
+        contractRef: readOnlyRecordWithoutInteraction
+          ? `${contractPath}#2. Read-Only By Construction`
+          : `${contractPath}#${events.heading || "5. Events"}`,
       });
     } else {
       required.push("events");
@@ -616,10 +630,14 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
         axis: "pointer",
         reason: staticFigureWithoutEvents
           ? "The contract defines a passive figure with no component-owned events, so it has no pointer interaction to prove."
-          : "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+          : readOnlyRecordWithoutInteraction
+            ? "Contract declares the record has no interactive parts, so it has no pointer interaction to prove."
+            : "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
         contractRef: staticFigureWithoutEvents
           ? `${contractPath}#3. Anatomy`
-          : `${contractPath}#${keyboard.heading || "Keyboard"}`,
+          : readOnlyRecordWithoutInteraction
+            ? `${contractPath}#2. Read-Only By Construction`
+            : `${contractPath}#${keyboard.heading || "Keyboard"}`,
       });
     } else {
       required.push("pointer");
@@ -629,10 +647,14 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
         axis: "keyboard_focus",
         reason: staticFigureWithoutEvents
           ? "The contract defines a passive figure that is not a focus stop and has no keyboard behavior."
-          : "Contract declares the component not focusable with no keyboard behavior.",
+          : readOnlyRecordWithoutInteraction
+            ? "Contract states nothing inside is focusable, so the record never appears in the tab order."
+            : "Contract declares the component not focusable with no keyboard behavior.",
         contractRef: staticFigureWithoutEvents
           ? `${contractPath}#3. Anatomy`
-          : `${contractPath}#${keyboard.heading || "Keyboard"}`,
+          : readOnlyRecordWithoutInteraction
+            ? `${contractPath}#6. Accessibility`
+            : `${contractPath}#${keyboard.heading || "Keyboard"}`,
       });
     } else if (keyboardNone && tabNotFocusable) {
       notApplicable.push({
@@ -925,6 +947,7 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
       const withheld = WITHHELD_AXES[component.name] ?? {};
       const axes = admission.axes.filter((axis) => entry.required.includes(axis) && withheld[axis] === undefined);
       const skipped = admission.axes.filter((axis) => !entry.required.includes(axis));
+      const notApplicableAxes = new Set(entry.notApplicable.map((item) => item.axis));
       for (const axis of admission.axes) {
         const reason = withheld[axis];
         if (reason !== undefined && entry.required.includes(axis)) {
@@ -932,6 +955,7 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
         }
       }
       for (const axis of skipped) {
+        if (notApplicableAxes.has(axis)) continue;
         refusals.push(`Expected test ${test} shows ${axis} signals the contract does not require; not admitted.`);
       }
       const admittedAxes = axes.filter((axis) => !admitted.some((item) => item.axis === axis));

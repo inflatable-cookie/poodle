@@ -206,6 +206,7 @@ describe("g18.001 census oracles", () => {
     const audioPlayer = manifest.find((entry) => entry.component === "AudioPlayer");
     const appHeader = manifest.find((entry) => entry.component === "AppHeader");
     const paginationSummary = manifest.find((entry) => entry.component === "PaginationSummary");
+    const agentQuestionRecord = manifest.find((entry) => entry.component === "AgentQuestionRecord");
     expect(pill?.required).toEqual(axes);
     expect(pill?.notApplicable).toEqual([]);
     expect(paginationSummary?.required).toEqual(["semantic", "accessibility", "visual"]);
@@ -215,6 +216,25 @@ describe("g18.001 census oracles", () => {
       "keyboard_focus",
     ]);
     expect(paginationSummary?.notApplicable.every((item) => item.contractRef.includes("pagination-summary.md#"))).toBe(true);
+    expect(agentQuestionRecord?.required).toEqual(["semantic", "accessibility", "visual"]);
+    expect(agentQuestionRecord?.notApplicable).toEqual([
+      {
+        axis: "events",
+        reason:
+          "Contract declares the record has no interactive parts and no inputs, so it has no callbacks or events to prove.",
+        contractRef: "docs/contracts/components/agent-question-record.md#2. Read-Only By Construction",
+      },
+      {
+        axis: "pointer",
+        reason: "Contract declares the record has no interactive parts, so it has no pointer interaction to prove.",
+        contractRef: "docs/contracts/components/agent-question-record.md#2. Read-Only By Construction",
+      },
+      {
+        axis: "keyboard_focus",
+        reason: "Contract states nothing inside is focusable, so the record never appears in the tab order.",
+        contractRef: "docs/contracts/components/agent-question-record.md#6. Accessibility",
+      },
+    ]);
     expect(audioPlayer?.required).toEqual([
       "semantic",
       "pointer",
