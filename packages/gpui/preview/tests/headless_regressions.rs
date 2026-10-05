@@ -62372,7 +62372,6 @@ fn code_copy_feedback_through_production_app_state_scheduling() {
     use gpui::{
         div, px, AppContext as _, Context, IntoElement, ParentElement as _, Render, Styled as _,
     };
-    use node_compat::Code;
     use poodle_specs::CodeSpec;
 
     struct LiveCodeHost {
@@ -62382,23 +62381,6 @@ fn code_copy_feedback_through_production_app_state_scheduling() {
     impl LiveCodeHost {
         fn apply_copy_reset(&mut self, key: &str, generation: u64) -> bool {
             self.state.clear_copy_if_current(key, generation)
-        }
-
-        fn live_code(&self, spec: CodeSpec, key: &str) -> Code {
-            let events = self.state.node_events.clone();
-            let press_key = key.to_string();
-            Code::from_spec(
-                spec.with_copied(self.state.specimens.is_on(key)),
-                &self.state.theme,
-            )
-            .on_copy(std::sync::Arc::new(move || {
-                events
-                    .lock()
-                    .unwrap()
-                    .push(app_state::NodeSpecimenEvent::CodeCopy {
-                        key: press_key.clone(),
-                    });
-            }))
         }
     }
 
@@ -62416,22 +62398,22 @@ fn code_copy_feedback_through_production_app_state_scheduling() {
                 .flex()
                 .flex_col()
                 .gap(px(16.0))
-                .child(
-                    self.live_code(
-                        CodeSpec::new()
-                            .with_content("echo hi")
-                            .with_language("bash"),
-                        "code-copy-block-ts",
-                    ),
-                )
-                .child(
-                    self.live_code(
-                        CodeSpec::new()
-                            .with_content("npm install")
-                            .with_inline(true),
-                        "code-copy-inline-npm",
-                    ),
-                )
+                .child(node_compat::Code::live_code(
+                    CodeSpec::new()
+                        .with_content("echo hi")
+                        .with_language("bash"),
+                    "code-copy-block-ts",
+                    &self.state,
+                    &self.state.theme,
+                ))
+                .child(node_compat::Code::live_code(
+                    CodeSpec::new()
+                        .with_content("npm install")
+                        .with_inline(true),
+                    "code-copy-inline-npm",
+                    &self.state,
+                    &self.state.theme,
+                ))
         }
     }
 
