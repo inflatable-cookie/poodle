@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g18-expected-test-execution.v1",
   "command": "effigy regressions:native",
-  "run_id": "8d673a86-839e-4346-a4d4-8e54a477cb9d",
-  "source_commit": "a89a2034f836362ec1af9f59f34a469e8e0e29e7",
+  "run_id": "f5e9ed48-fb4a-49d4-bd6d-5ed49c89c7de",
+  "source_commit": "ec7b30e997fa5560e9b24a5aea910a20e5947516",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "results": {
@@ -532,7 +532,7 @@
     },
     "first_mounted_parity_meter": {
       "outcome": "passed",
-      "body_sha256": "5d487e126ae8108c20d9282bf4f1862bd5ea8198e66c5b9f02ca7eb142c094f1"
+      "body_sha256": "1772fc716f7cdf2d4c65622b5a42c0f8b489e3a79626cf9a7c0ddbe76f1aea92"
     },
     "first_mounted_parity_status_bar": {
       "outcome": "passed",
