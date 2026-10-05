@@ -3575,10 +3575,16 @@ fn xy_pad_mounted_parity_through_production_dispatch() {
         ));
         let expected_content_size =
             expected_pad_size - 2.0 * initial_pad.style.descriptor.border.width;
-        let mounted_geometry = poodle_gpui_node_backend::bounds_for(id)
-            .expect("mounted XYPad geometry");
-        assert_eq!(f32::from(mounted_geometry.size.width), expected_content_size);
-        assert_eq!(f32::from(mounted_geometry.size.height), expected_content_size);
+        let mounted_geometry =
+            poodle_gpui_node_backend::bounds_for(id).expect("mounted XYPad geometry");
+        assert_eq!(
+            f32::from(mounted_geometry.size.width),
+            expected_content_size
+        );
+        assert_eq!(
+            f32::from(mounted_geometry.size.height),
+            expected_content_size
+        );
         drop(initial_pad);
         driver.wait_for_focus_handle(&x_id);
         driver.pointer_scrub_at(0.8, "press");
@@ -13335,11 +13341,15 @@ fn licence_status_renders_state_and_authority_reads_in_a_mounted_window() {
                 "the mounted section uses the shared stack spacing token"
             );
             let title_color = theme_provider.resolve_color("color.text.primary");
-            assert!(tree.find(&|candidate| {
-                candidate.style.descriptor.text_color == Some(title_color)
-                    && candidate.style.text_size
-                        == Some(theme_provider.resolve_space("typography.body.size"))
-            }).is_some(), "the mounted text resolves its primary colour and body-size tokens");
+            assert!(
+                tree.find(&|candidate| {
+                    candidate.style.descriptor.text_color == Some(title_color)
+                        && candidate.style.text_size
+                            == Some(theme_provider.resolve_space("typography.body.size"))
+                })
+                .is_some(),
+                "the mounted text resolves its primary colour and body-size tokens"
+            );
         }
         let mounted_geometry = poodle_gpui_node_backend::bounds_for(FIXTURE_ID)
             .expect("mounted licence status geometry");
@@ -29841,12 +29851,14 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
                 .find(&|n| n.runtime_id.as_deref()
                     == Some(collapsible_content_focus_id("controlled").as_str()))
                 .is_some());
-            assert!(tree
-                .find(&|candidate| matches!(
+            assert!(
+                tree.find(&|candidate| matches!(
                     &candidate.kind,
                     NodeKind::Icon { name, .. } if name == "chevron-up"
                 ))
-                .is_some(), "the open icon matches Svelte's rotated-up indicator");
+                .is_some(),
+                "the open icon matches Svelte's rotated-up indicator"
+            );
         }
 
         driver.wait_for_focus_handle(&trigger);
