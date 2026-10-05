@@ -1316,8 +1316,6 @@
       "substrate": "text-display",
       "required": [
         "semantic",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
@@ -1326,6 +1324,16 @@
           "axis": "events",
           "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/icon-provider.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "IconProvider renders no element and produces no visual output; pointer interaction belongs to descendant content.",
+          "contractRef": "docs/contracts/components/icon-provider.md#6. Accessibility"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "IconProvider emits no element and takes no focus; descendants keep their own focus targets.",
+          "contractRef": "docs/contracts/components/icon-provider.md#Keyboard"
         }
       ]
     },
@@ -1551,13 +1559,26 @@
       "substrate": "text-display",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "MediaPreview declares no component-owned events; state posture is delegated to MediaThumbnail.",
+          "contractRef": "docs/contracts/components/media-preview.md#6. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "MediaPreview is a styled-only composition; pointer interaction belongs to composed media and body content.",
+          "contractRef": "docs/contracts/components/media-preview.md#Behavior Machine"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "MediaPreview owns no focus stop or keyboard behavior; nested controls keep their own targets.",
+          "contractRef": "docs/contracts/components/media-preview.md#Behavior Machine"
+        }
+      ]
     },
     {
       "component": "MediaThumbnail",
@@ -1723,12 +1744,20 @@
       "substrate": "text-display",
       "required": [
         "semantic",
-        "events",
-        "pointer",
         "accessibility",
         "visual"
       ],
       "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "MetricTile is a non-interactive display component with no component-owned events.",
+          "contractRef": "docs/contracts/components/metric-tile.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "MetricTile declares no click behavior and no pointer interaction; it is a label-value display surface.",
+          "contractRef": "docs/contracts/components/metric-tile.md#1. Purpose"
+        },
         {
           "axis": "keyboard_focus",
           "reason": "Contract declares the component not focusable with no keyboard behavior.",
@@ -2520,13 +2549,26 @@
       "substrate": "text-display",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "StateTile is wholly static with no internal state or event surface.",
+          "contractRef": "docs/contracts/components/state-tile.md#Controlled And Uncontrolled"
+        },
+        {
+          "axis": "pointer",
+          "reason": "StateTile renders label, value, trend text and a host-owned sparkline slot with no pointer interaction of its own.",
+          "contractRef": "docs/contracts/components/state-tile.md#7. Accessibility"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "StateTile has no focus stop and no keyboard behavior; a host wrapper owns any promoted semantics.",
+          "contractRef": "docs/contracts/components/state-tile.md#7. Accessibility"
+        }
+      ]
     },
     {
       "component": "StatusBar",

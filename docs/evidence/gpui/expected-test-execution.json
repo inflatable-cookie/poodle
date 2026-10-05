@@ -2,7 +2,7 @@
   "schema": "poodle.g18-expected-test-execution.v1",
   "command": "effigy regressions:native",
   "run_id": "20f7852a-cc71-441a-8b01-12d2f349b188",
-  "source_commit": "7c5c62a3209bf4dd3eca3277f37b501df5598a20",
+  "source_commit": "c22fdbb393e81b909b57957a515b2a321602aecc",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "results": {
@@ -662,6 +662,41 @@
       "outcome": "passed",
       "body_sha256": "120de7ef4b63e21e387532b652065c5400c4335370699ff48f7513f4f73520f7",
       "run_id": "03281ee2-cdd7-488b-83c7-f897e05e401f"
+    },
+    "first_mounted_parity_code": {
+      "outcome": "passed",
+      "body_sha256": "15a14a0905c8d71ead92da664aecf57abfcef0153be81215b27af5936e76cdf0",
+      "run_id": "poodle-116-197271e1"
+    },
+    "first_mounted_parity_eyebrow": {
+      "outcome": "passed",
+      "body_sha256": "4fe7b8d570808017b532a3cc966d34e6b9a3e0801e6e6fc2977084ebb31445be",
+      "run_id": "poodle-116-197271e1"
+    },
+    "first_mounted_parity_text_link": {
+      "outcome": "passed",
+      "body_sha256": "b587730d44f794c067c63a0bd048735c5829791bf61419d090aa9df52454a547",
+      "run_id": "poodle-116-197271e1"
+    },
+    "first_mounted_parity_icon_provider": {
+      "outcome": "passed",
+      "body_sha256": "81934072dc7b0c7d0399692528e5398cfb6a355c28c58beffd9a0c7ed00f020f",
+      "run_id": "poodle-116-197271e1"
+    },
+    "first_mounted_parity_metric_tile": {
+      "outcome": "passed",
+      "body_sha256": "a5889fd197a42e0fa7a0d1e757b9464f902b7a28b2ae6370e0027e88fb7c14ec",
+      "run_id": "poodle-116-197271e1"
+    },
+    "first_mounted_parity_state_tile": {
+      "outcome": "passed",
+      "body_sha256": "6a53eacbd38cbb29a2110be67616c4fc074d9a8f1b152ac2297434867a6aec3e",
+      "run_id": "poodle-116-197271e1"
+    },
+    "first_mounted_parity_media_preview": {
+      "outcome": "passed",
+      "body_sha256": "46972ffe234cebeffe0b00b8d9726ebc25b7880085a239e0d3bc97fc42bd4ecb",
+      "run_id": "poodle-116-197271e1"
     }
   },
   "body_hash_baseline_commit": "539057155aa20e720e9e4d60fe97a8afa58f69b6"

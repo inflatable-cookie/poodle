@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "7c5c62a3209bf4dd3eca3277f37b501df5598a20",
+  "source_commit": "c22fdbb393e81b909b57957a515b2a321602aecc",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -688,13 +688,26 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_code"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_code"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_code"
+        }
+      ],
       "missing": [
-        "semantic",
         "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+        "keyboard_focus"
       ],
       "holds": [
         {
@@ -704,9 +717,14 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Code--first-mounted-parity-code.json"
+      ],
       "refusals": [
-        "No validated receipt and no retained expected test for Code; every required capability stays missing."
+        "Expected test first_mounted_parity_code shows pointer signals, but pointer is withheld: copy feedback through production AppState scheduling: follow-up task.",
+        "Expected test first_mounted_parity_code shows keyboard_focus signals, but keyboard_focus is withheld: copy feedback through production AppState scheduling: follow-up task.",
+        "Expected test first_mounted_parity_code proves no pointer claim; pointer stays missing.",
+        "Expected test first_mounted_parity_code proves no keyboard_focus claim; keyboard_focus stays missing."
       ]
     },
     {
@@ -1601,12 +1619,24 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_eyebrow"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_eyebrow"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_eyebrow"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -1615,10 +1645,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for Eyebrow; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Eyebrow--first-mounted-parity-eyebrow.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Field",
@@ -2090,19 +2120,27 @@
       "substrate": "text-display",
       "required": [
         "semantic",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_icon_provider"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_icon_provider"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_icon_provider"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2111,10 +2149,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for IconProvider; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/IconProvider--first-mounted-parity-icon-provider.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Meter",
@@ -4606,15 +4644,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_text_link"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_text_link"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_text_link"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_text_link"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_text_link"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_text_link"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -4623,10 +4685,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for TextLink; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/TextLink--first-mounted-parity-text-link.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Tabs",
@@ -7263,21 +7325,27 @@
       "substrate": "text-display",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_media_preview"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_media_preview"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_media_preview"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -7286,10 +7354,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for MediaPreview; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/MediaPreview--first-mounted-parity-media-preview.json"
+      ],
+      "refusals": []
     },
     {
       "component": "MediaThumbnail",
@@ -7818,19 +7886,27 @@
       "substrate": "text-display",
       "required": [
         "semantic",
-        "events",
-        "pointer",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_metric_tile"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_metric_tile"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_metric_tile"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -7839,10 +7915,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for MetricTile; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/MetricTile--first-mounted-parity-metric-tile.json"
+      ],
+      "refusals": []
     },
     {
       "component": "StateTile",
@@ -7851,21 +7927,27 @@
       "substrate": "text-display",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_state_tile"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_state_tile"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_state_tile"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -7874,10 +7956,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for StateTile; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/StateTile--first-mounted-parity-state-tile.json"
+      ],
+      "refusals": []
     },
     {
       "component": "ValidationSummary",
@@ -9462,49 +9544,20 @@
     }
   ],
   "summary": {
-    "admittedRows": 162,
-    "fullyAdmittedRows": 161,
+    "admittedRows": 169,
+    "fullyAdmittedRows": 167,
     "missingTally": {
-      "semantic": 13,
-      "events": 10,
-      "pointer": 12,
-      "keyboard_focus": 11,
-      "accessibility": 13,
-      "visual": 14
+      "semantic": 6,
+      "events": 6,
+      "pointer": 7,
+      "keyboard_focus": 7,
+      "accessibility": 6,
+      "visual": 7
     },
     "holdCount": 175,
-    "refusalCount": 31
+    "refusalCount": 28
   },
   "groups": [
-    {
-      "substrate": "text-display",
-      "components": [
-        "Code",
-        "Eyebrow",
-        "IconProvider",
-        "MediaPreview",
-        "MetricTile",
-        "StateTile",
-        "TextLink"
-      ],
-      "missingTally": {
-        "semantic": 7,
-        "events": 4,
-        "pointer": 6,
-        "keyboard_focus": 5,
-        "accessibility": 7,
-        "visual": 7
-      },
-      "contracts": [
-        "docs/contracts/components/code.md",
-        "docs/contracts/components/eyebrow.md",
-        "docs/contracts/components/icon-provider.md",
-        "docs/contracts/components/media-preview.md",
-        "docs/contracts/components/metric-tile.md",
-        "docs/contracts/components/state-tile.md",
-        "docs/contracts/components/text-link.md"
-      ]
-    },
     {
       "substrate": "general-composite",
       "components": [
@@ -9545,6 +9598,23 @@
       "contracts": [
         "docs/contracts/components/list-grid.md",
         "docs/contracts/components/tooltip.md"
+      ]
+    },
+    {
+      "substrate": "text-display",
+      "components": [
+        "Code"
+      ],
+      "missingTally": {
+        "semantic": 0,
+        "events": 0,
+        "pointer": 1,
+        "keyboard_focus": 1,
+        "accessibility": 0,
+        "visual": 0
+      },
+      "contracts": [
+        "docs/contracts/components/code.md"
       ]
     },
     {
