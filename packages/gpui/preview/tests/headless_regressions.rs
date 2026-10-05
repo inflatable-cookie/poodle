@@ -54261,6 +54261,121 @@ fn agent_question_record_answer_display_rebuilds_the_host_spec() {
         assert!(driver.mounted_observation().is_valid());
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
+
+    fn yes_no(id: &str, prompt: &str) -> AgentQuestionItem {
+        AgentQuestionItem {
+            id: id.to_owned(),
+            header: None,
+            prompt: prompt.to_owned(),
+            options: vec![option("yes", "Yes"), option("no", "No")],
+            allow_multiple: false,
+        }
+    }
+    fn selected_yes(question_id: &str) -> AgentQuestionAnswer {
+        AgentQuestionAnswer {
+            question_id: question_id.to_owned(),
+            outcome: AgentQuestionOutcome::Selected,
+            values: vec!["yes".to_owned()],
+            text: String::new(),
+        }
+    }
+    let delete_spec = AgentQuestionRecordSpec::new(
+        yes_no("confirm-delete", "Delete the draft?"),
+        selected_yes("confirm-delete"),
+    );
+    let save_spec = AgentQuestionRecordSpec::new(
+        yes_no("confirm-save", "Save the draft?"),
+        selected_yes("confirm-save"),
+    );
+    fn option_row_ids(node: &Node, out: &mut Vec<String>) {
+        if node.a11y.role == Some(NodeRole::ListItem) {
+            if let Some(id) = &node.id {
+                out.push(id.clone());
+            }
+        }
+        for child in &node.children {
+            option_row_ids(child, out);
+        }
+    }
+    let mut unmounted_ids = Vec::new();
+    option_row_ids(
+        &poodle_render::agent_question_record(&delete_spec, &ctx),
+        &mut unmounted_ids,
+    );
+    option_row_ids(
+        &poodle_render::agent_question_record(&save_spec, &ctx),
+        &mut unmounted_ids,
+    );
+    assert_eq!(
+        unmounted_ids,
+        vec![
+            "agent-question-record-confirm-delete-option-yes".to_owned(),
+            "agent-question-record-confirm-delete-option-no".to_owned(),
+            "agent-question-record-confirm-save-option-yes".to_owned(),
+            "agent-question-record-confirm-save-option-no".to_owned(),
+        ]
+    );
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut delete = poodle_render::agent_question_record(
+            &delete_spec,
+            &RenderContext::new(&theme_provider),
+        );
+        delete.id = Some("record-confirm-delete".to_owned());
+        let mut save =
+            poodle_render::agent_question_record(&save_spec, &RenderContext::new(&theme_provider));
+        save.id = Some("record-confirm-save".to_owned());
+        let mut column = Node::container();
+        column.style.descriptor.layout.direction = LayoutDirection::Column;
+        let node = Arc::new(Mutex::new(column.child(delete).child(save)));
+        let mut driver = HeadlessDriver::new_in_box(cx, node, 360.0, 360.0);
+        driver.wait_for_element("record-confirm-delete");
+        driver.wait_for_element("record-confirm-save");
+        driver.pointer_activate_id("record-confirm-delete");
+        let tree = driver.accessibility_nodes();
+        let items: Vec<_> = tree
+            .iter()
+            .filter(|node| node.role == NodeRole::ListItem)
+            .collect();
+        assert_eq!(items.len(), 4, "two records, two options each");
+        let semantic: Vec<_> = items
+            .iter()
+            .filter_map(|node| node.semantic_id.as_deref())
+            .collect();
+        let unique_semantic = semantic
+            .iter()
+            .copied()
+            .collect::<std::collections::HashSet<_>>();
+        assert_eq!(
+            unique_semantic.len(),
+            semantic.len(),
+            "option rows share a semantic id: {semantic:?}"
+        );
+        let element: Vec<_> = items.iter().map(|node| node.element_id.as_str()).collect();
+        let unique_element = element
+            .iter()
+            .copied()
+            .collect::<std::collections::HashSet<_>>();
+        assert_eq!(
+            unique_element.len(),
+            element.len(),
+            "option rows share a backend element id: {element:?}"
+        );
+        for id in [
+            "agent-question-record-confirm-delete-option-yes",
+            "agent-question-record-confirm-delete-option-no",
+            "agent-question-record-confirm-save-option-yes",
+            "agent-question-record-confirm-save-option-no",
+        ] {
+            assert!(
+                unique_semantic.contains(id),
+                "missing scoped option identity {id}; have {semantic:?}"
+            );
+        }
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
 }
 
 #[test]

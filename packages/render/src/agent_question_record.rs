@@ -79,7 +79,13 @@ pub fn agent_question_record(spec: &AgentQuestionRecordSpec, ctx: &RenderContext
             let chosen = spec.is_chosen(&option.value);
 
             let mut row = Node::container();
-            row.id = Some(format!("agent-question-record-option-{}", option.value));
+            // Node.id is GPUI element identity and the a11y projection's
+            // semantic identity. Records in one transcript share option
+            // values (yes/no), so the question id scopes each row.
+            row.id = Some(format!(
+                "agent-question-record-{}-option-{}",
+                spec.question.id, option.value
+            ));
             row.a11y.role = Some(NodeRole::ListItem);
             {
                 let s = &mut row.style;
