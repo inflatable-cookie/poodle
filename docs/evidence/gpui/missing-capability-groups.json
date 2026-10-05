@@ -60,47 +60,6 @@
       ]
     },
     {
-      "substrate": "form-editing",
-      "components": [
-        "AgentQuestionRecord",
-        "Calendar",
-        "EmbedInput",
-        "Fader",
-        "FormActions",
-        "FormLayout",
-        "Keyboard",
-        "Knob",
-        "LicenceActivation",
-        "NumberInput",
-        "Rating",
-        "Stepper",
-        "ValidationSummary"
-      ],
-      "missingTally": {
-        "semantic": 7,
-        "events": 6,
-        "pointer": 8,
-        "keyboard_focus": 7,
-        "accessibility": 8,
-        "visual": 13
-      },
-      "contracts": [
-        "docs/contracts/components/agent-question-record.md",
-        "docs/contracts/components/calendar.md",
-        "docs/contracts/components/embed-input.md",
-        "docs/contracts/components/fader.md",
-        "docs/contracts/components/form-actions.md",
-        "docs/contracts/components/form-layout.md",
-        "docs/contracts/components/keyboard.md",
-        "docs/contracts/components/knob.md",
-        "docs/contracts/components/licence-activation.md",
-        "docs/contracts/components/number-input.md",
-        "docs/contracts/components/rating.md",
-        "docs/contracts/components/stepper.md",
-        "docs/contracts/components/validation-summary.md"
-      ]
-    },
-    {
       "substrate": "general-composite",
       "components": [
         "Collapsible",
@@ -162,6 +121,35 @@
         "docs/contracts/components/metric-tile.md",
         "docs/contracts/components/state-tile.md",
         "docs/contracts/components/text-link.md"
+      ]
+    },
+    {
+      "substrate": "form-editing",
+      "components": [
+        "AgentQuestionRecord",
+        "Calendar",
+        "EmbedInput",
+        "FormActions",
+        "FormLayout",
+        "Keyboard",
+        "ValidationSummary"
+      ],
+      "missingTally": {
+        "semantic": 7,
+        "events": 6,
+        "pointer": 7,
+        "keyboard_focus": 7,
+        "accessibility": 7,
+        "visual": 7
+      },
+      "contracts": [
+        "docs/contracts/components/agent-question-record.md",
+        "docs/contracts/components/calendar.md",
+        "docs/contracts/components/embed-input.md",
+        "docs/contracts/components/form-actions.md",
+        "docs/contracts/components/form-layout.md",
+        "docs/contracts/components/keyboard.md",
+        "docs/contracts/components/validation-summary.md"
       ]
     },
     {

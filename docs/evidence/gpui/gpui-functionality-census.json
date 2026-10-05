@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "3b312d87787941f9c2a07154771522c10f0a519c",
+  "source_commit": "6e6cc532144a0ca1308fb3eaafc45b32eecc1fff",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -2375,6 +2375,11 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value"
         },
         {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#number_input_mounted_accessibility_projects_spin_button_surface"
+        },
+        {
           "axis": "keyboard_focus",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value"
@@ -2383,12 +2388,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#number_input_mounted_accessibility_projects_spin_button_surface"
         }
       ],
-      "missing": [
-        "pointer",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2403,9 +2410,7 @@
       ],
       "refusals": [
         "Expected test number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value proves no pointer claim; pointer stays missing.",
-        "Expected test number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value proves no visual claim; visual stays missing.",
-        "Expected test number_input_mounted_accessibility_projects_spin_button_surface proves no pointer claim; pointer stays missing.",
-        "Expected test number_input_mounted_accessibility_projects_spin_button_surface proves no visual claim; visual stays missing."
+        "Expected test number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value proves no visual claim; visual stays missing."
       ]
     },
     {
@@ -3139,11 +3144,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboard"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboard"
         }
       ],
-      "missing": [
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -3155,9 +3163,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Rating--rating-nullable-fractional-and-whole-step-through-mounted-pointer-and-keyboard.json"
       ],
-      "refusals": [
-        "Expected test rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboard proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "Region",
@@ -3788,12 +3794,15 @@
         {
           "axis": "accessibility",
           "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#stepper_collapse_stays_independent_in_a_mounted_window"
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#stepper_selection_and_rerun_reach_separate_mounted_controls"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#stepper_selection_and_rerun_reach_separate_mounted_controls"
         }
       ],
-      "missing": [
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -3808,13 +3817,7 @@
         "docs/evidence/gpui/mounted-receipts/Stepper--stepper-keyboard-entry-focuses-and-activates-without-a-pointer-press.json",
         "docs/evidence/gpui/mounted-receipts/Stepper--stepper-summary-takes-keyboard-entry-and-paints-the-inset-ring.json"
       ],
-      "refusals": [
-        "Expected test stepper_selection_and_rerun_reach_separate_mounted_controls proves no accessibility claim; accessibility stays missing.",
-        "Expected test stepper_selection_and_rerun_reach_separate_mounted_controls proves no visual claim; visual stays missing.",
-        "Expected test stepper_collapse_stays_independent_in_a_mounted_window proves no visual claim; visual stays missing.",
-        "Expected test stepper_keyboard_entry_focuses_and_activates_without_a_pointer_press proves no visual claim; visual stays missing.",
-        "Expected test stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "AgentQuestion",
@@ -6371,11 +6374,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#licence_activation_key_entry_types_and_emits_through_the_real_tree"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#licence_activation_key_entry_types_and_emits_through_the_real_tree"
         }
       ],
-      "missing": [
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6388,10 +6394,7 @@
         "docs/evidence/gpui/mounted-receipts/LicenceActivation--licence-activation-key-entry-types-and-emits-through-the-real-tree.json",
         "docs/evidence/gpui/mounted-receipts/LicenceActivation--licence-activation-machine-name-enter-and-escape-restore-display-focus.json"
       ],
-      "refusals": [
-        "Expected test licence_activation_key_entry_types_and_emits_through_the_real_tree proves no visual claim; visual stays missing.",
-        "Expected test licence_activation_machine_name_enter_and_escape_restore_display_focus proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "LicenceSeats",
@@ -8294,11 +8297,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#fader_mounted_parity_through_production_dispatch"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#fader_mounted_parity_through_production_dispatch"
         }
       ],
-      "missing": [
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -8310,9 +8316,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Fader--fader-mounted-parity-through-production-dispatch.json"
       ],
-      "refusals": [
-        "Expected test fader_mounted_parity_through_production_dispatch proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "GainReductionMeter",
@@ -8417,12 +8421,19 @@
           "axis": "keyboard_focus",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#knob_mounted_parity_through_production_dispatch"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#knob_mounted_parity_through_production_dispatch"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#knob_mounted_parity_through_production_dispatch"
         }
       ],
-      "missing": [
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -8434,10 +8445,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Knob--knob-mounted-parity-through-production-dispatch.json"
       ],
-      "refusals": [
-        "Expected test knob_mounted_parity_through_production_dispatch proves no accessibility claim; accessibility stays missing.",
-        "Expected test knob_mounted_parity_through_production_dispatch proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "ModMatrixGrid",
@@ -8871,17 +8879,17 @@
   ],
   "summary": {
     "admittedRows": 124,
-    "fullyAdmittedRows": 106,
+    "fullyAdmittedRows": 112,
     "missingTally": {
       "semantic": 51,
       "events": 43,
-      "pointer": 46,
+      "pointer": 45,
       "keyboard_focus": 43,
-      "accessibility": 56,
-      "visual": 66
+      "accessibility": 55,
+      "visual": 60
     },
     "holdCount": 175,
-    "refusalCount": 107
+    "refusalCount": 94
   },
   "groups": [
     {
@@ -8939,47 +8947,6 @@
         "docs/contracts/components/spinner.md",
         "docs/contracts/components/status-bar.md",
         "docs/contracts/components/tool-call.md"
-      ]
-    },
-    {
-      "substrate": "form-editing",
-      "components": [
-        "AgentQuestionRecord",
-        "Calendar",
-        "EmbedInput",
-        "Fader",
-        "FormActions",
-        "FormLayout",
-        "Keyboard",
-        "Knob",
-        "LicenceActivation",
-        "NumberInput",
-        "Rating",
-        "Stepper",
-        "ValidationSummary"
-      ],
-      "missingTally": {
-        "semantic": 7,
-        "events": 6,
-        "pointer": 8,
-        "keyboard_focus": 7,
-        "accessibility": 8,
-        "visual": 13
-      },
-      "contracts": [
-        "docs/contracts/components/agent-question-record.md",
-        "docs/contracts/components/calendar.md",
-        "docs/contracts/components/embed-input.md",
-        "docs/contracts/components/fader.md",
-        "docs/contracts/components/form-actions.md",
-        "docs/contracts/components/form-layout.md",
-        "docs/contracts/components/keyboard.md",
-        "docs/contracts/components/knob.md",
-        "docs/contracts/components/licence-activation.md",
-        "docs/contracts/components/number-input.md",
-        "docs/contracts/components/rating.md",
-        "docs/contracts/components/stepper.md",
-        "docs/contracts/components/validation-summary.md"
       ]
     },
     {
@@ -9044,6 +9011,35 @@
         "docs/contracts/components/metric-tile.md",
         "docs/contracts/components/state-tile.md",
         "docs/contracts/components/text-link.md"
+      ]
+    },
+    {
+      "substrate": "form-editing",
+      "components": [
+        "AgentQuestionRecord",
+        "Calendar",
+        "EmbedInput",
+        "FormActions",
+        "FormLayout",
+        "Keyboard",
+        "ValidationSummary"
+      ],
+      "missingTally": {
+        "semantic": 7,
+        "events": 6,
+        "pointer": 7,
+        "keyboard_focus": 7,
+        "accessibility": 7,
+        "visual": 7
+      },
+      "contracts": [
+        "docs/contracts/components/agent-question-record.md",
+        "docs/contracts/components/calendar.md",
+        "docs/contracts/components/embed-input.md",
+        "docs/contracts/components/form-actions.md",
+        "docs/contracts/components/form-layout.md",
+        "docs/contracts/components/keyboard.md",
+        "docs/contracts/components/validation-summary.md"
       ]
     },
     {
