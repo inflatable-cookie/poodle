@@ -60053,7 +60053,529 @@ fn first_mounted_parity_media_preview() {
         assert!(
             frames.contains(&"Empty folder".to_owned()),
             "empty frame projects its title: {frames:?}"
+/// ListGrid parity: the responsive tile layout resolves the contract gap and
+/// tile floor, stacks the compact variant in one column, and renders the
+/// header row only when actions are supplied — neutral semantics throughout,
+/// matching the Svelte auto-fill grid, gaps, and header rule.
+#[test]
+fn first_mounted_parity_list_grid() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::LayoutDirection;
+    use poodle_specs::{ListGridSpec, ListGridVariant};
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+
+        // ── Witness: default tile floor, gap, and neutral semantics ──────
+        let spec = ListGridSpec::new().with_min_item_width_em(12.0);
+        let mut first = Node::text("tile one");
+        first.id = Some("mounted-list-grid-tile-one".to_owned());
+        let mut second = Node::text("tile two");
+        second.id = Some("mounted-list-grid-tile-two".to_owned());
+        let node = poodle_render::list_grid(&spec, &ctx, None, vec![first, second]);
+        assert_eq!(node.a11y.role, None, "the layout root stays neutral");
+        assert_eq!(node.children.len(), 1, "no header without actions");
+        let grid = &node.children[0];
+        assert_eq!(grid.a11y.role, None, "the tile grid adds no landmark");
+        assert_eq!(grid.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert!(grid.style.flex_wrap, "auto-fill wraps by available width");
+        assert_eq!(
+            grid.style.descriptor.layout.spacing.gap,
+            theme_provider.resolve_space("space.stack.lg"),
+            "the default gap matches the 1.25rem Svelte token"
+        );
+        assert_eq!(grid.children.len(), 2);
+        for cell in &grid.children {
+            assert_eq!(
+                cell.style.min_width,
+                Some(poodle_render::presentation::rem_to_px(12.0)),
+                "each tile keeps the 12em floor"
+            );
+            assert_eq!(cell.style.flex_grow, Some(1.0));
+            assert_eq!(cell.style.flex_basis, Some(0.0));
+        }
+        assert!(node.has_text("tile one"));
+        assert!(node.has_text("tile two"));
+
+        // The default floor falls back to the 360px contract token.
+        let fallback =
+            poodle_render::list_grid(&ListGridSpec::new(), &ctx, None, vec![Node::text("tile")]);
+        assert_eq!(
+            fallback.children[0].children[0].style.min_width,
+            Some(theme_provider.resolve_space(ListGridSpec::new().min_item_width_token())),
+            "an unset floor matches the Svelte 360px default"
+        );
+
+        // ── Compact stacks in one column with the compact gap ────────────
+        let compact_spec = ListGridSpec::new().with_variant(ListGridVariant::Compact);
+        let compact = poodle_render::list_grid(
+            &compact_spec,
+            &ctx,
+            None,
+            vec![Node::text("a"), Node::text("b")],
+        );
+        let compact_grid = &compact.children[0];
+        assert_eq!(
+            compact_grid.style.descriptor.layout.direction,
+            LayoutDirection::Column,
+            "compact is single-column"
+        );
+        assert_eq!(
+            compact_grid.style.descriptor.layout.spacing.gap,
+            theme_provider.resolve_space("space.inline.sm"),
+            "compact keeps the 0.5rem Svelte gap"
+        );
+        assert_eq!(compact_grid.children.len(), 2);
+
+        // ── Header row only when actions are supplied ────────────────────
+        let mut action = Node::text("Toolbar");
+        action.id = Some("mounted-list-grid-action".to_owned());
+        let headed = poodle_render::list_grid(&spec, &ctx, Some(action), vec![Node::text("tile")]);
+        assert_eq!(headed.children.len(), 2, "actions add the header row");
+        let header = &headed.children[0];
+        assert_eq!(
+            header.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert_eq!(
+            header.style.descriptor.layout.alignment.main,
+            poodle_node::MainAxisAlignment::End,
+            "header actions sit at the row end"
+        );
+        assert!(headed.has_text("Toolbar"));
+
+        // ── Mounted: tiles share one row with neutral semantics ──────────
+        let mut first = Node::text("tile one");
+        first.id = Some("mounted-list-grid-tile-one".to_owned());
+        let mut second = Node::text("tile two");
+        second.id = Some("mounted-list-grid-tile-two".to_owned());
+        let mut wide = poodle_render::list_grid(
+            &ListGridSpec::new().with_min_item_width_em(6.0),
+            &ctx,
+            None,
+            vec![first, second],
+        );
+        wide.id = Some("mounted-list-grid".to_owned());
+        let _driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(wide)), 520.0, 240.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-list-grid")
+            .expect("ListGrid reaches the production GPUI paint pass");
+        assert_eq!(
+            painted.a11y_role, None,
+            "the mounted grid stays landmark-free"
+        );
+        let one = poodle_gpui_node_backend::bounds_for("mounted-list-grid-tile-one")
+            .expect("first tile geometry");
+        let two = poodle_gpui_node_backend::bounds_for("mounted-list-grid-tile-two")
+            .expect("second tile geometry");
+        assert!(f32::from(one.size.width) > 0.0);
+        assert!(f32::from(one.size.height) > 0.0);
+        assert!(f32::from(two.size.width) > 0.0);
+        assert!(f32::from(two.size.height) > 0.0);
+        assert!(
+            (f32::from(one.origin.y) - f32::from(two.origin.y)).abs() < 2.0,
+            "tiles share one row"
+        );
+        assert!(
+            f32::from(two.origin.x) > f32::from(one.origin.x),
+            "tiles run left to right"
+        );
+        assert!(
+            f32::from(two.origin.x) >= f32::from(one.origin.x) + f32::from(one.size.width),
+            "tiles never overlap"
         );
         let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let mut first = Node::text("tile one");
+        first.id = Some("mounted-list-grid-tile-one".to_owned());
+        let mut second = Node::text("tile two");
+        second.id = Some("mounted-list-grid-tile-two".to_owned());
+        let mut stacked = poodle_render::list_grid(
+            &ListGridSpec::new().with_variant(ListGridVariant::Compact),
+            &ctx,
+            None,
+            vec![first, second],
+        );
+        stacked.id = Some("mounted-list-grid-compact".to_owned());
+        let _driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(stacked)), 400.0, 240.0);
+        let one = poodle_gpui_node_backend::bounds_for("mounted-list-grid-tile-one")
+            .expect("first compact tile geometry");
+        let two = poodle_gpui_node_backend::bounds_for("mounted-list-grid-tile-two")
+            .expect("second compact tile geometry");
+        assert!(
+            f32::from(two.origin.y) >= f32::from(one.origin.y) + f32::from(one.size.height) - 1.0,
+            "compact tiles stack vertically"
+        );
+        assert!(
+            (f32::from(two.origin.x) - f32::from(one.origin.x)).abs() < 2.0,
+            "compact tiles share the column edge"
+        );
+    });
+}
+
+/// FieldSet parity: the legend eyebrow tokens and accessible name, the
+/// description wiring with the contract pull-up, and the column grid resolve
+/// the same tokens Svelte uses — group semantics survive mounting.
+#[test]
+fn first_mounted_parity_field_set() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{LayoutDirection, NodeRole};
+    use poodle_specs::{FieldSetSpec, SpaceScale};
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let spec = FieldSetSpec::new()
+            .with_legend("Billing address")
+            .with_description("Used for invoices.")
+            .with_columns(2)
+            .with_gap(SpaceScale::Lg);
+
+        let mut first = Node::text("Field A");
+        first.id = Some("mounted-field-set-field-a".to_owned());
+        let mut second = Node::text("Field B");
+        second.id = Some("mounted-field-set-field-b".to_owned());
+        let node = poodle_render::field_set(&spec, &ctx, vec![first, second]);
+
+        // Group semantics name the group from the legend, like fieldset.
+        assert_eq!(node.a11y.role, Some(NodeRole::Group));
+        assert_eq!(node.a11y.label.as_deref(), Some("Billing address"));
+        assert_eq!(node.children.len(), 3);
+
+        // Legend eyebrow: uppercase text with the contract tokens.
+        let legend = &node.children[0];
+        assert!(legend.has_text("BILLING ADDRESS"));
+        assert_eq!(
+            legend.style.descriptor.text_color,
+            Some(theme_provider.resolve_color(spec.legend_color_token()))
+        );
+        assert_eq!(
+            legend.style.text_size,
+            Some(poodle_render::presentation::rem_to_px(
+                FieldSetSpec::LEGEND_SIZE_REM
+            ))
+        );
+        assert_eq!(legend.style.text_weight, Some(600));
+        assert_eq!(legend.style.letter_spacing_em, Some(0.12));
+        assert_eq!(
+            legend.style.descriptor.layout.spacing.margin.bottom,
+            theme_provider.resolve_space(spec.legend_margin_bottom_token())
+        );
+
+        // Description sits between legend and fields with the pull-up.
+        let description = &node.children[1];
+        assert!(description.has_text("Used for invoices."));
+        assert_eq!(
+            description.style.descriptor.text_color,
+            Some(theme_provider.resolve_color(spec.description_color_token()))
+        );
+        assert_eq!(
+            description.style.text_size,
+            Some(theme_provider.resolve_space(spec.description_size_token()))
+        );
+        assert_eq!(
+            description.style.descriptor.layout.spacing.margin.top,
+            -0.5 * theme_provider.resolve_space("space.stack.sm"),
+            "the description pulls up under the legend"
+        );
+        assert_eq!(
+            description.style.descriptor.layout.spacing.margin.bottom,
+            theme_provider.resolve_space(spec.description_margin_bottom_token())
+        );
+
+        // Two columns resolve the lg column token; cells share the row.
+        let grid = &node.children[2];
+        assert_eq!(grid.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert!(grid.style.flex_wrap);
+        assert_eq!(
+            grid.style.descriptor.layout.spacing.gap,
+            theme_provider.resolve_space("space.panel.x"),
+            "the lg gap matches the Svelte column gap"
+        );
+        assert_eq!(grid.children.len(), 2);
+        for cell in &grid.children {
+            assert_eq!(cell.style.flex_grow, Some(1.0));
+            assert_eq!(cell.style.flex_basis, Some(0.0));
+        }
+        assert!(grid.children[0].has_text("Field A"));
+        assert!(grid.children[1].has_text("Field B"));
+
+        // A legendless single column stacks with the asymmetric row gap.
+        let single = poodle_render::field_set(&FieldSetSpec::new(), &ctx, vec![Node::text("solo")]);
+        assert_eq!(single.a11y.role, Some(NodeRole::Group));
+        assert_eq!(single.a11y.label, None);
+        let single_grid = &single.children[0];
+        assert_eq!(
+            single_grid.style.descriptor.layout.direction,
+            LayoutDirection::Column
+        );
+        assert_eq!(
+            single_grid.style.descriptor.layout.spacing.gap,
+            theme_provider.resolve_space("space.panel.y")
+                + poodle_render::presentation::rem_to_px(0.5),
+            "single-column rows keep the scale-plus-half-rem Svelte gap"
+        );
+
+        // Parent-grid span values match Svelte.
+        assert_eq!(
+            FieldSetSpec::new()
+                .with_span("full")
+                .span_value()
+                .as_deref(),
+            Some("1 / -1")
+        );
+        assert_eq!(
+            FieldSetSpec::new().with_span("3").span_value().as_deref(),
+            Some("span 3")
+        );
+
+        // ── Mounted: group semantics and stacking survive ────────────────
+        let mut first = Node::text("Field A");
+        first.id = Some("mounted-field-set-field-a".to_owned());
+        let mut second = Node::text("Field B");
+        second.id = Some("mounted-field-set-field-b".to_owned());
+        let mut root = poodle_render::field_set(
+            &FieldSetSpec::new()
+                .with_legend("Contact details")
+                .with_columns(1),
+            &ctx,
+            vec![first, second],
+        );
+        root.id = Some("mounted-field-set".to_owned());
+        let _driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(root)), 400.0, 220.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-field-set")
+            .expect("FieldSet reaches the production GPUI paint pass");
+        assert_eq!(
+            painted.a11y_role,
+            Some(NodeRole::Group),
+            "the mounted group keeps its role"
+        );
+        assert_eq!(
+            painted.a11y_label.as_deref(),
+            Some("Contact details"),
+            "the mounted group keeps its legend name"
+        );
+        let above = poodle_gpui_node_backend::bounds_for("mounted-field-set-field-a")
+            .expect("first field geometry");
+        let below = poodle_gpui_node_backend::bounds_for("mounted-field-set-field-b")
+            .expect("second field geometry");
+        assert!(f32::from(above.size.width) > 0.0);
+        assert!(f32::from(below.size.width) > 0.0);
+        assert!(
+            f32::from(below.origin.y)
+                >= f32::from(above.origin.y) + f32::from(above.size.height) - 1.0,
+            "single-column fields stack vertically"
+        );
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Tooltip parity: hover and focus open through the 300ms contract delay,
+/// leave, blur, and Escape dismiss, the anchor keeps its name and activation,
+/// and the bubble resolves the contract tokens with tooltip semantics.
+#[test]
+fn tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_gpui_node_backend::{
+        is_tooltip_pending, is_tooltip_visible, painted_tooltip, TOOLTIP_DELAY,
+    };
+    use poodle_specs::{ButtonSpec, TooltipSpec};
+    use std::time::Duration;
+
+    const ANCHOR: &str = "tooltip-proof-anchor";
+
+    fn anchor(handler: Option<Arc<dyn Fn() + Send + Sync>>) -> Node {
+        let mut node = poodle_render::button(
+            &ButtonSpec::new().with_label("Save"),
+            &RenderContext::new(&theme()),
+            handler,
+        );
+        node.id = Some(ANCHOR.to_owned());
+        node.tooltip = Some("Save document".to_owned());
+        node
+    }
+
+    // The tooltip supplements the trigger name instead of replacing it.
+    let vocabulary = anchor(None);
+    assert_eq!(vocabulary.tooltip.as_deref(), Some("Save document"));
+    assert_eq!(vocabulary.a11y.label.as_deref(), Some("Save"));
+    assert_eq!(
+        TOOLTIP_DELAY,
+        Duration::from_millis(300),
+        "hover and focus keep the 300ms contract delay"
+    );
+
+    // ── Witness: the bubble resolves the contract tokens ───────────────
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let bubble = poodle_render::tooltip(&TooltipSpec::new().with_content("Save document"), &ctx);
+    assert_eq!(bubble.a11y.role, Some(NodeRole::Tooltip));
+    assert!(bubble.has_text("Save document"));
+    assert!(bubble.style.no_wrap, "single-line content never wraps");
+    assert_eq!(
+        bubble.style.max_width,
+        Some(poodle_render::presentation::rem_to_px(16.0)),
+        "the bubble keeps the 16rem contract cap"
+    );
+    assert_eq!(
+        bubble.style.descriptor.layout.spacing.padding.left,
+        poodle_render::presentation::rem_to_px(0.5)
+    );
+    assert_eq!(
+        bubble.style.descriptor.layout.spacing.padding.right,
+        poodle_render::presentation::rem_to_px(0.5)
+    );
+    assert_eq!(
+        bubble.style.descriptor.layout.spacing.padding.top,
+        poodle_render::presentation::rem_to_px(0.375)
+    );
+    assert_eq!(
+        bubble.style.descriptor.layout.spacing.padding.bottom,
+        poodle_render::presentation::rem_to_px(0.375)
+    );
+    assert_eq!(
+        bubble.style.descriptor.corner_radii.top_left,
+        theme_provider.resolve_radius("radius.control")
+            - poodle_render::presentation::rem_to_px(0.125),
+        "the radius stays control minus the contract inset"
+    );
+    assert_eq!(
+        bubble.style.descriptor.border.width,
+        poodle_render::presentation::rem_to_px(0.0625)
+    );
+    let border_default = theme_provider.resolve_color("color.border.default");
+    assert!(
+        (bubble.style.descriptor.border.color.3 - border_default.3 * 0.72).abs() < 0.001,
+        "the border keeps 72% of the default alpha"
+    );
+    let elevated = theme_provider.resolve_color("color.background.elevated");
+    let panel = theme_provider.resolve_color("color.background.panel");
+    assert_eq!(
+        bubble.style.descriptor.background,
+        Some(poodle_render::color::mix_srgb(elevated, panel, 0.98)),
+        "the fill mixes elevated toward panel per contract"
+    );
+    let shadow = bubble
+        .style
+        .descriptor
+        .shadow
+        .as_ref()
+        .expect("bubble shadow");
+    assert_eq!(shadow.offset_y, poodle_render::presentation::rem_to_px(0.5));
+    assert_eq!(shadow.blur, poodle_render::presentation::rem_to_px(1.25));
+    assert!(
+        (shadow.color.3 - 0.30).abs() < 0.001,
+        "the first contract shadow layer renders"
+    );
+    let label = &bubble.children[0];
+    assert_eq!(
+        label.style.descriptor.text_color,
+        Some(theme_provider.resolve_color("color.text.primary"))
+    );
+    assert_eq!(
+        label.style.text_size,
+        Some(poodle_render::presentation::rem_to_px(0.6875))
+    );
+    assert_eq!(label.style.line_height, Some(1.35));
+
+    // ── Mounted: hover opens through the delay; leave dismisses ─────────
+    run_headless(|cx| {
+        let mut driver =
+            HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(anchor(None))), 420.0, 140.0);
+        driver.wait_for_focus_handle(ANCHOR);
+        driver.pointer_hover(payload_frac(ANCHOR, 0.5, 0.5));
+        assert!(is_tooltip_pending(ANCHOR), "hover starts the open delay");
+        assert!(
+            painted_tooltip().is_none(),
+            "nothing paints before the delay"
+        );
+        driver.advance_clock(Duration::from_millis(299));
+        driver.draw_frame();
+        assert!(painted_tooltip().is_none(), "nothing paints at 299ms");
+        driver.advance_clock(Duration::from_millis(1));
+        driver.draw_frame();
+        assert!(is_tooltip_visible(ANCHOR), "the tooltip paints at 300ms");
+        let painted = painted_tooltip().expect("the open tooltip paints");
+        assert_eq!(
+            painted.target_id, ANCHOR,
+            "the painted description stays bound to its anchor"
+        );
+        assert_eq!(painted.text, "Save document");
+        driver.pointer_hover(point(px(8.0), px(8.0)));
+        assert!(painted_tooltip().is_none(), "leave hides in the same frame");
+    });
+
+    // ── Mounted: focus opens; focus departure hides ─────────────────────
+    run_headless(|cx| {
+        let mut driver =
+            HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(anchor(None))), 420.0, 140.0);
+        driver.wait_for_focus_handle(ANCHOR);
+        driver.focus_element(ANCHOR);
+        assert!(is_tooltip_pending(ANCHOR), "focus starts the open delay");
+        driver.advance_clock(TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert!(is_tooltip_visible(ANCHOR), "focus opens after the delay");
+        driver.blur_element_focus(ANCHOR);
+        assert!(!is_tooltip_visible(ANCHOR), "focus departure hides");
+        assert!(painted_tooltip().is_none());
+    });
+
+    // ── Mounted: Escape dismisses the visible tooltip ──────────────────
+    run_headless(|cx| {
+        let mut driver =
+            HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(anchor(None))), 420.0, 140.0);
+        driver.wait_for_focus_handle(ANCHOR);
+        driver.pointer_hover(payload_frac(ANCHOR, 0.5, 0.5));
+        driver.advance_clock(TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert!(
+            is_tooltip_visible(ANCHOR),
+            "the tooltip is visible before Escape"
+        );
+        driver.dispatch_key("escape");
+        assert!(
+            painted_tooltip().is_none(),
+            "Escape dismisses the visible tooltip"
+        );
+    });
+
+    // ── Mounted: the described trigger still activates ──────────────────
+    run_headless(|cx| {
+        let (fire, count) = counting_handler();
+        let mut driver =
+            HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(anchor(Some(fire)))), 420.0, 140.0);
+        driver.wait_for_focus_handle(ANCHOR);
+        driver.pointer_activate_id(ANCHOR);
+        assert_eq!(
+            *count.lock().expect("activation count"),
+            1,
+            "the described trigger still activates"
+        );
+    });
+
+    // ── Mounted: disablement keeps the tooltip inert ────────────────────
+    run_headless(|cx| {
+        let mut node = poodle_render::button(
+            &ButtonSpec::new().with_label("Save").with_disabled(true),
+            &RenderContext::new(&theme()),
+            None,
+        );
+        node.id = Some(ANCHOR.to_owned());
+        node.tooltip = Some("Save document".to_owned());
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(node)), 420.0, 140.0);
+        driver.pointer_hover(payload_frac(ANCHOR, 0.5, 0.5));
+        driver.advance_clock(TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert!(
+            !is_tooltip_pending(ANCHOR),
+            "disablement keeps the tooltip inert"
+        );
+        assert!(!is_tooltip_visible(ANCHOR));
     });
 }

@@ -3,7 +3,7 @@
 //! Contract: `docs/contracts/components/field-set.md`
 //! Ported from: `packages/jetstream/components/src/field_set.rs`.
 
-use poodle_node::{LayoutDirection, LayoutSizing, Node};
+use poodle_node::{LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::FieldSetSpec;
 
 use crate::context::RenderContext;
@@ -22,6 +22,13 @@ pub fn field_set(spec: &FieldSetSpec, ctx: &RenderContext<'_>, children: Vec<Nod
     root.style.descriptor.layout.direction = LayoutDirection::Column;
     root.style.fill_width = true;
     root.style.self_stretch = true;
+    // Contract §5: the Svelte root is a native `<fieldset>`, so the node
+    // carries group semantics with the legend as its accessible name, the
+    // same grouping relationship accordion and card-option groups project.
+    root.a11y.role = Some(NodeRole::Group);
+    if let Some(ref legend) = spec.legend {
+        root.a11y.label = Some(legend.clone());
+    }
 
     if let Some(ref legend) = spec.legend {
         let mut l = Node::text(legend.to_uppercase());
@@ -39,6 +46,10 @@ pub fn field_set(spec: &FieldSetSpec, ctx: &RenderContext<'_>, children: Vec<Nod
         d.style.descriptor.text_color =
             Some(ctx.theme().resolve_color(spec.description_color_token()));
         d.style.text_size = Some(ctx.theme().resolve_space(spec.description_size_token()));
+        // Contract §6: the description pulls up under the legend by
+        // `space-stack-sm * -0.5` and leaves `space-stack-md` below.
+        d.style.descriptor.layout.spacing.margin.top =
+            -0.5 * ctx.theme().resolve_space(spec.legend_margin_bottom_token());
         d.style.descriptor.layout.spacing.margin.bottom = ctx
             .theme()
             .resolve_space(spec.description_margin_bottom_token());

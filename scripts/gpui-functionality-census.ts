@@ -382,6 +382,43 @@ const STATIC_DISPLAY_NOT_APPLICABLE: Record<string, ManifestNotApplicable[]> = {
       contractRef: "docs/contracts/components/detail-section.md#5. Events",
     },
   ],
+  ListGrid: [
+    {
+      axis: "events",
+      reason: "ListGrid is a styled-only layout primitive with no component-owned events.",
+      contractRef: "docs/contracts/components/list-grid.md#Behavior Machine",
+    },
+    {
+      axis: "pointer",
+      reason:
+        "ListGrid renders layout only and has no pointer interaction; grid items own theirs.",
+      contractRef: "docs/contracts/components/list-grid.md#2. Accessibility",
+    },
+    {
+      axis: "keyboard_focus",
+      reason: "ListGrid is styled-only and never a focus stop; it has no keyboard behavior.",
+      contractRef: "docs/contracts/components/list-grid.md#Behavior Machine",
+    },
+  ],
+  FieldSet: [
+    {
+      axis: "events",
+      reason:
+        "FieldSet groups controls and owns no callbacks or events; validation and submission stay host-owned.",
+      contractRef: "docs/contracts/components/field-set.md#1. Purpose",
+    },
+    {
+      axis: "pointer",
+      reason: "FieldSet owns grouping layout only; pointer interaction belongs to the grouped controls.",
+      contractRef: "docs/contracts/components/field-set.md#5. Accessibility",
+    },
+    {
+      axis: "keyboard_focus",
+      reason:
+        "FieldSet adds no keyboard behavior and is not a focus stop; grouped controls keep their own focus targets.",
+      contractRef: "docs/contracts/components/field-set.md#5. Accessibility",
+    },
+  ],
   UiPresentationProvider: [
     {
       axis: "pointer",

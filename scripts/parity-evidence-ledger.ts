@@ -83,6 +83,7 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   Avatar: "first_mounted_parity_avatar",
   Box: "first_mounted_parity_box",
   Grid: "first_mounted_parity_grid",
+  ListGrid: "first_mounted_parity_list_grid",
   Stack: "first_mounted_parity_stack",
   Spacer: "first_mounted_parity_spacer",
   Skeleton: "first_mounted_parity_skeleton",
@@ -163,7 +164,10 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   Popover: "a_nested_popover_paints_without_nesting_deferred_draws",
   ColorPicker: "first_mounted_parity_color_picker",
   HoverCard: "first_mounted_parity_hover_card",
+  Tooltip:
+    "tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui",
   Field: "first_mounted_parity_field",
+  FieldSet: "first_mounted_parity_field_set",
   Calendar: "first_mounted_parity_calendar",
   FormActions: "first_mounted_parity_form_actions",
   FormLayout: "first_mounted_parity_form_layout",
