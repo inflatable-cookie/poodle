@@ -150,6 +150,63 @@ export type CensusDoc = {
   crossRuntime: { constructionClaim: string; mountedScope: string; note: string };
 };
 
+/** The component itself is a static display surface; any interactions belong
+ * to composed children. These contract-backed boundaries stay local so they
+ * do not relax the census rules for other styled-only components. */
+const STATIC_DISPLAY_NOT_APPLICABLE: Record<string, ManifestNotApplicable[]> = {
+  Avatar: [
+    {
+      axis: "events",
+      reason: "Avatar is a styled-only display component with no component-owned events.",
+      contractRef: "docs/contracts/components/avatar.md#Behavior Machine",
+    },
+    {
+      axis: "pointer",
+      reason: "Avatar renders identity content and has no pointer interaction or focusable child.",
+      contractRef: "docs/contracts/components/avatar.md#1. Purpose",
+    },
+    {
+      axis: "keyboard_focus",
+      reason: "Avatar is styled-only and has no keyboard behavior or component-owned focus stop.",
+      contractRef: "docs/contracts/components/avatar.md#Behavior Machine",
+    },
+  ],
+  MetaBar: [
+    {
+      axis: "events",
+      reason: "MetaBar lays out caller-owned children and dispatches no component-owned events.",
+      contractRef: "docs/contracts/components/meta-bar.md#4. Behavior",
+    },
+    {
+      axis: "pointer",
+      reason: "MetaBar is a layout-only container; pointer interaction belongs to child content.",
+      contractRef: "docs/contracts/components/meta-bar.md#6. Accessibility",
+    },
+    {
+      axis: "keyboard_focus",
+      reason: "MetaBar has no keyboard behavior or focus stop; interactive children keep their own focus targets.",
+      contractRef: "docs/contracts/components/meta-bar.md#6. Accessibility",
+    },
+  ],
+  MetaItem: [
+    {
+      axis: "events",
+      reason: "MetaItem displays caller-owned value content and dispatches no component-owned events.",
+      contractRef: "docs/contracts/components/meta-item.md#6. Accessibility",
+    },
+    {
+      axis: "pointer",
+      reason: "MetaItem is a display wrapper; pointer interaction belongs to its value content.",
+      contractRef: "docs/contracts/components/meta-item.md#6. Accessibility",
+    },
+    {
+      axis: "keyboard_focus",
+      reason: "MetaItem has no keyboard behavior; an interactive value remains its own focus target.",
+      contractRef: "docs/contracts/components/meta-item.md#9. Keyboard",
+    },
+  ],
+};
+
 export type ExecutionRecord = {
   schema: string;
   command: string;
@@ -665,8 +722,16 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
     } else {
       required.push("keyboard_focus");
     }
+    for (const item of STATIC_DISPLAY_NOT_APPLICABLE[component.name] ?? []) {
+      const requiredIndex = required.indexOf(item.axis);
+      if (requiredIndex >= 0) {
+        required.splice(requiredIndex, 1);
+        notApplicable.push(item);
+      }
+    }
     const order = (axis: CensusAxis): number => CENSUS_AXES.indexOf(axis);
     required.sort((a, b) => order(a) - order(b));
+    notApplicable.sort((a, b) => order(a.axis) - order(b.axis));
     entries.push({
       component: component.name,
       portable: true,

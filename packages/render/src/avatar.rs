@@ -66,9 +66,11 @@ pub fn avatar(spec: &AvatarSpec, ctx: &RenderContext<'_>) -> Node {
         root = root.child(initials);
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        root.a11y.label = Some(label.to_string());
+    if spec.decorative {
+        root.a11y.hidden = Some(true);
+    } else {
+        root.a11y.label = spec.accessible_label();
+        root.a11y.role = Some(NodeRole::Image);
     }
-    root.a11y.role = Some(NodeRole::Image);
     root
 }

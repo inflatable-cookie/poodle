@@ -80,6 +80,9 @@ const AUDIO_RENDER_COMPONENTS = new Set([
 // evidence by itself; GPUI mounted cells below are driven by validated M1
 // receipts only.
 export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
+  Avatar: "first_mounted_parity_avatar",
+  MetaBar: "first_mounted_parity_meta_bar",
+  MetaItem: "first_mounted_parity_meta_item",
   AudioPlayer: "first_mounted_parity_audio_player",
   Table: "first_mounted_parity_table",
   DataTable: "first_mounted_parity_data_table",

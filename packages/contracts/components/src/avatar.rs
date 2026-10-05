@@ -89,10 +89,13 @@ impl AvatarSpec {
         if self.decorative {
             return None;
         }
+        let explicit_label = if self.has_image() {
+            self.alt.as_deref().or(self.aria_label.as_deref())
+        } else {
+            self.aria_label.as_deref().or(self.alt.as_deref())
+        };
         Some(
-            self.aria_label
-                .as_deref()
-                .or(self.alt.as_deref())
+            explicit_label
                 .or(self.initials.as_deref())
                 .unwrap_or("Avatar")
                 .to_string(),
