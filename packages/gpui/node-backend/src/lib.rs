@@ -689,6 +689,9 @@ fn build_svg_leaf(node: &Node, el: gpui::Svg) -> AnyElement {
 /// element state (click, drag, focus) forces a stateful div — gpui 0.2.2
 /// gates its listener model behind `Stateful`.
 fn build_box(node: &Node, base: Div) -> AnyElement {
+    if let Some(scope) = scroll::scoped(node) {
+        return scope;
+    }
     // Nested overlay surfaces (a popover inside a popover) draw inside the
     // enclosing deferred element; only the outermost overlay defers.
     let was_deferred = DEFERRED_SCOPE.with(|scope| scope.get());

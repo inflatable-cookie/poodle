@@ -315,7 +315,21 @@ const STATIC_DISPLAY_NOT_APPLICABLE: Record<string, ManifestNotApplicable[]> = {
       contractRef: "docs/contracts/components/detail-section.md#5. Events",
     },
   ],
+  UiPresentationProvider: [
+    {
+      axis: "pointer",
+      reason:
+        "The provider is not a hit target and intercepts no input; descendants own their pointer behavior.",
+      contractRef: "docs/contracts/components/ui-presentation-provider.md#7. Layout",
+    },
+  ],
   MotionPolicyProvider: [
+    {
+      axis: "pointer",
+      reason:
+        "The provider adds no hit target; descendants keep their own pointer behavior.",
+      contractRef: "docs/contracts/components/motion-policy-provider.md#7. Layout And Composition",
+    },
     {
       axis: "events",
       reason:

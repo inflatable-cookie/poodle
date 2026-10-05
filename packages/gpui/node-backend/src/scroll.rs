@@ -8,7 +8,10 @@
 
 use super::*;
 
-use gpui::{point, px, ScrollHandle};
+use gpui::{
+    point, px, AnyElement, AnyWindowHandle, Bounds, Element, ElementId, GlobalElementId,
+    InspectorElementId, IntoElement, LayoutId, Pixels, ScrollHandle,
+};
 use poodle_node::NodeScrollEvent;
 
 /// Scroll distance of one arrow key press, matching a browser line step.
@@ -18,26 +21,46 @@ const PAGE_SHARE: f32 = 0.875;
 
 type ScrollObserver = Arc<dyn Fn(&NodeScrollEvent) + Send + Sync>;
 
+/// Scroll state is per window: two windows mounting the same node id keep
+/// separate handles. `None` is a node mounted outside a scope (no explicit id,
+/// so there is nothing stable to key on).
+type ScrollKey = (Option<AnyWindowHandle>, String);
+
 thread_local! {
-    static SCROLL_HANDLES: RefCell<std::collections::HashMap<String, ScrollHandle>> =
+    static SCROLL_HANDLES: RefCell<std::collections::HashMap<ScrollKey, ScrollHandle>> =
         RefCell::new(std::collections::HashMap::new());
-    static REPORTED: RefCell<std::collections::HashMap<String, (f32, f32)>> =
+    static REPORTED: RefCell<std::collections::HashMap<ScrollKey, (f32, f32)>> =
         RefCell::new(std::collections::HashMap::new());
+    /// The handle the enclosing [`ScrollScope`] resolved for the node being
+    /// built, consumed by [`apply_scroll`].
+    static INJECTED: RefCell<Option<(ScrollKey, ScrollHandle)>> = const { RefCell::new(None) };
+    /// Set while a scope builds its own node, so `build_box` does not wrap it
+    /// a second time.
+    static BUILDING_SCOPE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
+fn find(id: &str) -> Option<ScrollHandle> {
+    SCROLL_HANDLES.with(|handles| {
+        handles
+            .borrow()
+            .iter()
+            .find(|((_, key), _)| key == id)
+            .map(|(_, handle)| handle.clone())
+    })
 }
 
 /// The retained scroll position for a node id as distance from the content
-/// start, if the node owns a scroll handle. Mounted proofs read this.
+/// start, if the node owns a scroll handle. Mounted proofs read this; with
+/// the same id in several windows, use one window per proof.
 pub fn scroll_offset_for(id: &str) -> Option<(f32, f32)> {
-    SCROLL_HANDLES.with(|handles| handles.borrow().get(id).map(position))
+    find(id).map(|handle| position(&handle))
 }
 
 /// The scrollable extent beyond the viewport on each axis.
 pub fn scroll_extent_for(id: &str) -> Option<(f32, f32)> {
-    SCROLL_HANDLES.with(|handles| {
-        handles.borrow().get(id).map(|handle| {
-            let max = handle.max_offset();
-            (max.width.into(), max.height.into())
-        })
+    find(id).map(|handle| {
+        let max = handle.max_offset();
+        (max.width.into(), max.height.into())
     })
 }
 
@@ -46,25 +69,127 @@ fn position(handle: &ScrollHandle) -> (f32, f32) {
     (-f32::from(offset.x), -f32::from(offset.y))
 }
 
-fn handle_for(id: &str) -> ScrollHandle {
+fn handle_for(key: &ScrollKey) -> ScrollHandle {
     SCROLL_HANDLES.with(|handles| {
         handles
             .borrow_mut()
-            .entry(id.to_owned())
+            .entry(key.clone())
             .or_insert_with(ScrollHandle::new)
             .clone()
     })
 }
 
-fn report(id: &str, handle: &ScrollHandle, handler: &ScrollObserver) {
+fn report(key: &ScrollKey, handle: &ScrollHandle, handler: &ScrollObserver) {
     let now = position(handle);
     let changed = REPORTED.with(|reported| {
         let mut reported = reported.borrow_mut();
-        let previous = reported.insert(id.to_owned(), now).unwrap_or((0.0, 0.0));
+        let previous = reported.insert(key.clone(), now).unwrap_or((0.0, 0.0));
         previous != now
     });
     if changed {
         handler(&NodeScrollEvent { x: now.0, y: now.1 });
+    }
+}
+
+/// Whether a node owns scroll state, and so is built inside a [`ScrollScope`].
+fn owns_scroll(node: &Node) -> bool {
+    let layout = &node.style.descriptor.layout;
+    (layout.overflow_x == LayoutOverflow::Scroll || layout.overflow_y == LayoutOverflow::Scroll)
+        && ((node.interaction.focusable && !node.interaction.disabled)
+            || node.interaction.on_scroll.is_some())
+}
+
+/// Wrap a scroll-owning node with an explicit id so its handle resolves
+/// against the window that actually lays it out. `None` builds it plainly.
+pub(super) fn scoped(node: &Node) -> Option<AnyElement> {
+    if BUILDING_SCOPE.with(|flag| flag.replace(false)) || !owns_scroll(node) {
+        return None;
+    }
+    let id = node.runtime_id.as_ref().or(node.id.as_ref())?.clone();
+    Some(
+        ScrollScope {
+            node: node.clone(),
+            id,
+            child: None,
+        }
+        .into_any_element(),
+    )
+}
+
+/// Resolves the per-window scroll handle during layout, where the window is
+/// known, then builds the node with that handle.
+struct ScrollScope {
+    node: Node,
+    id: String,
+    child: Option<AnyElement>,
+}
+
+impl IntoElement for ScrollScope {
+    type Element = Self;
+
+    fn into_element(self) -> Self {
+        self
+    }
+}
+
+impl Element for ScrollScope {
+    type RequestLayoutState = ();
+    type PrepaintState = ();
+
+    fn id(&self) -> Option<ElementId> {
+        None
+    }
+
+    fn source_location(&self) -> Option<&'static core::panic::Location<'static>> {
+        None
+    }
+
+    fn request_layout(
+        &mut self,
+        _id: Option<&GlobalElementId>,
+        _inspector_id: Option<&InspectorElementId>,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> (LayoutId, ()) {
+        let key = (Some(window.window_handle()), self.id.clone());
+        let handle = handle_for(&key);
+        INJECTED.with(|slot| *slot.borrow_mut() = Some((key, handle)));
+        BUILDING_SCOPE.with(|flag| flag.set(true));
+        let mut child = to_gpui_impl(&self.node);
+        BUILDING_SCOPE.with(|flag| flag.set(false));
+        INJECTED.with(|slot| *slot.borrow_mut() = None);
+        let layout = child.request_layout(window, cx);
+        self.child = Some(child);
+        (layout, ())
+    }
+
+    fn prepaint(
+        &mut self,
+        _id: Option<&GlobalElementId>,
+        _inspector_id: Option<&InspectorElementId>,
+        _bounds: Bounds<Pixels>,
+        _request_layout: &mut (),
+        window: &mut Window,
+        cx: &mut App,
+    ) {
+        if let Some(child) = self.child.as_mut() {
+            child.prepaint(window, cx);
+        }
+    }
+
+    fn paint(
+        &mut self,
+        _id: Option<&GlobalElementId>,
+        _inspector_id: Option<&InspectorElementId>,
+        _bounds: Bounds<Pixels>,
+        _request_layout: &mut (),
+        _prepaint: &mut (),
+        window: &mut Window,
+        cx: &mut App,
+    ) {
+        if let Some(child) = self.child.as_mut() {
+            child.paint(window, cx);
+        }
     }
 }
 
@@ -111,12 +236,18 @@ pub(super) fn apply_scroll(mut el: Stateful<Div>, node: &Node, id: &str) -> Stat
     if !(vertical || horizontal) || !(keyboard || observer.is_some()) {
         return el;
     }
-    let handle = handle_for(id);
+    let (key, handle) = INJECTED
+        .with(|slot| slot.borrow_mut().take())
+        .unwrap_or_else(|| {
+            let key = (None, id.to_owned());
+            let handle = handle_for(&key);
+            (key, handle)
+        });
     el = el.track_scroll(&handle);
 
     if let Some(observer) = observer.clone() {
         let observed = handle.clone();
-        let owner = id.to_owned();
+        let owner = key.clone();
         el = el.on_scroll_wheel(move |_event, window: &mut Window, cx: &mut App| {
             // GPUI's own wheel listener moves the handle later in this
             // dispatch, so read the position after it.
@@ -129,7 +260,7 @@ pub(super) fn apply_scroll(mut el: Stateful<Div>, node: &Node, id: &str) -> Stat
 
     if keyboard {
         let keys = handle.clone();
-        let owner = id.to_owned();
+        let owner = key.clone();
         el = el.on_key_down(move |event: &KeyDownEvent, window, cx| {
             let m = &event.keystroke.modifiers;
             if m.platform || m.control || m.alt || m.shift {

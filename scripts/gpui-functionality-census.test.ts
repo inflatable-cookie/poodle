@@ -323,7 +323,8 @@ describe("g18.001 census oracles", () => {
     const manifest = deriveCapabilityManifest(repositoryRoot);
     for (const [component, contract, notApplicable] of [
       ["DetailSection", "detail-section.md", ["events"]],
-      ["MotionPolicyProvider", "motion-policy-provider.md", ["events"]],
+      ["MotionPolicyProvider", "motion-policy-provider.md", ["pointer", "events"]],
+      ["UiPresentationProvider", "ui-presentation-provider.md", ["events", "pointer"]],
       ["AgentMessage", "agent-message.md", ["events", "pointer"]],
       ["ScrollShell", "scroll-shell.md", []],
     ] as Array<[string, string, string[]]>) {
