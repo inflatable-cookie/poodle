@@ -58239,31 +58239,56 @@ fn first_mounted_parity_scroll_shell() {
         };
         let first = Arc::new(Mutex::new(Vec::<(f32, f32)>::new()));
         let second = Arc::new(Mutex::new(Vec::<(f32, f32)>::new()));
-        {
-            let mut driver = HeadlessDriver::new_in_box(cx, build(&first), 320.0, 220.0);
-            driver.draw_frame();
-            driver.scroll_vertical(-60.0);
-            driver.scroll_vertical(-60.0);
-        }
+        // Both windows stay live for the whole proof: a second handle onto
+        // the same test app gives each driver its own window.
+        let mut other_app = cx.clone();
+        let mut first_driver = HeadlessDriver::new_in_box(cx, build(&first), 320.0, 220.0);
+        let mut second_driver =
+            HeadlessDriver::new_in_box(&mut other_app, build(&second), 320.0, 220.0);
+        first_driver.draw_frame();
+        second_driver.draw_frame();
+
+        first_driver.scroll_vertical(-60.0);
+        first_driver.scroll_vertical(-60.0);
         let first_offset = first.lock().expect("scroll payloads").last().copied();
         assert!(
             first_offset.is_some_and(|(_, y)| y > 0.0),
             "the first window scrolled: {first_offset:?}"
         );
-        {
-            let mut driver = HeadlessDriver::new_in_box(cx, build(&second), 320.0, 220.0);
-            driver.draw_frame();
-            driver.scroll_vertical(-60.0);
-        }
+        assert!(
+            second.lock().expect("scroll payloads").is_empty(),
+            "scrolling one live window reports nothing from the other"
+        );
+
+        second_driver.scroll_vertical(-60.0);
         let second_offsets = second.lock().expect("scroll payloads").clone();
         assert_eq!(
             second_offsets.len(),
             1,
             "one wheel step in the second window reports once: {second_offsets:?}"
         );
+        let second_y = second_offsets[0].1;
         assert!(
-            second_offsets[0].1 > 0.0 && second_offsets[0].1 < first_offset.expect("offset").1,
+            second_y > 0.0 && second_y < first_offset.expect("offset").1,
             "the second window starts from the top, not the first window's offset: {second_offsets:?} vs {first_offset:?}"
+        );
+
+        // The first window kept its own position and stream through the
+        // second window's frames and scrolling.
+        first_driver.draw_frame();
+        second_driver.draw_frame();
+        let before = first.lock().expect("scroll payloads").len();
+        first_driver.scroll_vertical(-60.0);
+        let first_stream = first.lock().expect("scroll payloads").clone();
+        assert_eq!(first_stream.len(), before + 1);
+        assert!(
+            first_stream.last().expect("report").1 > first_offset.expect("offset").1,
+            "the first window continues from its own offset: {first_stream:?}"
+        );
+        assert_eq!(
+            second.lock().expect("scroll payloads").len(),
+            1,
+            "the second window's stream is untouched by the first"
         );
     });
 
