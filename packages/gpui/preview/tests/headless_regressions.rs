@@ -60053,6 +60053,10 @@ fn first_mounted_parity_media_preview() {
         assert!(
             frames.contains(&"Empty folder".to_owned()),
             "empty frame projects its title: {frames:?}"
+        );
+    });
+}
+
 /// ListGrid parity: the responsive tile layout resolves the contract gap and
 /// tile floor, caps columns at the contracted default of three, stacks the
 /// compact variant in one column, and renders the header row only when actions
