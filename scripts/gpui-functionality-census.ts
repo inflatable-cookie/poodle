@@ -277,6 +277,51 @@ const STATIC_DISPLAY_NOT_APPLICABLE: Record<string, ManifestNotApplicable[]> = {
       contractRef: "docs/contracts/components/value-readout.md#6. Accessibility",
     },
   ],
+  EmptyState: [
+    {
+      axis: "events",
+      reason:
+        "EmptyState dispatches no component-owned events; action behavior belongs to slotted host buttons.",
+      contractRef: "docs/contracts/components/empty-state.md#5. Events",
+    },
+  ],
+  ErrorBoundary: [
+    {
+      axis: "events",
+      reason:
+        "The boundary dispatches no component-owned events: the error state is an EmptyState and the retry press is a host-reset action.",
+      contractRef: "docs/contracts/components/error-boundary.md#Composition",
+    },
+  ],
+  EmbedPreview: [
+    {
+      axis: "events",
+      reason: "EmbedPreview is a pure display component with no component-owned events.",
+      contractRef: "docs/contracts/components/embed-preview.md#5. Events",
+    },
+  ],
+  InlineListSection: [
+    {
+      axis: "events",
+      reason:
+        "The section dispatches no component-owned events; item content, row actions, and status pills stay host-owned.",
+      contractRef: "docs/contracts/components/inline-list-section.md#Rules",
+    },
+  ],
+  PasswordRequirements: [
+    {
+      axis: "events",
+      reason:
+        "Callers own policy fetch and retry behavior; the checklist dispatches no component-owned events.",
+      contractRef: "docs/contracts/components/password-requirements.md#5. Boundary",
+    },
+    {
+      axis: "pointer",
+      reason:
+        "The checklist is display-only with no pointer surface; status reads through wording and indicator.",
+      contractRef: "docs/contracts/components/password-requirements.md#6. Accessibility",
+    },
+  ],
 };
 
 export type ExecutionRecord = {

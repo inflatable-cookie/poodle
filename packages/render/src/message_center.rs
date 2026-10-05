@@ -18,7 +18,7 @@ use poodle_specs::{
 use crate::button::button;
 use crate::color::with_alpha;
 use crate::context::RenderContext;
-use crate::empty_state::empty_state;
+use crate::empty_state::{empty_state, EmptyStateHandlers};
 use crate::floating_overlay::floating_overlay;
 use crate::icon_button::icon_button;
 use crate::popover::popover_surface;
@@ -244,7 +244,7 @@ fn center_content(
             .with_message(&spec.empty_message)
             .with_size(EmptyStateSize::Compact)
             .with_density(density);
-        let mut empty = empty_state(&empty_spec, ctx);
+        let mut empty = empty_state(&empty_spec, ctx, EmptyStateHandlers::default());
         empty.runtime_id = scoped(instance, "empty");
         empty
             .roles

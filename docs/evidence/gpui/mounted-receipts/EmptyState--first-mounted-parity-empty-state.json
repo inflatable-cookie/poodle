@@ -1,13 +1,12 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "CollapseToggle",
-  "test": "collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_keyboard",
+  "component": "EmptyState",
+  "test": "first_mounted_parity_empty_state",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
     "semantic",
-    "events",
     "pointer",
     "keyboard_focus",
     "accessibility",
@@ -18,25 +17,23 @@
       "assert",
       "production-mount"
     ],
-    "events": [
-      "payloads.lock",
-      "assert_eq!(*payload"
-    ],
     "pointer": [
       "pointer_activate"
     ],
     "keyboard_focus": [
-      "focus_handle_for",
       "focus_state_for",
-      "focus_element"
+      "focus_element",
+      "keyboard_"
     ],
     "accessibility": [
+      "accessible",
       "NodeRole",
       "a11y."
     ],
     "visual": [
-      "resolve_radius",
-      "resolve_color"
+      "resolve_color",
+      "rem_to_px",
+      "geometry"
     ]
   },
   "production_path_observation": {
@@ -44,7 +41,7 @@
     "mount": "HeadlessDriver",
     "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::button",
+    "renderer": "poodle_render::empty_state",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -57,11 +54,10 @@
     "command": "effigy regressions:native",
     "run_id": "20f7852a-cc71-441a-8b01-12d2f349b188",
     "outcome": "passed",
-    "body_sha256": "393d7a1f2c92437cda92335b78b610f6427276cabd91f350e8ed897ea64453fe"
+    "body_sha256": "e5c6581f7a1bfda74b08a2fef76449c9718007368fe2f2e89e0ca2fc83c6f110"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
-    "asserted emitted payloads or handler delivery through mounted input",
     "drove real pointer activation through the mounted GPUI node backend",
     "drove real keyboard input or backend focus through the mounted tree",
     "asserted node-level role, label, state, or focusability in the mounted tree",

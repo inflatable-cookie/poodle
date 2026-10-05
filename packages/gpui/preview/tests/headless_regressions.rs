@@ -19859,10 +19859,15 @@ fn empty_state_compact_and_default_render_distinct_geometry() {
 
     let theme = theme();
     let ctx = RenderContext::new(&theme);
-    let default = empty_state(&EmptyStateSpec::new("No projects yet"), &ctx);
+    let default = empty_state(
+        &EmptyStateSpec::new("No projects yet"),
+        &ctx,
+        poodle_render::EmptyStateHandlers::default(),
+    );
     let compact = empty_state(
         &EmptyStateSpec::new("No projects yet").with_size(EmptyStateSize::Compact),
         &ctx,
+        poodle_render::EmptyStateHandlers::default(),
     );
 
     let default_title = title_text_size(&default).expect("default title");
@@ -56820,6 +56825,1036 @@ fn first_mounted_parity_value_readout() {
             .expect("value readout has mounted geometry");
         assert!(bounds.size.width > px(0.0));
         assert!(bounds.size.height > px(0.0));
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// EmptyState parity against Svelte: variant posture, title/message copy,
+/// decorative hiding, title-fallback naming, token chrome, and actions that
+/// stay live through the mounted tree. Svelte parity authority:
+/// `packages/svelte/components/src/EmptyState.svelte` (section with
+/// `aria-label={ariaLabel ?? title}`, `aria-hidden` visual, h3 title, live
+/// snippet actions, Tab through the buttons).
+#[test]
+fn first_mounted_parity_empty_state() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::color::with_alpha;
+    use poodle_specs::{EmptyStateSize, EmptyStateSpec, EmptyStateVariant, RemediationAction};
+
+    fn icon_name(node: &Node) -> Option<String> {
+        let mut found = None;
+        let mut stack = vec![node];
+        while let Some(next) = stack.pop() {
+            if let NodeKind::Icon { name, .. } = &next.kind {
+                found = Some(name.clone());
+            }
+            stack.extend(next.children.iter());
+        }
+        found
+    }
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let surface = theme_provider.resolve_color("color.background.surface");
+        let neutral_bg = with_alpha(surface, surface.3 * 0.76);
+
+        // Search posture: search glyph, accent tint, title-fallback name.
+        let search = poodle_render::empty_state(
+            &EmptyStateSpec::new("No results found")
+                .with_message("Try adjusting your search terms.")
+                .with_variant(EmptyStateVariant::Search),
+            &ctx,
+            poodle_render::EmptyStateHandlers::default(),
+        );
+        assert_eq!(search.a11y.role, Some(NodeRole::Region));
+        assert_eq!(
+            search.a11y.label.as_deref(),
+            Some("No results found"),
+            "the accessible name falls back to the title like Svelte"
+        );
+        assert_eq!(icon_name(&search).as_deref(), Some("search"));
+        let accent = theme_provider.resolve_color("color.accent.base");
+        assert_eq!(
+            search.style.descriptor.background,
+            Some(with_alpha(accent, accent.3 * 0.07))
+        );
+
+        // First-run posture: plus glyph, success tint, explicit name wins.
+        let first_run = poodle_render::empty_state(
+            &EmptyStateSpec::new("Welcome")
+                .with_variant(EmptyStateVariant::FirstRun)
+                .with_aria_label("Workspace welcome"),
+            &ctx,
+            poodle_render::EmptyStateHandlers::default(),
+        );
+        assert_eq!(icon_name(&first_run).as_deref(), Some("plus"));
+        assert_eq!(first_run.a11y.label.as_deref(), Some("Workspace welcome"));
+        let success = theme_provider.resolve_color("color.status.success");
+        assert_eq!(
+            first_run.style.descriptor.background,
+            Some(with_alpha(success, success.3 * 0.07))
+        );
+
+        // Neutral compact posture: inbox glyph, surface tint, smaller type.
+        let compact = poodle_render::empty_state(
+            &EmptyStateSpec::new("No projects yet").with_size(EmptyStateSize::Compact),
+            &ctx,
+            poodle_render::EmptyStateHandlers::default(),
+        );
+        assert_eq!(icon_name(&compact).as_deref(), Some("inbox"));
+        assert_eq!(compact.style.descriptor.background, Some(neutral_bg));
+        assert!(compact.style.border_dashed);
+        let title_size = compact
+            .children
+            .iter()
+            .flat_map(|child| child.children.iter())
+            .filter_map(|leaf| {
+                if matches!(leaf.kind, NodeKind::Text { .. }) {
+                    leaf.style.text_size
+                } else {
+                    None
+                }
+            })
+            .next()
+            .expect("compact copy carries a title");
+        assert_eq!(title_size, poodle_render::presentation::rem_to_px(0.9375));
+
+        // The visual circle is decorative while the title stays a heading.
+        let mut visual_hidden = false;
+        let mut title_heading = false;
+        let mut stack = vec![&compact];
+        while let Some(next) = stack.pop() {
+            if next.a11y.hidden == Some(true)
+                && next
+                    .children
+                    .iter()
+                    .any(|child| matches!(child.kind, NodeKind::Icon { .. }))
+            {
+                visual_hidden = true;
+            }
+            if next.a11y.role == Some(NodeRole::Heading)
+                && matches!(&next.kind, NodeKind::Text { content } if content == "No projects yet")
+            {
+                title_heading = true;
+            }
+            stack.extend(next.children.iter());
+        }
+        assert!(visual_hidden, "the visual circle hides from assistive tech");
+        assert!(title_heading, "the title keeps heading semantics like h3");
+
+        // Actions stay live: the host records the pressed action id, and a
+        // disabled action never records.
+        let activations = Arc::new(Mutex::new(Vec::<String>::new()));
+        let sink = Arc::clone(&activations);
+        let mut actionable = poodle_render::empty_state(
+            &EmptyStateSpec::new("No projects yet")
+                .with_message("Create your first project to get started.")
+                .with_actions(vec![
+                    RemediationAction::new("create", "Create project"),
+                    RemediationAction::new("import", "Import").with_disabled(true),
+                ]),
+            &ctx,
+            poodle_render::EmptyStateHandlers {
+                on_action: Some(Arc::new(move |id: &str| {
+                    sink.lock().expect("action record").push(id.to_owned());
+                })),
+                instance_id: None,
+            },
+        );
+        actionable.id = Some("empty-state-proof".to_owned());
+        assert_eq!(actionable.a11y.role, Some(NodeRole::Region));
+        assert_eq!(actionable.a11y.label.as_deref(), Some("No projects yet"));
+
+        let mounted = Arc::new(Mutex::new(Node::container().child(actionable)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 400.0, 600.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let nodes = driver.accessibility_nodes();
+        assert!(
+            nodes.iter().any(|node| node.role == NodeRole::Region
+                && node.label.as_deref() == Some("No projects yet")),
+            "the mounted section keeps its accessible name"
+        );
+        assert!(
+            nodes.iter().any(|node| node.role == NodeRole::Heading
+                && node.level == Some(3)
+                && node
+                    .text_content
+                    .iter()
+                    .any(|text| text == "No projects yet")),
+            "the mounted title keeps its h3-equivalent heading level"
+        );
+        let create = nodes
+            .iter()
+            .find(|node| node.element_id == "empty-state-action-create")
+            .expect("the create action paints an accessible button");
+        assert_eq!(create.role, NodeRole::Button);
+        assert_eq!(create.label.as_deref(), Some("Create project"));
+        assert!(create.focusable);
+        let painted = poodle_gpui_node_backend::painted_node_for("empty-state-action-create")
+            .expect("the create action reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Button));
+
+        driver.wait_for_focus_handle("empty-state-action-create");
+        driver.focus_element("empty-state-action-create");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("empty-state-action-create"),
+            Some(true)
+        );
+        driver.keyboard_activate("empty-state-action-create");
+        assert_eq!(
+            activations.lock().expect("action record").as_slice(),
+            ["create".to_string()],
+            "keyboard activation reaches the host action"
+        );
+        driver.pointer_activate_id("empty-state-action-create");
+        assert_eq!(
+            activations.lock().expect("action record").as_slice(),
+            ["create".to_string(), "create".to_string()],
+            "pointer activation reaches the same host action"
+        );
+        driver.pointer_activate_id("empty-state-action-import");
+        assert_eq!(
+            activations.lock().expect("action record").len(),
+            2,
+            "a disabled action takes the press and records nothing"
+        );
+
+        let bounds = poodle_gpui_node_backend::bounds_for("empty-state-proof")
+            .expect("the empty state has mounted geometry");
+        assert!(bounds.size.width > px(0.0));
+        assert!(bounds.size.height > px(0.0));
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// ErrorBoundary parity against Svelte: normal content passes through, the
+/// error state is an EmptyState with the message and a retry that reaches
+/// the host, and the host rebuild clears it. Svelte parity authority:
+/// `packages/svelte/components/src/ErrorBoundary.svelte` (children render
+/// normally; error shows EmptyState with message plus a retry button that
+/// resets and re-renders children).
+#[test]
+fn first_mounted_parity_error_boundary() {
+    use poodle_specs::ErrorBoundarySpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+
+        // No error: the wrapped child renders untouched.
+        let mut child = Node::text("Dashboard content");
+        child.id = Some("error-boundary-child".to_owned());
+        let normal = poodle_render::error_boundary(
+            &ErrorBoundarySpec::new(),
+            &ctx,
+            Some(child),
+            poodle_render::ErrorBoundaryHandlers::default(),
+        );
+        assert!(
+            normal.children.iter().any(|leaf| matches!(
+                &leaf.kind,
+                NodeKind::Text { content } if content == "Dashboard content"
+            )) || matches!(&normal.kind, NodeKind::Text { content } if content == "Dashboard content"),
+            "normal content passes the boundary through"
+        );
+
+        // Error: the fallback names the failure and offers the retry.
+        let retries = Arc::new(Mutex::new(0_usize));
+        let sink = Arc::clone(&retries);
+        let mut error = poodle_render::error_boundary(
+            &ErrorBoundarySpec::new()
+                .with_title("Load failed")
+                .with_retry_label("Reload")
+                .with_error_message("The view threw while rendering."),
+            &ctx,
+            None,
+            poodle_render::ErrorBoundaryHandlers {
+                on_retry: Some(Arc::new(move || {
+                    *sink.lock().expect("retry record") += 1;
+                })),
+                instance_id: None,
+            },
+        );
+        error.id = Some("error-boundary-proof".to_owned());
+        assert_eq!(error.a11y.role, Some(NodeRole::Region));
+        assert_eq!(error.a11y.label.as_deref(), Some("Load failed"));
+
+        let mounted = Arc::new(Mutex::new(Node::container().child(error)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 400.0, 560.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let nodes = driver.accessibility_nodes();
+        assert!(
+            nodes.iter().any(|node| node.role == NodeRole::Region
+                && node.label.as_deref() == Some("Load failed")),
+            "the mounted error state keeps its accessible name"
+        );
+        let retry = nodes
+            .iter()
+            .find(|node| node.element_id == "empty-state-action-retry")
+            .expect("the retry paints an accessible button");
+        assert_eq!(retry.role, NodeRole::Button);
+        assert_eq!(retry.label.as_deref(), Some("Reload"));
+        assert!(retry.focusable);
+
+        driver.wait_for_focus_handle("empty-state-action-retry");
+        driver.focus_element("empty-state-action-retry");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("empty-state-action-retry"),
+            Some(true)
+        );
+        driver.keyboard_activate("empty-state-action-retry");
+        assert_eq!(
+            *retries.lock().expect("retry record"),
+            1,
+            "keyboard retry reaches the host reset"
+        );
+        driver.pointer_activate_id("empty-state-action-retry");
+        assert_eq!(
+            *retries.lock().expect("retry record"),
+            2,
+            "pointer retry reaches the same host reset"
+        );
+        assert!(
+            mounted
+                .lock()
+                .expect("mount lock")
+                .texts()
+                .iter()
+                .any(|text| *text == "The view threw while rendering."),
+            "the failure message paints inside the mounted fallback"
+        );
+        let error_bounds = poodle_gpui_node_backend::bounds_for("error-boundary-proof")
+            .expect("the error fallback has mounted geometry");
+        assert!(error_bounds.size.width > px(0.0));
+        assert!(error_bounds.size.height > px(0.0));
+
+        // The host reset rebuilds without the error: the retry unmounts and
+        // the normal content paints in its place.
+        let mut recovered = Node::text("Dashboard content");
+        recovered.id = Some("error-boundary-child".to_owned());
+        *mounted.lock().expect("mount lock") = Node::container().child(recovered);
+        driver.draw_frame();
+        assert!(
+            !driver
+                .accessibility_nodes()
+                .iter()
+                .any(|node| node.element_id == "empty-state-action-retry"),
+            "the retry leaves the tree once the host clears the error"
+        );
+        assert!(
+            mounted
+                .lock()
+                .expect("mount lock")
+                .texts()
+                .iter()
+                .any(|text| *text == "Dashboard content"),
+            "the recovered content paints after the reset"
+        );
+        let bounds = poodle_gpui_node_backend::bounds_for("error-boundary-child")
+            .expect("recovered content has mounted geometry");
+        assert!(bounds.size.width > px(0.0));
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// EmbedPreview parity against Svelte: the state priority (loading, error,
+/// empty, placeholder, fallback), provider URL derivation, token chrome, and
+/// a fallback link that stays reachable by pointer and keyboard. Svelte
+/// parity authority:
+/// `packages/svelte/components/src/EmbedPreview.svelte` (loading skeleton,
+/// error/empty art with text, `{provider} embed` iframe title, original-URL
+/// anchor with `target="_blank"` reached by Tab natively).
+#[test]
+fn first_mounted_parity_embed_preview() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{EmbedPreviewSpec, ParsedEmbed};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+
+        // Loading outranks everything: skeleton plus the loading line.
+        let loading = poodle_render::embed_preview(
+            &EmbedPreviewSpec::new().with_loading(true),
+            &ctx,
+            poodle_render::EmbedPreviewHandlers::default(),
+        );
+        assert!(
+            loading
+                .texts()
+                .iter()
+                .any(|text| *text == "Loading preview..."),
+            "loading paints its announcement line"
+        );
+        // The state column behind loading/error/empty keeps the contract
+        // 8rem minimum height.
+        let mut state_min = false;
+        let mut loading_stack = vec![&loading];
+        while let Some(next) = loading_stack.pop() {
+            if next.style.min_height == Some(poodle_render::presentation::rem_to_px(8.0)) {
+                state_min = true;
+            }
+            loading_stack.extend(next.children.iter());
+        }
+        assert!(state_min, "the loading state keeps its minimum height");
+
+        // Error outranks parsed content: alert art plus the message.
+        let error = poodle_render::embed_preview(
+            &EmbedPreviewSpec::new()
+                .with_error("The provider refused the URL.")
+                .with_parsed(ParsedEmbed::new("youtube", "dQw4w9WgXcQ")),
+            &ctx,
+            poodle_render::EmbedPreviewHandlers::default(),
+        );
+        assert!(
+            error
+                .texts()
+                .iter()
+                .any(|text| *text == "The provider refused the URL."),
+            "the error message wins over parsed content"
+        );
+        assert!(
+            error
+                .children
+                .iter()
+                .any(|state| state.children.iter().any(|leaf| matches!(
+                    &leaf.kind,
+                    NodeKind::Icon { name, .. } if name == "alert-circle"
+                ))),
+            "the error keeps its alert art"
+        );
+
+        // Empty: play art plus the caller message when nothing parsed.
+        let empty = poodle_render::embed_preview(
+            &EmbedPreviewSpec::new().with_empty_message("Paste a URL above to see a preview"),
+            &ctx,
+            poodle_render::EmbedPreviewHandlers::default(),
+        );
+        assert!(
+            empty
+                .texts()
+                .iter()
+                .any(|text| *text == "Paste a URL above to see a preview"),
+            "empty paints the caller message"
+        );
+
+        // Parsed provider: the placeholder names the derived embed URL.
+        let player = poodle_render::embed_preview(
+            &EmbedPreviewSpec::new().with_parsed(ParsedEmbed::new("youtube", "dQw4w9WgXcQ")),
+            &ctx,
+            poodle_render::EmbedPreviewHandlers::default(),
+        );
+        assert!(
+            player.texts().iter().any(|text| *text == "youtube embed"),
+            "the placeholder names the provider embed"
+        );
+        assert!(
+            player
+                .texts()
+                .iter()
+                .any(|text| *text == "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"),
+            "the derived privacy-enhanced URL reaches the tree"
+        );
+
+        // Fallback: with no embed URL and no raw code, the parsed id
+        // paints as Svelte's no-navigation button — named, focusable, and
+        // opening nothing on either pointer or keyboard input.
+        let mut fallback = poodle_render::embed_preview(
+            &EmbedPreviewSpec::new().with_parsed(ParsedEmbed::new("generic", "post-1")),
+            &ctx,
+            poodle_render::EmbedPreviewHandlers::default(),
+        );
+        fallback.id = Some("embed-preview-proof".to_owned());
+        assert!(
+            fallback.texts().iter().any(|text| *text == "post-1"),
+            "the fallback link carries the parsed reference"
+        );
+        let fallback_control = fallback
+            .find(&|node| node.id.as_deref() == Some("embed-preview-fallback-link"))
+            .expect("the fallback control carries its proof id");
+        assert_eq!(fallback_control.a11y.role, Some(NodeRole::Button));
+        assert!(fallback_control.interaction.on_activate.is_none());
+        assert!(fallback_control.interaction.focusable);
+
+        // Original-URL derivation: a generic provider with an original URL
+        // resolves to that URL (contract §Embed URL Derivation), and the
+        // placeholder panel names it — Svelte renders the iframe against
+        // the same derived source.
+        let mut original = poodle_render::embed_preview(
+            &EmbedPreviewSpec::new().with_parsed(
+                ParsedEmbed::new("generic", "post-1")
+                    .with_original_url("https://example.com/post-1"),
+            ),
+            &ctx,
+            poodle_render::EmbedPreviewHandlers::default(),
+        );
+        original.id = Some("embed-preview-original-url-proof".to_owned());
+        assert!(
+            original
+                .texts()
+                .iter()
+                .any(|text| *text == "https://example.com/post-1"),
+            "the derived original URL reaches the placeholder"
+        );
+
+        let mut stack = Node::container();
+        stack.style.descriptor.layout.direction = LayoutDirection::Column;
+        let mut stack = Node::container();
+        stack.style.descriptor.layout.direction = LayoutDirection::Column;
+        stack.style.descriptor.layout.spacing.gap = poodle_render::presentation::rem_to_px(1.0);
+        let mounted = Arc::new(Mutex::new(stack.child(fallback).child(original)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 400.0, 620.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        assert!(
+            mounted
+                .lock()
+                .expect("mount lock")
+                .texts()
+                .iter()
+                .any(|text| *text == "https://example.com/post-1"),
+            "the original URL paints inside the mounted placeholder"
+        );
+        let original_bounds =
+            poodle_gpui_node_backend::bounds_for("embed-preview-original-url-proof")
+                .expect("the original-URL placeholder has mounted geometry");
+        assert!(original_bounds.size.width > px(0.0));
+        assert!(original_bounds.size.height > px(0.0));
+        let link = driver
+            .accessibility_nodes()
+            .into_iter()
+            .find(|node| node.element_id == "embed-preview-fallback-link")
+            .expect("the fallback control paints an accessible button");
+        assert_eq!(link.role, NodeRole::Button);
+        assert!(
+            link.text_content.iter().any(|text| text == "post-1"),
+            "the control names the parsed reference"
+        );
+        assert!(link.focusable);
+        let painted = poodle_gpui_node_backend::painted_node_for("embed-preview-fallback-link")
+            .expect("the fallback control reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Button));
+
+        driver.wait_for_focus_handle("embed-preview-fallback-link");
+        driver.focus_element("embed-preview-fallback-link");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("embed-preview-fallback-link"),
+            Some(true)
+        );
+        // Either input reaches the control and opens nothing: the
+        // no-navigation button has no activation behind it.
+        driver.keyboard_activate("embed-preview-fallback-link");
+        driver.pointer_activate_id("embed-preview-fallback-link");
+        assert!(
+            driver
+                .accessibility_nodes()
+                .iter()
+                .any(|node| node.element_id == "embed-preview-fallback-link"
+                    && node.role == NodeRole::Button),
+            "both inputs arrive and the control stays a plain button"
+        );
+
+        assert_eq!(
+            mounted.lock().expect("mount lock").children[0]
+                .style
+                .descriptor
+                .corner_radii
+                .top_left,
+            theme_provider.resolve_radius("radius.surface")
+        );
+        let bounds = poodle_gpui_node_backend::bounds_for("embed-preview-proof")
+            .expect("the preview has mounted geometry");
+        assert!(bounds.size.width > px(0.0));
+        assert!(bounds.size.height > px(0.0));
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+
+        // Loading and error states mount with their own content and
+        // geometry rather than living only in raw Nodes.
+        let mut mounted_loading = poodle_render::embed_preview(
+            &EmbedPreviewSpec::new().with_loading(true),
+            &ctx,
+            poodle_render::EmbedPreviewHandlers::default(),
+        );
+        mounted_loading.id = Some("embed-preview-loading-proof".to_owned());
+        let mut mounted_error = poodle_render::embed_preview(
+            &EmbedPreviewSpec::new().with_error("The provider refused the URL."),
+            &ctx,
+            poodle_render::EmbedPreviewHandlers::default(),
+        );
+        mounted_error.id = Some("embed-preview-error-proof".to_owned());
+        let mut states = Node::container();
+        states.style.descriptor.layout.direction = LayoutDirection::Column;
+        states.style.descriptor.layout.spacing.gap = poodle_render::presentation::rem_to_px(1.0);
+        let states = Arc::new(Mutex::new(
+            states.child(mounted_loading).child(mounted_error),
+        ));
+        let mut state_driver = HeadlessDriver::new_in_box(cx, Arc::clone(&states), 400.0, 480.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        state_driver.draw_frame();
+        assert!(
+            states
+                .lock()
+                .expect("mount lock")
+                .texts()
+                .iter()
+                .any(|text| *text == "Loading preview..."),
+            "the loading line paints inside the mounted tree"
+        );
+        assert!(
+            states
+                .lock()
+                .expect("mount lock")
+                .texts()
+                .iter()
+                .any(|text| *text == "The provider refused the URL."),
+            "the error line paints inside the mounted tree"
+        );
+        for proof in ["embed-preview-loading-proof", "embed-preview-error-proof"] {
+            let state_bounds = poodle_gpui_node_backend::bounds_for(proof)
+                .unwrap_or_else(|| panic!("mounted state {proof} has geometry"));
+            assert!(state_bounds.size.width > px(0.0));
+            assert!(state_bounds.size.height > px(0.0));
+        }
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// InlineListSection parity against Svelte: uppercase titled section with a
+/// named region, count pill, host header action, row chrome, and the empty
+/// message posture. Svelte parity authority:
+/// `packages/svelte/components/src/InlineListSection.svelte` (section with
+/// `aria-label={title}`, h4 title, count span, header actions, `ul` rows or
+/// the empty paragraph).
+#[test]
+fn first_mounted_parity_inline_list_section() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::color::mix_srgb;
+    use poodle_specs::{ButtonSpec, InlineListSectionSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let text_primary = theme_provider.resolve_color("color.text.primary");
+        let surface = theme_provider.resolve_color("color.background.surface");
+        let row_bg = mix_srgb(surface, text_primary, 0.93);
+
+        // Empty posture: the empty message paints, and no rows exist.
+        let bare = poodle_render::inline_list_section(
+            &InlineListSectionSpec::new("Versions").with_empty_message("No versions uploaded yet."),
+            &ctx,
+            vec![],
+            None,
+        );
+        assert!(
+            bare.texts()
+                .iter()
+                .any(|text| *text == "No versions uploaded yet."),
+            "the empty message paints inside the section"
+        );
+        let bare_section = bare
+            .find(&|node| node.a11y.role == Some(NodeRole::Region))
+            .expect("the empty section keeps its named region");
+        assert_eq!(bare_section.a11y.label.as_deref(), Some("Versions"));
+
+        // Populated posture: uppercase heading, count pill, row chrome.
+        let presses = Arc::new(Mutex::new(0_usize));
+        let sink = Arc::clone(&presses);
+        let mut upload = poodle_render::button(
+            &ButtonSpec::new().with_label("Upload"),
+            &ctx,
+            Some(Arc::new(move || {
+                *sink.lock().expect("press record") += 1;
+            })),
+        );
+        upload.id = Some("inline-list-upload".to_owned());
+        let row = |label: &str| {
+            let mut item = Node::text(label);
+            item.style.descriptor.layout.spacing.gap = poodle_render::presentation::rem_to_px(0.25);
+            item
+        };
+        let mut section = poodle_render::inline_list_section(
+            &InlineListSectionSpec::new("Versions").with_count("2"),
+            &ctx,
+            vec![row("v1.2.0"), row("v1.1.0")],
+            Some(upload),
+        );
+        section.id = Some("inline-list-proof".to_owned());
+        let inner = section
+            .find(&|node| node.a11y.role == Some(NodeRole::Region))
+            .expect("the populated section keeps its named region");
+        assert_eq!(inner.a11y.label.as_deref(), Some("Versions"));
+        assert!(
+            section.texts().iter().any(|text| *text == "VERSIONS"),
+            "the title paints uppercased like Svelte"
+        );
+        let heading = section
+            .find(&|node| node.a11y.role == Some(NodeRole::Heading))
+            .expect("the title keeps heading semantics like Svelte h4");
+        assert_eq!(heading.a11y.level, Some(4));
+        assert!(
+            section.texts().iter().any(|text| *text == "2"),
+            "the count pill paints beside the title"
+        );
+        assert!(
+            section.texts().iter().any(|text| *text == "v1.2.0"),
+            "host rows paint inside the section"
+        );
+        // Row chrome resolves the contract mix: surface 93% toward ink.
+        let mut chrome_ok = false;
+        let mut chrome_stack = vec![&section];
+        while let Some(next) = chrome_stack.pop() {
+            if next.a11y.role == Some(NodeRole::ListItem)
+                && next.style.descriptor.background == Some(row_bg)
+            {
+                chrome_ok = true;
+            }
+            chrome_stack.extend(next.children.iter());
+        }
+        assert!(chrome_ok, "rows paint the contract item chrome");
+
+        let mounted = Arc::new(Mutex::new(Node::container().child(section)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 400.0, 320.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let nodes = driver.accessibility_nodes();
+        assert!(
+            nodes
+                .iter()
+                .any(|node| node.role == NodeRole::Region
+                    && node.label.as_deref() == Some("Versions")),
+            "the mounted section keeps its accessible name"
+        );
+        assert!(
+            nodes.iter().any(|node| node.role == NodeRole::List),
+            "the mounted rows keep list semantics"
+        );
+        assert!(
+            nodes.iter().any(|node| node.role == NodeRole::Heading
+                && node.level == Some(4)
+                && node.text_content.iter().any(|text| text == "VERSIONS")),
+            "the mounted title keeps its h4-equivalent heading level"
+        );
+        let action = nodes
+            .iter()
+            .find(|node| node.element_id == "inline-list-upload")
+            .expect("the header action paints an accessible button");
+        assert_eq!(action.role, NodeRole::Button);
+        assert_eq!(action.label.as_deref(), Some("Upload"));
+        assert!(action.focusable);
+
+        driver.wait_for_focus_handle("inline-list-upload");
+        driver.focus_element("inline-list-upload");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("inline-list-upload"),
+            Some(true)
+        );
+        driver.keyboard_activate("inline-list-upload");
+        assert_eq!(
+            *presses.lock().expect("press record"),
+            1,
+            "keyboard activation reaches the header action"
+        );
+        driver.pointer_activate_id("inline-list-upload");
+        assert_eq!(
+            *presses.lock().expect("press record"),
+            2,
+            "pointer activation reaches the same header action"
+        );
+
+        {
+            let provider = theme();
+            let mounted_tree = mounted.lock().expect("mount lock");
+            let section_node = mounted_tree
+                .find(&|node| node.id.as_deref() == Some("inline-list-proof"))
+                .expect("section mounts under its proof id");
+            assert_eq!(
+                section_node.style.descriptor.layout.spacing.gap,
+                provider.resolve_space("space.stack.md"),
+                "the section gap is the resolved stack token"
+            );
+        }
+        let bounds = poodle_gpui_node_backend::bounds_for("inline-list-proof")
+            .expect("the section has mounted geometry");
+        assert!(bounds.size.width > px(0.0));
+        assert!(bounds.size.height > px(0.0));
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// PasswordRequirements parity against Svelte: the checklist evaluates each
+/// rule against the password, loading and error postures paint, and the size
+/// ladder scales the panel. Svelte parity authority:
+/// `packages/svelte/components/src/PasswordRequirements.svelte` (polite live
+/// panel, title line, `ul` checklist with per-rule met styling, loading line,
+/// error line; display-only, no pointer or keyboard surface).
+#[test]
+fn first_mounted_parity_password_requirements() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{ControlSize, PasswordRequirementsPolicy, PasswordRequirementsSpec};
+
+    fn row_state(node: &Node) -> Vec<(String, String, Option<String>)> {
+        let mut rows = Vec::new();
+        let mut stack = vec![node];
+        while let Some(next) = stack.pop() {
+            if next.a11y.role == Some(NodeRole::ListItem) {
+                let icon = next.children.iter().find_map(|child| match &child.kind {
+                    NodeKind::Icon { name, .. } => Some(name.clone()),
+                    _ => None,
+                });
+                let wording = next.children.iter().find_map(|child| match &child.kind {
+                    NodeKind::Text { content } => Some(content.clone()),
+                    _ => None,
+                });
+                if let (Some(glyph), Some(line)) = (icon, wording) {
+                    rows.push((line, glyph, next.a11y.label.clone()));
+                }
+            }
+            stack.extend(next.children.iter());
+        }
+        rows
+    }
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let met = theme_provider.resolve_color("color.status.success");
+
+        let policy = PasswordRequirementsPolicy::new(8)
+            .with_require_mixed_case(true)
+            .with_require_digit(true)
+            .with_require_special(true);
+
+        // A short password meets every rule but length.
+        let weak = poodle_render::password_requirements(
+            &PasswordRequirementsSpec::new()
+                .with_password("Ab1!")
+                .with_requirements(policy.clone()),
+            &ctx,
+        );
+        assert_eq!(
+            weak.a11y.role,
+            Some(NodeRole::Status),
+            "the ordinary checklist announces politely, never as an alert"
+        );
+        let weak_rows = row_state(&weak);
+        assert_eq!(weak_rows.len(), 4, "every enabled rule paints one row");
+        assert!(
+            weak_rows
+                .iter()
+                .any(|(line, glyph, name)| line == "At least 8 characters"
+                    && glyph == "x"
+                    && name.as_deref() == Some("At least 8 characters \u{2014} not met")),
+            "the unmet length rule paints its cross and names its state"
+        );
+        assert!(
+            weak_rows.iter().any(|(line, glyph, name)| line
+                == "Mix of uppercase and lowercase letters"
+                && glyph == "check"
+                && name.as_deref() == Some("Mix of uppercase and lowercase letters \u{2014} met")),
+            "mixed case paints met and names it"
+        );
+        assert!(
+            weak_rows
+                .iter()
+                .any(|(line, glyph, _)| line == "At least one number" && glyph == "check"),
+            "the digit rule paints met"
+        );
+        assert!(
+            weak_rows.iter().any(
+                |(line, glyph, _)| line == "At least one special character" && glyph == "check"
+            ),
+            "the special rule paints met"
+        );
+        assert!(
+            weak.texts()
+                .iter()
+                .any(|text| *text == "Password requirements:"),
+            "the title line introduces the checklist"
+        );
+
+        // A strong password meets all four rules with the met tone.
+        let strong = poodle_render::password_requirements(
+            &PasswordRequirementsSpec::new()
+                .with_password("Abcdef1!")
+                .with_requirements(policy),
+            &ctx,
+        );
+        let strong_rows = row_state(&strong);
+        assert_eq!(strong_rows.len(), 4);
+        assert!(
+            strong_rows.iter().all(|(_, glyph, _)| glyph == "check"),
+            "a strong password meets every rule"
+        );
+        assert!(
+            strong_rows.iter().all(|(_, _, name)| name
+                .as_deref()
+                .is_some_and(|text| text.ends_with(" \u{2014} met"))),
+            "every met row names its state for assistive tech"
+        );
+        // Met rows read the met tone, not body ink.
+        let mut met_tone = false;
+        let mut strong_stack = vec![&strong];
+        while let Some(next) = strong_stack.pop() {
+            if next.a11y.role == Some(NodeRole::ListItem) {
+                met_tone = next.children.iter().any(|child| {
+                    matches!(&child.kind, NodeKind::Text { .. })
+                        && child.style.descriptor.text_color == Some(met)
+                });
+            }
+            strong_stack.extend(next.children.iter());
+        }
+        assert!(met_tone, "met rows paint the success tone");
+
+        // Loading and error postures paint their own lines.
+        let loading = poodle_render::password_requirements(
+            &PasswordRequirementsSpec::new().with_loading(true),
+            &ctx,
+        );
+        assert!(
+            loading
+                .texts()
+                .iter()
+                .any(|text| *text == "Loading requirements..."),
+            "loading paints its announcement line"
+        );
+        assert_eq!(
+            loading.a11y.role,
+            Some(NodeRole::Status),
+            "loading keeps a polite live marker"
+        );
+        let failure = poodle_render::password_requirements(
+            &PasswordRequirementsSpec::new().with_error("Policy unavailable."),
+            &ctx,
+        );
+        assert!(
+            failure
+                .texts()
+                .iter()
+                .any(|text| *text == "Policy unavailable."),
+            "the error line paints when no policy exists"
+        );
+        assert_eq!(
+            failure.a11y.role,
+            Some(NodeRole::Alert),
+            "only the error announces assertively"
+        );
+        assert_eq!(
+            failure.children.iter().find_map(|leaf| match &leaf.kind {
+                NodeKind::Text { content } if content == "Policy unavailable." => {
+                    leaf.style.descriptor.text_color
+                }
+                _ => None,
+            }),
+            Some(theme_provider.resolve_color("color.status.danger"))
+        );
+
+        // The size ladder scales panel padding and title type.
+        let small = poodle_render::password_requirements(
+            &PasswordRequirementsSpec::new()
+                .with_password("Abcdef1!")
+                .with_requirements(PasswordRequirementsPolicy::new(8))
+                .with_size(ControlSize::Sm),
+            &ctx,
+        );
+        let medium = poodle_render::password_requirements(
+            &PasswordRequirementsSpec::new()
+                .with_password("Abcdef1!")
+                .with_requirements(PasswordRequirementsPolicy::new(8))
+                .with_size(ControlSize::Md),
+            &ctx,
+        );
+        assert!(
+            medium.style.descriptor.layout.spacing.padding.left
+                > small.style.descriptor.layout.spacing.padding.left,
+            "a larger size widens the panel padding"
+        );
+
+        // Mounted: the checklist keeps list semantics with per-item state
+        // names, the loading line keeps its polite marker, the error keeps
+        // its assertive one, and every panel keeps real geometry.
+        let mut mounted_checklist = poodle_render::password_requirements(
+            &PasswordRequirementsSpec::new()
+                .with_password("Ab1!")
+                .with_requirements(PasswordRequirementsPolicy::new(8).with_require_digit(true)),
+            &ctx,
+        );
+        mounted_checklist.id = Some("password-proof".to_owned());
+        let mut mounted_loading = poodle_render::password_requirements(
+            &PasswordRequirementsSpec::new().with_loading(true),
+            &ctx,
+        );
+        mounted_loading.id = Some("password-proof-loading".to_owned());
+        let mut mounted_error = poodle_render::password_requirements(
+            &PasswordRequirementsSpec::new().with_error("Policy unavailable."),
+            &ctx,
+        );
+        mounted_error.id = Some("password-proof-error".to_owned());
+        let mut stack = Node::container();
+        stack.style.descriptor.layout.direction = LayoutDirection::Column;
+        stack.style.descriptor.layout.spacing.gap = poodle_render::presentation::rem_to_px(1.0);
+        let mounted = Arc::new(Mutex::new(
+            stack
+                .child(mounted_checklist)
+                .child(mounted_loading)
+                .child(mounted_error),
+        ));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 760.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let nodes = driver.accessibility_nodes();
+        assert!(
+            nodes
+                .iter()
+                .any(|node| node.element_id == "password-proof" && node.role == NodeRole::Status),
+            "the mounted checklist announces politely"
+        );
+        assert!(
+            nodes
+                .iter()
+                .any(|node| node.element_id == "password-proof-loading"
+                    && node.role == NodeRole::Status),
+            "the mounted loading line keeps its polite marker"
+        );
+        assert!(
+            nodes
+                .iter()
+                .any(|node| node.element_id == "password-proof-error"
+                    && node.role == NodeRole::Alert),
+            "the mounted error announces assertively"
+        );
+        assert!(
+            nodes.iter().any(|node| node.role == NodeRole::List),
+            "the mounted checklist keeps list semantics"
+        );
+        assert!(
+            nodes.iter().any(|node| node.role == NodeRole::ListItem
+                && node.label.as_deref() == Some("At least 8 characters \u{2014} not met")),
+            "the mounted unmet row names its state"
+        );
+        assert!(
+            nodes.iter().any(|node| node.role == NodeRole::ListItem
+                && node.label.as_deref() == Some("At least one number \u{2014} met")),
+            "the mounted met row names its state"
+        );
+        let painted = poodle_gpui_node_backend::painted_node_for("password-proof")
+            .expect("the checklist reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Status));
+        let bounds = poodle_gpui_node_backend::bounds_for("password-proof")
+            .expect("the checklist has mounted geometry");
+        assert!(bounds.size.width > px(0.0));
+        assert!(bounds.size.height > px(0.0));
+        assert!(
+            mounted
+                .lock()
+                .expect("mount lock")
+                .texts()
+                .iter()
+                .any(|text| *text == "At least 8 characters"),
+            "the length rule paints inside the mounted panel"
+        );
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }

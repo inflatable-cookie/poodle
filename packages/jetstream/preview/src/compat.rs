@@ -524,11 +524,19 @@ pub fn js_embed_input(spec: &EmbedInputSpec, theme: &JetstreamThemeProvider) -> 
 }
 
 pub fn js_embed_preview(spec: &EmbedPreviewSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::embed_preview(spec, &pr::RenderContext::new(theme)))
+    El(pr::embed_preview(
+        spec,
+        &pr::RenderContext::new(theme),
+        pr::EmbedPreviewHandlers::default(),
+    ))
 }
 
 pub fn js_empty_state(spec: &EmptyStateSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::empty_state(spec, &pr::RenderContext::new(theme)))
+    El(pr::empty_state(
+        spec,
+        &pr::RenderContext::new(theme),
+        pr::EmptyStateHandlers::default(),
+    ))
 }
 
 pub fn js_error_boundary(
@@ -541,6 +549,7 @@ pub fn js_error_boundary(
         spec,
         &pr::RenderContext::new(theme),
         child,
+        pr::ErrorBoundaryHandlers::default(),
     ))
 }
 

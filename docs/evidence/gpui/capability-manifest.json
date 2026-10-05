@@ -924,13 +924,18 @@
       "substrate": "feedback-status",
       "required": [
         "semantic",
-        "events",
         "pointer",
         "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "EmbedPreview is a pure display component with no component-owned events.",
+          "contractRef": "docs/contracts/components/embed-preview.md#5. Events"
+        }
+      ]
     },
     {
       "component": "EmptyState",
@@ -939,13 +944,18 @@
       "substrate": "feedback-status",
       "required": [
         "semantic",
-        "events",
         "pointer",
         "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "EmptyState dispatches no component-owned events; action behavior belongs to slotted host buttons.",
+          "contractRef": "docs/contracts/components/empty-state.md#5. Events"
+        }
+      ]
     },
     {
       "component": "EnvelopeEditor",
@@ -969,13 +979,18 @@
       "substrate": "feedback-status",
       "required": [
         "semantic",
-        "events",
         "pointer",
         "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "The boundary dispatches no component-owned events: the error state is an EmptyState and the retry press is a host-reset action.",
+          "contractRef": "docs/contracts/components/error-boundary.md#Composition"
+        }
+      ]
     },
     {
       "component": "Eyebrow",
@@ -1307,13 +1322,18 @@
       "substrate": "feedback-status",
       "required": [
         "semantic",
-        "events",
         "pointer",
         "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "The section dispatches no component-owned events; item content, row actions, and status pills stay host-owned.",
+          "contractRef": "docs/contracts/components/inline-list-section.md#Rules"
+        }
+      ]
     },
     {
       "component": "Keyboard",
@@ -1952,12 +1972,20 @@
       "substrate": "feedback-status",
       "required": [
         "semantic",
-        "events",
-        "pointer",
         "accessibility",
         "visual"
       ],
       "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Callers own policy fetch and retry behavior; the checklist dispatches no component-owned events.",
+          "contractRef": "docs/contracts/components/password-requirements.md#5. Boundary"
+        },
+        {
+          "axis": "pointer",
+          "reason": "The checklist is display-only with no pointer surface; status reads through wording and indicator.",
+          "contractRef": "docs/contracts/components/password-requirements.md#6. Accessibility"
+        },
         {
           "axis": "keyboard_focus",
           "reason": "Contract declares the component not focusable with no keyboard behavior.",

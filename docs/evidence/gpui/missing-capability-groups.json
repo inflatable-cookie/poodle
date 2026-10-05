@@ -32,31 +32,6 @@
       ]
     },
     {
-      "substrate": "feedback-status",
-      "components": [
-        "EmbedPreview",
-        "EmptyState",
-        "ErrorBoundary",
-        "InlineListSection",
-        "PasswordRequirements"
-      ],
-      "missingTally": {
-        "semantic": 5,
-        "events": 5,
-        "pointer": 5,
-        "keyboard_focus": 4,
-        "accessibility": 5,
-        "visual": 5
-      },
-      "contracts": [
-        "docs/contracts/components/embed-preview.md",
-        "docs/contracts/components/empty-state.md",
-        "docs/contracts/components/error-boundary.md",
-        "docs/contracts/components/inline-list-section.md",
-        "docs/contracts/components/password-requirements.md"
-      ]
-    },
-    {
       "substrate": "general-composite",
       "components": [
         "EnvelopeEditor",

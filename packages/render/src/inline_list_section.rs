@@ -53,6 +53,11 @@ pub fn inline_list_section(
         s.min_width = Some(0.0);
     }
     let mut title = Node::text(spec.title.to_uppercase());
+    title.a11y.role = Some(poodle_node::NodeRole::Heading);
+    // Svelte renders the section title as an h4; the native heading
+    // carries the same level (contract leaves the level to the host
+    // context, and h4 is what the Svelte authority emits).
+    title.a11y.level = Some(4);
     title.style.text_size = Some(label_size);
     title.style.text_weight = Some(600);
     title.style.letter_spacing_em = Some(0.05); // contract Title: letter-spacing 0.05em
@@ -106,6 +111,10 @@ pub fn inline_list_section(
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.spacing.gap = root_gap;
     }
+    // Contract §2: the root section carries `aria-label={title}` — a named
+    // section, hence a region landmark, exactly like Svelte.
+    body.a11y.role = Some(poodle_node::NodeRole::Region);
+    body.a11y.label = Some(spec.title.clone());
     let mut body = body.child(header);
 
     if items.is_empty() {
@@ -117,13 +126,17 @@ pub fn inline_list_section(
         }
     } else {
         let mut list = Node::container();
+        // Svelte renders a real `ul`: the stacked container is a list.
         {
             let s = &mut list.style;
             s.descriptor.layout.direction = LayoutDirection::Column;
             s.descriptor.layout.spacing.gap = items_gap;
         }
+        list.a11y.role = Some(poodle_node::NodeRole::List);
         for item in items {
+            // Each row is Svelte's `li`: the item chrome around host content.
             let mut row = Node::container();
+            row.a11y.role = Some(poodle_node::NodeRole::ListItem);
             {
                 let s = &mut row.style;
                 s.descriptor.layout.direction = LayoutDirection::Row;

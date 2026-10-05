@@ -301,9 +301,9 @@ pub use duration_input::{duration_input, duration_input_with_handlers, DurationI
 pub use editable_label::{editable_label, editable_label_with_handlers, EditableLabelHandlers};
 pub use editable_list::{editable_list, EditableListHandlers};
 pub use embed_input::{embed_input, embed_input_with_handlers, EmbedInputHandlers};
-pub use embed_preview::embed_preview;
-pub use empty_state::empty_state;
-pub use error_boundary::error_boundary;
+pub use embed_preview::{embed_preview, embed_preview_fallback_link_id, EmbedPreviewHandlers};
+pub use empty_state::{empty_state, empty_state_action_focus_id, EmptyStateHandlers};
+pub use error_boundary::{error_boundary, ErrorBoundaryHandlers};
 pub use eyebrow::eyebrow;
 pub use field::field;
 pub use field_set::field_set;

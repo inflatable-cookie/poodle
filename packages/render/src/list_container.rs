@@ -18,7 +18,7 @@ use poodle_specs::{
 
 use crate::callout::{callout, CalloutHandlers};
 use crate::context::{RenderContext, SlotBuilder};
-use crate::empty_state::empty_state;
+use crate::empty_state::{empty_state, EmptyStateHandlers};
 use crate::page_header::page_header;
 use crate::pagination::pagination;
 use crate::pagination_summary::pagination_summary;
@@ -207,7 +207,10 @@ pub fn list_container(
             if let Some(ref msg) = spec.empty_message {
                 empty = empty.with_message(msg.clone());
             }
-            container = container.child(region(region_gap, empty_state(&empty, ctx)));
+            container = container.child(region(
+                region_gap,
+                empty_state(&empty, ctx, EmptyStateHandlers::default()),
+            ));
         }
     }
 

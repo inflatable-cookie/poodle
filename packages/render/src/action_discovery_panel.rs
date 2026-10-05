@@ -21,7 +21,7 @@ use poodle_specs::{
 
 use crate::color::{mix_srgb, with_alpha};
 use crate::context::RenderContext;
-use crate::empty_state::empty_state;
+use crate::empty_state::{empty_state, EmptyStateHandlers};
 use crate::eyebrow::eyebrow;
 use crate::presentation::{control_space_x_rem, rem_to_px, size_font_rem};
 use crate::skeleton::skeleton;
@@ -218,6 +218,7 @@ pub fn action_discovery_panel(
                     .with_message("Actions could not be loaded. Try again.")
                     .with_size(EmptyStateSize::Compact),
                 ctx,
+                EmptyStateHandlers::default(),
             );
             state
                 .roles
@@ -235,6 +236,7 @@ pub fn action_discovery_panel(
                     .with_message("No actions are available in this context.")
                     .with_size(EmptyStateSize::Compact),
                 ctx,
+                EmptyStateHandlers::default(),
             );
             state
                 .roles
@@ -249,6 +251,7 @@ pub fn action_discovery_panel(
                     .with_variant(EmptyStateVariant::Search)
                     .with_size(EmptyStateSize::Compact),
                 ctx,
+                EmptyStateHandlers::default(),
             );
             state
                 .roles

@@ -957,7 +957,11 @@ impl EmbedPreview {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::embed_preview(&self.spec, &RenderContext::new(&self.theme))
+        poodle_render::embed_preview(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            poodle_render::EmbedPreviewHandlers::default(),
+        )
     }
 }
 
@@ -3799,7 +3803,12 @@ impl ErrorBoundary {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::error_boundary(&self.spec, &RenderContext::new(&self.theme), self.child)
+        poodle_render::error_boundary(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.child,
+            poodle_render::ErrorBoundaryHandlers::default(),
+        )
     }
 }
 
@@ -3858,6 +3867,7 @@ impl IntoElement for EmptyState {
         poodle_gpui_node_backend::to_gpui(&poodle_render::empty_state(
             &self.spec,
             &RenderContext::new(&self.theme),
+            poodle_render::EmptyStateHandlers::default(),
         ))
     }
 }

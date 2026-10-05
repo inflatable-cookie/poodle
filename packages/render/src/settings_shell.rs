@@ -18,7 +18,7 @@ use poodle_specs::{
 use crate::callout::{callout, CalloutHandlers};
 use crate::context::RenderContext;
 use crate::dialog::dialog_with_slots;
-use crate::empty_state::empty_state;
+use crate::empty_state::{empty_state, EmptyStateHandlers};
 use crate::presentation::rem_to_px;
 use crate::scroll_shell::scroll_shell;
 use crate::sidebar_nav::sidebar_nav;
@@ -163,6 +163,7 @@ fn nav_rail(
                 .with_variant(variant)
                 .with_size(EmptyStateSize::Compact),
             ctx,
+            EmptyStateHandlers::default(),
         )
     } else {
         let mut nav_spec =
