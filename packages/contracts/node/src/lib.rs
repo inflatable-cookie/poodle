@@ -565,6 +565,14 @@ pub struct NodeWheelEvent {
     pub modifiers: NodeModifiers,
 }
 
+/// A scroll container's position after it moved: distance in logical pixels
+/// from the start of the content, never negative.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct NodeScrollEvent {
+    pub x: f32,
+    pub y: f32,
+}
+
 /// Modifier state at the moment of an interaction.
 ///
 /// `accel` is the platform's "toggle one of many" modifier — Cmd on macOS,
@@ -768,6 +776,11 @@ pub struct Interaction {
     /// Installing this handler asks the backend to consume the wheel so a
     /// parent scroll container does not also move.
     pub on_wheel: Option<Arc<dyn Fn(&NodeWheelEvent) + Send + Sync>>,
+    /// Reports the node's scroll position after it changes, from wheel or
+    /// keyboard scrolling. Observing only: the node keeps scrolling and the
+    /// wheel still reaches it, unlike [`Self::on_wheel`]. Meaningful on a
+    /// node whose layout overflow is `Scroll`.
+    pub on_scroll: Option<Arc<dyn Fn(&NodeScrollEvent) + Send + Sync>>,
     /// Queue backend focus for this node on the next paint. Used by machine
     /// effects such as type-in open/close; the backend applies it once the
     /// element exists.

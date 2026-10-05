@@ -8,14 +8,32 @@
 //!   Viewport  → scroll owner: per-axis overflow, padding
 //!   Content   → sizing wrapper: horizontal max-content
 //!
-//! Keyboard scroll is host-owned.
+//! A focusable viewport is a tab stop with the contract's focus ring, a
+//! region role, and the default "Scrollable content" name; the backend owns
+//! keyboard scrolling for any focusable scroll viewport. The role and name sit
+//! on the viewport, where Svelte puts them — the root is a plain clip boundary.
 
-use poodle_node::{LayoutDirection, LayoutOverflow, LayoutSizing, Node, NodeRole};
-use poodle_specs::{Direction, ScrollShellSpec};
+use std::sync::Arc;
+
+use poodle_node::{
+    FocusRing, LayoutDirection, LayoutOverflow, LayoutSizing, Node, NodeRole, NodeScrollEvent,
+};
+use poodle_specs::{Direction, ScrollShellSpec, SurfaceRole};
 
 use crate::context::RenderContext;
+use crate::presentation::rem_to_px;
 
-pub fn scroll_shell(spec: &ScrollShellSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> Node {
+/// Svelte's default name for a focusable viewport with no `label`.
+const DEFAULT_LABEL: &str = "Scrollable content";
+
+/// `on_scroll` observes the viewport position after wheel or keyboard
+/// scrolling (the contract's `onScroll`).
+pub fn scroll_shell(
+    spec: &ScrollShellSpec,
+    ctx: &RenderContext<'_>,
+    children: Vec<Node>,
+    on_scroll: Option<Arc<dyn Fn(&NodeScrollEvent) + Send + Sync>>,
+) -> Node {
     let needs_horizontal = matches!(spec.direction, Direction::Horizontal | Direction::Both);
 
     // ── Content — sizing wrapper ──
@@ -81,6 +99,30 @@ pub fn scroll_shell(spec: &ScrollShellSpec, ctx: &RenderContext<'_>, children: V
         pad.bottom = p;
     }
 
+    viewport.interaction.on_scroll = on_scroll;
+    if spec.is_focusable {
+        viewport.interaction.focusable = true;
+        viewport.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color(spec.focus_ring_color_token()),
+            width: ctx
+                .theme()
+                .resolve_border_width(spec.focus_ring_width_token()),
+            offset: rem_to_px(0.125),
+        });
+    }
+    let role = match spec.role {
+        Some(SurfaceRole::Group) => Some(NodeRole::Group),
+        Some(SurfaceRole::Region) => Some(NodeRole::Region),
+        None if spec.is_focusable => Some(NodeRole::Region),
+        None => None,
+    };
+    viewport.a11y.role = role;
+    viewport.a11y.label = match spec.label.as_deref() {
+        Some(label) => Some(label.to_owned()),
+        None if spec.is_focusable => Some(DEFAULT_LABEL.to_owned()),
+        None => None,
+    };
+
     let viewport = viewport.child(content);
 
     // ── Root — clip boundary ──
@@ -102,7 +144,5 @@ pub fn scroll_shell(spec: &ScrollShellSpec, ctx: &RenderContext<'_>, children: V
         s.descriptor.corner_radii.bottom_right = r;
         s.descriptor.corner_radii.bottom_left = r;
     }
-    let mut root = root.child(viewport);
-    root.a11y.role = Some(NodeRole::Region);
-    root
+    root.child(viewport)
 }

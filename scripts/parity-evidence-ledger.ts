@@ -255,11 +255,20 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   EmbedPreview: "first_mounted_parity_embed_preview",
   InlineListSection: "first_mounted_parity_inline_list_section",
   PasswordRequirements: "first_mounted_parity_password_requirements",
+  ScrollShell: "first_mounted_parity_scroll_shell",
+  DetailSection: "first_mounted_parity_detail_section",
+  UiPresentationProvider: "first_mounted_parity_ui_presentation_provider",
+  MotionPolicyProvider: "first_mounted_parity_motion_policy_provider",
+  AgentMessage: "first_mounted_parity_agent_message",
   EmbedInput: "embed_input_url_entry_validation_and_preview_rebuild_the_host_spec",
   AgentQuestionRecord: "agent_question_record_answer_display_rebuilds_the_host_spec",
   Keyboard: "keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec",
 };
 
+/** The map's size when g16.062 stopped promoting from it. Fixed: the live
+ * counts below keep growing and must not rewrite this baseline. */
+const HISTORICAL_PROMOTED_COMPONENT_COUNT = 142;
+const HISTORICAL_PROMOTED_TEST_COUNT = 158;
 const EXPECTED_MOUNTED_COMPONENT_COUNT = Object.keys(EXPECTED_MOUNTED_BEHAVIOUR_TESTS).length;
 const EXPECTED_MOUNTED_TEST_COUNT = Object.values(EXPECTED_MOUNTED_BEHAVIOUR_TESTS).reduce(
   (count, tests) => count + (Array.isArray(tests) ? tests.length : 1),
@@ -907,11 +916,13 @@ ${nucleusTable(nucleusRows)}
 
 ## Historical mounted expectation map
 
-Before g16.062, the generator promoted **${EXPECTED_MOUNTED_COMPONENT_COUNT}
-component entries across ${EXPECTED_MOUNTED_TEST_COUNT} named tests** to
+Before g16.062, the generator promoted **${HISTORICAL_PROMOTED_COMPONENT_COUNT}
+component entries across ${HISTORICAL_PROMOTED_TEST_COUNT} named tests** to
 \`mounted\`. The map remains planning input and is shown for traceability only;
 the current component ledger consumes validated receipts, so expected-without-
 receipt remains \`missing\`.
+The map now lists ${EXPECTED_MOUNTED_COMPONENT_COUNT} component entries across
+${EXPECTED_MOUNTED_TEST_COUNT} named tests.
 
 ${expectedMapTable()}
 

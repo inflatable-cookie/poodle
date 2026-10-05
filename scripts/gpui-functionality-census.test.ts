@@ -319,6 +319,22 @@ describe("g18.001 census oracles", () => {
     }
   });
 
+  it("manifest oracle: workstation and agent composites keep only their contract-declared N/A axes", () => {
+    const manifest = deriveCapabilityManifest(repositoryRoot);
+    for (const [component, contract, notApplicable] of [
+      ["DetailSection", "detail-section.md", ["events"]],
+      ["MotionPolicyProvider", "motion-policy-provider.md", ["events", "pointer"]],
+      ["UiPresentationProvider", "ui-presentation-provider.md", ["events", "pointer"]],
+      ["AgentMessage", "agent-message.md", ["events", "pointer"]],
+      ["ScrollShell", "scroll-shell.md", []],
+    ] as Array<[string, string, string[]]>) {
+      const entry = manifest.find((candidate) => candidate.component === component);
+      expect(entry?.notApplicable.map((item) => item.axis)).toEqual(notApplicable);
+      expect(entry?.notApplicable.every((item) => item.contractRef.includes(contract))).toBe(true);
+      expect(entry?.notApplicable.every((item) => item.reason.length > 0)).toBe(true);
+    }
+  });
+
   it("widened-A2 oracle: platform language can never justify not-applicable", () => {
     const entry = manifestEntry({
       component: "Checkbox",

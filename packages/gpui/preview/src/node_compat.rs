@@ -2788,7 +2788,12 @@ impl ScrollShell {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::scroll_shell(&self.spec, &RenderContext::new(&self.theme), self.children)
+        poodle_render::scroll_shell(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.children,
+            None,
+        )
     }
 }
 

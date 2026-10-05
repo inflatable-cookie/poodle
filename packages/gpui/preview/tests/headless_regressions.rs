@@ -57858,3 +57858,1127 @@ fn first_mounted_parity_password_requirements() {
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }
+
+/// Every node in the tree satisfying the predicate, depth first.
+fn nodes_where<'a>(node: &'a Node, predicate: &dyn Fn(&Node) -> bool) -> Vec<&'a Node> {
+    let mut found = Vec::new();
+    if predicate(node) {
+        found.push(node);
+    }
+    for child in &node.children {
+        found.extend(nodes_where(child, predicate));
+    }
+    found
+}
+
+/// Stacked fixed-height rows: content taller than a 160px viewport.
+fn scroll_rows(count: usize) -> Vec<Node> {
+    (0..count)
+        .map(|index| {
+            let mut row = Node::container().child(Node::text(format!("Row {index}")));
+            row.style.descriptor.layout.height = LayoutSizing::Fixed(30.0);
+            row.id = Some(format!("scroll-row-{index}"));
+            row
+        })
+        .collect()
+}
+
+/// A fixed-height frame so a fill-height shell has a real scrolling boundary.
+fn scroll_frame(shell: Node, width: Option<f32>) -> Node {
+    let mut frame = Node::container().child(shell);
+    frame.style.descriptor.layout.direction = LayoutDirection::Column;
+    frame.style.descriptor.layout.height = LayoutSizing::Fixed(160.0);
+    match width {
+        Some(width) => frame.style.descriptor.layout.width = LayoutSizing::Fixed(width),
+        None => frame.style.fill_width = true,
+    }
+    frame
+}
+
+/// poodle#117. ScrollShell's first mounted parity proof: one scroll owner
+/// (the viewport, never the clip root), per-direction axis ownership, the
+/// focusable viewport's tab stop, region role, default and explicit names,
+/// and keyboard scrolling with the contract's keys, clamped at both ends and
+/// reported through the scroll callback with the wheel.
+#[test]
+fn first_mounted_parity_scroll_shell() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::NodeScrollEvent;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{Direction, PaddingScale, ScrollShellSpec, SurfaceRole};
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+
+    // Spoken semantics, resolved against Svelte's defaults.
+    let plain = poodle_render::scroll_shell(&ScrollShellSpec::new(), &ctx, vec![], None);
+    let plain_viewport = &plain.children[0];
+    assert_eq!(plain.a11y.role, None, "the clip root carries no role");
+    assert_eq!(plain_viewport.a11y.role, None);
+    assert_eq!(plain_viewport.a11y.label, None);
+    assert!(!plain_viewport.interaction.focusable);
+    assert_eq!(
+        plain.style.descriptor.layout.overflow_y,
+        LayoutOverflow::Hidden,
+        "the root only clips"
+    );
+    assert_eq!(
+        plain_viewport.style.descriptor.layout.overflow_y,
+        LayoutOverflow::Scroll
+    );
+    assert_eq!(
+        plain_viewport.style.descriptor.layout.overflow_x,
+        LayoutOverflow::Hidden
+    );
+    let focusable = poodle_render::scroll_shell(
+        &ScrollShellSpec::new().with_focusable(true),
+        &ctx,
+        vec![],
+        None,
+    );
+    let focus_viewport = &focusable.children[0];
+    assert!(focus_viewport.interaction.focusable);
+    assert_eq!(focus_viewport.a11y.role, Some(NodeRole::Region));
+    assert_eq!(
+        focus_viewport.a11y.label.as_deref(),
+        Some("Scrollable content")
+    );
+    let ring = focus_viewport
+        .style
+        .focus_ring
+        .expect("a focusable viewport declares the contract ring");
+    assert_eq!(
+        ring.color,
+        theme_provider.resolve_color("color.accent.focusRing")
+    );
+    assert_eq!(
+        ring.width,
+        theme_provider.resolve_border_width("border.width.focus")
+    );
+    assert_eq!(ring.offset, rem_to_px(0.125));
+    let named = poodle_render::scroll_shell(
+        &ScrollShellSpec::new()
+            .with_focusable(true)
+            .with_role(SurfaceRole::Group)
+            .with_label("Activity log"),
+        &ctx,
+        vec![],
+        None,
+    );
+    assert_eq!(named.children[0].a11y.role, Some(NodeRole::Group));
+    assert_eq!(
+        named.children[0].a11y.label.as_deref(),
+        Some("Activity log")
+    );
+    let padded = poodle_render::scroll_shell(
+        &ScrollShellSpec::new().with_padding(PaddingScale::Md),
+        &ctx,
+        vec![],
+        None,
+    );
+    let inset = ScrollShellSpec::new()
+        .with_padding(PaddingScale::Md)
+        .resolved_padding();
+    assert_eq!(
+        padded.children[0]
+            .style
+            .descriptor
+            .layout
+            .spacing
+            .padding
+            .top,
+        theme_provider.resolve_space(inset.vertical.expect("md pads vertically"))
+    );
+    assert!(
+        padded.children[0]
+            .style
+            .descriptor
+            .layout
+            .spacing
+            .padding
+            .top
+            > 0.0,
+        "padding tokens resolve to real space"
+    );
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let reports = Arc::new(Mutex::new(Vec::<(f32, f32)>::new()));
+        let sink = Arc::clone(&reports);
+        let mut shell = poodle_render::scroll_shell(
+            &ScrollShellSpec::new()
+                .with_focusable(true)
+                .with_label("Rows"),
+            &ctx,
+            scroll_rows(12),
+            Some(Arc::new(move |event: &NodeScrollEvent| {
+                sink.lock()
+                    .expect("scroll payloads")
+                    .push((event.x, event.y));
+            })),
+        );
+        shell.id = Some("scroll-shell-root".into());
+        shell.children[0].id = Some("scroll-shell-viewport".into());
+        let node = Arc::new(Mutex::new(scroll_frame(shell, None)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 320.0, 220.0);
+        driver.draw_frame();
+
+        // One scroll owner: the viewport holds the extent, the root none.
+        let viewport = poodle_gpui_node_backend::bounds_for("scroll-shell-viewport")
+            .expect("viewport geometry");
+        assert!((f32::from(viewport.size.height) - 160.0).abs() < 1.0);
+        assert!(
+            poodle_gpui_node_backend::scroll_offset_for("scroll-shell-root").is_none(),
+            "the clip root owns no scroll state"
+        );
+        let (extent_x, extent_y) =
+            poodle_gpui_node_backend::scroll_extent_for("scroll-shell-viewport")
+                .expect("the viewport owns the scroll handle");
+        assert!(
+            extent_y >= 190.0 && extent_y <= 210.0,
+            "12x30 rows in 160: {extent_y}"
+        );
+        assert_eq!(extent_x, 0.0, "a vertical shell has no horizontal extent");
+
+        // Painted semantics reach the mounted backend.
+        let painted = poodle_gpui_node_backend::painted_node_for("scroll-shell-viewport")
+            .expect("viewport reached paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Region));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Rows"));
+
+        // Focus: the viewport is the single tab stop, never the clip root.
+        driver.wait_for_focus_handle("scroll-shell-viewport");
+        assert!(poodle_gpui_node_backend::focus_handle_for("scroll-shell-root").is_none());
+        driver.focus_element("scroll-shell-viewport");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("scroll-shell-viewport"),
+            Some(true)
+        );
+        let offset_y = || {
+            poodle_gpui_node_backend::scroll_offset_for("scroll-shell-viewport")
+                .expect("viewport scroll offset")
+                .1
+        };
+
+        // Keyboard scrolling with the contract's keys.
+        driver.keyboard_key("scroll-shell-viewport", "down");
+        assert_eq!(offset_y(), 40.0, "an arrow moves one line");
+        driver.keyboard_key("scroll-shell-viewport", "up");
+        assert_eq!(offset_y(), 0.0);
+        driver.keyboard_key("scroll-shell-viewport", "up");
+        assert_eq!(offset_y(), 0.0, "scrolling clamps at the start");
+        driver.keyboard_key("scroll-shell-viewport", "pagedown");
+        assert_eq!(offset_y(), 140.0, "a page moves most of the viewport");
+        driver.keyboard_key("scroll-shell-viewport", "end");
+        assert_eq!(offset_y(), extent_y);
+        driver.keyboard_key("scroll-shell-viewport", "down");
+        assert_eq!(offset_y(), extent_y, "scrolling clamps at the end");
+        driver.keyboard_key("scroll-shell-viewport", "pageup");
+        assert_eq!(offset_y(), extent_y - 140.0);
+        driver.keyboard_key("scroll-shell-viewport", "home");
+        assert_eq!(offset_y(), 0.0);
+        let before = reports.lock().expect("scroll payloads").len();
+        driver.keyboard_key("scroll-shell-viewport", "right");
+        assert_eq!(
+            reports.lock().expect("scroll payloads").len(),
+            before,
+            "an axis the shell does not own is inert"
+        );
+        let row_top = |index: usize| {
+            f32::from(
+                poodle_gpui_node_backend::bounds_for(&format!("scroll-row-{index}"))
+                    .expect("row geometry")
+                    .top(),
+            )
+        };
+        driver.keyboard_key("scroll-shell-viewport", "down");
+        assert!(
+            (row_top(0) - f32::from(viewport.top())).abs() > 39.0,
+            "scrolling moves the painted content"
+        );
+
+        // Callback: every change reported once, with the real position.
+        {
+            let payloads = reports.lock().expect("scroll payloads");
+            assert_eq!(
+                payloads.iter().map(|(_, y)| *y).collect::<Vec<_>>(),
+                [40.0, 0.0, 140.0, extent_y, extent_y - 140.0, 0.0, 40.0]
+            );
+            assert!(payloads.iter().all(|(x, _)| *x == 0.0));
+        }
+
+        // Pointer wheel scrolls the same owner and reports through the callback.
+        driver.keyboard_key("scroll-shell-viewport", "home");
+        let before = reports.lock().expect("scroll payloads").len();
+        driver.scroll_vertical_id("scroll-shell-viewport", -60.0);
+        assert!(offset_y() > 0.0, "the wheel moves the viewport");
+        {
+            let payloads = reports.lock().expect("scroll payloads");
+            assert_eq!(payloads.len(), before + 1, "one wheel gesture reports once");
+            assert_eq!(payloads.last().map(|(_, y)| *y), Some(offset_y()));
+        }
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+
+    run_headless(|cx| {
+        // Pointer: a control inside the viewport is hit-tested at its scrolled
+        // position, so a press after scrolling lands on it exactly once.
+        let presses = Arc::new(Mutex::new(0usize));
+        let sink = Arc::clone(&presses);
+        let mut rows = scroll_rows(12);
+        let mut action = poodle_render::button(
+            &poodle_specs::ButtonSpec::new().with_label("Last"),
+            &ctx,
+            Some(Arc::new(move || *sink.lock().expect("presses") += 1)),
+        );
+        action.id = Some("scroll-action".into());
+        rows.push(action);
+        let mut shell = poodle_render::scroll_shell(
+            &ScrollShellSpec::new().with_focusable(true),
+            &ctx,
+            rows,
+            None,
+        );
+        shell.children[0].id = Some("action-viewport".into());
+        let node = Arc::new(Mutex::new(scroll_frame(shell, None)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 320.0, 220.0);
+        driver.draw_frame();
+        driver.wait_for_focus_handle("action-viewport");
+        driver.keyboard_key("action-viewport", "end");
+        driver.pointer_activate_id("scroll-action");
+        assert_eq!(
+            *presses.lock().expect("presses"),
+            1,
+            "a pointer press reaches a control scrolled into view"
+        );
+
+        // Keys from a focused descendant are the descendant's: they bubble to
+        // the viewport but must not scroll it.
+        let resting = poodle_gpui_node_backend::scroll_offset_for("action-viewport")
+            .expect("viewport offset");
+        driver.keyboard_key("scroll-action", "home");
+        assert_eq!(
+            poodle_gpui_node_backend::scroll_offset_for("action-viewport"),
+            Some(resting),
+            "a bubbled key from a focused descendant does not scroll the viewport"
+        );
+    });
+
+    run_headless(|cx| {
+        // Lifecycle: scroll state belongs to the mounted scope. Unmounting
+        // drops it, so remounting the same id starts at the initial offset
+        // and reports from there.
+        let reports = Arc::new(Mutex::new(Vec::<(f32, f32)>::new()));
+        let build = || {
+            let sink = Arc::clone(&reports);
+            let mut shell = poodle_render::scroll_shell(
+                &ScrollShellSpec::new().with_focusable(true),
+                &ctx,
+                scroll_rows(12),
+                Some(Arc::new(move |event: &NodeScrollEvent| {
+                    sink.lock()
+                        .expect("scroll payloads")
+                        .push((event.x, event.y));
+                })),
+            );
+            shell.children[0].id = Some("remount-viewport".into());
+            Arc::new(Mutex::new(scroll_frame(shell, None)))
+        };
+        let mut driver = HeadlessDriver::new_in_box(cx, build(), 320.0, 220.0);
+        driver.draw_frame();
+        driver.wait_for_focus_handle("remount-viewport");
+        driver.keyboard_key("remount-viewport", "end");
+        let scrolled = poodle_gpui_node_backend::scroll_offset_for("remount-viewport")
+            .expect("mounted viewport offset")
+            .1;
+        assert!(scrolled > 0.0);
+
+        driver.mount_node(Arc::new(Mutex::new(Node::container())));
+        driver.draw_frame();
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::scroll_offset_for("remount-viewport").is_none(),
+            "an unmounted scope keeps no scroll state"
+        );
+
+        reports.lock().expect("scroll payloads").clear();
+        driver.mount_node(build());
+        driver.draw_frame();
+        driver.wait_for_focus_handle("remount-viewport");
+        assert_eq!(
+            poodle_gpui_node_backend::scroll_offset_for("remount-viewport"),
+            Some((0.0, 0.0)),
+            "a remounted scope starts at the initial offset"
+        );
+        driver.keyboard_key("remount-viewport", "down");
+        assert_eq!(
+            reports.lock().expect("scroll payloads").as_slice(),
+            [(0.0, 40.0)],
+            "the first report after a remount is relative to the initial offset"
+        );
+    });
+
+    run_headless(|cx| {
+        // Two live windows mounting the same ID-less shell keep separate
+        // scroll state: both build the same generated element id, so only the
+        // per-window key keeps the second window from inheriting the first's
+        // offset.
+        let build = |reports: &Arc<Mutex<Vec<(f32, f32)>>>| {
+            let sink = Arc::clone(reports);
+            let shell = poodle_render::scroll_shell(
+                &ScrollShellSpec::new(),
+                &ctx,
+                scroll_rows(12),
+                Some(Arc::new(move |event: &NodeScrollEvent| {
+                    sink.lock()
+                        .expect("scroll payloads")
+                        .push((event.x, event.y));
+                })),
+            );
+            Arc::new(Mutex::new(scroll_frame(shell, None)))
+        };
+        let first = Arc::new(Mutex::new(Vec::<(f32, f32)>::new()));
+        let second = Arc::new(Mutex::new(Vec::<(f32, f32)>::new()));
+        // Both windows stay live for the whole proof: a second handle onto
+        // the same test app gives each driver its own window.
+        let mut other_app = cx.clone();
+        let mut first_driver = HeadlessDriver::new_in_box(cx, build(&first), 320.0, 220.0);
+        let mut second_driver =
+            HeadlessDriver::new_in_box(&mut other_app, build(&second), 320.0, 220.0);
+        first_driver.draw_frame();
+        second_driver.draw_frame();
+
+        first_driver.scroll_vertical(-60.0);
+        first_driver.scroll_vertical(-60.0);
+        let first_offset = first.lock().expect("scroll payloads").last().copied();
+        assert!(
+            first_offset.is_some_and(|(_, y)| y > 0.0),
+            "the first window scrolled: {first_offset:?}"
+        );
+        assert!(
+            second.lock().expect("scroll payloads").is_empty(),
+            "scrolling one live window reports nothing from the other"
+        );
+
+        second_driver.scroll_vertical(-60.0);
+        let second_offsets = second.lock().expect("scroll payloads").clone();
+        assert_eq!(
+            second_offsets.len(),
+            1,
+            "one wheel step in the second window reports once: {second_offsets:?}"
+        );
+        let second_y = second_offsets[0].1;
+        assert!(
+            second_y > 0.0 && second_y < first_offset.expect("offset").1,
+            "the second window starts from the top, not the first window's offset: {second_offsets:?} vs {first_offset:?}"
+        );
+
+        // The first window kept its own position and stream through the
+        // second window's frames and scrolling.
+        first_driver.draw_frame();
+        second_driver.draw_frame();
+        let before = first.lock().expect("scroll payloads").len();
+        first_driver.scroll_vertical(-60.0);
+        let first_stream = first.lock().expect("scroll payloads").clone();
+        assert_eq!(first_stream.len(), before + 1);
+        assert!(
+            first_stream.last().expect("report").1 > first_offset.expect("offset").1,
+            "the first window continues from its own offset: {first_stream:?}"
+        );
+        assert_eq!(
+            second.lock().expect("scroll payloads").len(),
+            1,
+            "the second window's stream is untouched by the first"
+        );
+    });
+
+    run_headless(|cx| {
+        // Not focusable: no tab stop, no keyboard scrolling, wheel still works.
+        let mut plain =
+            poodle_render::scroll_shell(&ScrollShellSpec::new(), &ctx, scroll_rows(12), None);
+        plain.children[0].id = Some("plain-viewport".into());
+        let node = Arc::new(Mutex::new(scroll_frame(plain, None)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 320.0, 220.0);
+        driver.draw_frame();
+        assert!(poodle_gpui_node_backend::focus_handle_for("plain-viewport").is_none());
+        assert!(poodle_gpui_node_backend::scroll_offset_for("plain-viewport").is_none());
+        let top = |driver: &mut HeadlessDriver| {
+            let _ = driver;
+            f32::from(
+                poodle_gpui_node_backend::bounds_for("scroll-row-0")
+                    .expect("row geometry")
+                    .top(),
+            )
+        };
+        let start = top(&mut driver);
+        driver.dispatch_key("down");
+        assert_eq!(
+            top(&mut driver),
+            start,
+            "keys do nothing without focusability"
+        );
+        driver.scroll_vertical_id("plain-viewport", -60.0);
+        assert!(
+            top(&mut driver) < start,
+            "the wheel still scrolls the owner"
+        );
+    });
+
+    run_headless(|cx| {
+        // Horizontal ownership: left/right scroll, up/down do not.
+        let mut shell = poodle_render::scroll_shell(
+            &ScrollShellSpec::new()
+                .with_direction(Direction::Horizontal)
+                .with_focusable(true),
+            &ctx,
+            (0..8)
+                .map(|index| {
+                    let mut cell = Node::container().child(Node::text(format!("Cell {index}")));
+                    cell.style.descriptor.layout.width = LayoutSizing::Fixed(100.0);
+                    cell
+                })
+                .collect(),
+            None,
+        );
+        shell.children[0].id = Some("h-viewport".into());
+        let node = Arc::new(Mutex::new(scroll_frame(shell, Some(300.0))));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 340.0, 220.0);
+        driver.draw_frame();
+        driver.wait_for_focus_handle("h-viewport");
+        let (extent_x, extent_y) = poodle_gpui_node_backend::scroll_extent_for("h-viewport")
+            .expect("horizontal viewport owns the handle");
+        assert!(extent_x > 400.0, "8x100 cells in 300: {extent_x}");
+        assert_eq!(extent_y, 0.0);
+        let x = || {
+            poodle_gpui_node_backend::scroll_offset_for("h-viewport")
+                .expect("offset")
+                .0
+        };
+        driver.keyboard_key("h-viewport", "right");
+        assert_eq!(x(), 40.0);
+        driver.keyboard_key("h-viewport", "down");
+        assert_eq!(x(), 40.0, "a vertical key is inert on a horizontal shell");
+        driver.keyboard_key("h-viewport", "end");
+        assert_eq!(x(), extent_x);
+        driver.keyboard_key("h-viewport", "left");
+        assert_eq!(x(), extent_x - 40.0);
+        driver.keyboard_key("h-viewport", "home");
+        assert_eq!(x(), 0.0);
+    });
+}
+
+/// poodle#117. DetailSection's first mounted parity proof: the title is a
+/// level-3 heading, a named section is a region (an unnamed one is not), the
+/// header actions and body controls stay in document tab order while the
+/// section itself is no focus stop, and spacing resolves from density tokens.
+#[test]
+fn first_mounted_parity_detail_section() {
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{ButtonSpec, DetailSectionSpec};
+
+    fn action(label: &'static str, id: &str, presses: &Arc<Mutex<Vec<&'static str>>>) -> Node {
+        let sink = Arc::clone(presses);
+        let theme_provider = theme();
+        let mut button = poodle_render::button(
+            &ButtonSpec::new().with_label(label),
+            &RenderContext::new(&theme_provider),
+            Some(Arc::new(move || sink.lock().expect("presses").push(label))),
+        );
+        button.id = Some(id.to_owned());
+        button
+    }
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+
+    // Semantics: heading level, region only when named.
+    let unnamed = poodle_render::detail_section(
+        &DetailSectionSpec::new().with_title("Identity"),
+        &ctx,
+        vec![],
+        None,
+    );
+    assert_eq!(unnamed.a11y.role, None);
+    assert!(
+        !unnamed.interaction.focusable,
+        "the section is no focus stop"
+    );
+    let heading = unnamed
+        .find(&|node| node.a11y.role == Some(NodeRole::Heading))
+        .expect("the title is a heading");
+    assert_eq!(heading.a11y.level, Some(3));
+    assert!(heading.has_text("Identity"));
+    let described = poodle_render::detail_section(
+        &DetailSectionSpec::new()
+            .with_title("Identity")
+            .with_description("Who owns it"),
+        &ctx,
+        vec![],
+        None,
+    );
+    assert!(described.has_text("Who owns it"));
+    assert_eq!(
+        nodes_where(&described, &|node| node.a11y.role
+            == Some(NodeRole::Heading))
+        .len(),
+        1,
+        "the description is not a heading"
+    );
+    let untitled = poodle_render::detail_section(&DetailSectionSpec::new(), &ctx, vec![], None);
+    assert!(untitled
+        .find(&|node| node.a11y.role == Some(NodeRole::Heading))
+        .is_none());
+
+    // Density tokens: compact and comfortable resolve distinct real spacing.
+    let compact_spec = DetailSectionSpec::new()
+        .with_title("T")
+        .with_density(ControlDensity::Compact);
+    let comfortable_spec = DetailSectionSpec::new()
+        .with_title("T")
+        .with_density(ControlDensity::Comfortable);
+    let body = || vec![Node::text("a"), Node::text("b")];
+    let compact = poodle_render::detail_section(&compact_spec, &ctx, body(), None);
+    let comfortable = poodle_render::detail_section(&comfortable_spec, &ctx, body(), None);
+    let body_gap = |section: &Node| {
+        section
+            .children
+            .last()
+            .expect("body")
+            .style
+            .descriptor
+            .layout
+            .spacing
+            .gap
+    };
+    assert_eq!(
+        body_gap(&compact),
+        rem_to_px(compact_spec.body_gap_rem(ControlDensity::Compact))
+    );
+    assert_eq!(
+        body_gap(&comfortable),
+        rem_to_px(comfortable_spec.body_gap_rem(ControlDensity::Comfortable))
+    );
+    assert!(body_gap(&comfortable) > body_gap(&compact));
+    // The provider scope sets the density a section inherits.
+    let scoped = poodle_render::ui_presentation_provider(
+        &UiPresentationProviderSpec::new().with_density(ControlDensity::Comfortable),
+        &ctx,
+        |scope| {
+            poodle_render::detail_section(
+                &DetailSectionSpec::new().with_title("T"),
+                scope,
+                body(),
+                None,
+            )
+        },
+    );
+    assert_eq!(body_gap(&scoped), body_gap(&comfortable));
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let presses = Arc::new(Mutex::new(Vec::<&'static str>::new()));
+        let mut section = poodle_render::detail_section(
+            &DetailSectionSpec::new()
+                .with_title("Connections")
+                .with_description("Linked accounts")
+                .with_aria_label("Connections details"),
+            &ctx,
+            vec![action("Body", "section-body", &presses)],
+            Some(action("Edit", "section-edit", &presses)),
+        );
+        section.id = Some("detail-section-proof".into());
+        section.children[0].id = Some("detail-section-rule".into());
+        let node = Arc::new(Mutex::new(section));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 480.0, 220.0);
+        driver.draw_frame();
+
+        // Painted: the region name reaches the mounted backend.
+        let painted = poodle_gpui_node_backend::painted_node_for("detail-section-proof")
+            .expect("section reached paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Region));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Connections details"));
+        assert!(painted.texts.iter().any(|text| text == "Connections"));
+        assert!(poodle_gpui_node_backend::focus_handle_for("detail-section-proof").is_none());
+
+        // Geometry: the rule is the token height; header sits above the body.
+        let rule = poodle_gpui_node_backend::bounds_for("detail-section-rule")
+            .expect("separator geometry");
+        assert!((f32::from(rule.size.height) - rem_to_px(0.0625)).abs() < 0.5);
+        let edit = poodle_gpui_node_backend::bounds_for("section-edit").expect("action geometry");
+        let body = poodle_gpui_node_backend::bounds_for("section-body").expect("body geometry");
+        assert!(edit.bottom() <= body.top(), "the header precedes the body");
+
+        // Tab order: header action, then body, in document order.
+        driver.wait_for_focus_handle("section-edit");
+        driver.wait_for_focus_handle("section-body");
+        driver.focus_element("section-edit");
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("section-body"),
+            Some(true),
+            "Tab moves from the section action to the body content"
+        );
+        assert_ne!(
+            poodle_gpui_node_backend::focus_state_for("section-edit"),
+            Some(true)
+        );
+
+        // Pointer and keyboard reach both slots.
+        driver.pointer_activate_id("section-edit");
+        assert_eq!(*presses.lock().expect("presses"), ["Edit"]);
+        driver.pointer_activate_id("section-body");
+        driver.keyboard_activate("section-edit");
+        assert_eq!(*presses.lock().expect("presses"), ["Edit", "Body", "Edit"]);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// poodle#117. UiPresentationProvider's first mounted parity proof: the scope
+/// reaches a mounted descendant as real control geometry (size scale and
+/// density), nested scopes override outer ones, siblings keep the root, and
+/// the provider adds no node, role or focus stop — descendant pointer and
+/// keyboard behaviour is the descendant's own.
+#[test]
+fn first_mounted_parity_ui_presentation_provider() {
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::ButtonSpec;
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let presses = Arc::new(Mutex::new(0usize));
+
+    let scoped_button = |id: &str, scope: UiPresentationProviderSpec| {
+        let sink = Arc::clone(&presses);
+        let mut button = ui_presentation_provider(&scope, &ctx, |scoped| {
+            poodle_render::button(
+                &ButtonSpec::new().with_label("Go"),
+                scoped,
+                Some(Arc::new(move || *sink.lock().expect("presses") += 1)),
+            )
+        });
+        button.id = Some(id.to_owned());
+        button
+    };
+
+    // Provider resolves the contract's sizeScale → control-height ladder.
+    let ladder = [
+        (ControlSize::Xs, 1.5),
+        (ControlSize::Sm, 1.75),
+        (ControlSize::Md, 2.25),
+        (ControlSize::Lg, 2.75),
+        (ControlSize::Xl, 3.25),
+    ];
+    // Density drives horizontal control space: comfortable is wider.
+    let compact = scoped_button(
+        "scope-compact",
+        UiPresentationProviderSpec::new().with_density(ControlDensity::Compact),
+    );
+    let comfortable = scoped_button(
+        "scope-comfortable",
+        UiPresentationProviderSpec::new().with_density(ControlDensity::Comfortable),
+    );
+    // Inner provider overrides the outer scope; the sibling keeps the root.
+    let nested = {
+        let outer = UiPresentationProviderSpec::new().with_size_scale(ControlSize::Xl);
+        let inner = UiPresentationProviderSpec::new().with_size_scale(ControlSize::Sm);
+        let mut button = ui_presentation_provider(&outer, &ctx, |outer_ctx| {
+            ui_presentation_provider(&inner, outer_ctx, |inner_ctx| {
+                poodle_render::button(&ButtonSpec::new().with_label("Go"), inner_ctx, None)
+            })
+        });
+        button.id = Some("scope-nested".to_owned());
+        button
+    };
+    let root = {
+        let mut button = poodle_render::button(&ButtonSpec::new().with_label("Go"), &ctx, None);
+        button.id = Some("scope-root".to_owned());
+        button
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut stack = Node::container();
+        stack.style.descriptor.layout.direction = LayoutDirection::Column;
+        let mut ids = Vec::new();
+        for (size, rem) in ladder {
+            let id = format!("scope-{size:?}");
+            stack = stack.child(scoped_button(
+                &id,
+                UiPresentationProviderSpec::new().with_size_scale(size),
+            ));
+            ids.push((id, rem));
+        }
+        stack = stack
+            .child(compact)
+            .child(comfortable)
+            .child(nested)
+            .child(root);
+        let node = Arc::new(Mutex::new(stack));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 400.0, 520.0);
+        driver.draw_frame();
+
+        // Bounds exclude the 1px border per side (see the cascade test above).
+        for (id, rem) in &ids {
+            let bounds = poodle_gpui_node_backend::bounds_for(id).expect("scoped geometry");
+            assert_eq!(
+                f32::from(bounds.size.height),
+                rem_to_px(*rem) - 2.0,
+                "{id}: the provider's size scale sets the descendant's control height"
+            );
+        }
+        let pad_left = |id: &str| {
+            poodle_gpui_node_backend::painted_node_for(id)
+                .expect("scoped button reached paint")
+                .style
+                .layout
+                .spacing
+                .padding
+                .left
+        };
+        assert!(
+            pad_left("scope-comfortable") > pad_left("scope-compact"),
+            "density widens control padding: {} vs {}",
+            pad_left("scope-comfortable"),
+            pad_left("scope-compact")
+        );
+        let height = |id: &str| {
+            f32::from(
+                poodle_gpui_node_backend::bounds_for(id)
+                    .expect("geometry")
+                    .size
+                    .height,
+            )
+        };
+        assert_eq!(
+            height("scope-nested"),
+            rem_to_px(1.75) - 2.0,
+            "inner overrides outer"
+        );
+        assert_eq!(
+            height("scope-root"),
+            rem_to_px(2.25) - 2.0,
+            "siblings keep the root"
+        );
+
+        // No wrapper: the painted node is the button itself, one focus stop.
+        let painted = poodle_gpui_node_backend::painted_node_for("scope-Lg")
+            .expect("scoped button reached paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Button));
+        driver.wait_for_focus_handle("scope-Lg");
+        driver.focus_element("scope-Lg");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("scope-Lg"),
+            Some(true)
+        );
+        driver.pointer_activate_id("scope-Lg");
+        driver.keyboard_activate("scope-Lg");
+        assert_eq!(*presses.lock().expect("presses"), 2);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// poodle#117. MotionPolicyProvider's first mounted parity proof: the scoped
+/// policy reaches a mounted descendant as the clock it declares (full spins,
+/// reduced and frozen schedule none), nesting only restricts, a presentation
+/// scope preserves the policy, and the provider adds no node, role or focus
+/// stop — the descendant keeps its own pointer and keyboard behaviour.
+#[test]
+fn first_mounted_parity_motion_policy_provider() {
+    use poodle_specs::{ButtonSpec, MotionPolicyProviderSpec};
+
+    let theme_provider = theme();
+    let root_ctx = RenderContext::new(&theme_provider);
+    let committed = root_ctx.with_first_frame_committed(true);
+    let presses = Arc::new(Mutex::new(0usize));
+    let spec = |policy| MotionPolicyProviderSpec::new().with_policy(policy);
+
+    let spinner_under = |policies: &[MotionPolicy]| -> Node {
+        fn nest(policies: &[MotionPolicy], ctx: &RenderContext<'_>) -> Node {
+            match policies.split_first() {
+                None => poodle_render::spinner(&SpinnerSpec::new(), ctx),
+                Some((policy, rest)) => poodle_render::motion_policy_provider(
+                    &MotionPolicyProviderSpec::new().with_policy(*policy),
+                    ctx,
+                    |scoped| nest(rest, scoped),
+                ),
+            }
+        }
+        nest(policies, &committed)
+    };
+    let spins = |node: &Node| node.style.animation.is_some();
+
+    assert!(spins(&spinner_under(&[])), "no provider keeps full motion");
+    assert!(spins(&spinner_under(&[MotionPolicy::Full])));
+    assert!(!spins(&spinner_under(&[MotionPolicy::Reduced])));
+    assert!(!spins(&spinner_under(&[MotionPolicy::Frozen])));
+    assert!(
+        !spins(&spinner_under(&[MotionPolicy::Reduced, MotionPolicy::Full])),
+        "a child full cannot relax a reduced ancestor"
+    );
+    assert!(!spins(&spinner_under(&[
+        MotionPolicy::Frozen,
+        MotionPolicy::Reduced,
+        MotionPolicy::Full
+    ])));
+    // A presentation scope inside a restricted policy preserves it.
+    let presentation_inside =
+        poodle_render::motion_policy_provider(&spec(MotionPolicy::Frozen), &committed, |scoped| {
+            ui_presentation_provider(
+                &UiPresentationProviderSpec::new().with_size_scale(ControlSize::Lg),
+                scoped,
+                |inner| poodle_render::spinner(&SpinnerSpec::new(), inner),
+            )
+        });
+    assert!(!spins(&presentation_inside));
+
+    // The provider returns the child unchanged: no wrapper, role or focus stop.
+    let wrapped =
+        poodle_render::motion_policy_provider(&spec(MotionPolicy::Reduced), &committed, |scoped| {
+            poodle_render::button(&ButtonSpec::new().with_label("Go"), scoped, None)
+        });
+    assert!(matches!(wrapped.kind, NodeKind::Button { .. }));
+    assert_eq!(wrapped.a11y.role, Some(NodeRole::Button));
+
+    run_headless(|cx| {
+        // The provider adds no dimensions: a scoped child lays out exactly as
+        // the same child does with no provider.
+        let build = |id: &str, ctx: &RenderContext<'_>| {
+            let mut button = poodle_render::button(&ButtonSpec::new().with_label("Go"), ctx, None);
+            button.id = Some(id.to_owned());
+            button
+        };
+        let bare = build("motion-bare", &committed);
+        let mut scoped = poodle_render::motion_policy_provider(
+            &spec(MotionPolicy::Frozen),
+            &committed,
+            |inner| build("motion-scoped", inner),
+        );
+        scoped.id = Some("motion-scoped".to_owned());
+        let node = Arc::new(Mutex::new(Node::container().child(bare).child(scoped)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 240.0, 160.0);
+        driver.draw_frame();
+        let bare_geometry =
+            poodle_gpui_node_backend::bounds_for("motion-bare").expect("bare geometry");
+        let scoped_geometry =
+            poodle_gpui_node_backend::bounds_for("motion-scoped").expect("scoped geometry");
+        assert_eq!(bare_geometry.size, scoped_geometry.size);
+    });
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let sink = Arc::clone(&presses);
+        let mut button = poodle_render::motion_policy_provider(
+            &spec(MotionPolicy::Frozen),
+            &committed,
+            |scoped| {
+                poodle_render::button(
+                    &ButtonSpec::new().with_label("Go").with_loading(true),
+                    scoped,
+                    Some(Arc::new(move || *sink.lock().expect("presses") += 1)),
+                )
+            },
+        );
+        button.id = Some("motion-frozen".to_owned());
+        let node = Arc::new(Mutex::new(button));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 240.0, 120.0);
+        driver.draw_frame();
+        let frozen_channels = poodle_gpui_node_backend::take_probe_capture();
+        assert!(
+            !frozen_channels.contains(&"surface.animation.scheduled"),
+            "a frozen scope schedules no clock: {frozen_channels:?}"
+        );
+
+        // Policy never changes semantics: role, focus and activation stay live
+        // (a loading button is inert by its own contract, so use a plain one
+        // for the interaction proof below).
+        let painted = poodle_gpui_node_backend::painted_node_for("motion-frozen")
+            .expect("scoped button reached paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Button));
+    });
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let sink = Arc::clone(&presses);
+        let mut full_spinner = poodle_render::motion_policy_provider(
+            &spec(MotionPolicy::Full),
+            &committed,
+            |scoped| poodle_render::spinner(&SpinnerSpec::new(), scoped),
+        );
+        full_spinner.id = Some("motion-full-spinner".to_owned());
+        let mut button = poodle_render::motion_policy_provider(
+            &spec(MotionPolicy::Reduced),
+            &committed,
+            |scoped| {
+                poodle_render::button(
+                    &ButtonSpec::new().with_label("Go"),
+                    scoped,
+                    Some(Arc::new(move || *sink.lock().expect("presses") += 1)),
+                )
+            },
+        );
+        button.id = Some("motion-reduced".to_owned());
+        let node = Arc::new(Mutex::new(
+            Node::container().child(full_spinner).child(button),
+        ));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 240.0, 160.0);
+        driver.draw_frame();
+        let channels = poodle_gpui_node_backend::take_probe_capture();
+        assert!(
+            channels.contains(&"surface.animation.scheduled"),
+            "a full scope schedules the spinner clock: {channels:?}"
+        );
+
+        driver.wait_for_focus_handle("motion-reduced");
+        driver.focus_element("motion-reduced");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("motion-reduced"),
+            Some(true),
+            "reduced motion never delays focus"
+        );
+        driver.pointer_activate_id("motion-reduced");
+        driver.keyboard_activate("motion-reduced");
+        assert_eq!(
+            *presses.lock().expect("presses"),
+            2,
+            "reduced motion keeps pointer and keyboard activation immediate"
+        );
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+/// poodle#117. AgentMessage's first mounted parity proof: markdown reaches
+/// mounted GPUI as real heading and list semantics, the role/size/density
+/// facts and the user surface paint with token values, prose is not a focus
+/// stop or live region, and the natives' declared no-link boundary holds.
+#[test]
+fn first_mounted_parity_agent_message() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_headless::agent_transcript::TranscriptRole;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::AgentMessageSpec;
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let markdown = "# Plan\n\nFirst **bold** paragraph.\n\n- one\n- two\n\n1. alpha\n2. beta\n\n> quoted\n\n```rust\nlet x = 1;\n```";
+
+    let assistant = poodle_render::agent_message(&AgentMessageSpec::new(markdown), &ctx);
+    assert_eq!(assistant.a11y.role, None, "prose is not a landmark");
+    assert!(!assistant.interaction.focusable);
+    assert_eq!(
+        assistant.roles.get("role").map(String::as_str),
+        Some("assistant")
+    );
+    assert_eq!(
+        assistant.roles.get("streaming").map(String::as_str),
+        Some("false")
+    );
+    let headings = nodes_where(&assistant, &|node| {
+        node.a11y.role == Some(NodeRole::Heading)
+    });
+    assert_eq!(headings.len(), 1);
+    assert_eq!(headings[0].a11y.level, Some(1));
+    assert!(headings[0].has_text("Plan"));
+    let lists = nodes_where(&assistant, &|node| node.a11y.role == Some(NodeRole::List));
+    assert_eq!(lists.len(), 2, "both lists are real lists");
+    assert_eq!(
+        lists[0]
+            .children
+            .iter()
+            .filter(|row| row.a11y.role == Some(NodeRole::ListItem))
+            .count(),
+        2,
+        "item counts are announced"
+    );
+    assert!(
+        assistant
+            .find(&|node| {
+                node.interaction.focusable
+                    || matches!(
+                        node.a11y.role,
+                        Some(NodeRole::Status | NodeRole::Alert | NodeRole::Log)
+                    )
+            })
+            .is_none(),
+        "no focus stop and no live region"
+    );
+    let deep =
+        poodle_render::agent_message(&AgentMessageSpec::new("### Third\n\n###### Sixth"), &ctx);
+    let levels: Vec<_> = nodes_where(&deep, &|node| node.a11y.role == Some(NodeRole::Heading))
+        .iter()
+        .map(|node| node.a11y.level)
+        .collect();
+    assert_eq!(levels, [Some(3), Some(6)]);
+
+    let user_spec = AgentMessageSpec::new("Question?")
+        .with_role(TranscriptRole::User)
+        .with_size(ControlSize::Lg)
+        .with_density(ControlDensity::Comfortable);
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut message = poodle_render::agent_message(&AgentMessageSpec::new(markdown), &ctx);
+        message.id = Some("agent-message-assistant".into());
+        let mut user = poodle_render::agent_message(&user_spec, &ctx);
+        user.id = Some("agent-message-user".into());
+        let mut stack = Node::container().child(message).child(user);
+        stack.style.descriptor.layout.direction = LayoutDirection::Column;
+        stack.style.fill_width = true;
+        let node = Arc::new(Mutex::new(stack));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 480.0, 640.0);
+        driver.draw_frame();
+
+        // Painted facts: role/size/density travel with the mounted node.
+        let painted = poodle_gpui_node_backend::painted_node_for("agent-message-assistant")
+            .expect("assistant message reached paint");
+        assert_eq!(
+            painted.roles.get("role").map(String::as_str),
+            Some("assistant")
+        );
+        assert_eq!(painted.roles.get("size").map(String::as_str), Some("md"));
+        assert_eq!(
+            painted.roles.get("density").map(String::as_str),
+            Some("default")
+        );
+        assert!(painted.texts.iter().any(|text| text == "Plan"));
+        let user_painted = poodle_gpui_node_backend::painted_node_for("agent-message-user")
+            .expect("user message reached paint");
+        assert_eq!(
+            user_painted.roles.get("role").map(String::as_str),
+            Some("user")
+        );
+        assert_eq!(
+            user_painted.roles.get("size").map(String::as_str),
+            Some("lg")
+        );
+        assert_eq!(
+            user_painted.roles.get("density").map(String::as_str),
+            Some("comfortable")
+        );
+        assert_eq!(
+            user_painted.style.background,
+            Some(theme_provider.resolve_color(user_spec.user_surface_token()))
+        );
+        assert_eq!(
+            user_painted.style.corner_radii.top_left,
+            theme_provider.resolve_radius(user_spec.radius_token())
+        );
+        let inset = rem_to_px(user_spec.padding_inset_rem(ControlDensity::Comfortable));
+        assert_eq!(user_painted.style.layout.spacing.padding.left, inset);
+
+        // Geometry: the assistant prose stacks above the user surface.
+        let above = poodle_gpui_node_backend::bounds_for("agent-message-assistant")
+            .expect("assistant geometry");
+        let below =
+            poodle_gpui_node_backend::bounds_for("agent-message-user").expect("user geometry");
+        assert!(f32::from(above.size.height) > 0.0);
+        assert!(above.bottom() <= below.top());
+
+        // Pointer on prose is inert: it activates nothing and takes no focus.
+        driver.pointer_activate_id("agent-message-assistant");
+        assert!(poodle_gpui_node_backend::focus_handle_for("agent-message-assistant").is_none());
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}

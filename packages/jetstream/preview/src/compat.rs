@@ -1104,6 +1104,7 @@ pub fn js_scroll_shell(
         spec,
         &pr::RenderContext::new(theme),
         children,
+        None,
     ))
 }
 

@@ -49,12 +49,14 @@ mod interaction;
 mod layers;
 mod measured_node;
 mod overlay;
+mod scroll;
 mod style;
 mod tooltip;
 mod tracked_scroll;
 
 pub mod file_capability;
 
+pub use scroll::{scroll_extent_for, scroll_offset_for};
 pub use tooltip::{
     is_tooltip_pending, is_tooltip_visible, painted_tooltip, painted_tooltip_for,
     reset_tooltip_registry, teardown_window_tooltips, tooltip_runtime_owns_window,
@@ -687,6 +689,9 @@ fn build_svg_leaf(node: &Node, el: gpui::Svg) -> AnyElement {
 /// element state (click, drag, focus) forces a stateful div — gpui 0.2.2
 /// gates its listener model behind `Stateful`.
 fn build_box(node: &Node, base: Div) -> AnyElement {
+    if let Some(scope) = scroll::scoped(node) {
+        return scope;
+    }
     // Nested overlay surfaces (a popover inside a popover) draw inside the
     // enclosing deferred element; only the outermost overlay defers.
     let was_deferred = DEFERRED_SCOPE.with(|scope| scope.get());
@@ -747,6 +752,7 @@ fn needs_state(node: &Node) -> bool {
         || node.interaction.on_scrub.is_some()
         || node.interaction.on_continuous_value.is_some()
         || node.interaction.on_wheel.is_some()
+        || node.interaction.on_scroll.is_some()
         || node.interaction.on_double_activate.is_some()
         || node.interaction.on_select_range.is_some()
         || node.interaction.on_focus_change.is_some()
