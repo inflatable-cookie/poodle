@@ -1223,7 +1223,6 @@
       "required": [
         "semantic",
         "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
@@ -1232,6 +1231,11 @@
           "axis": "events",
           "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/icon.md#5. Events"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "Icon is not focusable; it is visual content announced through its parent context.",
+          "contractRef": "docs/contracts/components/icon.md#6. Accessibility"
         }
       ]
     },

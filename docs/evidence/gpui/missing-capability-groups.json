@@ -3,44 +3,10 @@
   "task": "g18.001",
   "groups": [
     {
-      "substrate": "general-composite",
-      "components": [
-        "Collapsible",
-        "EnvelopeEditor",
-        "FieldSet",
-        "LicenceStatus",
-        "ModMatrixGrid",
-        "ModelConnectionCard",
-        "Spacer",
-        "Stack",
-        "WaveformDisplay"
-      ],
-      "missingTally": {
-        "semantic": 6,
-        "events": 7,
-        "pointer": 5,
-        "keyboard_focus": 6,
-        "accessibility": 6,
-        "visual": 9
-      },
-      "contracts": [
-        "docs/contracts/components/collapsible.md",
-        "docs/contracts/components/envelope-editor.md",
-        "docs/contracts/components/field-set.md",
-        "docs/contracts/components/licence-status.md",
-        "docs/contracts/components/mod-matrix-grid.md",
-        "docs/contracts/components/model-connection-card.md",
-        "docs/contracts/components/spacer.md",
-        "docs/contracts/components/stack.md",
-        "docs/contracts/components/waveform-display.md"
-      ]
-    },
-    {
       "substrate": "text-display",
       "components": [
         "Code",
         "Eyebrow",
-        "Icon",
         "IconProvider",
         "MediaPreview",
         "MetricTile",
@@ -51,7 +17,7 @@
         "semantic": 7,
         "events": 4,
         "pointer": 6,
-        "keyboard_focus": 6,
+        "keyboard_focus": 5,
         "accessibility": 7,
         "visual": 7
       },
@@ -59,7 +25,6 @@
         "docs/contracts/components/code.md",
         "docs/contracts/components/eyebrow.md",
         "docs/contracts/components/icon-provider.md",
-        "docs/contracts/components/icon.md",
         "docs/contracts/components/media-preview.md",
         "docs/contracts/components/metric-tile.md",
         "docs/contracts/components/state-tile.md",
@@ -94,6 +59,33 @@
       ]
     },
     {
+      "substrate": "general-composite",
+      "components": [
+        "EnvelopeEditor",
+        "FieldSet",
+        "ModMatrixGrid",
+        "Spacer",
+        "Stack",
+        "WaveformDisplay"
+      ],
+      "missingTally": {
+        "semantic": 6,
+        "events": 4,
+        "pointer": 4,
+        "keyboard_focus": 5,
+        "accessibility": 6,
+        "visual": 6
+      },
+      "contracts": [
+        "docs/contracts/components/envelope-editor.md",
+        "docs/contracts/components/field-set.md",
+        "docs/contracts/components/mod-matrix-grid.md",
+        "docs/contracts/components/spacer.md",
+        "docs/contracts/components/stack.md",
+        "docs/contracts/components/waveform-display.md"
+      ]
+    },
+    {
       "substrate": "feedback-status",
       "components": [
         "EmbedPreview",
@@ -124,8 +116,7 @@
         "AudioMeter",
         "AudioSwitch",
         "GainReductionMeter",
-        "ValueReadout",
-        "XYPad"
+        "ValueReadout"
       ],
       "missingTally": {
         "semantic": 4,
@@ -133,14 +124,13 @@
         "pointer": 4,
         "keyboard_focus": 4,
         "accessibility": 4,
-        "visual": 5
+        "visual": 4
       },
       "contracts": [
         "docs/contracts/components/audio-meter.md",
         "docs/contracts/components/audio-switch.md",
         "docs/contracts/components/gain-reduction-meter.md",
-        "docs/contracts/components/value-readout.md",
-        "docs/contracts/components/xy-pad.md"
+        "docs/contracts/components/value-readout.md"
       ]
     },
     {
@@ -198,23 +188,6 @@
       },
       "contracts": [
         "docs/contracts/components/card-toggle-group.md"
-      ]
-    },
-    {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "ModelConnectionSetup"
-      ],
-      "missingTally": {
-        "semantic": 0,
-        "events": 0,
-        "pointer": 0,
-        "keyboard_focus": 0,
-        "accessibility": 0,
-        "visual": 1
-      },
-      "contracts": [
-        "docs/contracts/components/model-connection-setup.md"
       ]
     }
   ]

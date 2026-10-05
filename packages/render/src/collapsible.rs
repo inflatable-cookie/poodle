@@ -165,10 +165,13 @@ pub fn collapsible_with_handlers(
         heading = heading.child(d);
     }
 
+    // Svelte keeps one downward indicator and rotates it 180 degrees while
+    // open. The shared node vocabulary has no rotation transform, so use the
+    // equivalent named glyphs: down while closed, up while open.
     let chevron_icon = if is_open {
-        "chevron-down"
+        "chevron-up"
     } else {
-        "chevron-right"
+        "chevron-down"
     };
     let mut indicator = Node::icon(chevron_icon, icon_size);
     indicator.style.flex_shrink_zero = true;
