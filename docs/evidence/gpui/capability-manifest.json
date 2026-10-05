@@ -257,13 +257,26 @@
       "substrate": "feedback-status",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Avatar is a styled-only display component with no component-owned events.",
+          "contractRef": "docs/contracts/components/avatar.md#Behavior Machine"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Avatar renders identity content and has no pointer interaction or focusable child.",
+          "contractRef": "docs/contracts/components/avatar.md#1. Purpose"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "Avatar is styled-only and has no keyboard behavior or component-owned focus stop.",
+          "contractRef": "docs/contracts/components/avatar.md#Behavior Machine"
+        }
+      ]
     },
     {
       "component": "BlockEditor",
@@ -1544,13 +1557,26 @@
       "substrate": "feedback-status",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "MetaBar lays out caller-owned children and dispatches no component-owned events.",
+          "contractRef": "docs/contracts/components/meta-bar.md#4. Behavior"
+        },
+        {
+          "axis": "pointer",
+          "reason": "MetaBar is a layout-only container; pointer interaction belongs to child content.",
+          "contractRef": "docs/contracts/components/meta-bar.md#6. Accessibility"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "MetaBar has no keyboard behavior or focus stop; interactive children keep their own focus targets.",
+          "contractRef": "docs/contracts/components/meta-bar.md#6. Accessibility"
+        }
+      ]
     },
     {
       "component": "MetaItem",
@@ -1559,13 +1585,26 @@
       "substrate": "feedback-status",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "MetaItem displays caller-owned value content and dispatches no component-owned events.",
+          "contractRef": "docs/contracts/components/meta-item.md#6. Accessibility"
+        },
+        {
+          "axis": "pointer",
+          "reason": "MetaItem is a display wrapper; pointer interaction belongs to its value content.",
+          "contractRef": "docs/contracts/components/meta-item.md#6. Accessibility"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "MetaItem has no keyboard behavior; an interactive value remains its own focus target.",
+          "contractRef": "docs/contracts/components/meta-item.md#9. Keyboard"
+        }
+      ]
     },
     {
       "component": "Meter",

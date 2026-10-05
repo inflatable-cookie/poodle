@@ -3,45 +3,6 @@
   "task": "g18.001",
   "groups": [
     {
-      "substrate": "feedback-status",
-      "components": [
-        "Avatar",
-        "DetailSectionGroup",
-        "DetailShell",
-        "EmbedPreview",
-        "EmptyState",
-        "ErrorBoundary",
-        "InlineListSection",
-        "MetaBar",
-        "MetaItem",
-        "PageHeader",
-        "PasswordRequirements",
-        "Region"
-      ],
-      "missingTally": {
-        "semantic": 12,
-        "events": 12,
-        "pointer": 12,
-        "keyboard_focus": 11,
-        "accessibility": 12,
-        "visual": 12
-      },
-      "contracts": [
-        "docs/contracts/components/avatar.md",
-        "docs/contracts/components/detail-section-group.md",
-        "docs/contracts/components/detail-shell.md",
-        "docs/contracts/components/embed-preview.md",
-        "docs/contracts/components/empty-state.md",
-        "docs/contracts/components/error-boundary.md",
-        "docs/contracts/components/inline-list-section.md",
-        "docs/contracts/components/meta-bar.md",
-        "docs/contracts/components/meta-item.md",
-        "docs/contracts/components/page-header.md",
-        "docs/contracts/components/password-requirements.md",
-        "docs/contracts/components/region.md"
-      ]
-    },
-    {
       "substrate": "general-composite",
       "components": [
         "Collapsible",
@@ -72,6 +33,39 @@
         "docs/contracts/components/spacer.md",
         "docs/contracts/components/stack.md",
         "docs/contracts/components/waveform-display.md"
+      ]
+    },
+    {
+      "substrate": "feedback-status",
+      "components": [
+        "DetailSectionGroup",
+        "DetailShell",
+        "EmbedPreview",
+        "EmptyState",
+        "ErrorBoundary",
+        "InlineListSection",
+        "PageHeader",
+        "PasswordRequirements",
+        "Region"
+      ],
+      "missingTally": {
+        "semantic": 9,
+        "events": 9,
+        "pointer": 9,
+        "keyboard_focus": 8,
+        "accessibility": 9,
+        "visual": 9
+      },
+      "contracts": [
+        "docs/contracts/components/detail-section-group.md",
+        "docs/contracts/components/detail-shell.md",
+        "docs/contracts/components/embed-preview.md",
+        "docs/contracts/components/empty-state.md",
+        "docs/contracts/components/error-boundary.md",
+        "docs/contracts/components/inline-list-section.md",
+        "docs/contracts/components/page-header.md",
+        "docs/contracts/components/password-requirements.md",
+        "docs/contracts/components/region.md"
       ]
     },
     {
