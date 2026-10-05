@@ -155,6 +155,10 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   ColorPicker: "first_mounted_parity_color_picker",
   HoverCard: "first_mounted_parity_hover_card",
   Field: "first_mounted_parity_field",
+  Calendar: "first_mounted_parity_calendar",
+  FormActions: "first_mounted_parity_form_actions",
+  FormLayout: "first_mounted_parity_form_layout",
+  ValidationSummary: "first_mounted_parity_validation_summary",
   CodeInput: "a_grouped_code_input_types_and_completes_through_the_real_tree",
   FileUpload: "a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam",
   LicenceActivation: [
