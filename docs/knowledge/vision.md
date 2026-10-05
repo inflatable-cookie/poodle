@@ -96,7 +96,9 @@ Renderer-specific input, lifecycle, and drawing remain in the backend.
   [working rules](contracts/working-rules.md#runtime-parity-authority).
 - **Adoption follows releases, not merges.** A change reaches a consumer only
   when a published Poodle release carries it. Underlay applications receive
-  Poodle through Underlay foundation releases. See
+  Poodle through Underlay foundation releases. Consumers pin published
+  versions; they don't link Poodle's primary checkout, whose `main` and
+  prepared `dist` move with every merge (operator ruling 2026-10-05). See
   [release](contracts/release.md).
 
 ## Success Criteria
