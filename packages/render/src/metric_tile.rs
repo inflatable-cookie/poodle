@@ -12,11 +12,15 @@ use poodle_node::{
 };
 use poodle_specs::{MetricTileSpec, MetricTrend};
 
+use crate::color::with_alpha;
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 pub fn metric_tile(spec: &MetricTileSpec, ctx: &RenderContext<'_>) -> Node {
-    let fill = ctx.theme().resolve_color(spec.fill_token());
+    // Contract §8: `color-mix(in srgb, surface 60%, transparent)` — the tile
+    // reads as a contained surface wash, matching Svelte.
+    let surface = ctx.theme().resolve_color(spec.fill_token());
+    let fill = with_alpha(surface, surface.3 * 0.60);
     // Contract §8: border is `0.0625rem solid transparent` (invisible — keeps
     // box geometry stable).
     let border_w = rem_to_px(spec.border_width_rem());
@@ -90,6 +94,9 @@ pub fn metric_tile(spec: &MetricTileSpec, ctx: &RenderContext<'_>) -> Node {
         let bar_gap = rem_to_px(0.0625);
 
         let mut sparkline = Node::container();
+        // Svelte marks the chart `aria-hidden`: it is decorative paint next
+        // to the plain-text value.
+        sparkline.a11y.hidden = Some(true);
         {
             let s = &mut sparkline.style;
             s.descriptor.layout.direction = LayoutDirection::Row;
@@ -152,6 +159,9 @@ pub fn metric_tile(spec: &MetricTileSpec, ctx: &RenderContext<'_>) -> Node {
             s.descriptor.layout.spacing.gap = rem_to_px(spec.trend_gap_rem());
         }
         let mut arrow = Node::icon(trend_icon, icon_size);
+        // Svelte marks the trend arrow `aria-hidden`: direction reads
+        // through the trend label text, never the glyph alone.
+        arrow.a11y.hidden = Some(true);
         arrow.style.descriptor.text_color = Some(trend_color);
         let mut trend_row = trend_row.child(arrow);
 
@@ -167,10 +177,8 @@ pub fn metric_tile(spec: &MetricTileSpec, ctx: &RenderContext<'_>) -> Node {
         el = el.child(trend_row);
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            el.a11y.label = Some(label.to_string());
-        }
-    }
+    // Svelte falls back to `"{label}: {value}"` when no explicit
+    // `ariaLabel` is given (contract §6); the tile always names itself.
+    el.a11y.label = Some(spec.effective_aria_label());
     el
 }

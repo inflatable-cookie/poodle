@@ -1,4 +1,4 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Code, Eyebrow};
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
@@ -7,6 +7,22 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{CodeInlineVariant, CodeSpec, CodeTypography, EyebrowSpec};
+
+/// A block code specimen with live copy feedback: the press reports
+/// through the node-event queue and the latch renders until the host's 2s
+/// reset task clears it (contract §4, adapter-owned).
+fn live_code(spec: CodeSpec, key: &str, state: &AppState, theme: &GpuiThemeProvider) -> Code {
+    let events = state.node_events.clone();
+    let key = key.to_string();
+    let press_key = key.clone();
+    Code::from_spec(spec.with_copied(state.specimens.is_on(&key)), theme).on_copy(
+        std::sync::Arc::new(move || {
+            events.lock().unwrap().push(NodeSpecimenEvent::CodeCopy {
+                key: press_key.clone(),
+            });
+        }),
+    )
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -30,10 +46,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Block with language label"),
                     theme,
                 ))
-                .child(Code::from_spec(
+                .child(live_code(
                     CodeSpec::new()
                         .with_content(ts_source)
                         .with_language("typescript"),
+                    "code-copy-block-ts",
+                    state,
                     theme,
                 )),
         )
@@ -47,12 +65,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("With line numbers and highlight"),
                     theme,
                 ))
-                .child(Code::from_spec(
+                .child(live_code(
                     CodeSpec::new()
                         .with_content(ts_source)
                         .with_language("ts")
                         .with_show_line_numbers(true)
                         .with_highlight_lines(vec![3, 4]),
+                    "code-copy-block-highlight",
+                    state,
                     theme,
                 )),
         )
@@ -66,11 +86,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("CSS with max height"),
                     theme,
                 ))
-                .child(Code::from_spec(
+                .child(live_code(
                     CodeSpec::new()
                         .with_content(css_source)
                         .with_language("css")
                         .with_max_height(96.0),
+                    "code-copy-block-css",
+                    state,
                     theme,
                 )),
         )
@@ -94,10 +116,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .text_sm()
                         .text_color(color_to_hsla(text_primary))
                         .child("Use ".to_string())
-                        .child(Code::from_spec(
+                        .child(live_code(
                             CodeSpec::new()
                                 .with_content("npm install")
                                 .with_inline(true),
+                            "code-copy-inline-npm",
+                            state,
                             theme,
                         ))
                         .child(" to install dependencies.".to_string()),
@@ -123,19 +147,23 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .text_sm()
                         .text_color(color_to_hsla(text_primary))
                         .child("Plain ".to_string())
-                        .child(Code::from_spec(
+                        .child(live_code(
                             CodeSpec::new()
                                 .with_content("git status")
                                 .with_inline(true)
                                 .with_inline_variant(CodeInlineVariant::Plain),
+                            "code-copy-inline-status",
+                            state,
                             theme,
                         ))
                         .child(" and inline-typography ".to_string())
-                        .child(Code::from_spec(
+                        .child(live_code(
                             CodeSpec::new()
                                 .with_content("git log")
                                 .with_inline(true)
                                 .with_typography(CodeTypography::Inline),
+                            "code-copy-inline-log",
+                            state,
                             theme,
                         ))
                         .child(" fragments.".to_string()),

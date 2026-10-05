@@ -619,6 +619,7 @@ where
         || node.style.focus_ring.is_some()
         || node.interaction.focusable
         || node.interaction.on_activate.is_some()
+        || node.interaction.copy_text.is_some()
         || node.interaction.on_text_change.is_some()
         || node.interaction.on_drag.is_some()
         || node.interaction.on_continuous_value.is_some()
@@ -656,6 +657,7 @@ fn build_svg_leaf(node: &Node, el: gpui::Svg) -> AnyElement {
         || node.style.focus_ring.is_some()
         || node.interaction.focusable
         || node.interaction.on_activate.is_some()
+        || node.interaction.copy_text.is_some()
         || node.interaction.on_text_change.is_some()
         || node.interaction.on_drag.is_some()
         || node.interaction.on_continuous_value.is_some()
@@ -740,6 +742,7 @@ fn build_box(node: &Node, base: Div) -> AnyElement {
 fn needs_state(node: &Node) -> bool {
     node.interaction.focusable
         || node.interaction.on_activate.is_some()
+        || node.interaction.copy_text.is_some()
         || node.interaction.on_activate_modified.is_some()
         || node.interaction.on_context.is_some()
         || node.interaction.on_key.is_some()

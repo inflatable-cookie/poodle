@@ -242,6 +242,13 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   AudioSwitch: "first_mounted_parity_audio_switch",
   GainReductionMeter: "first_mounted_parity_gain_reduction_meter",
   ValueReadout: "first_mounted_parity_value_readout",
+  Code: "first_mounted_parity_code",
+  Eyebrow: "first_mounted_parity_eyebrow",
+  TextLink: "first_mounted_parity_text_link",
+  IconProvider: "first_mounted_parity_icon_provider",
+  MetricTile: "first_mounted_parity_metric_tile",
+  StateTile: "first_mounted_parity_state_tile",
+  MediaPreview: "first_mounted_parity_media_preview",
   StatusBar: "first_mounted_parity_status_bar",
   ToastStack: [
     "first_mounted_parity_toast_stack",

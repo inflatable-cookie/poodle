@@ -694,6 +694,14 @@ pub struct Interaction {
     /// describes (components bake disabled opacity into the descriptor).
     pub disabled: bool,
     pub on_activate: Option<ActivateHandler>,
+    /// Text the backend writes to the platform clipboard when this node is
+    /// activated. Pointer and keyboard share the one click path (Enter/Space
+    /// synthesize the same click on a focused element), so one declaration
+    /// covers both. The backend owns the platform API the way it owns
+    /// native editing; the component only declares what activating this
+    /// node copies, and any `on_activate` feedback latch stays host-owned
+    /// beside it.
+    pub copy_text: Option<String>,
     /// Reports replacement text for an input node. Backends with a native
     /// editor use its change stream; lightweight backends may provide a
     /// smaller editing subset while preserving the same callback contract.

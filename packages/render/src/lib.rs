@@ -254,7 +254,7 @@ pub use card_toggle_group::{
 };
 pub use changed_files::{changed_files, ChangedFilesHandlers};
 pub use checkbox::checkbox;
-pub use code::code;
+pub use code::{code, code_with_handlers, CodeHandlers};
 pub use code_input::{code_input, code_input_with_handlers, CodeInputHandlers};
 pub use collapse_toggle::collapse_toggle;
 pub use collapsible::{

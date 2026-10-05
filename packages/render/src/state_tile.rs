@@ -65,9 +65,10 @@ pub fn state_tile(spec: &StateTileSpec, ctx: &RenderContext<'_>) -> Node {
     let mut el = el.child(value);
 
     // ── Trend row (optional) ──
-    // Contract §7: trend meaning lives in `trend_label` text; the glyph is
-    // decorative.
-    if spec.trend.is_some() || spec.trend_label.is_some() {
+    // Contract §7: trend meaning lives in readable text, not the decorative
+    // glyph. Svelte renders the row whenever `trend` is set and falls back
+    // to the trend token itself when no `trendLabel` is given.
+    if spec.trend.is_some() {
         let mut trend_row = Node::container();
         {
             let s = &mut trend_row.style;
@@ -78,13 +79,16 @@ pub fn state_tile(spec: &StateTileSpec, ctx: &RenderContext<'_>) -> Node {
 
         if spec.trend.is_some() {
             let mut glyph = Node::text(spec.trend_glyph());
+            // Svelte marks the trend icon `aria-hidden`: the glyph is
+            // decorative paint; the trend meaning lives in the label text.
+            glyph.a11y.hidden = Some(true);
             glyph.style.descriptor.text_color = Some(trend_color);
             glyph.style.text_size = Some(trend_size);
             glyph.style.text_weight = Some(600);
             trend_row = trend_row.child(glyph);
         }
 
-        if let Some(ref trend_label) = spec.trend_label {
+        if let Some(ref trend_label) = spec.trend_label.clone().or_else(|| spec.trend.clone()) {
             let mut t = Node::text(trend_label);
             t.style.descriptor.text_color = Some(trend_color);
             t.style.text_size = Some(trend_size);

@@ -2,11 +2,15 @@
 //!
 //! Contract: `docs/contracts/components/code.md`
 //! Ported from: `packages/jetstream/components/src/code.rs`. The copy button
-//! renders inert here — clipboard and the 2s check swap are host interactions.
+//! exposes its press through [`CodeHandlers::on_copy`]; clipboard and the 2s
+//! check swap stay host interactions.
 
+use std::sync::Arc;
+
+use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
-    MainAxisAlignment, Node, TextAlign,
+    CrossAxisAlignment, CursorHint, FocusRing, FontFamily, LayoutDirection, LayoutOverflow,
+    LayoutSizing, MainAxisAlignment, Node, NodeRole, TextAlign,
 };
 use poodle_specs::{CodeInlineVariant, CodeSpec, CodeTypography, CodeWrap};
 
@@ -23,7 +27,77 @@ fn rounded_all(node: &mut Node, r: f32) {
     c.bottom_left = r;
 }
 
+/// Copy affordance shared by the block toolbar and the inline fragment.
+/// Svelte renders a real `<button>` with an accessible label (contract §6);
+/// clipboard and the 2s check swap stay host-owned, but the affordance
+/// itself is a focusable button in every tier. `id` keeps the block and
+/// inline buttons distinctly addressable when both mount together.
+fn copy_button(
+    theme: &dyn ThemeProvider,
+    id: &str,
+    size_rem: f32,
+    icon_rem: f32,
+    source: &str,
+    copied: bool,
+    on_copy: Option<Arc<dyn Fn() + Send + Sync>>,
+) -> Node {
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let mut copy = Node::container();
+    copy.id = Some(id.to_string());
+    copy.a11y.role = Some(NodeRole::Button);
+    // Svelte swaps the label and glyph for 2s after a clipboard write;
+    // the host flips `copied` through the spec and owns the reset timer.
+    copy.a11y.label = Some(if copied {
+        "Copied".to_string()
+    } else {
+        "Copy to clipboard".to_string()
+    });
+    copy.a11y.tab_index = Some(0);
+    copy.interaction.focusable = true;
+    // The backend writes this to the platform clipboard on activation, so
+    // the default path copies with zero host code (contract §5/§10).
+    copy.interaction.copy_text = Some(source.to_string());
+    copy.style.focus_ring = Some(FocusRing {
+        color: theme.resolve_color("color.accent.focusRing"),
+        width: theme.resolve_border_width("border.width.focus"),
+        offset: rem_to_px(0.125),
+    });
+    {
+        let s = &mut copy.style;
+        s.descriptor.layout.width = LayoutSizing::Fixed(rem_to_px(size_rem));
+        s.descriptor.layout.height = LayoutSizing::Fixed(rem_to_px(size_rem));
+        s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+        s.descriptor.text_color = Some(text_secondary);
+        s.descriptor.cursor = CursorHint::Pointer;
+    }
+    rounded_all(&mut copy, rem_to_px(0.25));
+    if let Some(on_copy) = on_copy {
+        copy.interaction.on_activate = Some(Arc::new(move || on_copy()));
+    }
+    let mut icon = Node::icon(if copied { "check" } else { "copy" }, rem_to_px(icon_rem));
+    icon.style.descriptor.text_color = Some(text_secondary);
+    copy.child(icon)
+}
+
+pub struct CodeHandlers {
+    /// Fired when the copy affordance is activated. The host owns the
+    /// platform clipboard write and the 2s feedback swap (contract §4:
+    /// adapter-owned interaction); without a handler the button still
+    /// renders, focuses, and labels itself, but presses go nowhere.
+    pub on_copy: Option<Arc<dyn Fn() + Send + Sync>>,
+}
+
 pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
+    code_with_handlers(spec, ctx, CodeHandlers { on_copy: None })
+}
+
+pub fn code_with_handlers(
+    spec: &CodeSpec,
+    ctx: &RenderContext<'_>,
+    handlers: CodeHandlers,
+) -> Node {
     let theme = ctx.theme();
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
@@ -56,6 +130,13 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
             s.no_wrap = spec.wrap == CodeWrap::Normal
                 && !spec.content.is_empty()
                 && !contains_whitespace_break(&spec.content);
+            // Inside the inline wrap row the fragment needs the same shrink
+            // contract as a block source line, or the row width never
+            // constrains the wrapping text.
+            if spec.wrap == CodeWrap::Anywhere {
+                s.flex_grow = Some(1.0);
+                s.min_width = Some(0.0);
+            }
             if spec.inline_variant == CodeInlineVariant::Default {
                 let inline_bg = mix_srgb(panel, elevated, 0.72);
                 s.descriptor.layout.spacing.padding.left = rem_to_px(0.375);
@@ -68,7 +149,29 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
         if spec.inline_variant == CodeInlineVariant::Default {
             rounded_all(&mut el, rem_to_px(0.25));
         }
-        return el;
+        // Svelte always wraps the inline fragment in an inline-flex span
+        // with a 0.25rem gap and shows the compact copy button beside it
+        // when copyable (contract §2/§8: 1.25rem button, 0.75rem icon).
+        let mut wrap = Node::container();
+        {
+            let s = &mut wrap.style;
+            s.descriptor.layout.direction = LayoutDirection::Row;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            s.descriptor.layout.spacing.gap = rem_to_px(0.25);
+        }
+        wrap = wrap.child(el);
+        if spec.is_copyable {
+            wrap = wrap.child(copy_button(
+                theme,
+                "poodle-code-copy-inline",
+                1.25,
+                0.75,
+                &spec.content,
+                spec.copied,
+                handlers.on_copy,
+            ));
+        }
+        return wrap;
     }
 
     // ── Block mode ──
@@ -128,22 +231,15 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
         }
 
         if spec.is_copyable {
-            let mut copy = Node::container();
-            copy.id = Some("poodle-code-copy".to_string());
-            {
-                let s = &mut copy.style;
-                s.descriptor.layout.width = LayoutSizing::Fixed(rem_to_px(1.5));
-                s.descriptor.layout.height = LayoutSizing::Fixed(rem_to_px(1.5));
-                s.descriptor.layout.direction = LayoutDirection::Row;
-                s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-                s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
-                s.descriptor.text_color = Some(text_secondary);
-                s.descriptor.cursor = CursorHint::Pointer;
-            }
-            rounded_all(&mut copy, rem_to_px(0.25));
-            let mut icon = Node::icon("copy", rem_to_px(0.875));
-            icon.style.descriptor.text_color = Some(text_secondary);
-            toolbar = toolbar.child(copy.child(icon));
+            toolbar = toolbar.child(copy_button(
+                theme,
+                "poodle-code-copy",
+                1.5,
+                0.875,
+                &spec.content,
+                spec.copied,
+                handlers.on_copy,
+            ));
         }
 
         root = root.child(toolbar);
@@ -270,35 +366,57 @@ mod tests {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
         let ctx = RenderContext::new(&theme);
+        // Svelte wraps every inline fragment with the adjacent copy button
+        // by default; the fragment carries the wrap directives.
         let normal_token = code(
             &CodeSpec::new()
                 .with_content("very-long-identifier")
                 .with_inline(true),
             &ctx,
         );
-        assert!(normal_token.style.no_wrap);
-        assert!(!normal_token.style.wrap_anywhere);
-        assert!(normal_token.style.collapse_text_whitespace);
+        assert_eq!(normal_token.children.len(), 2);
+        let fragment = &normal_token.children[0];
+        assert!(fragment.style.no_wrap);
+        assert!(!fragment.style.wrap_anywhere);
+        assert!(fragment.style.collapse_text_whitespace);
+        let copy = &normal_token.children[1];
+        assert_eq!(copy.id.as_deref(), Some("poodle-code-copy-inline"));
+        assert_eq!(copy.a11y.role, Some(NodeRole::Button));
+        assert_eq!(copy.a11y.label.as_deref(), Some("Copy to clipboard"));
+        assert!(copy.interaction.focusable);
+
+        let bare = code(
+            &CodeSpec::new()
+                .with_content("very-long-identifier")
+                .with_inline(true)
+                .with_copyable(false),
+            &ctx,
+        );
+        assert_eq!(bare.children.len(), 1);
 
         let normal_words = code(
             &CodeSpec::new()
                 .with_content("first\nsecond")
-                .with_inline(true),
+                .with_inline(true)
+                .with_copyable(false),
             &ctx,
         );
-        assert!(normal_words.style.text_wrap);
-        assert!(!normal_words.style.no_wrap);
+        let words_fragment = &normal_words.children[0];
+        assert!(words_fragment.style.text_wrap);
+        assert!(!words_fragment.style.no_wrap);
 
         let anywhere = code(
             &CodeSpec::new()
                 .with_content("very-long-identifier")
                 .with_inline(true)
-                .with_wrap(CodeWrap::Anywhere),
+                .with_wrap(CodeWrap::Anywhere)
+                .with_copyable(false),
             &ctx,
         );
-        assert!(anywhere.style.text_wrap);
-        assert!(anywhere.style.wrap_anywhere);
-        assert!(!anywhere.style.no_wrap);
+        let anywhere_fragment = &anywhere.children[0];
+        assert!(anywhere_fragment.style.text_wrap);
+        assert!(anywhere_fragment.style.wrap_anywhere);
+        assert!(!anywhere_fragment.style.no_wrap);
     }
 
     #[test]

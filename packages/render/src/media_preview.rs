@@ -6,7 +6,7 @@
 //! Composes `card` (media slot) with `media_thumbnail`, header (eyebrow /
 //! title / description + pill metadata), and body caption per §3/§10.
 
-use poodle_node::{LayoutDirection, Node};
+use poodle_node::{LayoutDirection, Node, NodeRole};
 use poodle_specs::{CardSpec, MediaPreviewSpec, MediaThumbnailSpec};
 
 use crate::card::card;
@@ -51,7 +51,9 @@ pub fn media_preview_with_content(
     let mut thumb_spec = MediaThumbnailSpec::new(spec.kind)
         .with_state(spec.state)
         .with_aspect_ratio(spec.aspect_ratio)
-        .with_show_caption(false);
+        .with_show_caption(false)
+        // Contract §8: the thumbnail frame is described by the preview title.
+        .with_aria_label(spec.title.clone());
     if let Some(ref badge) = spec.badge {
         thumb_spec = thumb_spec.with_badge_label(badge.clone());
     }
@@ -80,6 +82,9 @@ pub fn media_preview_with_content(
         heading = heading.child(e);
     }
     let mut title = Node::text(&spec.title);
+    // Contract §3/Svelte `<h3>`: the title is a level-3 heading.
+    title.a11y.role = Some(NodeRole::Heading);
+    title.a11y.level = Some(3);
     title.style.descriptor.text_color = Some(text_primary);
     title.style.text_size = Some(title_size);
     title.style.text_weight = Some(600);
@@ -97,7 +102,11 @@ pub fn media_preview_with_content(
     let mut header = header.child(heading);
 
     if spec.thumbnail_meta.is_some() || !spec.metadata.is_empty() {
+        // Contract §3/Svelte `<ul>`: the pill list is a List of ListItems.
         let mut meta_list = Node::container();
+        meta_list.a11y.role = Some(NodeRole::List);
+        // Contract §8: the pill list names itself for assistive technology.
+        meta_list.a11y.label = Some("preview metadata".to_string());
         {
             let s = &mut meta_list.style;
             s.descriptor.layout.direction = LayoutDirection::Row;
@@ -111,6 +120,8 @@ pub fn media_preview_with_content(
             .chain(spec.metadata.iter().cloned());
         for item in items {
             let mut chip = Node::text(&item);
+            // Svelte `<li>`: each pill is a list item.
+            chip.a11y.role = Some(NodeRole::ListItem);
             {
                 let s = &mut chip.style;
                 s.descriptor.text_color = Some(text_secondary);
