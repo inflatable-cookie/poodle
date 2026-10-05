@@ -249,14 +249,14 @@ impl ThemeProvider for JetstreamThemeProvider {
     }
 
     fn resolve_opacity(&self, token: &str) -> f32 {
-        // Look up semantic tokens first
+        self.try_resolve_opacity(token).unwrap_or(1.0)
+    }
+
+    fn try_resolve_opacity(&self, token: &str) -> Option<f32> {
         if let Some(val) = match_semantic_space(token) {
-            return val;
+            return Some(val);
         }
-        if let Ok(val) = token.parse::<f32>() {
-            return val;
-        }
-        1.0
+        token.parse::<f32>().ok()
     }
 }
 

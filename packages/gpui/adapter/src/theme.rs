@@ -357,18 +357,21 @@ impl ThemeProvider for GpuiThemeProvider {
     }
 
     fn resolve_opacity(&self, token: &str) -> f32 {
-        // Check overrides
+        self.try_resolve_opacity(token).unwrap_or(1.0)
+    }
+
+    fn try_resolve_opacity(&self, token: &str) -> Option<f32> {
         for &(path, value) in &self.overrides {
             if path == token {
                 if let Ok(v) = value.parse::<f32>() {
-                    return v;
+                    return Some(v);
                 }
             }
         }
         match token {
-            "state.opacity.disabled" => typed::semantic::STATE_OPACITY_DISABLED,
-            "state.opacity.muted" => typed::semantic::STATE_OPACITY_MUTED,
-            _ => token.parse::<f32>().unwrap_or(1.0),
+            "state.opacity.disabled" => Some(typed::semantic::STATE_OPACITY_DISABLED),
+            "state.opacity.muted" => Some(typed::semantic::STATE_OPACITY_MUTED),
+            _ => token.parse::<f32>().ok(),
         }
     }
 }

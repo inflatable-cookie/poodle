@@ -648,12 +648,7 @@ fn keyboard_recipe_color(ctx: &RenderContext<'_>, hook: &str, fallback: ColorVal
 }
 
 fn keyboard_recipe_opacity(ctx: &RenderContext<'_>, hook: &str, fallback: f32) -> f32 {
-    let resolved = ctx.theme().resolve_opacity(hook);
-    if (resolved - 1.0).abs() < f32::EPSILON {
-        fallback
-    } else {
-        resolved
-    }
+    ctx.theme().try_resolve_opacity(hook).unwrap_or(fallback)
 }
 
 pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {

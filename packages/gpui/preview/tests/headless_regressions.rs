@@ -54324,6 +54324,7 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
         inner: GpuiThemeProvider,
         white_key: ColorValue,
         black_key: ColorValue,
+        disabled_opacity: f32,
     }
     impl ThemeProvider for KeyboardRecipeTheme {
         fn resolve_color(&self, token: &str) -> ColorValue {
@@ -54347,13 +54348,22 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
             self.inner.resolve_radius(token)
         }
         fn resolve_opacity(&self, token: &str) -> f32 {
-            self.inner.resolve_opacity(token)
+            self.try_resolve_opacity(token)
+                .unwrap_or_else(|| self.inner.resolve_opacity(token))
+        }
+        fn try_resolve_opacity(&self, token: &str) -> Option<f32> {
+            if token == "recipe.keyboard.disabled-opacity" {
+                Some(self.disabled_opacity)
+            } else {
+                self.inner.try_resolve_opacity(token)
+            }
         }
     }
     let recipe_theme = KeyboardRecipeTheme {
         inner: theme_provider.clone(),
         white_key: recipe_white,
         black_key: recipe_black,
+        disabled_opacity: 1.0,
     };
     let recipe_node = poodle_render::keyboard(&spec, &RenderContext::new(&recipe_theme));
     assert!(
@@ -54367,6 +54377,19 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
             child.a11y.role.is_none() && child.style.descriptor.background == Some(recipe_black)
         }),
         "recipe.keyboard.black-key override paints idle black keys, including a valid black"
+    );
+    let mut disabled_spec = spec.clone();
+    disabled_spec.visual_state.enabled = false;
+    let disabled_fallback = poodle_render::keyboard(&disabled_spec, &ctx);
+    assert_eq!(
+        disabled_fallback.style.descriptor.opacity,
+        theme_provider.resolve_opacity("state.opacity.disabled")
+    );
+    let disabled_recipe =
+        poodle_render::keyboard(&disabled_spec, &RenderContext::new(&recipe_theme));
+    assert_eq!(
+        disabled_recipe.style.descriptor.opacity, 1.0,
+        "recipe.keyboard.disabled-opacity override of 1.0 is kept, not treated as missing"
     );
 
     let mut focused_machine = KeyboardContext::default();
