@@ -81,16 +81,6 @@ export const AXIS_TEST_SIGNALS: Record<CensusAxis, RegExp[]> = {
  * not yet earn. Each entry is a recorded refusal with its reason, never a
  * silent skip; remove the entry when the gap closes. */
 export const WITHHELD_AXES: Record<string, Partial<Record<CensusAxis, string>>> = {
-  NavigationMenu: {
-    accessibility:
-      "the contract requires a named <nav> landmark, and the node vocabulary has no navigation NodeRole yet; the mounted tree exposes only a roleless labelled container",
-  },
-  Meter: {
-    accessibility: "needs a Meter / content-info node role (planned)",
-  },
-  StatusBar: {
-    accessibility: "needs a Meter / content-info node role (planned)",
-  },
   CardToggleGroup: {
     // Planner ruling 2026-10-04 (brief v2): the contract's
     // `min(100%, max(min-width, track width))` clamp stays normative. GPUI

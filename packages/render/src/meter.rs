@@ -10,6 +10,7 @@
 
 use poodle_node::{
     ColorValue, CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
+    NodeRole,
 };
 use poodle_specs::{ControlSize, MeterShape, MeterSpec};
 
@@ -100,6 +101,11 @@ pub fn meter(spec: &MeterSpec, ctx: &RenderContext<'_>) -> Node {
     } else {
         spec.max
     };
+    // Contract §6: bounded-value meter semantics, distinct from progress.
+    // The value, bounds and value text are the same three the ARIA range
+    // keeps together; the role is what makes them a meter rather than a
+    // progress bar.
+    root.a11y.role = Some(NodeRole::Meter);
     root.a11y.value = Some(spec.safe_value());
     root.a11y.value_min = Some(spec.min);
     root.a11y.value_max = Some(safe_max);
