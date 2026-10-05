@@ -14,6 +14,7 @@ use poodle_specs::{
     KnobSpec, ModMatrixGridSpec, Orientation, ValueReadoutSpec, WaveformDisplaySpec, XYPadSpec,
 };
 
+use crate::color::{mix_srgb, with_alpha, BLACK, WHITE};
 use crate::context::RenderContext;
 use crate::presentation::{rem_to_px, size_font_rem};
 
@@ -641,6 +642,24 @@ pub fn gain_reduction_meter(spec: &GainReductionMeterSpec, ctx: &RenderContext<'
     root
 }
 
+fn keyboard_recipe_color(ctx: &RenderContext<'_>, hook: &str, fallback: ColorValue) -> ColorValue {
+    let resolved = ctx.theme().resolve_color(hook);
+    if resolved == BLACK {
+        fallback
+    } else {
+        resolved
+    }
+}
+
+fn keyboard_recipe_opacity(ctx: &RenderContext<'_>, hook: &str, fallback: f32) -> f32 {
+    let resolved = ctx.theme().resolve_opacity(hook);
+    if (resolved - 1.0).abs() < f32::EPSILON {
+        fallback
+    } else {
+        resolved
+    }
+}
+
 pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
     let state = &spec.visual_state;
     let size = ctx.resolve_size(spec.size, spec.size_role);
@@ -653,12 +672,45 @@ pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
     } else {
         (short, long)
     };
-    let white_idle = ctx.theme().resolve_color("#f7fafd");
-    let black_idle = ctx.theme().resolve_color("#131a22");
     let accent = ctx.theme().resolve_color("color.accent.base");
-    let white_held = crate::color::mix_srgb(accent, ColorValue(1.0, 1.0, 1.0, 1.0), 0.60);
+    let white_idle = keyboard_recipe_color(
+        ctx,
+        "recipe.keyboard.white-key",
+        poodle_tokens::typed::primitives::COLOR_NEUTRAL_25,
+    );
+    let black_idle = keyboard_recipe_color(
+        ctx,
+        "recipe.keyboard.black-key",
+        poodle_tokens::typed::primitives::COLOR_NEUTRAL_900,
+    );
+    let white_held = keyboard_recipe_color(
+        ctx,
+        "recipe.keyboard.white-key-held",
+        mix_srgb(accent, WHITE, 0.60),
+    );
+    let black_held = keyboard_recipe_color(ctx, "recipe.keyboard.black-key-held", accent);
+    let fill = keyboard_recipe_color(
+        ctx,
+        "recipe.keyboard.fill",
+        ctx.theme().resolve_color("color.background.surface"),
+    );
+    let container_border = keyboard_recipe_color(
+        ctx,
+        "recipe.keyboard.border",
+        ctx.theme().resolve_color("color.border.default"),
+    );
+    let key_border = keyboard_recipe_color(
+        ctx,
+        "recipe.keyboard.border",
+        with_alpha(poodle_tokens::typed::primitives::COLOR_NEUTRAL_900, 0.42),
+    );
+    let external_ring = keyboard_recipe_color(ctx, "recipe.keyboard.external-ring", accent);
     let focus_ring = FocusRing {
-        color: ctx.theme().resolve_color("color.accent.focusRing"),
+        color: keyboard_recipe_color(
+            ctx,
+            "recipe.keyboard.focus-ring",
+            ctx.theme().resolve_color("color.accent.focusRing"),
+        ),
         width: rem_to_px(0.125),
         offset: rem_to_px(-0.1875),
     };
@@ -666,9 +718,9 @@ pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
     root.id = Some("keyboard-root".into());
     root.style.descriptor.layout.width = LayoutSizing::Fixed(width);
     root.style.descriptor.layout.height = LayoutSizing::Fixed(height);
-    root.style.descriptor.background = Some(ctx.theme().resolve_color("color.background.surface"));
+    root.style.descriptor.background = Some(fill);
     root.style.descriptor.border.width = density_metric(density, [0.5, 1.0, 2.0]);
-    root.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
+    root.style.descriptor.border.color = container_border;
     root.a11y.role = Some(NodeRole::Toolbar);
     root.a11y.label = Some(spec.aria_label.clone());
     root.a11y.orientation = Some(if horizontal {
@@ -681,12 +733,16 @@ pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
     root.a11y.tab_index = Some(-1);
     if state.enabled {
         root.style.focus_ring = Some(FocusRing {
-            color: crate::color::with_alpha(accent, 0.32),
+            color: with_alpha(accent, 0.32),
             width: rem_to_px(0.1875),
             offset: 0.0,
         });
     } else {
-        root.style.descriptor.opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
+        root.style.descriptor.opacity = keyboard_recipe_opacity(
+            ctx,
+            "recipe.keyboard.disabled-opacity",
+            ctx.theme().resolve_opacity("state.opacity.disabled"),
+        );
     }
     let first_note = state.keys.first().map(|key| key.note);
     let any_focused = state.keys.iter().any(|key| key.focused);
@@ -695,7 +751,7 @@ pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
         let held = key.held || key.externally_held;
         visual.style.descriptor.background = Some(if held {
             if key.black {
-                accent
+                black_held
             } else {
                 white_held
             }
@@ -705,10 +761,13 @@ pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
             white_idle
         });
         visual.style.descriptor.border.width = density_metric(density, [0.0, 1.0, 2.0]);
-        visual.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
+        visual.style.descriptor.border.color = key_border;
         if key.externally_held {
             visual.style.descriptor.border.width = rem_to_px(0.125);
-            visual.style.descriptor.border.color = accent;
+            visual.style.descriptor.border.color = external_ring;
+        }
+        if key.focused {
+            visual.style.focus_ring = Some(focus_ring);
         }
         if horizontal {
             visual.style.descriptor.layout.width =
@@ -742,9 +801,6 @@ pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
         } else {
             None
         };
-        if state.enabled && (key.focused || tab_stop) {
-            control.style.focus_ring = Some(focus_ring);
-        }
         control.style.descriptor.layout.width = LayoutSizing::Fixed(1.0);
         control.style.descriptor.layout.height = LayoutSizing::Fixed(1.0);
         if horizontal {

@@ -9,7 +9,8 @@ use std::sync::{Arc, Mutex};
 use poodle_headless::audio::{
     drag_number_transition, fader_transition, format_value, keyboard_computer_key_down,
     keyboard_computer_key_up, keyboard_focus_note, keyboard_hit_test, keyboard_move_focus,
-    keyboard_press, keyboard_release, keyboard_retarget, keyboard_velocity_at_point,
+    keyboard_press, keyboard_release, keyboard_retarget, keyboard_set_disabled,
+    keyboard_set_octave_shift, keyboard_set_range, keyboard_velocity_at_point,
     keyboard_visual_state, knob_point_to_norm, knob_transition, xy_pad_transition, AudioPoint,
     AudioRect, AudioValueContext, AudioValueEffect, AudioValueEvent, DragNumberContext,
     FaderContext, FaderOrientation, KeyboardContext, KeyboardEffect, KnobContext, KnobDragMode,
@@ -1953,20 +1954,31 @@ fn run_keyboard(
     apply_keyboard_effects(&effects, handlers);
 }
 
-fn apply_host_keyboard(machine: &mut KeyboardContext, spec: &KeyboardSpec) {
+fn apply_host_keyboard(
+    mut machine: KeyboardContext,
+    spec: &KeyboardSpec,
+) -> (KeyboardContext, Vec<KeyboardEffect>) {
     let state = &spec.visual_state;
-    machine.first_note = state.first_note;
-    machine.last_note = state.last_note;
-    machine.orientation = state.orientation;
-    machine.octave_shift = state.octave_shift;
-    machine.external_held_notes = state.external_held_notes.clone();
-    let was_disabled = machine.disabled;
-    machine.disabled = !state.enabled;
-    if machine.disabled && !was_disabled {
-        let (released, _) = poodle_headless::audio::keyboard_release_all(machine.clone());
-        *machine = released;
-        machine.disabled = true;
+    let mut effects = Vec::new();
+    if machine.first_note != state.first_note || machine.last_note != state.last_note {
+        let (next, more) = keyboard_set_range(machine, state.first_note, state.last_note);
+        machine = next;
+        effects.extend(more);
     }
+    if machine.octave_shift != state.octave_shift {
+        let (next, more) = keyboard_set_octave_shift(machine, state.octave_shift);
+        machine = next;
+        effects.extend(more);
+    }
+    let host_disabled = !state.enabled;
+    if machine.disabled != host_disabled {
+        let (next, more) = keyboard_set_disabled(machine, host_disabled);
+        machine = next;
+        effects.extend(more);
+    }
+    machine.orientation = state.orientation;
+    machine.external_held_notes = state.external_held_notes.clone();
+    (machine, effects)
 }
 
 pub fn bind_keyboard(
@@ -1978,10 +1990,7 @@ pub fn bind_keyboard(
 ) {
     let _ = ctx;
     node.id = Some(audio_root_id(&handlers.instance_id));
-    {
-        let mut runtime = live.lock().expect("keyboard machine");
-        apply_host_keyboard(&mut runtime.machine, spec);
-    }
+    run_keyboard(live, |machine| apply_host_keyboard(machine, spec), handlers);
     let enabled = {
         let runtime = live.lock().expect("keyboard machine");
         !runtime.machine.disabled

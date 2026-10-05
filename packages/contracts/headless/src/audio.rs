@@ -2095,12 +2095,16 @@ pub fn keyboard_move_focus(mut context: KeyboardContext, direction: i8) -> Keybo
     context
 }
 
-pub fn keyboard_release_all(context: KeyboardContext) -> (KeyboardContext, Vec<KeyboardEffect>) {
+fn keyboard_release_matching(
+    context: KeyboardContext,
+    predicate: impl Fn(&str, u8) -> bool,
+) -> (KeyboardContext, Vec<KeyboardEffect>) {
     let mut effects = Vec::new();
     let mut next = context;
     let inputs: Vec<String> = next
         .active_inputs
         .iter()
+        .filter(|active| predicate(&active.0, active.1))
         .map(|active| active.0.clone())
         .collect();
     for input in inputs {
@@ -2108,6 +2112,50 @@ pub fn keyboard_release_all(context: KeyboardContext) -> (KeyboardContext, Vec<K
         next = released;
         effects.extend(more);
     }
+    (next, effects)
+}
+
+pub fn keyboard_release_all(context: KeyboardContext) -> (KeyboardContext, Vec<KeyboardEffect>) {
+    keyboard_release_matching(context, |_, _| true)
+}
+
+/// Svelte `SET_RANGE`: notes outside the inclusive bounds emit `noteOff`.
+pub fn keyboard_set_range(
+    context: KeyboardContext,
+    first_note: u8,
+    last_note: u8,
+) -> (KeyboardContext, Vec<KeyboardEffect>) {
+    let first = first_note.min(last_note);
+    let last = first_note.max(last_note);
+    let (mut next, effects) =
+        keyboard_release_matching(context, |_, note| note < first || note > last);
+    next.first_note = first;
+    next.last_note = last;
+    (next, effects)
+}
+
+/// Svelte `SET_OCTAVE_SHIFT`: computer-key inputs (`key:…`) emit `noteOff`.
+pub fn keyboard_set_octave_shift(
+    context: KeyboardContext,
+    octave_shift: i8,
+) -> (KeyboardContext, Vec<KeyboardEffect>) {
+    let (mut next, effects) = keyboard_release_matching(context, |id, _| id.starts_with("key:"));
+    next.octave_shift = octave_shift;
+    (next, effects)
+}
+
+/// Svelte `SET_DISABLED`: `true` releases every local input, then disables.
+pub fn keyboard_set_disabled(
+    context: KeyboardContext,
+    disabled: bool,
+) -> (KeyboardContext, Vec<KeyboardEffect>) {
+    if !disabled {
+        let mut next = context;
+        next.disabled = false;
+        return (next, vec![]);
+    }
+    let (mut next, effects) = keyboard_release_all(context);
+    next.disabled = true;
     (next, effects)
 }
 
@@ -2729,6 +2777,41 @@ mod tests {
         high.octave_shift = -1;
         assert_eq!(keyboard_computer_note(&high, "a"), None);
         assert_eq!(keyboard_computer_key_down(high, "a", 90, false).1, vec![]);
+    }
+
+    #[test]
+    fn range_octave_and_disable_changes_close_held_notes() {
+        let (context, _) = keyboard_press(KeyboardContext::default(), "pointer", 60, 127);
+        let (context, effects) = keyboard_set_range(context, 61, 72);
+        assert_eq!(effects, vec![KeyboardEffect::NoteOff { note: 60 }]);
+        assert_eq!(context.first_note, 61);
+        assert!(context.active_inputs.is_empty());
+
+        let (context, _) = keyboard_press(KeyboardContext::default(), "pointer", 60, 127);
+        let (context, effects) = keyboard_set_disabled(context, true);
+        assert_eq!(effects, vec![KeyboardEffect::NoteOff { note: 60 }]);
+        assert!(context.disabled);
+
+        let (context, _) = keyboard_computer_key_down(
+            KeyboardContext {
+                first_note: 48,
+                last_note: 96,
+                ..KeyboardContext::default()
+            },
+            "a",
+            90,
+            false,
+        );
+        let (context, effects) = keyboard_set_octave_shift(context, 1);
+        assert_eq!(effects, vec![KeyboardEffect::NoteOff { note: 60 }]);
+        assert_eq!(context.octave_shift, 1);
+        assert!(context.active_inputs.is_empty());
+
+        let (context, _) = keyboard_press(KeyboardContext::default(), "pointer", 60, 64);
+        let (context, effects) = keyboard_set_octave_shift(context, 1);
+        assert!(effects.is_empty());
+        assert_eq!(context.active_inputs[0].1, 60);
+        assert_eq!(context.octave_shift, 1);
     }
 
     #[test]

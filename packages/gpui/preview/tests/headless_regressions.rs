@@ -54308,7 +54308,7 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
     compact.density = Some(ControlDensity::Compact);
     let compact_node = poodle_render::keyboard(&compact, &ctx);
     assert_eq!(compact_node.style.descriptor.border.width, 0.5);
-    let white_idle = theme_provider.resolve_color("#f7fafd");
+    let white_idle = poodle_tokens::typed::primitives::COLOR_NEUTRAL_25;
     let visual_c4 = node
         .children
         .iter()
@@ -54318,19 +54318,84 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
         .expect("idle white keys use the recipe fill");
     assert_eq!(visual_c4.style.descriptor.background, Some(white_idle));
 
+    let recipe_white = ColorValue(0.11, 0.72, 0.44, 1.0);
+    struct KeyboardRecipeTheme {
+        inner: GpuiThemeProvider,
+        white_key: ColorValue,
+    }
+    impl ThemeProvider for KeyboardRecipeTheme {
+        fn resolve_color(&self, token: &str) -> ColorValue {
+            if token == "recipe.keyboard.white-key" {
+                self.white_key
+            } else {
+                self.inner.resolve_color(token)
+            }
+        }
+        fn resolve_space(&self, token: &str) -> f32 {
+            self.inner.resolve_space(token)
+        }
+        fn resolve_border_width(&self, token: &str) -> f32 {
+            self.inner.resolve_border_width(token)
+        }
+        fn resolve_radius(&self, token: &str) -> f32 {
+            self.inner.resolve_radius(token)
+        }
+        fn resolve_opacity(&self, token: &str) -> f32 {
+            self.inner.resolve_opacity(token)
+        }
+    }
+    let recipe_theme = KeyboardRecipeTheme {
+        inner: theme_provider.clone(),
+        white_key: recipe_white,
+    };
+    let recipe_node = poodle_render::keyboard(&spec, &RenderContext::new(&recipe_theme));
+    assert!(
+        recipe_node.children.iter().any(|child| {
+            child.a11y.role.is_none() && child.style.descriptor.background == Some(recipe_white)
+        }),
+        "recipe.keyboard.white-key override paints idle white keys"
+    );
+
+    let mut focused_machine = KeyboardContext::default();
+    focused_machine.focused_note = Some(60);
+    let focused_node = poodle_render::keyboard(
+        &KeyboardSpec::new(poodle_headless::audio::keyboard_visual_state(
+            &focused_machine,
+        )),
+        &ctx,
+    );
+    let focused_visual = focused_node
+        .children
+        .iter()
+        .find(|child| child.a11y.role.is_none() && child.style.focus_ring.is_some())
+        .expect("visible key carries the contract focus ring");
+    let ring = focused_visual
+        .style
+        .focus_ring
+        .expect("focused visual key ring");
+    assert_eq!(ring.width, rem_to_px(0.125));
+    assert_eq!(ring.offset, rem_to_px(-0.1875));
+    assert_eq!(
+        ring.color,
+        theme_provider.resolve_color("color.accent.focusRing")
+    );
+    let focused_control = focused_node
+        .find(&|child| child.id.as_deref() == Some("keyboard-root:note-60"))
+        .expect("C4 control");
+    assert!(
+        focused_control.style.focus_ring.is_none(),
+        "1px key control stays outline-none like Svelte"
+    );
+
     run_headless(|cx| {
         poodle_gpui_node_backend::begin_probe_capture();
         let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
         let live = Arc::new(Mutex::new(poodle_render::KeyboardLive::from_context(
             KeyboardContext::default(),
         )));
-        let build = || {
+        let build_from = |spec: KeyboardSpec| {
             let events = Arc::clone(&payloads);
             let off_events = Arc::clone(&payloads);
-            let spec = poodle_render::keyboard_spec_from_context(
-                &live.lock().expect("keyboard machine").machine,
-                "Keyboard",
-            );
             poodle_render::keyboard_with_handlers(
                 &spec,
                 &RenderContext::new(&theme_provider),
@@ -54349,6 +54414,13 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
                     })),
                 &live,
             )
+        };
+        let build = || {
+            let spec = poodle_render::keyboard_spec_from_context(
+                &live.lock().expect("keyboard machine").machine,
+                "Keyboard",
+            );
+            build_from(spec)
         };
         let mounted = Arc::new(Mutex::new(build()));
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 200.0);
@@ -54410,6 +54482,123 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
             .machine
             .active_inputs
             .is_empty());
+
+        driver.focus_element(ROOT);
+        driver.dispatch_key_press("a");
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.0 == "key:a" && active.1 == 60),
+            "computer key A is held before the host octave prop"
+        );
+        {
+            let mut host = poodle_render::keyboard_spec_from_context(
+                &live.lock().expect("keyboard machine").machine,
+                "Keyboard",
+            );
+            host.visual_state.octave_shift = 1;
+            *mounted.lock().expect("keyboard node") = build_from(host);
+        }
+        driver.draw_frame();
+        {
+            let machine = live.lock().expect("keyboard machine").machine.clone();
+            assert_eq!(machine.octave_shift, 1);
+            assert!(
+                machine.active_inputs.is_empty(),
+                "SET_OCTAVE_SHIFT releases computer-key inputs: {:?}",
+                machine.active_inputs
+            );
+        }
+        assert!(
+            payloads
+                .lock()
+                .expect("payloads lock")
+                .iter()
+                .any(|entry| entry == "noteOff:60"),
+            "host octaveShift emits noteOff for the held computer key"
+        );
+        driver.dispatch_key_release("a");
+        live.lock().expect("keyboard machine").machine.octave_shift = 0;
+        *mounted.lock().expect("keyboard node") = build();
+        driver.draw_frame();
+
+        driver.pointer_press(press_at(0.5, 0.85));
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.1 == 60),
+            "pointer holds C4 before the host range prop"
+        );
+        {
+            let mut host = poodle_render::keyboard_spec_from_context(
+                &live.lock().expect("keyboard machine").machine,
+                "Keyboard",
+            );
+            host.visual_state.first_note = 61;
+            *mounted.lock().expect("keyboard node") = build_from(host);
+        }
+        driver.draw_frame();
+        {
+            let machine = live.lock().expect("keyboard machine").machine.clone();
+            assert_eq!(machine.first_note, 61);
+            assert!(
+                !machine.active_inputs.iter().any(|active| active.1 == 60),
+                "SET_RANGE releases notes outside the new bounds: {:?}",
+                machine.active_inputs
+            );
+        }
+        driver.pointer_release(press_at(0.5, 0.85));
+        live.lock().expect("keyboard machine").machine.first_note = 48;
+        *mounted.lock().expect("keyboard node") = build();
+        driver.draw_frame();
+
+        driver.focus_element(ROOT);
+        driver.dispatch_key_press("a");
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.1 == 60),
+            "computer key A is held before the host disabled prop"
+        );
+        {
+            let mut host = poodle_render::keyboard_spec_from_context(
+                &live.lock().expect("keyboard machine").machine,
+                "Keyboard",
+            );
+            host.visual_state.enabled = false;
+            *mounted.lock().expect("keyboard node") = build_from(host);
+        }
+        driver.draw_frame();
+        {
+            let machine = live.lock().expect("keyboard machine").machine.clone();
+            assert!(machine.disabled);
+            assert!(
+                machine.active_inputs.is_empty(),
+                "SET_DISABLED releases held notes: {:?}",
+                machine.active_inputs
+            );
+        }
+        assert!(
+            payloads
+                .lock()
+                .expect("payloads lock")
+                .iter()
+                .any(|entry| entry == "noteOff:60"),
+            "host disabled emits noteOff"
+        );
+        driver.dispatch_key_release("a");
+        live.lock().expect("keyboard machine").machine.disabled = false;
+        *mounted.lock().expect("keyboard node") = build();
+        driver.draw_frame();
 
         live.lock().expect("keyboard machine").machine.octave_shift = 1;
         *mounted.lock().expect("keyboard node") = build();
@@ -54473,6 +54662,27 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
             live.lock().expect("keyboard machine").machine.focused_note,
             Some(61),
             "ArrowRight steps pitch"
+        );
+        *mounted.lock().expect("keyboard node") = build();
+        driver.draw_frame();
+        let focused_tree = mounted.lock().expect("keyboard node").clone();
+        let mounted_visual = focused_tree
+            .children
+            .iter()
+            .find(|child| child.a11y.role.is_none() && child.style.focus_ring.is_some())
+            .expect("mounted focused key paints the visible ring");
+        let mounted_ring = mounted_visual
+            .style
+            .focus_ring
+            .expect("mounted visible focus ring");
+        assert_eq!(mounted_ring.width, rem_to_px(0.125));
+        assert_eq!(mounted_ring.offset, rem_to_px(-0.1875));
+        let mounted_control = focused_tree
+            .find(&|child| child.id.as_deref() == Some("keyboard-main:note-61"))
+            .expect("C#4 control after ArrowRight");
+        assert!(
+            mounted_control.style.focus_ring.is_none(),
+            "mounted 1px control does not carry the visible focus ring"
         );
 
         let log = payloads.lock().expect("payloads lock").clone();
