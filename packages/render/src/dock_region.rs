@@ -129,12 +129,13 @@ pub fn dock_region(
     let active = spec.current_value().map(|s| s.to_string());
     // Svelte names the region `ariaLabel ?? "{edge} dock"`; an unnamed
     // region keeps the edge default so collapsed postures never lose their
-    // accessible name either.
-    let region_label = spec
-        .aria_label
+    // accessible name either. The nested tab strip takes the panels name
+    // Svelte passes its Tabs: `ariaLabel ?? "{edge} dock panels"`.
+    let aria_name = spec.aria_label.clone().filter(|label| !label.is_empty());
+    let region_label = aria_name
         .clone()
-        .filter(|label| !label.is_empty())
         .unwrap_or_else(|| format!("{edge_name} dock"));
+    let panels_label = aria_name.unwrap_or_else(|| format!("{edge_name} dock panels"));
 
     // ── Root emphasis treatment ────────────────────────────────
     // Standard: panel fill + subtle border. Quiet: transparent. Strong: accent
@@ -634,8 +635,18 @@ pub fn dock_region(
                 strip = strip.child(build_toggle(true));
             }
             if spec.show_tabs {
+                // The icon tabs keep their own nested tablist, as in the
+                // expanded strip; the toggle is not a tab and stays out.
+                let mut tab_list = Node::container();
+                tab_list.a11y.role = Some(NodeRole::TabList);
+                tab_list.a11y.label = Some(panels_label.clone());
+                {
+                    let s = &mut tab_list.style;
+                    s.descriptor.layout.direction = LayoutDirection::Column;
+                    s.descriptor.layout.spacing.gap = space_y * 0.5;
+                }
                 for (index, item) in spec.items.iter().enumerate() {
-                    strip = strip.child(build_tab(
+                    tab_list = tab_list.child(build_tab(
                         &item.value,
                         &item.label,
                         item.icon.as_deref(),
@@ -644,6 +655,7 @@ pub fn dock_region(
                         index,
                     ));
                 }
+                strip = strip.child(tab_list);
             }
             strip.a11y.role = Some(NodeRole::Region);
             strip.a11y.label = Some(region_label.clone());
@@ -666,8 +678,19 @@ pub fn dock_region(
             }
             let mut strip = strip;
             if spec.show_tabs {
+                // The icon tabs keep their own nested tablist, as in the
+                // expanded strip; the toggle is not a tab and stays out.
+                let mut tab_list = Node::container();
+                tab_list.a11y.role = Some(NodeRole::TabList);
+                tab_list.a11y.label = Some(panels_label.clone());
+                {
+                    let s = &mut tab_list.style;
+                    s.descriptor.layout.direction = LayoutDirection::Row;
+                    s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+                    s.descriptor.layout.spacing.gap = tab_gap;
+                }
                 for (index, item) in spec.items.iter().enumerate() {
-                    strip = strip.child(build_tab(
+                    tab_list = tab_list.child(build_tab(
                         &item.value,
                         &item.label,
                         item.icon.as_deref(),
@@ -676,6 +699,7 @@ pub fn dock_region(
                         index,
                     ));
                 }
+                strip = strip.child(tab_list);
             }
             if spec.is_collapsible {
                 strip = strip.child(build_toggle(false));
@@ -748,12 +772,7 @@ pub fn dock_region(
         // Svelte names it `ariaLabel ?? "{edge} dock panels"`.
         let mut tab_list = Node::container();
         tab_list.a11y.role = Some(NodeRole::TabList);
-        tab_list.a11y.label = Some(
-            spec.aria_label
-                .clone()
-                .filter(|label| !label.is_empty())
-                .unwrap_or_else(|| format!("{edge_name} dock panels")),
-        );
+        tab_list.a11y.label = Some(panels_label.clone());
         {
             let s = &mut tab_list.style;
             if is_tabs_on_edge {
@@ -1329,6 +1348,44 @@ mod tests {
                 .is_some(),
             "the tablist owns the tab buttons"
         );
+    }
+
+    /// Collapsed icon strips keep the same nesting: the outer node stays
+    // the named region on side and top edges, and the icon tabs sit in a
+    /// named nested tablist the toggle stays out of.
+    #[test]
+    fn collapsed_icon_strips_nest_a_named_tablist_under_the_region() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        for edge in [DockEdge::Left, DockEdge::Top] {
+            let collapsed = dock_region(
+                &DockRegionSpec::new(edge, vec![PanelTabItem::new("search", "Search")])
+                    .with_collapsible(true)
+                    .with_collapsed(true),
+                &ctx,
+                None,
+                DockRegionHandlers::default(),
+            );
+            let edge_name = format!("{edge:?}").to_lowercase();
+            assert_eq!(collapsed.a11y.role, Some(poodle_node::NodeRole::Region));
+            assert_eq!(
+                collapsed.a11y.label.as_deref(),
+                Some(format!("{edge_name} dock").as_str())
+            );
+            let strip = collapsed
+                .find(&|n| n.a11y.role == Some(poodle_node::NodeRole::TabList))
+                .expect("nested tab strip");
+            assert_eq!(
+                strip.a11y.label.as_deref(),
+                Some(format!("{edge_name} dock panels").as_str())
+            );
+            assert!(
+                strip
+                    .find(&|n| n.id.as_deref() == Some("dock-tab-search"))
+                    .is_some(),
+                "the tablist owns the icon tab"
+            );
+        }
     }
 
     /// g16.100. `show_tabs` is a portable field: every mode that draws a

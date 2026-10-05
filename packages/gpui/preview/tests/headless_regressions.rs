@@ -16675,6 +16675,31 @@ fn dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input() {
             after_collapse.iter().any(|t| t == "Tab: search"),
             "the stored tab survives collapse"
         );
+
+        // Collapsed icon strip: the outer node stays the named region and
+        // the icon tabs sit in the nested named tablist, matching Svelte's
+        // section/Tabs split in this posture too.
+        {
+            let mounted_node = mounted.lock().unwrap();
+            let region = mounted_node
+                .find(&|n| n.a11y.label.as_deref() == Some("left dock"))
+                .expect("collapsed region keeps its accessible name");
+            assert_eq!(region.a11y.role, Some(NodeRole::Region));
+            let tablist = mounted_node
+                .find(&|n| n.a11y.role == Some(NodeRole::TabList))
+                .expect("collapsed strip nests the tablist");
+            assert_eq!(
+                tablist.a11y.label.as_deref(),
+                Some("left dock panels"),
+                "the collapsed strip carries Svelte's panels name"
+            );
+            assert!(
+                tablist
+                    .find(&|n| n.id.as_deref() == Some("dock-tab-search"))
+                    .is_some(),
+                "the collapsed tablist owns the icon tab"
+            );
+        }
     });
 }
 
