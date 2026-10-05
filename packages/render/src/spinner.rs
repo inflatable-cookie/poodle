@@ -35,12 +35,16 @@ pub fn spinner(spec: &SpinnerSpec, ctx: &RenderContext<'_>) -> Node {
             ctx.motion_policy(),
             ctx.first_frame_committed(),
         ),
-        SpinnerVariant::Dots => build_dots(tone_color),
+        SpinnerVariant::Dots => {
+            build_dots(tone_color, ctx.motion_policy(), ctx.first_frame_committed())
+        }
     };
-    if let Some(label) = spec.aria_label.as_deref() {
+    if let Some(label) = spec.aria_label.as_deref().filter(|label| !label.is_empty()) {
         root.a11y.label = Some(label.to_string());
+        root.a11y.role = Some(NodeRole::Status);
+    } else {
+        root.a11y.hidden = Some(true);
     }
-    root.a11y.role = Some(NodeRole::Status);
     root
 }
 
@@ -115,8 +119,12 @@ fn build_grid(
     root
 }
 
-/// Dots: three static dots, the quietest variant.
-fn build_dots(tone: ColorValue) -> Node {
+/// Dots: three staggered rises, the quietest variant.
+fn build_dots(
+    tone: ColorValue,
+    policy: poodle_headless::motion_policy::MotionPolicy,
+    first_frame_committed: bool,
+) -> Node {
     let dot = rem_to_px(0.25);
     let gap = rem_to_px(0.1875);
 
@@ -127,7 +135,7 @@ fn build_dots(tone: ColorValue) -> Node {
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.spacing.gap = gap;
     }
-    for _ in 0..3 {
+    for index in 0..3 {
         let mut d = Node::container();
         {
             let s = &mut d.style;
@@ -138,10 +146,53 @@ fn build_dots(tone: ColorValue) -> Node {
             s.descriptor.corner_radii.bottom_right = 999.0;
             s.descriptor.corner_radii.bottom_left = 999.0;
             s.descriptor.background = Some(tone);
+            s.descriptor.opacity = 0.3;
+            s.animation = crate::motion::loop_animation_for_policy(
+                policy,
+                dot_pulse(index),
+                first_frame_committed,
+            );
         }
         row = row.child(d);
     }
     row
+}
+
+/// Match the web dots' 1.05s opacity/raise loop and 0.14s phase stagger.
+fn dot_pulse(index: usize) -> NodeAnimation {
+    let phase = index as f32 * (0.14 / 1.05);
+    let sample = |t: f32| -> (f32, f32) {
+        let local = (t - phase).rem_euclid(1.0);
+        let intensity = if local <= 0.35 {
+            local / 0.35
+        } else if local <= 0.7 {
+            (0.7 - local) / 0.35
+        } else {
+            0.0
+        }
+        .clamp(0.0, 1.0);
+        (0.3 + 0.7 * intensity, -rem_to_px(0.125) * intensity)
+    };
+    let keyframes = (0..=8)
+        .map(|step| {
+            let at = step as f32 / 8.0;
+            let (opacity, translate_y) = sample(at);
+            AnimKeyframe {
+                at,
+                values: vec![
+                    (AnimProperty::Opacity, opacity),
+                    (AnimProperty::TranslateY, translate_y),
+                ],
+            }
+        })
+        .collect();
+    NodeAnimation {
+        key: format!("poodle-spinner-dot-{index}"),
+        keyframes,
+        duration_secs: 1.05,
+        easing: AnimEasing::EaseInOut,
+        loop_mode: AnimLoop::Loop,
+    }
 }
 
 /// Looping opacity pulse: a sine sweep through the contract band, phase-shifted

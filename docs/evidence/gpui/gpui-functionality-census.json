@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "539057155aa20e720e9e4d60fe97a8afa58f69b6",
+  "source_commit": "fa32bb0b041f0d0ef98c9392b5c2ab7678baf155",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -2095,11 +2095,20 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_meter"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_meter"
+        }
+      ],
       "missing": [
-        "semantic",
-        "accessibility",
-        "visual"
+        "accessibility"
       ],
       "holds": [
         {
@@ -2109,9 +2118,12 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Meter--first-mounted-parity-meter.json"
+      ],
       "refusals": [
-        "No validated receipt and no retained expected test for Meter; every required capability stays missing."
+        "Expected test first_mounted_parity_meter shows accessibility signals, but accessibility is withheld: needs a Meter / content-info node role (planned).",
+        "Expected test first_mounted_parity_meter proves no accessibility claim; accessibility stays missing."
       ]
     },
     {
@@ -2954,12 +2966,24 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_progress"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_progress"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_progress"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2968,10 +2992,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for Progress; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Progress--first-mounted-parity-progress.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Radio",
@@ -3722,12 +3746,24 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_spinner"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_spinner"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_spinner"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -3736,10 +3772,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for Spinner; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Spinner--first-mounted-parity-spinner.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Spacer",
@@ -4203,13 +4239,30 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_status_bar"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_status_bar"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_status_bar"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_status_bar"
+        }
+      ],
       "missing": [
-        "semantic",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+        "accessibility"
       ],
       "holds": [
         {
@@ -4219,9 +4272,12 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/StatusBar--first-mounted-parity-status-bar.json"
+      ],
       "refusals": [
-        "No validated receipt and no retained expected test for StatusBar; every required capability stays missing."
+        "Expected test first_mounted_parity_status_bar shows accessibility signals, but accessibility is withheld: needs a Meter / content-info node role (planned).",
+        "Expected test first_mounted_parity_status_bar proves no accessibility claim; accessibility stays missing."
       ]
     },
     {
@@ -7713,14 +7769,11 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window"
-        },
-        {
-          "axis": "visual",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window"
         }
       ],
-      "missing": [],
+      "missing": [
+        "visual"
+      ],
       "holds": [
         {
           "axis": "accessibility",
@@ -7732,7 +7785,9 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/ModelConnectionSetup--model-connection-setup-direct-add-submits-from-choose-in-a-mounted-window.json"
       ],
-      "refusals": []
+      "refusals": [
+        "Expected test model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window proves no visual claim; visual stays missing."
+      ]
     },
     {
       "component": "ModelConnectionCard",
@@ -9000,18 +9055,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 128,
-    "fullyAdmittedRows": 121,
+    "admittedRows": 132,
+    "fullyAdmittedRows": 122,
     "missingTally": {
-      "semantic": 47,
+      "semantic": 43,
       "events": 36,
-      "pointer": 38,
-      "keyboard_focus": 39,
-      "accessibility": 48,
-      "visual": 52
+      "pointer": 37,
+      "keyboard_focus": 38,
+      "accessibility": 46,
+      "visual": 49
     },
     "holdCount": 175,
-    "refusalCount": 76
+    "refusalCount": 77
   },
   "groups": [
     {
@@ -9029,18 +9084,16 @@
         "Meter",
         "PageHeader",
         "PasswordRequirements",
-        "Progress",
         "Region",
-        "Spinner",
         "StatusBar"
       ],
       "missingTally": {
-        "semantic": 16,
+        "semantic": 12,
         "events": 12,
-        "pointer": 13,
-        "keyboard_focus": 12,
-        "accessibility": 16,
-        "visual": 16
+        "pointer": 12,
+        "keyboard_focus": 11,
+        "accessibility": 14,
+        "visual": 12
       },
       "contracts": [
         "docs/contracts/components/avatar.md",
@@ -9055,9 +9108,7 @@
         "docs/contracts/components/meter.md",
         "docs/contracts/components/page-header.md",
         "docs/contracts/components/password-requirements.md",
-        "docs/contracts/components/progress.md",
         "docs/contracts/components/region.md",
-        "docs/contracts/components/spinner.md",
         "docs/contracts/components/status-bar.md"
       ]
     },
@@ -9220,6 +9271,25 @@
       ]
     },
     {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ModelConnectionSetup",
+        "NavigationMenu"
+      ],
+      "missingTally": {
+        "semantic": 0,
+        "events": 0,
+        "pointer": 0,
+        "keyboard_focus": 0,
+        "accessibility": 1,
+        "visual": 1
+      },
+      "contracts": [
+        "docs/contracts/components/model-connection-setup.md",
+        "docs/contracts/components/navigation-menu.md"
+      ]
+    },
+    {
       "substrate": "agent-composites",
       "components": [
         "AgentMessage",
@@ -9236,23 +9306,6 @@
       "contracts": [
         "docs/contracts/components/agent-message.md",
         "docs/contracts/components/motion-policy-provider.md"
-      ]
-    },
-    {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "NavigationMenu"
-      ],
-      "missingTally": {
-        "semantic": 0,
-        "events": 0,
-        "pointer": 0,
-        "keyboard_focus": 0,
-        "accessibility": 1,
-        "visual": 0
-      },
-      "contracts": [
-        "docs/contracts/components/navigation-menu.md"
       ]
     },
     {

@@ -222,6 +222,10 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   ThemeSelect: "first_mounted_parity_theme_select",
   HistoryCenter: "first_mounted_parity_history_center",
   PageLoading: "first_mounted_parity_page_loading",
+  Spinner: "first_mounted_parity_spinner",
+  Progress: "first_mounted_parity_progress",
+  Meter: "first_mounted_parity_meter",
+  StatusBar: "first_mounted_parity_status_bar",
   ToastStack: [
     "first_mounted_parity_toast_stack",
     "toast_stack_renderer_owned_presence_phases_and_inert_remnant",

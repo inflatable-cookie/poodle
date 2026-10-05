@@ -132,6 +132,13 @@ describe("g18.001 census oracles", () => {
     expect(body).toBeUndefined();
   });
 
+  it("test-body oracle: appended test docs stay outside the previous body", () => {
+    const body = extractTestBody(repositoryRoot, "toast_stack_action_removal_hands_focus_on_or_leaves_it_alone");
+    expect(body).toBeDefined();
+    expect(body!.trimEnd().endsWith("\n}")).toBe(true);
+    expect(body).not.toContain("Spinner parity against the Svelte contract");
+  });
+
   it("claim-overreach oracle: a pointer-only body never admits keyboard_focus", () => {
     const body = [
       "run_headless(|cx| {",

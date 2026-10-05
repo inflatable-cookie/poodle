@@ -7,8 +7,7 @@
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
     "semantic",
-    "keyboard_focus",
-    "accessibility"
+    "keyboard_focus"
   ],
   "signals": {
     "semantic": [
@@ -19,9 +18,6 @@
       "focus_handle_for",
       "focus_element",
       "dispatch_key"
-    ],
-    "accessibility": [
-      "accessible"
     ]
   },
   "production_path_observation": {
@@ -34,20 +30,19 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "539057155aa20e720e9e4d60fe97a8afa58f69b6",
+  "source_commit": "fa32bb0b041f0d0ef98c9392b5c2ab7678baf155",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "8e7431f9-0aab-45aa-a44c-c51b687e1b84",
+    "run_id": "74CB8B1B-B7B4-403F-BB61-33703A050E8B",
     "outcome": "passed",
     "body_sha256": "6a55b868f94e634065eeca96d46fe4dc2528fe5efd1eea08da7fa956fdf8c6e4"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
-    "drove real keyboard input or backend focus through the mounted tree",
-    "asserted node-level role, label, state, or focusability in the mounted tree"
+    "drove real keyboard input or backend focus through the mounted tree"
   ],
   "outcome": "passed"
 }

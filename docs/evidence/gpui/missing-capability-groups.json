@@ -17,18 +17,16 @@
         "Meter",
         "PageHeader",
         "PasswordRequirements",
-        "Progress",
         "Region",
-        "Spinner",
         "StatusBar"
       ],
       "missingTally": {
-        "semantic": 16,
+        "semantic": 12,
         "events": 12,
-        "pointer": 13,
-        "keyboard_focus": 12,
-        "accessibility": 16,
-        "visual": 16
+        "pointer": 12,
+        "keyboard_focus": 11,
+        "accessibility": 14,
+        "visual": 12
       },
       "contracts": [
         "docs/contracts/components/avatar.md",
@@ -43,9 +41,7 @@
         "docs/contracts/components/meter.md",
         "docs/contracts/components/page-header.md",
         "docs/contracts/components/password-requirements.md",
-        "docs/contracts/components/progress.md",
         "docs/contracts/components/region.md",
-        "docs/contracts/components/spinner.md",
         "docs/contracts/components/status-bar.md"
       ]
     },
@@ -208,6 +204,25 @@
       ]
     },
     {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ModelConnectionSetup",
+        "NavigationMenu"
+      ],
+      "missingTally": {
+        "semantic": 0,
+        "events": 0,
+        "pointer": 0,
+        "keyboard_focus": 0,
+        "accessibility": 1,
+        "visual": 1
+      },
+      "contracts": [
+        "docs/contracts/components/model-connection-setup.md",
+        "docs/contracts/components/navigation-menu.md"
+      ]
+    },
+    {
       "substrate": "agent-composites",
       "components": [
         "AgentMessage",
@@ -224,23 +239,6 @@
       "contracts": [
         "docs/contracts/components/agent-message.md",
         "docs/contracts/components/motion-policy-provider.md"
-      ]
-    },
-    {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "NavigationMenu"
-      ],
-      "missingTally": {
-        "semantic": 0,
-        "events": 0,
-        "pointer": 0,
-        "keyboard_focus": 0,
-        "accessibility": 1,
-        "visual": 0
-      },
-      "contracts": [
-        "docs/contracts/components/navigation-menu.md"
       ]
     },
     {

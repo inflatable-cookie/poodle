@@ -50520,6 +50520,693 @@ fn toast_stack_action_removal_hands_focus_on_or_leaves_it_alone() {
     });
 }
 
+/// Spinner parity against the Svelte contract: decorative and announced
+/// semantics, size/tone geometry, and all three motion-policy paths.
+#[test]
+fn first_mounted_parity_spinner() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_headless::motion_policy::MotionPolicy;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{SpinnerSize, SpinnerTone, SpinnerVariant};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let base = RenderContext::new(&theme_provider);
+        let full = base.with_first_frame_committed(true);
+        let reduced = full.with_motion_policy(MotionPolicy::Reduced);
+        let frozen = full.with_motion_policy(MotionPolicy::Frozen);
+
+        let full_ring = poodle_render::spinner(&SpinnerSpec::new(), &full);
+        assert_eq!(
+            full_ring
+                .style
+                .animation
+                .as_ref()
+                .map(|animation| animation.duration_secs),
+            Some(0.8)
+        );
+        assert!(matches!(
+            &full_ring.kind,
+            NodeKind::Icon { size, .. } if (*size - rem_to_px(1.0)).abs() < f32::EPSILON
+        ));
+        let full_dots = poodle_render::spinner(
+            &SpinnerSpec::new().with_variant(SpinnerVariant::Dots),
+            &full,
+        );
+        assert_eq!(full_dots.children.len(), 3);
+        assert!(full_dots.children.iter().all(|dot| {
+            dot.style.animation.as_ref().is_some_and(|animation| {
+                animation.duration_secs == 1.05
+                    && animation.keyframes.iter().any(|frame| {
+                        frame
+                            .values
+                            .iter()
+                            .any(|(property, _)| *property == AnimProperty::TranslateY)
+                    })
+            })
+        }));
+        let full_grid = poodle_render::spinner(
+            &SpinnerSpec::new().with_variant(SpinnerVariant::Grid),
+            &full,
+        );
+        assert_eq!(full_grid.children.len(), 6);
+        assert!(full_grid
+            .children
+            .iter()
+            .all(|cell| cell.style.animation.is_some()));
+
+        for ctx in [&reduced, &frozen] {
+            assert!(poodle_render::spinner(&SpinnerSpec::new(), ctx)
+                .style
+                .animation
+                .is_none());
+            let static_grid =
+                poodle_render::spinner(&SpinnerSpec::new().with_variant(SpinnerVariant::Grid), ctx);
+            assert!(static_grid
+                .children
+                .iter()
+                .all(|cell| cell.style.animation.is_none()));
+            let static_dots =
+                poodle_render::spinner(&SpinnerSpec::new().with_variant(SpinnerVariant::Dots), ctx);
+            assert!(static_dots
+                .children
+                .iter()
+                .all(|dot| dot.style.animation.is_none()));
+        }
+
+        let mut grid = poodle_render::spinner(
+            &SpinnerSpec::new()
+                .with_variant(SpinnerVariant::Grid)
+                .with_size(SpinnerSize::Lg)
+                .with_tone(SpinnerTone::Accent)
+                .with_aria_label("Loading results"),
+            &reduced,
+        );
+        grid.id = Some("spinner-grid".to_owned());
+        assert_eq!(grid.children.len(), 6);
+        assert_eq!(
+            grid.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(0.75))
+        );
+        assert_eq!(
+            grid.children[0].style.descriptor.background,
+            Some(theme_provider.resolve_color("color.accent.base"))
+        );
+
+        let mut decorative = poodle_render::spinner(&SpinnerSpec::new(), &reduced);
+        decorative.id = Some("spinner-decorative".to_owned());
+        assert_eq!(decorative.a11y.role, None);
+        assert_eq!(decorative.a11y.hidden, Some(true));
+
+        let mut animated = poodle_render::spinner(
+            &SpinnerSpec::new()
+                .with_variant(SpinnerVariant::Dots)
+                .with_aria_label("Loading"),
+            &full,
+        );
+        animated.id = Some("spinner-animated".to_owned());
+
+        let mounted = Arc::new(Mutex::new(
+            Node::container()
+                .child(grid)
+                .child(decorative)
+                .child(animated),
+        ));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+
+        let painted_grid = poodle_gpui_node_backend::painted_node_for("spinner-grid")
+            .expect("announced spinner reaches the GPUI paint pass");
+        assert_eq!(painted_grid.a11y_role, Some(NodeRole::Status));
+        assert_eq!(painted_grid.a11y_label.as_deref(), Some("Loading results"));
+        let painted_decorative = poodle_gpui_node_backend::painted_node_for("spinner-decorative")
+            .expect("decorative spinner reaches the GPUI paint pass");
+        assert_eq!(painted_decorative.a11y_role, None);
+        assert_eq!(painted_decorative.a11y_hidden, Some(true));
+        let painted_animated = poodle_gpui_node_backend::painted_node_for("spinner-animated")
+            .expect("animated spinner reaches the GPUI paint pass");
+        assert_eq!(painted_animated.a11y_role, Some(NodeRole::Status));
+        assert_eq!(painted_animated.a11y_label.as_deref(), Some("Loading"));
+        let grid_bounds = poodle_gpui_node_backend::bounds_for("spinner-grid")
+            .expect("sized spinner has mounted geometry");
+        assert!(grid_bounds.size.width > px(0.0));
+        assert!(grid_bounds.size.height > px(0.0));
+        assert_eq!(driver.accessibility_nodes().len(), 2);
+        let channels = poodle_gpui_node_backend::take_probe_capture();
+        assert!(channels.contains(&"surface.animation.scheduled"));
+        assert!(channels.contains(&"surface.animation.applied.translation"));
+    });
+}
+
+/// Progress parity against Svelte: determinate and indeterminate value
+/// semantics, safe ranges, resolved track/fill tokens, and mounted geometry.
+#[test]
+fn first_mounted_parity_progress() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_headless::motion_policy::MotionPolicy;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::ProgressSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let full_ctx = ctx.with_first_frame_committed(true);
+
+        let mut determinate_spec = ProgressSpec::new().with_value(40.0);
+        determinate_spec.max = 80.0;
+        determinate_spec.aria_label = Some("Upload".to_owned());
+        let mut determinate = poodle_render::progress(&determinate_spec, &ctx);
+        determinate.id = Some("progress-determinate".to_owned());
+        assert_eq!(determinate.a11y.role, Some(NodeRole::ProgressIndicator));
+        assert_eq!(determinate.a11y.label.as_deref(), Some("Upload"));
+        assert_eq!(determinate.a11y.value_min, Some(0.0));
+        assert_eq!(determinate.a11y.value_max, Some(80.0));
+        assert_eq!(determinate.a11y.value, Some(40.0));
+        assert_eq!(determinate.a11y.value_text.as_deref(), Some("50%"));
+        assert!(matches!(
+            &determinate.kind,
+            NodeKind::Progress { fraction } if (*fraction - 0.5).abs() < f32::EPSILON
+        ));
+        assert_eq!(determinate.children.len(), 1);
+        assert_eq!(determinate.children[0].style.width_pct, Some(0.5));
+        assert_eq!(determinate.style.min_height, Some(rem_to_px(0.5)));
+        assert_eq!(
+            determinate.style.descriptor.background,
+            Some(poodle_render::color::mix_srgb(
+                theme_provider.resolve_color("color.background.surface"),
+                theme_provider.resolve_color("color.text.primary"),
+                0.96,
+            ))
+        );
+        assert_eq!(
+            determinate.children[0].style.descriptor.text_color,
+            Some(theme_provider.resolve_color("color.accent.base"))
+        );
+        assert_eq!(
+            determinate.children[0].style.gradient.as_ref().unwrap().1,
+            vec![
+                (
+                    poodle_render::color::mix_srgb(
+                        theme_provider.resolve_color("color.accent.base"),
+                        poodle_render::color::WHITE,
+                        0.88,
+                    ),
+                    0.0,
+                ),
+                (theme_provider.resolve_color("color.accent.base"), 1.0),
+            ]
+        );
+
+        let mut indeterminate_spec = ProgressSpec::new()
+            .with_value(70.0)
+            .with_indeterminate(true);
+        indeterminate_spec.aria_label = Some("Upload".to_owned());
+        indeterminate_spec.value_text = Some("Working".to_owned());
+        let mut indeterminate = poodle_render::progress(&indeterminate_spec, &full_ctx);
+        indeterminate.id = Some("progress-indeterminate".to_owned());
+        assert_eq!(indeterminate.a11y.role, Some(NodeRole::ProgressIndicator));
+        assert_eq!(indeterminate.a11y.value_min, None);
+        assert_eq!(indeterminate.a11y.value_max, None);
+        assert_eq!(indeterminate.a11y.value, None);
+        assert_eq!(indeterminate.a11y.value_text.as_deref(), Some("Working"));
+        assert!(matches!(&indeterminate.kind, NodeKind::Container));
+        assert_eq!(indeterminate.children.len(), 1);
+        assert_eq!(indeterminate.children[0].style.width_pct, Some(0.4));
+        let animation = indeterminate.children[0]
+            .style
+            .animation
+            .as_ref()
+            .expect("full motion animates the indeterminate fill");
+        assert_eq!(animation.duration_secs, 1.2);
+        assert!(animation
+            .keyframes
+            .iter()
+            .any(|frame| { frame.values.contains(&(AnimProperty::TranslateX, -0.4)) }));
+        assert!(animation
+            .keyframes
+            .iter()
+            .any(|frame| { frame.values.contains(&(AnimProperty::TranslateX, 1.0)) }));
+        assert_eq!(
+            indeterminate.children[0]
+                .style
+                .gradient
+                .as_ref()
+                .map(|(_, stops)| stops.len()),
+            Some(2),
+            "the resolved accent gradient is carried to the GPUI fill"
+        );
+        for policy in [MotionPolicy::Reduced, MotionPolicy::Frozen] {
+            let static_indeterminate = poodle_render::progress(
+                &ProgressSpec::new().with_indeterminate(true),
+                &full_ctx.with_motion_policy(policy),
+            );
+            assert!(static_indeterminate.children[0].style.animation.is_none());
+        }
+
+        let null_value = poodle_render::progress(&ProgressSpec::new(), &ctx);
+        assert!(matches!(
+            &null_value.kind,
+            NodeKind::Progress { fraction } if *fraction == 0.0
+        ));
+        assert_eq!(null_value.children[0].style.width_pct, Some(0.0));
+        assert_eq!(null_value.a11y.value_min, Some(0.0));
+        assert_eq!(null_value.a11y.value_max, Some(100.0));
+        assert_eq!(null_value.a11y.value, None);
+        assert_eq!(null_value.a11y.value_text, None);
+
+        let mut invalid_max_spec = ProgressSpec::new().with_value(10.0);
+        invalid_max_spec.max = 0.0;
+        let safe_range = poodle_render::progress(&invalid_max_spec, &ctx);
+        assert!(safe_range.children[0].style.width_pct == Some(0.1));
+        assert!(matches!(
+            &safe_range.kind,
+            NodeKind::Progress { fraction } if (*fraction - 0.1).abs() < f32::EPSILON
+        ));
+        assert_eq!(safe_range.a11y.value_max, Some(100.0));
+        assert_eq!(safe_range.a11y.value, Some(10.0));
+        assert_eq!(safe_range.a11y.value_text.as_deref(), Some("10%"));
+
+        let mut mounted_tree = Node::container().child(determinate).child(indeterminate);
+        mounted_tree.style.fill_width = true;
+        mounted_tree.children[0].children[0].id = Some("progress-determinate-indicator".to_owned());
+        mounted_tree.children[1].children[0].id =
+            Some("progress-indeterminate-indicator".to_owned());
+        let mounted = Arc::new(Mutex::new(mounted_tree));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 240.0, 72.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let mounted_a11y = driver.accessibility_nodes();
+        let determinate_a11y = mounted_a11y
+            .iter()
+            .find(|node| node.element_id == "progress-determinate")
+            .expect("determinate progress is in the mounted accessibility projection");
+        assert_eq!(determinate_a11y.role, NodeRole::ProgressIndicator);
+        assert_eq!(determinate_a11y.value, Some(40.0));
+        assert_eq!(determinate_a11y.value_text.as_deref(), Some("50%"));
+        let indeterminate_a11y = mounted_a11y
+            .iter()
+            .find(|node| node.element_id == "progress-indeterminate")
+            .expect("indeterminate progress is in the mounted accessibility projection");
+        assert_eq!(indeterminate_a11y.value, None);
+        assert_eq!(indeterminate_a11y.value_text.as_deref(), Some("Working"));
+        let mounted_tree = mounted.lock().expect("mounted progress tree");
+        assert_eq!(mounted_tree.children[0].a11y.value_min, Some(0.0));
+        assert_eq!(mounted_tree.children[0].a11y.value_max, Some(80.0));
+        assert_eq!(mounted_tree.children[1].a11y.value_min, None);
+        assert_eq!(mounted_tree.children[1].a11y.value_max, None);
+        assert_eq!(
+            mounted_tree.children[0].children[0].style.width_pct,
+            Some(0.5)
+        );
+        assert_eq!(
+            mounted_tree.children[1].children[0].style.width_pct,
+            Some(0.4)
+        );
+        drop(mounted_tree);
+        let bounds = poodle_gpui_node_backend::bounds_for("progress-determinate")
+            .expect("determinate progress has mounted geometry");
+        assert!(bounds.size.width > px(0.0));
+        assert!(bounds.size.height >= px(rem_to_px(0.5)));
+        let fill_bounds = poodle_gpui_node_backend::bounds_for("progress-determinate-indicator")
+            .expect("determinate fill has mounted geometry");
+        assert!(
+            (f32::from(fill_bounds.size.width) - f32::from(bounds.size.width) * 0.5).abs() < 1.0,
+            "mounted determinate fill tracks 50% of the progress bar"
+        );
+        let indeterminate_fill =
+            poodle_gpui_node_backend::bounds_for("progress-indeterminate-indicator")
+                .expect("indeterminate fill has mounted geometry");
+        assert!(
+            (f32::from(indeterminate_fill.size.width) - f32::from(bounds.size.width) * 0.4).abs()
+                < 1.0,
+            "mounted indeterminate fill keeps its 40% width"
+        );
+        let channels = poodle_gpui_node_backend::take_probe_capture();
+        assert!(channels.contains(&"surface.animation.scheduled"));
+        assert!(channels.contains(&"surface.animation.applied.translation"));
+    });
+}
+
+/// Meter parity against Svelte: bounded values, text, range normalization,
+/// linear/ring token geometry, and the planned missing role kept absent.
+#[test]
+fn first_mounted_parity_meter() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{MeterShape, MeterSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let mut linear = poodle_render::meter(
+            &MeterSpec::new()
+                .with_value(40.0)
+                .with_min(20.0)
+                .with_max(60.0)
+                .with_aria_label("Storage")
+                .with_value_text("40 of 60")
+                .with_show_value(true),
+            &ctx,
+        );
+        linear.id = Some("meter-linear".to_owned());
+        assert_eq!(
+            linear.a11y.role, None,
+            "the planned Meter role remains absent"
+        );
+        assert_eq!(linear.a11y.label.as_deref(), Some("Storage"));
+        assert_eq!(linear.a11y.value, Some(40.0));
+        assert_eq!(linear.a11y.value_min, Some(20.0));
+        assert_eq!(linear.a11y.value_max, Some(60.0));
+        assert_eq!(linear.a11y.value_text.as_deref(), Some("40 of 60"));
+        assert!(matches!(&linear.kind, NodeKind::Container));
+        assert_eq!(linear.children.len(), 2);
+        assert_eq!(linear.children[0].children.len(), 1);
+        assert_eq!(linear.children[0].children[0].style.width_pct, Some(0.5));
+        assert_eq!(linear.children[0].style.min_height, Some(rem_to_px(0.5)));
+        assert_eq!(
+            linear.children[0].children[0].style.descriptor.text_color,
+            Some(theme_provider.resolve_color("color.status.success"))
+        );
+        assert_eq!(
+            linear.children[0].children[0]
+                .style
+                .gradient
+                .as_ref()
+                .unwrap()
+                .1,
+            vec![
+                (
+                    poodle_render::color::mix_srgb(
+                        theme_provider.resolve_color("color.status.success"),
+                        poodle_render::color::WHITE,
+                        0.82,
+                    ),
+                    0.0,
+                ),
+                (theme_provider.resolve_color("color.status.success"), 1.0),
+            ]
+        );
+        assert_eq!(
+            linear.children[0].style.descriptor.background,
+            Some(poodle_render::color::mix_srgb(
+                theme_provider.resolve_color("color.background.surface"),
+                theme_provider.resolve_color("color.text.primary"),
+                0.96,
+            ))
+        );
+        assert_eq!(
+            linear.children[0].style.descriptor.corner_radii.top_left,
+            theme_provider.resolve_radius("radius.pill")
+        );
+        assert!(matches!(
+            &linear.children[1].kind,
+            NodeKind::Text { content } if content == "40 of 60"
+        ));
+        assert_eq!(
+            linear.children[1].style.descriptor.text_color,
+            Some(theme_provider.resolve_color("color.text.secondary"))
+        );
+        linear.children[0].children[0].id = Some("meter-linear-indicator".to_owned());
+
+        // The contract repairs an invalid range to [min, min + 1], rather
+        // than collapsing its visual percentage to zero.
+        let degenerate_spec = MeterSpec::new()
+            .with_value(20.5)
+            .with_min(20.0)
+            .with_max(20.0)
+            .with_show_value(true)
+            .with_aria_label("Degenerate range");
+        assert_eq!(degenerate_spec.normalized_progress(), 0.5);
+        let mut degenerate = poodle_render::meter(&degenerate_spec, &ctx);
+        degenerate.id = Some("meter-degenerate".to_owned());
+        assert_eq!(degenerate.a11y.value, Some(20.5));
+        assert_eq!(degenerate.a11y.value_min, Some(20.0));
+        assert_eq!(degenerate.a11y.value_max, Some(21.0));
+        assert_eq!(degenerate.a11y.value_text.as_deref(), Some("50%"));
+        assert_eq!(
+            degenerate.children[0].children[0].style.width_pct,
+            Some(0.5)
+        );
+        assert!(matches!(
+            &degenerate.children[1].kind,
+            NodeKind::Text { content } if content == "50%"
+        ));
+        degenerate.children[0].children[0].id = Some("meter-degenerate-indicator".to_owned());
+
+        let mut high = poodle_render::meter(
+            &MeterSpec::new()
+                .with_value(90.0)
+                .with_high(80.0)
+                .with_tone(poodle_specs::MeterTone::Accent)
+                .with_aria_label("CPU use"),
+            &ctx,
+        );
+        high.id = Some("meter-high".to_owned());
+        assert_eq!(
+            high.children[0].children[0].style.descriptor.text_color,
+            Some(theme_provider.resolve_color("color.status.warning")),
+            "the high threshold overrides the selected tone"
+        );
+        high.children[0].children[0].id = Some("meter-high-indicator".to_owned());
+
+        let ring_spec = MeterSpec::new()
+            .with_value(38.0)
+            .with_shape(MeterShape::Ring)
+            .with_size(ControlSize::Lg)
+            .with_show_value(true)
+            .with_aria_label("Context used");
+        let mut ring = poodle_render::meter(&ring_spec, &ctx);
+        ring.id = Some("meter-ring".to_owned());
+        assert_eq!(
+            ring.a11y.role, None,
+            "the planned Meter role remains absent"
+        );
+        assert_eq!(ring.a11y.value, Some(38.0));
+        assert_eq!(ring.a11y.value_text.as_deref(), Some("38%"));
+        assert_eq!(
+            ring.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(
+                ring_spec.ring_size_rem(ctx.resolve_size(ring_spec.size, ring_spec.size_role))
+            ))
+        );
+        assert!(ring.children.iter().any(|child| {
+            matches!(&child.kind, NodeKind::Text { content } if content == "38%")
+        }));
+
+        let mounted = Arc::new(Mutex::new(
+            Node::container()
+                .child(linear)
+                .child(high)
+                .child(ring)
+                .child(degenerate),
+        ));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 240.0, 128.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        for id in [
+            "meter-linear",
+            "meter-high",
+            "meter-ring",
+            "meter-degenerate",
+        ] {
+            let painted = poodle_gpui_node_backend::painted_node_for(id)
+                .expect("meter reaches the GPUI paint pass");
+            assert_eq!(painted.a11y_role, None);
+            assert!(painted.a11y_label.is_some());
+            let bounds =
+                poodle_gpui_node_backend::bounds_for(id).expect("meter has mounted geometry");
+            assert!(bounds.size.width > px(0.0));
+            assert!(bounds.size.height > px(0.0));
+        }
+        let linear_bounds =
+            poodle_gpui_node_backend::bounds_for("meter-linear").expect("linear track bounds");
+        let linear_fill = poodle_gpui_node_backend::bounds_for("meter-linear-indicator")
+            .expect("linear fill bounds");
+        assert!(
+            (f32::from(linear_fill.size.width) - f32::from(linear_bounds.size.width) * 0.5).abs()
+                < 1.0,
+            "mounted meter fill reflects its 50% range value"
+        );
+        let degenerate_bounds = poodle_gpui_node_backend::bounds_for("meter-degenerate")
+            .expect("fallback range bounds");
+        let degenerate_fill = poodle_gpui_node_backend::bounds_for("meter-degenerate-indicator")
+            .expect("fallback range fill bounds");
+        assert!(
+            (f32::from(degenerate_fill.size.width) - f32::from(degenerate_bounds.size.width) * 0.5)
+                .abs()
+                < 1.0,
+            "mounted fallback range uses contract min + 1 normalization"
+        );
+        let mounted_tree = mounted.lock().expect("mounted meter tree");
+        assert_eq!(mounted_tree.children[0].a11y.value, Some(40.0));
+        assert_eq!(mounted_tree.children[0].a11y.value_min, Some(20.0));
+        assert_eq!(mounted_tree.children[0].a11y.value_max, Some(60.0));
+        assert_eq!(
+            mounted_tree.children[2].a11y.value_text.as_deref(),
+            Some("38%")
+        );
+        assert_eq!(mounted_tree.children[3].a11y.value_max, Some(21.0));
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// StatusBar parity against Svelte: summary and regions, token geometry, and
+/// a snippet action that receives real mounted pointer and keyboard input.
+#[test]
+fn first_mounted_parity_status_bar() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::color::with_alpha;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{ButtonSpec, ShellStatusBarSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let summary_only = poodle_render::shell_status_bar(
+            &ShellStatusBarSpec::new().with_summary("Ready"),
+            &ctx,
+            vec![],
+            vec![],
+        );
+        assert_eq!(
+            summary_only.a11y.role, None,
+            "the planned footer role remains absent"
+        );
+        assert_eq!(summary_only.a11y.label.as_deref(), Some("Ready"));
+        assert!(matches!(
+            &summary_only.children[0].children[0].kind,
+            NodeKind::Text { content } if content == "Ready"
+        ));
+        assert_eq!(
+            summary_only.children.len(),
+            1,
+            "an empty trailing region is omitted"
+        );
+        assert_eq!(summary_only.style.descriptor.background, None);
+        let explicit_label = poodle_render::shell_status_bar(
+            &ShellStatusBarSpec::new()
+                .with_summary("Ready")
+                .with_aria_label("Workspace status"),
+            &ctx,
+            vec![],
+            vec![],
+        );
+        assert_eq!(
+            explicit_label.a11y.label.as_deref(),
+            Some("Workspace status"),
+            "an explicit accessible label overrides the summary"
+        );
+        assert!(matches!(
+            &explicit_label.children[0].children[0].kind,
+            NodeKind::Text { content } if content == "Ready"
+        ));
+        let default_label =
+            poodle_render::shell_status_bar(&ShellStatusBarSpec::new(), &ctx, vec![], vec![]);
+        assert_eq!(default_label.a11y.label.as_deref(), Some("Status"));
+
+        let hits = Arc::new(Mutex::new(0_usize));
+        let handler_hits = Arc::clone(&hits);
+        let on_retry: Arc<dyn Fn() + Send + Sync> = Arc::new(move || {
+            *handler_hits.lock().expect("status bar handler count") += 1;
+        });
+        let mut retry = poodle_render::button(
+            &ButtonSpec::new()
+                .with_label("Retry")
+                .with_aria_label("Retry"),
+            &ctx,
+            Some(on_retry),
+        );
+        retry.id = Some("status-bar-retry".to_owned());
+        let spec = ShellStatusBarSpec::new()
+            .with_summary("Connection lost")
+            .with_chrome(true)
+            .with_size(ControlSize::Lg)
+            .with_density(ControlDensity::Compact);
+        let mut status_bar = poodle_render::shell_status_bar(
+            &spec,
+            &ctx,
+            vec![retry],
+            vec![Node::text("Ln 42, Col 8")],
+        );
+        status_bar.id = Some("status-bar".to_owned());
+        assert_eq!(
+            status_bar.a11y.role, None,
+            "the planned footer role remains absent"
+        );
+        assert_eq!(status_bar.a11y.label.as_deref(), Some("Connection lost"));
+        assert_eq!(
+            status_bar.children.len(),
+            2,
+            "leading and trailing regions both render"
+        );
+        assert_eq!(status_bar.children[0].children.len(), 1);
+        assert_eq!(status_bar.children[1].children.len(), 1);
+        assert!(status_bar.style.fill_width);
+        assert!(status_bar.style.flex_wrap);
+        assert_eq!(status_bar.style.text_size, Some(rem_to_px(0.875)));
+        assert_eq!(status_bar.style.line_height, Some(1.5));
+        assert_eq!(
+            status_bar.style.descriptor.text_color,
+            Some(theme_provider.resolve_color("color.text.secondary"))
+        );
+        assert_eq!(
+            status_bar.style.descriptor.layout.spacing.padding.left,
+            rem_to_px(0.5)
+        );
+        assert_eq!(
+            status_bar.style.descriptor.layout.spacing.padding.top,
+            rem_to_px(0.4375)
+        );
+        assert_eq!(
+            status_bar.style.descriptor.background,
+            Some(with_alpha(
+                theme_provider.resolve_color(spec.chrome_background_token()),
+                theme_provider
+                    .resolve_color(spec.chrome_background_token())
+                    .3
+                    * spec.chrome_background_opacity(),
+            ))
+        );
+        assert_eq!(status_bar.style.border_top_width, Some(1.0));
+        assert_eq!(
+            status_bar.style.border_color_top,
+            Some(theme_provider.resolve_color(spec.chrome_border_token()))
+        );
+
+        let mounted = Arc::new(Mutex::new(status_bar));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 80.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let painted = poodle_gpui_node_backend::painted_node_for("status-bar")
+            .expect("StatusBar reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_role, None);
+        assert_eq!(painted.a11y_label.as_deref(), Some("Connection lost"));
+        driver.wait_for_focus_handle("status-bar-retry");
+        driver.focus_element("status-bar-retry");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("status-bar-retry"),
+            Some(true)
+        );
+        driver.keyboard_activate("status-bar-retry");
+        driver.pointer_activate_id("status-bar-retry");
+        assert_eq!(*hits.lock().expect("status bar action count"), 2);
+        let retry_accessible = driver
+            .accessibility_nodes()
+            .into_iter()
+            .find(|node| node.element_id == "status-bar-retry")
+            .expect("snippet action remains keyboard reachable");
+        assert_eq!(retry_accessible.role, NodeRole::Button);
+        assert_eq!(retry_accessible.label.as_deref(), Some("Retry"));
+        assert!(retry_accessible.focusable);
+        let bounds = poodle_gpui_node_backend::bounds_for("status-bar")
+            .expect("StatusBar has mounted geometry");
+        assert!(bounds.size.width > px(0.0));
+        assert!(bounds.size.height > px(0.0));
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
 /// PageLoading mounts its loading surface and drives cancellation through
 /// mounted GPUI input: the overlay paints the status semantics with token
 /// chrome, the cancel button is a real focusable button by pointer and by

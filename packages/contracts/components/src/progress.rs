@@ -48,11 +48,8 @@ impl ProgressSpec {
             None
         } else {
             self.value.map(|value| {
-                if self.max <= 0.0 {
-                    0.0
-                } else {
-                    (value / self.max).clamp(0.0, 1.0)
-                }
+                let safe_max = if self.max <= 0.0 { 100.0 } else { self.max };
+                (value.clamp(0.0, safe_max) / safe_max).clamp(0.0, 1.0)
             })
         }
     }

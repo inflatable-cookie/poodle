@@ -85,6 +85,12 @@ export const WITHHELD_AXES: Record<string, Partial<Record<CensusAxis, string>>> 
     accessibility:
       "the contract requires a named <nav> landmark, and the node vocabulary has no navigation NodeRole yet; the mounted tree exposes only a roleless labelled container",
   },
+  Meter: {
+    accessibility: "needs a Meter / content-info node role (planned)",
+  },
+  StatusBar: {
+    accessibility: "needs a Meter / content-info node role (planned)",
+  },
   CardToggleGroup: {
     // Planner ruling 2026-10-04 (brief v2): the contract's
     // `min(100%, max(min-width, track width))` clamp stays normative. GPUI
@@ -158,6 +164,8 @@ export type ExecutionRecord = {
   schema: string;
   command: string;
   source_commit: string;
+  /** Commit that first recorded the legacy test-body hashes. */
+  body_hash_baseline_commit?: string;
   lockfile: string;
   lockfile_sha256: string;
   run_id: string;
@@ -238,21 +246,29 @@ function validatePinAncestry(sourceCommit: string, root: string): void {
   }
 }
 
-/** Extract the top-level test function body, or undefined when the test is absent (renamed/stale). */
+/** Extract a top-level test through its own closing brace, or undefined when absent/stale. */
+function extractTestBodyFromSource(source: string, testName: string): string | undefined {
+  const lines = source.split("\n");
+  const start = lines.findIndex((line) => line.startsWith(`fn ${testName}(`));
+  if (start < 0) return undefined;
+  for (let end = start + 1; end < lines.length; end++) {
+    // Rustfmt puts a top-level function's closing brace at column zero.
+    // Stop here so comments for a following test (or appended tests at EOF)
+    // do not become part of this test's evidence hash.
+    if (lines[end] === "}") {
+      // Preserve trailing blank lines: the old EOF extraction included the
+      // file's final newline, and those existing execution hashes stay stable.
+      while (end + 1 < lines.length && lines[end + 1].trim() === "") end++;
+      return lines.slice(start, end + 1).join("\n");
+    }
+  }
+  return undefined;
+}
+
 export function extractTestBody(root: string, testName: string): string | undefined {
   const file = path.join(root, HEADLESS_TEST_FILE);
   if (!fs.existsSync(file)) return undefined;
-  const lines = fs.readFileSync(file, "utf8").split("\n");
-  const start = lines.findIndex((line) => line.startsWith(`fn ${testName}(`));
-  if (start < 0) return undefined;
-  let end = lines.length;
-  for (let i = start + 1; i < lines.length; i++) {
-    if (lines[i].startsWith("#[test]") || lines[i].startsWith("fn ")) {
-      end = i;
-      break;
-    }
-  }
-  return lines.slice(start, end).join("\n");
+  return extractTestBodyFromSource(fs.readFileSync(file, "utf8"), testName);
 }
 
 /** True when the test carries #[ignore]: it never executes, so it can never admit evidence. */
@@ -268,6 +284,54 @@ export function testIsIgnored(root: string, testName: string): boolean {
 export function testBodySha256(root: string, testName: string): string | undefined {
   const body = extractTestBody(root, testName);
   return body === undefined ? undefined : sha256Hex(body);
+}
+
+/** Previous extraction retained text through the next test/function boundary. */
+function extractLegacyTestBody(source: string, testName: string): string | undefined {
+  const lines = source.split("\n");
+  const start = lines.findIndex((line) => line.startsWith(`fn ${testName}(`));
+  if (start < 0) return undefined;
+  let end = lines.length;
+  for (let i = start + 1; i < lines.length; i++) {
+    if (lines[i].startsWith("#[test]") || lines[i].startsWith("fn ")) {
+      end = i;
+      break;
+    }
+  }
+  return lines.slice(start, end).join("\n");
+}
+
+function testSourceAtCommit(root: string, commit: string): string | undefined {
+  try {
+    return execSync(`git show ${commit}:${HEADLESS_TEST_FILE}`, {
+      cwd: root,
+      encoding: "utf8",
+      maxBuffer: 32 * 1024 * 1024,
+    });
+  } catch {
+    return undefined;
+  }
+}
+
+function executionBodyHashMatches(
+  root: string,
+  testName: string,
+  expectedHash: string,
+  baselineSource: string | undefined,
+): boolean {
+  const currentBody = extractTestBody(root, testName);
+  if (currentBody === undefined) return false;
+  const currentHash = sha256Hex(currentBody);
+  if (currentHash === expectedHash) return true;
+  if (baselineSource === undefined) return false;
+  const legacyBaseline = extractLegacyTestBody(baselineSource, testName);
+  const canonicalBaseline = extractTestBodyFromSource(baselineSource, testName);
+  return (
+    legacyBaseline !== undefined &&
+    canonicalBaseline !== undefined &&
+    sha256Hex(legacyBaseline) === expectedHash &&
+    sha256Hex(canonicalBaseline) === currentHash
+  );
 }
 
 type TopLevelFn = { name: string; test: boolean; body: string };
@@ -654,6 +718,12 @@ export function validateExecutionRecord(record: ExecutionRecord, root: string): 
   if (!/^[0-9a-f]{40}$/.test(record.source_commit)) throw new Error("Execution record needs a 40-hex source commit.");
   if (record.command !== NATIVE_SELECTOR) throw new Error(`Execution record must cite ${NATIVE_SELECTOR}.`);
   validatePinAncestry(record.source_commit, root);
+  const bodyHashBaselineCommit = record.body_hash_baseline_commit ?? record.source_commit;
+  if (!/^[0-9a-f]{40}$/.test(bodyHashBaselineCommit)) {
+    throw new Error("Execution record needs a 40-hex body-hash baseline commit.");
+  }
+  validatePinAncestry(bodyHashBaselineCommit, root);
+  const baselineSource = testSourceAtCommit(root, bodyHashBaselineCommit);
   const lockfile = read(root, record.lockfile);
   if (sha256Hex(lockfile) !== record.lockfile_sha256) {
     throw new Error("GPUI lockfile changed since the recorded execution; re-run the expected tests and regenerate the census.");
@@ -668,7 +738,7 @@ export function validateExecutionRecord(record: ExecutionRecord, root: string): 
     const current = testBodySha256(root, test);
     if (current === undefined) throw new Error(`Expected test ${test} is stale: it no longer exists in ${HEADLESS_TEST_FILE}.`);
     if (testIsIgnored(root, test)) throw new Error(`Expected test ${test} is ignored and never executes.`);
-    if (current !== entry.body_sha256) {
+    if (!executionBodyHashMatches(root, test, entry.body_sha256, baselineSource)) {
       throw new Error(`Expected test ${test} changed since the recorded execution; re-run it before admitting claims.`);
     }
   }
@@ -698,6 +768,7 @@ export function recordExpectedTestExecution(testNames: string[], runId: string, 
   const record = loadExecutionRecord(root);
   const sourceCommit = execSync("git rev-parse HEAD", { cwd: root, encoding: "utf8" }).trim();
   const lockfile = read(root, GPUI_LOCKFILE);
+  record.body_hash_baseline_commit ??= record.source_commit;
   record.source_commit = sourceCommit;
   record.lockfile_sha256 = sha256Hex(lockfile);
   record.run_id = runId;
@@ -1146,7 +1217,7 @@ export function writeCensusArtifacts(root = ROOT): { rows: number; admitted: num
   return { rows: doc.rows.length, admitted: doc.summary.admittedRows, receipts: receipts.length };
 }
 
-function validateReceiptFile(content: string, root: string): void {
+function validateReceiptFile(content: string, root: string, baselineSource: string | undefined): void {
   const receipt = JSON.parse(content) as {
     schema?: string;
     component?: string;
@@ -1191,7 +1262,7 @@ function validateReceiptFile(content: string, root: string): void {
       throw new Error(`Mounted receipt for ${receipt.component} claims ${axis} its test body does not show.`);
     }
   }
-  if (sha256Hex(body) !== receipt.execution.body_sha256) {
+  if (!executionBodyHashMatches(root, receipt.test, receipt.execution.body_sha256, baselineSource)) {
     throw new Error(`Mounted receipt test ${receipt.test} changed since its recorded execution.`);
   }
 }
@@ -1231,6 +1302,9 @@ export function checkCensusArtifacts(root = ROOT): void {
   const expectedJson = `${JSON.stringify({ ...doc, manifest: undefined }, null, 2)}\n`;
   const expectedMd = censusMarkdown(doc);
   const expectedGroups = `${JSON.stringify({ schema: "poodle.g18-missing-capability-groups.v1", task: "g18.001", groups: doc.groups }, null, 2)}\n`;
+  const record = loadExecutionRecord(root);
+  const baselineCommit = record.body_hash_baseline_commit ?? record.source_commit;
+  const baselineSource = testSourceAtCommit(root, baselineCommit);
   const compare = (relativePath: string, expected: string): void => {
     const actual = read(root, relativePath);
     if (actual !== expected) throw new Error(`Checked-in ${relativePath} disagrees with the generator; regenerate.`);
@@ -1248,7 +1322,7 @@ export function checkCensusArtifacts(root = ROOT): void {
     const actual = read(root, receipt.file);
     // Validate the checked-in receipt first so a stale package version fails
     // with its own provenance message, not only a generic byte mismatch.
-    validateReceiptFile(actual, root);
+    validateReceiptFile(actual, root, baselineSource);
     if (actual !== receipt.content) throw new Error(`Checked-in ${receipt.file} disagrees with the generator; regenerate.`);
   }
   validateManifestRefs(doc.manifest, root);
