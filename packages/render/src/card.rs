@@ -6,8 +6,7 @@
 //! border and shadow recipes.
 
 use poodle_node::{
-    ColorValue, CursorHint, LayoutDirection, LayoutOverflow, Node, NodeRole, ShadowLayer,
-    StylePatch,
+    ColorValue, CursorHint, LayoutDirection, LayoutOverflow, Node, ShadowLayer, StylePatch,
 };
 use poodle_specs::{CardLayout, CardSpec, CardVariant};
 
@@ -228,10 +227,9 @@ pub fn card(spec: &CardSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> No
     if let Some(label) = spec.aria_label.as_deref() {
         el.a11y.label = Some(label.to_string());
     }
-    // Interactive cards are buttons; structural ones stay structure.
-    if spec.is_interactive {
-        el.a11y.role = Some(NodeRole::Button);
-    }
+    // No role: Svelte renders an article with no ARIA role in either mode,
+    // and the contract records button semantics as not implemented there
+    // (Known Deltas). Interactive styling (cursor, hover) still applies.
     el
 }
 

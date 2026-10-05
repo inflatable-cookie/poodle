@@ -21,7 +21,7 @@ use std::sync::Arc;
 
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
-    MainAxisAlignment, Node, NodePosition, StylePatch, TextAlign,
+    MainAxisAlignment, Node, NodePosition, NodeRole, StylePatch, TextAlign,
 };
 use poodle_specs::{ControlDensity, ControlSize, FileUploadItem, FileUploadSpec};
 
@@ -216,7 +216,13 @@ pub fn file_upload_with_handlers(
         s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
     }
     all_corners(&mut dropzone, radius);
-    dropzone.interaction.focusable = true;
+    // Svelte names the dropzone "File upload dropzone" (role="group",
+    // tabindex 0, -1 when disabled). The hidden native input carries the
+    // browse label on web; on native the dropzone shell is the focusable
+    // surface the contract's keyboard section targets, so it owns the name.
+    dropzone.a11y.role = Some(NodeRole::Group);
+    dropzone.a11y.label = Some("File upload dropzone".to_string());
+    dropzone.interaction.focusable = !spec.is_disabled;
 
     // Browse intent: the dropzone and its "browse" affordance request one
     // file through the generic seam. The runtime owns the picker and the
@@ -239,6 +245,15 @@ pub fn file_upload_with_handlers(
         let hover_bg = mix_srgb(panel, TRANSPARENT, 0.5);
         let focus_border = ctx.theme().resolve_color(spec.focus_border_token());
         dropzone.style.hover = Some(StylePatch {
+            background: Some(hover_bg),
+            border_color: Some(focus_border),
+            text_color: None,
+            opacity: None,
+        });
+        // Keyboard parity with Svelte's focus-visible treatment: the same
+        // border-and-tint change, so the dropzone is a tracked focus target
+        // and Enter/Space reach the browse intent.
+        dropzone.style.focus = Some(StylePatch {
             background: Some(hover_bg),
             border_color: Some(focus_border),
             text_color: None,

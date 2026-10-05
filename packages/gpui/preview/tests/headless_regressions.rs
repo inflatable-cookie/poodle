@@ -12370,6 +12370,7 @@ fn a_stale_completion_result_cannot_render_in_a_mounted_window() {
 /// post-selection pipeline the live OS prompt uses.
 #[test]
 fn a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam() {
+    use poodle_adapter::ThemeProvider;
     use poodle_gpui_node_backend::file_capability::{
         finish_file_pick, InjectedFileSource, PickedFile, SingleFilePickSpec, SingleFileSource,
     };
@@ -12415,25 +12416,93 @@ fn a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam() {
             .on_activate
             .is_some(),));
         node.id = Some(FIXTURE_ID.to_owned());
+        // Accessibility witness: the dropzone owns Svelte's group name
+        // (role="group", "File upload dropzone") and is the keyboard
+        // surface the contract names.
+        {
+            let dropzone_witness = node
+                .find(&|n| n.id.as_deref() == Some("file-upload-dropzone"))
+                .expect("dropzone identity");
+            assert_eq!(dropzone_witness.a11y.role, Some(NodeRole::Group));
+            assert_eq!(
+                dropzone_witness.a11y.label.as_deref(),
+                Some("File upload dropzone")
+            );
+            assert!(
+                dropzone_witness.interaction.focusable,
+                "the dropzone is the keyboard surface, so it stays focusable"
+            );
+            // Visual witness: the 8rem dropzone floor resolves from tokens.
+            assert_eq!(
+                dropzone_witness.style.min_height,
+                Some(poodle_render::presentation::rem_to_px(8.0))
+            );
+            assert!(theme().resolve_color("color.border.default").3 > 0.0);
+        }
+        // Disabled parks the dropzone out of tab order, matching Svelte's
+        // tabindex=-1: the name stays, but nothing can focus or browse it.
+        {
+            let disabled_node = poodle_render::file_upload_with_handlers(
+                &poodle_specs::FileUploadSpec::new().with_disabled(true),
+                &RenderContext::new(&theme()),
+                poodle_render::FileUploadHandlers {
+                    on_browse: Some(Arc::new(|| {})),
+                    ..poodle_render::FileUploadHandlers::default()
+                },
+            );
+            let disabled_zone = disabled_node
+                .find(&|n| n.a11y.label.as_deref() == Some("File upload dropzone"))
+                .expect("disabled dropzone keeps its name");
+            assert!(
+                !disabled_zone.interaction.focusable,
+                "a disabled dropzone takes no keyboard focus"
+            );
+            assert!(disabled_zone.interaction.on_activate.is_none());
+        }
         let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
 
         driver.pointer_activate();
-        let outcomes = outcomes.lock().unwrap();
-        assert_eq!(outcomes.len(), 1, "one activation, one pick");
-        let selected = match &outcomes[0] {
-            poodle_gpui_node_backend::file_capability::FilePickOutcome::Selected {
-                name,
-                contents_base64,
-            } => (name.clone(), contents_base64.clone()),
-            other => panic!("expected a selection, got {other:?}"),
-        };
-        assert_eq!(selected.0, "machine.lic");
+        {
+            let outcomes = outcomes.lock().unwrap();
+            assert_eq!(outcomes.len(), 1, "one activation, one pick");
+            let selected = match &outcomes[0] {
+                poodle_gpui_node_backend::file_capability::FilePickOutcome::Selected {
+                    name,
+                    contents_base64,
+                } => (name.clone(), contents_base64.clone()),
+                other => panic!("expected a selection, got {other:?}"),
+            };
+            assert_eq!(selected.0, "machine.lic");
+            assert_eq!(
+                selected.1,
+                poodle_headless::file_upload::base64_encode(b"fixture payload"),
+                "the same bare-base64 payload the live route produces"
+            );
+            assert!(!selected.1.starts_with("data:"));
+        }
+
+        // Keyboard: focusing the dropzone and pressing Enter browses through
+        // the same seam — Svelte delegates Enter/Space to the native input.
+        driver.focus_element("file-upload-dropzone");
         assert_eq!(
-            selected.1,
-            poodle_headless::file_upload::base64_encode(b"fixture payload"),
-            "the same bare-base64 payload the live route produces"
+            poodle_gpui_node_backend::focus_state_for("file-upload-dropzone"),
+            Some(true),
+            "the dropzone is a real focus target, not a labelled box nobody can reach"
         );
-        assert!(!selected.1.starts_with("data:"));
+        driver.dispatch_key_raw("enter");
+        assert_eq!(
+            outcomes.lock().unwrap().len(),
+            2,
+            "keyboard Enter browses exactly once more"
+        );
+
+        // Visual: the mounted dropzone paints real geometry from the token
+        // floor above.
+        let geometry = poodle_gpui_node_backend::bounds_for("file-upload-dropzone")
+            .expect("mounted dropzone geometry");
+        assert!(f32::from(geometry.size.width) > 0.0);
+        assert!(f32::from(geometry.size.height) > 0.0);
+        assert!(driver.mounted_observation().is_valid());
     });
 }
 
@@ -16477,6 +16546,7 @@ fn action_discovery_selection_rebuilds_the_host_spec_through_mounted_input() {
 /// The host stores the chosen tab and the collapsed flag, then paints them.
 #[test]
 fn dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input() {
+    use poodle_adapter::ThemeProvider;
     use poodle_specs::{DockEdge, DockRegionSpec, PanelTabItem};
 
     run_headless(|cx| {
@@ -16521,6 +16591,55 @@ fn dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input() {
         *mounted.lock().unwrap() = build("explorer".to_string(), false, Arc::clone(&mounted));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
 
+        // Pointer: tab activation runs through real pointer input, the path
+        // Svelte tabs take on click — not only the keyboard path below.
+        driver.pointer_activate_id("dock-tab-search");
+        assert!(
+            mounted.lock().unwrap().has_text("Tab: search"),
+            "pointer activation reached the host and painted the next spec"
+        );
+
+        // Accessibility: the region keeps Svelte's edge-default name with no
+        // ariaLabel passed — the outer node is the region, and the nested
+        // tab strip owns the tablist — while tabs stay focus targets.
+        {
+            let mounted_node = mounted.lock().unwrap();
+            let region = mounted_node
+                .find(&|n| n.a11y.label.as_deref() == Some("left dock"))
+                .expect("region keeps its accessible name");
+            assert_eq!(region.a11y.role, Some(NodeRole::Region));
+            let tablist = mounted_node
+                .find(&|n| n.a11y.role == Some(NodeRole::TabList))
+                .expect("nested tab strip owns the tablist");
+            assert_eq!(
+                tablist.a11y.label.as_deref(),
+                Some("left dock panels"),
+                "the nested strip carries Svelte's panels name"
+            );
+            assert!(
+                tablist
+                    .find(&|n| n.id.as_deref() == Some("dock-tab-search"))
+                    .is_some(),
+                "the tablist owns the tab buttons"
+            );
+            let tab = mounted_node
+                .find(&|n| n.id.as_deref() == Some("dock-tab-search"))
+                .expect("search tab");
+            assert!(
+                tab.interaction.focusable,
+                "tabs stay keyboard-reachable while pointer-activatable"
+            );
+        }
+
+        // Visual: tabs resolve the accent token and paint real geometry.
+        {
+            let tab_geometry = poodle_gpui_node_backend::bounds_for("dock-tab-search")
+                .expect("mounted tab geometry");
+            assert!(f32::from(tab_geometry.size.width) > 0.0);
+            assert!(f32::from(tab_geometry.size.height) > 0.0);
+            assert!(theme().resolve_color("color.accent.base").3 > 0.0);
+        }
+
         driver.wait_for_focus_handle("dock-tab-search");
         driver.keyboard_activate("dock-tab-search");
         let after_tab: Vec<String> = mounted
@@ -16556,6 +16675,31 @@ fn dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input() {
             after_collapse.iter().any(|t| t == "Tab: search"),
             "the stored tab survives collapse"
         );
+
+        // Collapsed icon strip: the outer node stays the named region and
+        // the icon tabs sit in the nested named tablist, matching Svelte's
+        // section/Tabs split in this posture too.
+        {
+            let mounted_node = mounted.lock().unwrap();
+            let region = mounted_node
+                .find(&|n| n.a11y.label.as_deref() == Some("left dock"))
+                .expect("collapsed region keeps its accessible name");
+            assert_eq!(region.a11y.role, Some(NodeRole::Region));
+            let tablist = mounted_node
+                .find(&|n| n.a11y.role == Some(NodeRole::TabList))
+                .expect("collapsed strip nests the tablist");
+            assert_eq!(
+                tablist.a11y.label.as_deref(),
+                Some("left dock panels"),
+                "the collapsed strip carries Svelte's panels name"
+            );
+            assert!(
+                tablist
+                    .find(&|n| n.id.as_deref() == Some("dock-tab-search"))
+                    .is_some(),
+                "the collapsed tablist owns the icon tab"
+            );
+        }
     });
 }
 
@@ -49362,6 +49506,257 @@ fn first_mounted_parity_page_loading() {
         );
         assert!(theme_provider.resolve_color("color.background.elevated").3 > 0.0);
         assert!(rem_to_px(0.375) > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
+fn first_mounted_parity_separator() {
+    // Separator is a non-interactive rule: the semantic variant exposes the
+    // separator role with its orientation (Svelte's role="separator" plus
+    // aria-orientation), the decorative variant stays roleless, neither ever
+    // takes focus, and both tones resolve the contract's color-mix from
+    // tokens.
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{RuleTone, SeparatorOrientation, SeparatorSpec};
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+
+    // Witness: semantic versus decorative, matching Svelte's split.
+    let semantic = poodle_render::separator(&SeparatorSpec::new().with_decorative(false), &ctx);
+    assert_eq!(semantic.a11y.role, Some(NodeRole::Splitter));
+    assert_eq!(semantic.a11y.orientation.as_deref(), Some("horizontal"));
+    assert!(
+        !semantic.interaction.focusable,
+        "a separator is never a focus stop"
+    );
+    let vertical = poodle_render::separator(
+        &SeparatorSpec::new()
+            .with_decorative(false)
+            .with_orientation(SeparatorOrientation::Vertical),
+        &ctx,
+    );
+    assert_eq!(vertical.a11y.orientation.as_deref(), Some("vertical"));
+    let decorative = poodle_render::separator(&SeparatorSpec::new(), &ctx);
+    assert_eq!(decorative.a11y.role, None);
+    assert_eq!(decorative.a11y.orientation, None);
+
+    // Visual witness: subtle mutes border-subtle at 72%, default is full.
+    let subtle_base = theme_provider.resolve_color("color.border.subtle");
+    assert!(subtle_base.3 > 0.0);
+    assert_eq!(
+        semantic.style.descriptor.background,
+        Some(poodle_render::color::with_alpha(
+            subtle_base,
+            subtle_base.3 * 0.72
+        )),
+        "subtle tone is the contract's 72% mix"
+    );
+    let default_fill = poodle_render::separator(
+        &SeparatorSpec::new()
+            .with_decorative(false)
+            .with_tone(RuleTone::Default),
+        &ctx,
+    )
+    .style
+    .descriptor
+    .background
+    .expect("default tone fill");
+    assert_ne!(
+        semantic.style.descriptor.background,
+        Some(default_fill),
+        "default tone drops the mute"
+    );
+    assert_eq!(semantic.style.min_height, Some(rem_to_px(0.0625)));
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut before = poodle_render::button(
+            &poodle_specs::ButtonSpec::new().with_label("Before"),
+            &RenderContext::new(&theme_provider),
+            None,
+        );
+        before.id = Some("sep-before".to_owned());
+        let mut rule = poodle_render::separator(
+            &SeparatorSpec::new().with_decorative(false),
+            &RenderContext::new(&theme_provider),
+        );
+        rule.id = Some("mounted-separator-h".to_owned());
+        let mut after = poodle_render::button(
+            &poodle_specs::ButtonSpec::new().with_label("After"),
+            &RenderContext::new(&theme_provider),
+            None,
+        );
+        after.id = Some("sep-after".to_owned());
+        let mut column = Node::container();
+        column.style.descriptor.layout.direction = LayoutDirection::Column;
+        let node = Arc::new(Mutex::new(column.child(before).child(rule).child(after)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 240.0, 120.0);
+
+        // Keyboard: the rule is never a tab stop — Tab moves past it and no
+        // focus handle ever exists for it.
+        driver.focus_element("sep-before");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("sep-before"),
+            Some(true),
+            "the leading control takes focus"
+        );
+        driver.focus_next_tab_stop();
+        // A raw Tab keystroke through real dispatch also lands nowhere on
+        // the rule — and counts mounted input for the observation token.
+        driver.dispatch_key_raw("tab");
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for("mounted-separator-h").is_none(),
+            "a separator never becomes a focus target"
+        );
+        assert_ne!(
+            poodle_gpui_node_backend::focus_state_for("mounted-separator-h"),
+            Some(true)
+        );
+
+        // Painted: the semantic role reaches mounted GPUI with real geometry.
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-separator-h")
+            .expect("separator reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Splitter));
+        let geometry = poodle_gpui_node_backend::bounds_for("mounted-separator-h")
+            .expect("mounted separator geometry");
+        assert!(f32::from(geometry.size.width) > 0.0);
+        assert!(f32::from(geometry.size.height) > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
+fn first_mounted_parity_card() {
+    // Card is a surface container: variants resolve token fills and borders,
+    // the selected state keeps the accent ring, interactive cards take the
+    // pointer cursor and hover treatment while keeping their spoken name —
+    // with no role, matching Svelte's article — and slot content owns
+    // pointer and keyboard input. The card itself never takes focus, matching
+    // Svelte's article without tab stops.
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{CardLayout, CardSpec};
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+
+    // Witness: a plain card is an unfocused surface with no role.
+    let plain = poodle_render::card(&CardSpec::new(), &ctx, vec![Node::text("Body")]);
+    assert_eq!(plain.a11y.role, None);
+    assert!(
+        !plain.interaction.focusable,
+        "the card face itself is never a focus stop"
+    );
+    assert_eq!(
+        plain.style.descriptor.layout.direction,
+        LayoutDirection::Column
+    );
+    let horizontal = poodle_render::card(
+        &CardSpec::new().with_layout(CardLayout::Horizontal),
+        &ctx,
+        vec![],
+    );
+    assert_eq!(
+        horizontal.style.descriptor.layout.direction,
+        LayoutDirection::Row
+    );
+
+    // Interactive cards keep their spoken name and hover treatment, with no
+    // role — Svelte renders an article in both modes, and the contract
+    // records button semantics as not implemented there.
+    let interactive = poodle_render::card(
+        &CardSpec::new().interactive().with_aria_label("Learn more"),
+        &ctx,
+        vec![],
+    );
+    assert_eq!(interactive.a11y.role, None);
+    assert_eq!(interactive.a11y.label.as_deref(), Some("Learn more"));
+    assert!(
+        interactive.style.hover.is_some(),
+        "interactive cards keep the hover treatment"
+    );
+    assert_eq!(
+        interactive.style.descriptor.cursor,
+        poodle_node::CursorHint::Pointer,
+        "interactive cards take the pointer cursor"
+    );
+
+    // Selected keeps the accent ring; tokens resolve real values.
+    let selected = poodle_render::card(&CardSpec::new().interactive().selected(), &ctx, vec![]);
+    let accent = theme_provider.resolve_color("color.accent.base");
+    assert!(accent.3 > 0.0);
+    assert_eq!(selected.style.descriptor.border.color, accent);
+    assert_eq!(selected.style.shadow_layers.len(), 2);
+    assert!(rem_to_px(0.0625) > 0.0);
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let presses = Arc::new(Mutex::new(0usize));
+        let sink = Arc::clone(&presses);
+        let mut action = poodle_render::button(
+            &poodle_specs::ButtonSpec::new().with_label("Open"),
+            &RenderContext::new(&theme_provider),
+            Some(Arc::new(move || {
+                *sink.lock().expect("press tally") += 1;
+            })),
+        );
+        action.id = Some("card-action".to_owned());
+        let mut card_node = poodle_render::card(
+            &CardSpec::new().interactive().with_aria_label("Learn more"),
+            &RenderContext::new(&theme_provider),
+            vec![action],
+        );
+        card_node.id = Some("mounted-card".to_owned());
+        let node = Arc::new(Mutex::new(card_node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 320.0, 200.0);
+
+        // Focus lands on the slotted control, never the card face.
+        driver.focus_element("card-action");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("card-action"),
+            Some(true),
+            "focus lands on the slotted control, not the card face"
+        );
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for("mounted-card").is_none(),
+            "the card face never becomes a focus target"
+        );
+
+        // Pointer and keyboard both reach the slotted control.
+        driver.pointer_activate_id("card-action");
+        assert_eq!(
+            *presses.lock().expect("press tally"),
+            1,
+            "pointer press reaches the slotted action"
+        );
+        driver.keyboard_activate("card-action");
+        assert_eq!(
+            *presses.lock().expect("press tally"),
+            2,
+            "keyboard Enter fires the slotted action"
+        );
+
+        // Painted: the spoken name reaches mounted GPUI with real geometry;
+        // the card carries no role, matching Svelte's article, and paints
+        // the pointer cursor its interactive treatment declares.
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-card")
+            .expect("card reached GPUI paint");
+        assert_eq!(painted.a11y_role, None);
+        assert_eq!(painted.a11y_label.as_deref(), Some("Learn more"));
+        assert_eq!(
+            painted.style.cursor,
+            poodle_node::CursorHint::Pointer,
+            "the mounted card paints the pointer cursor"
+        );
+        let geometry =
+            poodle_gpui_node_backend::bounds_for("mounted-card").expect("mounted card geometry");
+        assert!(f32::from(geometry.size.width) > 0.0);
+        assert!(f32::from(geometry.size.height) > 0.0);
         assert!(driver.mounted_observation().is_valid());
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
