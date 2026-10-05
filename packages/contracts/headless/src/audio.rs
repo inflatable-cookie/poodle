@@ -2685,6 +2685,7 @@ mod tests {
         assert!(released.active_inputs.is_empty());
     }
 
+    #[test]
     fn phase_three_keyboard_pairs_notes_and_matches_velocity() {
         assert_eq!(keyboard_velocity(0.0), 1);
         assert_eq!(keyboard_velocity(1.0), 127);
