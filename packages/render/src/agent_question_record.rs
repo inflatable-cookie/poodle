@@ -12,6 +12,20 @@ use poodle_specs::AgentQuestionRecordSpec;
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
+/// Semantic id of one option row. `instance_id` is the record instance; `index`
+/// is the row position. Duplicate question ids share option values, so those
+/// two plus the value keep GPUI element identity unique.
+pub fn agent_question_record_option_id(
+    instance_id: Option<&str>,
+    index: usize,
+    value: &str,
+) -> String {
+    match instance_id {
+        Some(scope) => format!("agent-question-record:{scope}:{index}:option:{value}"),
+        None => format!("agent-question-record-option-{index}-{value}"),
+    }
+}
+
 pub fn agent_question_record(spec: &AgentQuestionRecordSpec, ctx: &RenderContext<'_>) -> Node {
     let base_size = ctx.base_size(spec.size);
     let density = ctx.resolve_density(spec.density);
@@ -75,16 +89,17 @@ pub fn agent_question_record(spec: &AgentQuestionRecordSpec, ctx: &RenderContext
             s.fill_width = true;
             s.descriptor.layout.spacing.gap = rem_to_px(spec.gap_rem(density));
         }
-        for option in &spec.question.options {
+        for (index, option) in spec.question.options.iter().enumerate() {
             let chosen = spec.is_chosen(&option.value);
 
             let mut row = Node::container();
             // Node.id is GPUI element identity and the a11y projection's
-            // semantic identity. Records in one transcript share option
-            // values (yes/no), so the question id scopes each row.
-            row.id = Some(format!(
-                "agent-question-record-{}-option-{}",
-                spec.question.id, option.value
+            // semantic identity. Scope by record instance and row position
+            // so two records sharing a question id stay distinct.
+            row.id = Some(agent_question_record_option_id(
+                spec.instance_id.as_deref(),
+                index,
+                &option.value,
             ));
             row.a11y.role = Some(NodeRole::ListItem);
             {

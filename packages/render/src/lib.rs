@@ -210,7 +210,7 @@ pub use agent_question::{
     agent_question, agent_question_dismiss_focus_id, agent_question_option_focus_id,
     AgentQuestionHandlers,
 };
-pub use agent_question_record::agent_question_record;
+pub use agent_question_record::{agent_question_record, agent_question_record_option_id};
 pub use agent_subagent::{agent_subagent, agent_subagent_action_focus_id, AgentSubagentHandlers};
 pub use agent_transcript::{agent_transcript, AgentTranscriptHandlers};
 pub use alert_dialog::{

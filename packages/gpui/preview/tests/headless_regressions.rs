@@ -54279,14 +54279,11 @@ fn agent_question_record_answer_display_rebuilds_the_host_spec() {
             text: String::new(),
         }
     }
-    let delete_spec = AgentQuestionRecordSpec::new(
-        yes_no("confirm-delete", "Delete the draft?"),
-        selected_yes("confirm-delete"),
-    );
-    let save_spec = AgentQuestionRecordSpec::new(
-        yes_no("confirm-save", "Save the draft?"),
-        selected_yes("confirm-save"),
-    );
+    let shared = yes_no("confirm", "Confirm the draft?");
+    let delete_spec = AgentQuestionRecordSpec::new(shared.clone(), selected_yes("confirm"))
+        .with_instance_id("delete");
+    let save_spec =
+        AgentQuestionRecordSpec::new(shared, selected_yes("confirm")).with_instance_id("save");
     fn option_row_ids(node: &Node, out: &mut Vec<String>) {
         if node.a11y.role == Some(NodeRole::ListItem) {
             if let Some(id) = &node.id {
@@ -54297,6 +54294,12 @@ fn agent_question_record_answer_display_rebuilds_the_host_spec() {
             option_row_ids(child, out);
         }
     }
+    let expected_ids = [
+        poodle_render::agent_question_record_option_id(Some("delete"), 0, "yes"),
+        poodle_render::agent_question_record_option_id(Some("delete"), 1, "no"),
+        poodle_render::agent_question_record_option_id(Some("save"), 0, "yes"),
+        poodle_render::agent_question_record_option_id(Some("save"), 1, "no"),
+    ];
     let mut unmounted_ids = Vec::new();
     option_row_ids(
         &poodle_render::agent_question_record(&delete_spec, &ctx),
@@ -54306,15 +54309,7 @@ fn agent_question_record_answer_display_rebuilds_the_host_spec() {
         &poodle_render::agent_question_record(&save_spec, &ctx),
         &mut unmounted_ids,
     );
-    assert_eq!(
-        unmounted_ids,
-        vec![
-            "agent-question-record-confirm-delete-option-yes".to_owned(),
-            "agent-question-record-confirm-delete-option-no".to_owned(),
-            "agent-question-record-confirm-save-option-yes".to_owned(),
-            "agent-question-record-confirm-save-option-no".to_owned(),
-        ]
-    );
+    assert_eq!(unmounted_ids, expected_ids);
 
     run_headless(|cx| {
         poodle_gpui_node_backend::begin_probe_capture();
@@ -54362,14 +54357,9 @@ fn agent_question_record_answer_display_rebuilds_the_host_spec() {
             element.len(),
             "option rows share a backend element id: {element:?}"
         );
-        for id in [
-            "agent-question-record-confirm-delete-option-yes",
-            "agent-question-record-confirm-delete-option-no",
-            "agent-question-record-confirm-save-option-yes",
-            "agent-question-record-confirm-save-option-no",
-        ] {
+        for id in &expected_ids {
             assert!(
-                unique_semantic.contains(id),
+                unique_semantic.contains(id.as_str()),
                 "missing scoped option identity {id}; have {semantic:?}"
             );
         }
