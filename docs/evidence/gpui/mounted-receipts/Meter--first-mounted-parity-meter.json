@@ -7,12 +7,17 @@
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
     "semantic",
+    "accessibility",
     "visual"
   ],
   "signals": {
     "semantic": [
       "assert",
       "production-mount"
+    ],
+    "accessibility": [
+      "NodeRole",
+      "a11y."
     ],
     "visual": [
       "resolve_radius",
@@ -30,18 +35,19 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "fa32bb0b041f0d0ef98c9392b5c2ab7678baf155",
+  "source_commit": "c511c8337fd50a1ec80421a0120a3635602dcfd5",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "74CB8B1B-B7B4-403F-BB61-33703A050E8B",
+    "run_id": "29F8BA43-9446-4029-A3C8-31218AFF6FD6",
     "outcome": "passed",
-    "body_sha256": "700b8a3235e2022d3c8558cebb9baf201b9713ffba65d890073463fe42892195"
+    "body_sha256": "f506442b125d7729c3d80333df3c763bc4ab3f6cedbbdc91aec0dfc6d60eb469"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
+    "asserted node-level role, label, state, or focusability in the mounted tree",
     "asserted resolved token values or mounted geometry"
   ],
   "outcome": "passed"

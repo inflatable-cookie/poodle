@@ -838,6 +838,9 @@ pub enum NodeRole {
     CheckBox,
     ColumnHeader,
     ComboBox,
+    /// Landmark for a page or shell footer (`<footer>` /
+    /// `role="contentinfo"`): the metadata strip at the end of a page.
+    ContentInfo,
     Dialog,
     /// Figure with an accessible name (`<figure>` / `role="figure"`).
     Figure,
@@ -861,6 +864,14 @@ pub enum NodeRole {
     MenuItem,
     MenuItemCheckBox,
     MenuItemRadio,
+    /// Bounded measurement within a known range (`<meter>` / `role="meter"`),
+    /// with the current value, bounds and value text on [`NodeA11y`]. Distinct
+    /// from [`Self::ProgressIndicator`], whose meaning is task completion
+    /// rather than a level inside a known span.
+    Meter,
+    /// Navigation landmark (`<nav>` / `role="navigation"`): a set of links or
+    /// disclosure triggers for moving between views.
+    Navigation,
     Splitter,
     /// A value along a track (hue/alpha channel strips, range thumbs).
     Slider,

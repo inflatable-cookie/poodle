@@ -45980,19 +45980,28 @@ fn navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_back
 
         host.rebuild();
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&host.mounted), 640.0, 400.0);
+        poodle_gpui_node_backend::begin_probe_capture();
         driver.draw_frame();
         assert!(
             poodle_gpui_node_backend::bounds_for("navigation-menu-panel:components").is_none(),
             "a default navigation menu discloses no viewport"
         );
+        // The list is a real navigation landmark in the painted tree: the
+        // role and accessible name ride the same node Svelte renders as
+        // `<nav aria-label>`.
+        let nav_landmark = poodle_gpui_node_backend::painted_node_for("navigation-menu-list")
+            .expect("the nav landmark reaches the GPUI paint pass");
+        assert_eq!(nav_landmark.a11y_role, Some(NodeRole::Navigation));
+        assert_eq!(nav_landmark.a11y_label.as_deref(), Some("Main navigation"));
 
         // ── Trigger linkage and roving-tab posture ──
         {
             let tree = host.mounted.lock().expect("mount lock");
             let nav = tree
-                .find(&|n| n.a11y.label.as_deref() == Some("Main navigation"))
-                .expect("navigation root");
-            assert!(nav.a11y.label.is_some());
+                .find(&|n| n.id.as_deref() == Some("navigation-menu-list"))
+                .expect("navigation landmark");
+            assert_eq!(nav.a11y.role, Some(NodeRole::Navigation));
+            assert_eq!(nav.a11y.label.as_deref(), Some("Main navigation"));
             for (value, tab) in [
                 ("home", 0),
                 ("components", -1),
@@ -46302,6 +46311,7 @@ fn navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_back
             ["escape", "escape", "outside"]
         );
         assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }
 /// SplitButton pairs a primary action with a toggle-owned menu: both halves
@@ -50871,8 +50881,9 @@ fn first_mounted_parity_meter() {
         );
         linear.id = Some("meter-linear".to_owned());
         assert_eq!(
-            linear.a11y.role, None,
-            "the planned Meter role remains absent"
+            linear.a11y.role,
+            Some(NodeRole::Meter),
+            "the meter carries bounded-value semantics, not progress"
         );
         assert_eq!(linear.a11y.label.as_deref(), Some("Storage"));
         assert_eq!(linear.a11y.value, Some(40.0));
@@ -50978,10 +50989,7 @@ fn first_mounted_parity_meter() {
             .with_aria_label("Context used");
         let mut ring = poodle_render::meter(&ring_spec, &ctx);
         ring.id = Some("meter-ring".to_owned());
-        assert_eq!(
-            ring.a11y.role, None,
-            "the planned Meter role remains absent"
-        );
+        assert_eq!(ring.a11y.role, Some(NodeRole::Meter));
         assert_eq!(ring.a11y.value, Some(38.0));
         assert_eq!(ring.a11y.value_text.as_deref(), Some("38%"));
         assert_eq!(
@@ -51012,7 +51020,7 @@ fn first_mounted_parity_meter() {
         ] {
             let painted = poodle_gpui_node_backend::painted_node_for(id)
                 .expect("meter reaches the GPUI paint pass");
-            assert_eq!(painted.a11y_role, None);
+            assert_eq!(painted.a11y_role, Some(NodeRole::Meter));
             assert!(painted.a11y_label.is_some());
             let bounds =
                 poodle_gpui_node_backend::bounds_for(id).expect("meter has mounted geometry");
@@ -51070,8 +51078,9 @@ fn first_mounted_parity_status_bar() {
             vec![],
         );
         assert_eq!(
-            summary_only.a11y.role, None,
-            "the planned footer role remains absent"
+            summary_only.a11y.role,
+            Some(NodeRole::ContentInfo),
+            "the status bar is a content-info footer landmark"
         );
         assert_eq!(summary_only.a11y.label.as_deref(), Some("Ready"));
         assert!(matches!(
@@ -51130,10 +51139,7 @@ fn first_mounted_parity_status_bar() {
             vec![Node::text("Ln 42, Col 8")],
         );
         status_bar.id = Some("status-bar".to_owned());
-        assert_eq!(
-            status_bar.a11y.role, None,
-            "the planned footer role remains absent"
-        );
+        assert_eq!(status_bar.a11y.role, Some(NodeRole::ContentInfo));
         assert_eq!(status_bar.a11y.label.as_deref(), Some("Connection lost"));
         assert_eq!(
             status_bar.children.len(),
@@ -51180,7 +51186,7 @@ fn first_mounted_parity_status_bar() {
         driver.draw_frame();
         let painted = poodle_gpui_node_backend::painted_node_for("status-bar")
             .expect("StatusBar reaches the GPUI paint pass");
-        assert_eq!(painted.a11y_role, None);
+        assert_eq!(painted.a11y_role, Some(NodeRole::ContentInfo));
         assert_eq!(painted.a11y_label.as_deref(), Some("Connection lost"));
         driver.wait_for_focus_handle("status-bar-retry");
         driver.focus_element("status-bar-retry");

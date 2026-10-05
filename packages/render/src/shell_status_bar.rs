@@ -4,7 +4,7 @@
 //!
 //! Ported from: `packages/jetstream/components/src/shell_status_bar.rs`.
 
-use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node, NodeRole};
 use poodle_specs::ShellStatusBarSpec;
 
 use crate::color::with_alpha;
@@ -103,6 +103,7 @@ pub fn shell_status_bar(
         el = el.child(region(trailing));
     }
 
+    el.a11y.role = Some(NodeRole::ContentInfo);
     el.a11y.label = Some(spec.resolved_aria_label().to_owned());
     el
 }

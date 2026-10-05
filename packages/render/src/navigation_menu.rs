@@ -133,6 +133,17 @@ pub fn navigation_menu(
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.spacing.gap = list_gap;
     }
+    // Contract §6/§8: the list is the `<nav>` landmark, and its accessible
+    // name rides the landmark rather than the roleless root container. Svelte
+    // renders `<nav aria-label>`; a nav without the role announces as a plain
+    // group with no way to jump to it.
+    list.id = Some("navigation-menu-list".to_string());
+    list.a11y.role = Some(NodeRole::Navigation);
+    if let Some(label) = spec.aria_label.as_deref() {
+        if !label.is_empty() {
+            list.a11y.label = Some(label.to_string());
+        }
+    }
 
     // Roving-tab posture (Svelte `focusIndex`): the host-tracked focus
     // value owns the tab stop when it names an enabled trigger; otherwise
@@ -424,11 +435,6 @@ pub fn navigation_menu(
         root = root.child(viewport);
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            root.a11y.label = Some(label.to_string());
-        }
-    }
     root
 }
 
