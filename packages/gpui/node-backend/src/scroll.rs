@@ -63,6 +63,41 @@ pub(crate) fn sweep_unpainted(window: Option<AnyWindowHandle>) {
     REPORTED.with(|reported| reported.borrow_mut().retain(|key, _| keep(key)));
 }
 
+/// Drop all scroll state owned by a window that has closed.
+pub(crate) fn teardown_window_scroll(handle: AnyWindowHandle) {
+    let keep = |key: &ScrollKey| key.0 != Some(handle);
+    SCROLL_HANDLES.with(|handles| handles.borrow_mut().retain(|key, _| keep(key)));
+    REPORTED.with(|reported| reported.borrow_mut().retain(|key, _| keep(key)));
+    PAINTED.with(|painted| painted.borrow_mut().retain(keep));
+}
+
+/// Number of retained scroll handles, reported offsets, and painted scopes
+/// owned by one window, in that order.
+pub fn scroll_state_counts_for_window(handle: AnyWindowHandle) -> (usize, usize, usize) {
+    let handles = SCROLL_HANDLES.with(|handles| {
+        handles
+            .borrow()
+            .keys()
+            .filter(|key| key.0 == Some(handle))
+            .count()
+    });
+    let reported = REPORTED.with(|reported| {
+        reported
+            .borrow()
+            .keys()
+            .filter(|key| key.0 == Some(handle))
+            .count()
+    });
+    let painted = PAINTED.with(|painted| {
+        painted
+            .borrow()
+            .iter()
+            .filter(|key| key.0 == Some(handle))
+            .count()
+    });
+    (handles, reported, painted)
+}
+
 fn find(id: &str) -> Option<ScrollHandle> {
     SCROLL_HANDLES.with(|handles| {
         handles

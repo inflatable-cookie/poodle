@@ -58367,6 +58367,75 @@ fn first_mounted_parity_scroll_shell() {
     });
 }
 
+/// Closing a window releases its ScrollShell state immediately, while another
+/// live window's state remains available without an intervening frame.
+#[test]
+fn gpui_node_scroll_shell_window_teardown_clears_only_closed_window() {
+    use poodle_node::NodeScrollEvent;
+    use poodle_specs::ScrollShellSpec;
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+
+    let build = |viewport_id: &str| {
+        let mut shell = poodle_render::scroll_shell(
+            &ScrollShellSpec::new().with_focusable(true),
+            &ctx,
+            scroll_rows(12),
+            Some(Arc::new(|_: &NodeScrollEvent| {})),
+        );
+        shell.children[0].id = Some(viewport_id.into());
+        Arc::new(Mutex::new(scroll_frame(shell, None)))
+    };
+
+    run_headless(|cx| {
+        let mut cx_survivor = cx.clone();
+        let mut closing =
+            HeadlessDriver::new_in_box(cx, build("closing-scroll-viewport"), 320.0, 220.0);
+        let mut survivor = HeadlessDriver::new_in_box(
+            &mut cx_survivor,
+            build("survivor-scroll-viewport"),
+            320.0,
+            220.0,
+        );
+        let closing_handle = closing.with_window(|window, _cx| window.window_handle());
+        let survivor_handle = survivor.with_window(|window, _cx| window.window_handle());
+
+        closing.draw_frame();
+        survivor.draw_frame();
+        closing.wait_for_focus_handle("closing-scroll-viewport");
+        survivor.wait_for_focus_handle("survivor-scroll-viewport");
+        closing.keyboard_key("closing-scroll-viewport", "down");
+        survivor.keyboard_key("survivor-scroll-viewport", "down");
+
+        assert_eq!(
+            poodle_gpui_node_backend::scroll_state_counts_for_window(closing_handle),
+            (1, 1, 1),
+            "the closing window has a handle, reported offset, and painted scope"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::scroll_state_counts_for_window(survivor_handle),
+            (1, 1, 1),
+            "the other live window has independent scroll state"
+        );
+
+        // Close through GPUI's production removal path. No frame runs after
+        // close, so cleanup must come from the close hook itself.
+        closing.close_window();
+
+        assert_eq!(
+            poodle_gpui_node_backend::scroll_state_counts_for_window(closing_handle),
+            (0, 0, 0),
+            "window close immediately clears all three per-window scroll maps"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::scroll_state_counts_for_window(survivor_handle),
+            (1, 1, 1),
+            "closing one window preserves the other window's state"
+        );
+    });
+}
+
 /// poodle#117. DetailSection's first mounted parity proof: the title is a
 /// level-3 heading, a named section is a region (an unnamed one is not), the
 /// header actions and body controls stay in document tab order while the

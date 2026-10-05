@@ -148,6 +148,7 @@ pub(crate) fn bind_window_teardown(handle: AnyWindowHandle, cx: &mut App) {
     let subscription = cx.on_window_closed(move |app| {
         if handle.update(app, |_, _, _| {}).is_err() {
             teardown_window_tooltips(handle);
+            crate::scroll::teardown_window_scroll(handle);
             // Drop after this notify finishes. SubscriberSet::retain has the
             // callback list taken; dropping here would unsubscribe mid-notify.
             app.defer(move |_app| {
