@@ -50944,7 +50944,10 @@ fn first_mounted_parity_meter() {
         assert_eq!(degenerate.a11y.value_min, Some(20.0));
         assert_eq!(degenerate.a11y.value_max, Some(21.0));
         assert_eq!(degenerate.a11y.value_text.as_deref(), Some("50%"));
-        assert_eq!(degenerate.children[0].children[0].style.width_pct, Some(0.5));
+        assert_eq!(
+            degenerate.children[0].children[0].style.width_pct,
+            Some(0.5)
+        );
         assert!(matches!(
             &degenerate.children[1].kind,
             NodeKind::Text { content } if content == "50%"
@@ -51001,7 +51004,12 @@ fn first_mounted_parity_meter() {
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 240.0, 128.0);
         poodle_gpui_node_backend::begin_probe_capture();
         driver.draw_frame();
-        for id in ["meter-linear", "meter-high", "meter-ring", "meter-degenerate"] {
+        for id in [
+            "meter-linear",
+            "meter-high",
+            "meter-ring",
+            "meter-degenerate",
+        ] {
             let painted = poodle_gpui_node_backend::painted_node_for(id)
                 .expect("meter reaches the GPUI paint pass");
             assert_eq!(painted.a11y_role, None);
@@ -51020,13 +51028,12 @@ fn first_mounted_parity_meter() {
                 < 1.0,
             "mounted meter fill reflects its 50% range value"
         );
-        let degenerate_bounds =
-            poodle_gpui_node_backend::bounds_for("meter-degenerate").expect("fallback range bounds");
+        let degenerate_bounds = poodle_gpui_node_backend::bounds_for("meter-degenerate")
+            .expect("fallback range bounds");
         let degenerate_fill = poodle_gpui_node_backend::bounds_for("meter-degenerate-indicator")
             .expect("fallback range fill bounds");
         assert!(
-            (f32::from(degenerate_fill.size.width)
-                - f32::from(degenerate_bounds.size.width) * 0.5)
+            (f32::from(degenerate_fill.size.width) - f32::from(degenerate_bounds.size.width) * 0.5)
                 .abs()
                 < 1.0,
             "mounted fallback range uses contract min + 1 normalization"
