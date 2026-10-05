@@ -12,6 +12,7 @@
 
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
+    NodeRole,
 };
 use poodle_specs::{DetailShellSpec, DetailState, ScrollOwner};
 use poodle_specs::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
@@ -62,7 +63,7 @@ pub fn detail_shell(
         }
     }
 
-    // ── Header region (title OR header slot) ─────────────────────
+    // ── Header region (header slot OR title fallback) ─────────────
     if spec.title.is_some() || header.is_some() {
         let mut header_region = Node::container();
         {
@@ -80,12 +81,16 @@ pub fn detail_shell(
             pad.bottom = panel_y;
         }
 
-        if let Some(ref title) = spec.title {
-            let mut t = Node::text(title);
-            t.style.descriptor.text_color = Some(header_text);
-            t.style.text_size = Some(heading_size);
-            t.style.text_weight = Some(600);
-            header_region = header_region.child(t);
+        if header.is_none() {
+            if let Some(ref title) = spec.title {
+                let mut t = Node::text(title);
+                t.a11y.role = Some(NodeRole::Heading);
+                t.a11y.level = Some(2);
+                t.style.descriptor.text_color = Some(header_text);
+                t.style.text_size = Some(heading_size);
+                t.style.text_weight = Some(600);
+                header_region = header_region.child(t);
+            }
         }
         if let Some(h) = header {
             header_region = header_region.child(h);
@@ -189,6 +194,7 @@ pub fn detail_shell(
 
     if let Some(label) = spec.aria_label.as_deref() {
         if !label.is_empty() {
+            shell.a11y.role = Some(NodeRole::Region);
             shell.a11y.label = Some(label.to_string());
         }
     }

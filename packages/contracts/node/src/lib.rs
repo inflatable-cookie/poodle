@@ -877,6 +877,8 @@ pub enum NodeRole {
     /// Navigation landmark (`<nav>` / `role="navigation"`): a set of links or
     /// disclosure triggers for moving between views.
     Navigation,
+    /// Decorative content with no accessible semantics (`role="presentation"`).
+    Presentation,
     Splitter,
     /// A value along a track (hue/alpha channel strips, range thumbs).
     Slider,

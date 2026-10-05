@@ -544,6 +544,7 @@ pub(crate) fn aria_role(role: NodeRole) -> &'static str {
         NodeRole::MenuItemRadio => "menuitemradio",
         NodeRole::Meter => "meter",
         NodeRole::Navigation => "navigation",
+        NodeRole::Presentation => "presentation",
         NodeRole::Splitter => "separator",
         NodeRole::Table => "table",
         NodeRole::Slider => "slider",
