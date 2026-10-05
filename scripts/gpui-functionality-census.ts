@@ -376,7 +376,10 @@ export type ExecutionRecord = {
   lockfile: string;
   lockfile_sha256: string;
   run_id: string;
-  results: Record<string, { outcome: "passed" | "failed" | "not-run"; body_sha256: string }>;
+  /** `run_id` on a result names the run that executed that test when it
+   * differs from the record's shared run, so recording new tests never
+   * reattributes the receipts of tests an earlier run executed. */
+  results: Record<string, { outcome: "passed" | "failed" | "not-run"; body_sha256: string; run_id?: string }>;
 };
 
 export function sha256Hex(text: string): string {
@@ -1054,11 +1057,14 @@ export function recordExpectedTestExecution(testNames: string[], runId: string, 
   record.body_hash_baseline_commit ??= record.source_commit;
   record.source_commit = sourceCommit;
   record.lockfile_sha256 = sha256Hex(lockfile);
-  record.run_id = runId;
+  const sharedRun = record.run_id;
   for (const test of testNames) {
     const bodySha = testBodySha256(root, test);
     if (bodySha === undefined) throw new Error(`Expected test ${test} disappeared after execution.`);
-    record.results[test] = { outcome: "passed", body_sha256: bodySha };
+    record.results[test] =
+      sharedRun === runId
+        ? { outcome: "passed", body_sha256: bodySha }
+        : { outcome: "passed", body_sha256: bodySha, run_id: runId };
   }
   validateExecutionRecord(record, root);
   writeFile(root, EXECUTION_RECORD_PATH, `${JSON.stringify(record, null, 2)}\n`);
@@ -1255,7 +1261,7 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
           packageVersion,
           sourceCommit: record.source_commit,
           lockfileSha256: record.lockfile_sha256,
-          runId: record.run_id,
+          runId: record.results[test].run_id ?? record.run_id,
           bodySha256: record.results[test].body_sha256,
         }),
       });

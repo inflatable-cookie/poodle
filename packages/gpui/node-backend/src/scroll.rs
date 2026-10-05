@@ -105,7 +105,9 @@ pub(super) fn scoped(node: &Node) -> Option<AnyElement> {
     if BUILDING_SCOPE.with(|flag| flag.replace(false)) || !owns_scroll(node) {
         return None;
     }
-    let id = node.runtime_id.as_ref().or(node.id.as_ref())?.clone();
+    // An id-less viewport keys on its generated build-order id, which is
+    // deterministic per frame, so it still gets per-window state.
+    let id = element_id_text(&element_id(node));
     Some(
         ScrollScope {
             node: node.clone(),
