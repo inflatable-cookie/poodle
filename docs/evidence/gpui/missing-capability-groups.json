@@ -36,39 +36,6 @@
       ]
     },
     {
-      "substrate": "feedback-status",
-      "components": [
-        "DetailSectionGroup",
-        "DetailShell",
-        "EmbedPreview",
-        "EmptyState",
-        "ErrorBoundary",
-        "InlineListSection",
-        "PageHeader",
-        "PasswordRequirements",
-        "Region"
-      ],
-      "missingTally": {
-        "semantic": 9,
-        "events": 9,
-        "pointer": 9,
-        "keyboard_focus": 8,
-        "accessibility": 9,
-        "visual": 9
-      },
-      "contracts": [
-        "docs/contracts/components/detail-section-group.md",
-        "docs/contracts/components/detail-shell.md",
-        "docs/contracts/components/embed-preview.md",
-        "docs/contracts/components/empty-state.md",
-        "docs/contracts/components/error-boundary.md",
-        "docs/contracts/components/inline-list-section.md",
-        "docs/contracts/components/page-header.md",
-        "docs/contracts/components/password-requirements.md",
-        "docs/contracts/components/region.md"
-      ]
-    },
-    {
       "substrate": "text-display",
       "components": [
         "Code",
@@ -124,6 +91,31 @@
         "docs/contracts/components/skeleton.md",
         "docs/contracts/components/time-ago.md",
         "docs/contracts/components/tooltip.md"
+      ]
+    },
+    {
+      "substrate": "feedback-status",
+      "components": [
+        "EmbedPreview",
+        "EmptyState",
+        "ErrorBoundary",
+        "InlineListSection",
+        "PasswordRequirements"
+      ],
+      "missingTally": {
+        "semantic": 5,
+        "events": 5,
+        "pointer": 5,
+        "keyboard_focus": 4,
+        "accessibility": 5,
+        "visual": 5
+      },
+      "contracts": [
+        "docs/contracts/components/embed-preview.md",
+        "docs/contracts/components/empty-state.md",
+        "docs/contracts/components/error-boundary.md",
+        "docs/contracts/components/inline-list-section.md",
+        "docs/contracts/components/password-requirements.md"
       ]
     },
     {
