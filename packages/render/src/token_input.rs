@@ -121,6 +121,32 @@ fn report_reject(handler: &Option<Arc<dyn Fn(String) + Send + Sync>>, value: &st
     }
 }
 
+/// Commit the live draft into the controlled value. The live lock is taken
+/// once to read and clear the draft, then released **before** any host
+/// callback runs: a host `on_values_change` may legitimately lock this same
+/// `TokenInputLive`, and holding the guard across the callback would deadlock.
+fn commit_draft(
+    live: &Arc<Mutex<TokenInputLive>>,
+    values: &[String],
+    dedupe: bool,
+    on_values: &Option<Arc<dyn Fn(Vec<String>) + Send + Sync>>,
+    on_reject: &Option<Arc<dyn Fn(String) + Send + Sync>>,
+) {
+    let draft = {
+        let mut state = live.lock().expect("token input live");
+        let draft = std::mem::take(&mut state.draft);
+        state.selection = (0, 0);
+        draft
+    };
+    if let Some(trimmed) = normalize_token(&draft) {
+        if let Some(next) = add_tokens(std::slice::from_ref(&trimmed), values, dedupe) {
+            apply_values(on_values, next);
+        } else {
+            report_reject(on_reject, &trimmed);
+        }
+    }
+}
+
 /// The shared renderer. `live` present means the draft is wired for editing;
 /// absent keeps the historical static draft (the shared Jetstream specimen).
 #[expect(
@@ -292,25 +318,13 @@ fn build(
         let commit_on_values = on_values.clone();
         let commit_on_reject = on_reject.clone();
         let commit: Arc<dyn Fn() + Send + Sync> = Arc::new(move || {
-            let draft = {
-                let state = commit_live.lock().expect("token input live");
-                state.draft.clone()
-            };
-            let mut state = commit_live.lock().expect("token input live");
-            match normalize_token(&draft) {
-                Some(trimmed) => {
-                    if let Some(next) =
-                        add_tokens(std::slice::from_ref(&trimmed), &commit_values, dedupe)
-                    {
-                        apply_values(&commit_on_values, next);
-                    } else {
-                        report_reject(&commit_on_reject, &trimmed);
-                    }
-                }
-                None => {}
-            }
-            state.draft.clear();
-            state.selection = (0, 0);
+            commit_draft(
+                &commit_live,
+                &commit_values,
+                dedupe,
+                &commit_on_values,
+                &commit_on_reject,
+            );
         });
         text_handlers.on_submit = Some(Arc::clone(&commit));
         if commit_on_blur {
@@ -320,23 +334,13 @@ fn build(
             let blur_on_reject = on_reject.clone();
             text_handlers.on_focus_change = Some(Arc::new(move |focused| {
                 if !focused {
-                    // Re-run the same commit on blur.
-                    let draft = {
-                        let state = blur_live.lock().expect("token input live");
-                        state.draft.clone()
-                    };
-                    let mut state = blur_live.lock().expect("token input live");
-                    if let Some(trimmed) = normalize_token(&draft) {
-                        if let Some(next) =
-                            add_tokens(std::slice::from_ref(&trimmed), &blur_values, dedupe)
-                        {
-                            apply_values(&blur_on_values, next);
-                        } else {
-                            report_reject(&blur_on_reject, &trimmed);
-                        }
-                    }
-                    state.draft.clear();
-                    state.selection = (0, 0);
+                    commit_draft(
+                        &blur_live,
+                        &blur_values,
+                        dedupe,
+                        &blur_on_values,
+                        &blur_on_reject,
+                    );
                 }
             }));
         }
