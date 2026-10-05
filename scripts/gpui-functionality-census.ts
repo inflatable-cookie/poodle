@@ -732,7 +732,9 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
             ? `${contractPath}#2. Read-Only By Construction`
             : layoutOnlyGroup
               ? `${contractPath}#4. Behavior Rules`
-              : `${contractPath}#6. Accessibility`,
+              : decorativeRegion
+                ? `${contractPath}#6. Accessibility`
+                : `${contractPath}#${keyboard.heading || "Keyboard"}`,
       });
     } else {
       required.push("pointer");
