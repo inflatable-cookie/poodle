@@ -21,7 +21,7 @@ use poodle_specs::{ControlDensity, ControlSize, RatingSpec};
 
 use crate::color::with_alpha;
 use crate::context::RenderContext;
-use crate::presentation::{control_height_rem, rem_to_px};
+use crate::presentation::rem_to_px;
 
 /// Host-owned native interaction for one Rating instance.
 ///
@@ -64,6 +64,18 @@ fn item_gap_rem(density: ControlDensity) -> f32 {
         ControlDensity::Compact => 0.0625,
         ControlDensity::Default => 0.125,
         ControlDensity::Comfortable => 0.25,
+    }
+}
+
+/// Per-size icon size token. The rating item box is the Svelte CSS
+/// `size-icon-{size} + 0.75rem`, not the generic control-height ladder.
+fn icon_size_token(size: ControlSize) -> &'static str {
+    match size {
+        ControlSize::Xs => "size.icon.xs",
+        ControlSize::Sm => "size.icon.sm",
+        ControlSize::Md => "size.icon.md",
+        ControlSize::Lg => "size.icon.lg",
+        ControlSize::Xl => "size.icon.xl",
     }
 }
 
@@ -234,7 +246,7 @@ pub fn rating(spec: &RatingSpec, ctx: &RenderContext<'_>, handlers: RatingHandle
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
     let glyph_px = rem_to_px(glyph_font_rem(effective_size)) * 1.125;
-    let item_px = rem_to_px(control_height_rem(effective_size));
+    let item_px = ctx.theme().resolve_space(icon_size_token(effective_size)) + rem_to_px(0.75);
     let gap = rem_to_px(item_gap_rem(density));
     let item_count = spec.item_count();
     let step = resolve_rating_step(spec.step);

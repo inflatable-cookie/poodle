@@ -401,7 +401,9 @@ pub fn number_input(
 
     // ── Vertical steppers (only when enabled) ─────────────────────────────
     if spec.show_steppers {
-        let stepper_width = rem_to_px(1.25);
+        // Svelte `.poodle-number-input__steppers button` is `size.icon.md +
+        // 0.5rem` wide, independent of the field's own size.
+        let stepper_width = ctx.theme().resolve_space("size.icon.md") + rem_to_px(0.5);
         let mut steppers = Node::container();
         {
             let s = &mut steppers.style;

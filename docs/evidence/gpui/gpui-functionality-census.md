@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `3b312d87787941f9c2a07154771522c10f0a519c`
+Evidence commit (execution identity from the execution record, not the checkout): `6e6cc532144a0ca1308fb3eaafc45b32eecc1fff`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
@@ -15,9 +15,9 @@ Construction is not functional completion. A passing route, a test name, or one 
 ## Summary
 
 Rows with at least one admitted capability: **124**/175.
-Fully admitted rows: **106**/175.
-Missing by axis: semantic 51; events 43; pointer 46; keyboard_focus 43; accessibility 56; visual 66.
-Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **107**.
+Fully admitted rows: **112**/175.
+Missing by axis: semantic 51; events 43; pointer 45; keyboard_focus 43; accessibility 55; visual 60.
+Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **94**.
 
 ## Rows
 
@@ -69,7 +69,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **107**.
 | Menu | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | — |
 | MetaBar | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | MetaItem | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
-| NumberInput | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); keyboard_focus (expected-test); accessibility (expected-test) | pointer; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/NumberInput--number-input-mounted-valid-direct-editing-rebuilds-host-draft-and-value.json`; `docs/evidence/gpui/mounted-receipts/NumberInput--number-input-mounted-accessibility-projects-spin-button-surface.json` |
+| NumberInput | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/NumberInput--number-input-mounted-valid-direct-editing-rebuilds-host-draft-and-value.json`; `docs/evidence/gpui/mounted-receipts/NumberInput--number-input-mounted-accessibility-projects-spin-button-surface.json` |
 | OrderBy | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/OrderBy--order-by-substrate-reorder-and-alt-arrow-rebuild-the-host-spec.json` |
 | NavCard | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/NavCard--gpui-mounted-nav-card-link-button-actions-and-accessibility.json` |
 | NavigationMenu | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); visual (expected-test) | accessibility | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/NavigationMenu--navigation-menu-disclosure-viewport-roving-and-dismissal-through-mounted-backend.json` |
@@ -83,7 +83,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **107**.
 | Radio | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Radio--radio-selects-on-activate-and-does-not-uncheck-itself.json` |
 | RefSelect | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/RefSelect--first-mounted-parity-ref-select.json` |
 | RadioGroup | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/RadioGroup--radio-group-exclusive-focus-identity-and-disabled-paths.json` |
-| Rating | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test) | visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Rating--rating-nullable-fractional-and-whole-step-through-mounted-pointer-and-keyboard.json` |
+| Rating | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Rating--rating-nullable-fractional-and-whole-step-through-mounted-pointer-and-keyboard.json` |
 | Region | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | ResizeHandle | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ResizeHandle--a-focused-resize-handle-steps-the-pane-and-its-declared-value.json`; `docs/evidence/gpui/mounted-receipts/ResizeHandle--a-disabled-resize-handle-takes-no-focus-and-answers-no-key.json` |
 | RangeSlider | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/RangeSlider--a-scrub-reports-change-while-dragging-and-commits-once-at-release.json` |
@@ -97,7 +97,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **107**.
 | Spinner | semantic; accessibility; visual | — | semantic; accessibility; visual | accessibility (A2-platform-hold) | — |
 | Spacer | semantic; keyboard_focus; accessibility; visual | — | semantic; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | Stack | semantic; accessibility; visual | — | semantic; accessibility; visual | accessibility (A2-platform-hold) | — |
-| Stepper | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test) | visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Stepper--stepper-selection-and-rerun-reach-separate-mounted-controls.json`; `docs/evidence/gpui/mounted-receipts/Stepper--stepper-collapse-stays-independent-in-a-mounted-window.json`; `docs/evidence/gpui/mounted-receipts/Stepper--stepper-keyboard-entry-focuses-and-activates-without-a-pointer-press.json`; `docs/evidence/gpui/mounted-receipts/Stepper--stepper-summary-takes-keyboard-entry-and-paints-the-inset-ring.json` |
+| Stepper | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Stepper--stepper-selection-and-rerun-reach-separate-mounted-controls.json`; `docs/evidence/gpui/mounted-receipts/Stepper--stepper-collapse-stays-independent-in-a-mounted-window.json`; `docs/evidence/gpui/mounted-receipts/Stepper--stepper-keyboard-entry-focuses-and-activates-without-a-pointer-press.json`; `docs/evidence/gpui/mounted-receipts/Stepper--stepper-summary-takes-keyboard-entry-and-paints-the-inset-ring.json` |
 | AgentQuestion | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-a1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | — |
 | AgentQuestionRecord | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | AgentSubagent | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); keyboard_focus (expected-test) | events; pointer; accessibility; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/AgentSubagent--agent-subagent-disclosure-rebuilds-the-host-spec-through-mounted-input.json` |
@@ -149,7 +149,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **107**.
 | FormLayout | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | InlineListSection | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | DebugDialog | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/DebugDialog--first-mounted-parity-debug-dialog.json` |
-| LicenceActivation | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test) | visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/LicenceActivation--licence-activation-key-entry-types-and-emits-through-the-real-tree.json`; `docs/evidence/gpui/mounted-receipts/LicenceActivation--licence-activation-machine-name-enter-and-escape-restore-display-focus.json` |
+| LicenceActivation | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/LicenceActivation--licence-activation-key-entry-types-and-emits-through-the-real-tree.json`; `docs/evidence/gpui/mounted-receipts/LicenceActivation--licence-activation-machine-name-enter-and-escape-restore-display-focus.json` |
 | LicenceSeats | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test) | visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/LicenceSeats--licence-seats-release-flows-through-confirm-in-a-mounted-window.json`; `docs/evidence/gpui/mounted-receipts/LicenceSeats--licence-seats-seat-row-enter-and-escape-restore-display-focus.json` |
 | LicenceStatus | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); accessibility (expected-test) | events; pointer; keyboard_focus; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/LicenceStatus--licence-status-renders-state-and-authority-reads-in-a-mounted-window.json` |
 | LogList | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/LogList--gpui-mounted-log-list-stream-audit-and-clear-filters.json` |
@@ -186,10 +186,10 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **107**.
 | AudioSwitch | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | DragNumberField | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/DragNumberField--drag-number-field-scrub-keyboard-bounds-and-entry-rebuild-the-host-spec.json` |
 | EnvelopeEditor | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
-| Fader | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test) | visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Fader--fader-mounted-parity-through-production-dispatch.json` |
+| Fader | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Fader--fader-mounted-parity-through-production-dispatch.json` |
 | GainReductionMeter | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | Keyboard | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
-| Knob | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test) | accessibility; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Knob--knob-mounted-parity-through-production-dispatch.json` |
+| Knob | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Knob--knob-mounted-parity-through-production-dispatch.json` |
 | ModMatrixGrid | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | ValueReadout | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | WaveformDisplay | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
@@ -220,24 +220,16 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **107**.
 - MetaItem: No validated receipt and no retained expected test for MetaItem; every required capability stays missing.
 - NumberInput: Expected test number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value proves no pointer claim; pointer stays missing.
 - NumberInput: Expected test number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value proves no visual claim; visual stays missing.
-- NumberInput: Expected test number_input_mounted_accessibility_projects_spin_button_surface proves no pointer claim; pointer stays missing.
-- NumberInput: Expected test number_input_mounted_accessibility_projects_spin_button_surface proves no visual claim; visual stays missing.
 - NavigationMenu: Expected test navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend shows accessibility signals, but accessibility is withheld: the contract requires a named <nav> landmark, and the node vocabulary has no navigation NodeRole yet; the mounted tree exposes only a roleless labelled container.
 - NavigationMenu: Expected test navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend proves no accessibility claim; accessibility stays missing.
 - PasswordRequirements: No validated receipt and no retained expected test for PasswordRequirements; every required capability stays missing.
 - Progress: No validated receipt and no retained expected test for Progress; every required capability stays missing.
-- Rating: Expected test rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboard proves no visual claim; visual stays missing.
 - Region: No validated receipt and no retained expected test for Region; every required capability stays missing.
 - ScrollShell: No validated receipt and no retained expected test for ScrollShell; every required capability stays missing.
 - Skeleton: No validated receipt and no retained expected test for Skeleton; every required capability stays missing.
 - Spinner: No validated receipt and no retained expected test for Spinner; every required capability stays missing.
 - Spacer: No validated receipt and no retained expected test for Spacer; every required capability stays missing.
 - Stack: No validated receipt and no retained expected test for Stack; every required capability stays missing.
-- Stepper: Expected test stepper_selection_and_rerun_reach_separate_mounted_controls proves no accessibility claim; accessibility stays missing.
-- Stepper: Expected test stepper_selection_and_rerun_reach_separate_mounted_controls proves no visual claim; visual stays missing.
-- Stepper: Expected test stepper_collapse_stays_independent_in_a_mounted_window proves no visual claim; visual stays missing.
-- Stepper: Expected test stepper_keyboard_entry_focuses_and_activates_without_a_pointer_press proves no visual claim; visual stays missing.
-- Stepper: Expected test stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring proves no visual claim; visual stays missing.
 - AgentQuestionRecord: No validated receipt and no retained expected test for AgentQuestionRecord; every required capability stays missing.
 - AgentSubagent: Expected test agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input proves no events claim; events stays missing.
 - AgentSubagent: Expected test agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input proves no pointer claim; pointer stays missing.
@@ -268,8 +260,6 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **107**.
 - EmptyState: No validated receipt and no retained expected test for EmptyState; every required capability stays missing.
 - FormLayout: No validated receipt and no retained expected test for FormLayout; every required capability stays missing.
 - InlineListSection: No validated receipt and no retained expected test for InlineListSection; every required capability stays missing.
-- LicenceActivation: Expected test licence_activation_key_entry_types_and_emits_through_the_real_tree proves no visual claim; visual stays missing.
-- LicenceActivation: Expected test licence_activation_machine_name_enter_and_escape_restore_display_focus proves no visual claim; visual stays missing.
 - LicenceSeats: Expected test licence_seats_release_flows_through_confirm_in_a_mounted_window proves no events claim; events stays missing.
 - LicenceSeats: Expected test licence_seats_release_flows_through_confirm_in_a_mounted_window proves no keyboard_focus claim; keyboard_focus stays missing.
 - LicenceSeats: Expected test licence_seats_release_flows_through_confirm_in_a_mounted_window proves no visual claim; visual stays missing.
@@ -300,11 +290,8 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **107**.
 - AudioMeter: No validated receipt and no retained expected test for AudioMeter; every required capability stays missing.
 - AudioSwitch: No validated receipt and no retained expected test for AudioSwitch; every required capability stays missing.
 - EnvelopeEditor: No validated receipt and no retained expected test for EnvelopeEditor; every required capability stays missing.
-- Fader: Expected test fader_mounted_parity_through_production_dispatch proves no visual claim; visual stays missing.
 - GainReductionMeter: No validated receipt and no retained expected test for GainReductionMeter; every required capability stays missing.
 - Keyboard: No validated receipt and no retained expected test for Keyboard; every required capability stays missing.
-- Knob: Expected test knob_mounted_parity_through_production_dispatch proves no accessibility claim; accessibility stays missing.
-- Knob: Expected test knob_mounted_parity_through_production_dispatch proves no visual claim; visual stays missing.
 - ModMatrixGrid: No validated receipt and no retained expected test for ModMatrixGrid; every required capability stays missing.
 - ValueReadout: No validated receipt and no retained expected test for ValueReadout; every required capability stays missing.
 - WaveformDisplay: No validated receipt and no retained expected test for WaveformDisplay; every required capability stays missing.
@@ -316,9 +303,9 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **107**.
 Shared-substrate groupings for repair-tranche compilation. Grouping only; no tranche is planned here.
 
 - feedback-status: 21 components (ActionDiscoveryPanel, AgentSubagent, AgentTranscript, Avatar, DetailSectionGroup, DetailShell, EmbedPreview, EmptyState, ErrorBoundary, InlineListSection, LicenceSeats, MetaBar, MetaItem, Meter, PageHeader, PasswordRequirements, Progress, Region, Spinner, StatusBar, ToolCall); missing semantic 16; events 16; pointer 16; keyboard_focus 12; accessibility 19; visual 20
-- form-editing: 13 components (AgentQuestionRecord, Calendar, EmbedInput, Fader, FormActions, FormLayout, Keyboard, Knob, LicenceActivation, NumberInput, Rating, Stepper, ValidationSummary); missing semantic 7; events 6; pointer 8; keyboard_focus 7; accessibility 8; visual 13
 - general-composite: 9 components (Collapsible, EnvelopeEditor, FieldSet, LicenceStatus, ModMatrixGrid, ModelConnectionCard, Spacer, Stack, WaveformDisplay); missing semantic 6; events 7; pointer 5; keyboard_focus 6; accessibility 6; visual 9
 - text-display: 8 components (Code, Eyebrow, Icon, IconProvider, MediaPreview, MetricTile, StateTile, TextLink); missing semantic 7; events 4; pointer 6; keyboard_focus 6; accessibility 7; visual 7
+- form-editing: 7 components (AgentQuestionRecord, Calendar, EmbedInput, FormActions, FormLayout, Keyboard, ValidationSummary); missing semantic 7; events 6; pointer 7; keyboard_focus 7; accessibility 7; visual 7
 - layout-primitive: 6 components (Box, Grid, ListGrid, Skeleton, TimeAgo, Tooltip); missing semantic 6; events 2; pointer 2; keyboard_focus 3; accessibility 6; visual 6
 - media-data: 5 components (AudioMeter, AudioSwitch, GainReductionMeter, ValueReadout, XYPad); missing semantic 4; events 4; pointer 4; keyboard_focus 4; accessibility 4; visual 5
 - workstation-shell: 3 components (DetailSection, ScrollShell, UiPresentationProvider); missing semantic 3; events 2; pointer 3; keyboard_focus 3; accessibility 3; visual 3

@@ -67,13 +67,15 @@ pub fn knob(spec: &KnobSpec, ctx: &RenderContext<'_>) -> Node {
     let accent = ctx.theme().resolve_color("color.accent.base");
     let muted = ctx.theme().resolve_color("color.border.default");
     let surface = ctx.theme().resolve_color("color.background.elevated");
+    let hairline = ctx.theme().resolve_border_width("border.width.default");
+    let disabled_opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
     let mut root = Node::container();
     root.id = Some("knob-root".into());
     root.style.descriptor.layout.width = LayoutSizing::Fixed(size);
     root.style.descriptor.layout.height = LayoutSizing::Fixed(size);
     root.interaction.focusable = state.enabled;
     root.interaction.disabled = !state.enabled;
-    root.style.descriptor.opacity = if state.enabled { 1.0 } else { 0.48 };
+    root.style.descriptor.opacity = if state.enabled { 1.0 } else { disabled_opacity };
     a11y_value(
         &mut root,
         NodeRole::Slider,
@@ -107,7 +109,7 @@ pub fn knob(spec: &KnobSpec, ctx: &RenderContext<'_>) -> Node {
     let mut cap = Node::container();
     circle(&mut cap, size * 0.68);
     cap.style.descriptor.background = Some(surface);
-    cap.style.descriptor.border.width = 1.0;
+    cap.style.descriptor.border.width = hairline;
     cap.style.descriptor.border.color = muted;
     absolute(&mut cap, size * 0.16, size * 0.16);
     root = root.child(cap);
@@ -139,13 +141,15 @@ pub fn fader(spec: &FaderSpec, ctx: &RenderContext<'_>) -> Node {
     let track = ctx.theme().resolve_color("color.border.default");
     let accent = ctx.theme().resolve_color("color.accent.base");
     let thumb_color = ctx.theme().resolve_color("color.background.elevated");
+    let hairline = ctx.theme().resolve_border_width("border.width.default");
+    let disabled_opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
     let mut root = Node::container();
     root.id = Some("fader-root".into());
     root.style.descriptor.layout.width = LayoutSizing::Fixed(width);
     root.style.descriptor.layout.height = LayoutSizing::Fixed(height);
     root.interaction.focusable = state.enabled;
     root.interaction.disabled = !state.enabled;
-    root.style.descriptor.opacity = if state.enabled { 1.0 } else { 0.48 };
+    root.style.descriptor.opacity = if state.enabled { 1.0 } else { disabled_opacity };
     a11y_value(
         &mut root,
         NodeRole::Slider,
@@ -160,7 +164,7 @@ pub fn fader(spec: &FaderSpec, ctx: &RenderContext<'_>) -> Node {
     rail.style.descriptor.layout.width = LayoutSizing::Fixed(rail_w);
     rail.style.descriptor.layout.height = LayoutSizing::Fixed(rail_h);
     rail.style.descriptor.background = Some(track);
-    let r = 3.0;
+    let r = rail_cross / 2.0;
     rail.style.descriptor.corner_radii.top_left = r;
     rail.style.descriptor.corner_radii.top_right = r;
     rail.style.descriptor.corner_radii.bottom_left = r;
@@ -203,8 +207,8 @@ pub fn fader(spec: &FaderSpec, ctx: &RenderContext<'_>) -> Node {
     thumb.style.descriptor.layout.width = LayoutSizing::Fixed(thumb_w);
     thumb.style.descriptor.layout.height = LayoutSizing::Fixed(thumb_h);
     thumb.style.descriptor.background = Some(thumb_color);
-    thumb.style.descriptor.border.width = 1.0;
-    thumb.style.descriptor.border.color = accent;
+    thumb.style.descriptor.border.width = hairline;
+    thumb.style.descriptor.border.color = track;
     absolute(
         &mut thumb,
         if vertical {

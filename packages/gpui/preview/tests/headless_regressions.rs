@@ -2648,6 +2648,136 @@ fn fader_mounted_parity_through_production_dispatch() {
         spec
     }
 
+    // Visual parity with the Svelte `FaderVisual` authority: the resolved size
+    // ladder, rail/thumb/detent geometry, and the token colours for enabled,
+    // detented, and disabled states. Rail weight is density's, not size's.
+    {
+        use poodle_adapter::ThemeProvider;
+        use poodle_render::presentation::rem_to_px;
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let track = theme_provider.resolve_color("color.border.default");
+        let accent = theme_provider.resolve_color("color.accent.base");
+        let surface = theme_provider.resolve_color("color.background.elevated");
+        let hairline = theme_provider.resolve_border_width("border.width.default");
+        let rail_thickness = rem_to_px(0.375);
+
+        let ladder = [
+            (ControlSize::Xs, 1.5_f32, 7.0_f32),
+            (ControlSize::Sm, 1.75, 8.5),
+            (ControlSize::Md, 2.0, 10.0),
+            (ControlSize::Lg, 2.25, 11.5),
+            (ControlSize::Xl, 2.5, 13.0),
+        ];
+        for (size, cross_rem, length_rem) in ladder {
+            let mut spec = seed(0.25, Orientation::Horizontal);
+            spec.size = Some(size);
+            let live = fader_live(&spec);
+            let node = fader_with_handlers(&spec, &ctx, &handlers("fader-visual"), &live);
+            assert_eq!(
+                node.style.descriptor.layout.width,
+                LayoutSizing::Fixed(rem_to_px(length_rem)),
+                "{size:?} track length"
+            );
+            assert_eq!(
+                node.style.descriptor.layout.height,
+                LayoutSizing::Fixed(rem_to_px(cross_rem)),
+                "{size:?} cross-axis footprint"
+            );
+            let rail = &node.children[0];
+            assert_eq!(
+                rail.style.descriptor.layout.width,
+                LayoutSizing::Fixed(rem_to_px(length_rem))
+            );
+            assert_eq!(
+                rail.style.descriptor.layout.height,
+                LayoutSizing::Fixed(rail_thickness)
+            );
+            assert_eq!(rail.style.descriptor.background, Some(track));
+            assert_eq!(
+                rail.style.descriptor.corner_radii.top_left,
+                rail_thickness / 2.0,
+                "the rail pillar resolves the pill radius"
+            );
+            let detent = &node.children[1];
+            assert_eq!(detent.style.descriptor.background, Some(accent));
+            assert_eq!(
+                detent.style.descriptor.layout.width,
+                LayoutSizing::Fixed(hairline)
+            );
+            assert_eq!(
+                detent.style.descriptor.layout.height,
+                LayoutSizing::Fixed(rem_to_px(cross_rem))
+            );
+            let thumb = &node.children[2];
+            assert_eq!(thumb.style.descriptor.background, Some(surface));
+            assert_eq!(thumb.style.descriptor.border.width, hairline);
+            assert_eq!(thumb.style.descriptor.border.color, track);
+            assert_eq!(
+                thumb.style.descriptor.layout.height,
+                LayoutSizing::Fixed(rem_to_px(cross_rem))
+            );
+            // Value geometry: the thumb rides the travelled track.
+            match thumb.position {
+                NodePosition::Absolute {
+                    left: Some(left), ..
+                } => {
+                    let expected = 0.25 * (rem_to_px(length_rem) - 12.0);
+                    assert!((left - expected).abs() < 1e-4, "{size:?} thumb travel");
+                }
+                ref other => panic!("fader thumb is positioned: {other:?}"),
+            }
+            assert_eq!(
+                node.style.focus_ring.map(|ring| ring.width),
+                Some(rem_to_px(0.1875)),
+                "the slider paints the contracted focus ring weight"
+            );
+        }
+
+        // Density changes rail weight without touching the hit geometry.
+        let mut compact = seed(0.25, Orientation::Horizontal);
+        compact.density = Some(ControlDensity::Compact);
+        let compact_live = fader_live(&compact);
+        let compact_node =
+            fader_with_handlers(&compact, &ctx, &handlers("fader-compact"), &compact_live);
+        assert_eq!(
+            compact_node.children[0].style.descriptor.layout.height,
+            LayoutSizing::Fixed(rem_to_px(0.25))
+        );
+        assert_eq!(
+            compact_node.style.descriptor.layout.height,
+            LayoutSizing::Fixed(rem_to_px(2.0))
+        );
+
+        // The disabled state resolves the contracted opacity token, and the
+        // vertical orientation maps the same size ladder to the other axis.
+        let mut disabled = seed(0.4, Orientation::Vertical);
+        disabled.visual_state.enabled = false;
+        let disabled_live = fader_live(&disabled);
+        let disabled_node = fader_with_handlers(
+            &disabled,
+            &ctx,
+            &handlers("fader-disabled-visual"),
+            &disabled_live,
+        );
+        assert_eq!(
+            disabled_node.style.descriptor.opacity,
+            theme_provider.resolve_opacity("state.opacity.disabled")
+        );
+        assert_eq!(
+            disabled_node.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(2.0))
+        );
+        assert_eq!(
+            disabled_node.style.descriptor.layout.height,
+            LayoutSizing::Fixed(rem_to_px(10.0))
+        );
+        assert_eq!(disabled_node.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(disabled_node.a11y.orientation.as_deref(), Some("vertical"));
+        assert_eq!(disabled_node.a11y.value_min, Some(0.0));
+        assert_eq!(disabled_node.a11y.value_max, Some(1.0));
+    }
+
     run_headless(|cx| {
         let id = "fader-main";
         let spec0 = seed(0.2, Orientation::Horizontal);
@@ -3001,6 +3131,133 @@ fn knob_mounted_parity_through_production_dispatch() {
         spec.default_value = 0.0;
         spec.aria_label = "Gain".into();
         spec
+    }
+
+    // Visual and accessible parity with the Svelte `KnobVisual` authority: the
+    // resolved square ladder, the ring/cap/indicator token colours and
+    // geometry, and the slider name, range, and formatted value text.
+    {
+        use poodle_adapter::ThemeProvider;
+        use poodle_render::presentation::rem_to_px;
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let accent = theme_provider.resolve_color("color.accent.base");
+        let muted = theme_provider.resolve_color("color.border.default");
+        let surface = theme_provider.resolve_color("color.background.elevated");
+        let hairline = theme_provider.resolve_border_width("border.width.default");
+        let expected_text = poodle_headless::audio::format_value(
+            0.4,
+            poodle_headless::audio::AudioValueFormat::Number { decimals: 2 },
+        );
+
+        let ladder = [
+            (ControlSize::Xs, 2.0_f32),
+            (ControlSize::Sm, 2.5),
+            (ControlSize::Md, 3.0),
+            (ControlSize::Lg, 3.5),
+            (ControlSize::Xl, 4.0),
+        ];
+        for (size, size_rem) in ladder {
+            let mut spec = seed(0.4, KnobDragMode::Vertical);
+            spec.size = Some(size);
+            let live = knob_live(&spec);
+            let node = knob_with_handlers(&spec, &ctx, &KnobHandlers::new("knob-visual"), &live);
+            let diameter = rem_to_px(size_rem);
+            assert_eq!(
+                node.style.descriptor.layout.width,
+                LayoutSizing::Fixed(diameter),
+                "{size:?} diameter"
+            );
+            assert_eq!(
+                node.style.descriptor.layout.height,
+                LayoutSizing::Fixed(diameter)
+            );
+            assert_eq!(node.a11y.role, Some(NodeRole::Slider));
+            assert_eq!(node.a11y.label.as_deref(), Some("Gain"));
+            assert_eq!(node.a11y.value, Some(0.4));
+            assert_eq!(node.a11y.value_min, Some(0.0));
+            assert_eq!(node.a11y.value_max, Some(1.0));
+            assert_eq!(
+                node.a11y.value_text.as_deref(),
+                Some(expected_text.as_str())
+            );
+            let segment_count = 28;
+            assert_eq!(node.children.len(), segment_count + 2);
+            assert_eq!(node.children[0].style.descriptor.background, Some(accent));
+            assert_eq!(
+                node.children[segment_count - 1].style.descriptor.background,
+                Some(muted),
+                "segments past the value paint the muted ring token"
+            );
+            let cap = &node.children[segment_count];
+            assert_eq!(
+                cap.style.descriptor.layout.width,
+                LayoutSizing::Fixed(diameter * 0.68)
+            );
+            assert_eq!(cap.style.descriptor.background, Some(surface));
+            assert_eq!(cap.style.descriptor.border.width, hairline);
+            assert_eq!(cap.style.descriptor.border.color, muted);
+            let indicator = &node.children[segment_count + 1];
+            assert_eq!(indicator.style.descriptor.background, Some(accent));
+            assert_eq!(
+                indicator.style.descriptor.layout.width,
+                LayoutSizing::Fixed(5.0)
+            );
+            assert_eq!(
+                node.style.focus_ring.map(|ring| ring.width),
+                Some(rem_to_px(0.1875)),
+                "the knob paints the contracted focus ring weight"
+            );
+        }
+
+        // Density changes ring weight (segment count), not the square.
+        let mut compact = seed(0.4, KnobDragMode::Vertical);
+        compact.density = Some(ControlDensity::Compact);
+        let compact_live = knob_live(&compact);
+        let compact_node = knob_with_handlers(
+            &compact,
+            &ctx,
+            &KnobHandlers::new("knob-compact"),
+            &compact_live,
+        );
+        assert_eq!(compact_node.children.len(), 20 + 2);
+        assert_eq!(
+            compact_node.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(3.0))
+        );
+        let mut comfortable = seed(0.4, KnobDragMode::Vertical);
+        comfortable.density = Some(ControlDensity::Comfortable);
+        let comfortable_live = knob_live(&comfortable);
+        let comfortable_node = knob_with_handlers(
+            &comfortable,
+            &ctx,
+            &KnobHandlers::new("knob-comfortable"),
+            &comfortable_live,
+        );
+        assert_eq!(comfortable_node.children.len(), 36 + 2);
+
+        // Disabled resolves the contracted opacity token, keeps the slider
+        // name and value text, and gives up the tab stop.
+        let mut disabled = seed(0.4, KnobDragMode::Vertical);
+        disabled.visual_state.enabled = false;
+        let disabled_live = knob_live(&disabled);
+        let disabled_node = knob_with_handlers(
+            &disabled,
+            &ctx,
+            &KnobHandlers::new("knob-disabled-visual"),
+            &disabled_live,
+        );
+        assert_eq!(
+            disabled_node.style.descriptor.opacity,
+            theme_provider.resolve_opacity("state.opacity.disabled")
+        );
+        assert_eq!(disabled_node.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(
+            disabled_node.a11y.value_text.as_deref(),
+            Some(expected_text.as_str())
+        );
+        assert!(!disabled_node.interaction.focusable);
+        assert_eq!(disabled_node.a11y.tab_index, None);
     }
 
     run_headless(|cx| {
@@ -12583,6 +12840,154 @@ fn licence_activation_key_entry_types_and_emits_through_the_real_tree() {
     };
     use poodle_specs::{LicenceActivationSpec, LicenceKeyCodeInputOptions};
 
+    // Visual parity with the Svelte LicenceActivation authority: the root
+    // stack spacing, the heading type and colour, the action row's inline
+    // gap, and the size-owned key-slot geometry all resolve from tokens.
+    {
+        use poodle_adapter::ThemeProvider;
+        use poodle_render::presentation::{code_input_slot_size_rem, rem_to_px};
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+
+        let ladder = [
+            (ControlSize::Xs, 1.5_f32),
+            (ControlSize::Sm, 1.75),
+            (ControlSize::Md, 2.25),
+            (ControlSize::Lg, 2.75),
+            (ControlSize::Xl, 3.25),
+        ];
+        for (size, slot_rem) in ladder {
+            let size_label = format!("{size:?}").to_ascii_lowercase();
+            let spec = LicenceActivationSpec::new()
+                .with_mode(LicenceActivationMode::Key)
+                .with_key_code_input(LicenceKeyCodeInputOptions::new(20).with_groups([5, 5, 5, 5]))
+                .with_size(size);
+            let node = poodle_render::licence_activation(
+                &spec,
+                &ctx,
+                poodle_render::LicenceActivationHandlers::default(),
+            );
+            assert_eq!(
+                node.roles.get("size").map(String::as_str),
+                Some(size_label.as_str())
+            );
+            assert_eq!(
+                node.roles.get("density").map(String::as_str),
+                Some("default")
+            );
+            assert_eq!(node.roles.get("mode").map(String::as_str), Some("key"));
+            assert_eq!(node.roles.get("route").map(String::as_str), Some("key"));
+            assert_eq!(node.roles.get("busy").map(String::as_str), Some("false"));
+            assert_eq!(
+                node.style.descriptor.layout.direction,
+                LayoutDirection::Column
+            );
+            assert_eq!(
+                node.style.descriptor.layout.spacing.gap,
+                theme_provider.resolve_space("space.stack.md"),
+                "{size:?} root stack gap"
+            );
+
+            let header = &node.children[0];
+            assert_eq!(
+                header.style.descriptor.layout.direction,
+                LayoutDirection::Row
+            );
+            let title = &header.children[0];
+            assert_eq!(title.style.text_size, Some(rem_to_px(1.0)));
+            assert_eq!(title.style.text_weight, Some(600));
+            assert_eq!(
+                title.style.descriptor.text_color,
+                Some(theme_provider.resolve_color("color.text.primary"))
+            );
+
+            let actions = node.children.last().expect("actions row");
+            assert_eq!(
+                actions.style.descriptor.layout.direction,
+                LayoutDirection::Row
+            );
+            assert_eq!(
+                actions.style.descriptor.layout.spacing.gap,
+                theme_provider.resolve_space("space.inline.md")
+            );
+            assert_eq!(
+                actions.style.descriptor.layout.alignment.cross,
+                poodle_node::CrossAxisAlignment::End
+            );
+
+            // The key row's slots are the size-owned squares from CodeInput §7.
+            assert_eq!(code_input_slot_size_rem(size), slot_rem);
+            let row = node
+                .find(&|candidate| candidate.a11y.role == Some(NodeRole::TextInput))
+                .expect("mounted code row");
+            assert_eq!(
+                row.style.descriptor.layout.spacing.gap,
+                theme_provider.resolve_space("space.inline.sm")
+            );
+            assert_eq!(
+                row.children[0].style.descriptor.layout.width,
+                LayoutSizing::Fixed(rem_to_px(slot_rem))
+            );
+            assert_eq!(
+                row.children[0].style.descriptor.layout.height,
+                LayoutSizing::Fixed(rem_to_px(slot_rem))
+            );
+        }
+
+        // Density moves the slot gap and the action row's inline gap.
+        for (density, gap_token) in [
+            (ControlDensity::Compact, "space.inline.xs"),
+            (ControlDensity::Default, "space.inline.sm"),
+            (ControlDensity::Comfortable, "space.inline.md"),
+        ] {
+            let density_label = format!("{density:?}").to_ascii_lowercase();
+            let spec = LicenceActivationSpec::new()
+                .with_mode(LicenceActivationMode::Key)
+                .with_key_code_input(LicenceKeyCodeInputOptions::new(20))
+                .with_density(density);
+            let node = poodle_render::licence_activation(
+                &spec,
+                &ctx,
+                poodle_render::LicenceActivationHandlers::default(),
+            );
+            assert_eq!(
+                node.roles.get("density").map(String::as_str),
+                Some(density_label.as_str())
+            );
+            let row = node
+                .find(&|candidate| candidate.a11y.role == Some(NodeRole::TextInput))
+                .expect("mounted code row");
+            assert_eq!(
+                row.style.descriptor.layout.spacing.gap,
+                theme_provider.resolve_space(gap_token),
+                "{density:?} slot gap"
+            );
+        }
+
+        // Frozen resolves the disabled state on the composed controls.
+        let frozen = LicenceActivationSpec::new()
+            .with_mode(LicenceActivationMode::Key)
+            .with_key_code_input(LicenceKeyCodeInputOptions::new(20))
+            .with_disabled(true);
+        let frozen_node = poodle_render::licence_activation(
+            &frozen,
+            &ctx,
+            poodle_render::LicenceActivationHandlers::default(),
+        );
+        let row = frozen_node
+            .find(&|candidate| candidate.a11y.role == Some(NodeRole::TextInput))
+            .expect("mounted code row");
+        assert!(row.interaction.disabled);
+        let submit = frozen_node
+            .children
+            .last()
+            .expect("actions")
+            .children
+            .last()
+            .expect("submit");
+        assert!(submit.interaction.disabled);
+    }
+
     struct SpecimenKeyFormat;
     impl LicenceKeyFormat for SpecimenKeyFormat {
         fn parse(&self, input: &str) -> LicenceKeyResult {
@@ -18990,6 +19395,179 @@ fn identify_stepper(root: &mut Node, values: &[&str]) {
 #[test]
 fn stepper_selection_and_rerun_reach_separate_mounted_controls() {
     use poodle_specs::{StepStatus, StepperSpec, StepperStep};
+
+    // Visual parity with the Svelte Stepper authority: the resolved size
+    // ladder (row height, marker box, marker/label type), the surface border
+    // and radius, the status colours, and the disabled/current states.
+    {
+        use poodle_adapter::ThemeProvider;
+        use poodle_render::color::with_alpha;
+        use poodle_render::presentation::rem_to_px;
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let steps = || {
+            vec![
+                StepperStep::new("read", "Read").with_status(StepStatus::Complete),
+                StepperStep::new("apply", "Apply").with_disabled(true),
+            ]
+        };
+
+        let ladder = [
+            (ControlSize::Xs, 2.5_f32, 1.125_f32, 0.625_f32, 0.5625_f32),
+            (ControlSize::Sm, 2.875, 1.25, 0.6875, 0.5625),
+            (ControlSize::Md, 3.25, 1.35, 0.75, 0.625),
+            (ControlSize::Lg, 3.625, 1.5, 0.8125, 0.6875),
+            (ControlSize::Xl, 4.0, 1.75, 0.875, 0.75),
+        ];
+        for (size, row_rem, marker_rem, font_rem, marker_font_rem) in ladder {
+            let spec = StepperSpec::new(steps())
+                .with_value("apply")
+                .with_show_rerun(true)
+                .with_size(size);
+            let node =
+                poodle_render::stepper(&spec, &ctx, poodle_render::StepperHandlers::default());
+            assert_eq!(node.a11y.role, Some(NodeRole::List));
+            assert_eq!(node.style.descriptor.border.width, rem_to_px(0.0625));
+            assert_eq!(
+                node.style.descriptor.border.color,
+                theme_provider.resolve_color(spec.border_token())
+            );
+            assert_eq!(
+                node.style.descriptor.corner_radii.top_left,
+                theme_provider.resolve_radius(spec.radius_token()),
+                "{size:?} track radius"
+            );
+            let panel = theme_provider.resolve_color(spec.surface_token());
+            assert_eq!(
+                node.style.descriptor.background,
+                Some(with_alpha(panel, panel.3 * 0.92)),
+                "{size:?} panel fill"
+            );
+
+            let read_cell = &node.children[0];
+            assert_eq!(read_cell.a11y.role, Some(NodeRole::ListItem));
+            let trigger = &read_cell.children[0];
+            assert_eq!(trigger.id.as_deref(), Some("poodle-stepper:trigger:read"));
+            assert_eq!(trigger.style.min_height, Some(rem_to_px(row_rem)));
+            assert_eq!(trigger.style.text_size, Some(rem_to_px(font_rem)));
+            assert_eq!(
+                trigger.style.focus_ring.map(|ring| ring.width),
+                Some(theme_provider.resolve_border_width("border.width.focus")),
+                "{size:?} trigger focus ring"
+            );
+            let marker = &trigger.children[0];
+            assert_eq!(
+                marker.style.descriptor.layout.width,
+                LayoutSizing::Fixed(rem_to_px(marker_rem))
+            );
+            assert_eq!(
+                marker.style.descriptor.layout.height,
+                LayoutSizing::Fixed(rem_to_px(marker_rem))
+            );
+            let complete = theme_provider.resolve_color(spec.accent_token());
+            assert_eq!(marker.style.descriptor.border.color, complete);
+            let glyph = &marker.children[0];
+            assert_eq!(glyph.style.text_size, Some(rem_to_px(marker_font_rem)));
+            assert_eq!(glyph.style.descriptor.text_color, Some(complete));
+            let rerun = &read_cell.children[1];
+            assert_eq!(rerun.id.as_deref(), Some("poodle-stepper:rerun:read"));
+            assert_eq!(
+                rerun.style.descriptor.layout.width,
+                LayoutSizing::Fixed(rem_to_px(marker_rem))
+            );
+            assert_eq!(read_cell.style.border_right_width, Some(1.0));
+
+            let apply_cell = &node.children[1];
+            assert_eq!(apply_cell.style.border_right_width, None);
+            let apply_trigger = &apply_cell.children[0];
+            assert!(apply_trigger.interaction.disabled);
+            assert_eq!(
+                apply_trigger.style.descriptor.opacity,
+                theme_provider.resolve_opacity(spec.disabled_opacity_token()),
+                "{size:?} disabled step opacity"
+            );
+        }
+
+        // Density moves inline padding and gap without touching the height.
+        let steps = steps();
+        for (density, pad_rem, gap_rem) in [
+            (ControlDensity::Compact, 0.625_f32, 0.4375_f32),
+            (ControlDensity::Default, 0.8, 0.55),
+            (ControlDensity::Comfortable, 1.0, 0.6875),
+        ] {
+            let spec = StepperSpec::new(steps.clone())
+                .with_value("apply")
+                .with_show_rerun(true)
+                .with_density(density);
+            let node =
+                poodle_render::stepper(&spec, &ctx, poodle_render::StepperHandlers::default());
+            let trigger = &node.children[0].children[0];
+            assert_eq!(
+                trigger.style.descriptor.layout.spacing.padding.left,
+                rem_to_px(pad_rem),
+                "{density:?} inline padding"
+            );
+            assert_eq!(
+                trigger.style.descriptor.layout.spacing.gap,
+                rem_to_px(gap_rem),
+                "{density:?} marker/label gap"
+            );
+            assert_eq!(
+                trigger.style.min_height,
+                Some(rem_to_px(3.25)),
+                "{density:?} height stays size-owned"
+            );
+        }
+
+        // Vertical collapsible summary: the chevron, rail dashes, current
+        // label, and count all resolve from the density and token ladders.
+        let summary_spec = StepperSpec::new(steps)
+            .with_orientation(Orientation::Vertical)
+            .with_collapsible(true)
+            .with_collapsed(true)
+            .with_value("apply");
+        let summary_node = poodle_render::stepper(
+            &summary_spec,
+            &ctx,
+            poodle_render::StepperHandlers::default(),
+        );
+        let summary = &summary_node.children[0];
+        assert_eq!(summary.id.as_deref(), Some("poodle-stepper-summary"));
+        assert_eq!(summary.a11y.role, Some(NodeRole::Button));
+        assert_eq!(summary.a11y.expanded, Some(false));
+        assert_eq!(summary.style.min_height, Some(rem_to_px(3.25)));
+        let rail = &summary.children[1];
+        assert_eq!(rail.children.len(), 2);
+        assert_eq!(
+            rail.children[1].style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(1.0)),
+            "the current step draws the full dash"
+        );
+        assert_eq!(
+            rail.children[0].style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(0.5)),
+            "other steps draw half"
+        );
+        assert_eq!(
+            rail.children[0].style.descriptor.background,
+            Some(theme_provider.resolve_color(summary_spec.accent_token())),
+            "the completed step paints the accent dash"
+        );
+        assert_eq!(
+            rail.children[1].style.descriptor.background,
+            Some(theme_provider.resolve_color(summary_spec.rail_pending_token())),
+            "the pending current step paints the pending dash"
+        );
+        let count = &summary.children[3];
+        assert!(matches!(
+            &count.kind,
+            NodeKind::Text { content } if content == "1/2"
+        ));
+        assert_eq!(
+            count.style.descriptor.text_color,
+            Some(theme_provider.resolve_color(summary_spec.count_token()))
+        );
+    }
 
     run_headless(|cx| {
         let changes = Arc::new(Mutex::new(Vec::new()));
@@ -26986,6 +27564,137 @@ fn number_input_mounted_disabled_and_read_only_are_inert() {
 /// treatment on the field root.
 #[test]
 fn number_input_mounted_accessibility_projects_spin_button_surface() {
+    // Visual parity with the Svelte NumberInput authority: the size-owned row
+    // height, the resolved border/radius/fill, the size-offset inline padding,
+    // the stepper column, and the validation-state border colours.
+    {
+        use poodle_adapter::ThemeProvider;
+        use poodle_render::color::with_alpha;
+        use poodle_render::presentation::{rem_to_px, size_padding_x_offset_rem};
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+
+        let ladder = [
+            (ControlSize::Xs, 1.5_f32),
+            (ControlSize::Sm, 1.75),
+            (ControlSize::Md, 2.25),
+            (ControlSize::Lg, 2.75),
+            (ControlSize::Xl, 3.25),
+        ];
+        for (size, height_rem) in ladder {
+            let spec = poodle_specs::NumberInputSpec::new(Some(5.0))
+                .with_id("visual")
+                .with_aria_label("Qty")
+                .with_steppers(true)
+                .with_size(size);
+            let node = poodle_render::number_input(
+                &spec,
+                &ctx,
+                poodle_render::NumberInputHandlers::default(),
+            );
+            assert_eq!(node.a11y.role, Some(NodeRole::SpinButton));
+            assert_eq!(node.a11y.value, Some(5.0));
+            assert_eq!(
+                node.style.descriptor.layout.height,
+                LayoutSizing::Fixed(rem_to_px(height_rem)),
+                "{size:?} control height"
+            );
+            assert_eq!(
+                node.style.descriptor.border.width,
+                theme_provider.resolve_border_width(spec.border_width_token())
+            );
+            assert_eq!(
+                node.style.descriptor.border.color,
+                theme_provider.resolve_color(spec.border_token())
+            );
+            assert_eq!(
+                node.style.descriptor.corner_radii.top_left,
+                theme_provider.resolve_radius(spec.radius_token()),
+                "{size:?} field radius"
+            );
+            assert_eq!(
+                node.style.descriptor.background,
+                Some(theme_provider.resolve_color(spec.fill_token()))
+            );
+
+            let value_row = &node.children[0];
+            let pad_x = theme_provider.resolve_space(spec.horizontal_padding_token())
+                + rem_to_px(size_padding_x_offset_rem(size));
+            assert_eq!(
+                value_row.style.descriptor.layout.spacing.padding.left,
+                pad_x
+            );
+            assert_eq!(
+                value_row.style.descriptor.layout.spacing.padding.right,
+                pad_x
+            );
+            assert_eq!(
+                value_row.style.descriptor.layout.spacing.gap,
+                rem_to_px(0.5)
+            );
+            let value = value_row.children.last().expect("editable value");
+            assert_eq!(
+                value.style.descriptor.text_color,
+                Some(theme_provider.resolve_color(spec.text_color_token()))
+            );
+
+            let steppers = &node.children[1];
+            assert_eq!(
+                steppers.style.descriptor.layout.width,
+                LayoutSizing::Fixed(theme_provider.resolve_space("size.icon.md") + rem_to_px(0.5)),
+                "{size:?} stepper column"
+            );
+            let elevated = theme_provider.resolve_color("color.background.elevated");
+            let inc = &steppers.children[0];
+            assert_eq!(
+                inc.style.descriptor.background,
+                Some(with_alpha(elevated, elevated.3 * 0.88)),
+                "{size:?} stepper fill mix"
+            );
+            assert_eq!(inc.a11y.label.as_deref(), Some("Increment"));
+            match &inc.children[0].kind {
+                NodeKind::Icon { name, .. } => assert_eq!(name, "plus"),
+                _ => panic!("increment glyph is an icon"),
+            }
+        }
+
+        // Validation states recolour the border, disabled lowers opacity.
+        for (state, token) in [
+            (
+                poodle_specs::ValidationState::Invalid,
+                "color.status.danger",
+            ),
+            (poodle_specs::ValidationState::Valid, "color.status.success"),
+            (poodle_specs::ValidationState::Pending, "color.accent.base"),
+        ] {
+            let spec = poodle_specs::NumberInputSpec::new(Some(1.0))
+                .with_id("visual")
+                .with_validation_state(state);
+            let node = poodle_render::number_input(
+                &spec,
+                &ctx,
+                poodle_render::NumberInputHandlers::default(),
+            );
+            assert_eq!(
+                node.style.descriptor.border.color,
+                theme_provider.resolve_color(token),
+                "{state:?} border"
+            );
+        }
+        let disabled = poodle_render::number_input(
+            &poodle_specs::NumberInputSpec::new(Some(1.0))
+                .with_id("visual")
+                .with_disabled(true),
+            &ctx,
+            poodle_render::NumberInputHandlers::default(),
+        );
+        assert_eq!(
+            disabled.style.descriptor.opacity,
+            theme_provider.resolve_opacity("state.opacity.disabled")
+        );
+        assert!(disabled.interaction.disabled);
+    }
+
     run_headless(|cx| {
         let mut pending = NumberFieldState::new("pending", Some(2.0)).bounded(0.0, 10.0);
         pending.validation_state = poodle_specs::ValidationState::Pending;
@@ -27024,6 +27733,20 @@ fn number_input_mounted_accessibility_projects_spin_button_surface() {
 
         let pending_node = mounted_number(&mounted, "pending");
         assert_eq!(pending_node.a11y.busy, Some(true));
+
+        // Pointer activation reaches the mounted stepper button and steps the
+        // committed value through the host rebuild.
+        driver.pointer_activate_id(&number_field_inc_id("qty"));
+        assert_eq!(
+            host.field("qty").value,
+            Some(4.0),
+            "Increment steps the committed value"
+        );
+        assert_eq!(
+            mounted_number(&mounted, "qty").a11y.value,
+            Some(4.0),
+            "the rebuilt spin-button projects the stepped value"
+        );
 
         driver.focus_element(&number_field_id("qty"));
         driver.dispatch_key_raw("cmd-a");
@@ -29516,6 +30239,157 @@ fn rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboar
         );
         node.id = Some(FIXTURE_ID.to_owned());
         node
+    }
+
+    // Visual parity with the Svelte `Rating` authority: the per-size item box
+    // is `size-icon-{size} + 0.75rem` (not the generic control-height ladder),
+    // the glyph is the 1.125em star, and the fill/gap colours resolve from the
+    // rating tokens for whole-step, fractional, and disabled states.
+    {
+        use poodle_adapter::ThemeProvider;
+        use poodle_render::color::with_alpha;
+        use poodle_render::presentation::rem_to_px;
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let active = theme_provider.resolve_color("color.accent.base");
+        let inactive_base = theme_provider.resolve_color("color.text.secondary");
+        let inactive = with_alpha(inactive_base, inactive_base.3 * 0.48);
+
+        // (size, icon token, icon rem, glyph font rem) from rating.css §8.
+        let ladder = [
+            (ControlSize::Xs, "size.icon.xs", 0.625_f32, 0.75_f32),
+            (ControlSize::Sm, "size.icon.sm", 0.75, 0.875),
+            (ControlSize::Md, "size.icon.md", 1.0, 1.0),
+            (ControlSize::Lg, "size.icon.lg", 1.25, 1.125),
+            (ControlSize::Xl, "size.icon.xl", 1.5, 1.25),
+        ];
+        for (size, token, icon_rem, glyph_rem) in ladder {
+            assert_eq!(
+                theme_provider.resolve_space(token),
+                rem_to_px(icon_rem),
+                "{size:?} icon token matches its Svelte CSS primitive"
+            );
+            let mut spec = RatingSpec::new().with_value(3.0).with_step(1.0);
+            spec.size = Some(size);
+            let node = poodle_render::rating(&spec, &ctx, RatingHandlers::new("rating-visual"));
+            assert_eq!(
+                node.style.descriptor.layout.spacing.gap,
+                rem_to_px(0.125),
+                "{size:?} default-density inter-item gap"
+            );
+            assert_eq!(node.children.len(), 5);
+            let item_px = rem_to_px(icon_rem + 0.75);
+            let glyph_px = rem_to_px(glyph_rem) * 1.125;
+            for item in &node.children {
+                assert_eq!(
+                    item.style.descriptor.layout.width,
+                    LayoutSizing::Fixed(item_px),
+                    "{size:?} item width"
+                );
+                assert_eq!(
+                    item.style.descriptor.layout.height,
+                    LayoutSizing::Fixed(item_px)
+                );
+                let glyph = &item.children[0];
+                assert_eq!(
+                    glyph.style.descriptor.layout.width,
+                    LayoutSizing::Fixed(glyph_px)
+                );
+                assert_eq!(
+                    glyph.style.descriptor.layout.height,
+                    LayoutSizing::Fixed(glyph_px)
+                );
+                match &glyph.children[0].kind {
+                    NodeKind::Icon { name, size } => {
+                        assert_eq!(name, "star");
+                        assert_eq!(*size, glyph_px);
+                    }
+                    _ => panic!("rating base is a star icon"),
+                }
+            }
+            // The first three stars are complete: base muted under an accent
+            // fill clipped to the full glyph.
+            let filled = &node.children[0].children[0];
+            assert_eq!(
+                filled.children[0].style.descriptor.text_color,
+                Some(inactive)
+            );
+            let fill = &filled.children[1];
+            assert_eq!(
+                fill.style.descriptor.layout.width,
+                LayoutSizing::Fixed(glyph_px)
+            );
+            assert_eq!(
+                fill.style.descriptor.layout.overflow_x,
+                LayoutOverflow::Hidden
+            );
+            assert_eq!(fill.children[0].style.descriptor.text_color, Some(active));
+            // The last two are empty: the base glyph alone, no fill layer.
+            let empty = &node.children[4].children[0];
+            assert_eq!(empty.children.len(), 1);
+            assert_eq!(
+                empty.children[0].style.descriptor.text_color,
+                Some(inactive)
+            );
+        }
+
+        // Density moves only the gap.
+        let mut compact = RatingSpec::new().with_value(3.0).with_step(1.0);
+        compact.density = Some(ControlDensity::Compact);
+        let compact_node =
+            poodle_render::rating(&compact, &ctx, RatingHandlers::new("rating-compact"));
+        assert_eq!(
+            compact_node.style.descriptor.layout.spacing.gap,
+            rem_to_px(0.0625)
+        );
+        assert_eq!(
+            compact_node.children[0].style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(1.75))
+        );
+        let mut comfortable = RatingSpec::new().with_value(3.0).with_step(1.0);
+        comfortable.density = Some(ControlDensity::Comfortable);
+        let comfortable_node = poodle_render::rating(
+            &comfortable,
+            &ctx,
+            RatingHandlers::new("rating-comfortable"),
+        );
+        assert_eq!(
+            comfortable_node.style.descriptor.layout.spacing.gap,
+            rem_to_px(0.25)
+        );
+
+        // Fractional mode is one slider root; the star boxes keep the same
+        // per-size geometry and the partial star clips to its ratio.
+        let partial = poodle_render::rating(
+            &RatingSpec::new().with_value(2.5),
+            &ctx,
+            RatingHandlers::new("rating-partial"),
+        );
+        assert_eq!(partial.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(partial.a11y.value, Some(2.5));
+        assert_eq!(partial.a11y.value_min, Some(0.0));
+        assert_eq!(partial.a11y.value_max, Some(5.0));
+        let third_fill = &partial.children[2].children[0].children[1];
+        assert_eq!(
+            third_fill.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(1.0) * 1.125 / 2.0),
+            "the half star clips to half the glyph width"
+        );
+
+        // Disabled resolves the contracted opacity token on the group.
+        let disabled = poodle_render::rating(
+            &RatingSpec::new()
+                .with_value(2.0)
+                .with_step(1.0)
+                .with_disabled(true),
+            &ctx,
+            RatingHandlers::new("rating-disabled"),
+        );
+        assert_eq!(disabled.a11y.role, Some(NodeRole::RadioGroup));
+        assert_eq!(
+            disabled.style.descriptor.opacity,
+            theme_provider.resolve_opacity("state.opacity.disabled")
+        );
     }
 
     // Fractional default half-step: pointer, keys, clear, disabled inertia.
