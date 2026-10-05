@@ -5,7 +5,7 @@
 //! Decorative, non-interactive: a dashed border with an optional centred,
 //! uppercase label. Per contract §3 it does NOT accept child content.
 
-use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node, NodeRole};
 use poodle_specs::RegionSpec;
 
 use crate::color::hex_color;
@@ -29,6 +29,7 @@ pub fn region(spec: &RegionSpec, ctx: &RenderContext<'_>) -> Node {
 
     // Contract §2/Svelte: dashed border at 0.125rem (2px).
     let mut el = Node::container();
+    el.a11y.role = Some(NodeRole::Presentation);
     {
         let s = &mut el.style;
         s.descriptor.layout.direction = LayoutDirection::Column;

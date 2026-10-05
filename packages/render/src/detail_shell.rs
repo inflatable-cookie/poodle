@@ -12,6 +12,7 @@
 
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
+    NodeRole,
 };
 use poodle_specs::{DetailShellSpec, DetailState, ScrollOwner};
 use poodle_specs::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
@@ -82,6 +83,8 @@ pub fn detail_shell(
 
         if let Some(ref title) = spec.title {
             let mut t = Node::text(title);
+            t.a11y.role = Some(NodeRole::Heading);
+            t.a11y.level = Some(2);
             t.style.descriptor.text_color = Some(header_text);
             t.style.text_size = Some(heading_size);
             t.style.text_weight = Some(600);
@@ -189,6 +192,7 @@ pub fn detail_shell(
 
     if let Some(label) = spec.aria_label.as_deref() {
         if !label.is_empty() {
+            shell.a11y.role = Some(NodeRole::Region);
             shell.a11y.label = Some(label.to_string());
         }
     }

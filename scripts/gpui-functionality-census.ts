@@ -611,8 +611,8 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
     if (!component.portable) continue;
     const contractPath = `docs/contracts/components/${component.slug}.md`;
     const contract = read(root, contractPath);
-    // AppHeader and MediaThumbnail order Events after the usual §5 position.
-    // Read those real sections without changing how any other contract is parsed.
+    // MediaThumbnail has no event section but explicitly declares a passive
+    // figure with no component-owned events.
     const staticFigureWithoutEvents =
       component.name === "MediaThumbnail" &&
       /\[Root\].*<figure>/.test(contract) &&
@@ -624,9 +624,23 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
       component.name === "AgentQuestionRecord" &&
       /This component has no interactive parts\./.test(contract) &&
       /Nothing inside is\s+focusable/.test(contract);
+    // These two components declare only composition/layout and no component
+    // interaction. Their children remain responsible for their own behavior.
+    const layoutOnlyGroup =
+      component.name === "DetailSectionGroup" &&
+      /the component does not inject section chrome; it only owns layout/i.test(contract) &&
+      /root element is a plain `<div>`/i.test(contract);
+    const decorativeRegion =
+      component.name === "Region" &&
+      /Role: `presentation`/.test(contract) &&
+      /Region is non-interactive and should not be keyboard-focusable\./.test(contract);
     const events = headingBody(
       contract,
-      staticFigureWithoutEvents || component.name === "AppHeader" ? /^## 6\. Events/ : /^## 5\. /,
+      component.name === "DetailShell"
+        ? /^## 6\. Events/
+        : staticFigureWithoutEvents || component.name === "AppHeader"
+          ? /^## 6\. Events/
+          : /^## 5\. /,
     );
     const keyboard = headingBody(contract, /^### Keyboard/);
     const focus = headingBody(contract, /^### Focus/);
@@ -638,11 +652,15 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
     const hasDeclaredEvents = eventTableKeys.some((key) => !/^(event|callback|none|[-—–])$/i.test(key));
     const eventsNone =
       readOnlyRecordWithoutInteraction ||
+      layoutOnlyGroup ||
+      decorativeRegion ||
       (!hasDeclaredEvents &&
         (/^\|\s*none\s*\|/m.test(events.body) ||
           /^\s*None\.\s*$/m.test(events.body) ||
           /^No component-owned events are dispatched\./m.test(events.body) ||
-          (component.name === "AppHeader" && /^No component-owned events\./m.test(events.body)) ||
+          ((component.name === "AppHeader" || component.name === "DetailShell") &&
+            /^No component-owned events\./m.test(events.body)) ||
+          (component.name === "PageHeader" && /^No component-owned events beyond child action behavior\./m.test(events.body)) ||
           /layout primitive only|no events/i.test(events.body) ||
           staticFigureWithoutEvents));
     const keyboardRows = keyboard.body
@@ -660,13 +678,19 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
     );
     const keyboardNone =
       readOnlyRecordWithoutInteraction ||
+      layoutOnlyGroup ||
+      decorativeRegion ||
       (!hasKeyboardBehavior &&
         (keyboardRows.some(({ key }) => /^none$/i.test(key)) ||
           tabNotFocusable ||
           /no keyboard behavior/i.test(keyboard.body) ||
           staticFigureWithoutEvents));
     const focusNeutral =
-      /not focusable/i.test(focus.body) || staticFigureWithoutEvents || readOnlyRecordWithoutInteraction;
+      /not focusable/i.test(focus.body) ||
+      staticFigureWithoutEvents ||
+      readOnlyRecordWithoutInteraction ||
+      layoutOnlyGroup ||
+      decorativeRegion;
     const required: CensusAxis[] = ["semantic", "accessibility", "visual"];
     const notApplicable: ManifestNotApplicable[] = [];
     if (eventsNone) {
@@ -674,10 +698,18 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
         axis: "events",
         reason: readOnlyRecordWithoutInteraction
           ? "Contract declares the record has no interactive parts and no inputs, so it has no callbacks or events to prove."
-          : "Contract declares no component callbacks or events.",
+          : layoutOnlyGroup
+            ? "Contract assigns only responsive section layout to this group; child sections own any callbacks or events."
+            : decorativeRegion
+              ? "Contract defines a decorative placeholder with no child content or component callbacks."
+              : "Contract declares no component callbacks or events.",
         contractRef: readOnlyRecordWithoutInteraction
           ? `${contractPath}#2. Read-Only By Construction`
-          : `${contractPath}#${events.heading || "5. Events"}`,
+          : layoutOnlyGroup
+            ? `${contractPath}#4. Behavior Rules`
+            : decorativeRegion
+              ? `${contractPath}#3. Composition`
+              : `${contractPath}#${events.heading || "Events"}`,
       });
     } else {
       required.push("events");
@@ -689,12 +721,18 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
           ? "The contract defines a passive figure with no component-owned events, so it has no pointer interaction to prove."
           : readOnlyRecordWithoutInteraction
             ? "Contract declares the record has no interactive parts, so it has no pointer interaction to prove."
-            : "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+            : layoutOnlyGroup
+              ? "The contract assigns only section layout to this plain container; pointer interactions belong to its children."
+              : decorativeRegion
+                ? "The contract defines a decorative placeholder with no child content, so it has no pointer interaction to prove."
+                : "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
         contractRef: staticFigureWithoutEvents
           ? `${contractPath}#3. Anatomy`
           : readOnlyRecordWithoutInteraction
             ? `${contractPath}#2. Read-Only By Construction`
-            : `${contractPath}#${keyboard.heading || "Keyboard"}`,
+            : layoutOnlyGroup
+              ? `${contractPath}#4. Behavior Rules`
+              : `${contractPath}#6. Accessibility`,
       });
     } else {
       required.push("pointer");
@@ -706,12 +744,18 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
           ? "The contract defines a passive figure that is not a focus stop and has no keyboard behavior."
           : readOnlyRecordWithoutInteraction
             ? "Contract states nothing inside is focusable, so the record never appears in the tab order."
-            : "Contract declares the component not focusable with no keyboard behavior.",
+            : layoutOnlyGroup
+              ? "The contract defines a plain layout container, not a focus stop; child controls own keyboard behavior."
+              : decorativeRegion
+                ? "The contract states the decorative placeholder is non-interactive and not keyboard-focusable."
+                : "Contract declares the component not focusable with no keyboard behavior.",
         contractRef: staticFigureWithoutEvents
           ? `${contractPath}#3. Anatomy`
           : readOnlyRecordWithoutInteraction
             ? `${contractPath}#6. Accessibility`
-            : `${contractPath}#${keyboard.heading || "Keyboard"}`,
+            : layoutOnlyGroup || decorativeRegion
+              ? `${contractPath}#6. Accessibility`
+              : `${contractPath}#${keyboard.heading || "Keyboard"}`,
       });
     } else if (keyboardNone && tabNotFocusable) {
       notApplicable.push({

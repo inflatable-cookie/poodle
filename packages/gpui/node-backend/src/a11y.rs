@@ -41,6 +41,7 @@ pub fn record_role(role: NodeRole) -> &'static str {
         NodeRole::MenuItemRadio => "menuitemradio",
         NodeRole::Meter => "meter",
         NodeRole::Navigation => "navigation",
+        NodeRole::Presentation => "presentation",
         NodeRole::Splitter => "separator",
         NodeRole::Slider => "slider",
         NodeRole::ProgressIndicator => "progressbar",

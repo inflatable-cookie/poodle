@@ -207,6 +207,10 @@ describe("g18.001 census oracles", () => {
     const appHeader = manifest.find((entry) => entry.component === "AppHeader");
     const paginationSummary = manifest.find((entry) => entry.component === "PaginationSummary");
     const agentQuestionRecord = manifest.find((entry) => entry.component === "AgentQuestionRecord");
+    const detailShell = manifest.find((entry) => entry.component === "DetailShell");
+    const detailSectionGroup = manifest.find((entry) => entry.component === "DetailSectionGroup");
+    const pageHeader = manifest.find((entry) => entry.component === "PageHeader");
+    const region = manifest.find((entry) => entry.component === "Region");
     expect(pill?.required).toEqual(axes);
     expect(pill?.notApplicable).toEqual([]);
     expect(paginationSummary?.required).toEqual(["semantic", "accessibility", "visual"]);
@@ -254,6 +258,24 @@ describe("g18.001 census oracles", () => {
         contractRef: "docs/contracts/components/app-header.md#6. Events",
       },
     ]);
+    expect(detailShell?.required).toEqual(["semantic", "pointer", "keyboard_focus", "accessibility", "visual"]);
+    expect(detailShell?.notApplicable.map((item) => item.axis)).toEqual(["events"]);
+    expect(pageHeader?.required).toEqual(["semantic", "pointer", "keyboard_focus", "accessibility", "visual"]);
+    expect(pageHeader?.notApplicable.map((item) => item.axis)).toEqual(["events"]);
+    expect(detailSectionGroup?.required).toEqual(["semantic", "accessibility", "visual"]);
+    expect(detailSectionGroup?.notApplicable.map((item) => item.axis)).toEqual([
+      "events",
+      "pointer",
+      "keyboard_focus",
+    ]);
+    expect(detailSectionGroup?.notApplicable.every((item) => item.contractRef.includes("detail-section-group.md#"))).toBe(true);
+    expect(region?.required).toEqual(["semantic", "accessibility", "visual"]);
+    expect(region?.notApplicable.map((item) => item.axis)).toEqual([
+      "events",
+      "pointer",
+      "keyboard_focus",
+    ]);
+    expect(region?.notApplicable.every((item) => item.contractRef.includes("region.md#"))).toBe(true);
   });
 
   it("manifest oracle: static metadata leaves only its interaction axes not applicable", () => {

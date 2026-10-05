@@ -12,7 +12,7 @@
 
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node,
+    Node, NodeRole,
 };
 use poodle_specs::{
     ControlSize, PageHeaderAlign, PageHeaderSpec, PillAppearance, PillSize, PillSpec, PillTone,
@@ -162,6 +162,8 @@ pub fn page_header(
             ctx,
         ));
     }
+    title_row.a11y.role = Some(NodeRole::Heading);
+    title_row.a11y.level = Some(spec.level as usize);
 
     left_col = left_col.child(title_row);
 
@@ -305,6 +307,7 @@ pub fn page_header(
 
     if let Some(label) = spec.aria_label.as_deref() {
         if !label.is_empty() {
+            outer.a11y.role = Some(NodeRole::Banner);
             outer.a11y.label = Some(label.to_string());
         }
     }

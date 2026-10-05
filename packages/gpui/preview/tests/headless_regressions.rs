@@ -55221,3 +55221,308 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }
+
+/// DetailShell keeps its named section and h2 semantics, resolves its spacing
+/// tokens, and leaves header actions usable through mounted keyboard/pointer input.
+#[test]
+fn first_mounted_parity_detail_shell() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{ButtonSpec, DetailShellSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let activations = Arc::new(Mutex::new(Vec::<&'static str>::new()));
+        let action_activations = Arc::clone(&activations);
+        let mut refresh = poodle_render::button(
+            &ButtonSpec::new()
+                .with_label("Refresh")
+                .with_aria_label("Refresh details"),
+            &ctx,
+            Some(Arc::new(move || {
+                action_activations
+                    .lock()
+                    .expect("detail-shell callback payloads")
+                    .push("refresh");
+            })),
+        );
+        refresh.id = Some("detail-shell-refresh".into());
+
+        let spec = DetailShellSpec::new()
+            .with_title("Profile")
+            .with_aria_label("Profile details");
+        let mut shell = poodle_render::detail_shell(
+            &spec,
+            &ctx,
+            Some(refresh),
+            Some(Node::text("Owner: Ada")),
+            None,
+        );
+        shell.id = Some("detail-shell-proof".into());
+        assert_eq!(shell.a11y.role, Some(NodeRole::Region));
+        assert_eq!(shell.a11y.label.as_deref(), Some("Profile details"));
+        let heading = shell
+            .find(&|node| node.a11y.role == Some(NodeRole::Heading))
+            .expect("title uses the contract h2 semantics");
+        assert_eq!(heading.a11y.level, Some(2));
+        assert!(heading.has_text("Profile"));
+        assert!(shell.children[1].has_text("Owner: Ada"));
+        assert_eq!(
+            shell.style.descriptor.layout.spacing.gap,
+            theme_provider.resolve_space(spec.stack_gap_token())
+        );
+        assert_eq!(
+            shell.children[1].style.descriptor.layout.spacing.padding.top,
+            theme_provider.resolve_space("space.panel.y")
+        );
+
+        let mounted = Arc::new(Mutex::new(shell));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 320.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let painted = poodle_gpui_node_backend::painted_node_for("detail-shell-proof")
+            .expect("DetailShell reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Region));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Profile details"));
+        driver.wait_for_focus_handle("detail-shell-refresh");
+        driver.focus_element("detail-shell-refresh");
+        driver.keyboard_activate("detail-shell-refresh");
+        driver.pointer_activate_id("detail-shell-refresh");
+        assert_eq!(
+            activations.lock().expect("detail-shell callback payloads").as_slice(),
+            ["refresh", "refresh"],
+            "the header action callback fires from mounted keyboard and pointer input"
+        );
+        let bounds = poodle_gpui_node_backend::bounds_for("detail-shell-proof")
+            .expect("DetailShell has mounted geometry");
+        assert!(f32::from(bounds.size.width) > 0.0);
+        assert!(f32::from(bounds.size.height) > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// DetailSectionGroup resolves density and column minimums, retains its name,
+/// and mounts the capped grid geometry. Children own their own interaction.
+#[test]
+fn first_mounted_parity_detail_section_group() {
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{DetailSectionGroupLayout, DetailSectionGroupSpec, DetailSectionSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let mut identity = poodle_render::detail_section(
+            &DetailSectionSpec::new().with_title("Identity"),
+            &ctx,
+            vec![],
+            None,
+        );
+        identity.id = Some("detail-group-identity".into());
+        let mut connections = poodle_render::detail_section(
+            &DetailSectionSpec::new().with_title("Connections"),
+            &ctx,
+            vec![],
+            None,
+        );
+        connections.id = Some("detail-group-connections".into());
+        let mut activity = poodle_render::detail_section(
+            &DetailSectionSpec::new().with_title("Activity"),
+            &ctx,
+            vec![],
+            None,
+        );
+        activity.id = Some("detail-group-activity".into());
+        let spec = DetailSectionGroupSpec::new()
+            .with_layout(DetailSectionGroupLayout::Grid)
+            .with_density(ControlDensity::Compact)
+            .with_max_columns(2)
+            .with_min_column_width("8rem")
+            .with_aria_label("Project metadata");
+        let mut group = poodle_render::detail_section_group(
+            &spec,
+            &ctx,
+            vec![identity, connections, activity],
+        );
+        group.id = Some("detail-section-group-proof".into());
+
+        assert_eq!(group.a11y.label.as_deref(), Some("Project metadata"));
+        assert_eq!(group.children.len(), 3);
+        assert_eq!(
+            group.style.descriptor.layout.spacing.gap,
+            rem_to_px(spec.gap_rem(ControlDensity::Compact))
+        );
+        assert!(group.style.flex_wrap);
+        for cell in &group.children {
+            assert_eq!(cell.style.width_pct, Some(0.49));
+            assert_eq!(cell.style.min_width, Some(rem_to_px(8.0)));
+            assert!(cell.style.flex_shrink_zero);
+        }
+        assert!(group.children[0].has_text("Identity"));
+        assert!(group.children[1].has_text("Connections"));
+        assert!(group.children[2].has_text("Activity"));
+
+        let mounted = Arc::new(Mutex::new(group));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 640.0, 260.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let painted = poodle_gpui_node_backend::painted_node_for("detail-section-group-proof")
+            .expect("DetailSectionGroup reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_label.as_deref(), Some("Project metadata"));
+        let group_bounds = poodle_gpui_node_backend::bounds_for("detail-section-group-proof")
+            .expect("group has mounted geometry");
+        assert!(f32::from(group_bounds.size.width) > 0.0);
+        assert!(f32::from(group_bounds.size.height) > 0.0);
+        for id in [
+            "detail-group-identity",
+            "detail-group-connections",
+            "detail-group-activity",
+        ] {
+            let bounds = poodle_gpui_node_backend::bounds_for(id)
+                .expect("each section child has mounted geometry");
+            assert!(f32::from(bounds.size.width) >= rem_to_px(8.0));
+            assert!(f32::from(bounds.size.height) > 0.0);
+        }
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// PageHeader exposes a named banner and configured heading level, resolves
+/// its spacing token, and preserves mounted host-action interactions.
+#[test]
+fn first_mounted_parity_page_header() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{ButtonSpec, PageHeaderSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let activations = Arc::new(Mutex::new(Vec::<&'static str>::new()));
+        let action_activations = Arc::clone(&activations);
+        let spec = PageHeaderSpec::new("Assets")
+            .with_subtitle("Shared files")
+            .with_count(12)
+            .with_level(3)
+            .with_aria_label("Assets page heading");
+        let mut header = poodle_render::page_header(
+            &spec,
+            &ctx,
+            None,
+            Some(Box::new(move |slot_ctx| {
+                let mut create = poodle_render::button(
+                    &ButtonSpec::new()
+                        .with_label("Create")
+                        .with_aria_label("Create asset"),
+                    slot_ctx,
+                    Some(Arc::new(move || {
+                        action_activations
+                            .lock()
+                            .expect("page-header callback payloads")
+                            .push("create");
+                    })),
+                );
+                create.id = Some("page-header-create".into());
+                create
+            })),
+            None,
+        );
+        header.id = Some("page-header-proof".into());
+
+        assert_eq!(header.a11y.role, Some(NodeRole::Banner));
+        assert_eq!(header.a11y.label.as_deref(), Some("Assets page heading"));
+        let heading = header
+            .find(&|node| node.a11y.role == Some(NodeRole::Heading))
+            .expect("PageHeader title has heading semantics");
+        assert_eq!(heading.a11y.level, Some(3));
+        assert!(heading.has_text("Assets"));
+        assert_eq!(
+            header.style.descriptor.layout.spacing.gap,
+            theme_provider.resolve_space(spec.gap_token())
+        );
+        assert!(header.has_text("Shared files"));
+        assert!(header.has_text("12"));
+
+        let mounted = Arc::new(Mutex::new(header));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 640.0, 220.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let painted = poodle_gpui_node_backend::painted_node_for("page-header-proof")
+            .expect("PageHeader reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Banner));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Assets page heading"));
+        driver.wait_for_focus_handle("page-header-create");
+        driver.focus_element("page-header-create");
+        driver.keyboard_activate("page-header-create");
+        driver.pointer_activate_id("page-header-create");
+        assert_eq!(
+            activations.lock().expect("page-header callback payloads").as_slice(),
+            ["create", "create"],
+            "the host action fires for keyboard and pointer activation"
+        );
+        let bounds = poodle_gpui_node_backend::bounds_for("page-header-proof")
+            .expect("PageHeader has mounted geometry");
+        assert!(f32::from(bounds.size.width) > 0.0);
+        assert!(f32::from(bounds.size.height) > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Region stays decorative while its custom color, radius, padding and
+/// minimum height resolve into the mounted GPUI node and geometry.
+#[test]
+fn first_mounted_parity_region() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::color::hex_color;
+    use poodle_specs::RegionSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let spec = RegionSpec::new()
+            .with_label("Canvas area")
+            .with_color("#ff00aa")
+            .with_min_height(96.0);
+        let mut region = poodle_render::region(&spec, &ctx);
+        region.id = Some("region-proof".into());
+
+        assert_eq!(region.a11y.role, Some(NodeRole::Presentation));
+        assert_eq!(region.a11y.label, None);
+        assert!(!region.interaction.focusable);
+        assert!(region.has_text("CANVAS AREA"));
+        assert_eq!(region.style.min_height, Some(96.0));
+        assert!(region.style.border_dashed);
+        assert_eq!(region.style.descriptor.border.width, 2.0);
+        assert_eq!(region.style.descriptor.border.color, hex_color("#ff00aa").unwrap());
+        assert_eq!(
+            region.style.descriptor.corner_radii.top_left,
+            theme_provider.resolve_radius(spec.radius_token())
+        );
+        assert_eq!(
+            region.style.descriptor.layout.spacing.padding.top,
+            theme_provider.resolve_space(spec.padding_token())
+        );
+        let border_width = region.style.descriptor.border.width;
+
+        let mounted = Arc::new(Mutex::new(region));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 180.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let painted = poodle_gpui_node_backend::painted_node_for("region-proof")
+            .expect("Region reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Presentation));
+        let bounds = poodle_gpui_node_backend::bounds_for("region-proof")
+            .expect("Region has mounted geometry");
+        assert!(f32::from(bounds.size.width) > 0.0);
+        // `bounds_for` records the absolute canvas inside the Region, which
+        // measures its padding box. Reconstruct the mounted border box, as
+        // the capture path does, before comparing with the CSS min-height.
+        let mounted_border_box_height = f32::from(bounds.size.height) + border_width * 2.0;
+        assert!(
+            mounted_border_box_height >= spec.min_height_px,
+            "contract minimum height is {}px, mounted Region border box measured {mounted_border_box_height}px",
+            spec.min_height_px
+        );
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
