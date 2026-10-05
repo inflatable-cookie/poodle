@@ -89,6 +89,7 @@ export const WITHHELD_AXES: Record<string, Partial<Record<CensusAxis, string>>> 
     visual:
       "narrow-container clamp needs a shared min(100%, max(…)) layout capability",
   },
+<<<<<<< HEAD
   Code: {
     // Planner split ruling 2026-10-05 (brief v3): the copy press reaches
     // the backend clipboard channel, but the Copied feedback latch and
@@ -97,6 +98,26 @@ export const WITHHELD_AXES: Record<string, Partial<Record<CensusAxis, string>>> 
     pointer: "copy feedback through production AppState scheduling: follow-up task",
     keyboard_focus:
       "copy feedback through production AppState scheduling: follow-up task",
+  },
+  ListGrid: {
+    // Same clamp class as the CardToggleGroup ruling above: the contract's
+    // `min(minItemWidth, 100%)` / `min(100%, max(…))` track floor stays
+    // normative, and the static flex vocabulary cannot clamp the tile floor
+    // to the container width, so a sub-floor host overflows where Svelte
+    // collapses to one full-width column. Withheld pending the same shared
+    // container-relative layout capability; the cap, gap, and token proofs
+    // stay asserted in the retained test as regression value.
+    visual:
+      "narrow-container floor clamp needs a shared container-relative layout capability",
+  },
+  Tooltip: {
+    // Svelte's `onOpenChange` has no projection in the Rust TooltipSpec or
+    // the Node.tooltip backend runtime: open/close transitions are observable
+    // only as painted/is-visible state, and the anchor activation handler in
+    // the retained test proves trigger liveness, not tooltip open-change.
+    // Projecting the callback needs node-handler work planned as its own task.
+    events:
+      "open-change callback needs a production handler projection for tooltip transitions",
   },
 };
 

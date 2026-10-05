@@ -9,6 +9,11 @@ use poodle_specs::FieldSetSpec;
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
+/// Gap reservation below one exact column share, so a multi-column grid keeps
+/// its configured count as the wrap's upper bound. Same device (and value) as
+/// ListGrid's cap share and CardToggleGroup's `GRID_GAP_SHARE`.
+const COLUMN_COUNT_GAP_SHARE: f32 = 0.03;
+
 pub fn field_set(spec: &FieldSetSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> Node {
     let col_gap = spec
         .column_gap_token()
@@ -80,10 +85,14 @@ pub fn field_set(spec: &FieldSetSpec, ctx: &RenderContext<'_>, children: Vec<Nod
         // The old builder chains .child() before layout config; children order
         // is what matters and the adapter emits fields, not call order.
         if cols > 1 {
-            // GPUI's `.flex_1()` is grow + zero basis, which gives each
-            // child an equal share of the wrapping row.
+            // Svelte's `repeat(columns, minmax(0, 1fr))` holds the configured
+            // count: seed each cell just under one column share — the same
+            // gap reservation ListGrid and CardToggleGroup use — so an extra
+            // child wraps instead of growing a further column. `flex-grow`
+            // then shares the row the way `1fr` tracks do.
             wrapper.style.flex_grow = Some(1.0);
-            wrapper.style.flex_basis = Some(0.0);
+            wrapper.style.flex_basis_pct = Some(1.0 / f32::from(cols) - COLUMN_COUNT_GAP_SHARE);
+            wrapper.style.flex_basis = None;
         } else {
             wrapper.style.descriptor.layout.width = LayoutSizing::Grow;
             wrapper.style.fill_width = true;

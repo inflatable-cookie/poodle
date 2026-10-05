@@ -60392,9 +60392,17 @@ fn first_mounted_parity_field_set() {
             "the lg gap matches the Svelte column gap"
         );
         assert_eq!(grid.children.len(), 2);
+        // The two-column count holds as one share per cell, so an extra
+        // child wraps instead of growing a third column like Svelte's
+        // `repeat(2, minmax(0, 1fr))`.
         for cell in &grid.children {
             assert_eq!(cell.style.flex_grow, Some(1.0));
-            assert_eq!(cell.style.flex_basis, Some(0.0));
+            assert_eq!(cell.style.flex_basis, None);
+            assert_eq!(
+                cell.style.flex_basis_pct,
+                Some(1.0 / 2.0 - 0.03),
+                "two-column cells seed one column share"
+            );
         }
         assert!(grid.children[0].has_text("Field A"));
         assert!(grid.children[1].has_text("Field B"));
@@ -60494,6 +60502,42 @@ fn first_mounted_parity_field_set() {
             "fields start below the description"
         );
         let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+
+    // ── Mounted: a third child wraps past the two-column count ──────────
+    // Svelte's `repeat(2, minmax(0, 1fr))` puts the third child on row two;
+    // the mounted grid must too instead of growing a third column.
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let cells: Vec<Node> = ["A", "B", "C"]
+            .iter()
+            .map(|name| {
+                let mut field = Node::text(format!("Field {name}"));
+                field.id = Some(format!("mounted-field-set-overflow-{name}"));
+                field
+            })
+            .collect();
+        let mut root = poodle_render::field_set(&FieldSetSpec::new().with_columns(2), &ctx, cells);
+        root.id = Some("mounted-field-set-overflow".to_owned());
+        // Width-dependent geometry needs a fixed host width: the mount box
+        // centers intrinsic content, so the grid takes the Svelte viewport
+        // width explicitly, the same Fixed pattern the Grid parity test uses.
+        root.style.descriptor.layout.width = LayoutSizing::Fixed(400.0);
+        let _driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(root)), 400.0, 220.0);
+        let first = poodle_gpui_node_backend::bounds_for("mounted-field-set-overflow-A")
+            .expect("first cell geometry");
+        let wrapped = poodle_gpui_node_backend::bounds_for("mounted-field-set-overflow-C")
+            .expect("wrapped cell geometry");
+        assert!(
+            f32::from(wrapped.origin.y)
+                >= f32::from(first.origin.y) + f32::from(first.size.height) - 1.0,
+            "the third child wraps past the two-column count"
+        );
+        assert!(
+            (f32::from(wrapped.origin.x) - f32::from(first.origin.x)).abs() < 8.0,
+            "the wrapped child restarts at the row edge"
+        );
     });
 
     // ── Mounted: grouped controls keep their own disabled state ─────────
