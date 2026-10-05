@@ -1,12 +1,15 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "MetaBar",
-  "test": "first_mounted_parity_meta_bar",
+  "component": "WaveformDisplay",
+  "test": "first_mounted_parity_waveform_display",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
     "semantic",
+    "events",
+    "pointer",
+    "keyboard_focus",
     "accessibility",
     "visual"
   ],
@@ -15,13 +18,28 @@
       "assert",
       "production-mount"
     ],
+    "events": [
+      "assert_eq!(\n            selection_commits\n                .lock()\n                .expect(\"commits lock\")\n                .last()\n                .expect(\"an extended commit\"),\n            &Some(extended),\n            \"an extending move commit",
+      "assert_eq!(\n            selection_commits.lock().expect(\"commits lock\").as_slice(),\n            &[Some(WaveformSelection { start: 1024, end: 2048 })],\n            \"one drag commit",
+      "assert_eq!(\n            selection_changes\n                .lock()\n                .expect(\"selection lock\")\n                .last()\n                .expect(\"an extended change"
+    ],
+    "pointer": [
+      "pointer_press"
+    ],
+    "keyboard_focus": [
+      "focus_state_for",
+      "focus_element",
+      "dispatch_key"
+    ],
     "accessibility": [
+      "a11y\n            .",
+      "NodeRole",
       "a11y."
     ],
     "visual": [
-      "resolve_space",
       "resolve_color",
-      "rem_to_px"
+      "rem_to_px",
+      "_geometry"
     ]
   },
   "production_path_observation": {
@@ -40,12 +58,15 @@
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "20f7852a-cc71-441a-8b01-12d2f349b188",
+    "run_id": "poodle-122-869c45e",
     "outcome": "passed",
-    "body_sha256": "573cc338ee083d7056094264c3cb225c057ec85194d1ce2fce2e89ba7c6841d8"
+    "body_sha256": "78e25aa11048c0ac61a13fde18f39425af2ddbc117571cac0b4f83e3728a4cca"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
+    "asserted emitted payloads or handler delivery through mounted input",
+    "drove real pointer activation through the mounted GPUI node backend",
+    "drove real keyboard input or backend focus through the mounted tree",
     "asserted node-level role, label, state, or focusability in the mounted tree",
     "asserted resolved token values or mounted geometry"
   ],

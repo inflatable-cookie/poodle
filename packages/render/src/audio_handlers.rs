@@ -13,17 +13,20 @@ use poodle_headless::audio::{
     keyboard_move_focus, keyboard_press, keyboard_release, keyboard_retarget,
     keyboard_set_disabled, keyboard_set_octave_shift, keyboard_set_range,
     keyboard_velocity_at_point, keyboard_visual_state, knob_point_to_norm, knob_transition,
+    move_envelope_point, normalize_envelope_points, remove_envelope_point,
     switch_visual_state, xy_pad_transition, AudioPoint, AudioRect, AudioSwitchContext,
     AudioSwitchEffect, AudioSwitchEvent, AudioValueContext, AudioValueEffect, AudioValueEvent,
-    DragNumberContext, FaderContext, FaderOrientation, KeyboardContext, KeyboardEffect,
-    KnobContext, KnobDragMode, ValueBound, XYPadAxis, XYPadContext, XYPadEffect, XYPadEvent,
+    DragNumberContext, EnvelopePoint, FaderContext, FaderOrientation, KeyboardContext,
+    KeyboardEffect, KnobContext, KnobDragMode, ModMatrixCell, ModMatrixContext, ValueBound,
+    WaveformContext, WaveformSelection, XYPadAxis, XYPadContext, XYPadEffect, XYPadEvent,
 };
 use poodle_node::{
-    ContinuousValuePhase, FocusRing, Node, NodeContinuousValueEvent, NodeKey, NodeRole,
-    NodeWheelEvent,
+    ContinuousValuePhase, FocusRing, Node, NodeContinuousValueEvent, NodeKey, NodeModifiers,
+    NodeRole, NodeWheelEvent, ScrubAxis, ScrubPhase,
 };
 use poodle_specs::{
-    AudioSwitchSpec, DragNumberFieldSpec, FaderSpec, KeyboardSpec, KnobSpec, Orientation, XYPadSpec,
+    AudioSwitchSpec, DragNumberFieldSpec, EnvelopeEditorSpec, FaderSpec, KeyboardSpec, KnobSpec,
+    ModMatrixGridSpec, Orientation, WaveformDisplaySpec, XYPadSpec,
 };
 
 use crate::color::with_alpha;
@@ -2352,6 +2355,951 @@ fn bind_switch_blur(
     node.interaction.on_focus_change = Some(Arc::new(move |focused| {
         if !focused {
             run_switch(&live, AudioSwitchEvent::Cancel, &handlers);
+        }
+    }));
+}
+
+// ── EnvelopeEditor ───────────────────────────────────────────────────────
+//
+// The GPUI adapter owns point hit testing, drag capture, focus, and key
+// translation (contract §10); the shared headless helpers own normalized
+// ordering, clamping, and curve evaluation. The event model mirrors the
+// Svelte `envelopeTransition` authority: DRAG_BEGIN selects the hit point and
+// opens the gesture, DRAG_MOVE reports live change through the snap hook,
+// DRAG_END commits and closes it, while arrows/PageUp/PageDown nudge the
+// selected point, Delete removes it, and atomic edits emit change plus
+// commit. `[`/`]` curve keys and Backspace have no `NodeKey` vocabulary, so
+// curve editing stays web-only until the backend carries those keys.
+
+/// Host-owned adapter state for one EnvelopeEditor instance.
+#[derive(Clone, Debug)]
+pub struct EnvelopeLive {
+    pub points: Vec<EnvelopePoint>,
+    pub selected: Option<String>,
+    pub dragging: Option<String>,
+    pub step: f64,
+    pub curve_step: f64,
+    pub disabled: bool,
+    pub aria_label: String,
+}
+
+impl EnvelopeLive {
+    pub fn new(points: Vec<EnvelopePoint>) -> Self {
+        Self {
+            points: normalize_envelope_points(&points),
+            selected: None,
+            dragging: None,
+            step: 0.01,
+            curve_step: 0.1,
+            disabled: false,
+            aria_label: "Envelope".into(),
+        }
+    }
+}
+
+/// Contract effects plus a required lifetime-stable instance scope.
+#[derive(Clone, Default)]
+pub struct EnvelopeHandlers {
+    pub instance_id: String,
+    pub on_points_change: Option<Arc<dyn Fn(Vec<EnvelopePoint>) + Send + Sync>>,
+    pub on_points_commit: Option<Arc<dyn Fn(Vec<EnvelopePoint>) + Send + Sync>>,
+    pub on_gesture_begin: Option<Arc<dyn Fn() + Send + Sync>>,
+    pub on_gesture_end: Option<Arc<dyn Fn() + Send + Sync>>,
+    pub snap_point: Option<Arc<dyn Fn(f64, f64) -> (f64, f64) + Send + Sync>>,
+}
+
+impl EnvelopeHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.is_empty(),
+            "native audio instance_id must be non-empty and lifetime-stable"
+        );
+        Self {
+            instance_id,
+            ..Self::default()
+        }
+    }
+
+    pub fn on_points_change(
+        mut self,
+        handler: Arc<dyn Fn(Vec<EnvelopePoint>) + Send + Sync>,
+    ) -> Self {
+        self.on_points_change = Some(handler);
+        self
+    }
+
+    pub fn on_points_commit(
+        mut self,
+        handler: Arc<dyn Fn(Vec<EnvelopePoint>) + Send + Sync>,
+    ) -> Self {
+        self.on_points_commit = Some(handler);
+        self
+    }
+
+    pub fn on_gesture_begin(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.on_gesture_begin = Some(handler);
+        self
+    }
+
+    pub fn on_gesture_end(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.on_gesture_end = Some(handler);
+        self
+    }
+
+    pub fn snap_point(mut self, hook: Arc<dyn Fn(f64, f64) -> (f64, f64) + Send + Sync>) -> Self {
+        self.snap_point = Some(hook);
+        self
+    }
+}
+
+/// Rebuild a spec from host-owned envelope state, so a mounted tree refreshes
+/// from the committed machine value like the other audio binds.
+pub fn envelope_spec_from_live(live: &EnvelopeLive) -> EnvelopeEditorSpec {
+    let mut spec = EnvelopeEditorSpec::new(poodle_headless::audio::EnvelopeVisualState {
+        points: live
+            .points
+            .iter()
+            .map(|point| poodle_headless::audio::EnvelopeVisualPoint {
+                id: point.id.clone(),
+                x_norm: point.x,
+                y_norm: point.y,
+                curve: point.curve,
+                selected: live.selected.as_deref() == Some(point.id.as_str()),
+                dragging: live.dragging.as_deref() == Some(point.id.as_str()),
+            })
+            .collect(),
+        hover_point_id: None,
+        focus: false,
+        enabled: !live.disabled,
+    });
+    spec.aria_label = live.aria_label.clone();
+    spec
+}
+
+fn envelope_handle_id(instance_id: &str, point_id: &str) -> String {
+    format!("{instance_id}:point:{point_id}")
+}
+
+/// Port of the Svelte `envelopeHitTest` authority: closest normalized point
+/// within a 10px radius of the pointer position.
+fn envelope_hit_test(points: &[EnvelopePoint], x_px: f32, y_px: f32, width: f32, height: f32) -> Option<String> {
+    let mut closest: Option<String> = None;
+    let mut distance = 10.0_f32.max(0.0);
+    for point in points {
+        let px = point.x as f32 * width;
+        let py = (1.0 - point.y as f32) * height;
+        let next = ((x_px - px).powi(2) + (y_px - py).powi(2)).sqrt();
+        if next <= distance {
+            closest = Some(point.id.clone());
+            distance = next;
+        }
+    }
+    closest
+}
+
+fn envelope_emit_change(live: &Mutex<EnvelopeLive>, handlers: &EnvelopeHandlers) {
+    let points = live.lock().expect("envelope machine").points.clone();
+    if let Some(emit) = &handlers.on_points_change {
+        emit(points);
+    }
+}
+
+fn envelope_emit_commit(live: &Mutex<EnvelopeLive>, handlers: &EnvelopeHandlers) {
+    let points = live.lock().expect("envelope machine").points.clone();
+    if let Some(emit) = &handlers.on_points_commit {
+        emit(points);
+    }
+}
+
+fn envelope_gesture_begin(handlers: &EnvelopeHandlers) {
+    if let Some(begin) = &handlers.on_gesture_begin {
+        begin();
+    }
+}
+
+fn envelope_gesture_end(handlers: &EnvelopeHandlers) {
+    if let Some(end) = &handlers.on_gesture_end {
+        end();
+    }
+}
+
+/// Wire the production envelope tree: root drag capture with real deltas plus
+/// per-handle focus selection and keyboard. `width`/`height` are the resolved
+/// fixed geometry the renderer painted, so hit testing matches Svelte's
+/// bounding-rect math.
+pub fn bind_envelope_editor(
+    node: &mut Node,
+    spec: &EnvelopeEditorSpec,
+    ctx: &RenderContext<'_>,
+    handlers: &EnvelopeHandlers,
+    live: &Arc<Mutex<EnvelopeLive>>,
+    width: f32,
+    height: f32,
+) {
+    let instance_id = handlers.instance_id.clone();
+    node.id = Some(audio_root_id(&instance_id));
+    node.runtime_id = Some(audio_root_id(&instance_id));
+    node.a11y.label = Some(spec.aria_label.clone());
+    let enabled = !live.lock().expect("envelope machine").disabled;
+    node.interaction.disabled = !enabled;
+    if enabled {
+        node.style.focus_ring = Some(audio_focus_ring(ctx));
+    }
+    bind_envelope_drag(node, Arc::clone(live), handlers.clone(), width, height);
+    let mut handle_index = 0;
+    for child in node
+        .children
+        .iter_mut()
+        .filter(|child| child.a11y.role == Some(NodeRole::Slider))
+    {
+        let points = live.lock().expect("envelope machine").points.clone();
+        if let Some(point) = points.get(handle_index) {
+            let id = envelope_handle_id(&instance_id, &point.id);
+            child.id = Some(id.clone());
+            child.runtime_id = Some(id);
+            child.interaction.focusable = enabled;
+            child.interaction.disabled = !enabled;
+            child.a11y.tab_index = enabled.then_some(0);
+            if enabled {
+                child.style.focus_ring = Some(audio_focus_ring(ctx));
+                bind_envelope_handle_focus(child, Arc::clone(live), point.id.clone());
+                bind_envelope_handle_keys(child, Arc::clone(live), handlers.clone(), point.id.clone());
+            }
+        }
+        handle_index += 1;
+    }
+    debug_assert_eq!(
+        handle_index,
+        live.lock().expect("envelope machine").points.len(),
+        "every normalized point paints exactly one handle"
+    );
+}
+
+fn bind_envelope_drag(
+    node: &mut Node,
+    live: Arc<Mutex<EnvelopeLive>>,
+    handlers: EnvelopeHandlers,
+    width: f32,
+    height: f32,
+) {
+    node.interaction.on_continuous_value = Some(Arc::new(move |event: &NodeContinuousValueEvent| {
+        let mut runtime = live.lock().expect("envelope machine");
+        if runtime.disabled {
+            return;
+        }
+        match event.phase {
+            ContinuousValuePhase::Press => {
+                let x_px = event.x * width;
+                let y_px = (1.0 - event.y) * height;
+                if let Some(id) = envelope_hit_test(&runtime.points, x_px, y_px, width, height) {
+                    runtime.selected = Some(id.clone());
+                    runtime.dragging = Some(id);
+                    drop(runtime);
+                    envelope_gesture_begin(&handlers);
+                }
+            }
+            ContinuousValuePhase::Move => {
+                if let Some(id) = runtime.dragging.clone() {
+                    let x = (event.x as f64).clamp(0.0, 1.0);
+                    // Continuous norms are y-up with 1 at the top, exactly the
+                    // envelope's normalized sense, so no flip is needed here
+                    // (the from-top pixel hit test above still flips).
+                    let y = (event.y as f64).clamp(0.0, 1.0);
+                    let (x, y) = handlers
+                        .snap_point
+                        .as_ref()
+                        .map(|snap| snap(x, y))
+                        .unwrap_or((x, y));
+                    runtime.points = move_envelope_point(&runtime.points, &id, x, y);
+                    drop(runtime);
+                    envelope_emit_change(&live, &handlers);
+                }
+            }
+            ContinuousValuePhase::Release | ContinuousValuePhase::Cancel => {
+                if runtime.dragging.take().is_some() {
+                    drop(runtime);
+                    envelope_emit_commit(&live, &handlers);
+                    envelope_gesture_end(&handlers);
+                }
+            }
+        }
+    }));
+}
+
+fn bind_envelope_handle_focus(node: &mut Node, live: Arc<Mutex<EnvelopeLive>>, point_id: String) {
+    node.interaction.on_focus_change = Some(Arc::new(move |focused| {
+        if focused {
+            live.lock().expect("envelope machine").selected = Some(point_id.clone());
+        }
+    }));
+}
+
+fn bind_envelope_handle_keys(
+    node: &mut Node,
+    live: Arc<Mutex<EnvelopeLive>>,
+    handlers: EnvelopeHandlers,
+    point_id: String,
+) {
+    node.interaction.on_key = Some(Arc::new(move |key, mods: NodeModifiers| {
+        let mut runtime = live.lock().expect("envelope machine");
+        if runtime.disabled {
+            return None;
+        }
+        runtime.selected = Some(point_id.clone());
+        if key == NodeKey::Delete {
+            if let Some(selected) = runtime.selected.clone() {
+                runtime.points = remove_envelope_point(&runtime.points, &selected);
+                runtime.selected = None;
+                runtime.dragging = None;
+                drop(runtime);
+                envelope_emit_change(&live, &handlers);
+                envelope_emit_commit(&live, &handlers);
+            }
+            return None;
+        }
+        let Some((direction, multiplier)) = audio_nudge(key) else {
+            return None;
+        };
+        let Some(selected) = runtime.selected.clone() else {
+            return None;
+        };
+        let current = runtime.points.iter().find(|point| point.id == selected)?.clone();
+        let delta = direction as f64 * runtime.step * multiplier * if mods.shift { 0.1 } else { 1.0 };
+        let vertical = matches!(key, NodeKey::ArrowUp | NodeKey::ArrowDown | NodeKey::PageUp | NodeKey::PageDown);
+        let (x, y) = if vertical {
+            (current.x, current.y + delta)
+        } else {
+            (current.x + delta, current.y)
+        };
+        runtime.points = move_envelope_point(&runtime.points, &selected, x, y);
+        drop(runtime);
+        envelope_emit_change(&live, &handlers);
+        envelope_emit_commit(&live, &handlers);
+        None
+    }));
+}
+
+// ── WaveformDisplay ──────────────────────────────────────────────────────
+//
+// The adapter owns viewport hit positions, focus, and key translation
+// (contract §10); the Rust core owns pyramid validation, level choice, and
+// the 4,096-column reduction. The event model mirrors the Svelte
+// `waveformTransition` authority: press opens an ordered selection and
+// reports cursor plus selection change, moves extend it live, release commits
+// it, arrows move the cursor (Shift extends), Home/End target viewport
+// bounds, and Escape clears.
+
+/// Host-owned adapter state for one WaveformDisplay instance: the shared
+/// waveform context itself, whose fields the transition owns.
+pub type WaveformLive = WaveformContext;
+
+/// Contract effects plus a required lifetime-stable instance scope.
+#[derive(Clone, Default)]
+pub struct WaveformHandlers {
+    pub instance_id: String,
+    pub on_cursor_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
+    pub on_selection_change: Option<Arc<dyn Fn(Option<WaveformSelection>) + Send + Sync>>,
+    pub on_selection_commit: Option<Arc<dyn Fn(Option<WaveformSelection>) + Send + Sync>>,
+}
+
+impl WaveformHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.is_empty(),
+            "native audio instance_id must be non-empty and lifetime-stable"
+        );
+        Self {
+            instance_id,
+            ..Self::default()
+        }
+    }
+
+    pub fn on_cursor_change(mut self, handler: Arc<dyn Fn(usize) + Send + Sync>) -> Self {
+        self.on_cursor_change = Some(handler);
+        self
+    }
+
+    pub fn on_selection_change(
+        mut self,
+        handler: Arc<dyn Fn(Option<WaveformSelection>) + Send + Sync>,
+    ) -> Self {
+        self.on_selection_change = Some(handler);
+        self
+    }
+
+    pub fn on_selection_commit(
+        mut self,
+        handler: Arc<dyn Fn(Option<WaveformSelection>) + Send + Sync>,
+    ) -> Self {
+        self.on_selection_commit = Some(handler);
+        self
+    }
+}
+
+/// Rebuild a spec from host-owned waveform state, so a mounted tree refreshes
+/// from the committed machine value like the other audio binds.
+pub fn waveform_spec_from_context(context: &WaveformContext, aria_label: &str) -> WaveformDisplaySpec {
+    let mut spec = WaveformDisplaySpec::new(context.visual_state());
+    spec.aria_label = aria_label.to_owned();
+    spec
+}
+
+/// Port of the Svelte `waveformPointToSample` authority: the scrub fraction
+/// resolves to a clamped viewport sample.
+fn waveform_sample_at(fraction: f32, visible_start: usize, visible_end: usize) -> usize {
+    let span = visible_end.saturating_sub(visible_start).max(1);
+    let sample = visible_start + (fraction.clamp(0.0, 1.0) as f64 * span as f64).floor() as usize;
+    sample.clamp(
+        visible_start,
+        visible_end.saturating_sub(1).max(visible_start),
+    )
+}
+
+fn waveform_clamp_sample(sample: usize, visible_start: usize, visible_end: usize) -> usize {
+    sample.clamp(
+        visible_start,
+        visible_end.saturating_sub(1).max(visible_start),
+    )
+}
+
+fn waveform_ordered(anchor: usize, sample: usize) -> WaveformSelection {
+    WaveformSelection {
+        start: anchor.min(sample),
+        end: anchor.max(sample),
+    }
+}
+
+fn waveform_emit_cursor(handlers: &WaveformHandlers, sample: usize) {
+    if let Some(emit) = &handlers.on_cursor_change {
+        emit(sample);
+    }
+}
+
+fn waveform_emit_selection(handlers: &WaveformHandlers, selection: Option<WaveformSelection>) {
+    if let Some(emit) = &handlers.on_selection_change {
+        emit(selection);
+    }
+}
+
+fn waveform_emit_selection_commit(handlers: &WaveformHandlers, selection: Option<WaveformSelection>) {
+    if let Some(emit) = &handlers.on_selection_commit {
+        emit(selection);
+    }
+}
+
+/// Move the cursor by a signed delta, extending the selection from the anchor
+/// when asked. Ports `MOVE_CURSOR`: a plain move reports cursor change only,
+/// while an extending move also reports selection change and commits the
+/// atomic keyboard edit.
+fn waveform_move_cursor(
+    live: &Mutex<WaveformLive>,
+    handlers: &WaveformHandlers,
+    delta: isize,
+    extend: bool,
+) {
+    let mut context = live.lock().expect("waveform machine");
+    if context.disabled {
+        return;
+    }
+    let origin = context.cursor_sample.unwrap_or(context.visible_start);
+    let sample = waveform_clamp_sample(
+        origin.saturating_add_signed(delta),
+        context.visible_start,
+        context.visible_end,
+    );
+    context.cursor_sample = Some(sample);
+    if !extend {
+        context.selection_anchor = None;
+        drop(context);
+        waveform_emit_cursor(handlers, sample);
+        return;
+    }
+    let anchor = context.selection_anchor.unwrap_or(origin);
+    let selection = waveform_ordered(anchor, sample);
+    context.selection = Some(selection);
+    context.selection_anchor = Some(anchor);
+    drop(context);
+    waveform_emit_cursor(handlers, sample);
+    waveform_emit_selection(handlers, Some(selection));
+    waveform_emit_selection_commit(handlers, Some(selection));
+}
+
+/// Wire the production waveform tree: scrub selection with real pointer
+/// fractions plus cursor/selection keyboard over the shared context.
+pub fn bind_waveform_display(
+    node: &mut Node,
+    _spec: &WaveformDisplaySpec,
+    ctx: &RenderContext<'_>,
+    handlers: &WaveformHandlers,
+    live: &Arc<Mutex<WaveformLive>>,
+) {
+    // The summary label, value range, and value text come from the base
+    // render and refresh on every rebuild; the bind only stamps identity.
+    let instance_id = handlers.instance_id.clone();
+    node.id = Some(audio_root_id(&instance_id));
+    node.runtime_id = Some(audio_root_id(&instance_id));
+    let enabled = !live.lock().expect("waveform machine").disabled;
+    node.interaction.focusable = enabled;
+    node.interaction.disabled = !enabled;
+    node.a11y.tab_index = enabled.then_some(0);
+    if enabled {
+        node.style.focus_ring = Some(audio_focus_ring(ctx));
+        bind_waveform_scrub(node, Arc::clone(live), handlers.clone());
+        bind_waveform_keys(node, Arc::clone(live), handlers.clone());
+        let focus_live = Arc::clone(live);
+        node.interaction.on_focus_change = Some(Arc::new(move |focused| {
+            focus_live.lock().expect("waveform machine").focus = focused;
+        }));
+    } else {
+        node.style.focus_ring = None;
+    }
+}
+
+fn bind_waveform_scrub(node: &mut Node, live: Arc<Mutex<WaveformLive>>, handlers: WaveformHandlers) {
+    node.interaction.scrub_axis = ScrubAxis::Horizontal;
+    node.interaction.on_scrub = Some(Arc::new(move |fraction: f32, phase: ScrubPhase| {
+        let mut context = live.lock().expect("waveform machine");
+        if context.disabled {
+            return;
+        }
+        match phase {
+            ScrubPhase::Press => {
+                let sample =
+                    waveform_sample_at(fraction, context.visible_start, context.visible_end);
+                context.cursor_sample = Some(sample);
+                context.selection = Some(WaveformSelection {
+                    start: sample,
+                    end: sample,
+                });
+                context.selection_anchor = Some(sample);
+                context.selecting = true;
+                let selection = context.selection;
+                drop(context);
+                waveform_emit_cursor(&handlers, sample);
+                waveform_emit_selection(&handlers, selection);
+            }
+            ScrubPhase::Drag => {
+                if !context.selecting {
+                    return;
+                }
+                let anchor = context.selection_anchor;
+                let sample =
+                    waveform_sample_at(fraction, context.visible_start, context.visible_end);
+                if let Some(anchor) = anchor {
+                    let selection = waveform_ordered(anchor, sample);
+                    context.cursor_sample = Some(sample);
+                    context.selection = Some(selection);
+                    drop(context);
+                    waveform_emit_cursor(&handlers, sample);
+                    waveform_emit_selection(&handlers, Some(selection));
+                }
+            }
+            ScrubPhase::Release => {
+                if !context.selecting {
+                    return;
+                }
+                context.selecting = false;
+                context.selection_anchor = None;
+                let selection = context.selection;
+                drop(context);
+                waveform_emit_selection_commit(&handlers, selection);
+            }
+        }
+    }));
+}
+
+fn bind_waveform_keys(node: &mut Node, live: Arc<Mutex<WaveformLive>>, handlers: WaveformHandlers) {
+    node.interaction.on_key = Some(Arc::new(move |key, mods: NodeModifiers| {
+        let extend = mods.shift;
+        match key {
+            NodeKey::ArrowLeft => waveform_move_cursor(&live, &handlers, -1, extend),
+            NodeKey::ArrowRight => waveform_move_cursor(&live, &handlers, 1, extend),
+            NodeKey::Home => {
+                let (start, cursor) = {
+                    let context = live.lock().expect("waveform machine");
+                    (context.visible_start, context.cursor_sample.unwrap_or(context.visible_start))
+                };
+                waveform_move_cursor(&live, &handlers, start as isize - cursor as isize, extend);
+            }
+            NodeKey::End => {
+                let (end, cursor) = {
+                    let context = live.lock().expect("waveform machine");
+                    (
+                        context.visible_end.saturating_sub(1).max(context.visible_start),
+                        context.cursor_sample.unwrap_or(context.visible_start),
+                    )
+                };
+                waveform_move_cursor(&live, &handlers, end as isize - cursor as isize, extend);
+            }
+            NodeKey::Escape => {
+                let mut context = live.lock().expect("waveform machine");
+                if context.disabled {
+                    return None;
+                }
+                context.selection = None;
+                context.selection_anchor = None;
+                drop(context);
+                waveform_emit_selection(&handlers, None);
+                waveform_emit_selection_commit(&handlers, None);
+            }
+            _ => {}
+        }
+        None
+    }));
+}
+
+// ── ModMatrixGrid ────────────────────────────────────────────────────────
+//
+// The adapter owns grid navigation, enablement, caller IDs, and parameter
+// mapping (contract §7); the shared Rust machine owns ID normalization,
+// per-cell laws, and the embedded slider value mapping. The event model
+// mirrors the Svelte `modMatrixTransition` authority: pointer activation
+// focuses a cell, horizontal scrub drags run the embedded slider machine
+// with live change and a single release commit bracketed by gesture
+// begin/end, Space toggles, arrows move, Home/End target row bounds
+// (Control pairs target grid bounds), and PageUp/PageDown nudge by the
+// focused cell's step.
+
+/// Host-owned adapter state for one ModMatrixGrid instance.
+#[derive(Clone, Debug)]
+pub struct ModMatrixLive {
+    pub machine: ModMatrixContext,
+    pub dragging: bool,
+}
+
+impl ModMatrixLive {
+    pub fn new(machine: ModMatrixContext) -> Self {
+        Self {
+            machine,
+            dragging: false,
+        }
+    }
+}
+
+/// Contract effects plus a required lifetime-stable instance scope.
+#[derive(Clone, Default)]
+pub struct ModMatrixHandlers {
+    pub instance_id: String,
+    pub on_cell_change: Option<Arc<dyn Fn(ModMatrixCell) + Send + Sync>>,
+    pub on_cell_commit: Option<Arc<dyn Fn(ModMatrixCell) + Send + Sync>>,
+    pub on_gesture_begin: Option<Arc<dyn Fn() + Send + Sync>>,
+    pub on_gesture_end: Option<Arc<dyn Fn() + Send + Sync>>,
+}
+
+impl ModMatrixHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.is_empty(),
+            "native audio instance_id must be non-empty and lifetime-stable"
+        );
+        Self {
+            instance_id,
+            ..Self::default()
+        }
+    }
+
+    pub fn on_cell_change(mut self, handler: Arc<dyn Fn(ModMatrixCell) + Send + Sync>) -> Self {
+        self.on_cell_change = Some(handler);
+        self
+    }
+
+    pub fn on_cell_commit(mut self, handler: Arc<dyn Fn(ModMatrixCell) + Send + Sync>) -> Self {
+        self.on_cell_commit = Some(handler);
+        self
+    }
+
+    pub fn on_gesture_begin(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.on_gesture_begin = Some(handler);
+        self
+    }
+
+    pub fn on_gesture_end(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.on_gesture_end = Some(handler);
+        self
+    }
+}
+
+/// Rebuild a spec from host-owned matrix state, so a mounted tree refreshes
+/// from the committed machine value like the other audio binds.
+pub fn mod_matrix_spec_from_context(context: &ModMatrixContext, aria_label: &str) -> ModMatrixGridSpec {
+    let mut spec = ModMatrixGridSpec::new(context.visual_state());
+    spec.aria_label = aria_label.to_owned();
+    spec
+}
+
+fn mod_matrix_cell_id(instance_id: &str, source_id: &str, destination_id: &str) -> String {
+    format!("{instance_id}:cell:{source_id}:{destination_id}")
+}
+
+fn mod_matrix_row_id(instance_id: &str, source_id: &str) -> String {
+    format!("{instance_id}:row:{source_id}")
+}
+
+fn mod_matrix_focused_cell_id(live: &Mutex<ModMatrixLive>, handlers: &ModMatrixHandlers) -> Option<String> {
+    let runtime = live.lock().expect("mod matrix machine");
+    let (row, column) = runtime.machine.focus_row.zip(runtime.machine.focus_column)?;
+    let destinations = runtime.machine.destinations.len();
+    let cell = runtime.machine.cells.get(row * destinations + column)?;
+    Some(mod_matrix_cell_id(
+        &handlers.instance_id,
+        &cell.source_id,
+        &cell.destination_id,
+    ))
+}
+
+fn mod_matrix_emit_commit(live: &Mutex<ModMatrixLive>, handlers: &ModMatrixHandlers) {
+    mod_matrix_emit_with(live, handlers, true);
+}
+
+fn mod_matrix_emit_with(live: &Mutex<ModMatrixLive>, handlers: &ModMatrixHandlers, commit: bool) {
+    let cell = {
+        let runtime = live.lock().expect("mod matrix machine");
+        runtime
+            .machine
+            .focus_row
+            .zip(runtime.machine.focus_column)
+            .and_then(|(row, column)| {
+                runtime
+                    .machine
+                    .cells
+                    .get(row * runtime.machine.destinations.len() + column)
+                    .cloned()
+            })
+    };
+    if let (Some(cell), Some(emit)) = (
+        cell,
+        if commit {
+            &handlers.on_cell_commit
+        } else {
+            &handlers.on_cell_change
+        },
+    ) {
+        emit(cell);
+    }
+}
+
+/// Focus one cell with the Svelte `boundedFocus` clamping: empty axes clear
+/// the focus instead of pointing outside the grid.
+fn mod_matrix_focus_cell(live: &Mutex<ModMatrixLive>, row: usize, column: usize) {
+    let mut runtime = live.lock().expect("mod matrix machine");
+    if runtime.machine.disabled
+        || runtime.machine.sources.is_empty()
+        || runtime.machine.destinations.is_empty()
+    {
+        return;
+    }
+    runtime.machine.focus_row = Some(row.min(runtime.machine.sources.len() - 1));
+    runtime.machine.focus_column = Some(column.min(runtime.machine.destinations.len() - 1));
+}
+
+/// Wire the production matrix tree: per-cell activation focus, horizontal
+/// scrub drags through the embedded slider machine, and the full grid
+/// keyboard map with roving focus targets.
+pub fn bind_mod_matrix_grid(
+    node: &mut Node,
+    spec: &ModMatrixGridSpec,
+    ctx: &RenderContext<'_>,
+    handlers: &ModMatrixHandlers,
+    live: &Arc<Mutex<ModMatrixLive>>,
+) {
+    let instance_id = handlers.instance_id.clone();
+    node.id = Some(audio_root_id(&instance_id));
+    node.runtime_id = Some(audio_root_id(&instance_id));
+    node.a11y.label = Some(spec.aria_label.clone());
+    let enabled = !live.lock().expect("mod matrix machine").machine.disabled;
+    node.interaction.disabled = !enabled;
+    let (focus_row, focus_column) = {
+        let runtime = live.lock().expect("mod matrix machine");
+        (runtime.machine.focus_row, runtime.machine.focus_column)
+    };
+    let mut rows = node.children.iter_mut();
+    let _header = rows.next();
+    for (row_index, row) in rows.enumerate() {
+        let source_id = live
+            .lock()
+            .expect("mod matrix machine")
+            .machine
+            .sources
+            .get(row_index)
+            .map(|source| source.id.clone())
+            .unwrap_or_default();
+        row.id = Some(mod_matrix_row_id(&instance_id, &source_id));
+        row.runtime_id = Some(mod_matrix_row_id(&instance_id, &source_id));
+        let mut cells = row.children.iter_mut();
+        let _label = cells.next();
+        for (column_index, cell) in cells.enumerate() {
+            let destination_id = live
+                .lock()
+                .expect("mod matrix machine")
+                .machine
+                .destinations
+                .get(column_index)
+                .map(|destination| destination.id.clone())
+                .unwrap_or_default();
+            let id = mod_matrix_cell_id(&instance_id, &source_id, &destination_id);
+            cell.id = Some(id.clone());
+            cell.runtime_id = Some(id);
+            cell.interaction.focusable = enabled;
+            cell.interaction.disabled = !enabled;
+            let focused = focus_row == Some(row_index) && focus_column == Some(column_index);
+            let first_unfocused = focus_row.is_none() && row_index == 0 && column_index == 0;
+            cell.a11y.tab_index = enabled.then_some(if focused || first_unfocused { 0 } else { -1 });
+            if enabled {
+                cell.style.focus_ring = Some(audio_focus_ring(ctx));
+                bind_mod_matrix_cell_focus(cell, Arc::clone(live), row_index, column_index);
+                bind_mod_matrix_cell_pointer(cell, Arc::clone(live), handlers.clone(), row_index, column_index);
+                bind_mod_matrix_cell_keys(cell, Arc::clone(live), handlers.clone(), row_index, column_index);
+            }
+        }
+    }
+}
+
+fn bind_mod_matrix_cell_focus(node: &mut Node, live: Arc<Mutex<ModMatrixLive>>, row: usize, column: usize) {
+    node.interaction.on_focus_change = Some(Arc::new(move |focused| {
+        if focused {
+            mod_matrix_focus_cell(&live, row, column);
+        }
+    }));
+}
+
+fn bind_mod_matrix_cell_pointer(
+    node: &mut Node,
+    live: Arc<Mutex<ModMatrixLive>>,
+    handlers: ModMatrixHandlers,
+    row: usize,
+    column: usize,
+) {
+    let focus_live = Arc::clone(&live);
+    node.interaction.on_activate = Some(Arc::new(move || {
+        mod_matrix_focus_cell(&focus_live, row, column);
+    }));
+    node.interaction.scrub_axis = ScrubAxis::Horizontal;
+    node.interaction.on_scrub = Some(Arc::new(move |fraction: f32, phase: ScrubPhase| {
+        let mut runtime = live.lock().expect("mod matrix machine");
+        if runtime.machine.disabled {
+            return;
+        }
+        match phase {
+            ScrubPhase::Press => {
+                if runtime.machine.sources.is_empty() || runtime.machine.destinations.is_empty() {
+                    return;
+                }
+                runtime.machine.focus_row = Some(row.min(runtime.machine.sources.len() - 1));
+                runtime.machine.focus_column =
+                    Some(column.min(runtime.machine.destinations.len() - 1));
+                runtime.machine =
+                    std::mem::replace(&mut runtime.machine, mod_matrix_empty_context())
+                        .set_normalized(fraction as f64);
+                runtime.dragging = true;
+                drop(runtime);
+                mod_matrix_emit_with(&live, &handlers, false);
+                if let Some(begin) = &handlers.on_gesture_begin {
+                    begin();
+                }
+            }
+            ScrubPhase::Drag => {
+                if !runtime.dragging {
+                    return;
+                }
+                runtime.machine =
+                    std::mem::replace(&mut runtime.machine, mod_matrix_empty_context())
+                        .set_normalized(fraction as f64);
+                drop(runtime);
+                mod_matrix_emit_with(&live, &handlers, false);
+            }
+            ScrubPhase::Release => {
+                if !runtime.dragging {
+                    return;
+                }
+                runtime.dragging = false;
+                drop(runtime);
+                mod_matrix_emit_with(&live, &handlers, true);
+                if let Some(end) = &handlers.on_gesture_end {
+                    end();
+                }
+            }
+        }
+    }));
+}
+
+/// Placeholder a live matrix context never observes: `set_normalized` takes
+/// `self` by value, so the bind swaps the real machine out, runs it, and
+/// swaps it back. The empty stand-in is immediately replaced and only exists
+/// to satisfy the borrow checker.
+fn mod_matrix_empty_context() -> ModMatrixContext {
+    ModMatrixContext::new(vec![], vec![], vec![])
+}
+
+fn bind_mod_matrix_cell_keys(
+    node: &mut Node,
+    live: Arc<Mutex<ModMatrixLive>>,
+    handlers: ModMatrixHandlers,
+    _row: usize,
+    _column: usize,
+) {
+    node.interaction.on_key = Some(Arc::new(move |key, mods: NodeModifiers| {
+        let mut runtime = live.lock().expect("mod matrix machine");
+        if runtime.machine.disabled {
+            return None;
+        }
+        match key {
+            NodeKey::ArrowUp | NodeKey::ArrowDown | NodeKey::ArrowLeft | NodeKey::ArrowRight => {
+                let (rows, columns) = match key {
+                    NodeKey::ArrowDown => (1, 0),
+                    NodeKey::ArrowUp => (-1, 0),
+                    NodeKey::ArrowRight => (0, 1),
+                    _ => (0, -1),
+                };
+                runtime.machine = std::mem::replace(&mut runtime.machine, mod_matrix_empty_context())
+                    .move_focus(rows, columns);
+                drop(runtime);
+                mod_matrix_focused_cell_id(&live, &handlers)
+            }
+            NodeKey::Home | NodeKey::End => {
+                let sources = runtime.machine.sources.len();
+                let destinations = runtime.machine.destinations.len();
+                if sources == 0 || destinations == 0 {
+                    return None;
+                }
+                let grid = mods.accel;
+                let at_start = key == NodeKey::Home;
+                let (row, column) = if grid {
+                    (if at_start { 0 } else { sources - 1 }, if at_start { 0 } else { destinations - 1 })
+                } else if at_start {
+                    (runtime.machine.focus_row.unwrap_or(0).min(sources - 1), 0)
+                } else {
+                    (
+                        runtime.machine.focus_row.unwrap_or(0).min(sources - 1),
+                        destinations - 1,
+                    )
+                };
+                runtime.machine.focus_row = Some(row);
+                runtime.machine.focus_column = Some(column);
+                drop(runtime);
+                mod_matrix_focused_cell_id(&live, &handlers)
+            }
+            NodeKey::Space => {
+                runtime.machine =
+                    std::mem::replace(&mut runtime.machine, mod_matrix_empty_context()).toggle();
+                drop(runtime);
+                mod_matrix_emit_with(&live, &handlers, false);
+                mod_matrix_emit_commit(&live, &handlers);
+                None
+            }
+            NodeKey::PageUp | NodeKey::PageDown => {
+                let direction = if key == NodeKey::PageUp { 1.0 } else { -1.0 };
+                runtime.machine =
+                    std::mem::replace(&mut runtime.machine, mod_matrix_empty_context())
+                        .nudge(direction, mods.shift);
+                drop(runtime);
+                mod_matrix_emit_with(&live, &handlers, false);
+                mod_matrix_emit_commit(&live, &handlers);
+                None
+            }
+            _ => None,
         }
     }));
 }

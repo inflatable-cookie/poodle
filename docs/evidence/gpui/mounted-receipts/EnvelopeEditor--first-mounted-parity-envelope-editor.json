@@ -1,12 +1,15 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "MetaBar",
-  "test": "first_mounted_parity_meta_bar",
+  "component": "EnvelopeEditor",
+  "test": "first_mounted_parity_envelope_editor",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
     "semantic",
+    "events",
+    "pointer",
+    "keyboard_focus",
     "accessibility",
     "visual"
   ],
@@ -15,13 +18,28 @@
       "assert",
       "production-mount"
     ],
+    "events": [
+      "counting_handler",
+      "assert!(\n            commits\n                .lock()\n                .expect(\"commits lock\")\n                .last()\n                .expect(\"a removal commit\")\n                .iter()\n                .all(|point| point.id != \"decay\"),\n            \"the removal commit",
+      "assert_eq!(\n            commits\n                .lock()\n                .expect(\"commits lock\")\n                .last()\n                .expect(\"a snap commit\")\n                .iter()\n                .find(|point| point.id == \"decay\")\n                .expect(\"commit"
+    ],
+    "pointer": [
+      "pointer_press"
+    ],
+    "keyboard_focus": [
+      "focus_state_for",
+      "focus_element",
+      "dispatch_key"
+    ],
     "accessibility": [
+      "a11y\n            .",
+      "NodeRole",
       "a11y."
     ],
     "visual": [
-      "resolve_space",
       "resolve_color",
-      "rem_to_px"
+      "rem_to_px",
+      "_geometry"
     ]
   },
   "production_path_observation": {
@@ -40,12 +58,15 @@
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "20f7852a-cc71-441a-8b01-12d2f349b188",
+    "run_id": "poodle-122-869c45e",
     "outcome": "passed",
-    "body_sha256": "573cc338ee083d7056094264c3cb225c057ec85194d1ce2fce2e89ba7c6841d8"
+    "body_sha256": "c494b9d000b40f9a9228fea98372665c49b6a0b92b73b198bf814242b2738aa4"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
+    "asserted emitted payloads or handler delivery through mounted input",
+    "drove real pointer activation through the mounted GPUI node backend",
+    "drove real keyboard input or backend focus through the mounted tree",
     "asserted node-level role, label, state, or focusability in the mounted tree",
     "asserted resolved token values or mounted geometry"
   ],

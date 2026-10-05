@@ -221,18 +221,21 @@ pub use alert_dialog::{
 pub use app_header::app_header;
 pub use audio::{
     audio_meter, audio_switch, audio_switch_with_handlers, drag_number_field,
-    drag_number_field_with_handlers, envelope_editor, fader, fader_with_handlers,
-    gain_reduction_meter, keyboard, keyboard_with_handlers, knob, knob_with_handlers,
-    mod_matrix_grid, value_readout, waveform_display, xy_pad, xy_pad_with_handlers,
+    drag_number_field_with_handlers, envelope_editor, envelope_editor_with_handlers, fader,
+    fader_with_handlers, gain_reduction_meter, keyboard, keyboard_with_handlers, knob,
+    knob_with_handlers, mod_matrix_grid, mod_matrix_grid_with_handlers, value_readout,
+    waveform_display, waveform_display_with_handlers, xy_pad, xy_pad_with_handlers,
 };
 pub use audio_handlers::{
     audio_entry_id, audio_root_id, audio_switch_context_from_spec, audio_switch_spec_from_context,
-    drag_number_context_from_spec, drag_number_spec_from_context, fader_context_from_spec,
-    fader_spec_from_context, keyboard_key_id, keyboard_spec_from_context, keyboard_visual_id,
-    knob_context_from_spec, knob_spec_from_context, xy_pad_context_from_spec,
+    drag_number_context_from_spec, drag_number_spec_from_context, envelope_spec_from_live,
+    fader_context_from_spec, fader_spec_from_context, keyboard_key_id, keyboard_spec_from_context,
+    keyboard_visual_id, knob_context_from_spec, knob_spec_from_context,
+    mod_matrix_spec_from_context, waveform_spec_from_context, xy_pad_context_from_spec,
     xy_pad_spec_from_context, xy_pad_x_id, xy_pad_y_id, AudioSwitchHandlers, AudioSwitchLive,
-    DragNumberHandlers, DragNumberLive, FaderHandlers, FaderLive, KeyboardHandlers, KeyboardLive,
-    KnobHandlers, KnobLive, XYPadHandlers, XYPadLive,
+    DragNumberHandlers, DragNumberLive, EnvelopeHandlers, EnvelopeLive, FaderHandlers, FaderLive,
+    KeyboardHandlers, KeyboardLive, KnobHandlers, KnobLive, ModMatrixHandlers, ModMatrixLive,
+    WaveformHandlers, WaveformLive, XYPadHandlers, XYPadLive,
 };
 pub use audio_player::{audio_player, audio_player_with_handlers, AudioPlayerHandlers};
 pub use avatar::avatar;
