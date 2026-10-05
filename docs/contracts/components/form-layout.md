@@ -112,7 +112,9 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Events
 
-None. FormLayout is a structural composite with no component-owned events.
+None.
+
+FormLayout is a structural composite with no component-owned events.
 
 ## 6. Accessibility
 

@@ -4,7 +4,7 @@
 //! Contract: `docs/contracts/components/form-layout.md`
 //! Ported from: `packages/jetstream/components/src/form_layout.rs`.
 
-use poodle_node::{ColorValue, LayoutDirection, Node};
+use poodle_node::{ColorValue, LayoutDirection, Node, NodeRole};
 use poodle_specs::{CallOutSpec, CalloutAnnounceMode, FormActionsSpec, FormLayoutSpec, StatusTone};
 
 use crate::callout::{callout, CalloutHandlers};
@@ -82,6 +82,7 @@ fn field_errors_summary(spec: &FormLayoutSpec, ctx: &RenderContext<'_>) -> Node 
         item.style.text_size = Some(font_size);
         list = list.child(item);
     }
+    block.a11y.role = Some(NodeRole::Alert);
     block.child(list)
 }
 
