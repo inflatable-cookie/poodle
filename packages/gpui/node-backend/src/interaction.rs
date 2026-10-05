@@ -1325,7 +1325,9 @@ fn window_point(position: gpui::Point<gpui::Pixels>) -> (f32, f32) {
     (position.x.into(), position.y.into())
 }
 
-/// Normalized local position: x right, y up, both clamped to 0..=1.
+/// Normalized local position: x right, y up. Captured movement may fall
+/// outside 0..=1 so a hit-test can distinguish leaving the node from sitting
+/// on its edge.
 fn continuous_local(window: (f32, f32), bounds: gpui::Bounds<gpui::Pixels>) -> (f32, f32) {
     let left: f32 = bounds.origin.x.into();
     let top: f32 = bounds.origin.y.into();
@@ -1334,12 +1336,12 @@ fn continuous_local(window: (f32, f32), bounds: gpui::Bounds<gpui::Pixels>) -> (
     let x = if width <= 0.0 {
         0.0
     } else {
-        ((window.0 - left) / width).clamp(0.0, 1.0)
+        (window.0 - left) / width
     };
     let y = if height <= 0.0 {
         0.0
     } else {
-        (1.0 - (window.1 - top) / height).clamp(0.0, 1.0)
+        1.0 - (window.1 - top) / height
     };
     (x, y)
 }
@@ -1480,6 +1482,14 @@ mod scrub_axis_tests {
         assert!((top_right.1 - 1.0).abs() < 1e-6);
         assert!((center.0 - 0.5).abs() < 1e-6);
         assert!((center.1 - 0.5).abs() < 1e-6);
+        let left_of = continuous_local((0.0, 120.0), bounds);
+        let right_of = continuous_local((200.0, 120.0), bounds);
+        let above = continuous_local((60.0, 0.0), bounds);
+        let below = continuous_local((60.0, 400.0), bounds);
+        assert!(left_of.0 < 0.0);
+        assert!(right_of.0 > 1.0);
+        assert!(above.1 > 1.0);
+        assert!(below.1 < 0.0);
     }
 
     #[test]

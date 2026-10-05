@@ -2666,6 +2666,10 @@ mod tests {
             ..KeyboardContext::default()
         };
         assert_eq!(keyboard_hit_test(&horizontal, 0.5, 0.9), Some(60));
+        assert_eq!(keyboard_hit_test(&horizontal, -0.1, 0.9), None);
+        assert_eq!(keyboard_hit_test(&horizontal, 1.1, 0.9), None);
+        assert_eq!(keyboard_hit_test(&horizontal, 0.5, -0.1), None);
+        assert_eq!(keyboard_hit_test(&horizontal, 0.5, 1.1), None);
         let vertical = KeyboardContext {
             first_note: 60,
             last_note: 61,

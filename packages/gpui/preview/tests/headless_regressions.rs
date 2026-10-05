@@ -2549,8 +2549,10 @@ fn a_continuous_value_gesture_releases_once_and_cancels_on_lost_host() {
         );
         let released = last.lock().expect("event lock").expect("release event");
         assert_eq!(released.phase, ContinuousValuePhase::Release);
-        assert!(released.x >= 0.0 && released.x <= 1.0);
-        assert!(released.y >= 0.0 && released.y <= 1.0);
+        assert!(
+            released.x > 1.0 || released.x < 0.0 || released.y > 1.0 || released.y < 0.0,
+            "captured release outside the node keeps unclamped local coords: {released:?}"
+        );
 
         trace.lock().expect("trace lock").clear();
         driver.pointer_press(center);
@@ -53949,15 +53951,23 @@ fn embed_input_url_entry_validation_and_preview_rebuild_the_host_spec() {
 
     let theme_provider = theme();
     let ctx = RenderContext::new(&theme_provider);
-    const FIELD: &str = "poodle-input-embed-input";
+    const DEFAULT_FIELD: &str = "poodle-input-embed-input";
+    const FIELD: &str = "poodle-input-embed-custom";
     const ROOT: &str = "mounted-embed-input";
 
     let youtube = "https://youtu.be/dQw4w9WgXcQ";
     let idle = poodle_render::embed_input(&EmbedInputSpec::new(), &ctx);
     assert!(
-        idle.find(&|node| node.id.as_deref() == Some(FIELD))
+        idle.find(&|node| node.id.as_deref() == Some(DEFAULT_FIELD))
             .is_some(),
         "the nested TextInput keeps the contract id"
+    );
+    let custom = poodle_render::embed_input(&EmbedInputSpec::new().with_id("embed-custom"), &ctx);
+    assert!(
+        custom
+            .find(&|node| node.id.as_deref() == Some(FIELD))
+            .is_some(),
+        "a caller-supplied id reaches the nested TextInput"
     );
     assert!(
         !idle.has_text("Embed detected"),
@@ -54007,6 +54017,7 @@ fn embed_input_url_entry_validation_and_preview_rebuild_the_host_spec() {
             let edit_host = Arc::clone(&host);
             let edit_payloads = Arc::clone(&payloads);
             let spec = EmbedInputSpec::new()
+                .with_id("embed-custom")
                 .with_value(value)
                 .with_detected_parse();
             let mut node = poodle_render::embed_input_with_handlers(
@@ -54500,6 +54511,40 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
             .expect("C4 key in the mounted tree");
         assert_eq!(held.toggled, Some(poodle_node::NodeToggled::True));
         assert_eq!(held.label.as_deref(), Some("C4"));
+        let leave_at = point(
+            px(f32::from(bounds.origin.x) + f32::from(bounds.size.width) * 0.5),
+            px(f32::from(bounds.origin.y) - 40.0),
+        );
+        // GPUI arms `on_drag` after the movement threshold; the first held
+        // move establishes the payload, the second is the captured Move.
+        driver.pointer_drag(leave_at);
+        driver.pointer_drag(leave_at);
+        {
+            let machine = live.lock().expect("keyboard machine").machine.clone();
+            assert!(
+                machine.active_inputs.is_empty(),
+                "leaving all keys releases the captured pointer note: {:?}",
+                machine.active_inputs
+            );
+        }
+        assert!(
+            payloads
+                .lock()
+                .expect("payloads lock")
+                .iter()
+                .any(|entry| entry == "noteOff:60"),
+            "leave emits noteOff for the edge note"
+        );
+        driver.pointer_drag(press_at(0.5, 0.85));
+        assert!(
+            live.lock()
+                .expect("keyboard machine")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.1 == 60),
+            "re-entry presses the newly resolved key"
+        );
         driver.pointer_release(press_at(0.5, 0.85));
         assert!(
             live.lock()

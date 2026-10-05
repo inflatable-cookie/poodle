@@ -57,7 +57,7 @@ pub fn embed_input_with_handlers(
         .unwrap_or_else(|| String::from("Paste a URL or embed code..."));
     let field = text_input_with_change(
         &TextInputSpec::new()
-            .with_id("embed-input")
+            .with_id(spec.id.clone())
             .with_input_type("multiline")
             .with_rows(3)
             .with_value(spec.value.clone())

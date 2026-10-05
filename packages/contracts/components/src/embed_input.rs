@@ -5,6 +5,8 @@ use crate::composite_types::ParsedEmbed;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct EmbedInputSpec {
+    /// id attribute for the nested TextInput. Contract default `"embed-input"`.
+    pub id: String,
     pub value: String,
     pub parsed: Option<ParsedEmbed>,
     pub placeholder: Option<String>,
@@ -43,6 +45,7 @@ impl EmbedInputSpec {
 
     pub fn new() -> Self {
         Self {
+            id: String::from("embed-input"),
             value: String::new(),
             parsed: None,
             placeholder: None,
@@ -54,6 +57,11 @@ impl EmbedInputSpec {
             size_role: SemanticControlSizeRole::Control,
             density: None,
         }
+    }
+
+    pub fn with_id(mut self, id: impl Into<String>) -> Self {
+        self.id = id.into();
+        self
     }
 
     pub fn with_value(mut self, value: impl Into<String>) -> Self {
