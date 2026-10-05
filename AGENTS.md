@@ -52,7 +52,10 @@ guardrails below stay local.
   directory or adapter (architecture 001, operator decision 2026-09-02).
 - Bits Svelte is an implementation detail, not public contract authority.
 - Before v1.0, add no compatibility shims, aliases or silent fallbacks. Stop and
-  ask before a breaking migration.
+  ask before a breaking migration. While the native crates have no release and
+  no external consumer, adding a spec field with a `with_*` builder or a
+  renderer argument isn't one; update in-repo callers in the same change
+  ([working rules](docs/knowledge/contracts/working-rules.md#shared-implementation)).
 
 ## Guardrails
 
