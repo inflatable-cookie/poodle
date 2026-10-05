@@ -291,7 +291,13 @@ pub fn card_radio_group_with_handlers(
         }
 
         // Compose the Card primitive — selected state owns the fill/border.
-        let mut card_spec = CardSpec::new().interactive();
+        // A disabled option never composes the interactive tier, so it keeps
+        // no pointer cursor and no hover patch; the option is the hit target
+        // and shows the not-allowed cursor instead.
+        let mut card_spec = CardSpec::new();
+        if !is_item_disabled {
+            card_spec = card_spec.interactive();
+        }
         if is_selected {
             card_spec = card_spec.selected();
         }
@@ -327,6 +333,7 @@ pub fn card_radio_group_with_handlers(
             // never dims (the web contract has no group opacity rule), so a
             // disabled group is not dimmed twice.
             option_card.style.descriptor.opacity = disabled_opacity;
+            option_card.style.descriptor.cursor = CursorHint::NotAllowed;
             option_card.interaction.disabled = true;
             option_card.interaction.focusable = false;
             option_card.a11y.tab_index = Some(-1);

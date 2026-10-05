@@ -349,7 +349,13 @@ fn render_card_toggle_group(
         }
 
         // Compose the Card primitive — selected state owns the fill/border.
-        let mut card_spec = CardSpec::new().interactive();
+        // A disabled option never composes the interactive tier, so the inner
+        // card keeps no pointer cursor and no hover patch; the option cell
+        // owns the not-allowed cursor for the whole disabled card.
+        let mut card_spec = CardSpec::new();
+        if !is_option_disabled {
+            card_spec = card_spec.interactive();
+        }
         if is_selected {
             card_spec = card_spec.selected();
         }
@@ -363,6 +369,7 @@ fn render_card_toggle_group(
         // the inner button role and label: the option exposes exactly one
         // Button, named by the option title.
         let mut option_card = card(&card_spec, ctx, vec![body_slot.child(body)]);
+        option_card.id = Some(option_part_id(instance_scope, &option.value, "card"));
         option_card.a11y.role = None;
         option_card.a11y.label = None;
 
