@@ -7,6 +7,37 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.4.9] - 2026-10-05
+
+`0.4.9` is a patch candidate with one behaviour change and no breaking API
+change.
+
+### Changed
+
+- **ContextMenu returns focus to its invoker.** Closing a ContextMenu through
+  Escape, outside interaction or item activation now moves focus back to the
+  element that opened it (the keyboard `ContextMenu`/`Shift+F10` target or the
+  right-clicked element), or to the nearest surviving fallback if that element
+  is gone. Previously focus stayed where it was. Menus without a trigger,
+  including SidebarNav's per-item menus, keep their consumer-owned
+  restoration. No props or events change.
+- **Web package dependency ranges.** Svelte and React require core
+  `>=0.4.9 <0.5`. Svelte, React, React DOM and Marked peer ranges stay
+  unchanged.
+- **Release status.** Core and Svelte are the `0.4.9` npm publication set.
+  React follows the web version for paired validation and remains private.
+  GPUI parity work merged since `0.4.8` belongs to the native train, which has
+  no release procedure yet; Cargo packages do not move in this patch.
+
+### Fixed
+
+- **PasswordRequirements semantics.** Each requirement row carries an
+  accessible label stating whether it is met, its icon is hidden from
+  assistive technology, and the error message is exposed as an alert.
+- **GPUI motion plan.** `gpuiMotionPlan` applies `translateX` and
+  `translateY` instead of dropping them, so native toast entrances move as
+  contracted.
+
 ## [0.4.8] - 2026-10-04
 
 `0.4.8` is an additive patch candidate with no breaking API change.
@@ -688,6 +719,7 @@ supersedes `0.4.3`, which was never published.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.4.9]: docs/release-notes/0.4.9.md
 [0.4.8]: docs/release-notes/0.4.8.md
 [0.4.7]: docs/release-notes/0.4.7.md
 [0.4.6]: docs/release-notes/0.4.6.md

@@ -20,6 +20,9 @@ exists yet.
 
 ## Versions
 
+- [0.4.9](0.4.9.md) — 2026-10-05 — patch candidate with ContextMenu focus
+  restoration on close, PasswordRequirements semantics and a GPUI motion-plan
+  fix; core and Svelte publication set
 - [0.4.8](0.4.8.md) — 2026-10-04 — additive patch candidate with Tabs fill as
   a flex/grid child, panelScroll, chrome tokens and data-part hooks; core and
   Svelte publication set

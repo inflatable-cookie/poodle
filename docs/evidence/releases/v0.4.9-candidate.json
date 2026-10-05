@@ -1,0 +1,26 @@
+{
+  "schema": "poodle.web-candidate-evidence.v1",
+  "version": "0.4.9",
+  "source_commit": "5db3bdf987df6a68fbb9d4737ee558cb642c7301",
+  "base_commit": "fc5b69fb91a2a92c9d632d2a482b77b17f6db21c",
+  "payload_commits": [
+    "b52c628399b8a3fcddd39b221ddbb850efed1988",
+    "53c08605b7531860370bb1fc4b20759d982cd3d5",
+    "72b195e32c4a49fef4d34cc0dbd6914253f3283f"
+  ],
+  "publication_set": [
+    "@inflatable-cookie/poodle-core",
+    "@inflatable-cookie/poodle-svelte"
+  ],
+  "native_train_changed": false,
+  "operator_acceptance": "Tom approved cutting and publishing 0.4.9 on 2026-10-05 (Queue decision d5954328: \"Cut and publish 0.4.9 now\"); the ContextMenu focus change follows his decision b92d0aff.",
+  "focused_evidence": {
+    "milestone_qa": "Queue project.qa.run 8058a07c (effigy ci:fresh) passed on 2ec7b7e44 and local check:gpui passed; no web package changed between 2ec7b7e44 and the base fc5b69fb9; confirming run 0a8ae486 targets the base.",
+    "context_menu_focus": "PR #359 restores ContextMenu focus to the invoker on Escape, outside interaction and activation in Svelte, React and GPUI; focused ContextMenu and SidebarNav tests (22 each runtime) and parity pass.",
+    "password_requirements": "PR #372 gives PasswordRequirements met/not-met labels, hidden icons and an alert error; focused PasswordRequirements tests pass.",
+    "motion_plan": "PR #357 makes gpuiMotionPlan apply translateX/translateY; core motion-policy tests pass.",
+    "frozen_lockfile": "effigy lock:workspaces-refresh updated the bun.lock workspace slice to 0.4.9 and core ranges >=0.4.9 <0.5; docs:lint lock:workspaces-check passes.",
+    "bun_toolchain": "packageManager bun@1.4.2; CI installs through bun-version-file from package.json",
+    "diff_check": "clean"
+  }
+}
