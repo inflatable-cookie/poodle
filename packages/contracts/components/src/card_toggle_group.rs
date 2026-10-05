@@ -5,6 +5,8 @@ pub struct CardToggleOption {
     pub value: String,
     pub title: String,
     pub description: Option<String>,
+    /// Optional count pill shown at the end of the header row (contract §2/§7).
+    pub count: Option<String>,
     pub disabled: bool,
 }
 
@@ -14,12 +16,18 @@ impl CardToggleOption {
             value: value.into(),
             title: title.into(),
             description: None,
+            count: None,
             disabled: false,
         }
     }
 
     pub fn with_description(mut self, description: impl Into<String>) -> Self {
         self.description = Some(description.into());
+        self
+    }
+
+    pub fn with_count(mut self, count: impl Into<String>) -> Self {
+        self.count = Some(count.into());
         self
     }
 
@@ -41,6 +49,10 @@ pub struct CardToggleGroupSpec {
     /// is a responsive auto-fit grid capped at this; the Rust targets render the options
     /// in rows of `column_count()` cards.
     pub columns: u32,
+    /// Selecting the active card clears the value to `null` (contract §3 default `false`).
+    pub allow_deactivation: bool,
+    /// Accessible label for the `group` root (contract §3 `ariaLabel`).
+    pub aria_label: Option<String>,
 }
 
 impl Default for CardToggleGroupSpec {
@@ -53,6 +65,8 @@ impl Default for CardToggleGroupSpec {
             size_role: SemanticControlSizeRole::Control,
             density: None,
             columns: 2,
+            allow_deactivation: false,
+            aria_label: None,
         }
     }
 }
@@ -99,6 +113,16 @@ impl CardToggleGroupSpec {
         self
     }
 
+    pub fn with_allow_deactivation(mut self, allow_deactivation: bool) -> Self {
+        self.allow_deactivation = allow_deactivation;
+        self
+    }
+
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
+        self
+    }
+
     /// Column count clamped to the contract's 1–4 range.
     pub fn column_count(&self) -> usize {
         self.columns.clamp(1, 4) as usize
@@ -125,6 +149,42 @@ impl CardToggleGroupSpec {
             ControlSize::Md => 0.75,
             ControlSize::Lg => 0.875,
             ControlSize::Xl => 0.9375,
+        }
+    }
+
+    /// Count-pill padding in rem `(block, inline)` for the given effective size.
+    /// Contract §7 Size Adjustments.
+    pub fn count_padding_rem(size: ControlSize) -> (f32, f32) {
+        match size {
+            ControlSize::Xs => (0.03125, 0.3125),
+            ControlSize::Sm => (0.03125, 0.375),
+            ControlSize::Md => (0.03125, 0.4375),
+            ControlSize::Lg => (0.09375, 0.5625),
+            ControlSize::Xl => (0.125, 0.625),
+        }
+    }
+
+    /// Count-pill font-size in rem for the given effective size.
+    /// Contract §7 Size Adjustments.
+    pub fn count_font_rem(size: ControlSize) -> f32 {
+        match size {
+            ControlSize::Xs => 0.625,
+            ControlSize::Sm => 0.6875,
+            ControlSize::Md => 0.71875,
+            ControlSize::Lg => 0.8125,
+            ControlSize::Xl => 0.875,
+        }
+    }
+
+    /// Minimum card width in rem before the responsive grid wraps.
+    /// Contract §7 Size Adjustments (base 12rem).
+    pub fn min_width_rem(size: ControlSize) -> f32 {
+        match size {
+            ControlSize::Xs => 9.5,
+            ControlSize::Sm => 10.5,
+            ControlSize::Md => 11.25,
+            ControlSize::Lg => 11.75,
+            ControlSize::Xl => 12.0,
         }
     }
 }

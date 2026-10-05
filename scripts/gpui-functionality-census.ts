@@ -85,6 +85,14 @@ export const WITHHELD_AXES: Record<string, Partial<Record<CensusAxis, string>>> 
     accessibility:
       "the contract requires a named <nav> landmark, and the node vocabulary has no navigation NodeRole yet; the mounted tree exposes only a roleless labelled container",
   },
+  CardToggleGroup: {
+    // Planner ruling 2026-10-04 (brief v2): the contract's
+    // `min(100%, max(min-width, track width))` clamp stays normative. GPUI
+    // cannot express it with today's node vocabulary, so the visual claim is
+    // withheld and the shared layout capability is planned as its own task.
+    visual:
+      "narrow-container clamp needs a shared min(100%, max(…)) layout capability",
+  },
 };
 
 const RECEIPT_TEXT_SIGNALS: Record<Exclude<CensusAxis, "semantic">, RegExp> = {

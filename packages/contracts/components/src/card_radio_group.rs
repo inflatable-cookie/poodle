@@ -12,11 +12,18 @@ pub struct CardRadioGroupSpec {
     pub density: Option<ControlDensity>,
     /// Grid column count for the card layout.
     pub columns: u8,
+    /// Accessible label for the `radiogroup` root (contract §3 `ariaLabel`).
+    pub aria_label: Option<String>,
 }
 
 impl CardRadioGroupSpec {
     pub fn with_columns(mut self, value: u8) -> Self {
         self.columns = value;
+        self
+    }
+
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
         self
     }
 
@@ -30,6 +37,7 @@ impl CardRadioGroupSpec {
             size_role: SemanticControlSizeRole::Control,
             density: None,
             columns: 2,
+            aria_label: None,
         }
     }
 
@@ -50,6 +58,11 @@ impl CardRadioGroupSpec {
 
     pub fn current_value(&self) -> Option<&str> {
         self.value.as_deref().or(self.default_value.as_deref())
+    }
+
+    /// Column count clamped to the contract's 1–4 range (default 2).
+    pub fn column_count(&self) -> usize {
+        self.columns.clamp(1, 4) as usize
     }
 
     pub fn selected_fill_token(&self) -> &'static str {

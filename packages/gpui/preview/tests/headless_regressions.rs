@@ -50153,3 +50153,1028 @@ fn token_input_entry_removal_and_keyboard_rebuild_the_host_spec() {
         assert!(driver.mounted_observation().is_valid());
     });
 }
+
+/// ListCard mounts its interactive root as a real button/link: pointer and
+/// Enter both activate it, the selectable state is projected as
+/// `aria-pressed`, the accessible name falls back to the title, the root is
+/// the single tab stop with its contracted focus ring, and the disabled
+/// sibling wires nothing. Svelte parity authority:
+/// `packages/svelte/components/src/ListCard.svelte` (role=button, aria-pressed,
+/// aria-current, tabindex 0 when interactive, aria-label from ariaLabel or
+/// title, focus ring, Enter/Space activation).
+#[test]
+fn first_mounted_parity_list_card() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::NodeToggled;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{EyebrowSpec, ListCardCounterSpec, ListCardSpec};
+
+    const CARD: &str = "poodle-list-card-proof";
+    const DISABLED: &str = "poodle-list-card-disabled";
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let activations = Arc::new(Mutex::new(0_usize));
+
+    // ── Witness: production renderer structure, no mount ───────────────
+    // Selectable-only on purpose: a selectable card is interactive through
+    // the root interaction contract, with no `is_interactive` opt-in.
+    let spec = ListCardSpec::new()
+        .with_title("Design system")
+        .with_eyebrow("Brand kit")
+        .with_subtitle("Tokens and primitives")
+        .with_meta("14.2 MB")
+        .with_selectable(true)
+        .with_selected(true);
+    let mut witness = poodle_render::list_card(
+        &spec,
+        &ctx,
+        poodle_render::ListCardSlots::default(),
+        Some(Arc::new({
+            let activations = Arc::clone(&activations);
+            move || *activations.lock().expect("activations") += 1
+        })),
+    );
+    witness.id = Some(CARD.into());
+    assert_eq!(witness.a11y.role, Some(NodeRole::Button));
+    assert_eq!(witness.a11y.label.as_deref(), Some("Design system"));
+    assert_eq!(
+        witness.a11y.tab_index,
+        Some(0),
+        "an interactive card is a tab stop"
+    );
+    assert_eq!(
+        witness.a11y.toggled,
+        Some(NodeToggled::True),
+        "a selectable card reflects selection as aria-pressed"
+    );
+    assert!(witness.interaction.focusable);
+    assert!(witness.interaction.on_activate.is_some());
+    assert!(
+        witness.style.focus_ring.is_some(),
+        "the interactive root paints the focus ring"
+    );
+    let eyebrow_and_title: Vec<String> = witness.texts().into_iter().map(str::to_owned).collect();
+    assert!(
+        eyebrow_and_title
+            .windows(2)
+            .any(|pair| pair[0] == "BRAND KIT" && pair[1] == "Design system"),
+        "the eyebrow sits above the title, got {eyebrow_and_title:?}"
+    );
+
+    // Stamp observable slot identities for the mounted geometry proof. This
+    // spec renders [leading, body, meta]; the text slots are stamped by their
+    // painted content.
+    fn stamp_text(node: &mut Node, text: &str, id: &str) -> bool {
+        if matches!(&node.kind, NodeKind::Text { content } if content == text) {
+            node.id = Some(id.to_string());
+            return true;
+        }
+        for child in &mut node.children {
+            if stamp_text(child, text, id) {
+                return true;
+            }
+        }
+        false
+    }
+    witness.children[0].id = Some("poodle-list-card-leading".into());
+    witness.children[1].id = Some("poodle-list-card-body".into());
+    assert!(stamp_text(
+        &mut witness,
+        "BRAND KIT",
+        "poodle-list-card-eyebrow"
+    ));
+    assert!(stamp_text(
+        &mut witness,
+        "Design system",
+        "poodle-list-card-title"
+    ));
+    assert!(stamp_text(
+        &mut witness,
+        "Tokens and primitives",
+        "poodle-list-card-subtitle"
+    ));
+    assert!(stamp_text(&mut witness, "14.2 MB", "poodle-list-card-meta"));
+
+    // A link root without `selectable` is a link, not a button.
+    let link = poodle_render::list_card(
+        &ListCardSpec::new().with_title("Docs").with_href("/docs"),
+        &ctx,
+        poodle_render::ListCardSlots::default(),
+        None,
+    );
+    assert_eq!(link.a11y.role, Some(NodeRole::Link));
+
+    // Contract §8 geometry: 0.75rem gap, 0.625rem block padding, 1px border.
+    assert_eq!(
+        witness.style.descriptor.layout.spacing.gap,
+        theme_provider.resolve_space("space.inline.md")
+    );
+    assert_eq!(
+        witness.style.descriptor.layout.spacing.padding.top,
+        rem_to_px(0.625)
+    );
+    assert_eq!(witness.style.descriptor.border.width, 1.0);
+    assert_eq!(
+        witness.style.descriptor.corner_radii.top_left,
+        theme_provider.resolve_radius(spec.radius_token())
+    );
+
+    // A disabled card is inert: no role, no tab stop, no activation.
+    let mut disabled = poodle_render::list_card(
+        &ListCardSpec::new()
+            .with_title("Archived")
+            .with_interactive(true)
+            .with_disabled(true),
+        &ctx,
+        poodle_render::ListCardSlots::default(),
+        Some(Arc::new(|| {})),
+    );
+    disabled.id = Some(DISABLED.into());
+    assert!(!disabled.interaction.focusable);
+    assert!(disabled.interaction.on_activate.is_none());
+    assert_eq!(disabled.a11y.role, None);
+    assert_eq!(disabled.a11y.tab_index, None);
+
+    // A card composed from custom slots: a caller eyebrow node and a footer
+    // counter row (the production ListCardCounter), proving the slot handoff
+    // rather than the spec-string fallback.
+    let mut custom_eyebrow =
+        poodle_render::eyebrow(&EyebrowSpec::new().with_content("Custom lane"), &ctx);
+    custom_eyebrow.id = Some("poodle-list-card-custom-eyebrow".into());
+    let counter = poodle_render::list_card_counter(
+        &ListCardCounterSpec::new("file-text", 24).with_href("#documents"),
+        &ctx,
+        None,
+    );
+    let mut footer = Node::container();
+    footer.id = Some("poodle-list-card-footer".into());
+    footer.style.descriptor.layout.direction = LayoutDirection::Row;
+    let footer = footer.child(counter);
+    let mut slotted = poodle_render::list_card(
+        &ListCardSpec::new()
+            .with_title("Slotted")
+            .with_subtitle("With slots")
+            .with_interactive(true),
+        &ctx,
+        poodle_render::ListCardSlots {
+            eyebrow: Some(custom_eyebrow),
+            footer: Some(footer),
+            ..Default::default()
+        },
+        None,
+    );
+    slotted.id = Some("poodle-list-card-slotted".into());
+    assert!(stamp_text(
+        &mut slotted,
+        "Slotted",
+        "poodle-list-card-slotted-title"
+    ));
+    assert!(stamp_text(
+        &mut slotted,
+        "With slots",
+        "poodle-list-card-slotted-subtitle"
+    ));
+
+    // ── Mounted: pointer, keyboard, accessibility, geometry ────────────
+    let mut root = Node::container();
+    root.id = Some("poodle-list-card-proof-root".into());
+    root.style.descriptor.layout.direction = LayoutDirection::Column;
+    root.style.descriptor.layout.spacing.gap = rem_to_px(0.5);
+    root = root.child(witness).child(disabled).child(slotted);
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 320.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for(CARD).is_some(),
+            "pointer proof needs a real hit target"
+        );
+        driver.wait_for_focus_handle(CARD);
+
+        // Pointer activates the interactive card; the disabled sibling does not.
+        driver.pointer_activate_id(CARD);
+        assert_eq!(
+            *activations.lock().expect("activations"),
+            1,
+            "pointer activation reaches the card callback"
+        );
+        driver.pointer_activate_id(DISABLED);
+        assert_eq!(
+            *activations.lock().expect("activations"),
+            1,
+            "a disabled card never activates"
+        );
+
+        // Keyboard activation: focus + Enter, exactly the Svelte keydown path.
+        driver.focus_element(CARD);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(CARD),
+            Some(true),
+            "focus lands on the card root"
+        );
+        driver.keyboard_activate(CARD);
+        assert_eq!(
+            *activations.lock().expect("activations"),
+            2,
+            "keyboard activation reaches the card callback"
+        );
+
+        // Node-level accessibility projection survives the mount.
+        let painted = poodle_gpui_node_backend::painted_node_for(CARD).expect("painted card");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Button));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Design system"));
+
+        // Mounted slot geometry against resolved tokens: the leading block
+        // paints at its size-ladder square, and the eyebrow/subtitle/meta
+        // lanes keep their vertical and horizontal order.
+        let leading = poodle_gpui_node_backend::bounds_for("poodle-list-card-leading")
+            .expect("leading slot bounds");
+        let leading_size =
+            rem_to_px(spec.leading_size_rem(ctx.resolve_size(spec.size, spec.size_role)));
+        assert!(
+            (f32::from(leading.size.width) - leading_size).abs() < 0.5,
+            "the leading slot paints at the resolved token square"
+        );
+        assert!((f32::from(leading.size.height) - leading_size).abs() < 0.5);
+        let eyebrow = poodle_gpui_node_backend::bounds_for("poodle-list-card-eyebrow")
+            .expect("eyebrow bounds");
+        let title =
+            poodle_gpui_node_backend::bounds_for("poodle-list-card-title").expect("title bounds");
+        let subtitle = poodle_gpui_node_backend::bounds_for("poodle-list-card-subtitle")
+            .expect("subtitle bounds");
+        let meta =
+            poodle_gpui_node_backend::bounds_for("poodle-list-card-meta").expect("meta bounds");
+        assert!(
+            eyebrow.origin.y + eyebrow.size.height <= title.origin.y + px(0.5),
+            "the eyebrow paints above the title"
+        );
+        assert!(
+            subtitle.origin.y >= title.origin.y + title.size.height - px(0.5),
+            "the subtitle paints below the title"
+        );
+        assert!(
+            meta.origin.x >= title.origin.x + title.size.width,
+            "right-aligned meta paints after the body"
+        );
+
+        // Custom slots mount and keep their lane order: the caller eyebrow
+        // paints above the slotted title, and the footer counter row paints
+        // below the subtitle.
+        let slotted_paint = poodle_gpui_node_backend::painted_node_for("poodle-list-card-slotted")
+            .expect("painted slotted card");
+        assert!(
+            slotted_paint.texts.iter().any(|text| text == "CUSTOM LANE")
+                && slotted_paint.texts.iter().any(|text| text == "24"),
+            "the custom eyebrow and footer counter paint, got {:?}",
+            slotted_paint.texts
+        );
+        let custom_eyebrow =
+            poodle_gpui_node_backend::bounds_for("poodle-list-card-custom-eyebrow")
+                .expect("custom eyebrow bounds");
+        let slotted_title = poodle_gpui_node_backend::bounds_for("poodle-list-card-slotted-title")
+            .expect("slotted title bounds");
+        let slotted_subtitle =
+            poodle_gpui_node_backend::bounds_for("poodle-list-card-slotted-subtitle")
+                .expect("slotted subtitle bounds");
+        let footer =
+            poodle_gpui_node_backend::bounds_for("poodle-list-card-footer").expect("footer bounds");
+        let counter = poodle_gpui_node_backend::bounds_for("poodle-lcc-file-text-24")
+            .expect("counter bounds");
+        assert!(
+            custom_eyebrow.origin.y + custom_eyebrow.size.height
+                <= slotted_title.origin.y + px(0.5),
+            "the custom eyebrow paints above the slotted title"
+        );
+        assert!(
+            footer.origin.y >= slotted_subtitle.origin.y + slotted_subtitle.size.height - px(0.5),
+            "the footer slot paints below the subtitle"
+        );
+        assert!(
+            counter.size.width > px(0.0) && counter.size.height > px(0.0),
+            "the footer counter paints positive dimensions"
+        );
+
+        // Geometry: the card paints real, tabular-meta dimensions.
+        let bounds = poodle_gpui_node_backend::bounds_for(CARD).expect("card geometry");
+        assert!(
+            bounds.size.width > px(0.0) && bounds.size.height > px(0.0),
+            "the card paints positive dimensions"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for(DISABLED).is_some(),
+            "the disabled sibling still paints"
+        );
+        assert!(theme_provider.resolve_color("color.text.primary").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// CardRadioGroup mounts a real radiogroup: the option cards carry the radio
+/// role and checked state, the checked option is the single roving tab stop
+/// with its contracted focus ring, pointer activation reports the next value,
+/// and ArrowDown/ArrowUp walk the enabled options (skipping the disabled one)
+/// with wrap. Svelte parity authority:
+/// `packages/svelte/components/src/CardRadioGroup.svelte` (role=radiogroup,
+/// role=radio + aria-checked per option, roving tabindex, menuListNavigate
+/// arrow wrap skipping disabled items, toggle-group reselect semantics).
+#[test]
+fn first_mounted_parity_card_radio_group() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{CursorHint, NodeToggled};
+    use poodle_render::presentation::rem_to_px;
+    use poodle_render::{card_radio_group_with_handlers, CardRadioGroupHandlers};
+    use poodle_specs::{CardRadioGroupSpec, ChoiceOption};
+
+    const ROOT: &str = "card-radio-plan-root";
+    const FREE: &str = "card-radio:plan:option:free";
+    const PRO: &str = "card-radio:plan:option:pro";
+    const TEAM: &str = "card-radio:plan:option:team";
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let spec = CardRadioGroupSpec::new(vec![
+        ChoiceOption::new("free", "Free").with_description("Basic features."),
+        ChoiceOption::new("pro", "Pro").with_disabled(true),
+        ChoiceOption::new("team", "Team").with_description("Shared workspace."),
+    ])
+    .with_value("free")
+    .with_aria_label("Plan");
+
+    let payloads: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+    let sink = Arc::clone(&payloads);
+
+    // ── Witness: production renderer structure, no mount ───────────────
+    let mut witness = card_radio_group_with_handlers(
+        &spec,
+        &ctx,
+        CardRadioGroupHandlers::new("plan").on_change(Arc::new(move |value: &str| {
+            sink.lock().expect("payloads").push(value.to_string());
+        })),
+    );
+    witness.id = Some(ROOT.into());
+    assert_eq!(witness.a11y.role, Some(NodeRole::RadioGroup));
+    assert_eq!(witness.a11y.label.as_deref(), Some("Plan"));
+
+    let free = witness
+        .find(&|n| n.id.as_deref() == Some("card-radio:free"))
+        .expect("free option");
+    assert_eq!(free.a11y.role, Some(NodeRole::RadioButton));
+    assert_eq!(free.a11y.label.as_deref(), Some("Free"));
+    assert_eq!(free.a11y.selected, Some(true));
+    assert_eq!(free.a11y.toggled, Some(NodeToggled::True));
+    assert_eq!(
+        free.runtime_id.as_deref(),
+        Some("card-radio:plan:option:free"),
+        "focus identity is caller-scoped"
+    );
+    assert_eq!(free.a11y.tab_index, Some(0));
+    assert!(free.interaction.focusable);
+    assert!(free.style.focus_ring.is_some());
+    assert!(free.interaction.on_activate.is_some());
+    assert!(free.interaction.on_key.is_some());
+
+    // Contract §7/§8 md indicator geometry and the checked dot.
+    let indicator = &free.children[0].children[0].children[0];
+    assert_eq!(
+        indicator.style.descriptor.layout.width,
+        LayoutSizing::Fixed(rem_to_px(1.125))
+    );
+    assert_eq!(
+        indicator.style.descriptor.layout.height,
+        LayoutSizing::Fixed(rem_to_px(1.125))
+    );
+    assert_eq!(
+        indicator.children.len(),
+        1,
+        "the selected option paints one dot"
+    );
+
+    let pro = witness
+        .find(&|n| n.id.as_deref() == Some("card-radio:pro"))
+        .expect("pro option");
+    assert!(pro.interaction.disabled);
+    assert!(!pro.interaction.focusable);
+    assert_eq!(pro.a11y.tab_index, Some(-1));
+    assert!(pro.interaction.on_activate.is_none());
+    assert!(pro.style.focus_ring.is_none());
+    assert!(
+        pro.style.hover.is_none(),
+        "a disabled option keeps no interactive hover patch"
+    );
+    assert_eq!(pro.style.descriptor.cursor, CursorHint::NotAllowed);
+
+    let team = witness
+        .find(&|n| n.id.as_deref() == Some("card-radio:team"))
+        .expect("team option");
+    assert_eq!(team.a11y.tab_index, Some(-1));
+    assert_eq!(team.a11y.selected, Some(false));
+
+    // Contract §7 density gap: default resolves the 0.75rem grid gap.
+    assert_eq!(witness.style.descriptor.layout.spacing.gap, rem_to_px(0.75));
+
+    // Contract §7 columns: the default 2 lays three options into two rows and
+    // pads the short second row so card widths stay aligned.
+    assert_eq!(witness.children.len(), 2, "two grid rows");
+    assert_eq!(witness.children[0].children.len(), 2, "full first row");
+    assert_eq!(witness.children[1].children.len(), 2, "padded second row");
+    assert!(
+        witness.children[1].children[0]
+            .find(&|n| n.id.as_deref() == Some("card-radio:team"))
+            .is_some(),
+        "team sits in the second row"
+    );
+    let one_column = card_radio_group_with_handlers(
+        &spec.clone().with_columns(1),
+        &ctx,
+        CardRadioGroupHandlers::new("plan-one-column"),
+    );
+    assert_eq!(
+        one_column.children.len(),
+        3,
+        "columns=1 gives one option per row"
+    );
+    assert_eq!(one_column.children[0].children.len(), 1);
+
+    // Group-level disabled dims each option once; the root never dims, so the
+    // group is not double-dimmed (the web contract has no root opacity rule).
+    let locked = card_radio_group_with_handlers(
+        &CardRadioGroupSpec::new(vec![
+            ChoiceOption::new("free", "Free"),
+            ChoiceOption::new("pro", "Pro").with_disabled(true),
+            ChoiceOption::new("team", "Team"),
+        ])
+        .with_disabled(true),
+        &ctx,
+        CardRadioGroupHandlers::new("locked"),
+    );
+    assert_eq!(locked.style.descriptor.opacity, 1.0);
+    for value in ["free", "pro", "team"] {
+        let id = format!("card-radio:{value}");
+        let option = locked
+            .find(&|n| n.id.as_deref() == Some(id.as_str()))
+            .expect("locked option");
+        assert_eq!(
+            option.style.descriptor.opacity,
+            theme_provider.resolve_opacity("state.opacity.disabled"),
+            "{value} dims once under group-level disabled"
+        );
+    }
+
+    // ── Mounted: pointer, roving keyboard, accessibility, geometry ─────
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(witness));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 560.0, 260.0);
+        driver.wait_for_focus_handle(FREE);
+        driver.wait_for_focus_handle(TEAM);
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(PRO).is_none(),
+            "a disabled option registers no focus handle"
+        );
+        let pro_paint =
+            poodle_gpui_node_backend::painted_node_for(PRO).expect("painted disabled option");
+        assert_eq!(
+            pro_paint.style.cursor,
+            CursorHint::NotAllowed,
+            "a disabled option paints not-allowed, not the interactive pointer"
+        );
+        assert!(poodle_gpui_node_backend::bounds_for(FREE).is_some());
+
+        // Pointer activation reports the next value.
+        driver.pointer_activate_id(TEAM);
+        assert_eq!(
+            payloads.lock().expect("payloads").as_slice(),
+            ["team"],
+            "pointer activation emits the option value"
+        );
+
+        // ArrowDown from the checked option skips the disabled row; ArrowDown
+        // again wraps to the first enabled option.
+        driver.focus_element(FREE);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(FREE),
+            Some(true),
+            "the checked option holds the roving focus"
+        );
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(TEAM),
+            Some(true),
+            "ArrowDown skips the disabled option and lands on the next enabled one"
+        );
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(FREE),
+            Some(true),
+            "ArrowDown from the last enabled option wraps to the first"
+        );
+        driver.dispatch_key_raw("up");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(TEAM),
+            Some(true),
+            "ArrowUp from the first enabled option wraps to the last"
+        );
+        assert_eq!(
+            payloads.lock().expect("payloads").as_slice(),
+            ["team", "team", "free", "team"],
+            "arrow navigation also selects the target"
+        );
+
+        // Node-level accessibility projection survives the mount.
+        let painted = poodle_gpui_node_backend::painted_node_for(TEAM).expect("painted option");
+        assert_eq!(painted.a11y_role, Some(NodeRole::RadioButton));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Team"));
+
+        // Mounted indicator geometry against the resolved md token: the
+        // painted indicator box (content plus its contracted 0.125rem border)
+        // is the 1.125rem square.
+        let indicator =
+            poodle_gpui_node_backend::bounds_for("card-radio:plan:option:free:indicator")
+                .expect("indicator bounds");
+        let border = rem_to_px(spec.indicator_border_rem());
+        assert!(
+            (f32::from(indicator.size.width) + 2.0 * border - rem_to_px(1.125)).abs() < 0.5
+                && (f32::from(indicator.size.height) + 2.0 * border - rem_to_px(1.125)).abs() < 0.5,
+            "the indicator box paints at the resolved token size"
+        );
+
+        // Geometry: every option paints, stays inside the group, and the rows
+        // do not share a focus identity.
+        let root_bounds = poodle_gpui_node_backend::bounds_for(ROOT).expect("group geometry");
+        for option in [FREE, PRO, TEAM] {
+            let bounds = poodle_gpui_node_backend::bounds_for(option).expect("option geometry");
+            assert!(
+                bounds.size.width > px(0.0) && bounds.size.height > px(0.0),
+                "{option} paints positive dimensions"
+            );
+            assert!(
+                bounds.origin.x >= root_bounds.origin.x
+                    && bounds.origin.x + bounds.size.width
+                        <= root_bounds.origin.x + root_bounds.size.width,
+                "{option} stays contained in the group"
+            );
+        }
+
+        // Contract §7 `columns=2` grid: free and pro share the first row with
+        // equal widths, and the short second row still pads team to one track.
+        let free_bounds = poodle_gpui_node_backend::bounds_for(FREE).expect("free geometry");
+        let pro_bounds = poodle_gpui_node_backend::bounds_for(PRO).expect("pro geometry");
+        let team_bounds = poodle_gpui_node_backend::bounds_for(TEAM).expect("team geometry");
+        assert!(
+            f32::from(free_bounds.origin.y) == f32::from(pro_bounds.origin.y),
+            "the first two options share a row"
+        );
+        assert!(
+            free_bounds.origin.x < pro_bounds.origin.x,
+            "the second option paints to the right of the first"
+        );
+        assert!(
+            (f32::from(free_bounds.size.width) - f32::from(pro_bounds.size.width)).abs() < 1.0,
+            "options on a row share an equal width"
+        );
+        assert!(
+            team_bounds.origin.y >= free_bounds.origin.y + free_bounds.size.height,
+            "the third option wraps onto the next row"
+        );
+        assert!(theme_provider.resolve_color("color.accent.base").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+
+    // Contract §7 `columns=1`: a single track stacks every option.
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let one_column = card_radio_group_with_handlers(
+            &spec.clone().with_columns(1),
+            &ctx,
+            CardRadioGroupHandlers::new("plan-one-column"),
+        );
+        let mounted = Arc::new(Mutex::new(one_column));
+        let _driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 360.0);
+        let first = poodle_gpui_node_backend::bounds_for("card-radio:plan-one-column:option:free")
+            .expect("free geometry");
+        let second = poodle_gpui_node_backend::bounds_for("card-radio:plan-one-column:option:pro")
+            .expect("pro geometry");
+        let third = poodle_gpui_node_backend::bounds_for("card-radio:plan-one-column:option:team")
+            .expect("team geometry");
+        assert!(
+            second.origin.y >= first.origin.y + first.size.height
+                && third.origin.y >= second.origin.y + second.size.height,
+            "columns=1 stacks every option onto its own row"
+        );
+        assert!(
+            (f32::from(first.size.width) - f32::from(second.size.width)).abs() < 1.0,
+            "single-column options share the full width"
+        );
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+
+    // Contract §6: arrow navigation on a single enabled option wraps to the
+    // same option and still runs the selection machine. Svelte's
+    // `menuListNavigate` returns index 0 there and still calls `select`, so an
+    // unselected one-option group selects on the first arrow.
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let payloads: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let solo = card_radio_group_with_handlers(
+            &CardRadioGroupSpec::new(vec![ChoiceOption::new("solo", "Solo")]),
+            &ctx,
+            CardRadioGroupHandlers::new("solo-group").on_change(Arc::new(move |value: &str| {
+                sink.lock().expect("payloads").push(value.to_string());
+            })),
+        );
+        let mounted = Arc::new(Mutex::new(solo));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 160.0);
+        let solo_id = "card-radio:solo-group:option:solo";
+        driver.wait_for_focus_handle(solo_id);
+        driver.focus_element(solo_id);
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            payloads.lock().expect("payloads").as_slice(),
+            ["solo"],
+            "arrow navigation on a one-option group still selects it"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(solo_id),
+            Some(true),
+            "focus stays on the wrapped option"
+        );
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// CardToggleGroup mounts a real group of pressed-state buttons: selection
+/// projects as aria-pressed, the selected option is the roving tab stop with
+/// its focus ring, pointer activation emits the resulting value (including
+/// `null` when the spec allows deactivation), and arrow navigation walks the
+/// enabled options with wrap. Svelte parity authority:
+/// `packages/svelte/components/src/CardToggleGroup.svelte` (role=group,
+/// role=button + aria-pressed per option, roving tabindex, arrow wrap,
+/// allowDeactivation clears to null).
+#[test]
+fn first_mounted_parity_card_toggle_group() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{CursorHint, NodeToggled};
+    use poodle_render::presentation::rem_to_px;
+    use poodle_render::{card_toggle_group_with_handlers, CardToggleGroupHandlers};
+    use poodle_specs::{CardToggleGroupSpec, CardToggleOption};
+
+    const ROOT: &str = "card-toggle-views-root";
+    const ALPHA: &str = "card-toggle:views:option:alpha";
+    const BETA: &str = "card-toggle:views:option:beta";
+    const GAMMA: &str = "card-toggle:views:option:gamma";
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let spec = CardToggleGroupSpec::new(vec![
+        CardToggleOption::new("alpha", "Grid view")
+            .with_description("Cards.")
+            .with_count("24"),
+        CardToggleOption::new("beta", "List view").with_disabled(true),
+        CardToggleOption::new("gamma", "Board view"),
+    ])
+    .with_values(vec!["alpha".to_string()])
+    .with_aria_label("Views");
+
+    let payloads: Arc<Mutex<Vec<Option<String>>>> = Arc::new(Mutex::new(Vec::new()));
+    let sink = Arc::clone(&payloads);
+
+    // ── Witness: production renderer structure, no mount ───────────────
+    let mut witness = card_toggle_group_with_handlers(
+        &spec,
+        &ctx,
+        CardToggleGroupHandlers::new("views").on_value_change(Arc::new(
+            move |value: Option<&str>| {
+                sink.lock()
+                    .expect("payloads")
+                    .push(value.map(str::to_owned));
+            },
+        )),
+    );
+    witness.id = Some(ROOT.into());
+    assert_eq!(witness.a11y.role, Some(NodeRole::Group));
+    assert_eq!(witness.a11y.label.as_deref(), Some("Views"));
+
+    let alpha = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(ALPHA))
+        .expect("alpha option cell");
+    assert_eq!(alpha.a11y.role, Some(NodeRole::Button));
+    assert_eq!(alpha.a11y.label.as_deref(), Some("Grid view"));
+    assert_eq!(alpha.a11y.selected, None);
+    assert_eq!(alpha.a11y.toggled, Some(NodeToggled::True));
+    assert_eq!(alpha.a11y.tab_index, Some(0));
+    assert!(alpha.style.focus_ring.is_some());
+    assert!(alpha.interaction.on_activate.is_some());
+    assert!(alpha.interaction.on_key.is_some());
+    // The composed Card is a surface child (Svelte's interactive Card is a
+    // plain div); the option cell is the only Button, so no nested button role
+    // either in this tree or in the accessibility projection.
+    assert_eq!(alpha.children[0].a11y.role, None);
+    assert_eq!(alpha.children[0].a11y.label, None);
+
+    let beta = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(BETA))
+        .expect("beta option cell");
+    assert!(beta.interaction.disabled);
+    assert!(!beta.interaction.focusable);
+    assert_eq!(beta.a11y.tab_index, Some(-1));
+    assert!(beta.interaction.on_activate.is_none());
+    assert!(
+        beta.children[0].style.hover.is_none(),
+        "the disabled option's inner card keeps no interactive hover patch"
+    );
+    assert_ne!(
+        beta.children[0].style.descriptor.cursor,
+        CursorHint::Pointer
+    );
+
+    let gamma = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(GAMMA))
+        .expect("gamma option cell");
+    assert_eq!(gamma.a11y.toggled, Some(NodeToggled::False));
+    assert_eq!(gamma.a11y.tab_index, Some(-1));
+
+    // Contract §7 density gap: default resolves the 0.75rem grid gap.
+    assert_eq!(witness.style.descriptor.layout.spacing.gap, rem_to_px(0.75));
+
+    // Group-level disabled dims each option once; the root never dims, so the
+    // group is not double-dimmed (the web contract has no root opacity rule).
+    let locked = card_toggle_group_with_handlers(
+        &CardToggleGroupSpec::new(vec![
+            CardToggleOption::new("alpha", "Grid view"),
+            CardToggleOption::new("gamma", "Board view"),
+        ])
+        .with_disabled(true),
+        &ctx,
+        CardToggleGroupHandlers::new("locked"),
+    );
+    assert_eq!(locked.style.descriptor.opacity, 1.0);
+    for value in ["alpha", "gamma"] {
+        let id = format!("card-toggle:locked:option:{value}");
+        let option = locked
+            .find(&|n| n.runtime_id.as_deref() == Some(id.as_str()))
+            .expect("locked option");
+        assert_eq!(
+            option.style.descriptor.opacity,
+            theme_provider.resolve_opacity("state.opacity.disabled"),
+            "{value} dims once under group-level disabled"
+        );
+    }
+
+    // ── Mounted: pointer, roving keyboard, accessibility, geometry ─────
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(witness));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 560.0, 260.0);
+        driver.wait_for_focus_handle(ALPHA);
+        driver.wait_for_focus_handle(GAMMA);
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(BETA).is_none(),
+            "a disabled option registers no focus handle"
+        );
+        let beta_paint =
+            poodle_gpui_node_backend::painted_node_for(BETA).expect("painted disabled option");
+        assert_eq!(
+            beta_paint.style.cursor,
+            CursorHint::NotAllowed,
+            "a disabled option paints not-allowed, not the interactive pointer"
+        );
+        let beta_card =
+            poodle_gpui_node_backend::painted_node_for("card-toggle:views:option:beta:card")
+                .expect("painted disabled inner card");
+        assert_ne!(
+            beta_card.style.cursor,
+            CursorHint::Pointer,
+            "the disabled option's inner card keeps no interactive pointer cursor"
+        );
+
+        // Pointer activation reports the resulting value.
+        driver.pointer_activate_id(GAMMA);
+        assert_eq!(
+            payloads.lock().expect("payloads").as_slice(),
+            [Some("gamma".to_string())],
+            "pointer activation emits the next value"
+        );
+
+        // ArrowDown skips the disabled row and selects the target; ArrowDown
+        // again wraps; ArrowUp wraps back.
+        driver.focus_element(ALPHA);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(ALPHA),
+            Some(true),
+            "the selected option holds the roving focus"
+        );
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(GAMMA),
+            Some(true),
+            "ArrowDown skips the disabled option and lands on the next enabled one"
+        );
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(ALPHA),
+            Some(true),
+            "ArrowDown from the last enabled option wraps to the first"
+        );
+        assert_eq!(
+            payloads.lock().expect("payloads").as_slice(),
+            [
+                Some("gamma".to_string()),
+                Some("gamma".to_string()),
+                Some("alpha".to_string())
+            ],
+            "arrow navigation also selects the target"
+        );
+
+        // Node-level accessibility projection survives the mount.
+        let painted = poodle_gpui_node_backend::painted_node_for(GAMMA).expect("painted option");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Button));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Board view"));
+
+        // Mounted slot geometry: the count pill paints positive at the end of
+        // the header row, after the title.
+        let count = poodle_gpui_node_backend::bounds_for("card-toggle:views:option:alpha:count")
+            .expect("count pill bounds");
+        let title = poodle_gpui_node_backend::bounds_for("card-toggle:views:option:alpha:title")
+            .expect("title bounds");
+        assert!(
+            count.size.width > px(0.0) && count.size.height > px(0.0),
+            "the count pill paints positive dimensions"
+        );
+        assert!(
+            count.origin.x >= title.origin.x + title.size.width,
+            "the count pill paints after the title"
+        );
+
+        // Geometry: every option paints and stays inside the group.
+        let root_bounds = poodle_gpui_node_backend::bounds_for(ROOT).expect("group geometry");
+        for option in [ALPHA, BETA, GAMMA] {
+            let bounds = poodle_gpui_node_backend::bounds_for(option).expect("option geometry");
+            assert!(
+                bounds.size.width > px(0.0) && bounds.size.height > px(0.0),
+                "{option} paints positive dimensions"
+            );
+            assert!(
+                bounds.origin.x >= root_bounds.origin.x
+                    && bounds.origin.x + bounds.size.width
+                        <= root_bounds.origin.x + root_bounds.size.width,
+                "{option} stays contained in the group"
+            );
+        }
+
+        // Contract §6 responsive auto-fit: with the default two-column upper
+        // bound, the first two cards share a row of equal widths and the third
+        // wraps onto the next row.
+        let alpha_bounds = poodle_gpui_node_backend::bounds_for(ALPHA).expect("alpha geometry");
+        let beta_bounds = poodle_gpui_node_backend::bounds_for(BETA).expect("beta geometry");
+        let gamma_bounds = poodle_gpui_node_backend::bounds_for(GAMMA).expect("gamma geometry");
+        assert!(
+            f32::from(alpha_bounds.origin.y) == f32::from(beta_bounds.origin.y),
+            "the first two cards share a row"
+        );
+        assert!(
+            alpha_bounds.origin.x < beta_bounds.origin.x,
+            "the second card paints to the right of the first"
+        );
+        assert!(
+            (f32::from(alpha_bounds.size.width) - f32::from(beta_bounds.size.width)).abs() < 1.0,
+            "cards on a row share an equal width"
+        );
+        assert!(
+            gamma_bounds.origin.y >= alpha_bounds.origin.y + alpha_bounds.size.height,
+            "the third card wraps onto the next row"
+        );
+        assert!(
+            f32::from(gamma_bounds.size.width) >= f32::from(alpha_bounds.size.width),
+            "the wrapped card fills the collapsed auto-fit track"
+        );
+        assert!(theme_provider.resolve_color("color.text.primary").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+
+    // Contract §6 `columns=1`: the upper bound is one, so every card gets its
+    // own full-width row.
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let one_column = card_toggle_group_with_handlers(
+            &CardToggleGroupSpec::new(vec![
+                CardToggleOption::new("alpha", "Grid view"),
+                CardToggleOption::new("beta", "List view"),
+                CardToggleOption::new("gamma", "Board view"),
+            ])
+            .with_columns(1),
+            &ctx,
+            CardToggleGroupHandlers::new("views-one-column"),
+        );
+        let mounted = Arc::new(Mutex::new(one_column));
+        let _driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 400.0, 400.0);
+        let root_x =
+            poodle_gpui_node_backend::bounds_for("card-toggle:views-one-column:option:alpha")
+                .expect("first option geometry")
+                .origin
+                .x;
+        let first =
+            poodle_gpui_node_backend::bounds_for("card-toggle:views-one-column:option:alpha")
+                .expect("alpha geometry");
+        let second =
+            poodle_gpui_node_backend::bounds_for("card-toggle:views-one-column:option:beta")
+                .expect("beta geometry");
+        let third =
+            poodle_gpui_node_backend::bounds_for("card-toggle:views-one-column:option:gamma")
+                .expect("gamma geometry");
+        assert!(
+            (f32::from(first.origin.x) - f32::from(root_x)).abs() < 0.5,
+            "the first card starts the row"
+        );
+        assert!(
+            second.origin.y >= first.origin.y + first.size.height
+                && third.origin.y >= second.origin.y + second.size.height,
+            "columns=1 stacks every card onto its own row"
+        );
+        assert!(
+            (f32::from(first.size.width) - f32::from(second.size.width)).abs() < 1.0
+                && (f32::from(second.size.width) - f32::from(third.size.width)).abs() < 1.0,
+            "single-column cards share the full width"
+        );
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+
+    // Deactivation is a real payload: an explicit allowDeactivation spec
+    // reports `null` when the selected card is pressed again.
+    let seen: Arc<Mutex<Vec<Option<String>>>> = Arc::new(Mutex::new(Vec::new()));
+    let sink = Arc::clone(&seen);
+    let deactivating = CardToggleGroupSpec::new(vec![
+        CardToggleOption::new("alpha", "Grid view"),
+        CardToggleOption::new("gamma", "Board view"),
+    ])
+    .with_values(vec!["alpha".to_string()])
+    .with_allow_deactivation(true);
+    let node = card_toggle_group_with_handlers(
+        &deactivating,
+        &ctx,
+        CardToggleGroupHandlers::new("deactivate").on_value_change(Arc::new(
+            move |value: Option<&str>| {
+                sink.lock()
+                    .expect("payloads")
+                    .push(value.map(str::to_owned));
+            },
+        )),
+    );
+    let alpha = node
+        .find(&|n| n.runtime_id.as_deref() == Some("card-toggle:deactivate:option:alpha"))
+        .expect("alpha option cell");
+    (alpha
+        .interaction
+        .on_activate
+        .as_ref()
+        .expect("alpha is activatable"))();
+    assert_eq!(
+        seen.lock().expect("payloads").as_slice(),
+        [None],
+        "re-pressing the selected card under allowDeactivation emits null"
+    );
+
+    // Contract §4: arrow navigation on a single selected option with
+    // allowDeactivation wraps to itself and still runs the toggle machine, so
+    // it clears the active value rather than short-circuiting.
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let payloads: Arc<Mutex<Vec<Option<String>>>> = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let solo = card_toggle_group_with_handlers(
+            &CardToggleGroupSpec::new(vec![CardToggleOption::new("solo", "Solo")])
+                .with_values(vec!["solo".to_string()])
+                .with_allow_deactivation(true),
+            &ctx,
+            CardToggleGroupHandlers::new("solo-toggle").on_value_change(Arc::new(
+                move |value: Option<&str>| {
+                    sink.lock()
+                        .expect("payloads")
+                        .push(value.map(str::to_owned));
+                },
+            )),
+        );
+        let mounted = Arc::new(Mutex::new(solo));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 160.0);
+        let solo_id = "card-toggle:solo-toggle:option:solo";
+        driver.wait_for_focus_handle(solo_id);
+        driver.focus_element(solo_id);
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            payloads.lock().expect("payloads").as_slice(),
+            [None],
+            "arrow navigation on a one-option toggle group clears the active value"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(solo_id),
+            Some(true),
+            "focus stays on the wrapped option"
+        );
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}

@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "BulkActionBar",
-  "test": "gpui_mounted_bulk_action_bar_actions_clear_and_select_all",
+  "component": "ListCard",
+  "test": "first_mounted_parity_list_card",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -19,24 +19,26 @@
       "production-mount"
     ],
     "events": [
-      "payloads.lock",
-      "assert_eq!(\n            payloads.lock().expect(\"bulk callback payload"
+      "assert_eq!(\n            *activations.lock().expect(\"activations\"),\n            2,\n            \"keyboard activation reaches the card callback",
+      "assert_eq!(\n            *activations.lock().expect(\"activations\"),\n            1,\n            \"pointer activation reaches the card callback"
     ],
     "pointer": [
       "pointer_activate"
     ],
     "keyboard_focus": [
       "focus_state_for",
+      "focus_element",
       "keyboard_"
     ],
     "accessibility": [
+      "NodeToggled",
       "NodeRole",
       "a11y."
     ],
     "visual": [
       "resolve_radius",
-      "resolve_color",
-      "rem_to_px"
+      "resolve_space",
+      "resolve_color"
     ]
   },
   "production_path_observation": {
@@ -57,7 +59,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-101-single-option-arrow",
     "outcome": "passed",
-    "body_sha256": "8c94f89a047b3908a79e7591fd36f4122370d19458fea5ad7482f281aed47190"
+    "body_sha256": "add078f829a81ea54ac160d0a583098221d1f0a275474f4e32d5edf05ac17c69"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

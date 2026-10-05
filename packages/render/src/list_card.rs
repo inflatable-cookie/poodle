@@ -16,8 +16,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing, Node,
-    NodePosition, ShadowLayer, StylePatch,
+    CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutOverflow, LayoutSizing, Node,
+    NodePosition, NodeRole, NodeToggled, ShadowLayer, StylePatch,
 };
 use poodle_specs::{
     EyebrowSpec, LeadingFill, LeadingShape, ListCardLayout, ListCardSpec, SelectionIndicator,
@@ -496,11 +496,31 @@ pub fn list_card(
         el.style.descriptor.cursor = CursorHint::NotAllowed;
     }
 
-    // Interactive: hover background + border, pointer + focusable.
-    let interactive = (spec.is_interactive || spec.href.is_some()) && !spec.is_disabled;
+    // Interactive: hover background + border, pointer + focusable. A
+    // selectable card is interactive even without `is_interactive` (the web
+    // `isInteractive` is `href || interactive || selectable`), because
+    // selection toggles through the root interaction contract.
+    let interactive =
+        (spec.is_interactive || spec.href.is_some() || spec.is_selectable) && !spec.is_disabled;
     if interactive {
-        el.style.descriptor.cursor = CursorHint::Pointer;
+        let s = &mut el.style;
+        s.descriptor.cursor = CursorHint::Pointer;
         el.interaction.focusable = true;
+        el.a11y.tab_index = Some(0);
+        // Contract §6: `href` without `selectable` is a link; every other
+        // interactive root is a button (Svelte's `<a>` / `role="button"`
+        // split). The card stays reachable by keyboard either way.
+        el.a11y.role = Some(if spec.href.is_some() && !spec.is_selectable {
+            NodeRole::Link
+        } else {
+            NodeRole::Button
+        });
+        el.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color("color.accent.focusRing"),
+            width: ctx.theme().resolve_border_width("border.width.focus"),
+            // Contract §8 root focus: outline-offset -0.0625rem.
+            offset: -rem_to_px(0.0625),
+        });
         el.style.hover = Some(StylePatch {
             background: Some(hover_fill),
             border_color: Some(hover_border),
@@ -524,11 +544,23 @@ pub fn list_card(
         el.interaction.on_activate = Some(Arc::new(|| {}));
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            el.a11y.label = Some(label.to_string());
-        }
+    // Contract §6: a selectable card reflects its selection as aria-pressed.
+    if spec.is_selectable {
+        el.a11y.toggled = Some(if spec.is_selected {
+            NodeToggled::True
+        } else {
+            NodeToggled::False
+        });
     }
+
+    // Contract §6: interactive and link roots carry `aria-label` from the
+    // `ariaLabel` prop or the `title` alone.
+    let accessible_name = spec
+        .aria_label
+        .as_deref()
+        .filter(|label| !label.is_empty())
+        .unwrap_or(spec.title.as_str());
+    el.a11y.label = Some(accessible_name.to_string());
     el
 }
 
