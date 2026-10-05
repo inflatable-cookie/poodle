@@ -15,7 +15,7 @@ import {
   receiptPath,
   writeReceipt,
 } from "./receipt";
-import { cleanStaging } from "./staging";
+import { createStagingDir, discardStaging, publishStaging } from "./staging";
 import {
   FORBIDDEN_GRAMMAR_MODULES,
   SVELTE_EXTERNAL_MODULES,
@@ -126,7 +126,22 @@ export async function buildSvelte(repoRoot: string = findRepoRoot()): Promise<Bu
   assertSvelteManifest(repoRoot);
   const spec = svelteBuildSpec(repoRoot);
   const packageRoot = join(repoRoot, spec.packageDir);
-  const outDir = cleanStaging(packageRoot);
+  const stagedDir = createStagingDir(packageRoot);
+  try {
+    return await buildSvelteStaged(repoRoot, spec, packageRoot, stagedDir);
+  } catch (error) {
+    discardStaging(stagedDir);
+    throw error;
+  }
+}
+
+async function buildSvelteStaged(
+  repoRoot: string,
+  spec: PackageBuildSpec,
+  packageRoot: string,
+  stagedDir: string,
+): Promise<BuiltPackage> {
+  const outDir = stagedDir;
   const dual = svelteDualEntries();
   const types = svelteTypesEntry();
   const adapter = svelteEditorAdapterEntry();
@@ -169,22 +184,23 @@ export async function buildSvelte(repoRoot: string = findRepoRoot()): Promise<Bu
   const viteSources = packageRelativeViteSources(packageRoot, graph.moduleIds);
   assertTypeScriptAuthority(viteSources);
 
-  generateSvelteComponentDeclarations(packageRoot);
+  generateSvelteComponentDeclarations(packageRoot, stagedDir);
 
   const tools = readLockedTools(repoRoot);
-  const receipt = writeReceipt({ repoRoot, packageRoot, spec, tools });
+  const receipt = writeReceipt({ repoRoot, packageRoot, spec, tools, distDir: stagedDir });
   assertReceiptCoversViteSources(receipt.inputs, viteSources);
   auditStagedDist({
-    distDir: outDir,
+    distDir: stagedDir,
     publicFiles: sveltePublicFiles(),
     forbiddenModules: spec.forbiddenModules,
     moduleIds: graph.moduleIds,
     specifiers: graph.specifiers,
   });
 
+  const publishedDir = publishStaging(packageRoot, stagedDir);
   return {
     packageDir: spec.packageDir,
-    distDir: outDir,
+    distDir: publishedDir,
     receipt,
     receiptPath: receiptPath(packageRoot),
   };

@@ -234,7 +234,7 @@
   { task = "svelte:package" },
   { task = "react:package" },
 ]
-"test:core-build" = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts test/package-install/pack-archives.test.ts scripts/gate-tree-guard.test.ts scripts/docs-deps-preflight.test.ts scripts/workspace-lock.test.ts"
+"test:core-build" = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/staging.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts test/package-install/pack-archives.test.ts scripts/gate-tree-guard.test.ts scripts/docs-deps-preflight.test.ts scripts/workspace-lock.test.ts"
 # g18.032: the installed-package scope suite plants dozens of git ranges and
 # exceeds Bun's default per-test timeout when it shares a parallel test-file
 # run with the core-build files. It is the same assertion inventory as its own

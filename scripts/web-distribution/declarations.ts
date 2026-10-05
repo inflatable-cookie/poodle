@@ -6,6 +6,7 @@ export function emitDeclarations(options: {
   repoRoot: string;
   packageRoot: string;
   tsconfigPath: string;
+  outDir?: string;
 }): void {
   const tsconfig = join(options.packageRoot, options.tsconfigPath);
   if (!existsSync(tsconfig)) {
@@ -13,7 +14,15 @@ export function emitDeclarations(options: {
   }
   const result = spawnSync(
     "bun",
-    ["x", "tsc", "-p", options.tsconfigPath, "--pretty", "false"],
+    [
+      "x",
+      "tsc",
+      "-p",
+      options.tsconfigPath,
+      ...(options.outDir ? ["--outDir", options.outDir] : []),
+      "--pretty",
+      "false",
+    ],
     {
       cwd: options.packageRoot,
       encoding: "utf8",
