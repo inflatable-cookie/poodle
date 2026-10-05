@@ -612,6 +612,19 @@ pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> State
         record_probe_channel("semantic.disabled.blocked");
         return el;
     }
+    if let Some(copy_text) = node.interaction.copy_text.clone() {
+        // Platform clipboard write for copy affordances. Independent of
+        // `on_activate` (which a feedback latch may or may not use), so
+        // the default path copies with zero host code; Enter/Space reach
+        // the same listener through click synthesis.
+        el = el.on_click(
+            move |_event: &ClickEvent, _window: &mut Window, cx: &mut App| {
+                cx.write_to_clipboard(gpui::ClipboardItem::new_string(copy_text.clone()));
+                cx.refresh_windows();
+            },
+        );
+        record_probe_channel("clipboard.write");
+    }
     if let Some(handler) = &node.interaction.on_activate {
         let click = handler.clone();
         el = el.on_click(

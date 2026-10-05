@@ -46,6 +46,10 @@ pub struct CodeSpec {
     pub aria_label: Option<String>,
     /// Whether the copy-to-clipboard control renders.
     pub shows_copy_button: bool,
+    /// Copy feedback latch (contract §4: the 2s `copied` swap, adapter-owned).
+    /// When true the copy affordance reads "Copied" with the check glyph;
+    /// the host owns flipping it after a clipboard write and resetting it.
+    pub copied: bool,
     /// Overflow wrapping for long identifiers (contract §3 `wrap`).
     pub wrap: CodeWrap,
 }
@@ -67,6 +71,7 @@ impl Default for CodeSpec {
             density: None,
             aria_label: None,
             shows_copy_button: true,
+            copied: false,
             wrap: CodeWrap::Normal,
         }
     }
@@ -75,6 +80,11 @@ impl Default for CodeSpec {
 impl CodeSpec {
     pub fn with_copy_button(mut self, value: bool) -> Self {
         self.shows_copy_button = value;
+        self
+    }
+
+    pub fn with_copied(mut self, copied: bool) -> Self {
+        self.copied = copied;
         self
     }
 

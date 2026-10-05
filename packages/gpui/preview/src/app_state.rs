@@ -431,6 +431,9 @@ pub enum NodeSpecimenEvent {
     /// Set a boolean specimen key to a specific value (e.g. opening a dialog
     /// whose trigger must remain idempotent).
     SetToggle { key: String, value: bool },
+    /// A code specimen's copy button was pressed: latch the 2s Copied
+    /// feedback for `key`. The host clears it on a timer (contract §4).
+    CodeCopy { key: String },
     /// Set a text specimen key and close the owning overlay
     /// (e.g. select's change: record the value, close the panel).
     Change {
@@ -852,6 +855,14 @@ pub struct AppState {
     /// Single-file picks requested through the generic browse seam whose OS
     /// prompt has not been opened yet.
     pub pending_file_picks: Vec<FilePickRequest>,
+    /// Code specimen keys whose copy feedback is latched and still waiting
+    /// for the 2s reset task to clear them, each with the press generation
+    /// that scheduled it.
+    pub pending_copy_resets: Vec<(String, u64)>,
+    /// Press generation per code-copy key. A repeat press bumps the counter
+    /// so its fresh 2s window wins; a stale task whose generation no longer
+    /// matches clears nothing, and feedback never ends early.
+    pub copy_generations: HashMap<String, u64>,
     /// Every key with a pick whose prompt was opened (completed or in
     /// flight). An invalidation clears these keys' specimen state.
     pub active_file_keys: Vec<String>,
@@ -897,6 +908,8 @@ impl AppState {
             model_connection: ModelConnectionPreviewState::new(),
             agent_transcript_scroll: poodle_gpui_node_backend::TrackedScrollState::new(),
             pending_file_picks: Vec::new(),
+            pending_copy_resets: Vec::new(),
+            copy_generations: HashMap::new(),
             active_file_keys: Vec::new(),
             file_generation: 0,
         }
@@ -917,6 +930,12 @@ impl AppState {
                 }
                 NodeSpecimenEvent::SetToggle { key, value } => {
                     self.specimens.set_toggle(&key, value);
+                }
+                NodeSpecimenEvent::CodeCopy { key } => {
+                    self.specimens.set_toggle(&key, true);
+                    let generation = self.copy_generations.get(&key).copied().unwrap_or(0) + 1;
+                    self.copy_generations.insert(key.clone(), generation);
+                    self.pending_copy_resets.push((key, generation));
                 }
                 NodeSpecimenEvent::Change {
                     open_key,
@@ -1210,6 +1229,26 @@ impl AppState {
     /// `{key}-name` / `{key}-base64` / `{key}-error`, guarded by the
     /// generation captured at spawn: a route change after the dialog opened
     /// makes the result stale and it is dropped.
+    /// Latch-clearing timers for code-copy feedback (contract §4: the 2s
+    /// `copied` swap, adapter-owned). One task per press: after two seconds
+    /// it clears the specimen latch and notifies the root so the idle
+    /// affordance repaints. Mirrors the file-pick task seam above.
+    pub fn start_copy_resets(
+        &mut self,
+        window: &mut gpui::Window,
+        cx: &mut App,
+        root: &gpui::WeakEntity<crate::PreviewRoot>,
+    ) {
+        for (key, generation) in std::mem::take(&mut self.pending_copy_resets) {
+            let root = root.clone();
+            window
+                .spawn(cx, async move |cx| {
+                    deliver_copy_reset(&root, key, generation, cx).await;
+                })
+                .detach();
+        }
+    }
+
     pub fn start_file_picks(
         &mut self,
         window: &mut gpui::Window,
@@ -1274,6 +1313,27 @@ impl AppState {
 /// captured at spawn: a route change after the dialog opened drops the
 /// result entirely. This is the exact seam `start_file_picks` runs; tests
 /// drive it with an injected receiver completed after the first frame.
+/// Latch-clearing end of a code-copy press: after two seconds the
+/// specimen latch returns to idle and the root repaints.
+pub async fn deliver_copy_reset(
+    root: &gpui::WeakEntity<crate::PreviewRoot>,
+    key: String,
+    generation: u64,
+    cx: &mut gpui::AsyncApp,
+) {
+    gpui::Timer::after(std::time::Duration::from_secs(2)).await;
+    let _ = cx.update(|cx| {
+        root.update(cx, |this, cx| {
+            // A repeat press scheduled a newer window; the stale task
+            // clears nothing so feedback lasts the full duration.
+            if this.state.copy_generations.get(&key).copied() == Some(generation) {
+                this.state.specimens.set_toggle(&key, false);
+                cx.notify();
+            }
+        })
+    });
+}
+
 pub async fn deliver_os_pick(
     root: &gpui::WeakEntity<crate::PreviewRoot>,
     receiver: futures::channel::oneshot::Receiver<anyhow::Result<Option<Vec<std::path::PathBuf>>>>,
@@ -1480,6 +1540,38 @@ mod tests {
         );
         assert!(!state.specimens.is_on("la-machine-editing"));
         assert!(state.specimens.text.get("la-machine-label-draft").is_none());
+    }
+
+    /// A code-copy press latches the 2s Copied feedback for its key and
+    /// queues the reset task; the idle affordance returns only through that
+    /// task, never by dropping the event.
+    #[test]
+    fn code_copy_press_latches_feedback_and_queues_its_reset() {
+        let mut state = AppState::new();
+        assert!(!state.specimens.is_on("code-copy-block-ts"));
+        let mut events = vec![NodeSpecimenEvent::CodeCopy {
+            key: "code-copy-block-ts".to_string(),
+        }];
+        state.drain_node_events_into(&mut events);
+        assert!(state.specimens.is_on("code-copy-block-ts"));
+        assert_eq!(
+            state.pending_copy_resets,
+            vec![("code-copy-block-ts".to_string(), 1)]
+        );
+        // A repeat press starts a fresh generation so its own 2s window
+        // wins; the stale task carries the old number and clears nothing.
+        let mut repeat = vec![NodeSpecimenEvent::CodeCopy {
+            key: "code-copy-block-ts".to_string(),
+        }];
+        state.drain_node_events_into(&mut repeat);
+        assert_eq!(
+            state.pending_copy_resets,
+            vec![
+                ("code-copy-block-ts".to_string(), 1),
+                ("code-copy-block-ts".to_string(), 2),
+            ]
+        );
+        assert_eq!(state.copy_generations.get("code-copy-block-ts"), Some(&2));
     }
 
     impl AppState {

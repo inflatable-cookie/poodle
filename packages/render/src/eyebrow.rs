@@ -3,7 +3,7 @@
 //! Ported from: `packages/jetstream/components/src/eyebrow.rs`. Uppercasing
 //! happens here (no CSS transform channel), matching both old tiers.
 
-use poodle_node::{FontFamily, Node};
+use poodle_node::{FontFamily, Node, NodeRole};
 use poodle_specs::EyebrowSpec;
 
 use crate::context::RenderContext;
@@ -30,6 +30,12 @@ pub fn eyebrow(spec: &EyebrowSpec, ctx: &RenderContext<'_>) -> Node {
     }
     if let Some(label) = spec.aria_label.as_deref() {
         el.a11y.label = Some(label.to_string());
+    }
+    // Svelte renders `as="h2"|"h3"|"h4"` as real heading elements;
+    // the native node carries the same semantics through Heading + level.
+    if spec.element.is_heading() {
+        el.a11y.role = Some(NodeRole::Heading);
+        el.a11y.level = spec.element.heading_level().map(|level| level as usize);
     }
     el
 }

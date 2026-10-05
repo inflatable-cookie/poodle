@@ -4359,6 +4359,7 @@ impl IntoElement for StateTile {
 pub(crate) struct Code {
     spec: CodeSpec,
     theme: GpuiThemeProvider,
+    on_copy: Option<Arc<dyn Fn() + Send + Sync>>,
 }
 
 impl Code {
@@ -4366,7 +4367,13 @@ impl Code {
         Self {
             spec,
             theme: theme.clone(),
+            on_copy: None,
         }
+    }
+
+    pub(crate) fn on_copy(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.on_copy = Some(handler);
+        self
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
@@ -4379,8 +4386,19 @@ impl Code {
         self
     }
 
+    pub(crate) fn with_copied(mut self, copied: bool) -> Self {
+        self.spec.copied = copied;
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::code(&self.spec, &RenderContext::new(&self.theme))
+        poodle_render::code_with_handlers(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            poodle_render::CodeHandlers {
+                on_copy: self.on_copy,
+            },
+        )
     }
 }
 

@@ -89,6 +89,15 @@ export const WITHHELD_AXES: Record<string, Partial<Record<CensusAxis, string>>> 
     visual:
       "narrow-container clamp needs a shared min(100%, max(…)) layout capability",
   },
+  Code: {
+    // Planner split ruling 2026-10-05 (brief v3): the copy press reaches
+    // the backend clipboard channel, but the Copied feedback latch and
+    // its scheduled reset stay host-owned. The copy button is Code's only
+    // pointer/keyboard surface, so both axes wait for the follow-up task.
+    pointer: "copy feedback through production AppState scheduling: follow-up task",
+    keyboard_focus:
+      "copy feedback through production AppState scheduling: follow-up task",
+  },
 };
 
 const RECEIPT_TEXT_SIGNALS: Record<Exclude<CensusAxis, "semantic">, RegExp> = {
@@ -275,6 +284,64 @@ const STATIC_DISPLAY_NOT_APPLICABLE: Record<string, ManifestNotApplicable[]> = {
       axis: "keyboard_focus",
       reason: "The output carries an optional accessible name and is not a keyboard focus stop.",
       contractRef: "docs/contracts/components/value-readout.md#6. Accessibility",
+    },
+  ],
+  IconProvider: [
+    {
+      axis: "pointer",
+      reason: "IconProvider renders no element and produces no visual output; pointer interaction belongs to descendant content.",
+      contractRef: "docs/contracts/components/icon-provider.md#6. Accessibility",
+    },
+    {
+      axis: "keyboard_focus",
+      reason: "IconProvider emits no element and takes no focus; descendants keep their own focus targets.",
+      contractRef: "docs/contracts/components/icon-provider.md#Keyboard",
+    },
+  ],
+  MetricTile: [
+    {
+      axis: "events",
+      reason: "MetricTile is a non-interactive display component with no component-owned events.",
+      contractRef: "docs/contracts/components/metric-tile.md#5. Events",
+    },
+    {
+      axis: "pointer",
+      reason: "MetricTile declares no click behavior and no pointer interaction; it is a label-value display surface.",
+      contractRef: "docs/contracts/components/metric-tile.md#1. Purpose",
+    },
+  ],
+  StateTile: [
+    {
+      axis: "events",
+      reason: "StateTile is wholly static with no internal state or event surface.",
+      contractRef: "docs/contracts/components/state-tile.md#Controlled And Uncontrolled",
+    },
+    {
+      axis: "pointer",
+      reason: "StateTile renders label, value, trend text and a host-owned sparkline slot with no pointer interaction of its own.",
+      contractRef: "docs/contracts/components/state-tile.md#7. Accessibility",
+    },
+    {
+      axis: "keyboard_focus",
+      reason: "StateTile has no focus stop and no keyboard behavior; a host wrapper owns any promoted semantics.",
+      contractRef: "docs/contracts/components/state-tile.md#7. Accessibility",
+    },
+  ],
+  MediaPreview: [
+    {
+      axis: "events",
+      reason: "MediaPreview declares no component-owned events; state posture is delegated to MediaThumbnail.",
+      contractRef: "docs/contracts/components/media-preview.md#6. Events",
+    },
+    {
+      axis: "pointer",
+      reason: "MediaPreview is a styled-only composition; pointer interaction belongs to composed media and body content.",
+      contractRef: "docs/contracts/components/media-preview.md#Behavior Machine",
+    },
+    {
+      axis: "keyboard_focus",
+      reason: "MediaPreview owns no focus stop or keyboard behavior; nested controls keep their own targets.",
+      contractRef: "docs/contracts/components/media-preview.md#Behavior Machine",
     },
   ],
   EmptyState: [

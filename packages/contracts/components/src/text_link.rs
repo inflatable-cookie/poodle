@@ -44,6 +44,21 @@ impl TextLinkSpec {
         self.href.is_some() && !self.disabled
     }
 
+    /// Focus-visible ring color (contract §4: `--poodle-color-accent-focusRing`).
+    pub fn focus_ring_color_token(&self) -> &'static str {
+        "color.accent.focusRing"
+    }
+
+    /// Focus-visible ring width (contract §4: `--poodle-border-width-focus`).
+    pub fn focus_ring_width_token(&self) -> &'static str {
+        "border.width.focus"
+    }
+
+    /// Disabled treatment (contract §4: `--poodle-state-opacity-disabled`).
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        "state.opacity.disabled"
+    }
+
     pub fn color_token(&self) -> &'static str {
         match self.tone {
             TextLinkTone::Accent => "color.accent.base",

@@ -430,6 +430,9 @@ impl Render for PreviewRoot {
         // a route change makes a late result stale so it cannot land.
         let root_weak = cx.entity().downgrade();
         self.state.start_file_picks(window, cx, &root_weak);
+        // Latch-clearing timers for code-copy feedback (contract §4). Like
+        // the file-pick tasks above, each press schedules its own reset.
+        self.state.start_copy_resets(window, cx, &root_weak);
         // Restart the backend's generated-id counter so a node that declares no
         // id keeps the same ElementId between frames. gpui keys a click's
         // pending mouse-down by element id, and a real click spans frames.

@@ -59051,3 +59051,1009 @@ fn first_mounted_parity_agent_message() {
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }
+
+/// Code parity against Svelte: block toolbar (uppercase language label, focusable
+/// copy button), line numbers, highlight bleed, token surfaces, and the inline
+/// wrap contract — all through the mounted GPUI backend.
+///
+/// Production-path scope only: the copy press is proved through the
+/// backend clipboard channel on the default adapter path. The Copied
+/// feedback latch and its 2s scheduled reset live in the preview host
+/// (AppState) and move to their own task; the pointer and keyboard_focus
+/// axes stay missing for that reason.
+#[test]
+fn first_mounted_parity_code() {
+    use node_compat::IntoCompatNode;
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{CodeSpec, CodeWrap};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let text_primary = theme_provider.resolve_color("color.text.primary");
+        let text_secondary = theme_provider.resolve_color("color.text.secondary");
+        let subtle = theme_provider.resolve_color("color.border.subtle");
+        let accent = theme_provider.resolve_color("color.accent.base");
+
+        let spec = CodeSpec::new()
+            .with_content("let a = 1;\nlet b = 2;\n")
+            .with_language("typescript")
+            .with_show_line_numbers(true)
+            .with_highlight_lines(vec![2]);
+        // Default path only: no injected handler. The press reaches the
+        // backend clipboard channel, never test-owned scaffolding.
+        let mut block = poodle_render::code(&spec, &ctx);
+        block.id = Some("code-block".to_owned());
+
+        // Toolbar: uppercase language label plus the copy affordance.
+        let toolbar = block.children.first().expect("block code toolbar");
+        assert_eq!(toolbar.children.len(), 2);
+        assert!(matches!(
+            &toolbar.children[0].kind,
+            NodeKind::Text { content } if content == "TYPESCRIPT"
+        ));
+        assert_eq!(
+            toolbar.children[0].style.descriptor.text_color,
+            Some(text_secondary)
+        );
+        assert_eq!(toolbar.children[0].style.text_size, Some(rem_to_px(0.6875)));
+        let copy = toolbar
+            .children
+            .iter()
+            .find(|child| child.id.as_deref() == Some("poodle-code-copy"))
+            .expect("copy button keeps its stable identity");
+        assert_eq!(copy.a11y.role, Some(NodeRole::Button));
+        assert_eq!(
+            copy.a11y.label.as_deref(),
+            Some("Copy to clipboard"),
+            "Svelte renders a labelled button; the host owns clipboard + feedback"
+        );
+        assert!(copy.interaction.focusable);
+        assert_eq!(copy.a11y.tab_index, Some(0));
+        assert!(copy.style.focus_ring.is_some());
+        assert_eq!(
+            copy.interaction.copy_text.as_deref(),
+            Some("let a = 1;\nlet b = 2;\n"),
+            "the button carries its source for the backend clipboard channel"
+        );
+        assert_eq!(
+            copy.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(1.5))
+        );
+        assert_eq!(
+            copy.style.descriptor.layout.height,
+            LayoutSizing::Fixed(rem_to_px(1.5))
+        );
+
+        // Block surface: subtle border, surface radius, canvas wash, 1.4 lines.
+        assert_eq!(block.style.descriptor.border.width, rem_to_px(0.0625));
+        assert_eq!(block.style.descriptor.border.color, subtle);
+        assert_eq!(
+            block.style.descriptor.corner_radii.top_left,
+            theme_provider.resolve_radius("radius.surface")
+        );
+        let scroll = block.children.last().expect("block code scroll surface");
+        assert_eq!(scroll.style.line_height, Some(1.4));
+        assert_eq!(
+            scroll.style.descriptor.background,
+            Some(poodle_render::color::mix_srgb(
+                theme_provider.resolve_color("color.background.canvas"),
+                poodle_render::color::BLACK,
+                0.92,
+            ))
+        );
+
+        // Lines: gutter width, second line highlighted with the 1rem bleed.
+        assert_eq!(scroll.children.len(), 3);
+        let highlighted = &scroll.children[1];
+        assert_eq!(
+            highlighted.style.descriptor.background,
+            Some(poodle_render::color::with_alpha(accent, accent.3 * 0.12,)),
+            "highlighted line carries the accent-base 12% wash"
+        );
+        assert_eq!(
+            highlighted.style.descriptor.layout.spacing.margin.left,
+            rem_to_px(-1.0)
+        );
+        assert_eq!(
+            highlighted.style.descriptor.layout.spacing.padding.left,
+            rem_to_px(1.0)
+        );
+        let gutter = highlighted.children.first().expect("line number gutter");
+        assert!(matches!(
+            &gutter.kind,
+            NodeKind::Text { content } if content == "2"
+        ));
+        assert_eq!(
+            gutter.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(2.5))
+        );
+
+        // Wrap contract: inline normal keeps a lone token intact, anywhere may
+        // break inside it; block normal preserves line feeds without wrapping.
+        // Svelte wraps every inline fragment with its copy button; the
+        // fragment child carries the wrap directives.
+        let long_token = "supercalifragilisticexpialidociousidentifierlongtoken";
+        let mut inline_token = poodle_render::code(
+            &CodeSpec::new()
+                .with_content(long_token)
+                .with_inline(true)
+                .with_copyable(false),
+            &ctx,
+        );
+        inline_token.id = Some("code-inline-normal".to_owned());
+        inline_token.style.descriptor.layout.width = LayoutSizing::Fixed(200.0);
+        let fragment = &inline_token.children[0];
+        assert!(fragment.style.no_wrap);
+        assert!(!fragment.style.wrap_anywhere);
+        assert_eq!(
+            fragment.style.descriptor.background,
+            Some(poodle_render::color::mix_srgb(
+                theme_provider.resolve_color("color.background.panel"),
+                theme_provider.resolve_color("color.background.elevated"),
+                0.72,
+            ))
+        );
+        assert_eq!(fragment.style.descriptor.text_color, Some(text_primary));
+        let mut inline_anywhere = poodle_render::code(
+            &CodeSpec::new()
+                .with_content(long_token)
+                .with_inline(true)
+                .with_wrap(CodeWrap::Anywhere)
+                .with_copyable(false),
+            &ctx,
+        );
+        inline_anywhere.id = Some("code-inline-anywhere".to_owned());
+        inline_anywhere.style.descriptor.layout.width = LayoutSizing::Fixed(200.0);
+        let anywhere_fragment = &inline_anywhere.children[0];
+        assert!(anywhere_fragment.style.text_wrap);
+        assert!(anywhere_fragment.style.wrap_anywhere);
+
+        // The inline copy button: compact Svelte geometry beside the
+        // fragment, default path with no injected handler.
+        let mut inline_copy = poodle_render::code(
+            &CodeSpec::new()
+                .with_content("npm install")
+                .with_inline(true),
+            &ctx,
+        );
+        inline_copy.id = Some("code-inline-copy".to_owned());
+        assert_eq!(inline_copy.children.len(), 2);
+        let inline_copy_button = &inline_copy.children[1];
+        assert_eq!(
+            inline_copy_button.id.as_deref(),
+            Some("poodle-code-copy-inline")
+        );
+        assert_eq!(inline_copy_button.a11y.role, Some(NodeRole::Button));
+        assert_eq!(
+            inline_copy_button.a11y.label.as_deref(),
+            Some("Copy to clipboard")
+        );
+        assert!(inline_copy_button.interaction.focusable);
+        assert_eq!(
+            inline_copy_button.interaction.copy_text.as_deref(),
+            Some("npm install")
+        );
+        assert_eq!(
+            inline_copy_button.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(1.25))
+        );
+        assert_eq!(
+            inline_copy_button.style.descriptor.layout.height,
+            LayoutSizing::Fixed(rem_to_px(1.25))
+        );
+
+        // The mounted tree goes through the production GPUI Code adapter
+        // on its default path: no injected handler. The press reaches the
+        // backend clipboard channel; the Copied latch and its scheduled
+        // reset stay host-owned and move to the follow-up task.
+        let mut adapted =
+            node_compat::Code::from_spec(spec.clone(), &theme_provider).into_compat_node();
+        adapted.id = Some("code-block".to_owned());
+        let mounted = Arc::new(Mutex::new(
+            Node::container()
+                .child(adapted)
+                .child(inline_token)
+                .child(inline_anywhere)
+                .child(inline_copy),
+        ));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 420.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let painted_copy = poodle_gpui_node_backend::painted_node_for("poodle-code-copy")
+            .expect("copy button reaches the GPUI paint pass");
+        assert_eq!(painted_copy.a11y_role, Some(NodeRole::Button));
+        assert_eq!(
+            painted_copy.a11y_label.as_deref(),
+            Some("Copy to clipboard")
+        );
+        let copy_bounds = poodle_gpui_node_backend::bounds_for("poodle-code-copy")
+            .expect("copy button has mounted geometry");
+        assert!(f32::from(copy_bounds.size.width) > 0.0);
+        assert!(f32::from(copy_bounds.size.height) > 0.0);
+        let block_bounds = poodle_gpui_node_backend::bounds_for("code-block")
+            .expect("code block has mounted geometry");
+        assert!(f32::from(block_bounds.size.width) > 0.0);
+
+        // The wrap directives reach the production backend as real layout:
+        // the normal token holds one line while anywhere breaks inside the
+        // token and grows taller at the same constrained width.
+        let normal_height = f32::from(
+            poodle_gpui_node_backend::bounds_for("code-inline-normal")
+                .expect("normal inline fragment geometry")
+                .size
+                .height,
+        );
+        let anywhere_height = f32::from(
+            poodle_gpui_node_backend::bounds_for("code-inline-anywhere")
+                .expect("anywhere inline fragment geometry")
+                .size
+                .height,
+        );
+        assert!(
+            anywhere_height > normal_height * 1.5,
+            "anywhere {anywhere_height} wraps taller than normal {normal_height}"
+        );
+        // The inline copy button paints compact beside its fragment and
+        // activates through the backend like the block one.
+        let painted_inline_copy =
+            poodle_gpui_node_backend::painted_node_for("poodle-code-copy-inline")
+                .expect("inline copy button reaches the GPUI paint pass");
+        assert_eq!(painted_inline_copy.a11y_role, Some(NodeRole::Button));
+        assert_eq!(
+            painted_inline_copy.a11y_label.as_deref(),
+            Some("Copy to clipboard")
+        );
+        let inline_copy_bounds = poodle_gpui_node_backend::bounds_for("poodle-code-copy-inline")
+            .expect("inline copy button has mounted geometry");
+        assert!((f32::from(inline_copy_bounds.size.width) - rem_to_px(1.25)).abs() < 1.0);
+        // The inline press reaches the backend channel too; the default
+        // path wires no host callback.
+        driver.pointer_activate_id("poodle-code-copy-inline");
+
+        // The copy affordance is a real Tab stop: pointer and keyboard input
+        // move real backend focus to it through the default adapter path.
+        // The Copied latch and its scheduled reset stay host-owned and move
+        // to the follow-up task with the pointer and keyboard_focus axes.
+        driver.focus_element("poodle-code-copy");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("poodle-code-copy"),
+            Some(true)
+        );
+        driver.pointer_activate_id("poodle-code-copy");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("poodle-code-copy"),
+            Some(true),
+            "pointer dispatch lands on the focusable copy button"
+        );
+        driver.keyboard_activate("poodle-code-copy");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("poodle-code-copy"),
+            Some(true),
+            "keyboard dispatch keeps the focusable copy button focused"
+        );
+        assert!(driver.mounted_observation().is_valid());
+        drop(driver);
+        // Activation writes the block source through the backend clipboard
+        // channel with no host handler involved.
+        assert_eq!(
+            cx.read_from_clipboard()
+                .and_then(|item| item.text())
+                .as_deref(),
+            Some("let a = 1;\nlet b = 2;\n"),
+            "activation writes the block source to the platform clipboard"
+        );
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Eyebrow parity against Svelte: uppercase transform, secondary label tokens,
+/// size/spacing variants, and heading semantics through the mounted backend.
+#[test]
+fn first_mounted_parity_eyebrow() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{EyebrowElement, EyebrowSize, EyebrowSpacing, EyebrowSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let secondary = theme_provider.resolve_color("color.text.secondary");
+
+        let mut plain =
+            poodle_render::eyebrow(&EyebrowSpec::new().with_content("Section label"), &ctx);
+        plain.id = Some("eyebrow-plain".to_owned());
+        assert!(matches!(
+            &plain.kind,
+            NodeKind::Text { content } if content == "SECTION LABEL"
+        ));
+        assert_eq!(plain.style.descriptor.text_color, Some(secondary));
+        assert_eq!(plain.style.text_size, Some(rem_to_px(0.6875)));
+        assert_eq!(plain.style.text_weight, Some(600));
+        assert_eq!(plain.style.letter_spacing_em, Some(0.12));
+        assert_eq!(plain.style.line_height, Some(1.5));
+        assert_eq!(plain.a11y.role, None);
+
+        let mut heading = poodle_render::eyebrow(
+            &EyebrowSpec::new()
+                .with_content("Primitive")
+                .with_element(EyebrowElement::H3)
+                .with_size(EyebrowSize::Md)
+                .with_spacing(EyebrowSpacing::Bottom)
+                .with_aria_label("Custom name"),
+            &ctx,
+        );
+        heading.id = Some("eyebrow-heading".to_owned());
+        assert!(matches!(
+            &heading.kind,
+            NodeKind::Text { content } if content == "PRIMITIVE"
+        ));
+        assert_eq!(heading.a11y.role, Some(NodeRole::Heading));
+        assert_eq!(heading.a11y.level, Some(3));
+        assert_eq!(heading.a11y.label.as_deref(), Some("Custom name"));
+        assert_eq!(heading.style.text_size, Some(rem_to_px(0.85)));
+        assert_eq!(heading.style.letter_spacing_em, Some(0.04));
+        assert_eq!(
+            heading.style.descriptor.layout.spacing.margin.bottom,
+            rem_to_px(0.5)
+        );
+
+        let mounted = Arc::new(Mutex::new(Node::container().child(plain).child(heading)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 120.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let painted = poodle_gpui_node_backend::painted_node_for("eyebrow-heading")
+            .expect("heading eyebrow reaches the GPUI paint pass");
+        assert_eq!(painted.texts, vec!["PRIMITIVE"]);
+        assert_eq!(
+            painted.style.text_color,
+            Some(secondary),
+            "mounted heading keeps the secondary label token"
+        );
+        for id in ["eyebrow-plain", "eyebrow-heading"] {
+            let bounds =
+                poodle_gpui_node_backend::bounds_for(id).expect("mounted eyebrow geometry");
+            assert!(f32::from(bounds.size.width) > 0.0);
+            assert!(f32::from(bounds.size.height) > 0.0);
+        }
+        let nodes = driver.accessibility_nodes();
+        let mounted_heading = nodes
+            .iter()
+            .find(|node| node.element_id == "eyebrow-heading")
+            .expect("heading eyebrow in the mounted accessibility projection");
+        assert_eq!(mounted_heading.role, NodeRole::Heading);
+        assert_eq!(mounted_heading.level, Some(3));
+        assert_eq!(mounted_heading.label.as_deref(), Some("Custom name"));
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// TextLink parity against Svelte: anchor vs button rendering, tone colors,
+/// disabled suppression, and pointer/keyboard activation through the backend.
+#[test]
+fn first_mounted_parity_text_link() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{TextLinkSpec, TextLinkTone};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let accent = theme_provider.resolve_color("color.accent.base");
+        let secondary = theme_provider.resolve_color("color.text.secondary");
+
+        let (handler, activations) = counting_handler();
+        let mut anchor = poodle_render::text_link(
+            &TextLinkSpec::new("Read the docs")
+                .with_href("https://example.com/docs")
+                .with_tone(TextLinkTone::Accent),
+            &ctx,
+            Some(handler),
+        );
+        anchor.id = Some("text-link-docs".to_owned());
+        assert_eq!(anchor.a11y.role, Some(NodeRole::Link));
+        assert_eq!(anchor.style.descriptor.text_color, Some(accent));
+        assert!(anchor.style.text_underline);
+        assert_eq!(
+            anchor.style.descriptor.cursor,
+            poodle_node::CursorHint::Pointer,
+            "enabled links keep the pointer cursor, matching Svelte"
+        );
+        assert!(anchor.interaction.focusable);
+        assert_eq!(anchor.a11y.tab_index, Some(0));
+        assert!(anchor.style.focus_ring.is_some());
+        assert!(anchor.interaction.on_activate.is_some());
+
+        let button = poodle_render::text_link(
+            &TextLinkSpec::new("Secondary action").with_tone(TextLinkTone::Secondary),
+            &ctx,
+            None,
+        );
+        assert_eq!(button.a11y.role, Some(NodeRole::Button));
+        assert_eq!(button.style.descriptor.text_color, Some(secondary));
+        assert!(button.interaction.focusable);
+        assert!(button.interaction.on_activate.is_none());
+
+        // A disabled link is never an anchor: no focus stop, no callback,
+        // suppressed activation with the disabled treatment.
+        let (disabled_handler, disabled_activations) = counting_handler();
+        let disabled = poodle_render::text_link(
+            &TextLinkSpec::new("Dead target")
+                .with_href("https://example.com/gone")
+                .with_disabled(true),
+            &ctx,
+            Some(disabled_handler),
+        );
+        assert_eq!(disabled.a11y.role, Some(NodeRole::Button));
+        assert!(!disabled.interaction.focusable);
+        assert!(disabled.interaction.on_activate.is_none());
+        assert_eq!(
+            disabled.style.descriptor.cursor,
+            poodle_node::CursorHint::Default,
+            "disabled links keep the default cursor per contract §4 and Svelte :disabled"
+        );
+        assert_eq!(
+            disabled.style.descriptor.opacity,
+            theme_provider.resolve_opacity("state.opacity.disabled")
+        );
+
+        let mounted = Arc::new(Mutex::new(Node::container().child(anchor)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 80.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let painted = poodle_gpui_node_backend::painted_node_for("text-link-docs")
+            .expect("link reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Link));
+        assert_eq!(painted.texts, vec!["Read the docs"]);
+        let bounds =
+            poodle_gpui_node_backend::bounds_for("text-link-docs").expect("mounted link geometry");
+        assert!(f32::from(bounds.size.width) > 0.0);
+        assert!(f32::from(bounds.size.height) > 0.0);
+
+        driver.focus_element("text-link-docs");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("text-link-docs"),
+            Some(true)
+        );
+        assert!(
+            poodle_gpui_node_backend::painted_ring_for("text-link-docs").is_some(),
+            "focused link paints its declared focus ring"
+        );
+        driver.keyboard_activate("text-link-docs");
+        assert_eq!(
+            *activations.lock().expect("activation count"),
+            1,
+            "one Enter produces one link callback"
+        );
+        driver.pointer_activate_id("text-link-docs");
+        assert_eq!(
+            *activations.lock().expect("activation count"),
+            2,
+            "one pointer press produces one link callback"
+        );
+        driver.blur_element_focus("text-link-docs");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("text-link-docs"),
+            Some(false)
+        );
+        assert_eq!(
+            *disabled_activations.lock().expect("disabled count"),
+            0,
+            "the disabled renderer wires no activation at all"
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// IconProvider parity: the boundary passes its child through unchanged, so
+/// icon resolution (name, token size, tint, label) survives the mounted tree.
+#[test]
+fn first_mounted_parity_icon_provider() {
+    use poodle_specs::{IconProviderSpec, IconSize, IconSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let expected_size = ctx
+            .theme()
+            .resolve_space(poodle_tokens::semantic::SIZE_ICON_LG);
+        let expected_tint = ctx.theme().resolve_color("color.icon.primary");
+
+        let mut icon = poodle_render::icon(
+            &IconSpec::new("search")
+                .with_size(IconSize::Lg)
+                .with_aria_label("Search documents"),
+            &ctx,
+        );
+        icon.id = Some("icon-provider-child".to_owned());
+        let passed = poodle_render::icon_provider(
+            &IconProviderSpec::new().with_icon_set_name("app"),
+            &ctx,
+            Some(icon),
+        );
+        assert!(matches!(
+            &passed.kind,
+            NodeKind::Icon { name, size }
+            if name == "search" && (*size - expected_size).abs() < f32::EPSILON
+        ));
+        assert_eq!(passed.a11y.label.as_deref(), Some("Search documents"));
+        assert_eq!(passed.a11y.role, Some(NodeRole::Image));
+        assert_eq!(
+            passed.style.descriptor.text_color,
+            Some(expected_tint),
+            "icon keeps its explicit primary tint through the provider"
+        );
+
+        let empty = poodle_render::icon_provider(&IconProviderSpec::new(), &ctx, None);
+        assert!(empty.children.is_empty());
+
+        let mounted = Arc::new(Mutex::new(passed));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 160.0, 120.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let bounds = poodle_gpui_node_backend::bounds_for("icon-provider-child")
+            .expect("provided icon has mounted geometry");
+        assert!((f32::from(bounds.size.width) - expected_size).abs() < 1.0);
+        assert!((f32::from(bounds.size.height) - expected_size).abs() < 1.0);
+        let nodes = driver.accessibility_nodes();
+        assert!(nodes.iter().any(|node| {
+            node.element_id == "icon-provider-child"
+                && node.role == NodeRole::Image
+                && node.label.as_deref() == Some("Search documents")
+        }));
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// MetricTile parity against Svelte: computed accessible name, trend mapping,
+/// sparkline geometry, density padding, and the 60% surface wash, mounted.
+#[test]
+fn first_mounted_parity_metric_tile() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{ControlDensity, MetricTileSpec, MetricTrend};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let surface = theme_provider.resolve_color("color.background.surface");
+        let success = theme_provider.resolve_color("color.status.success");
+        let danger = theme_provider.resolve_color("color.status.danger");
+        let tertiary = theme_provider.resolve_color("color.text.tertiary");
+
+        let mut tile = poodle_render::metric_tile(
+            &MetricTileSpec::new("Active users", "2,847")
+                .with_trend(MetricTrend::Up)
+                .with_trend_label("+12.3%")
+                .with_sparkline(vec![800.0, 920.0, 850.0, 1100.0, 980.0, 1050.0, 1204.0]),
+            &ctx,
+        );
+        tile.id = Some("metric-tile-users".to_owned());
+        assert_eq!(tile.a11y.label.as_deref(), Some("Active users: 2,847"));
+        assert_eq!(
+            tile.style.descriptor.background,
+            Some(poodle_render::color::with_alpha(surface, surface.3 * 0.60)),
+            "tile surface is the 60% surface wash, matching Svelte"
+        );
+        assert_eq!(
+            tile.style.descriptor.corner_radii.top_left,
+            theme_provider.resolve_radius("radius.surface")
+        );
+
+        let body = tile.children.get(1).expect("tile body row");
+        let sparkline = body.children.get(1).expect("sparkline strip");
+        assert_eq!(sparkline.children.len(), 7);
+        assert_eq!(
+            sparkline.a11y.hidden,
+            Some(true),
+            "the decorative chart stays out of accessibility content"
+        );
+        assert_eq!(
+            sparkline.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(4.0))
+        );
+        assert_eq!(
+            sparkline.style.descriptor.layout.height,
+            LayoutSizing::Fixed(rem_to_px(1.5))
+        );
+
+        let trend = tile.children.get(2).expect("trend row");
+        assert!(matches!(
+            &trend.children[0].kind,
+            NodeKind::Icon { name, size }
+            if name == "trending-up" && (*size - rem_to_px(0.875)).abs() < f32::EPSILON
+        ));
+        assert_eq!(trend.children[0].style.descriptor.text_color, Some(success));
+        assert_eq!(
+            trend.children[0].a11y.hidden,
+            Some(true),
+            "the decorative trend glyph stays out of accessibility content"
+        );
+        assert!(matches!(
+            &trend.children[1].kind,
+            NodeKind::Text { content } if content == "+12.3%"
+        ));
+
+        let down = poodle_render::metric_tile(
+            &MetricTileSpec::new("Error rate", "0.04%")
+                .with_trend(MetricTrend::Down)
+                .with_trend_label("-8%"),
+            &ctx,
+        );
+        let down_trend = down.children.get(2).expect("down trend row");
+        assert!(matches!(
+            &down_trend.children[0].kind,
+            NodeKind::Icon { name, .. } if name == "trending-down"
+        ));
+        assert_eq!(
+            down_trend.children[0].style.descriptor.text_color,
+            Some(danger)
+        );
+
+        let flat = poodle_render::metric_tile(
+            &MetricTileSpec::new("Latency", "42ms").with_trend(MetricTrend::Flat),
+            &ctx,
+        );
+        let flat_trend = flat.children.get(2).expect("flat trend row");
+        assert!(matches!(
+            &flat_trend.children[0].kind,
+            NodeKind::Icon { name, .. } if name == "arrow-right"
+        ));
+        assert_eq!(
+            flat_trend.children[0].style.descriptor.text_color,
+            Some(tertiary)
+        );
+
+        let named = poodle_render::metric_tile(
+            &MetricTileSpec::new("Components", "85").with_aria_label("Total components"),
+            &ctx,
+        );
+        assert_eq!(named.a11y.label.as_deref(), Some("Total components"));
+        // Fewer than two points renders no chart.
+        let single = poodle_render::metric_tile(
+            &MetricTileSpec::new("Memory", "4.2 GB").with_sparkline(vec![4.2]),
+            &ctx,
+        );
+        assert_eq!(single.children.get(1).expect("body").children.len(), 1);
+
+        let compact = poodle_render::metric_tile(
+            &MetricTileSpec::new("Build time", "1.8s").with_density(ControlDensity::Compact),
+            &ctx,
+        );
+        assert_eq!(
+            compact.style.descriptor.layout.spacing.padding.left,
+            rem_to_px(0.75)
+        );
+        assert_eq!(
+            compact.style.descriptor.layout.spacing.padding.top,
+            rem_to_px(0.5)
+        );
+
+        let mounted = Arc::new(Mutex::new(tile));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 280.0, 200.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let painted = poodle_gpui_node_backend::painted_node_for("metric-tile-users")
+            .expect("tile reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_label.as_deref(), Some("Active users: 2,847"));
+        let bounds = poodle_gpui_node_backend::bounds_for("metric-tile-users")
+            .expect("mounted tile geometry");
+        assert!(f32::from(bounds.size.width) > 0.0);
+        assert!(f32::from(bounds.size.height) > 0.0);
+        // The tile root carries no role in either tier (Svelte: a plain div
+        // with an accessible name), so it stays out of the focusable
+        // accessibility projection; the painted node still carries the name
+        // and the surface wash to the backend.
+        assert_eq!(
+            painted.style.background,
+            Some(poodle_render::color::with_alpha(surface, surface.3 * 0.60))
+        );
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// StateTile parity against Svelte: neutral semantics, ordered label/value
+/// text, trend glyph/color mapping with label fallback, and the reserved
+/// sparkline slot — mounted.
+#[test]
+fn first_mounted_parity_state_tile() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::StateTileSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let secondary = theme_provider.resolve_color("color.text.secondary");
+        let success = theme_provider.resolve_color("color.status.success");
+        let danger = theme_provider.resolve_color("color.status.danger");
+
+        let mut tile = poodle_render::state_tile(
+            &StateTileSpec::new("CPU", "62%")
+                .with_trend("up")
+                .with_trend_label("Up 1.2%")
+                .with_sparkline(true),
+            &ctx,
+        );
+        tile.id = Some("state-tile-cpu".to_owned());
+        assert_eq!(tile.a11y.role, None);
+        assert_eq!(
+            tile.style.descriptor.background,
+            Some(theme_provider.resolve_color("color.background.panel"))
+        );
+        assert_eq!(
+            tile.style.descriptor.border.color,
+            theme_provider.resolve_color("color.border.subtle")
+        );
+        let texts = tile.texts();
+        assert_eq!(texts, vec!["CPU", "62%", "↑", "Up 1.2%"]);
+        let trend = tile.children.get(2).expect("trend row");
+        assert_eq!(
+            trend.children[0].a11y.hidden,
+            Some(true),
+            "the decorative glyph stays out of accessibility content, like Svelte aria-hidden"
+        );
+        assert_eq!(trend.children[0].style.descriptor.text_color, Some(success));
+        assert_eq!(trend.children[1].style.descriptor.text_color, Some(success));
+        let slot = tile.children.get(3).expect("sparkline slot");
+        assert_eq!(slot.id.as_deref(), Some("state-tile-sparkline"));
+        assert_eq!(
+            slot.style.descriptor.layout.height,
+            LayoutSizing::Fixed(rem_to_px(2.0))
+        );
+
+        // A domain trend without a label still reads as text, like Svelte's
+        // `trendLabel ?? trend` fallback; the glyph stays decorative.
+        let neutral =
+            poodle_render::state_tile(&StateTileSpec::new("Queue", "7").with_trend("steady"), &ctx);
+        assert_eq!(neutral.texts(), vec!["Queue", "7", "\u{2192}", "steady"]);
+        let neutral_trend = neutral.children.get(2).expect("neutral trend row");
+        assert_eq!(
+            neutral_trend.children[0].style.descriptor.text_color,
+            Some(secondary)
+        );
+
+        let down = poodle_render::state_tile(
+            &StateTileSpec::new("Errors", "3")
+                .with_trend("down")
+                .with_trend_label("Down 4"),
+            &ctx,
+        );
+        assert_eq!(down.texts(), vec!["Errors", "3", "\u{2193}", "Down 4"]);
+        assert_eq!(
+            down.children.get(2).expect("down trend row").children[0]
+                .style
+                .descriptor
+                .text_color,
+            Some(danger)
+        );
+
+        let bare = poodle_render::state_tile(&StateTileSpec::new("Temp", "21C"), &ctx);
+        assert_eq!(bare.children.len(), 2);
+        assert_eq!(bare.texts(), vec!["Temp", "21C"]);
+
+        let mounted = Arc::new(Mutex::new(tile));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 280.0, 220.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let painted = poodle_gpui_node_backend::painted_node_for("state-tile-cpu")
+            .expect("tile reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_role, None);
+        assert_eq!(painted.texts, vec!["CPU", "62%", "\u{2191}", "Up 1.2%"]);
+        let bounds =
+            poodle_gpui_node_backend::bounds_for("state-tile-cpu").expect("mounted tile geometry");
+        assert!(f32::from(bounds.size.width) > 0.0);
+        assert!(f32::from(bounds.size.height) > 0.0);
+        let slot_bounds = poodle_gpui_node_backend::bounds_for("state-tile-sparkline")
+            .expect("reserved sparkline slot paints");
+        assert!((f32::from(slot_bounds.size.height) - rem_to_px(2.0)).abs() < 1.0);
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// MediaPreview parity against Svelte: card fallback name, thumbnail frame
+/// description, eyebrow/title/meta tokens, badge overlay, and the error
+/// posture — mounted.
+#[test]
+fn first_mounted_parity_media_preview() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{AspectRatio, MediaKind, MediaPreviewSpec, MediaState};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let text_primary = theme_provider.resolve_color("color.text.primary");
+        let text_secondary = theme_provider.resolve_color("color.text.secondary");
+
+        let mut preview = poodle_render::media_preview(
+            &MediaPreviewSpec::new(MediaKind::Image, "Hero banner")
+                .with_eyebrow("Image")
+                .with_description("Main landing page banner.")
+                .with_caption("Ships with the launch.")
+                .with_badge("Live")
+                .with_thumbnail_meta("PNG")
+                .with_metadata(vec!["1920 x 1080".to_owned(), "245 KB".to_owned()])
+                .with_aspect_ratio(AspectRatio::Landscape),
+            &ctx,
+        );
+        preview.id = Some("media-preview-hero".to_owned());
+        assert_eq!(preview.a11y.label.as_deref(), Some("Hero banner"));
+        assert_eq!(preview.children.len(), 3);
+
+        // Card wraps the media child in an overflow-clipped region; the
+        // thumbnail frame sits one level down.
+        let media_region = preview.children.first().expect("media region");
+        let thumbnail = media_region.children.first().expect("media slot");
+        assert_eq!(thumbnail.a11y.role, Some(NodeRole::Figure));
+        assert_eq!(thumbnail.a11y.label.as_deref(), Some("Hero banner"));
+        assert!(thumbnail.texts().contains(&"LIVE"));
+
+        let header = preview.children.get(1).expect("header");
+        assert_eq!(header.children.len(), 2);
+        let heading = header.children.first().expect("heading block");
+        assert_eq!(heading.children.len(), 3);
+        assert!(matches!(
+            &heading.children[0].kind,
+            NodeKind::Text { content } if content == "IMAGE"
+        ));
+        assert_eq!(
+            heading.children[0].style.descriptor.text_color,
+            Some(text_secondary)
+        );
+        assert_eq!(heading.children[0].style.text_size, Some(rem_to_px(0.6875)));
+        assert!(matches!(
+            &heading.children[1].kind,
+            NodeKind::Text { content } if content == "Hero banner"
+        ));
+        assert_eq!(
+            heading.children[1].style.descriptor.text_color,
+            Some(text_primary)
+        );
+        assert_eq!(heading.children[1].style.text_size, Some(rem_to_px(1.125)));
+        assert_eq!(heading.children[1].a11y.role, Some(NodeRole::Heading));
+        assert_eq!(heading.children[1].a11y.level, Some(3));
+        let meta = header.children.get(1).expect("metadata list");
+        assert_eq!(meta.a11y.role, Some(NodeRole::List));
+        assert_eq!(meta.a11y.label.as_deref(), Some("preview metadata"));
+        assert_eq!(meta.children.len(), 3);
+        assert!(meta
+            .children
+            .iter()
+            .all(|chip| chip.a11y.role == Some(NodeRole::ListItem)));
+        assert_eq!(meta.children[0].style.text_size, Some(rem_to_px(0.8125)));
+
+        let body = preview.children.get(2).expect("body");
+        assert!(body.texts().contains(&"Ships with the launch."));
+
+        // Error posture keeps the title while the frame names the failure.
+        let mut error = poodle_render::media_preview(
+            &MediaPreviewSpec::new(MediaKind::Document, "Corrupted file")
+                .with_state(MediaState::Error)
+                .with_state_title("Preview unavailable")
+                .with_state_message("This file cannot be previewed."),
+            &ctx,
+        );
+        error.id = Some("media-preview-error".to_owned());
+        assert_eq!(error.a11y.label.as_deref(), Some("Corrupted file"));
+        let error_thumb = error
+            .children
+            .first()
+            .expect("error media region")
+            .children
+            .first()
+            .expect("error media slot");
+        assert_eq!(error_thumb.a11y.label.as_deref(), Some("Corrupted file"));
+        assert!(error_thumb.texts().contains(&"Preview unavailable"));
+        assert!(error_thumb
+            .texts()
+            .contains(&"This file cannot be previewed."));
+
+        // Loading posture: the spinner frame announces its busy title.
+        let mut loading = poodle_render::media_preview(
+            &MediaPreviewSpec::new(MediaKind::Video, "Export progress")
+                .with_state(MediaState::Loading)
+                .with_state_message("Rendering 42%."),
+            &ctx,
+        );
+        loading.id = Some("media-preview-loading".to_owned());
+        let loading_thumb = loading
+            .children
+            .first()
+            .expect("loading media region")
+            .children
+            .first()
+            .expect("loading media slot");
+        assert_eq!(loading_thumb.a11y.role, Some(NodeRole::Figure));
+        assert_eq!(loading_thumb.a11y.label.as_deref(), Some("Export progress"));
+        assert_eq!(loading_thumb.a11y.busy, Some(true));
+        assert!(loading_thumb.texts().contains(&"Loading preview"));
+        assert!(loading_thumb.texts().contains(&"Rendering 42%."));
+
+        // Empty posture: the frame names the missing preview.
+        let mut empty = poodle_render::media_preview(
+            &MediaPreviewSpec::new(MediaKind::Document, "Empty folder")
+                .with_state(MediaState::Empty)
+                .with_state_message("Nothing here yet."),
+            &ctx,
+        );
+        empty.id = Some("media-preview-empty".to_owned());
+        let empty_thumb = empty
+            .children
+            .first()
+            .expect("empty media region")
+            .children
+            .first()
+            .expect("empty media slot");
+        assert_eq!(empty_thumb.a11y.role, Some(NodeRole::Figure));
+        assert_eq!(empty_thumb.a11y.label.as_deref(), Some("Empty folder"));
+        assert!(empty_thumb.texts().contains(&"No preview"));
+        assert!(empty_thumb.texts().contains(&"Nothing here yet."));
+
+        let mounted = Arc::new(Mutex::new(
+            Node::container()
+                .child(preview)
+                .child(error)
+                .child(loading)
+                .child(empty),
+        ));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 1700.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let painted = poodle_gpui_node_backend::painted_node_for("media-preview-hero")
+            .expect("preview reaches the GPUI paint pass");
+        assert_eq!(painted.a11y_label.as_deref(), Some("Hero banner"));
+        let bounds = poodle_gpui_node_backend::bounds_for("media-preview-hero")
+            .expect("mounted preview geometry");
+        assert!(f32::from(bounds.size.width) > 0.0);
+        assert!(f32::from(bounds.size.height) > 0.0);
+        // The error posture mounts too: its card keeps the title and its
+        // frame paints the failure messaging, both visible in the backend.
+        let painted_error = poodle_gpui_node_backend::painted_node_for("media-preview-error")
+            .expect("error preview reaches the GPUI paint pass");
+        assert_eq!(painted_error.a11y_label.as_deref(), Some("Corrupted file"));
+        let error_bounds = poodle_gpui_node_backend::bounds_for("media-preview-error")
+            .expect("mounted error preview geometry");
+        assert!(f32::from(error_bounds.size.width) > 0.0);
+        assert!(f32::from(error_bounds.size.height) > 0.0);
+        // Both thumbnail frames project as labelled figures, ready and
+        // non-ready alike.
+        let frames: Vec<_> = driver
+            .accessibility_nodes()
+            .into_iter()
+            .filter(|node| node.role == NodeRole::Figure)
+            .map(|node| node.label.unwrap_or_default())
+            .collect();
+        assert!(
+            frames.contains(&"Hero banner".to_owned()),
+            "ready frame projects its title: {frames:?}"
+        );
+        assert!(
+            frames.contains(&"Corrupted file".to_owned()),
+            "error frame projects its title: {frames:?}"
+        );
+        // Loading and empty postures mount with their titles and geometry.
+        for (id, title) in [
+            ("media-preview-loading", "Export progress"),
+            ("media-preview-empty", "Empty folder"),
+        ] {
+            let painted_state = poodle_gpui_node_backend::painted_node_for(id)
+                .unwrap_or_else(|| panic!("{id} reaches the GPUI paint pass"));
+            assert_eq!(painted_state.a11y_label.as_deref(), Some(title));
+            let state_bounds = poodle_gpui_node_backend::bounds_for(id)
+                .unwrap_or_else(|| panic!("mounted {id} geometry"));
+            assert!(f32::from(state_bounds.size.width) > 0.0);
+            assert!(f32::from(state_bounds.size.height) > 0.0);
+        }
+        assert!(
+            frames.contains(&"Export progress".to_owned()),
+            "loading frame projects its title: {frames:?}"
+        );
+        assert!(
+            frames.contains(&"Empty folder".to_owned()),
+            "empty frame projects its title: {frames:?}"
+        );
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
