@@ -89,7 +89,6 @@ export const WITHHELD_AXES: Record<string, Partial<Record<CensusAxis, string>>> 
     visual:
       "narrow-container clamp needs a shared min(100%, max(…)) layout capability",
   },
-<<<<<<< HEAD
   Code: {
     // Planner split ruling 2026-10-05 (brief v3): the copy press reaches
     // the backend clipboard channel, but the Copied feedback latch and
