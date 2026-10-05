@@ -1,15 +1,12 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "AlertDialog",
-  "test": "first_mounted_parity_alert_dialog",
+  "component": "FieldSet",
+  "test": "first_mounted_parity_field_set",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
     "semantic",
-    "events",
-    "pointer",
-    "keyboard_focus",
     "accessibility",
     "visual"
   ],
@@ -18,35 +15,22 @@
       "assert",
       "production-mount"
     ],
-    "events": [
-      "assert_eq!(\n            host.lock().expect(\"AlertDialog host\").events.as_slice(),\n            [\"confirm\", \"cancel\", \"cancel\", \"cancel\", \"cancel\"],\n            \"backdrop, Escape, and close each emit the cancel callback",
-      "assert_eq!(\n            host.lock().expect(\"AlertDialog host\").events.as_slice(),\n            [\"confirm\", \"cancel\"],\n            \"cancel callback",
-      "assert_eq!(\n            host.lock().expect(\"AlertDialog host\").events.as_slice(),\n            [\"confirm\"],\n            \"confirm callback"
-    ],
-    "pointer": [
-      "pointer_activate",
-      "pointer_press"
-    ],
-    "keyboard_focus": [
-      "dispatch_key",
-      "keyboard_"
-    ],
     "accessibility": [
-      "accessible",
       "NodeRole",
       "a11y."
     ],
     "visual": [
       "resolve_color",
+      "resolve_space",
       "rem_to_px"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "HeadlessDriver::new_element_in_box",
+    "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::presentation",
+    "renderer": "poodle_render::field_set",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -57,15 +41,12 @@
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "20f7852a-cc71-441a-8b01-12d2f349b188",
+    "run_id": "44658d4b-001c-4363-b3f2-2dbf6244bb10",
     "outcome": "passed",
-    "body_sha256": "0ead9e8456723074b50a5a8e24a115e3896f196e5f7ec98e9b800e08812e1698"
+    "body_sha256": "3cd31265bf95488436ca6b1bbe6e2dcceb8e4736b1e5ef1af2946f06b79ac9e5"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
-    "asserted emitted payloads or handler delivery through mounted input",
-    "drove real pointer activation through the mounted GPUI node backend",
-    "drove real keyboard input or backend focus through the mounted tree",
     "asserted node-level role, label, state, or focusability in the mounted tree",
     "asserted resolved token values or mounted geometry"
   ],

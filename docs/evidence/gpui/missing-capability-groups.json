@@ -6,21 +6,19 @@
       "substrate": "general-composite",
       "components": [
         "EnvelopeEditor",
-        "FieldSet",
         "ModMatrixGrid",
         "WaveformDisplay"
       ],
       "missingTally": {
-        "semantic": 4,
-        "events": 4,
-        "pointer": 4,
-        "keyboard_focus": 4,
-        "accessibility": 4,
-        "visual": 4
+        "semantic": 3,
+        "events": 3,
+        "pointer": 3,
+        "keyboard_focus": 3,
+        "accessibility": 3,
+        "visual": 3
       },
       "contracts": [
         "docs/contracts/components/envelope-editor.md",
-        "docs/contracts/components/field-set.md",
         "docs/contracts/components/mod-matrix-grid.md",
         "docs/contracts/components/waveform-display.md"
       ]
@@ -32,12 +30,12 @@
         "Tooltip"
       ],
       "missingTally": {
-        "semantic": 2,
-        "events": 2,
-        "pointer": 2,
-        "keyboard_focus": 2,
-        "accessibility": 2,
-        "visual": 2
+        "semantic": 0,
+        "events": 1,
+        "pointer": 0,
+        "keyboard_focus": 0,
+        "accessibility": 0,
+        "visual": 1
       },
       "contracts": [
         "docs/contracts/components/list-grid.md",
