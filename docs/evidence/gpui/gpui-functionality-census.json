@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "ab75f5c37f853dd10c6b5e45f913b5d0e511ad3f",
+  "source_commit": "539057155aa20e720e9e4d60fe97a8afa58f69b6",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -3975,17 +3975,32 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
           "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input"
         }
       ],
-      "missing": [
-        "events",
-        "pointer",
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -3997,12 +4012,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/AgentSubagent--agent-subagent-disclosure-rebuilds-the-host-spec-through-mounted-input.json"
       ],
-      "refusals": [
-        "Expected test agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input proves no events claim; events stays missing.",
-        "Expected test agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input proves no pointer claim; pointer stays missing.",
-        "Expected test agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input proves no accessibility claim; accessibility stays missing.",
-        "Expected test agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "ChangedFiles",
@@ -4083,17 +4093,32 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
           "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input"
         }
       ],
-      "missing": [
-        "events",
-        "pointer",
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -4105,12 +4130,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/ToolCall--tool-call-disclosure-rebuilds-the-host-spec-through-mounted-input.json"
       ],
-      "refusals": [
-        "Expected test tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input proves no events claim; events stays missing.",
-        "Expected test tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input proves no pointer claim; pointer stays missing.",
-        "Expected test tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input proves no accessibility claim; accessibility stays missing.",
-        "Expected test tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "ToolCallGroup",
@@ -5340,17 +5360,32 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#action_discovery_selection_rebuilds_the_host_spec_through_mounted_input"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#action_discovery_selection_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#action_discovery_selection_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
           "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#action_discovery_selection_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#action_discovery_selection_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#action_discovery_selection_rebuilds_the_host_spec_through_mounted_input"
         }
       ],
-      "missing": [
-        "events",
-        "pointer",
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -5362,12 +5397,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/ActionDiscoveryPanel--action-discovery-selection-rebuilds-the-host-spec-through-mounted-input.json"
       ],
-      "refusals": [
-        "Expected test action_discovery_selection_rebuilds_the_host_spec_through_mounted_input proves no events claim; events stays missing.",
-        "Expected test action_discovery_selection_rebuilds_the_host_spec_through_mounted_input proves no pointer claim; pointer stays missing.",
-        "Expected test action_discovery_selection_rebuilds_the_host_spec_through_mounted_input proves no accessibility claim; accessibility stays missing.",
-        "Expected test action_discovery_selection_rebuilds_the_host_spec_through_mounted_input proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "AppHeader",
@@ -6496,11 +6526,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#licence_seats_release_flows_through_confirm_in_a_mounted_window"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#licence_seats_release_flows_through_confirm_in_a_mounted_window"
         }
       ],
-      "missing": [
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6515,9 +6548,7 @@
       ],
       "refusals": [
         "Expected test licence_seats_release_flows_through_confirm_in_a_mounted_window proves no events claim; events stays missing.",
-        "Expected test licence_seats_release_flows_through_confirm_in_a_mounted_window proves no keyboard_focus claim; keyboard_focus stays missing.",
-        "Expected test licence_seats_release_flows_through_confirm_in_a_mounted_window proves no visual claim; visual stays missing.",
-        "Expected test licence_seats_seat_row_enter_and_escape_restore_display_focus proves no visual claim; visual stays missing."
+        "Expected test licence_seats_release_flows_through_confirm_in_a_mounted_window proves no keyboard_focus claim; keyboard_focus stays missing."
       ]
     },
     {
@@ -8869,6 +8900,11 @@
           "ref": "docs/evidence/nucleus/nucleus-parity-receipts/agenttranscript--nucleus-agent-agent-transcript.json#proof_level"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport"
+        },
+        {
           "axis": "pointer",
           "via": "nucleus-m1",
           "ref": "docs/evidence/nucleus/nucleus-parity-receipts/agenttranscript--nucleus-agent-agent-transcript.json#proof_level"
@@ -8889,9 +8925,7 @@
           "ref": "docs/evidence/nucleus/nucleus-parity-receipts/agenttranscript--nucleus-agent-agent-transcript.json#proof_level"
         }
       ],
-      "missing": [
-        "events"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -8900,7 +8934,9 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/AgentTranscript--agent-transcript-detaches-jumps-and-resumes-following-on-a-real-viewport.json"
+      ],
       "refusals": []
     },
     {
@@ -8965,25 +9001,22 @@
   ],
   "summary": {
     "admittedRows": 128,
-    "fullyAdmittedRows": 116,
+    "fullyAdmittedRows": 121,
     "missingTally": {
       "semantic": 47,
-      "events": 40,
-      "pointer": 41,
+      "events": 36,
+      "pointer": 38,
       "keyboard_focus": 39,
-      "accessibility": 51,
-      "visual": 56
+      "accessibility": 48,
+      "visual": 52
     },
     "holdCount": 175,
-    "refusalCount": 90
+    "refusalCount": 76
   },
   "groups": [
     {
       "substrate": "feedback-status",
       "components": [
-        "ActionDiscoveryPanel",
-        "AgentSubagent",
-        "AgentTranscript",
         "Avatar",
         "DetailSectionGroup",
         "DetailShell",
@@ -8991,7 +9024,6 @@
         "EmptyState",
         "ErrorBoundary",
         "InlineListSection",
-        "LicenceSeats",
         "MetaBar",
         "MetaItem",
         "Meter",
@@ -9000,21 +9032,17 @@
         "Progress",
         "Region",
         "Spinner",
-        "StatusBar",
-        "ToolCall"
+        "StatusBar"
       ],
       "missingTally": {
         "semantic": 16,
-        "events": 16,
-        "pointer": 16,
+        "events": 12,
+        "pointer": 13,
         "keyboard_focus": 12,
-        "accessibility": 19,
-        "visual": 20
+        "accessibility": 16,
+        "visual": 16
       },
       "contracts": [
-        "docs/contracts/components/action-discovery-panel.md",
-        "docs/contracts/components/agent-subagent.md",
-        "docs/contracts/components/agent-transcript.md",
         "docs/contracts/components/avatar.md",
         "docs/contracts/components/detail-section-group.md",
         "docs/contracts/components/detail-shell.md",
@@ -9022,7 +9050,6 @@
         "docs/contracts/components/empty-state.md",
         "docs/contracts/components/error-boundary.md",
         "docs/contracts/components/inline-list-section.md",
-        "docs/contracts/components/licence-seats.md",
         "docs/contracts/components/meta-bar.md",
         "docs/contracts/components/meta-item.md",
         "docs/contracts/components/meter.md",
@@ -9031,8 +9058,7 @@
         "docs/contracts/components/progress.md",
         "docs/contracts/components/region.md",
         "docs/contracts/components/spinner.md",
-        "docs/contracts/components/status-bar.md",
-        "docs/contracts/components/tool-call.md"
+        "docs/contracts/components/status-bar.md"
       ]
     },
     {
