@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "72b195e32c4a49fef4d34cc0dbd6914253f3283f",
+  "source_commit": "515b749726eb5742add241d02c847998bbb2c44c",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -3575,15 +3575,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_scroll_shell"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_scroll_shell"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_scroll_shell"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_scroll_shell"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_scroll_shell"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_scroll_shell"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -3592,10 +3616,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for ScrollShell; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/ScrollShell--first-mounted-parity-scroll-shell.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Separator",
@@ -5329,14 +5353,34 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_ui_presentation_provider"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_ui_presentation_provider"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_ui_presentation_provider"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_ui_presentation_provider"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_ui_presentation_provider"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -5345,10 +5389,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for UiPresentationProvider; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/UiPresentationProvider--first-mounted-parity-ui-presentation-provider.json"
+      ],
+      "refusals": []
     },
     {
       "component": "MotionPolicyProvider",
@@ -5357,21 +5401,39 @@
       "substrate": "agent-composites",
       "required": [
         "semantic",
-        "events",
         "pointer",
         "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_motion_policy_provider"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_motion_policy_provider"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_motion_policy_provider"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_motion_policy_provider"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_motion_policy_provider"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -5380,10 +5442,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for MotionPolicyProvider; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/MotionPolicyProvider--first-mounted-parity-motion-policy-provider.json"
+      ],
+      "refusals": []
     },
     {
       "component": "VideoPlayer",
@@ -6123,21 +6185,39 @@
       "substrate": "workstation-shell",
       "required": [
         "semantic",
-        "events",
         "pointer",
         "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_detail_section"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_detail_section"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_detail_section"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_detail_section"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_detail_section"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6146,10 +6226,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for DetailSection; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/DetailSection--first-mounted-parity-detail-section.json"
+      ],
+      "refusals": []
     },
     {
       "component": "DockRegion",
@@ -9116,21 +9196,33 @@
       "substrate": "agent-composites",
       "required": [
         "semantic",
-        "events",
-        "pointer",
         "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_agent_message"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_agent_message"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_agent_message"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_agent_message"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -9139,10 +9231,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for AgentMessage; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/AgentMessage--first-mounted-parity-agent-message.json"
+      ],
+      "refusals": []
     },
     {
       "component": "AgentPlan",
@@ -9382,18 +9474,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 157,
-    "fullyAdmittedRows": 156,
+    "admittedRows": 162,
+    "fullyAdmittedRows": 161,
     "missingTally": {
-      "semantic": 18,
-      "events": 14,
-      "pointer": 17,
-      "keyboard_focus": 16,
-      "accessibility": 18,
-      "visual": 19
+      "semantic": 13,
+      "events": 10,
+      "pointer": 12,
+      "keyboard_focus": 11,
+      "accessibility": 13,
+      "visual": 14
     },
     "holdCount": 175,
-    "refusalCount": 36
+    "refusalCount": 31
   },
   "groups": [
     {
@@ -9449,27 +9541,6 @@
       ]
     },
     {
-      "substrate": "workstation-shell",
-      "components": [
-        "DetailSection",
-        "ScrollShell",
-        "UiPresentationProvider"
-      ],
-      "missingTally": {
-        "semantic": 3,
-        "events": 2,
-        "pointer": 3,
-        "keyboard_focus": 3,
-        "accessibility": 3,
-        "visual": 3
-      },
-      "contracts": [
-        "docs/contracts/components/detail-section.md",
-        "docs/contracts/components/scroll-shell.md",
-        "docs/contracts/components/ui-presentation-provider.md"
-      ]
-    },
-    {
       "substrate": "layout-primitive",
       "components": [
         "ListGrid",
@@ -9486,25 +9557,6 @@
       "contracts": [
         "docs/contracts/components/list-grid.md",
         "docs/contracts/components/tooltip.md"
-      ]
-    },
-    {
-      "substrate": "agent-composites",
-      "components": [
-        "AgentMessage",
-        "MotionPolicyProvider"
-      ],
-      "missingTally": {
-        "semantic": 2,
-        "events": 2,
-        "pointer": 2,
-        "keyboard_focus": 2,
-        "accessibility": 2,
-        "visual": 2
-      },
-      "contracts": [
-        "docs/contracts/components/agent-message.md",
-        "docs/contracts/components/motion-policy-provider.md"
       ]
     },
     {

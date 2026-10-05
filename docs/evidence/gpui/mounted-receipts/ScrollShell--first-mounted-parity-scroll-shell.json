@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "Checkbox",
-  "test": "checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec",
+  "component": "ScrollShell",
+  "test": "first_mounted_parity_scroll_shell",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -19,9 +19,9 @@
       "production-mount"
     ],
     "events": [
-      "payloads.lock",
-      "assert!(\n            payloads.lock().unwrap().is_empty(),\n            \"readonly does not change or emit",
-      "assert!(\n            payload"
+      "assert_eq!(\n            reports.lock().expect(\"scroll payload",
+      "assert_eq!(\n                payload",
+      "assert_eq!(payload"
     ],
     "pointer": [
       "pointer_activate"
@@ -32,22 +32,21 @@
       "focus_element"
     ],
     "accessibility": [
-      "NodeToggled",
       "NodeRole",
       "a11y."
     ],
     "visual": [
-      "resolve_opacity",
+      "resolve_color",
       "resolve_space",
-      "resolve_color"
+      "rem_to_px"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "HeadlessDriver::new",
+    "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::checkbox",
+    "renderer": "poodle_render::presentation",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -60,7 +59,7 @@
     "command": "effigy regressions:native",
     "run_id": "b47cd690-3158-48a1-8e35-ca0a6031f360",
     "outcome": "passed",
-    "body_sha256": "2b27eaf05b337f01539155ca1b29d67bd14f8446969262ffa8ec114c62dfdb4a"
+    "body_sha256": "a4b04940e4e06e9b1160162f7d7f2cb6e59a96eecca261771df3f0606d96a5ac"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

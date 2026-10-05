@@ -55,27 +55,6 @@
       ]
     },
     {
-      "substrate": "workstation-shell",
-      "components": [
-        "DetailSection",
-        "ScrollShell",
-        "UiPresentationProvider"
-      ],
-      "missingTally": {
-        "semantic": 3,
-        "events": 2,
-        "pointer": 3,
-        "keyboard_focus": 3,
-        "accessibility": 3,
-        "visual": 3
-      },
-      "contracts": [
-        "docs/contracts/components/detail-section.md",
-        "docs/contracts/components/scroll-shell.md",
-        "docs/contracts/components/ui-presentation-provider.md"
-      ]
-    },
-    {
       "substrate": "layout-primitive",
       "components": [
         "ListGrid",
@@ -92,25 +71,6 @@
       "contracts": [
         "docs/contracts/components/list-grid.md",
         "docs/contracts/components/tooltip.md"
-      ]
-    },
-    {
-      "substrate": "agent-composites",
-      "components": [
-        "AgentMessage",
-        "MotionPolicyProvider"
-      ],
-      "missingTally": {
-        "semantic": 2,
-        "events": 2,
-        "pointer": 2,
-        "keyboard_focus": 2,
-        "accessibility": 2,
-        "visual": 2
-      },
-      "contracts": [
-        "docs/contracts/components/agent-message.md",
-        "docs/contracts/components/motion-policy-provider.md"
       ]
     },
     {

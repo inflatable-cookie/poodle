@@ -235,6 +235,10 @@ Applied when direction is `"horizontal"` or `"both"`:
 - `overscroll-behavior: contain` equivalent must prevent scroll chaining where
   possible
 - direction-to-overflow mapping must produce equivalent axis locking
+- the node backend owns keyboard scrolling for a focusable scroll viewport
+  (arrows per owned axis, Page Up/Down, Home/End, clamped) and reports the
+  position through `Interaction::on_scroll`, the native `onScroll`; the
+  renderer puts role, label, tab stop and focus ring on the viewport
 
 ## 11. Parity Checklist
 
