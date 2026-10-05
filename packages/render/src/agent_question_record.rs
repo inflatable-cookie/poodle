@@ -6,7 +6,7 @@
 //! No handlers, and that is the component: an answer the agent already has
 //! cannot be changed from the transcript, so there is nothing to click.
 
-use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::AgentQuestionRecordSpec;
 
 use crate::context::RenderContext;
@@ -48,6 +48,8 @@ pub fn agent_question_record(spec: &AgentQuestionRecordSpec, ctx: &RenderContext
         c.bottom_left = radius;
         s.descriptor.background = Some(surface);
     }
+    // Contract §6: a plain region, never a list of controls.
+    root.a11y.role = Some(NodeRole::Region);
 
     if let Some(header) = &spec.question.header {
         let mut h = Node::text(header.clone());
@@ -63,11 +65,22 @@ pub fn agent_question_record(spec: &AgentQuestionRecordSpec, ctx: &RenderContext
 
     if spec.shows_options() {
         // Every option survives: why the agent did something is usually
-        // answered by what it did not do.
+        // answered by what it did not do. Svelte renders a `ul`/`li`; the
+        // mounted accessibility tree only collects nodes with a role.
+        let mut list = Node::container();
+        list.a11y.role = Some(NodeRole::List);
+        {
+            let s = &mut list.style;
+            s.descriptor.layout.direction = LayoutDirection::Column;
+            s.fill_width = true;
+            s.descriptor.layout.spacing.gap = rem_to_px(spec.gap_rem(density));
+        }
         for option in &spec.question.options {
             let chosen = spec.is_chosen(&option.value);
 
             let mut row = Node::container();
+            row.id = Some(format!("agent-question-record-option-{}", option.value));
+            row.a11y.role = Some(NodeRole::ListItem);
             {
                 let s = &mut row.style;
                 s.descriptor.layout.direction = LayoutDirection::Row;
@@ -97,8 +110,9 @@ pub fn agent_question_record(spec: &AgentQuestionRecordSpec, ctx: &RenderContext
             label.style.descriptor.text_color =
                 Some(if chosen { chosen_color } else { unchosen_color });
 
-            root = root.child(row.child(lead).child(label));
+            list = list.child(row.child(lead).child(label));
         }
+        root = root.child(list);
     } else {
         let mut summary = Node::text(spec.summary());
         summary.style.text_size = Some(font_size);

@@ -7,16 +7,21 @@
 use std::sync::{Arc, Mutex};
 
 use poodle_headless::audio::{
-    drag_number_transition, fader_transition, format_value, knob_point_to_norm, knob_transition,
-    xy_pad_transition, AudioPoint, AudioRect, AudioValueContext, AudioValueEffect, AudioValueEvent,
-    DragNumberContext, FaderContext, FaderOrientation, KnobContext, KnobDragMode, ValueBound,
-    XYPadAxis, XYPadContext, XYPadEffect, XYPadEvent,
+    drag_number_transition, fader_transition, format_value, keyboard_computer_key_down,
+    keyboard_computer_key_up, keyboard_focus_note, keyboard_hit_test, keyboard_move_focus,
+    keyboard_press, keyboard_release, keyboard_retarget, keyboard_velocity_at_point,
+    keyboard_visual_state, knob_point_to_norm, knob_transition, xy_pad_transition, AudioPoint,
+    AudioRect, AudioValueContext, AudioValueEffect, AudioValueEvent, DragNumberContext,
+    FaderContext, FaderOrientation, KeyboardContext, KeyboardEffect, KnobContext, KnobDragMode,
+    ValueBound, XYPadAxis, XYPadContext, XYPadEffect, XYPadEvent,
 };
 use poodle_node::{
     ContinuousValuePhase, FocusRing, Node, NodeContinuousValueEvent, NodeKey, NodeRole,
     NodeWheelEvent,
 };
-use poodle_specs::{DragNumberFieldSpec, FaderSpec, KnobSpec, Orientation, XYPadSpec};
+use poodle_specs::{
+    DragNumberFieldSpec, FaderSpec, KeyboardSpec, KnobSpec, Orientation, XYPadSpec,
+};
 
 use crate::color::with_alpha;
 use crate::context::RenderContext;
@@ -1838,6 +1843,309 @@ fn bind_drag_number_entry(
         );
     }));
     *node = std::mem::take(node).child(entry);
+}
+
+/// Host-owned adapter state for one Keyboard instance.
+pub struct KeyboardLive {
+    pub machine: KeyboardContext,
+}
+
+impl KeyboardLive {
+    pub fn from_context(machine: KeyboardContext) -> Self {
+        Self { machine }
+    }
+}
+
+impl Default for KeyboardLive {
+    fn default() -> Self {
+        Self {
+            machine: KeyboardContext::default(),
+        }
+    }
+}
+
+/// Contract note effects plus a required lifetime-stable instance scope.
+#[derive(Clone)]
+pub struct KeyboardHandlers {
+    pub instance_id: String,
+    pub on_note_on: Option<Arc<dyn Fn(u8, u8) + Send + Sync>>,
+    pub on_note_off: Option<Arc<dyn Fn(u8) + Send + Sync>>,
+}
+
+impl KeyboardHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.is_empty(),
+            "native audio instance_id must be non-empty and lifetime-stable"
+        );
+        Self {
+            instance_id,
+            on_note_on: None,
+            on_note_off: None,
+        }
+    }
+
+    pub fn on_note_on(mut self, handler: Arc<dyn Fn(u8, u8) + Send + Sync>) -> Self {
+        self.on_note_on = Some(handler);
+        self
+    }
+
+    pub fn on_note_off(mut self, handler: Arc<dyn Fn(u8) + Send + Sync>) -> Self {
+        self.on_note_off = Some(handler);
+        self
+    }
+}
+
+pub fn keyboard_key_id(instance_id: &str, note: u8) -> String {
+    format!("{instance_id}:note-{note}")
+}
+
+pub fn keyboard_spec_from_context(context: &KeyboardContext, aria_label: &str) -> KeyboardSpec {
+    let mut spec = KeyboardSpec::new(keyboard_visual_state(context));
+    spec.aria_label = aria_label.to_owned();
+    spec
+}
+
+fn apply_keyboard_effects(effects: &[KeyboardEffect], handlers: &KeyboardHandlers) {
+    for effect in effects {
+        match effect {
+            KeyboardEffect::NoteOn { note, velocity } => {
+                if let Some(handler) = &handlers.on_note_on {
+                    handler(*note, *velocity);
+                }
+            }
+            KeyboardEffect::NoteOff { note } => {
+                if let Some(handler) = &handlers.on_note_off {
+                    handler(*note);
+                }
+            }
+        }
+    }
+}
+
+fn is_reserved_computer_key(key: &str) -> bool {
+    matches!(
+        key,
+        "left"
+            | "right"
+            | "up"
+            | "down"
+            | "space"
+            | "enter"
+            | "tab"
+            | "escape"
+            | "home"
+            | "end"
+            | "pageup"
+            | "pagedown"
+    )
+}
+
+fn run_keyboard(
+    live: &Mutex<KeyboardLive>,
+    apply: impl FnOnce(KeyboardContext) -> (KeyboardContext, Vec<KeyboardEffect>),
+    handlers: &KeyboardHandlers,
+) {
+    let current = live.lock().expect("keyboard machine").machine.clone();
+    let (next, effects) = apply(current);
+    live.lock().expect("keyboard machine").machine = next;
+    apply_keyboard_effects(&effects, handlers);
+}
+
+fn apply_host_keyboard(machine: &mut KeyboardContext, spec: &KeyboardSpec) {
+    let state = &spec.visual_state;
+    machine.first_note = state.first_note;
+    machine.last_note = state.last_note;
+    machine.orientation = state.orientation;
+    machine.octave_shift = state.octave_shift;
+    machine.external_held_notes = state.external_held_notes.clone();
+    let was_disabled = machine.disabled;
+    machine.disabled = !state.enabled;
+    if machine.disabled && !was_disabled {
+        let (released, _) = poodle_headless::audio::keyboard_release_all(machine.clone());
+        *machine = released;
+        machine.disabled = true;
+    }
+}
+
+pub fn bind_keyboard(
+    node: &mut Node,
+    spec: &KeyboardSpec,
+    ctx: &RenderContext<'_>,
+    handlers: &KeyboardHandlers,
+    live: &Arc<Mutex<KeyboardLive>>,
+) {
+    let _ = ctx;
+    node.id = Some(audio_root_id(&handlers.instance_id));
+    {
+        let mut runtime = live.lock().expect("keyboard machine");
+        apply_host_keyboard(&mut runtime.machine, spec);
+    }
+    let enabled = {
+        let runtime = live.lock().expect("keyboard machine");
+        !runtime.machine.disabled
+    };
+    if !enabled {
+        return;
+    }
+    bind_keyboard_pointer(node, Arc::clone(live), handlers.clone());
+    bind_computer_keys(node, Arc::clone(live), handlers.clone());
+    let keys = spec.visual_state.keys.clone();
+    let mut key_index = 0usize;
+    for child in &mut node.children {
+        if child.a11y.role != Some(NodeRole::Button) {
+            continue;
+        }
+        let Some(key) = keys.get(key_index) else {
+            break;
+        };
+        child.id = Some(keyboard_key_id(&handlers.instance_id, key.note));
+        bind_key_control(child, key.note, Arc::clone(live), handlers.clone());
+        key_index += 1;
+    }
+}
+
+fn bind_keyboard_pointer(
+    node: &mut Node,
+    live: Arc<Mutex<KeyboardLive>>,
+    handlers: KeyboardHandlers,
+) {
+    node.interaction.on_continuous_value =
+        Some(Arc::new(move |event: &NodeContinuousValueEvent| {
+            let x_from_left = event.x as f64;
+            let y_from_top = 1.0 - event.y as f64;
+            let (orientation, hit) = {
+                let runtime = live.lock().expect("keyboard machine");
+                (
+                    runtime.machine.orientation,
+                    keyboard_hit_test(&runtime.machine, x_from_left, y_from_top),
+                )
+            };
+            let velocity = keyboard_velocity_at_point(orientation, x_from_left, y_from_top);
+            match event.phase {
+                ContinuousValuePhase::Press => {
+                    if let Some(note) = hit {
+                        run_keyboard(
+                            &live,
+                            |context| keyboard_press(context, "pointer", note, velocity),
+                            &handlers,
+                        );
+                    }
+                }
+                ContinuousValuePhase::Move => {
+                    run_keyboard(
+                        &live,
+                        |context| keyboard_retarget(context, "pointer", hit, velocity),
+                        &handlers,
+                    );
+                }
+                ContinuousValuePhase::Release | ContinuousValuePhase::Cancel => {
+                    run_keyboard(
+                        &live,
+                        |context| keyboard_release(context, "pointer"),
+                        &handlers,
+                    );
+                }
+            }
+        }));
+}
+
+fn bind_computer_keys(node: &mut Node, live: Arc<Mutex<KeyboardLive>>, handlers: KeyboardHandlers) {
+    let down_live = Arc::clone(&live);
+    let down_handlers = handlers.clone();
+    node.interaction.on_edit_key = Some(Arc::new(move |key, _mods| {
+        if is_reserved_computer_key(key) {
+            return;
+        }
+        run_keyboard(
+            &down_live,
+            |context| keyboard_computer_key_down(context, key, 100, false),
+            &down_handlers,
+        );
+    }));
+    let up_live = live;
+    node.interaction.on_key_up = Some(Arc::new(move |key, _mods| {
+        if is_reserved_computer_key(key) {
+            return;
+        }
+        run_keyboard(
+            &up_live,
+            |context| keyboard_computer_key_up(context, key),
+            &handlers,
+        );
+    }));
+}
+
+fn bind_key_control(
+    node: &mut Node,
+    note: u8,
+    live: Arc<Mutex<KeyboardLive>>,
+    handlers: KeyboardHandlers,
+) {
+    let focus_live = Arc::clone(&live);
+    node.interaction.on_focus_change = Some(Arc::new(move |focused| {
+        if focused {
+            let mut runtime = focus_live.lock().expect("keyboard machine");
+            runtime.machine = keyboard_focus_note(runtime.machine.clone(), Some(note));
+        }
+    }));
+    let arrow_live = Arc::clone(&live);
+    let instance = handlers.instance_id.clone();
+    node.interaction.on_key = Some(Arc::new(move |key, _mods| {
+        let direction = match key {
+            NodeKey::ArrowRight | NodeKey::ArrowUp => 1,
+            NodeKey::ArrowLeft | NodeKey::ArrowDown => -1,
+            _ => return None,
+        };
+        let next = {
+            let mut runtime = arrow_live.lock().expect("keyboard machine");
+            runtime.machine = keyboard_move_focus(runtime.machine.clone(), direction);
+            runtime.machine.focused_note
+        };
+        next.map(|focused| keyboard_key_id(&instance, focused))
+    }));
+    let press_live = Arc::clone(&live);
+    let press_handlers = handlers.clone();
+    node.interaction.on_key_activate = Some(Arc::new(move || {
+        run_keyboard(
+            &press_live,
+            |context| keyboard_press(context, format!("a11y:{note}"), note, 100),
+            &press_handlers,
+        );
+        None
+    }));
+    let down_live = Arc::clone(&live);
+    let down_handlers = handlers.clone();
+    node.interaction.on_edit_key = Some(Arc::new(move |key, _mods| {
+        if is_reserved_computer_key(key) {
+            return;
+        }
+        run_keyboard(
+            &down_live,
+            |context| keyboard_computer_key_down(context, key, 100, false),
+            &down_handlers,
+        );
+    }));
+    let up_live = Arc::clone(&live);
+    let up_handlers = handlers;
+    node.interaction.on_key_up = Some(Arc::new(move |key, _mods| {
+        if matches!(key, "space" | "enter") {
+            run_keyboard(
+                &up_live,
+                |context| keyboard_release(context, &format!("a11y:{note}")),
+                &up_handlers,
+            );
+        }
+        if is_reserved_computer_key(key) {
+            return;
+        }
+        run_keyboard(
+            &up_live,
+            |context| keyboard_computer_key_up(context, key),
+            &up_handlers,
+        );
+    }));
 }
 
 #[cfg(test)]

@@ -1395,6 +1395,17 @@ mod tests {
             restricted.error.as_deref(),
             Some("Provider \"generic\" is not allowed")
         );
+        let garbage = EmbedInputSpec::new()
+            .with_value("not-a-url")
+            .with_detected_parse();
+        assert_eq!(garbage.parsed, None);
+        assert_eq!(
+            garbage.error.as_deref(),
+            Some("Could not parse embed source")
+        );
+        let empty = EmbedInputSpec::new().with_detected_parse();
+        assert_eq!(empty.parsed, None);
+        assert_eq!(empty.error, None);
     }
 
     #[test]

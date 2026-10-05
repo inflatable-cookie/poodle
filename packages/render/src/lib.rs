@@ -219,15 +219,17 @@ pub use alert_dialog::{
 pub use app_header::app_header;
 pub use audio::{
     audio_meter, audio_switch, drag_number_field, drag_number_field_with_handlers, envelope_editor,
-    fader, fader_with_handlers, gain_reduction_meter, keyboard, knob, knob_with_handlers,
-    mod_matrix_grid, value_readout, waveform_display, xy_pad, xy_pad_with_handlers,
+    fader, fader_with_handlers, gain_reduction_meter, keyboard, keyboard_with_handlers, knob,
+    knob_with_handlers, mod_matrix_grid, value_readout, waveform_display, xy_pad,
+    xy_pad_with_handlers,
 };
 pub use audio_handlers::{
     audio_entry_id, audio_root_id, drag_number_context_from_spec, drag_number_spec_from_context,
-    fader_context_from_spec, fader_spec_from_context, knob_context_from_spec,
-    knob_spec_from_context, xy_pad_context_from_spec, xy_pad_spec_from_context, xy_pad_x_id,
-    xy_pad_y_id, DragNumberHandlers, DragNumberLive, FaderHandlers, FaderLive, KnobHandlers,
-    KnobLive, XYPadHandlers, XYPadLive,
+    fader_context_from_spec, fader_spec_from_context, keyboard_key_id, keyboard_spec_from_context,
+    knob_context_from_spec, knob_spec_from_context, xy_pad_context_from_spec,
+    xy_pad_spec_from_context, xy_pad_x_id, xy_pad_y_id, DragNumberHandlers, DragNumberLive,
+    FaderHandlers, FaderLive, KeyboardHandlers, KeyboardLive, KnobHandlers, KnobLive,
+    XYPadHandlers, XYPadLive,
 };
 pub use audio_player::{audio_player, audio_player_with_handlers, AudioPlayerHandlers};
 pub use avatar::avatar;
@@ -295,7 +297,7 @@ pub use drawer::drawer;
 pub use duration_input::{duration_input, duration_input_with_handlers, DurationInputHandlers};
 pub use editable_label::{editable_label, editable_label_with_handlers, EditableLabelHandlers};
 pub use editable_list::{editable_list, EditableListHandlers};
-pub use embed_input::embed_input;
+pub use embed_input::{embed_input, embed_input_with_handlers, EmbedInputHandlers};
 pub use embed_preview::embed_preview;
 pub use empty_state::empty_state;
 pub use error_boundary::error_boundary;

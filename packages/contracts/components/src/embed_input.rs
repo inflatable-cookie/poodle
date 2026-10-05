@@ -96,23 +96,29 @@ impl EmbedInputSpec {
             return (self.parsed.clone(), self.error.clone());
         }
 
-        let parsed = ParsedEmbed::detect(&self.value);
-
-        if let Some(ref parsed) = parsed {
-            if !self.providers.is_empty()
-                && !self
-                    .providers
-                    .iter()
-                    .any(|provider| provider == &parsed.provider)
-            {
-                return (
-                    None,
-                    Some(format!("Provider \"{}\" is not allowed", parsed.provider)),
-                );
-            }
+        // Empty stays a successful idle field (Svelte `parseEmbed` / `resolveEmbedParseState`).
+        if self.value.trim().is_empty() {
+            return (None, None);
         }
 
-        (parsed, None)
+        let parsed = ParsedEmbed::detect(&self.value);
+        let Some(parsed) = parsed else {
+            return (None, Some(String::from("Could not parse embed source")));
+        };
+
+        if !self.providers.is_empty()
+            && !self
+                .providers
+                .iter()
+                .any(|provider| provider == &parsed.provider)
+        {
+            return (
+                None,
+                Some(format!("Provider \"{}\" is not allowed", parsed.provider)),
+            );
+        }
+
+        (Some(parsed), None)
     }
 
     pub fn with_detected_parse(mut self) -> Self {

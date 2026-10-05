@@ -1308,6 +1308,16 @@ fn apply_selection_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div
             }
         });
     }
+    if let Some(handler) = &node.interaction.on_key_up {
+        let up = handler.clone();
+        el = el.on_key_up(move |event: &KeyUpEvent, _window, cx| {
+            up(
+                event.keystroke.key.as_str(),
+                node_modifiers(&event.keystroke.modifiers),
+            );
+            cx.refresh_windows();
+        });
+    }
     el
 }
 

@@ -12,7 +12,7 @@
 //! resolved.
 
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node};
-use poodle_specs::{EmbedInputSpec, PillSize, PillSpec, PillTone, TextInputSpec};
+use poodle_specs::{EmbedInputSpec, PillSpec, PillTone, SemanticControlSizeRole, TextInputSpec};
 
 use crate::context::RenderContext;
 use crate::pill::pill;
@@ -108,7 +108,7 @@ pub fn embed_input_with_handlers(
                     &PillSpec::new()
                         .with_label(parsed.provider.clone())
                         .with_tone(PillTone::Success)
-                        .with_size(PillSize::Sm),
+                        .with_size_role(SemanticControlSizeRole::Chrome),
                     ctx,
                 ))
                 .child(success);

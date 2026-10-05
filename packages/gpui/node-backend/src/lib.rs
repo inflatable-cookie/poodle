@@ -28,7 +28,7 @@ use std::time::Duration;
 use gpui::{
     canvas, deferred, div, img, linear_color_stop, linear_gradient, point, px, relative, size, svg,
     AnyElement, AnyWindowHandle, App, AppContext, Bounds, ClickEvent, CursorStyle, Div, ElementId,
-    Hsla, InteractiveElement, IntoElement, KeyDownEvent, MouseButton, MouseDownEvent,
+    Hsla, InteractiveElement, IntoElement, KeyDownEvent, KeyUpEvent, MouseButton, MouseDownEvent,
     MouseMoveEvent, MouseUpEvent, ParentElement, PathBuilder, Pixels, ScrollDelta,
     ScrollWheelEvent, SharedString, Stateful, StatefulInteractiveElement, StyleRefinement, Styled,
     StyledImage, Window,
@@ -736,6 +736,8 @@ fn needs_state(node: &Node) -> bool {
         || node.interaction.on_activate_modified.is_some()
         || node.interaction.on_context.is_some()
         || node.interaction.on_key.is_some()
+        || node.interaction.on_key_up.is_some()
+        || node.interaction.on_edit_key.is_some()
         || node.interaction.drag_source.is_some()
         || node.interaction.drop_target.is_some()
         || node.interaction.on_text_change.is_some()

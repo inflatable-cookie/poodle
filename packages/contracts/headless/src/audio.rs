@@ -2030,6 +2030,87 @@ pub fn keyboard_velocity(depth_norm: f64) -> u8 {
     (1.0 + depth_norm.clamp(0.0, 1.0) * 126.0).round() as u8
 }
 
+/// MIDI velocity from a point in the keyboard box. `x_from_left` / `y_from_top`
+/// are 0..=1 in the same space Svelte's `keyboardVelocityAtPoint` uses
+/// (origin at the top-left of the painted keyboard).
+pub fn keyboard_velocity_at_point(
+    orientation: KeyboardOrientation,
+    x_from_left: f64,
+    y_from_top: f64,
+) -> u8 {
+    let depth = match orientation {
+        KeyboardOrientation::Horizontal => y_from_top,
+        KeyboardOrientation::Vertical => x_from_left,
+    };
+    keyboard_velocity(depth)
+}
+
+/// Note under a local point. Coordinates are 0..=1 from the top-left of the
+/// keyboard, matching Svelte `keyboardHitTest`. Black keys win while the
+/// depth is inside their breadth.
+pub fn keyboard_hit_test(
+    context: &KeyboardContext,
+    x_from_left: f64,
+    y_from_top: f64,
+) -> Option<u8> {
+    let (axis, depth) = match context.orientation {
+        KeyboardOrientation::Horizontal => (x_from_left, y_from_top),
+        KeyboardOrientation::Vertical => (y_from_top, x_from_left),
+    };
+    if !(0.0..=1.0).contains(&axis) || !(0.0..=1.0).contains(&depth) {
+        return None;
+    }
+    let keys = keyboard_visual_state(context).keys;
+    keys.iter()
+        .find(|key| {
+            key.black
+                && depth <= key.breadth_norm
+                && axis >= key.start_norm
+                && axis <= key.start_norm + key.length_norm
+        })
+        .or_else(|| {
+            keys.iter().find(|key| {
+                !key.black && axis >= key.start_norm && axis <= key.start_norm + key.length_norm
+            })
+        })
+        .map(|key| key.note)
+}
+
+pub fn keyboard_focus_note(mut context: KeyboardContext, note: Option<u8>) -> KeyboardContext {
+    context.focused_note = note;
+    context
+}
+
+/// Arrow-key pitch step. Unfocused, a positive step lands on `first_note` and
+/// a negative step on `last_note` — Svelte `MOVE_FOCUS`.
+pub fn keyboard_move_focus(mut context: KeyboardContext, direction: i8) -> KeyboardContext {
+    let current = match context.focused_note {
+        Some(note) => i16::from(note),
+        None if direction > 0 => i16::from(context.first_note) - 1,
+        None => i16::from(context.last_note) + 1,
+    };
+    let next = (current + i16::from(direction))
+        .clamp(i16::from(context.first_note), i16::from(context.last_note));
+    context.focused_note = Some(next as u8);
+    context
+}
+
+pub fn keyboard_release_all(context: KeyboardContext) -> (KeyboardContext, Vec<KeyboardEffect>) {
+    let mut effects = Vec::new();
+    let mut next = context;
+    let inputs: Vec<String> = next
+        .active_inputs
+        .iter()
+        .map(|active| active.0.clone())
+        .collect();
+    for input in inputs {
+        let (released, more) = keyboard_release(next, &input);
+        next = released;
+        effects.extend(more);
+    }
+    (next, effects)
+}
+
 pub fn keyboard_visual_state(context: &KeyboardContext) -> KeyboardVisualState {
     let notes: Vec<u8> = (context.first_note..=context.last_note).collect();
     let white: Vec<u8> = notes
@@ -2518,6 +2599,40 @@ mod tests {
     use super::*;
 
     #[test]
+    fn keyboard_hit_test_matches_svelte_geometry() {
+        assert_eq!(
+            keyboard_velocity_at_point(KeyboardOrientation::Horizontal, 0.5, 0.0),
+            1
+        );
+        assert_eq!(
+            keyboard_velocity_at_point(KeyboardOrientation::Horizontal, 0.5, 1.0),
+            127
+        );
+        assert_eq!(
+            keyboard_velocity_at_point(KeyboardOrientation::Vertical, 1.0, 0.5),
+            127
+        );
+        let horizontal = KeyboardContext {
+            first_note: 60,
+            last_note: 61,
+            ..KeyboardContext::default()
+        };
+        assert_eq!(keyboard_hit_test(&horizontal, 0.5, 0.9), Some(60));
+        let vertical = KeyboardContext {
+            first_note: 60,
+            last_note: 61,
+            orientation: KeyboardOrientation::Vertical,
+            ..KeyboardContext::default()
+        };
+        assert_eq!(keyboard_hit_test(&vertical, 0.9, 0.75), Some(60));
+        let moved = keyboard_move_focus(KeyboardContext::default(), 1);
+        assert_eq!(moved.focused_note, Some(48));
+        let (released, effects) =
+            keyboard_release_all(keyboard_press(KeyboardContext::default(), "pointer", 60, 64).0);
+        assert_eq!(effects, vec![KeyboardEffect::NoteOff { note: 60 }]);
+        assert!(released.active_inputs.is_empty());
+    }
+
     fn phase_three_keyboard_pairs_notes_and_matches_velocity() {
         assert_eq!(keyboard_velocity(0.0), 1);
         assert_eq!(keyboard_velocity(1.0), 127);

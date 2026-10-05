@@ -813,6 +813,11 @@ pub struct Interaction {
     /// click synthesis, so the component can open idempotently where a click
     /// toggles. Returning an element id asks the backend to move focus there.
     pub on_key_activate: Option<Arc<dyn Fn() -> Option<String> + Send + Sync>>,
+    /// Key-up for the focused node, with the platform key name (`"a"`,
+    /// `"space"`, `"enter"`, …) and the modifiers still held. Computer-key
+    /// instruments and Space/Enter note-off need the matching release; the
+    /// backend has no key-up today on `on_key` / `on_key_activate`.
+    pub on_key_up: Option<Arc<dyn Fn(&str, NodeModifiers) + Send + Sync>>,
     /// Registers this node as a semantic drag source with the runtime's drag
     /// controller. Identity, subject, allowed operations, accessible name, and
     /// the start/terminal callbacks live in the registration; the gesture that

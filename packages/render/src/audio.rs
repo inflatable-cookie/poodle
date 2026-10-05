@@ -3,9 +3,10 @@
 //! Contract: `docs/architecture/008-audio-control-family.md` and the twelve
 //! component contracts under `docs/contracts/components/`.
 
+use poodle_headless::audio::{format_value, AudioValueFormat};
 use poodle_node::{
-    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeKind,
-    NodePosition, NodeRole, NodeToggled,
+    ColorValue, CrossAxisAlignment, FocusRing, LayoutDirection, LayoutSizing, MainAxisAlignment,
+    Node, NodeKind, NodePosition, NodeRole, NodeToggled,
 };
 use poodle_specs::{
     AudioMeterSpec, AudioMeterStyle, AudioSwitchSpec, ControlDensity, ControlSize,
@@ -652,6 +653,15 @@ pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
     } else {
         (short, long)
     };
+    let white_idle = ctx.theme().resolve_color("#f7fafd");
+    let black_idle = ctx.theme().resolve_color("#131a22");
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let white_held = crate::color::mix_srgb(accent, ColorValue(1.0, 1.0, 1.0, 1.0), 0.60);
+    let focus_ring = FocusRing {
+        color: ctx.theme().resolve_color("color.accent.focusRing"),
+        width: rem_to_px(0.125),
+        offset: rem_to_px(-0.1875),
+    };
     let mut root = Node::container();
     root.id = Some("keyboard-root".into());
     root.style.descriptor.layout.width = LayoutSizing::Fixed(width);
@@ -661,38 +671,101 @@ pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
     root.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
     root.a11y.role = Some(NodeRole::Toolbar);
     root.a11y.label = Some(spec.aria_label.clone());
+    root.a11y.orientation = Some(if horizontal {
+        "horizontal".into()
+    } else {
+        "vertical".into()
+    });
     root.interaction.disabled = !state.enabled;
+    root.interaction.focusable = state.enabled;
+    root.a11y.tab_index = Some(-1);
+    if state.enabled {
+        root.style.focus_ring = Some(FocusRing {
+            color: crate::color::with_alpha(accent, 0.32),
+            width: rem_to_px(0.1875),
+            offset: 0.0,
+        });
+    } else {
+        root.style.descriptor.opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
+    }
+    let first_note = state.keys.first().map(|key| key.note);
+    let any_focused = state.keys.iter().any(|key| key.focused);
     for key in &state.keys {
-        let mut node = Node::container();
+        let mut visual = Node::container();
         let held = key.held || key.externally_held;
-        node.style.descriptor.background = Some(ctx.theme().resolve_color(if held {
-            "color.accent.base"
+        visual.style.descriptor.background = Some(if held {
+            if key.black {
+                accent
+            } else {
+                white_held
+            }
         } else if key.black {
-            "#131a22"
+            black_idle
         } else {
-            "#f7fafd"
-        }));
-        node.style.descriptor.border.width = density_metric(density, [0.0, 1.0, 2.0]);
-        node.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
-        node.a11y.role = Some(NodeRole::Button);
-        node.a11y.label = Some(format!("MIDI note {}", key.note));
-        node.interaction.focusable = state.enabled;
-        if horizontal {
-            node.style.descriptor.layout.width =
-                LayoutSizing::Fixed(key.length_norm as f32 * width);
-            node.style.descriptor.layout.height =
-                LayoutSizing::Fixed(key.breadth_norm as f32 * height);
-            absolute(&mut node, key.start_norm as f32 * width, 0.0);
-        } else {
-            node.style.descriptor.layout.width =
-                LayoutSizing::Fixed(key.breadth_norm as f32 * width);
-            node.style.descriptor.layout.height =
-                LayoutSizing::Fixed(key.length_norm as f32 * height);
-            absolute(&mut node, 0.0, key.start_norm as f32 * height);
+            white_idle
+        });
+        visual.style.descriptor.border.width = density_metric(density, [0.0, 1.0, 2.0]);
+        visual.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
+        if key.externally_held {
+            visual.style.descriptor.border.width = rem_to_px(0.125);
+            visual.style.descriptor.border.color = accent;
         }
-        root = root.child(node);
+        if horizontal {
+            visual.style.descriptor.layout.width =
+                LayoutSizing::Fixed(key.length_norm as f32 * width);
+            visual.style.descriptor.layout.height =
+                LayoutSizing::Fixed(key.breadth_norm as f32 * height);
+            absolute(&mut visual, key.start_norm as f32 * width, 0.0);
+        } else {
+            visual.style.descriptor.layout.width =
+                LayoutSizing::Fixed(key.breadth_norm as f32 * width);
+            visual.style.descriptor.layout.height =
+                LayoutSizing::Fixed(key.length_norm as f32 * height);
+            absolute(&mut visual, 0.0, key.start_norm as f32 * height);
+        }
+        root = root.child(visual);
+    }
+    for key in &state.keys {
+        let mut control = Node::container();
+        control.id = Some(format!("keyboard-root:note-{}", key.note));
+        control.a11y.role = Some(NodeRole::Button);
+        control.a11y.label = Some(format_value(f64::from(key.note), AudioValueFormat::Note));
+        control.a11y.toggled = Some(if key.held || key.externally_held {
+            NodeToggled::True
+        } else {
+            NodeToggled::False
+        });
+        let tab_stop = key.focused || (!any_focused && first_note == Some(key.note));
+        control.interaction.focusable = state.enabled;
+        control.a11y.tab_index = if state.enabled {
+            Some(if tab_stop { 0 } else { -1 })
+        } else {
+            None
+        };
+        if state.enabled && (key.focused || tab_stop) {
+            control.style.focus_ring = Some(focus_ring);
+        }
+        control.style.descriptor.layout.width = LayoutSizing::Fixed(1.0);
+        control.style.descriptor.layout.height = LayoutSizing::Fixed(1.0);
+        if horizontal {
+            absolute(&mut control, key.start_norm as f32 * width, 0.0);
+        } else {
+            absolute(&mut control, 0.0, key.start_norm as f32 * height);
+        }
+        root = root.child(control);
     }
     root
+}
+
+pub fn keyboard_with_handlers(
+    spec: &KeyboardSpec,
+    ctx: &RenderContext<'_>,
+    handlers: &crate::audio_handlers::KeyboardHandlers,
+    live: &std::sync::Arc<std::sync::Mutex<crate::audio_handlers::KeyboardLive>>,
+) -> Node {
+    let mut node = keyboard(spec, ctx);
+    crate::audio_handlers::bind_keyboard(&mut node, spec, ctx, handlers, live);
+    node
 }
 
 pub fn waveform_display(spec: &WaveformDisplaySpec, ctx: &RenderContext<'_>) -> Node {

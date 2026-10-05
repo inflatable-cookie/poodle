@@ -233,6 +233,9 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   ],
   Separator: "first_mounted_parity_separator",
   Card: "first_mounted_parity_card",
+  EmbedInput: "embed_input_url_entry_validation_and_preview_rebuild_the_host_spec",
+  AgentQuestionRecord: "agent_question_record_answer_display_rebuilds_the_host_spec",
+  Keyboard: "keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec",
 };
 
 const EXPECTED_MOUNTED_COMPONENT_COUNT = Object.keys(EXPECTED_MOUNTED_BEHAVIOUR_TESTS).length;
