@@ -1902,6 +1902,10 @@ pub fn keyboard_key_id(instance_id: &str, note: u8) -> String {
     format!("{instance_id}:note-{note}")
 }
 
+pub fn keyboard_visual_id(instance_id: &str, note: u8) -> String {
+    format!("{instance_id}:visual-{note}")
+}
+
 pub fn keyboard_spec_from_context(context: &KeyboardContext, aria_label: &str) -> KeyboardSpec {
     let mut spec = KeyboardSpec::new(keyboard_visual_state(context));
     spec.aria_label = aria_label.to_owned();
@@ -2002,15 +2006,20 @@ pub fn bind_keyboard(
     bind_computer_keys(node, Arc::clone(live), handlers.clone());
     let keys = spec.visual_state.keys.clone();
     let mut key_index = 0usize;
-    for child in &mut node.children {
-        if child.a11y.role != Some(NodeRole::Button) {
+    for visual in &mut node.children {
+        let Some(control) = visual
+            .children
+            .iter_mut()
+            .find(|child| child.a11y.role == Some(NodeRole::Button))
+        else {
             continue;
-        }
+        };
         let Some(key) = keys.get(key_index) else {
             break;
         };
-        child.id = Some(keyboard_key_id(&handlers.instance_id, key.note));
-        bind_key_control(child, key.note, Arc::clone(live), handlers.clone());
+        visual.id = Some(keyboard_visual_id(&handlers.instance_id, key.note));
+        control.id = Some(keyboard_key_id(&handlers.instance_id, key.note));
+        bind_key_control(control, key.note, Arc::clone(live), handlers.clone());
         key_index += 1;
     }
 }

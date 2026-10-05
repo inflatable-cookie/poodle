@@ -54319,16 +54319,22 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
     assert_eq!(visual_c4.style.descriptor.background, Some(white_idle));
 
     let recipe_white = ColorValue(0.11, 0.72, 0.44, 1.0);
+    let recipe_black = ColorValue(0.0, 0.0, 0.0, 1.0);
     struct KeyboardRecipeTheme {
         inner: GpuiThemeProvider,
         white_key: ColorValue,
+        black_key: ColorValue,
     }
     impl ThemeProvider for KeyboardRecipeTheme {
         fn resolve_color(&self, token: &str) -> ColorValue {
-            if token == "recipe.keyboard.white-key" {
-                self.white_key
-            } else {
-                self.inner.resolve_color(token)
+            self.try_resolve_color(token)
+                .unwrap_or_else(|| self.inner.resolve_color(token))
+        }
+        fn try_resolve_color(&self, token: &str) -> Option<ColorValue> {
+            match token {
+                "recipe.keyboard.white-key" => Some(self.white_key),
+                "recipe.keyboard.black-key" => Some(self.black_key),
+                _ => self.inner.try_resolve_color(token),
             }
         }
         fn resolve_space(&self, token: &str) -> f32 {
@@ -54347,6 +54353,7 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
     let recipe_theme = KeyboardRecipeTheme {
         inner: theme_provider.clone(),
         white_key: recipe_white,
+        black_key: recipe_black,
     };
     let recipe_node = poodle_render::keyboard(&spec, &RenderContext::new(&recipe_theme));
     assert!(
@@ -54354,6 +54361,12 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
             child.a11y.role.is_none() && child.style.descriptor.background == Some(recipe_white)
         }),
         "recipe.keyboard.white-key override paints idle white keys"
+    );
+    assert!(
+        recipe_node.children.iter().any(|child| {
+            child.a11y.role.is_none() && child.style.descriptor.background == Some(recipe_black)
+        }),
+        "recipe.keyboard.black-key override paints idle black keys, including a valid black"
     );
 
     let mut focused_machine = KeyboardContext::default();
@@ -54369,6 +54382,10 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
         .iter()
         .find(|child| child.a11y.role.is_none() && child.style.focus_ring.is_some())
         .expect("visible key carries the contract focus ring");
+    assert!(
+        focused_visual.style.focus_ring_within,
+        "visual ring paints from the nested note button's focus"
+    );
     let ring = focused_visual
         .style
         .focus_ring
@@ -54385,6 +54402,14 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
     assert!(
         focused_control.style.focus_ring.is_none(),
         "1px key control stays outline-none like Svelte"
+    );
+    assert_eq!(
+        focused_visual
+            .children
+            .first()
+            .map(|child| child.id.as_deref()),
+        Some(Some("keyboard-root:note-60")),
+        "note button is nested under the visual key it focuses"
     );
 
     run_headless(|cx| {
@@ -54671,6 +54696,7 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
             .iter()
             .find(|child| child.a11y.role.is_none() && child.style.focus_ring.is_some())
             .expect("mounted focused key paints the visible ring");
+        assert!(mounted_visual.style.focus_ring_within);
         let mounted_ring = mounted_visual
             .style
             .focus_ring
@@ -54683,6 +54709,17 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
         assert!(
             mounted_control.style.focus_ring.is_none(),
             "mounted 1px control does not carry the visible focus ring"
+        );
+        driver.wait_for_focus_handle("keyboard-main:note-61");
+        driver.focus_element("keyboard-main:note-61");
+        driver.draw_frame();
+        let painted = poodle_gpui_node_backend::painted_ring_for("keyboard-main:visual-61")
+            .expect("focused visual key paints a ring while the note button holds focus");
+        assert_eq!(painted.ring.width, rem_to_px(0.125));
+        assert_eq!(painted.ring.offset, rem_to_px(-0.1875));
+        assert!(
+            poodle_gpui_node_backend::painted_ring_for("keyboard-main:note-61").is_none(),
+            "1px key control stays outline-none like Svelte"
         );
 
         let log = payloads.lock().expect("payloads lock").clone();

@@ -226,7 +226,7 @@ pub use audio::{
 pub use audio_handlers::{
     audio_entry_id, audio_root_id, drag_number_context_from_spec, drag_number_spec_from_context,
     fader_context_from_spec, fader_spec_from_context, keyboard_key_id, keyboard_spec_from_context,
-    knob_context_from_spec, knob_spec_from_context, xy_pad_context_from_spec,
+    keyboard_visual_id, knob_context_from_spec, knob_spec_from_context, xy_pad_context_from_spec,
     xy_pad_spec_from_context, xy_pad_x_id, xy_pad_y_id, DragNumberHandlers, DragNumberLive,
     FaderHandlers, FaderLive, KeyboardHandlers, KeyboardLive, KnobHandlers, KnobLive,
     XYPadHandlers, XYPadLive,

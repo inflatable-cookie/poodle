@@ -26,6 +26,20 @@ pub trait ThemeProvider {
     /// Resolve a color token path to an RGBA color value.
     fn resolve_color(&self, token: &str) -> ColorValue;
 
+    /// Resolve a color token when the theme defines it.
+    ///
+    /// `None` means the token is missing. A defined black is
+    /// `Some(ColorValue(0.0, 0.0, 0.0, 1.0))`, distinct from a missing token.
+    /// The default treats the `resolve_color` black fallback as missing.
+    fn try_resolve_color(&self, token: &str) -> Option<ColorValue> {
+        let resolved = self.resolve_color(token);
+        if resolved == ColorValue(0.0, 0.0, 0.0, 1.0) {
+            None
+        } else {
+            Some(resolved)
+        }
+    }
+
     /// Resolve a space/size token path to a pixel value.
     fn resolve_space(&self, token: &str) -> f32;
 

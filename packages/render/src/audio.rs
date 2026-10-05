@@ -3,6 +3,7 @@
 //! Contract: `docs/architecture/008-audio-control-family.md` and the twelve
 //! component contracts under `docs/contracts/components/`.
 
+use poodle_adapter::ThemeProvider as _;
 use poodle_headless::audio::{format_value, AudioValueFormat};
 use poodle_node::{
     ColorValue, CrossAxisAlignment, FocusRing, LayoutDirection, LayoutSizing, MainAxisAlignment,
@@ -643,12 +644,7 @@ pub fn gain_reduction_meter(spec: &GainReductionMeterSpec, ctx: &RenderContext<'
 }
 
 fn keyboard_recipe_color(ctx: &RenderContext<'_>, hook: &str, fallback: ColorValue) -> ColorValue {
-    let resolved = ctx.theme().resolve_color(hook);
-    if resolved == BLACK {
-        fallback
-    } else {
-        resolved
-    }
+    ctx.theme().try_resolve_color(hook).unwrap_or(fallback)
 }
 
 fn keyboard_recipe_opacity(ctx: &RenderContext<'_>, hook: &str, fallback: f32) -> f32 {
@@ -748,6 +744,7 @@ pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
     let any_focused = state.keys.iter().any(|key| key.focused);
     for key in &state.keys {
         let mut visual = Node::container();
+        visual.id = Some(format!("keyboard-root:visual-{}", key.note));
         let held = key.held || key.externally_held;
         visual.style.descriptor.background = Some(if held {
             if key.black {
@@ -768,6 +765,7 @@ pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
         }
         if key.focused {
             visual.style.focus_ring = Some(focus_ring);
+            visual.style.focus_ring_within = true;
         }
         if horizontal {
             visual.style.descriptor.layout.width =
@@ -782,9 +780,6 @@ pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
                 LayoutSizing::Fixed(key.length_norm as f32 * height);
             absolute(&mut visual, 0.0, key.start_norm as f32 * height);
         }
-        root = root.child(visual);
-    }
-    for key in &state.keys {
         let mut control = Node::container();
         control.id = Some(format!("keyboard-root:note-{}", key.note));
         control.a11y.role = Some(NodeRole::Button);
@@ -803,12 +798,8 @@ pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
         };
         control.style.descriptor.layout.width = LayoutSizing::Fixed(1.0);
         control.style.descriptor.layout.height = LayoutSizing::Fixed(1.0);
-        if horizontal {
-            absolute(&mut control, key.start_norm as f32 * width, 0.0);
-        } else {
-            absolute(&mut control, 0.0, key.start_norm as f32 * height);
-        }
-        root = root.child(control);
+        absolute(&mut control, 0.0, 0.0);
+        root = root.child(visual.child(control));
     }
     root
 }
@@ -1063,9 +1054,8 @@ mod tests {
         let keyboard_node = keyboard(&KeyboardSpec::new(keyboard_state), &ctx);
         assert_eq!(keyboard_node.a11y.role, Some(NodeRole::Toolbar));
         assert!(keyboard_node
-            .children
-            .iter()
-            .any(|child| child.a11y.role == Some(NodeRole::Button)));
+            .find(&|child| child.a11y.role == Some(NodeRole::Button))
+            .is_some());
 
         let waveform_state = poodle_headless::audio::WaveformContext {
             pyramid: poodle_headless::audio::WaveformPeakPyramid {
