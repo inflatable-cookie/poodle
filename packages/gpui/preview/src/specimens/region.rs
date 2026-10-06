@@ -94,7 +94,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         )
                         .child(
                             div()
-                                .flex_grow()
+                                .flex_grow(1.0)
                                 .flex()
                                 .flex_col()
                                 .gap(px(8.0))

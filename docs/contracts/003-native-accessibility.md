@@ -1,30 +1,30 @@
 # 003 - Native Accessibility
 
 Status: active
-Updated: 2026-09-05
+Updated: 2026-10-06
 Owner: Poodle core
 Applies to: every contract with ARIA requirements, on the GPUI and Jetstream targets
 
 ## The Fact
 
-**The two native runtimes are no longer in the same position.** Jetstream has an
-accessibility API because we built one. GPUI does not, and cannot be given one
-from outside without a cost that outlives the wait.
+**The two native runtimes are at different stages of AccessKit adoption.**
+Jetstream projects its rendered tree into a live platform accessibility tree.
+GPUI 1.22.0 exposes AccessKit, but Poodle's GPUI backend has not yet wired its
+node metadata into that API.
 
 | Runtime | State | Evidence |
 |---------|-------|----------|
-| gpui 0.2.2 | **Nothing to call.** No `accesskit` dependency in its `Cargo.toml`, no accessibility node type, no role or label API anywhere in `src/`. 0.2.2 is the latest published version. | source search, and measured: its preview exposes **7 AX elements, 1 named** — `AXApplication`, `AXWindow`, three traffic lights and the title. That is AppKit's window chrome. None of GPUI's content is in it. |
+| gpui-unofficial 1.22.0 | **AccessKit API available upstream; Poodle mapping pending.** The GPUI backend carries node accessibility metadata, but does not yet project it into AccessKit. No live Poodle platform-tree read has been recorded for this release. | The pinned crate includes AccessKit; #127 owns Poodle mapping and live-tree proof. |
 | Jetstream | **AccessKit, live.** `jetstream-ui::accessibility` projects the retained `UiTree` into an `accesskit::TreeUpdate`; `jetstream-platform` owns an `accesskit_winit` adapter and routes action requests back through the same handlers pointer input uses. | `jetstream` commit `7e997892`, and measured: its preview exposes **471 elements of our own UI, 467 named**, read out of macOS through `AXUIElement`. |
 
-Those two numbers on the same machine, through the same probe, are the whole
-argument. This is no longer a claim about source code.
+The Jetstream measurement is live platform evidence. GPUI's API availability is
+not yet a claim about Poodle's rendered accessibility tree.
 
 The earlier version of this document said neither runtime had an API and
-recommended not scheduling the work at all. That was right about GPUI and wrong
-about Jetstream, where the blocker was a decision no one had taken rather than
-anything upstream. The `g12` roll-up preserves the
-original options study;
-this records what shipped.
+recommended not scheduling the work at all. That was right about GPUI 0.2.2
+and wrong about Jetstream, where the blocker was a decision no one had taken
+rather than anything upstream. The `g12` roll-up preserves the original
+options study; this records what shipped.
 
 ## What This Means For `aria_label`
 
@@ -38,9 +38,8 @@ the target:
   rendered tree headlessly, and `effigy test:jetstream-ax` checks the mounted
   macOS accessibility tree.
 - **GPUI** carries the metadata through the shared renderer into
-  `poodle-node`, but its node backend cannot map it to GPUI 0.2.2 accessibility
-  attributes. The backend reads the channel explicitly so the omission stays
-  visible and deliberate.
+  `poodle-node`, but the node backend does not yet map it to AccessKit. Task
+  #127 owns that wiring and its live platform-tree proof.
 
 So the field is no longer uniformly inert on native. Do not write "native
 targets do not consume `aria_label`" — one of them does.
@@ -75,11 +74,13 @@ only of the crates.io 0.2.2 pin. Adoption still waits on a buildable published
 
 Operator ruling (Tom, 2026-10-06): switch Poodle's GPUI dependency from
 crates.io `gpui` 0.2.2 to `gpui-unofficial`, pinned to an exact stable release
-(1.22.0 at the time of the ruling), and adopt its AccessKit path. Re-checked
-the same day: `gpui-apple-gpui-unofficial` 1.22.0 bundles its own `gpui`
-source and resolves it inside its crate directory, so the September
-sibling-path gate looks cleared; the `bzip2-1.0.6` licence is allowed in
-`deny.toml`. The remaining gate is a live, non-activating platform-tree read.
+(1.22.0 at the time of the ruling), then adopt its AccessKit path. Task #126
+switches the dependency and ports its API; task #127 wires Poodle's node
+metadata into AccessKit and proves it with a live, non-activating platform-tree
+read. Re-checked the same day: `gpui-apple-gpui-unofficial` 1.22.0 bundles its
+own `gpui` source and resolves it inside its crate directory, clearing the
+September sibling-path gate; the `bzip2-1.0.6` licence is allowed in
+`deny.toml`.
 Pre-release (`-pre`) tags are not pinned; upgrades are deliberate, one stable
 tag at a time. GPUI 1.22.0 still has only `Definite`/`Auto` lengths and
 `Normal`/`Nowrap` white space, so the two recorded layout and wrapping Known
@@ -87,18 +88,15 @@ Deltas remain upstream items.
 
 ## Consequences For Planning
 
-- **Do not schedule A2 against the crates.io 0.2.2 pin.** Upstream GPUI now has
+- **Do not claim GPUI A2 from the dependency switch alone.** Upstream GPUI has
   AccessKit and the `gpui-unofficial` spike proved that Poodle's existing node
-  accessibility record maps without a vocabulary change. Adoption remains
-  blocked because the published `gpui-apple` crate cannot build from crates.io,
-  and the in-memory test platform exposes no live accessibility tree. Track
-  those exact gates in
-  the `gpui-unofficial` adoption gates Queue lead; do not build a
-  parallel macOS-only tree against 0.2.2.
+  accessibility record maps without a vocabulary change. Task #127 owns that
+  mapping and a live platform-tree read. The in-memory test platform exposes no
+  live accessibility tree; do not use its snapshots as platform proof.
 - **Continue component-level accessibility work below A2.** Poodle can still
   prove roles, labels, state, value, keyboard operation, and focus in its
-  mounted node/backend path. The upstream publication hold cannot make those
-  contract claims not-applicable or complete.
+  mounted node/backend path. AccessKit API availability cannot make those
+  contract claims complete without Poodle mapping and platform-tree evidence.
 - **Do not read the GPUI accessibility artifacts as runtime proof.**
   `packages/gpui/native-accessibility-proof.json` is explicit about this in its
   own non-goals — it forbids claiming "mounted assistive-technology proof for
@@ -122,24 +120,26 @@ Deltas remain upstream items.
 
 ## What Would Change The GPUI Half
 
-The source API exists upstream. The remaining adoption gate is a published
-crate set that builds outside the publisher's sibling layout, followed by a
-non-activating live-window proof that reads Poodle content from the platform
-accessibility tree. Re-check each `gpui-unofficial` release; do not infer A2
-from headless node snapshots.
+The source API exists upstream. Task #126 verifies the published crate set and
+ports the platform facade. The remaining adoption gate is a non-activating
+live-window proof that reads Poodle content from the platform accessibility
+tree after node metadata is wired through AccessKit. Re-check each
+`gpui-unofficial` release; do not infer A2 from headless node snapshots.
 
-Until those gates clear, A2 is a **forced acceptance**, in the sense the Tree
-contract already uses. Component-level node semantics, keyboard, and focus are
-still payable work and remain governed by the active GPUI runway.
+Until the mapping and platform-tree proof clear, A2 is a **forced acceptance**,
+in the sense the Tree contract already uses. Component-level node semantics,
+keyboard, and focus are still payable work and remain governed by the active
+GPUI runway.
 
 ## The 48 Contracts This Governs
 
 **48 component contracts carry ARIA requirements inside their GPUI Notes
-section** — requirements that cannot be met on gpui 0.2.2. `checkbox.md` is
+section** — requirements that Poodle's GPUI backend does not yet expose through
+AccessKit. `checkbox.md` is
 representative: it requires the indeterminate state to be "accessible to
 assistive technology as `aria-checked="mixed"`", and requires exposing "state,
-and accessible name through the native accessibility tree". There is no native
-accessibility tree in GPUI to expose anything through.
+and accessible name through the native accessibility tree". Poodle content is
+not yet projected into GPUI's platform accessibility tree.
 
 Those requirements are not deleted or softened. They describe what the component
 must do when the runtime can, and they are the specification a future

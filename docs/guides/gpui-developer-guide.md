@@ -11,7 +11,8 @@ crates.io. Use path or workspace dependencies.
 
 ```toml
 [dependencies]
-gpui = "0.2.2"
+gpui = { package = "gpui-unofficial", version = "=1.22.0" }
+gpui_platform = { package = "gpui-platform-gpui-unofficial", version = "=1.22.0", features = ["font-kit"] }
 poodle-gpui = { path = "../poodle/packages/gpui/adapter" }
 poodle-gpui-node-backend = { path = "../poodle/packages/gpui/node-backend" }
 poodle-render = { path = "../poodle/packages/render" }

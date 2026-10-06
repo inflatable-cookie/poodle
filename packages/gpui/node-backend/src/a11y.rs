@@ -1,8 +1,8 @@
-//! Record `poodle-node` accessibility roles on the GPUI 0.2.2 path.
+//! Record `poodle-node` accessibility roles on the GPUI backend path.
 //!
-//! crates.io GPUI has no AccessKit paint API. Roles stay on the node record
-//! and the painted snapshot (`a11y_role`); this match is total so a new role
-//! cannot ship unmapped.
+//! GPUI 1.22.0 has AccessKit APIs, but Poodle mapping is a follow-up task.
+//! Roles stay on the node record and the painted snapshot (`a11y_role`); this
+//! match is total so a new role cannot ship unmapped.
 
 use poodle_node::NodeRole;
 

@@ -750,12 +750,14 @@ mod tests {
     /// The receipt identity and the dependency pin are the same claim; drift
     /// between them invalidates every receipt. This also fails if the
     /// manifest ever goes back to a Git source, because a `git = ` pin
-    /// carries no `gpui = "<version>"` line.
+    /// carries no registry package/version fragment.
     #[test]
     fn the_gpui_identity_matches_the_manifest_pin() {
         let manifest = include_str!("../../Cargo.toml");
         assert!(
-            manifest.contains(&format!("gpui = \"{GPUI_VERSION}\"")),
+            manifest.contains(&format!(
+                "package = \"gpui-unofficial\", version = \"={GPUI_VERSION}\""
+            )),
             "GPUI_VERSION drifted from the manifest pin"
         );
         assert!(

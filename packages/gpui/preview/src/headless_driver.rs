@@ -515,9 +515,9 @@ impl<'a> HeadlessDriver<'a> {
 
     /// Focus the element through the real backend focus registry.
     pub fn focus_element(&mut self, element_id: &str) {
-        self.cx.update(|window, _cx| {
+        self.cx.update(|window, cx| {
             if let Some(handle) = poodle_gpui_node_backend::focus_handle_for(element_id) {
-                handle.focus(window);
+                handle.focus(window, cx);
             }
         });
         self.draw_frame();
@@ -526,8 +526,8 @@ impl<'a> HeadlessDriver<'a> {
     /// Move focus to the next tab stop through the window's real traversal —
     /// the native counterpart of pressing Tab, with no pointer involved.
     pub fn focus_next_tab_stop(&mut self) {
-        self.cx.update(|window, _cx| {
-            window.focus_next();
+        self.cx.update(|window, cx| {
+            window.focus_next(cx);
         });
         self.draw_frame();
     }
@@ -538,8 +538,8 @@ impl<'a> HeadlessDriver<'a> {
         self.wait_named(
             &format!("element `{element_id}` to report blurred"),
             |driver| {
-                driver.cx.update(|window, _cx| {
-                    window.blur();
+                driver.cx.update(|window, cx| {
+                    window.blur(cx);
                 });
                 poodle_gpui_node_backend::focus_state_for(element_id) == Some(false)
             },
@@ -688,7 +688,7 @@ impl<'a> HeadlessDriver<'a> {
 
     /// The point `pointer_activate_id` would press, or why it cannot.
     ///
-    /// gpui 0.2.2's hit test intersects each registered hitbox with the
+    /// GPUI's hit test intersects each registered hitbox with the
     /// content mask active where it painted, and the mask the mount host
     /// leaves in place is the window viewport. The mount box itself never
     /// clips (a press outside it but inside the viewport still dispatches),
@@ -793,9 +793,9 @@ impl<'a> HeadlessDriver<'a> {
     /// overlay dismissal) would never fire. The mount host is focused first;
     /// the same guarantee a document-level key listener has on the web.
     pub fn dispatch_key(&mut self, key: &str) {
-        self.cx.update(|window, _cx| {
+        self.cx.update(|window, cx| {
             let handle = self.root_focus.clone();
-            handle.focus(window);
+            handle.focus(window, cx);
         });
         self.dispatch_key_raw(key);
     }
@@ -812,6 +812,7 @@ impl<'a> HeadlessDriver<'a> {
         self.cx.simulate_event(KeyDownEvent {
             keystroke,
             is_held: false,
+            prefer_character_input: false,
         });
         self.run_until_idle();
         self.draw_frame();
@@ -835,6 +836,7 @@ impl<'a> HeadlessDriver<'a> {
         self.cx.simulate_event(KeyDownEvent {
             keystroke: keystroke.clone(),
             is_held: false,
+            prefer_character_input: false,
         });
         self.cx.simulate_event(KeyUpEvent { keystroke });
         self.run_until_idle();
@@ -850,6 +852,7 @@ impl<'a> HeadlessDriver<'a> {
         self.cx.simulate_event(KeyDownEvent {
             keystroke: keystroke.clone(),
             is_held: false,
+            prefer_character_input: false,
         });
         self.cx.simulate_event(KeyUpEvent { keystroke });
         self.run_until_idle();
@@ -1033,7 +1036,7 @@ impl HeadlessDriver<'_> {
         candidate_ids: &[String],
         limit: usize,
     ) -> Vec<Option<String>> {
-        self.cx.update(|window, _cx| window.blur());
+        self.cx.update(|window, cx| window.blur(cx));
         self.draw_frame();
         let mut first: Option<FocusHandle> = None;
         let mut stops = Vec::new();

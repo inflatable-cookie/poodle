@@ -210,7 +210,21 @@ struct Scenario {
     #[serde(default)]
     #[allow(dead_code)]
     web_only_exclusions: Vec<Exclusion>,
+    #[serde(default, rename = "roleRemaps")]
+    #[allow(dead_code)]
+    role_remaps: Vec<RoleRemap>,
     capture: CaptureViewport,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+#[allow(dead_code)]
+struct RoleRemap {
+    index: usize,
+    field: String,
+    gpui: Value,
+    svelte: Value,
+    reason: String,
 }
 
 #[derive(Clone, Debug, Deserialize)]

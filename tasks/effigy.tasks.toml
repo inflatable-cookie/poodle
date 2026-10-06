@@ -154,7 +154,7 @@
 
 # GPUI native preview (macOS)
 "gpui:build" = "cargo build -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
-"gpui:run" = "cargo run -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
+"gpui:run" = "cargo run -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview -- {args}"
 "gpui:test" = "cargo test -p poodle-gpui --manifest-path packages/gpui/adapter/Cargo.toml"
 "gpui:preview" = [{ task = "gpui:run" }]
 
@@ -188,12 +188,11 @@
 # when dependencies are already installed. `effigy ci:fresh` is the
 # from-nothing command Queue runs as pre-merge validation: frozen-lockfile
 # install, then the same PR lanes, leaving only ignored outputs behind.
-# g16.005 downstream consumer proof. Compiles a throwaway crate that declares
-# crates.io `gpui = "0.2.2"` for itself AND depends on Poodle's GPUI node
-# backend, passing GPUI values across the boundary both ways. A forked or
-# patched GPUI source in Poodle gives the two crates different identities and
-# this stops compiling — which is exactly what published v0.2.1 did to
-# Longhorn. Includes a negative control. Headless; no window, no permission.
+# g16.005 downstream consumer proof. Compiles a throwaway crate that pins
+# `gpui-unofficial =1.22.0` for itself AND depends on Poodle's GPUI node
+# backend, passing GPUI values across the boundary both ways. A different
+# GPUI source or version in Poodle gives the crates different identities and
+# this stops compiling. Includes a negative control. Headless; no window.
 "drift:gpui-consumer-identity" = "bun test/consumer-dual-dependency/run.ts"
 # g18.032 / spec 071: changed-range admission and archive certification are
 # separate selectors. The npm certificate runs both and is the only web-release
@@ -275,6 +274,7 @@
   { run = "cargo deny --manifest-path packages/gpui/adapter/Cargo.toml check advisories sources" },
   { run = "cargo deny --manifest-path packages/jetstream/adapter/Cargo.toml check advisories sources" },
 ]
+"test:repository-security" = "bun test scripts/audit-repository-security.test.ts"
 "audit:licenses" = [
   { run = "bun scripts/audit-license-compliance.ts" },
   { run = "cargo deny --manifest-path packages/render/Cargo.toml check licenses" },

@@ -146,6 +146,9 @@ Poodle therefore applies these rules to every GPUI release graph:
   for a crate that has left is a false claim about what Poodle distributes.
   `audit:licenses` enforces both directions against the lockfiles: a missing
   notice fails, and so does a retained claim no lockfile resolves.
+- GPUI 1.22.0 resolves `libbz2-rs-sys` under `bzip2-1.0.6`. That existing
+  operator-approved licence is allowed in `deny.toml`, with notices at the
+  repository root and beside the public-intent GPUI node backend.
 - Remote Git sources are denied by default. An approved source must use a
   reviewed repository URL and an immutable full commit revision. Branches,
   tags, moving refs, and unreviewed repositories remain forbidden.
@@ -166,12 +169,12 @@ and made Poodle's GPUI types incompatible with a consumer's crates.io GPUI
 types. That source shape is rejected for public packages and is removed by
 `g15.059`.
 
-Stock crates.io GPUI 0.2.2 has no true offscreen pixel-readback API. Poodle
-therefore keeps its default native evidence on GPUI's in-memory test platform
-and treats real pixel capture as an explicit, non-activating window-server
-diagnostic. The diagnostic stays outside default QA, CI, and release gates. A
-future true-offscreen route must arrive through a crates.io GPUI release or a
-new explicit public-dependency decision; it cannot silently reintroduce a fork.
+GPUI 1.22.0 has no true offscreen pixel-readback API. Poodle therefore keeps
+its default native evidence on GPUI's in-memory test platform and treats real
+pixel capture as an explicit, non-activating window-server diagnostic. The
+diagnostic stays outside default QA, CI, and release gates. A future
+true-offscreen route must arrive through a crates.io GPUI release or a new
+explicit public-dependency decision; it cannot silently reintroduce a fork.
 
 This is Poodle's distribution policy, not legal advice. Admitting a
 strong-copyleft dependency or changing the native distribution claim requires

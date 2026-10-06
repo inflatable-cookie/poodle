@@ -3,7 +3,7 @@
 //!
 //! This crate is the GPUI half of the inversion `g12.019` completes. Poodle's
 //! components (`poodle-render`) emit `Spec + Theme → Node` trees and know
-//! nothing of GPUI; this adapter translates that vocabulary into GPUI 0.2.2's
+//! nothing of GPUI; this adapter translates that vocabulary into GPUI 1.22.0's
 //! fluent element API. The transcription source is the Jetstream backend
 //! (`jetstream-poodle/src/lib.rs`), whose channel walk this mirrors channel by
 //! channel; where GPUI has no equivalent channel the gap is documented inline
@@ -603,7 +603,7 @@ fn collapse_text_whitespace(content: &str) -> String {
 }
 
 /// Leaves (svg, img) implement `Styled` but not `InteractiveElement`/
-/// `ParentElement` in gpui 0.2.2. A leaf node that declares interaction,
+/// `ParentElement`. A leaf node that declares interaction,
 /// state patches, or children is wrapped in a div that carries them — the
 /// leaf keeps its own sizing and colour.
 fn build_leaf<E>(node: &Node, el: E) -> AnyElement
@@ -688,7 +688,7 @@ fn build_svg_leaf(node: &Node, el: gpui::Svg) -> AnyElement {
 }
 
 /// Container-shaped nodes: the full channel walk. Interaction that needs
-/// element state (click, drag, focus) forces a stateful div — gpui 0.2.2
+/// element state (click, drag, focus) forces a stateful div — GPUI
 /// gates its listener model behind `Stateful`.
 fn build_box(node: &Node, base: Div) -> AnyElement {
     if let Some(scope) = scroll::scoped(node) {
@@ -763,7 +763,7 @@ fn needs_state(node: &Node) -> bool {
         // A declared focus ring paints through a canvas child and implies
         // focus tracking — both need element state.
         || node.style.focus_ring.is_some()
-        // `active` style patches and scroll overflow live on gpui 0.2.2's
+        // `active` style patches and scroll overflow live on GPUI's
         // StatefulInteractiveElement — both need element state.
         || node.style.active.is_some()
         || node.style.descriptor.layout.overflow_x == LayoutOverflow::Scroll
@@ -811,7 +811,7 @@ thread_local! {
     /// Whether the subtree currently being built sits inside a focused node.
     static FOCUS_SCOPE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
     /// Whether the subtree currently being built sits inside an overlay
-    /// (deferred) node. gpui 0.2.2 forbids calling `defer_draw` during its
+    /// (deferred) node. GPUI forbids calling `defer_draw` during its
     /// deferred pass, so a nested overlay surface (a menu inside a popover)
     /// draws within the enclosing deferred element instead of deferring
     /// again.
@@ -1213,7 +1213,7 @@ fn sample_property(anim: &NodeAnimation, prop: AnimProperty, t: f32) -> Option<f
 
 fn gpui_animation(anim: &NodeAnimation) -> gpui::Animation {
     let a = gpui::Animation::new(Duration::from_secs_f32(anim.duration_secs));
-    // APPROXIMATION: gpui 0.2.2 animations repeat or run once; there is no
+    // APPROXIMATION: GPUI animations repeat or run once; there is no
     // ping-pong mode, so PingPong degrades to Loop.
     let a = match anim.loop_mode {
         AnimLoop::Once => a,
@@ -1233,7 +1233,7 @@ fn gpui_animation(anim: &NodeAnimation) -> gpui::Animation {
     }
 }
 
-/// Opacity is the one property gpui 0.2.2 can animate on any Styled element.
+/// Opacity is the one property GPUI can animate on any `Styled` element.
 /// SVG rotation is handled above; other transform channels remain unavailable
 /// on generic elements.
 fn maybe_animated<E>(el: E, node: &Node) -> AnyElement
@@ -1295,11 +1295,11 @@ where
 // ── Accessibility ───────────────────────────────────────────────────
 //
 // NodeA11y (role, label, expanded, selected, toggled, level) is intentionally
-// NOT mapped: gpui 0.2.2's fluent element API exposes no accessibility
-// attributes. `docs/contracts/003-native-accessibility.md` records the same
-// accepted runtime gap, and g12.015 holds GPUI accessibility upstream work
-// deliberately. The channels are walked (read)
-// here so the omission is a decision, not a drift.
+// NOT mapped: GPUI 1.22 exposes AccessKit, but Poodle's backend does not yet
+// project node accessibility metadata into it. The native accessibility
+// contract records the remaining gap and task #127 owns the mapping
+// and platform-tree proof. The channels are walked here so the omission stays
+// visible rather than drifting silently.
 
 mod ime;
 mod input_text;

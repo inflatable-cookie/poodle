@@ -26,7 +26,7 @@ const DISTRIBUTION: &str = "workspace";
 /// dependency first, then the four workspace packages. The emitter derives
 /// exactly these entries, in this order, from the lockfile bytes.
 const LOCKED_PACKAGES: [&str; 5] = [
-    "gpui",
+    "gpui-unofficial",
     "poodle-gpui",
     "poodle-gpui-preview",
     "poodle-node",
@@ -35,7 +35,7 @@ const LOCKED_PACKAGES: [&str; 5] = [
 
 /// The one selected package that is not a workspace member: its receipt entry
 /// carries the normalized `crates.io` source and the lockfile checksum.
-const REGISTRY_PACKAGE: &str = "gpui";
+const REGISTRY_PACKAGE: &str = "gpui-unofficial";
 
 #[derive(Debug, PartialEq, Serialize)]
 struct LockedPackage {

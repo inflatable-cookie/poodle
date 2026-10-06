@@ -18,9 +18,9 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
     };
     record_probe_channel("layout.intent.direction");
     match d.layout.width {
-        // `.flex_grow()` is a flex property, not a width — matching the
+        // `.flex_grow(1.0)` is a flex property, not a width — matching the
         // Jetstream `el.grow()` mapping, which is also a flex property.
-        LayoutSizing::Grow => el = el.flex_grow(),
+        LayoutSizing::Grow => el = el.flex_grow(1.0),
         LayoutSizing::Fixed(w) => el = el.w(px(w)),
         LayoutSizing::Fit => {}
         LayoutSizing::Constrained { min, max } => {
@@ -56,19 +56,18 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
         el = el.flex_none();
     }
     if style.self_stretch {
-        // No fluent self-stretch in gpui 0.2.2; set the refinement field.
-        el.style().align_self = Some(gpui::AlignSelf::Stretch);
+        el = el.self_stretch();
     }
     if let Some(grow) = style.flex_grow {
-        // Raw factor (fractional splits); `.flex_grow()` is the 1.0 case.
+        // Raw factor (fractional splits); `.flex_grow(1.0)` is the 1.0 case.
         el.style().flex_grow = Some(grow);
         record_probe_channel("layout.geometry.flex-grow");
     }
     if style.flex_fill {
         // Jetstream maps flex_fill to its grow() — grow + shrink, no stretch.
-        // gpui's `.flex_grow()` leaves shrink at its 1.0 default and does not
+        // GPUI's `.flex_grow(1.0)` leaves shrink at its 1.0 default and does not
         // touch align-self, which is exactly that.
-        el = el.flex_grow();
+        el = el.flex_grow(1.0);
     }
     if style.flex_shrink_zero {
         el = el.flex_shrink_0();
@@ -210,7 +209,7 @@ pub(super) fn apply_paint<E: Styled>(mut el: E, node: &Node) -> E {
         record_probe_channel("surface.channels.background");
     }
     if let Some((angle, stops)) = &style.gradient {
-        // gpui 0.2.2 `linear_gradient` takes exactly two stops. Two-stop
+        // GPUI `linear_gradient` takes exactly two stops. Two-stop
         // gradients (the only kind with a ported call site) map exactly;
         // longer stop lists keep their endpoints and drop the middle —
         // flagged as an approximation for the first component that needs it.
@@ -223,7 +222,7 @@ pub(super) fn apply_paint<E: Styled>(mut el: E, node: &Node) -> E {
         }
     }
 
-    // gpui 0.2.2's fluent border widths are fixed steps (border_1, border_2,
+    // GPUI's fluent border widths are fixed steps (border_1, border_2,
     // …); arbitrary widths go straight to the refinement fields. Per-side
     // widths compose with the uniform width exactly as the Jetstream walk's
     // `border_widths[i] = w` did.
@@ -251,7 +250,7 @@ pub(super) fn apply_paint<E: Styled>(mut el: E, node: &Node) -> E {
     // Colour accompanies any border — a border with no colour emission is
     // invisible. Per-side colour overrides win over the uniform colour.
     //
-    // APPROXIMATION: gpui 0.2.2 has a single `border_color` — no per-side
+    // APPROXIMATION: GPUI has a single `border_color` — no per-side
     // colours. When exactly one side overrides and the uniform colour is
     // unset (the ring-spinner arc, the remediation left accent, the active
     // tab underline), the override becomes the element's one border colour,
@@ -279,8 +278,8 @@ pub(super) fn apply_paint<E: Styled>(mut el: E, node: &Node) -> E {
         el = el.border_color(color(bottom));
     }
 
-    // UNIMPLEMENTED: `grayscale` — gpui 0.2.2 has no filter channel. A
-    // not-live card's washed-out treatment renders in full colour.
+    // UNIMPLEMENTED: `grayscale` — GPUI has no generic element filter channel.
+    // A not-live card's washed-out treatment renders in full colour.
     // UNIMPLEMENTED: `border_dashed` IS supported (BorderStyle) — mapped:
     if style.border_dashed {
         el = el.border_dashed();
@@ -301,10 +300,8 @@ pub(super) fn apply_paint<E: Styled>(mut el: E, node: &Node) -> E {
     }
 
     if !style.shadow_layers.is_empty() {
-        // Drop layers only. crates.io gpui 0.2.2 `BoxShadow` has no inset
-        // flag, so inset (highlight) layers cannot ride this refinement —
-        // `inset_shadow::apply` paints them instead, and the two halves are
-        // complementary, not a filter that loses one of them.
+        // Keep the existing inset renderer to preserve its geometry while
+        // GPUI's extended `BoxShadow` handles drop layers here.
         let shadows = style
             .shadow_layers
             .iter()
@@ -314,6 +311,7 @@ pub(super) fn apply_paint<E: Styled>(mut el: E, node: &Node) -> E {
                 offset: point(px(l.offset_x), px(l.offset_y)),
                 blur_radius: px(l.blur),
                 spread_radius: px(l.spread),
+                inset: false,
             })
             .collect::<Vec<_>>();
         if !shadows.is_empty() {
@@ -325,6 +323,7 @@ pub(super) fn apply_paint<E: Styled>(mut el: E, node: &Node) -> E {
             offset: point(px(shadow.offset_x), px(shadow.offset_y)),
             blur_radius: px(shadow.blur),
             spread_radius: px(0.0),
+            inset: false,
         }]);
         record_probe_channel("surface.extended.shadow");
     }
@@ -368,9 +367,7 @@ pub(super) fn apply_text<E: Styled>(mut el: E, node: &Node) -> E {
     if style.tabular_figures {
         // Vocabulary: tabular figures → OpenType `tnum`, so every digit
         // advances the same width (count columns align across rows).
-        el.text_style()
-            .get_or_insert_with(Default::default)
-            .font_features = Some(gpui::FontFeatures(std::sync::Arc::new(vec![(
+        el.text_style().font_features = Some(gpui::FontFeatures(std::sync::Arc::new(vec![(
             "tnum".to_owned(),
             1,
         )])));
@@ -403,7 +400,7 @@ pub(super) fn apply_text<E: Styled>(mut el: E, node: &Node) -> E {
     if style.no_wrap {
         el = el.whitespace_nowrap();
     }
-    // UNIMPLEMENTED: `letter_spacing_em` — gpui 0.2.2 text styles have no
+    // UNIMPLEMENTED: `letter_spacing_em` — GPUI text styles have no
     // letter-spacing channel.
     // Button labels are centered by the flex main-axis channel. The old GPUI
     // tier did not also apply text alignment to the label wrapper.

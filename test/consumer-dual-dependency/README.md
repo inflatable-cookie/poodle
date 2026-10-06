@@ -1,7 +1,7 @@
 # Downstream dual-dependency proof (g16.005)
 
-One question: can an ordinary crates.io consumer depend on `gpui` **and** on
-Poodle's GPUI node backend, and pass GPUI values between them?
+One question: can a crates.io consumer pin `gpui-unofficial` and Poodle's GPUI
+node backend to the same release, and pass GPUI values between them?
 
 Published `v0.2.1` could not. It resolved `gpui` from the
 `inflatable-cookie/zed` fork so an internal capture tool could reach
@@ -17,7 +17,8 @@ effigy drift:gpui-consumer-identity
 ## What runs
 
 `consumer/` is written the way a real consumer would write it: it declares
-`gpui = "0.2.2"` for itself, depends on `poodle-gpui-node-backend` by path,
+`gpui = { package = "gpui-unofficial", version = "=1.22.0" }` for itself,
+depends on `poodle-gpui-node-backend` by path,
 and threads GPUI values across the boundary in both directions —
 `to_gpui` → `gpui::AnyElement`, `color` → `gpui::Hsla`, `focus_handle_for` →
 `gpui::FocusHandle`, `bounds_for` → `gpui::Bounds<Pixels>`, and a Poodle
@@ -31,8 +32,8 @@ directory ever land in this checkout. It then asserts:
 
 1. the staged manifest declares its own `gpui` and carries no override;
 2. the consumer compiles;
-3. the resolved lockfile contains exactly one `gpui`, and every `gpui*` crate
-   comes from the registry;
+3. the resolved lockfile contains exactly one `gpui-unofficial` 1.22.0, and
+   every `gpui*` crate comes from the registry;
 4. the resolved graph enables `tinyvec`'s `std` feature — tinyvec `1.13.0`
    cannot compile its alloc-only path (`cannot find macro vec`), so an
    alloc-only tinyvec in the fresh resolution is the g16.092 break;
@@ -40,8 +41,8 @@ directory ever land in this checkout. It then asserts:
    annotation fails to compile, with a type mismatch. A proof that cannot fail
    proves nothing.
 
-Compilation reuses a stable target directory under the system temp directory,
-so repeat runs are seconds rather than a cold GPUI build.
+The consumer, its lockfile, and its target directory are staged under one
+fresh temporary directory and removed after the proof.
 
 This is a type-identity proof. It opens no window, renders nothing, and needs
 no window server or Screen Recording permission, so it runs on the ordinary
@@ -50,6 +51,6 @@ headless native board.
 ## Related
 
 - Source policy: `scripts/repository-security-policy.ts` (`registryOnlyCrates`)
-  rejects a Git-sourced `gpui`/`gpui_platform` in any active manifest or lock,
-  and `deny.toml` admits no Git source at all.
+  rejects Git-sourced GPUI aliases in manifests and any `gpui-*` package in
+  locks; `deny.toml` admits no Git source at all.
 - Card: task g16.005 (Git history).

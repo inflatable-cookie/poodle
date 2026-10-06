@@ -38,8 +38,8 @@ use std::time::{Duration, Instant};
 
 use anyhow::{bail, Context as _, Result};
 use gpui::{
-    px, size, App, AppContext as _, Application, AssetSource, AsyncApp, Bounds, Entity, Point,
-    Render, VisualContext as _, Window, WindowBounds, WindowOptions,
+    px, size, App, AppContext as _, AssetSource, AsyncApp, Bounds, Entity, Point, Render,
+    VisualContext as _, Window, WindowBounds, WindowOptions,
 };
 use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 use serde::Serialize;
@@ -56,7 +56,7 @@ pub const TRANSPORT: &str = "macos-window-server-nonactivating";
 /// The published GPUI identity these pixels come from. A consumer reading a
 /// receipt must be able to tell that Poodle used the registry crate.
 pub const GPUI_SOURCE: &str = "crates.io";
-pub const GPUI_VERSION: &str = "0.2.2";
+pub const GPUI_VERSION: &str = "1.22.0";
 
 /// How many drawn frames a scene with nothing to read back waits for. One is
 /// not enough: the first frame can land before layout has settled.
@@ -405,7 +405,7 @@ pub fn capture_batch<V: Render, A: AssetSource>(
     // Baseline BEFORE the application exists, let alone a window.
     let monitor = Arc::new(ForegroundMonitor::start());
 
-    Application::new()
+    gpui_platform::application()
         .with_assets(assets)
         .run(move |cx: &mut App| {
             if !fonts.is_empty() {
@@ -487,7 +487,6 @@ async fn capture_one<V: Render>(
                 build,
             )
         })
-        .with_context(|| format!("open the capture window for {label}"))?
         .with_context(|| format!("open the capture window for {label}"))?;
 
     let opened = Instant::now();

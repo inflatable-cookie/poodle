@@ -16,6 +16,6 @@ name = "consumer"
 path = "src/main.rs"
 
 [dependencies]
-gpui = "0.2.2"
+gpui = { package = "gpui-unofficial", version = "=1.22.0" }
 poodle-gpui-node-backend = { path = "__POODLE_ROOT__/packages/gpui/node-backend" }
 poodle-node = { path = "__POODLE_ROOT__/packages/contracts/node" }

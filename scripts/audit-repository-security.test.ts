@@ -71,14 +71,14 @@ test("lockfile URL and revision pairs fail closed", () => {
   expect(errors.join("\n")).toContain("is not approved");
 });
 
-// ── g16.005: GPUI is registry-only in the public graph ────────────────
+// ── g16.005: GPUI aliases and package family are registry-only ────────
 //
 // Published v0.2.1 resolved `gpui` from a Git fork, so a consumer on
 // crates.io gpui received a different crate identity and could not pass GPUI
 // types through Poodle. These are the checks that make that regression
 // impossible to land again quietly.
 
-test("gpui and gpui_platform are named as registry-only", () => {
+test("gpui and gpui_platform aliases are named as registry-only", () => {
   expect(registryOnlyCrates).toEqual(["gpui", "gpui_platform"]);
 });
 
@@ -103,30 +103,45 @@ test("a Git-sourced gpui_platform manifest dependency is rejected by name", () =
   expect(errors.join("\n")).toContain("gpui_platform must resolve from crates.io");
 });
 
-test("a Git-sourced gpui lockfile entry is rejected by name", () => {
+test("a Git-sourced gpui-unofficial lockfile entry is rejected by name", () => {
   const errors = validateCargoLockSources(
     "packages/gpui/preview/Cargo.lock",
     [
       "[[package]]",
-      'name = "gpui"',
-      'version = "0.2.2"',
+      'name = "gpui-unofficial"',
+      'version = "1.22.0"',
       `source = "git+${reviewedUrl}?rev=${reviewedRevision}#${reviewedRevision}"`,
     ].join("\n"),
     reviewed,
   );
 
   expect(errors.join("\n")).toContain(
-    "gpui resolves from a Git source",
+    "gpui-unofficial resolves from a Git source",
   );
 });
 
-test("a registry gpui entry passes, and an unrelated Git crate is not blamed on gpui", () => {
+test("Git-sourced platform crates in the GPUI package family are rejected", () => {
+  const errors = validateCargoLockSources(
+    "packages/gpui/preview/Cargo.lock",
+    [
+      "[[package]]",
+      'name = "gpui-platform-gpui-unofficial"',
+      'version = "1.22.0"',
+      `source = "git+${reviewedUrl}?rev=${reviewedRevision}#${reviewedRevision}"`,
+    ].join("\n"),
+    reviewed,
+  );
+
+  expect(errors.join("\n")).toContain("gpui-platform-gpui-unofficial resolves from a Git source");
+});
+
+test("a registry gpui-unofficial entry passes, and unrelated Git crates are not blamed on GPUI", () => {
   const clean = validateCargoLockSources(
     "packages/gpui/preview/Cargo.lock",
     [
       "[[package]]",
-      'name = "gpui"',
-      'version = "0.2.2"',
+      'name = "gpui-unofficial"',
+      'version = "1.22.0"',
       'source = "registry+https://github.com/rust-lang/crates.io-index"',
     ].join("\n"),
   );
@@ -147,7 +162,7 @@ test("a registry gpui entry passes, and an unrelated Git crate is not blamed on 
     ].join("\n"),
     reviewed,
   );
-  expect(unrelated.join("\n")).not.toContain("gpui resolves from a Git source");
+  expect(unrelated).toEqual([]);
 });
 
 test("historical documentation is not a Cargo manifest and is never scanned", () => {

@@ -228,7 +228,7 @@ pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> State
     }
     // A pointer press that lands inside a dismissable layer must still run
     // the shared outside-dismissal check when the layer's own subtree does
-    // not contain the position. gpui 0.2.2 does not route pointer events
+    // not contain the position. GPUI does not route pointer events
     // over deferred overlay content to window-level (root) listeners, so the
     // window host alone cannot dismiss a nested layer from a press inside
     // the enclosing overlay. Every layer member therefore observes presses
@@ -329,7 +329,7 @@ pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> State
                     // the target element exists and has a handle.
                     if super::layers::take_focus_request(&id) {
                         if !handle.is_focused(window) {
-                            handle.focus(window);
+                            handle.focus(window, cx);
                             cx.refresh_windows();
                         }
                     }
@@ -599,6 +599,10 @@ pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> State
             let enter_id = id.to_owned();
             let leave_id = id.to_owned();
             let hover_text = text.clone();
+            let move_id = id.to_owned();
+            let move_text = text.clone();
+            let move_bubble = tooltip_bubble.clone();
+            let move_open_change = tooltip_open_change.clone();
             el = el.on_hover(move |hovered: &bool, window: &mut Window, cx: &mut App| {
                 if *hovered {
                     crate::tooltip::on_pointer_enter(
@@ -612,6 +616,17 @@ pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> State
                 } else {
                     crate::tooltip::on_pointer_leave(window, cx, &leave_id);
                 }
+            });
+            el = el.on_mouse_move(move |event: &MouseMoveEvent, window, cx| {
+                crate::tooltip::on_pointer_move(
+                    window,
+                    cx,
+                    &move_id,
+                    &move_text,
+                    move_bubble.clone(),
+                    move_open_change.clone(),
+                    event.position,
+                );
             });
         }
     }
@@ -1319,7 +1334,7 @@ fn apply_selection_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div
                 KEY_ACTIVATED.with(|keys| keys.borrow_mut().insert(key.to_owned()));
                 if let Some(target) = activate() {
                     if let Some(handle) = focus_handle_for(&target) {
-                        handle.focus(window);
+                        handle.focus(window, cx);
                     }
                 }
                 cx.stop_propagation();
@@ -1333,7 +1348,7 @@ fn apply_selection_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div
             if let Some(key) = node_key(event.keystroke.key.as_str()) {
                 if let Some(target) = keys(key, node_modifiers(&event.keystroke.modifiers)) {
                     if let Some(handle) = focus_handle_for(&target) {
-                        handle.focus(window);
+                        handle.focus(window, cx);
                     }
                 }
                 cx.refresh_windows();

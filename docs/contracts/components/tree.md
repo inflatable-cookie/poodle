@@ -320,10 +320,11 @@ helpers `visible_rows` / `next_visible` / `prev_visible` / `parent_of`.
 - focus entry: the first selected item, else the first item
 - focus exit: native; roving tabindex preserves the last focused item
 - live-region or announcement behavior: none; state is conveyed by ARIA on items
-- GPUI-native accessibility mapping notes: **not exposed.** gpui 0.2.2 ships no
-  public accessibility API (no role/level/selected/checked tree), so the GPUI
-  Tree conveys state visually only. This is a runtime limitation, not a design
-  choice — see Known Deltas. Svelte emits the full ARIA tree.
+- GPUI-native accessibility mapping notes: **not exposed yet.** GPUI 1.22.0
+  provides AccessKit, but Poodle's backend does not yet map role, level,
+  selected, or checked metadata into it. The GPUI Tree currently conveys state
+  visually only; task #127 owns that mapping and platform-tree proof. Svelte
+  emits the full ARIA tree.
 
 ### The Twisty Gutter On A Flat Tree
 
@@ -704,7 +705,7 @@ None.
 | Jetstream has no `onActivate` | activation is a double-click or Enter on the web; the runtime reports single clicks with no click count, and raises no key events | accepted, tracked | g12.017 |
 | Jetstream has no rename, reorder or context-menu events | inline rename needs a text field and key handling, reorder needs drag, and the context menu needs a right-click — none of which this target raises yet | accepted, tracked | g12.017 |
 | Jetstream has no `onLoadChildren` | lazy loading is driven by expansion, which the host already hears through `on_toggle_expand` | accepted (by design) | none |
-| GPUI exposes no accessibility | gpui 0.2.2 has no public a11y API (no role/level/selected tree) | accepted (forced) | revisit when gpui ships accesskit support |
+| GPUI accessibility is not mapped | GPUI 1.22.0 exposes AccessKit, but Poodle's backend does not yet project its node metadata | accepted (forced) | task #127: map and prove the platform tree |
 | Jetstream exposes no ARIA | immediate-mode runtime has no a11y tree | accepted (forced) | — |
 | Virtual scroll is Svelte-only | GPUI/Jetstream have no row-windowing primitive; they render all visible rows | accepted | revisit if a Rust runtime gains windowing |
 | Rust interaction is host-driven | GPUI is stateless + driven by the owning view; Jetstream renders from spec with the app loop owning state/events | accepted | inherent to the runtimes |

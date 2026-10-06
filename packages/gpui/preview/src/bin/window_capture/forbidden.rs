@@ -76,8 +76,8 @@ pub const FORBIDDEN: &[(&str, &str)] = &[
 ];
 
 /// Words that would make a receipt field, constant, or diagnostic claim
-/// capabilities stock crates.io GPUI 0.2.2 does not have. Naming the
-/// transport dishonestly is the exact defect g16.005 exists to correct.
+/// capabilities the published GPUI API does not have. Naming the transport
+/// dishonestly is the exact defect g16.005 exists to correct.
 pub const FORBIDDEN_CLAIMS: &[(&str, &str)] = &[
     ("offscreen", "this transport uses a real window"),
     (
@@ -92,7 +92,6 @@ pub const FORBIDDEN_CLAIMS: &[(&str, &str)] = &[
         "HeadlessAppContext",
         "the headless app context is not a published API",
     ),
-    ("gpui_platform", "the platform crate is unpublished"),
 ];
 
 /// A single violation: which file, which fragment, and why it is refused.

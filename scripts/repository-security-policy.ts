@@ -16,14 +16,13 @@ const fullRevision = /^[0-9a-f]{40}$/;
 export const approvedGitRevisions = new Map<string, string>([]);
 
 /**
- * Crates whose source choice is a PUBLIC contract, not an internal one.
+ * Public GPUI dependency aliases whose source choice is a PUBLIC contract.
  *
- * `poodle-gpui-node-backend` is a public-intent package: a consumer that
- * depends on crates.io `gpui` must receive the same crate identity through
- * Poodle, or the two are different types and nothing can be passed across the
- * boundary. Published `v0.2.1` resolved `gpui` from a Git fork so an internal
- * capture tool could reach unpublished APIs, and Longhorn's prototypes could
- * not compile against it.
+ * `poodle-gpui-node-backend` is a public-intent package: a consumer and Poodle
+ * must resolve GPUI to the same crate identity, or their GPUI values cannot
+ * cross the boundary. Published `v0.2.1` resolved `gpui` from a Git fork so an
+ * internal capture tool could reach unpublished APIs, and Longhorn's
+ * prototypes could not compile against it.
  *
  * These crates are therefore rejected from a Git source EVEN IF that
  * repository is otherwise approved above. Optional tooling does not get to
@@ -35,9 +34,7 @@ const registryOnlyPattern = new RegExp(
   `^\\s*(?:${registryOnlyCrates.join("|")})\\s*=`,
 );
 
-const registryOnlyLockName = new RegExp(
-  `^name\\s*=\\s*"(?:${registryOnlyCrates.join("|")})"$`,
-);
+const registryOnlyLockName = /^name\s*=\s*"(?:gpui|gpui[_-].+)"$/;
 
 function activeManifestLines(source: string): Array<{ line: string; number: number }> {
   return source.split(/\r?\n/).flatMap((line, index) => {

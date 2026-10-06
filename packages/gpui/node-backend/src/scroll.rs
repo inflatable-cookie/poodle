@@ -119,7 +119,7 @@ pub fn scroll_offset_for(id: &str) -> Option<(f32, f32)> {
 pub fn scroll_extent_for(id: &str) -> Option<(f32, f32)> {
     find(id).map(|handle| {
         let max = handle.max_offset();
-        (max.width.into(), max.height.into())
+        (max.x.into(), max.y.into())
     })
 }
 
@@ -341,7 +341,7 @@ pub(super) fn apply_scroll(mut el: Stateful<Div>, node: &Node, id: &str) -> Stat
             let Some((x, y)) = target(
                 event.keystroke.key.as_str(),
                 position(&keys),
-                (max.width.into(), max.height.into()),
+                (max.x.into(), max.y.into()),
                 viewport,
                 vertical,
                 horizontal,

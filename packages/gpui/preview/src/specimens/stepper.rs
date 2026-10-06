@@ -32,9 +32,8 @@ const RERUN_LAST: &str = "stepper-rerun-last";
 /// Test-only markers (no-ops outside `test-support`), so the mounted specimen
 /// probe can locate these two steppers and aim real clicks at their controls.
 /// Same mechanism `specimen_layout` uses for its axis tabs. What the clicks
-/// then did is read off the retained state above, not off a marker: gpui 0.2.2
-/// never clears `debug_bounds`, so a selector keyed by a live value would keep
-/// reporting the value it held several frames ago.
+/// then did is read off the retained state above, not off a marker: the marker
+/// locates the control and the root entity owns its retained state.
 pub(crate) const WIZARD_MARKER: &str = "stepper-wizard";
 pub(crate) const RERUN_MARKER: &str = "stepper-rerun-group";
 
