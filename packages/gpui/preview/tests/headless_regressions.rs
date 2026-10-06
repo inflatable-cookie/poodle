@@ -20574,6 +20574,350 @@ fn simple_controls_paint_focus_rings_only_for_keyboard_origin() {
     }
 }
 
+/// Composite focus treatments follow the same window keyboard-origin signal
+/// as simple controls. The test ring observes production focusable targets
+/// whose contract treatment is a focus patch or a declared ring.
+#[test]
+fn composites_paint_focus_treatment_only_for_keyboard_origin() {
+    use poodle_headless::agent_plan::AgentPlanStatus;
+    use poodle_headless::agent_subagent::{AgentSubagentItem, AgentSubagentStatus};
+    use poodle_headless::agent_transcript::{ChangedFile, ToolCallStatus, TranscriptToolCall};
+    use poodle_headless::history_center::{
+        history_center_visible_rows, HistoryEntry, HistoryPathPage,
+    };
+    use poodle_specs::{
+        ActionDiscoveryPanelSpec, ActionDiscoverySection, AgentChatInputSpec, AgentPlanRecordSpec,
+        AgentSubagentSpec, AudioPlayerSpec, BlockEditorSpec, BlockTypeDefinition, CallOutSpec,
+        ChangedFilesSpec, DockEdge, DockRegionSpec, EditableListItem, EditableListSpec,
+        EditorBlock, FileUploadSpec, HistoryCenterSpec, MarkdownEditorSpec, MessageCenterItem,
+        MessageCenterSpec, ModelConnectionSetupSpec, PanelTabItem, RemediationBannerSpec,
+        ToolCallGroupSpec, ToolCallSpec,
+    };
+
+    fn instrument_focus_targets(
+        node: &mut Node,
+        component: &str,
+        focus_color: ColorValue,
+        index: &mut usize,
+        targets: &mut Vec<(String, ColorValue)>,
+    ) {
+        let has_treatment = node.style.focus_ring.is_some()
+            || (node.interaction.focusable && node.style.focus.is_some())
+            || (node.a11y.initial_focus && node.style.focus.is_some());
+        if has_treatment && !node.interaction.disabled {
+            let existing_ring = node.style.focus_ring;
+            let expected_color = existing_ring
+                .map(|ring| ring.color)
+                .or_else(|| node.style.focus.and_then(|patch| patch.border_color))
+                .unwrap_or(focus_color);
+            let id = format!("composite-focus-{component}-{index}");
+            *index += 1;
+            node.runtime_id = Some(id.clone());
+            let ring = existing_ring.unwrap_or(FocusRing {
+                color: expected_color,
+                width: 2.0,
+                offset: 2.0,
+            });
+            node.style.focus_ring = Some(FocusRing {
+                color: expected_color,
+                ..ring
+            });
+            targets.push((id, expected_color));
+        }
+        for child in &mut node.children {
+            instrument_focus_targets(child, component, focus_color, index, targets);
+        }
+    }
+
+    let provider = theme();
+    let ctx = RenderContext::new(&provider);
+    let focus_color = ctx.theme().resolve_color("color.accent.focusRing");
+
+    let history_pages = vec![HistoryPathPage::new(vec![HistoryEntry::new(
+        "focus-entry",
+        "Focus entry",
+    )])];
+    let history_view = poodle_render::HistoryCenterView {
+        is_open: true,
+        rows: history_center_visible_rows(Some(&history_pages), &[]),
+        ..poodle_render::HistoryCenterView::default()
+    };
+    let history_handlers = poodle_render::HistoryCenterHandlers::default();
+    let tool_call = |id: &str, detail: &str| TranscriptToolCall {
+        id: id.to_owned(),
+        label: "Run command".to_owned(),
+        detail: Some(detail.to_owned()),
+        status: ToolCallStatus::Success,
+        icon: None,
+        output: None,
+    };
+
+    let cases = vec![
+        (
+            "ActionDiscoveryPanel",
+            poodle_render::action_discovery_panel(
+                &ActionDiscoveryPanelSpec::new(vec![ActionDiscoverySection::new(
+                    "general",
+                    "General",
+                    vec![poodle_specs::CommandActionItem::new("save", "Save")],
+                )]),
+                &ctx,
+                poodle_render::ActionDiscoveryPanelHandlers::default(),
+            ),
+        ),
+        (
+            "AgentChatInput",
+            poodle_render::agent_chat_input(
+                &AgentChatInputSpec::new(),
+                &ctx,
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+                poodle_render::AgentChatInputHandlers::default(),
+            ),
+        ),
+        (
+            "AgentPlanRecord",
+            poodle_render::agent_plan_record(
+                &AgentPlanRecordSpec::new("A settled plan", AgentPlanStatus::Accepted),
+                &ctx,
+                poodle_render::AgentPlanRecordHandlers::default(),
+            ),
+        ),
+        (
+            "AgentSubagent",
+            poodle_render::agent_subagent(
+                &AgentSubagentSpec::new(AgentSubagentItem {
+                    id: "focus-child".to_owned(),
+                    label: "Research".to_owned(),
+                    status: AgentSubagentStatus::Running,
+                    activity_line: Some("Searching".to_owned()),
+                    summary: None,
+                })
+                .with_detail_lines(vec!["Found a source".to_owned()]),
+                &ctx,
+                poodle_render::AgentSubagentHandlers::default(),
+            ),
+        ),
+        (
+            "Audio",
+            poodle_render::audio_player(&AudioPlayerSpec::new("fixture.wav"), &ctx),
+        ),
+        (
+            "BlockEditor",
+            poodle_render::block_editor(
+                &BlockEditorSpec::new()
+                    .with_blocks(vec![EditorBlock::new("block-1", "paragraph")])
+                    .with_block_types(vec![BlockTypeDefinition::new(
+                        "paragraph",
+                        "Paragraph",
+                        "text",
+                    )]),
+                &ctx,
+                poodle_render::BlockEditorHandlers::new("focus-gate-block-editor"),
+            ),
+        ),
+        (
+            "Callout",
+            poodle_render::callout(
+                &CallOutSpec::new()
+                    .with_title("Notice")
+                    .with_content("Focus treatment probe")
+                    .dismissible(true),
+                &ctx,
+                poodle_render::CalloutHandlers::default(),
+            ),
+        ),
+        (
+            "ChangedFiles",
+            poodle_render::changed_files(
+                &ChangedFilesSpec::new(
+                    "focus-files",
+                    vec![ChangedFile {
+                        path: "src/focus.rs".to_owned(),
+                        additions: 1,
+                        deletions: 0,
+                        status: None,
+                    }],
+                )
+                .with_expanded(true),
+                &ctx,
+                poodle_render::ChangedFilesHandlers {
+                    on_file_select: Some(Arc::new(|_| {})),
+                    ..poodle_render::ChangedFilesHandlers::default()
+                },
+            ),
+        ),
+        (
+            "DockRegion",
+            poodle_render::dock_region(
+                &DockRegionSpec::new(
+                    DockEdge::Left,
+                    vec![PanelTabItem::new("focus-panel", "Focus panel")],
+                )
+                .with_collapsible(true)
+                .with_value("focus-panel"),
+                &ctx,
+                None,
+                poodle_render::DockRegionHandlers::default(),
+            ),
+        ),
+        (
+            "EditableList",
+            poodle_render::editable_list(
+                &EditableListSpec::new().with_items(vec![
+                    EditableListItem::new("focus-item-a").with_label("Focus item A"),
+                    EditableListItem::new("focus-item-b").with_label("Focus item B"),
+                ]),
+                &ctx,
+                poodle_render::EditableListHandlers {
+                    on_reorder: Some(Arc::new(|_| {})),
+                    ..poodle_render::EditableListHandlers::new("focus-gate-editable-list")
+                },
+            ),
+        ),
+        (
+            "FileUpload",
+            poodle_render::file_upload(&FileUploadSpec::new(), &ctx, None),
+        ),
+        (
+            "HistoryCenter",
+            poodle_render::history_center(
+                &HistoryCenterSpec::new().with_can_undo(true).with_open(true),
+                &ctx,
+                &history_view,
+                &history_handlers,
+            ),
+        ),
+        (
+            "MarkdownEditor",
+            poodle_render::markdown_editor(&MarkdownEditorSpec::new(), &ctx),
+        ),
+        (
+            "MessageCenter",
+            poodle_render::message_center(
+                &MessageCenterSpec::new(vec![MessageCenterItem::new(
+                    "focus-message",
+                    "Focus message",
+                )])
+                .with_open(true),
+                &ctx,
+                poodle_render::MessageCenterHandlers {
+                    on_item_select: Some(Arc::new(|_| {})),
+                    ..poodle_render::MessageCenterHandlers::default()
+                },
+            ),
+        ),
+        (
+            "ModelConnectionSetup",
+            poodle_render::model_connection_setup(
+                &ModelConnectionSetupSpec::new(),
+                &ctx,
+                poodle_render::ModelConnectionSetupHandlers::default(),
+            ),
+        ),
+        (
+            "RemediationBanner",
+            poodle_render::remediation_banner(
+                &RemediationBannerSpec::new("Recovery", "Take the next step")
+                    .with_dismissible(true),
+                &ctx,
+                poodle_render::RemediationBannerHandlers::default(),
+            ),
+        ),
+        (
+            "ToolCall",
+            poodle_render::tool_call(
+                &ToolCallSpec::new("focus-call", "Run command")
+                    .with_detail("bun test")
+                    .with_output("passed"),
+                &ctx,
+                poodle_render::ToolCallHandlers::default(),
+            ),
+        ),
+        (
+            "ToolCallGroup",
+            poodle_render::tool_call_group(
+                &ToolCallGroupSpec::new(
+                    "focus-run",
+                    vec![
+                        tool_call("focus-a", "one"),
+                        tool_call("focus-b", "two"),
+                        tool_call("focus-c", "three"),
+                    ],
+                ),
+                &ctx,
+                poodle_render::ToolCallGroupHandlers::default(),
+            ),
+        ),
+    ];
+
+    for (component, mut node) in cases {
+        let mut index = 0;
+        let mut targets = Vec::new();
+        instrument_focus_targets(&mut node, component, focus_color, &mut index, &mut targets);
+        assert!(
+            !targets.is_empty(),
+            "{component} exposes a focus treatment for the mounted probe"
+        );
+
+        run_headless(|cx| {
+            let mut driver =
+                HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(node)), 1000.0, 760.0);
+            for (id, expected_color) in &targets {
+                driver.wait_for_focus_handle(id);
+
+                // A pointer press establishes pointer modality. Focusing the
+                // exact measured handle keeps nested surfaces deterministic.
+                driver.pointer_activate_id(id);
+                assert!(
+                    !driver.with_window(|window, _| window.last_input_was_keyboard()),
+                    "pointer modality is active for {component}:{id}"
+                );
+                driver.focus_element(id);
+                assert_eq!(
+                    poodle_gpui_node_backend::focus_state_for(id),
+                    Some(true),
+                    "pointer-origin focus reaches {component}:{id}"
+                );
+                assert_eq!(
+                    poodle_gpui_node_backend::painted_ring_for(id),
+                    None,
+                    "pointer-origin focus leaves {component}:{id} without treatment"
+                );
+
+                driver.dispatch_key_raw("tab");
+                assert!(
+                    driver.with_window(|window, _| window.last_input_was_keyboard()),
+                    "keyboard modality is active for {component}:{id}"
+                );
+                driver.focus_element(id);
+                assert_eq!(
+                    poodle_gpui_node_backend::painted_ring_for(id)
+                        .expect("keyboard-origin composite focus paints a ring")
+                        .ring
+                        .color,
+                    *expected_color,
+                    "{component}:{id} uses its declared focus token"
+                );
+
+                driver.pointer_activate_id(id);
+                assert!(
+                    !driver.with_window(|window, _| window.last_input_was_keyboard()),
+                    "a pointer press restores pointer modality for {component}:{id}"
+                );
+                driver.focus_element(id);
+                assert_eq!(
+                    poodle_gpui_node_backend::painted_ring_for(id),
+                    None,
+                    "a pointer press removes {component}:{id}'s focus treatment"
+                );
+            }
+        });
+    }
+}
+
 // ── Component-owned focus rings: bare IconButton and Collapsible trigger ──
 //
 // The compositions no longer stamp focus patches over these components:

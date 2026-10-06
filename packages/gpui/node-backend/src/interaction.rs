@@ -208,25 +208,6 @@ fn should_focus_initial_overlay_node(node: &Node, id: &str) -> bool {
         && super::claim_initial_focus(id)
 }
 
-/// The first native focus-visible rollout covers standalone controls. Their
-/// focus treatment follows GPUI's window input-modality signal; composite
-/// containers keep their existing focus behavior for the follow-up work.
-pub(super) fn uses_keyboard_origin_focus(role: Option<NodeRole>) -> bool {
-    matches!(
-        role,
-        Some(
-            NodeRole::Button
-                | NodeRole::CheckBox
-                | NodeRole::RadioButton
-                | NodeRole::Switch
-                | NodeRole::Slider
-                | NodeRole::Tab
-                | NodeRole::TextInput
-                | NodeRole::SearchBox
-        )
-    )
-}
-
 pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> Stateful<Div> {
     let mut el = super::scroll::apply_scroll(el, node, id);
     if node.interaction.request_focus {
@@ -443,7 +424,6 @@ pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> State
     if let Some(ring) = node.style.focus_ring {
         let ring_id = id.to_owned();
         let ring_within = node.style.focus_ring_within;
-        let keyboard_origin_only = uses_keyboard_origin_focus(node.a11y.role);
         let border = &node.style.descriptor.border;
         let border_left = node.style.border_left_width.unwrap_or(border.width);
         let border_right = node.style.border_right_width.unwrap_or(border.width);
@@ -454,7 +434,7 @@ pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> State
             gpui::canvas(
                 move |_, _, _| {},
                 move |bounds, (), window, cx| {
-                    if keyboard_origin_only && !window.last_input_was_keyboard() {
+                    if !window.last_input_was_keyboard() {
                         super::clear_painted_ring(&ring_id);
                         return;
                     }
@@ -527,11 +507,7 @@ pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> State
         if node.interaction.focusable {
             if let Some(patch) = &node.style.focus {
                 let patch = *patch;
-                if uses_keyboard_origin_focus(node.a11y.role) {
-                    el = el.focus_visible(move |s| apply_patch(s, patch));
-                } else {
-                    el = el.focus(move |s| apply_patch(s, patch));
-                }
+                el = el.focus_visible(move |s| apply_patch(s, patch));
                 record_probe_channel("surface.state-patches.focus");
             }
         }

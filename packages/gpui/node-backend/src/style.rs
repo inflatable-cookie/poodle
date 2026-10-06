@@ -449,7 +449,7 @@ pub(super) fn apply_patch(mut s: StyleRefinement, patch: StylePatch) -> StyleRef
     s
 }
 
-pub(super) fn apply_state_patches<E: InteractiveElement>(mut el: E, node: &Node, id: &str) -> E {
+pub(super) fn apply_state_patches<E: InteractiveElement>(mut el: E, node: &Node) -> E {
     // Disabled nodes keep their baked style and get no patches — the
     // vocabulary's contract is "renders in the disabled state the style
     // already describes".
@@ -458,26 +458,10 @@ pub(super) fn apply_state_patches<E: InteractiveElement>(mut el: E, node: &Node,
     }
     if let Some(patch) = &node.style.hover {
         let patch = *patch;
-        // gpui refines hover *after* focus (`div.rs`: focus_style at 2490,
-        // hover_style at 2506), so a hover border silently overwrites a focus
-        // ring — a focused field lost its ring the moment you moved the mouse
-        // over it. Fold the focus patch back on top inside the hover closure
-        // while this node actually holds focus, so the last word is focus's.
-        let focus_patch = node
-            .style
-            .focus
-            .filter(|_| is_focused(id))
-            // Simple controls now use GPUI's native `focus_visible` style.
-            // Reapplying their plain focus patch here would restore the ring
-            // on pointer focus after the hover refinement.
-            .filter(|_| !super::interaction::uses_keyboard_origin_focus(node.a11y.role));
-        el = el.hover(move |s| {
-            let s = apply_patch(s, patch);
-            match focus_patch {
-                Some(focus) => apply_patch(s, focus),
-                None => s,
-            }
-        });
+        // Focus patches are applied separately through GPUI's `focus_visible`
+        // refinement. Folding one back into hover would restore focus
+        // treatment after a pointer press.
+        el = el.hover(move |s| apply_patch(s, patch));
         record_probe_channel("surface.state-patches.hover");
     }
     el
