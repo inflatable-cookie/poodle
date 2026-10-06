@@ -448,8 +448,13 @@ pub fn drag_number_field(spec: &DragNumberFieldSpec, ctx: &RenderContext<'_>) ->
     root
 }
 
-pub fn envelope_editor(spec: &EnvelopeEditorSpec, ctx: &RenderContext<'_>) -> Node {
-    let state = &spec.visual_state;
+/// Resolved envelope geometry: fixed width, height, and point-control size.
+/// The bind reuses the exact painted dimensions for hit testing, so pointer
+/// math matches the render instead of guessing its own length.
+pub(crate) fn envelope_geometry(
+    spec: &EnvelopeEditorSpec,
+    ctx: &RenderContext<'_>,
+) -> (f32, f32, f32) {
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
     let width = rem_to_px(audio_size_rem(
@@ -457,7 +462,12 @@ pub fn envelope_editor(spec: &EnvelopeEditorSpec, ctx: &RenderContext<'_>) -> No
         [8.0, 10.0, 12.0, 14.0, 16.0],
     ));
     let height = rem_to_px(audio_size_rem(effective_size, [6.0, 8.0, 10.0, 12.0, 14.0]));
-    let point_size = density_metric(density, [6.0, 8.0, 10.0]);
+    (width, height, density_metric(density, [6.0, 8.0, 10.0]))
+}
+
+pub fn envelope_editor(spec: &EnvelopeEditorSpec, ctx: &RenderContext<'_>) -> Node {
+    let state = &spec.visual_state;
+    let (width, height, point_size) = envelope_geometry(spec, ctx);
     let accent = ctx.theme().resolve_color("color.accent.base");
     let mut root = Node::container();
     root.id = Some("envelope-editor-root".into());
@@ -495,7 +505,7 @@ pub fn envelope_editor(spec: &EnvelopeEditorSpec, ctx: &RenderContext<'_>) -> No
             root = root.child(dot);
         }
     }
-    for point in &state.points {
+    for (index, point) in state.points.iter().enumerate() {
         let mut handle = Node::container();
         circle(
             &mut handle,
@@ -510,7 +520,13 @@ pub fn envelope_editor(spec: &EnvelopeEditorSpec, ctx: &RenderContext<'_>) -> No
         handle.style.descriptor.border.width = 2.0;
         handle.style.descriptor.border.color = accent;
         handle.a11y.role = Some(NodeRole::Slider);
-        handle.a11y.label = Some(format!("Envelope point {}", point.id));
+        handle.a11y.label = Some(format!(
+            "Point {}, X {} percent, Y {} percent, curve {:.2}",
+            index + 1,
+            (point.x_norm * 100.0).round() as i64,
+            (point.y_norm * 100.0).round() as i64,
+            point.curve
+        ));
         handle.interaction.focusable = state.enabled;
         absolute(
             &mut handle,
@@ -520,6 +536,20 @@ pub fn envelope_editor(spec: &EnvelopeEditorSpec, ctx: &RenderContext<'_>) -> No
         root = root.child(handle);
     }
     root
+}
+
+pub fn envelope_editor_with_handlers(
+    spec: &EnvelopeEditorSpec,
+    ctx: &RenderContext<'_>,
+    handlers: &crate::audio_handlers::EnvelopeHandlers,
+    live: &std::sync::Arc<std::sync::Mutex<crate::audio_handlers::EnvelopeLive>>,
+) -> Node {
+    let (width, height, _) = envelope_geometry(spec, ctx);
+    let mut node = envelope_editor(spec, ctx);
+    crate::audio_handlers::bind_envelope_editor(
+        &mut node, spec, ctx, handlers, live, width, height,
+    );
+    node
 }
 
 pub fn xy_pad(spec: &XYPadSpec, ctx: &RenderContext<'_>) -> Node {
@@ -899,10 +929,24 @@ pub fn waveform_display(spec: &WaveformDisplaySpec, ctx: &RenderContext<'_>) -> 
     root.style.descriptor.border.width = 1.0;
     root.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
     root.a11y.role = Some(NodeRole::Slider);
-    root.a11y.label = Some(format!(
-        "{}: cursor {:?}, selection {:?}",
-        spec.aria_label, state.cursor_sample, state.selection
-    ));
+    let mut summary = format!(
+        "{}, samples {} to {}",
+        spec.aria_label, state.visible_start, state.visible_end
+    );
+    if let Some(cursor) = state.cursor_sample {
+        summary.push_str(&format!(", cursor {cursor}"));
+    }
+    if let Some(selection) = state.selection {
+        summary.push_str(&format!(
+            ", selection {} to {}",
+            selection.start, selection.end
+        ));
+    }
+    root.a11y.label = Some(summary.clone());
+    root.a11y.value_min = Some(state.visible_start as f64);
+    root.a11y.value_max = Some(state.visible_end.saturating_sub(1).max(state.visible_start) as f64);
+    root.a11y.value = Some(state.cursor_sample.unwrap_or(state.visible_start) as f64);
+    root.a11y.value_text = Some(summary);
     root.interaction.focusable = state.enabled;
     root.interaction.disabled = !state.enabled;
     let gap = density_metric(density, [0.0, 0.5, 1.0]);
@@ -1014,13 +1058,19 @@ pub fn mod_matrix_grid(spec: &ModMatrixGridSpec, ctx: &RenderContext<'_>) -> Nod
             node.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
             node.a11y.role = Some(NodeRole::Cell);
             node.a11y.label = Some(format!(
-                "{} to {}, {}, range {} to {}",
+                "{} to {}, {}, {:.2}, range {:.2} to {:.2}",
                 source.label,
                 destination_label,
+                if cell.cell.enabled {
+                    "enabled"
+                } else {
+                    "disabled"
+                },
                 cell.cell.amount,
                 cell.cell.parameters.min,
                 cell.cell.parameters.max
             ));
+            node.a11y.selected = Some(cell.cell.enabled);
             node.interaction.focusable = state.enabled;
             let mut zero = Node::container();
             zero.style.descriptor.layout.width = LayoutSizing::Fixed(1.0);
@@ -1058,6 +1108,28 @@ pub fn mod_matrix_grid(spec: &ModMatrixGridSpec, ctx: &RenderContext<'_>) -> Nod
         root = root.child(row);
     }
     root
+}
+
+pub fn waveform_display_with_handlers(
+    spec: &WaveformDisplaySpec,
+    ctx: &RenderContext<'_>,
+    handlers: &crate::audio_handlers::WaveformHandlers,
+    live: &std::sync::Arc<std::sync::Mutex<crate::audio_handlers::WaveformLive>>,
+) -> Node {
+    let mut node = waveform_display(spec, ctx);
+    crate::audio_handlers::bind_waveform_display(&mut node, spec, ctx, handlers, live);
+    node
+}
+
+pub fn mod_matrix_grid_with_handlers(
+    spec: &ModMatrixGridSpec,
+    ctx: &RenderContext<'_>,
+    handlers: &crate::audio_handlers::ModMatrixHandlers,
+    live: &std::sync::Arc<std::sync::Mutex<crate::audio_handlers::ModMatrixLive>>,
+) -> Node {
+    let mut node = mod_matrix_grid(spec, ctx);
+    crate::audio_handlers::bind_mod_matrix_grid(&mut node, spec, ctx, handlers, live);
+    node
 }
 
 #[cfg(test)]

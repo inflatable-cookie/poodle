@@ -24,7 +24,11 @@ use std::sync::{Arc, Mutex};
 // crashes on current rustc).
 use gpui::{point, px, InteractiveElement, Modifiers, Pixels, Point, TestAppContext};
 use poodle_gpui::GpuiThemeProvider;
-use poodle_headless::audio::{AudioValueLaw, KnobDragMode, XYPadVisualState};
+use poodle_headless::audio::{
+    AudioValueLaw, EnvelopePoint, KnobDragMode, ModMatrixCell, ModMatrixCellParameters,
+    ModMatrixContext, ModMatrixHeader, WaveformContext, WaveformPeakLevel, WaveformPeakPair,
+    WaveformPeakPyramid, WaveformSelection, XYPadVisualState, WAVEFORM_MAX_COLUMNS,
+};
 use poodle_headless::motion_policy::MotionPolicy;
 use poodle_headless::time_input::{
     time_input_invalid, time_input_transition, TimeInputContext, TimeInputEvent,
@@ -39,14 +43,17 @@ use poodle_node::{
 };
 use poodle_render::{
     audio_entry_id, collapsible_trigger_focus_id, collapsible_with_handlers,
-    fader_spec_from_context, fader_with_handlers, history_center, icon_button,
-    knob_spec_from_context, knob_with_handlers, skeleton, spinner, tabs,
+    envelope_editor_with_handlers, envelope_spec_from_live, fader_spec_from_context,
+    fader_with_handlers, history_center, icon_button, knob_spec_from_context, knob_with_handlers,
+    mod_matrix_grid_with_handlers, mod_matrix_spec_from_context, skeleton, spinner, tabs,
     time_input_with_persistent_context, toast_stack, toast_stack_with_presence,
-    ui_presentation_provider, xy_pad_spec_from_context, xy_pad_with_handlers, xy_pad_x_id,
-    xy_pad_y_id, CollapsibleHandlers, FaderHandlers, FaderLive, HistoryCenterHandlers,
-    HistoryCenterView, KnobHandlers, KnobLive, RadioGroupHandlers, RatingHandlers, RenderContext,
-    SliderHandlers, TabsHandlers, ToastStackHandlers, ToastStackPresence, ToggleGroupHandlers,
-    TriStateSwitchHandlers, XYPadHandlers, XYPadLive,
+    ui_presentation_provider, waveform_display_with_handlers, waveform_spec_from_context,
+    xy_pad_spec_from_context, xy_pad_with_handlers, xy_pad_x_id, xy_pad_y_id, CollapsibleHandlers,
+    EnvelopeHandlers, EnvelopeLive, FaderHandlers, FaderLive, HistoryCenterHandlers,
+    HistoryCenterView, KnobHandlers, KnobLive, ModMatrixHandlers, ModMatrixLive,
+    RadioGroupHandlers, RatingHandlers, RenderContext, SliderHandlers, TabsHandlers,
+    ToastStackHandlers, ToastStackPresence, ToggleGroupHandlers, TriStateSwitchHandlers,
+    WaveformHandlers, XYPadHandlers, XYPadLive,
 };
 use poodle_specs::{
     AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ChoiceOption, CodeSpec, CodeWrap,
@@ -60855,5 +60862,1510 @@ fn tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui() {
             "disablement keeps the tooltip inert"
         );
         assert!(!is_tooltip_visible(ANCHOR));
+    });
+}
+
+/// EnvelopeEditor proves its mounted GPUI parity: normalized point geometry
+/// and the sampled curve render, draggable points with real pointer-derived
+/// deltas, keyboard nudging and deletion, snap hooks, and committed value
+/// semantics through the production adapter.
+#[test]
+fn first_mounted_parity_envelope_editor() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+
+    fn seed_points() -> Vec<EnvelopePoint> {
+        vec![
+            EnvelopePoint {
+                id: "attack".into(),
+                x: 0.1,
+                y: 0.8,
+                curve: 0.0,
+            },
+            EnvelopePoint {
+                id: "decay".into(),
+                x: 0.5,
+                y: 0.5,
+                curve: 0.5,
+            },
+            EnvelopePoint {
+                id: "release".into(),
+                x: 0.9,
+                y: 0.2,
+                curve: -0.5,
+            },
+        ]
+    }
+
+    fn node_for(
+        id: &str,
+        live: &Arc<Mutex<EnvelopeLive>>,
+        changes: &Arc<Mutex<Vec<Vec<EnvelopePoint>>>>,
+        commits: &Arc<Mutex<Vec<Vec<EnvelopePoint>>>>,
+        begin: &Arc<dyn Fn() + Send + Sync>,
+        end: &Arc<dyn Fn() + Send + Sync>,
+    ) -> Node {
+        let handlers = EnvelopeHandlers::new(id)
+            .on_points_change({
+                let changes = Arc::clone(changes);
+                Arc::new(move |points: Vec<EnvelopePoint>| {
+                    changes.lock().expect("changes lock").push(points);
+                })
+            })
+            .on_points_commit({
+                let commits = Arc::clone(commits);
+                Arc::new(move |points: Vec<EnvelopePoint>| {
+                    commits.lock().expect("commits lock").push(points);
+                })
+            })
+            .on_gesture_begin(Arc::clone(begin))
+            .on_gesture_end(Arc::clone(end));
+        let mut spec = envelope_spec_from_live(&live.lock().expect("envelope machine"));
+        spec.size = Some(ControlSize::Md);
+        envelope_editor_with_handlers(&spec, &RenderContext::new(&theme()), &handlers, live)
+    }
+
+    // Semantic, accessibility, and visual: the labelled group, one operable
+    // slider-like control per normalized point with formatted position text,
+    // and the sampled curve between them resolve the size ladder and tokens.
+    {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let live = Arc::new(Mutex::new(EnvelopeLive::new(seed_points())));
+        let changes = Arc::new(Mutex::new(Vec::new()));
+        let commits = Arc::new(Mutex::new(Vec::new()));
+        let (begin, _) = counting_handler();
+        let (end, _) = counting_handler();
+        let node = node_for("envelope-visual", &live, &changes, &commits, &begin, &end);
+        assert_eq!(node.a11y.role, Some(NodeRole::Group));
+        assert_eq!(node.a11y.label.as_deref(), Some("Envelope"));
+        assert_eq!(
+            node.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(12.0))
+        );
+        assert_eq!(
+            node.style.descriptor.layout.height,
+            LayoutSizing::Fixed(rem_to_px(10.0))
+        );
+        assert_eq!(
+            node.style.descriptor.background,
+            Some(theme_provider.resolve_color("color.background.surface"))
+        );
+        assert_eq!(
+            node.style.descriptor.border.color,
+            theme_provider.resolve_color("color.border.default")
+        );
+        let handles: Vec<&Node> = node
+            .children
+            .iter()
+            .filter(|child| child.a11y.role == Some(NodeRole::Slider))
+            .collect();
+        assert_eq!(handles.len(), 3);
+        assert_eq!(
+            handles[0].a11y.label.as_deref(),
+            Some("Point 1, X 10 percent, Y 80 percent, curve 0.00")
+        );
+        assert_eq!(
+            handles[1].a11y.label.as_deref(),
+            Some("Point 2, X 50 percent, Y 50 percent, curve 0.50")
+        );
+        assert_eq!(
+            handles[2].a11y.label.as_deref(),
+            Some("Point 3, X 90 percent, Y 20 percent, curve -0.50")
+        );
+        assert!(handles.iter().all(|handle| handle.interaction.focusable));
+        assert_eq!(
+            handles[1].style.descriptor.layout.width,
+            LayoutSizing::Fixed(8.0),
+            "the default-density point control resolves its weight"
+        );
+        let dots = node.children.len() - handles.len();
+        assert_eq!(dots, 50, "two segments sample 25 curve dots each");
+        assert_eq!(
+            node.children[0].style.descriptor.background,
+            Some(theme_provider.resolve_color("color.accent.base"))
+        );
+
+        for (size, width_rem, height_rem) in [
+            (ControlSize::Xs, 8.0, 6.0),
+            (ControlSize::Sm, 10.0, 8.0),
+            (ControlSize::Md, 12.0, 10.0),
+            (ControlSize::Lg, 14.0, 12.0),
+            (ControlSize::Xl, 16.0, 14.0),
+        ] {
+            let mut spec = envelope_spec_from_live(&live.lock().expect("envelope machine"));
+            spec.size = Some(size);
+            let sized = poodle_render::envelope_editor(&spec, &ctx);
+            assert_eq!(
+                sized.style.descriptor.layout.width,
+                LayoutSizing::Fixed(rem_to_px(width_rem)),
+                "{size:?} editor width"
+            );
+            assert_eq!(
+                sized.style.descriptor.layout.height,
+                LayoutSizing::Fixed(rem_to_px(height_rem)),
+                "{size:?} editor height"
+            );
+        }
+        let mut compact = envelope_spec_from_live(&live.lock().expect("envelope machine"));
+        compact.size = Some(ControlSize::Md);
+        compact.density = Some(ControlDensity::Compact);
+        let compact_node = poodle_render::envelope_editor(&compact, &ctx);
+        let compact_handle = compact_node
+            .children
+            .iter()
+            .find(|child| child.a11y.role == Some(NodeRole::Slider))
+            .expect("compact point handle");
+        assert_eq!(
+            compact_handle.style.descriptor.layout.width,
+            LayoutSizing::Fixed(6.0),
+            "density changes point weight without touching normalized geometry"
+        );
+    }
+
+    run_headless(|cx| {
+        let id = "envelope-main";
+        let live = Arc::new(Mutex::new(EnvelopeLive::new(seed_points())));
+        live.lock().expect("envelope machine").aria_label = "Amp envelope".into();
+        let changes: Arc<Mutex<Vec<Vec<EnvelopePoint>>>> = Arc::new(Mutex::new(Vec::new()));
+        let commits: Arc<Mutex<Vec<Vec<EnvelopePoint>>>> = Arc::new(Mutex::new(Vec::new()));
+        let (begin, begin_count) = counting_handler();
+        let (end, end_count) = counting_handler();
+        let mounted = Arc::new(Mutex::new(node_for(
+            id, &live, &changes, &commits, &begin, &end,
+        )));
+        let handle_id = format!("{id}:point:decay");
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 360.0);
+        driver.draw_frame();
+
+        let painted_root = poodle_gpui_node_backend::painted_node_for(id)
+            .expect("envelope root reached GPUI paint");
+        assert_eq!(painted_root.a11y_role, Some(NodeRole::Group));
+        assert_eq!(painted_root.a11y_label.as_deref(), Some("Amp envelope"));
+        let painted_handle = poodle_gpui_node_backend::painted_node_for(&handle_id)
+            .expect("decay handle reached GPUI paint");
+        assert_eq!(painted_handle.a11y_role, Some(NodeRole::Slider));
+        assert_eq!(
+            painted_handle.a11y_label.as_deref(),
+            Some("Point 2, X 50 percent, Y 50 percent, curve 0.50")
+        );
+        let root_geometry =
+            poodle_gpui_node_backend::bounds_for(id).expect("mounted envelope geometry");
+        let painted_geometry_width = f32::from(root_geometry.size.width);
+        let painted_geometry_height = f32::from(root_geometry.size.height);
+        assert!(painted_geometry_width > 0.0);
+        assert!(painted_geometry_height > 0.0);
+        let mounted_a11y = driver.accessibility_nodes();
+        let decay_a11y = mounted_a11y
+            .iter()
+            .find(|node| node.element_id == handle_id)
+            .expect("decay handle is in the mounted accessibility projection");
+        assert_eq!(decay_a11y.role, NodeRole::Slider);
+        assert_eq!(
+            decay_a11y.label.as_deref(),
+            Some("Point 2, X 50 percent, Y 50 percent, curve 0.50")
+        );
+
+        // Pointer drag with real deltas: the pointer-derived position moves
+        // the hit point live, then commits exactly once bracketed by one
+        // gesture pair.
+        let handle_bounds =
+            poodle_gpui_node_backend::bounds_for(&handle_id).expect("decay handle geometry");
+        let press = handle_bounds.center();
+        // Two moves like the drag-number proof: the first move opens the
+        // native drag session, the second delivers through it.
+        driver.pointer_press(press);
+        driver.pointer_drag(point(press.x + px(12.0), press.y - px(6.0)));
+        driver.pointer_drag(point(press.x + px(24.0), press.y - px(12.0)));
+        driver.pointer_release(point(press.x + px(24.0), press.y - px(12.0)));
+        let dragged = changes
+            .lock()
+            .expect("changes lock")
+            .last()
+            .expect("a drag change")
+            .iter()
+            .find(|point| point.id == "decay")
+            .expect("dragged decay point")
+            .clone();
+        assert!(
+            (dragged.x - (0.5 + 24.0 / painted_geometry_width as f64)).abs() < 0.02,
+            "24px across the painted width moves x by the real delta: {}",
+            dragged.x
+        );
+        assert!(
+            (dragged.y - (0.5 + 12.0 / painted_geometry_height as f64)).abs() < 0.02,
+            "12px upward moves y by the real delta: {}",
+            dragged.y
+        );
+        assert_eq!(
+            commits.lock().expect("commits lock").len(),
+            1,
+            "one drag commits once at release"
+        );
+        assert_eq!(*begin_count.lock().expect("begin lock"), 1);
+        assert_eq!(*end_count.lock().expect("end lock"), 1);
+        *mounted.lock().expect("mount") = node_for(id, &live, &changes, &commits, &begin, &end);
+        let rebuilt_label = mounted
+            .lock()
+            .expect("mount")
+            .children
+            .iter()
+            .find(|child| child.id.as_deref() == Some(handle_id.as_str()))
+            .expect("rebuilt decay handle")
+            .a11y
+            .label
+            .clone()
+            .expect("rebuilt position text");
+        assert!(
+            rebuilt_label.starts_with("Point 2, X 63 percent"),
+            "the mounted tree projects the dragged value: {rebuilt_label}"
+        );
+
+        // Keyboard focus and nudging: arrows step by the live step, Delete
+        // removes the selected point, each edit changing and committing.
+        driver.focus_element(&handle_id);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&handle_id),
+            Some(true),
+            "the point handle is a real focus target"
+        );
+        let before = live
+            .lock()
+            .expect("envelope machine")
+            .points
+            .iter()
+            .find(|point| point.id == "decay")
+            .expect("decay point")
+            .x;
+        driver.keyboard_key(&handle_id, "right");
+        let nudged = live
+            .lock()
+            .expect("envelope machine")
+            .points
+            .iter()
+            .find(|point| point.id == "decay")
+            .expect("decayed point")
+            .x;
+        assert!(
+            (nudged - before - 0.01).abs() < 1e-9,
+            "ArrowRight nudges by one step: {before} -> {nudged}"
+        );
+        driver.keyboard_key(&handle_id, "shift-left");
+        let fined = live
+            .lock()
+            .expect("envelope machine")
+            .points
+            .iter()
+            .find(|point| point.id == "decay")
+            .expect("decay point")
+            .x;
+        assert!(
+            (fined - nudged + 0.001).abs() < 1e-9,
+            "Shift uses one tenth step: {nudged} -> {fined}"
+        );
+        let commit_count = commits.lock().expect("commits lock").len();
+        assert!(
+            commit_count >= 3,
+            "drag plus keyboard nudges commit each atomic edit"
+        );
+        driver.keyboard_key(&handle_id, "delete");
+        assert_eq!(
+            live.lock().expect("envelope machine").points.len(),
+            2,
+            "Delete removes the selected point"
+        );
+        assert!(
+            live.lock().expect("envelope machine").selected.is_none(),
+            "removal clears the selection"
+        );
+        assert!(
+            commits
+                .lock()
+                .expect("commits lock")
+                .last()
+                .expect("a removal commit")
+                .iter()
+                .all(|point| point.id != "decay"),
+            "the removal commit carries the remaining points"
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+
+    // Snap hooks run in the adapter: the snapped drag commits the snapped
+    // point, and a disabled editor answers neither pointer nor keyboard.
+    run_headless(|cx| {
+        let id = "envelope-snap";
+        let live = Arc::new(Mutex::new(EnvelopeLive::new(seed_points())));
+        let changes: Arc<Mutex<Vec<Vec<EnvelopePoint>>>> = Arc::new(Mutex::new(Vec::new()));
+        let commits: Arc<Mutex<Vec<Vec<EnvelopePoint>>>> = Arc::new(Mutex::new(Vec::new()));
+        let (begin, _) = counting_handler();
+        let (end, _) = counting_handler();
+        let handlers = EnvelopeHandlers::new(id)
+            .on_points_change({
+                let changes = Arc::clone(&changes);
+                Arc::new(move |points: Vec<EnvelopePoint>| {
+                    changes.lock().expect("changes lock").push(points);
+                })
+            })
+            .on_points_commit({
+                let commits = Arc::clone(&commits);
+                Arc::new(move |points: Vec<EnvelopePoint>| {
+                    commits.lock().expect("commits lock").push(points);
+                })
+            })
+            .on_gesture_begin(begin)
+            .on_gesture_end(end)
+            .snap_point(Arc::new(|x: f64, y: f64| {
+                ((x * 4.0).round() / 4.0, (y * 4.0).round() / 4.0)
+            }));
+        let mut spec = envelope_spec_from_live(&live.lock().expect("envelope machine"));
+        spec.size = Some(ControlSize::Md);
+        let node =
+            envelope_editor_with_handlers(&spec, &RenderContext::new(&theme()), &handlers, &live);
+        let mounted = Arc::new(Mutex::new(node));
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 360.0);
+        driver.draw_frame();
+        let handle_id = format!("{id}:point:decay");
+        let press = poodle_gpui_node_backend::bounds_for(&handle_id)
+            .expect("snap handle geometry")
+            .center();
+        driver.pointer_press(press);
+        driver.pointer_drag(point(press.x + px(20.0), press.y));
+        driver.pointer_drag(point(press.x + px(40.0), press.y));
+        driver.pointer_release(point(press.x + px(40.0), press.y));
+        let snapped = live
+            .lock()
+            .expect("envelope machine")
+            .points
+            .iter()
+            .find(|point| point.id == "decay")
+            .expect("snapped decay point")
+            .x;
+        assert_eq!(
+            snapped, 0.75,
+            "the quarter-grid snap hook resolves the dragged point"
+        );
+        assert_eq!(
+            commits
+                .lock()
+                .expect("commits lock")
+                .last()
+                .expect("a snap commit")
+                .iter()
+                .find(|point| point.id == "decay")
+                .expect("committed decay point")
+                .x,
+            0.75
+        );
+    });
+
+    run_headless(|cx| {
+        let id = "envelope-disabled";
+        let live = Arc::new(Mutex::new(EnvelopeLive::new(seed_points())));
+        live.lock().expect("envelope machine").disabled = true;
+        let changes: Arc<Mutex<Vec<Vec<EnvelopePoint>>>> = Arc::new(Mutex::new(Vec::new()));
+        let commits: Arc<Mutex<Vec<Vec<EnvelopePoint>>>> = Arc::new(Mutex::new(Vec::new()));
+        let (begin, begin_count) = counting_handler();
+        let (end, _) = counting_handler();
+        let mounted = Arc::new(Mutex::new(node_for(
+            id, &live, &changes, &commits, &begin, &end,
+        )));
+        assert!(
+            !mounted
+                .lock()
+                .expect("mount")
+                .children
+                .iter()
+                .filter(|child| child.a11y.role == Some(NodeRole::Slider))
+                .all(|handle| handle.interaction.focusable),
+            "disabled point handles leave the focus chain"
+        );
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 360.0);
+        driver.draw_frame();
+        let handle_id = format!("{id}:point:decay");
+        let press = poodle_gpui_node_backend::bounds_for(&handle_id)
+            .expect("disabled handle geometry")
+            .center();
+        driver.pointer_press(press);
+        driver.pointer_drag(point(press.x + px(12.0), press.y));
+        driver.pointer_drag(point(press.x + px(24.0), press.y));
+        driver.pointer_release(point(press.x + px(24.0), press.y));
+        driver.focus_element(&handle_id);
+        driver.dispatch_key_raw("right");
+        driver.dispatch_key_raw("delete");
+        assert!(changes.lock().expect("changes lock").is_empty());
+        assert!(commits.lock().expect("commits lock").is_empty());
+        assert_eq!(*begin_count.lock().expect("begin lock"), 0);
+        assert_eq!(
+            live.lock().expect("envelope machine").points,
+            seed_points(),
+            "disabled drags and keys never reach the machine"
+        );
+    });
+}
+
+/// WaveformDisplay proves its mounted GPUI parity: pyramid validation with
+/// viewport-driven level choice and the 4,096-column ceiling, cursor and
+/// ordered-selection pointer mapping with real scrub fractions, keyboard
+/// cursor/selection behavior, and the contracted accessible summary through
+/// the production adapter.
+#[test]
+fn first_mounted_parity_waveform_display() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+
+    fn pyramid() -> WaveformPeakPyramid {
+        let ramp = |count: usize| {
+            (0..count)
+                .map(|index| {
+                    let peak = index as f64 / count as f64;
+                    WaveformPeakPair {
+                        min: -peak,
+                        max: peak,
+                    }
+                })
+                .collect()
+        };
+        WaveformPeakPyramid {
+            sample_count: 4096,
+            levels: vec![
+                WaveformPeakLevel {
+                    samples_per_peak: 1,
+                    peaks: ramp(4096),
+                },
+                WaveformPeakLevel {
+                    samples_per_peak: 4,
+                    peaks: ramp(1024),
+                },
+                WaveformPeakLevel {
+                    samples_per_peak: 64,
+                    peaks: ramp(64),
+                },
+            ],
+        }
+    }
+
+    fn seed_context() -> WaveformContext {
+        WaveformContext {
+            pyramid: pyramid(),
+            visible_start: 0,
+            visible_end: 4096,
+            column_count: 64,
+            cursor_sample: None,
+            selection: None,
+            selection_anchor: None,
+            selecting: false,
+            focus: false,
+            disabled: false,
+        }
+    }
+
+    fn node_for(
+        id: &str,
+        context: &WaveformContext,
+        aria: &str,
+        cursor_changes: &Arc<Mutex<Vec<usize>>>,
+        selection_changes: &Arc<Mutex<Vec<Option<WaveformSelection>>>>,
+        selection_commits: &Arc<Mutex<Vec<Option<WaveformSelection>>>>,
+    ) -> Node {
+        let handlers = WaveformHandlers::new(id)
+            .on_cursor_change({
+                let cursor_changes = Arc::clone(cursor_changes);
+                Arc::new(move |sample: usize| {
+                    cursor_changes.lock().expect("cursor lock").push(sample);
+                })
+            })
+            .on_selection_change({
+                let selection_changes = Arc::clone(selection_changes);
+                Arc::new(move |selection: Option<WaveformSelection>| {
+                    selection_changes
+                        .lock()
+                        .expect("selection lock")
+                        .push(selection);
+                })
+            })
+            .on_selection_commit({
+                let selection_commits = Arc::clone(selection_commits);
+                Arc::new(move |selection: Option<WaveformSelection>| {
+                    selection_commits
+                        .lock()
+                        .expect("commits lock")
+                        .push(selection);
+                })
+            });
+        let live = Arc::new(Mutex::new(context.clone()));
+        let mut spec = waveform_spec_from_context(&live.lock().expect("waveform machine"), aria);
+        spec.size = Some(ControlSize::Md);
+        waveform_display_with_handlers(&spec, &RenderContext::new(&theme()), &handlers, &live)
+    }
+
+    // Semantic and visual: the pyramid reduces to the fitting level for the
+    // viewport, the ceiling holds at 4,096 columns, and the size ladder plus
+    // tokens resolve before any input.
+    {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let cursor_changes = Arc::new(Mutex::new(Vec::new()));
+        let selection_changes = Arc::new(Mutex::new(Vec::new()));
+        let selection_commits = Arc::new(Mutex::new(Vec::new()));
+        let node = node_for(
+            "waveform-visual",
+            &seed_context(),
+            "Lead vocal",
+            &cursor_changes,
+            &selection_changes,
+            &selection_commits,
+        );
+        assert_eq!(node.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(
+            node.a11y.label.as_deref(),
+            Some("Lead vocal, samples 0 to 4096")
+        );
+        assert_eq!(node.a11y.value_min, Some(0.0));
+        assert_eq!(node.a11y.value_max, Some(4095.0));
+        assert_eq!(node.a11y.value, Some(0.0));
+        assert_eq!(
+            node.a11y.value_text.as_deref(),
+            Some("Lead vocal, samples 0 to 4096")
+        );
+        assert!(node.interaction.focusable);
+        assert_eq!(node.children.len(), 64);
+        assert_eq!(
+            node.children[0].style.descriptor.layout.width,
+            LayoutSizing::Fixed(5.0),
+            "64 default columns share the 22rem width minus the default gap"
+        );
+        assert_eq!(
+            node.children[0].style.descriptor.background,
+            Some(theme_provider.resolve_color("color.accent.base"))
+        );
+        assert_eq!(
+            node.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(22.0))
+        );
+        assert_eq!(
+            node.style.descriptor.layout.height,
+            LayoutSizing::Fixed(rem_to_px(7.0))
+        );
+        assert_eq!(
+            node.style.descriptor.background,
+            Some(theme_provider.resolve_color("color.background.surface"))
+        );
+        assert_eq!(
+            node.style.descriptor.border.color,
+            theme_provider.resolve_color("color.border.default")
+        );
+
+        // Level choice follows the viewport: the full range reduces the
+        // coarse level, while a zoomed viewport picks the fitting mid level.
+        let full = seed_context();
+        assert_eq!(full.visual_state().columns.len(), 64);
+        assert_eq!(
+            full.visual_state().columns[0],
+            WaveformPeakPair {
+                min: -0.0,
+                max: 0.0
+            },
+            "the full range aggregates the coarse level"
+        );
+        let mut zoomed = seed_context();
+        zoomed.visible_start = 0;
+        zoomed.visible_end = 256;
+        assert_eq!(zoomed.visual_state().columns.len(), 64);
+        let mid_first = WaveformPeakPair {
+            min: -0.0,
+            max: 0.0,
+        };
+        assert_eq!(zoomed.visual_state().columns[0], mid_first);
+        assert_ne!(
+            full.visual_state().columns[63],
+            zoomed.visual_state().columns[63],
+            "different viewports reduce different levels"
+        );
+
+        // The scale ceiling holds no matter how many columns are requested.
+        let mut ceiling = seed_context();
+        ceiling.column_count = 9000;
+        assert_eq!(
+            ceiling.visual_state().columns.len(),
+            WAVEFORM_MAX_COLUMNS,
+            "requested columns cap at the contracted ceiling"
+        );
+
+        for (size, width_rem, height_rem) in [
+            (ControlSize::Xs, 12.0, 3.0),
+            (ControlSize::Sm, 17.0, 5.0),
+            (ControlSize::Md, 22.0, 7.0),
+            (ControlSize::Lg, 27.0, 9.0),
+            (ControlSize::Xl, 32.0, 11.0),
+        ] {
+            let mut spec = waveform_spec_from_context(&seed_context(), "Lead vocal");
+            spec.size = Some(size);
+            let sized = poodle_render::waveform_display(&spec, &ctx);
+            assert_eq!(
+                sized.style.descriptor.layout.width,
+                LayoutSizing::Fixed(rem_to_px(width_rem)),
+                "{size:?} display width"
+            );
+            assert_eq!(
+                sized.style.descriptor.layout.height,
+                LayoutSizing::Fixed(rem_to_px(height_rem)),
+                "{size:?} display height"
+            );
+        }
+    }
+
+    run_headless(|cx| {
+        let id = "waveform-main";
+        let live = Arc::new(Mutex::new(seed_context()));
+        let cursor_changes: Arc<Mutex<Vec<usize>>> = Arc::new(Mutex::new(Vec::new()));
+        let selection_changes: Arc<Mutex<Vec<Option<WaveformSelection>>>> =
+            Arc::new(Mutex::new(Vec::new()));
+        let selection_commits: Arc<Mutex<Vec<Option<WaveformSelection>>>> =
+            Arc::new(Mutex::new(Vec::new()));
+        let handlers = WaveformHandlers::new(id)
+            .on_cursor_change({
+                let cursor_changes = Arc::clone(&cursor_changes);
+                Arc::new(move |sample: usize| {
+                    cursor_changes.lock().expect("cursor lock").push(sample);
+                })
+            })
+            .on_selection_change({
+                let selection_changes = Arc::clone(&selection_changes);
+                Arc::new(move |selection: Option<WaveformSelection>| {
+                    selection_changes
+                        .lock()
+                        .expect("selection lock")
+                        .push(selection);
+                })
+            })
+            .on_selection_commit({
+                let selection_commits = Arc::clone(&selection_commits);
+                Arc::new(move |selection: Option<WaveformSelection>| {
+                    selection_commits
+                        .lock()
+                        .expect("commits lock")
+                        .push(selection);
+                })
+            });
+        let rebuild = |live: &Arc<Mutex<WaveformContext>>| {
+            let handlers = WaveformHandlers::new(id)
+                .on_cursor_change({
+                    let cursor_changes = Arc::clone(&cursor_changes);
+                    Arc::new(move |sample: usize| {
+                        cursor_changes.lock().expect("cursor lock").push(sample);
+                    })
+                })
+                .on_selection_change({
+                    let selection_changes = Arc::clone(&selection_changes);
+                    Arc::new(move |selection: Option<WaveformSelection>| {
+                        selection_changes
+                            .lock()
+                            .expect("selection lock")
+                            .push(selection);
+                    })
+                })
+                .on_selection_commit({
+                    let selection_commits = Arc::clone(&selection_commits);
+                    Arc::new(move |selection: Option<WaveformSelection>| {
+                        selection_commits
+                            .lock()
+                            .expect("commits lock")
+                            .push(selection);
+                    })
+                });
+            let mut spec =
+                waveform_spec_from_context(&live.lock().expect("waveform machine"), "Lead vocal");
+            spec.size = Some(ControlSize::Md);
+            waveform_display_with_handlers(&spec, &RenderContext::new(&theme()), &handlers, live)
+        };
+        let mounted = Arc::new(Mutex::new(rebuild(&live)));
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 240.0);
+        driver.draw_frame();
+        let _ = handlers;
+
+        let painted_root = poodle_gpui_node_backend::painted_node_for(id)
+            .expect("waveform root reached GPUI paint");
+        assert_eq!(painted_root.a11y_role, Some(NodeRole::Slider));
+        assert_eq!(
+            painted_root.a11y_label.as_deref(),
+            Some("Lead vocal, samples 0 to 4096")
+        );
+        let root_geometry =
+            poodle_gpui_node_backend::bounds_for(id).expect("mounted waveform geometry");
+        assert!(f32::from(root_geometry.size.width) > 0.0);
+        assert!(f32::from(root_geometry.size.height) > 0.0);
+        let mounted_a11y = driver.accessibility_nodes();
+        let root_a11y = mounted_a11y
+            .iter()
+            .find(|node| node.element_id == id)
+            .expect("waveform is in the mounted accessibility projection");
+        assert_eq!(root_a11y.role, NodeRole::Slider);
+        assert_eq!(
+            root_a11y.value_text.as_deref(),
+            Some("Lead vocal, samples 0 to 4096")
+        );
+
+        // Pointer selection with real fractions: press moves the cursor and
+        // anchors the selection, drag extends it live, release commits once.
+        let origin_x: f32 = root_geometry.origin.x.into();
+        let origin_y: f32 = root_geometry.origin.y.into();
+        let box_width: f32 = root_geometry.size.width.into();
+        let box_height: f32 = root_geometry.size.height.into();
+        let at = |fraction: f32| {
+            point(
+                px(origin_x + box_width * fraction),
+                px(origin_y + box_height * 0.5),
+            )
+        };
+        driver.pointer_press(at(0.25));
+        driver.pointer_drag(at(0.375));
+        driver.pointer_drag(at(0.5));
+        driver.pointer_release(at(0.5));
+        // The first move opens the backend drag session; the press and the
+        // final move report live through the mounted tree.
+        assert_eq!(
+            cursor_changes.lock().expect("cursor lock").as_slice(),
+            &[1024, 2048],
+            "scrub fractions map to viewport samples"
+        );
+        assert_eq!(
+            selection_changes.lock().expect("selection lock").as_slice(),
+            &[
+                Some(WaveformSelection {
+                    start: 1024,
+                    end: 1024
+                }),
+                Some(WaveformSelection {
+                    start: 1024,
+                    end: 2048
+                }),
+            ]
+        );
+        assert_eq!(
+            selection_commits.lock().expect("commits lock").as_slice(),
+            &[Some(WaveformSelection {
+                start: 1024,
+                end: 2048
+            })],
+            "one drag commits once at release"
+        );
+        *mounted.lock().expect("mount") = rebuild(&live);
+        let rebuilt = mounted.lock().expect("mount");
+        assert_eq!(
+            rebuilt.a11y.label.as_deref(),
+            Some("Lead vocal, samples 0 to 4096, cursor 2048, selection 1024 to 2048")
+        );
+        assert_eq!(rebuilt.a11y.value, Some(2048.0));
+        assert_eq!(
+            rebuilt.children.len(),
+            66,
+            "columns plus selection and cursor"
+        );
+        let overlay = rebuilt
+            .children
+            .iter()
+            .find(|child| child.style.descriptor.opacity == 0.22)
+            .expect("selection overlay");
+        assert!(
+            matches!(
+                overlay.style.descriptor.layout.width,
+                LayoutSizing::Fixed(width) if width > 0.0
+            ),
+            "the selection overlay spans the selected samples"
+        );
+        let cursor_line = rebuilt
+            .children
+            .iter()
+            .find(|child| child.style.descriptor.layout.width == LayoutSizing::Fixed(2.0))
+            .expect("cursor line");
+        assert_eq!(
+            cursor_line.style.descriptor.layout.height,
+            LayoutSizing::Fixed(poodle_render::presentation::rem_to_px(7.0))
+        );
+        drop(rebuilt);
+
+        // A reverse drag owns the ordered selection from its anchor. The
+        // geometry is re-read because the rebuilt tree repaints its bounds.
+        let fresh_geometry =
+            poodle_gpui_node_backend::bounds_for(id).expect("repainted waveform geometry");
+        let fresh_x: f32 = fresh_geometry.origin.x.into();
+        let fresh_y: f32 = fresh_geometry.origin.y.into();
+        let fresh_w: f32 = fresh_geometry.size.width.into();
+        let fresh_h: f32 = fresh_geometry.size.height.into();
+        let at_fresh = |fraction: f32| {
+            point(
+                px(fresh_x + fresh_w * fraction),
+                px(fresh_y + fresh_h * 0.5),
+            )
+        };
+        driver.pointer_press(at_fresh(0.75));
+        driver.pointer_drag(at_fresh(0.675));
+        driver.pointer_drag(at_fresh(0.6));
+        driver.pointer_release(at_fresh(0.6));
+        let reversed = selection_changes
+            .lock()
+            .expect("selection lock")
+            .last()
+            .expect("a reverse change")
+            .expect("a reverse selection");
+        assert!(
+            (reversed.start as isize - 2457).abs() <= 4,
+            "the 0.6 fraction maps near sample 2457 (sub-pixel repaint variance): {}",
+            reversed.start
+        );
+        assert_eq!(
+            reversed.end, 3072,
+            "dragging back from the anchor keeps the ordered range"
+        );
+        assert_eq!(
+            selection_commits
+                .lock()
+                .expect("commits lock")
+                .last()
+                .expect("a reverse commit"),
+            &Some(reversed)
+        );
+        *mounted.lock().expect("mount") = rebuild(&live);
+
+        // Keyboard: arrows move the cursor without committing, Shift extends
+        // and commits the atomic edit, Home/End target viewport bounds, and
+        // Escape clears the selection.
+        driver.focus_element(id);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(id),
+            Some(true),
+            "the display is a real focus target"
+        );
+        let commits_before = selection_commits.lock().expect("commits lock").len();
+        let drag_end_cursor = *cursor_changes
+            .lock()
+            .expect("cursor lock")
+            .last()
+            .expect("a cursor");
+        driver.keyboard_key(id, "left");
+        assert_eq!(
+            *cursor_changes
+                .lock()
+                .expect("cursor lock")
+                .last()
+                .expect("a cursor change"),
+            drag_end_cursor - 1,
+            "arrows move the cursor one sample from the drag end"
+        );
+        assert_eq!(
+            selection_commits.lock().expect("commits lock").len(),
+            commits_before,
+            "a plain cursor move reports no selection commit"
+        );
+        driver.keyboard_key(id, "shift-right");
+        let extended = WaveformSelection {
+            start: drag_end_cursor - 1,
+            end: drag_end_cursor,
+        };
+        assert_eq!(
+            selection_changes
+                .lock()
+                .expect("selection lock")
+                .last()
+                .expect("an extended change"),
+            &Some(extended)
+        );
+        assert_eq!(
+            selection_commits
+                .lock()
+                .expect("commits lock")
+                .last()
+                .expect("an extended commit"),
+            &Some(extended),
+            "an extending move commits its atomic edit"
+        );
+        driver.keyboard_key(id, "home");
+        assert_eq!(
+            *cursor_changes
+                .lock()
+                .expect("cursor lock")
+                .last()
+                .expect("a home change"),
+            0
+        );
+        driver.keyboard_key(id, "end");
+        assert_eq!(
+            *cursor_changes
+                .lock()
+                .expect("cursor lock")
+                .last()
+                .expect("an end change"),
+            4095
+        );
+        driver.keyboard_key(id, "escape");
+        assert_eq!(
+            selection_changes
+                .lock()
+                .expect("selection lock")
+                .last()
+                .expect("a clear change"),
+            &None
+        );
+        assert_eq!(
+            selection_commits
+                .lock()
+                .expect("commits lock")
+                .last()
+                .expect("a clear commit"),
+            &None
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+
+    // A disabled display blocks cursor and selection interaction.
+    run_headless(|cx| {
+        let id = "waveform-disabled";
+        let mut context = seed_context();
+        context.disabled = true;
+        let cursor_changes: Arc<Mutex<Vec<usize>>> = Arc::new(Mutex::new(Vec::new()));
+        let selection_changes: Arc<Mutex<Vec<Option<WaveformSelection>>>> =
+            Arc::new(Mutex::new(Vec::new()));
+        let selection_commits: Arc<Mutex<Vec<Option<WaveformSelection>>>> =
+            Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(node_for(
+            id,
+            &context,
+            "Lead vocal",
+            &cursor_changes,
+            &selection_changes,
+            &selection_commits,
+        )));
+        assert!(!mounted.lock().expect("mount").interaction.focusable);
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 240.0);
+        driver.draw_frame();
+        let geometry =
+            poodle_gpui_node_backend::bounds_for(id).expect("disabled waveform geometry");
+        let geometry_x: f32 = geometry.origin.x.into();
+        let geometry_y: f32 = geometry.origin.y.into();
+        let geometry_w: f32 = geometry.size.width.into();
+        let geometry_h: f32 = geometry.size.height.into();
+        let middle = point(
+            px(geometry_x + geometry_w * 0.5),
+            px(geometry_y + geometry_h * 0.5),
+        );
+        driver.pointer_press(middle);
+        driver.pointer_drag(middle);
+        driver.pointer_drag(middle);
+        driver.pointer_release(middle);
+        driver.focus_element(id);
+        driver.dispatch_key_raw("right");
+        driver.dispatch_key_raw("escape");
+        assert!(cursor_changes.lock().expect("cursor lock").is_empty());
+        assert!(selection_changes.lock().expect("selection lock").is_empty());
+        assert!(selection_commits.lock().expect("commits lock").is_empty());
+    });
+}
+
+/// ModMatrixGrid proves its mounted GPUI parity: sparse-cell normalization
+/// with per-cell parameters, grid navigation with roving focus, horizontal
+/// cell drags with real scrub fractions through the embedded slider machine,
+/// keyboard toggle and nudging, and header plus formatted cell accessibility
+/// through the production adapter.
+#[test]
+fn first_mounted_parity_mod_matrix_grid() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+
+    fn seed_context() -> ModMatrixContext {
+        ModMatrixContext::new(
+            vec![
+                ModMatrixHeader {
+                    id: "lfo".into(),
+                    label: "LFO".into(),
+                },
+                ModMatrixHeader {
+                    id: "env".into(),
+                    label: "Envelope".into(),
+                },
+            ],
+            vec![
+                ModMatrixHeader {
+                    id: "pitch".into(),
+                    label: "Pitch".into(),
+                },
+                ModMatrixHeader {
+                    id: "cutoff".into(),
+                    label: "Cutoff".into(),
+                },
+            ],
+            vec![
+                ModMatrixCell {
+                    source_id: "lfo".into(),
+                    destination_id: "pitch".into(),
+                    amount: 0.5,
+                    enabled: true,
+                    parameters: ModMatrixCellParameters::default(),
+                },
+                ModMatrixCell {
+                    source_id: "lfo".into(),
+                    destination_id: "cutoff".into(),
+                    amount: 0.75,
+                    enabled: false,
+                    parameters: ModMatrixCellParameters {
+                        min: 0.0,
+                        max: 1.0,
+                        step: 0.05,
+                        law: AudioValueLaw::Linear,
+                    },
+                },
+                ModMatrixCell {
+                    source_id: "env".into(),
+                    destination_id: "cutoff".into(),
+                    amount: -40.0,
+                    enabled: true,
+                    parameters: ModMatrixCellParameters {
+                        min: -100.0,
+                        max: 0.0,
+                        step: 1.0,
+                        law: AudioValueLaw::Linear,
+                    },
+                },
+            ],
+        )
+    }
+
+    fn cell_id(instance: &str, source: &str, destination: &str) -> String {
+        format!("{instance}:cell:{source}:{destination}")
+    }
+
+    // Read the machine focus through one lock held once: a tuple of two
+    // `live.lock()` temporaries would hold the first guard while taking the
+    // second and deadlock the single test thread on the std mutex.
+    fn matrix_focus(live: &Arc<Mutex<ModMatrixLive>>) -> (Option<usize>, Option<usize>) {
+        let runtime = live.lock().expect("matrix machine");
+        (runtime.machine.focus_row, runtime.machine.focus_column)
+    }
+
+    fn node_for(
+        id: &str,
+        live: &Arc<Mutex<ModMatrixLive>>,
+        changes: &Arc<Mutex<Vec<ModMatrixCell>>>,
+        commits: &Arc<Mutex<Vec<ModMatrixCell>>>,
+        begin: &Arc<dyn Fn() + Send + Sync>,
+        end: &Arc<dyn Fn() + Send + Sync>,
+    ) -> Node {
+        let handlers = ModMatrixHandlers::new(id)
+            .on_cell_change({
+                let changes = Arc::clone(changes);
+                Arc::new(move |cell: ModMatrixCell| {
+                    changes.lock().expect("changes lock").push(cell);
+                })
+            })
+            .on_cell_commit({
+                let commits = Arc::clone(commits);
+                Arc::new(move |cell: ModMatrixCell| {
+                    commits.lock().expect("commits lock").push(cell);
+                })
+            })
+            .on_gesture_begin(Arc::clone(begin))
+            .on_gesture_end(Arc::clone(end));
+        let mut spec =
+            mod_matrix_spec_from_context(&live.lock().expect("matrix machine").machine, "Matrix");
+        spec.size = Some(ControlSize::Md);
+        mod_matrix_grid_with_handlers(&spec, &RenderContext::new(&theme()), &handlers, live)
+    }
+
+    fn cells_of(node: &Node) -> Vec<&Node> {
+        node.children
+            .iter()
+            .skip(1)
+            .flat_map(|row| row.children.iter().skip(1))
+            .collect()
+    }
+
+    // Semantic, accessibility, and visual: the labelled grid normalizes its
+    // sparse cells with per-cell parameters, publishes the zero anchors, and
+    // resolves the size ladder and tokens.
+    {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let live = Arc::new(Mutex::new(ModMatrixLive::new(seed_context())));
+        let changes = Arc::new(Mutex::new(Vec::new()));
+        let commits = Arc::new(Mutex::new(Vec::new()));
+        let (begin, _) = counting_handler();
+        let (end, _) = counting_handler();
+        let node = node_for("matrix-visual", &live, &changes, &commits, &begin, &end);
+        assert_eq!(node.a11y.role, Some(NodeRole::Grid));
+        assert_eq!(node.a11y.label.as_deref(), Some("Matrix"));
+        assert_eq!(
+            node.style.descriptor.background,
+            Some(theme_provider.resolve_color("color.background.surface"))
+        );
+        assert_eq!(
+            node.style.descriptor.border.color,
+            theme_provider.resolve_color("color.border.default")
+        );
+        assert_eq!(
+            node.children.len(),
+            3,
+            "column headers plus two source rows"
+        );
+        assert_eq!(
+            node.children[0].children.len(),
+            3,
+            "corner plus two destination headers"
+        );
+        assert_eq!(node.children[0].children[1].intrinsic_text(), Some("Pitch"));
+        assert_eq!(
+            node.children[0].children[2].intrinsic_text(),
+            Some("Cutoff")
+        );
+        for (index, label) in ["LFO", "Envelope"].iter().enumerate() {
+            assert_eq!(node.children[index + 1].a11y.role, Some(NodeRole::Row));
+            assert_eq!(node.children[index + 1].a11y.label.as_deref(), Some(*label));
+        }
+        let cells = cells_of(&node);
+        assert_eq!(cells.len(), 4);
+        assert!(cells
+            .iter()
+            .all(|cell| cell.a11y.role == Some(NodeRole::Cell)));
+        assert_eq!(
+            cells[0].a11y.label.as_deref(),
+            Some("LFO to Pitch, enabled, 0.50, range -1.00 to 1.00")
+        );
+        assert_eq!(cells[0].a11y.selected, Some(true));
+        assert_eq!(
+            cells[1].a11y.label.as_deref(),
+            Some("LFO to Cutoff, disabled, 0.75, range 0.00 to 1.00")
+        );
+        assert_eq!(cells[1].a11y.selected, Some(false));
+        assert_eq!(
+            cells[2].a11y.label.as_deref(),
+            Some("Envelope to Pitch, disabled, 0.00, range -1.00 to 1.00"),
+            "a missing cell normalizes to disabled zero with default parameters"
+        );
+        assert_eq!(cells[2].a11y.selected, Some(false));
+        assert_eq!(
+            cells[3].a11y.label.as_deref(),
+            Some("Envelope to Cutoff, enabled, -40.00, range -100.00 to 0.00")
+        );
+        assert!(cells.iter().all(|cell| cell.interaction.focusable));
+        for cell in &cells {
+            assert_eq!(
+                cell.style.descriptor.layout.width,
+                LayoutSizing::Fixed(rem_to_px(3.5))
+            );
+            assert_eq!(
+                cell.style.descriptor.layout.height,
+                LayoutSizing::Fixed(rem_to_px(1.75))
+            );
+        }
+        // Bars expand from the published zero anchor: centered for the
+        // default bipolar cell, from the left for positive unipolar, and
+        // from the right for negative unipolar.
+        fn zero_left(cell: &Node) -> f32 {
+            let zero = cell
+                .children
+                .iter()
+                .find(|child| child.style.descriptor.layout.width == LayoutSizing::Fixed(1.0))
+                .expect("zero anchor bar");
+            match zero.position {
+                NodePosition::Absolute {
+                    left: Some(left), ..
+                } => left,
+                ref other => panic!("zero anchor is positioned: {other:?}"),
+            }
+        }
+        assert_eq!(zero_left(cells[0]), rem_to_px(3.5) * 0.5);
+        assert_eq!(zero_left(cells[1]), 0.0);
+        assert_eq!(zero_left(cells[3]), rem_to_px(3.5));
+
+        for (size, cell_rem) in [
+            (ControlSize::Xs, 2.5),
+            (ControlSize::Sm, 3.0),
+            (ControlSize::Md, 3.5),
+            (ControlSize::Lg, 4.0),
+            (ControlSize::Xl, 4.5),
+        ] {
+            let mut spec = mod_matrix_spec_from_context(&seed_context(), "Matrix");
+            spec.size = Some(size);
+            let sized = poodle_render::mod_matrix_grid(&spec, &ctx);
+            let sized_cells = cells_of(&sized);
+            assert_eq!(
+                sized_cells[0].style.descriptor.layout.width,
+                LayoutSizing::Fixed(rem_to_px(cell_rem)),
+                "{size:?} cell footprint"
+            );
+        }
+    }
+
+    run_headless(|cx| {
+        let id = "matrix-main";
+        let live = Arc::new(Mutex::new(ModMatrixLive::new(seed_context())));
+        let changes: Arc<Mutex<Vec<ModMatrixCell>>> = Arc::new(Mutex::new(Vec::new()));
+        let commits: Arc<Mutex<Vec<ModMatrixCell>>> = Arc::new(Mutex::new(Vec::new()));
+        let (begin, begin_count) = counting_handler();
+        let (end, end_count) = counting_handler();
+        let mounted = Arc::new(Mutex::new(node_for(
+            id, &live, &changes, &commits, &begin, &end,
+        )));
+        let cutoff_id = cell_id(id, "lfo", "cutoff");
+        let pitch_id = cell_id(id, "lfo", "pitch");
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 240.0);
+        driver.draw_frame();
+
+        let painted_root =
+            poodle_gpui_node_backend::painted_node_for(id).expect("matrix root reached GPUI paint");
+        assert_eq!(painted_root.a11y_role, Some(NodeRole::Grid));
+        assert_eq!(painted_root.a11y_label.as_deref(), Some("Matrix"));
+        let painted_cutoff = poodle_gpui_node_backend::painted_node_for(&cutoff_id)
+            .expect("cutoff cell reached GPUI paint");
+        assert_eq!(painted_cutoff.a11y_role, Some(NodeRole::Cell));
+        assert_eq!(
+            painted_cutoff.a11y_label.as_deref(),
+            Some("LFO to Cutoff, disabled, 0.75, range 0.00 to 1.00")
+        );
+        let matrix_geometry =
+            poodle_gpui_node_backend::bounds_for(id).expect("mounted matrix geometry");
+        assert!(f32::from(matrix_geometry.size.width) > 0.0);
+        assert!(f32::from(matrix_geometry.size.height) > 0.0);
+        let mounted_a11y = driver.accessibility_nodes();
+        let cutoff_a11y = mounted_a11y
+            .iter()
+            .find(|node| node.element_id == cutoff_id)
+            .expect("cutoff cell is in the mounted accessibility projection");
+        assert_eq!(cutoff_a11y.role, NodeRole::Cell);
+        assert_eq!(
+            cutoff_a11y.label.as_deref(),
+            Some("LFO to Cutoff, disabled, 0.75, range 0.00 to 1.00")
+        );
+        assert_eq!(cutoff_a11y.selected, Some(false));
+
+        // A pointer press both activates (focuses) the cell and opens the
+        // horizontal scrub drag through the mounted backend: the embedded
+        // slider machine reports live change plus one release commit
+        // bracketed by gestures.
+        let cell_geometry =
+            poodle_gpui_node_backend::bounds_for(&cutoff_id).expect("mounted cutoff cell geometry");
+        let cell_x: f32 = cell_geometry.origin.x.into();
+        let cell_y: f32 = cell_geometry.origin.y.into();
+        let cell_w: f32 = cell_geometry.size.width.into();
+        let cell_h: f32 = cell_geometry.size.height.into();
+        let at = |fraction: f32| point(px(cell_x + cell_w * fraction), px(cell_y + cell_h * 0.5));
+        driver.pointer_press(at(0.5));
+        driver.pointer_drag(at(0.65));
+        driver.pointer_drag(at(0.8));
+        driver.pointer_release(at(0.8));
+        assert_eq!(
+            matrix_focus(&live),
+            (Some(0), Some(1)),
+            "pointer activation focuses the cell"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&cutoff_id),
+            Some(true)
+        );
+        let dragged = changes
+            .lock()
+            .expect("changes lock")
+            .last()
+            .expect("a drag change")
+            .clone();
+        assert!(
+            (dragged.amount - 0.8).abs() < 1e-6,
+            "the 0.8 scrub fraction resolves through the cell law: {}",
+            dragged.amount
+        );
+        assert_eq!(
+            commits
+                .lock()
+                .expect("commits lock")
+                .last()
+                .expect("a drag commit")
+                .amount,
+            dragged.amount
+        );
+        assert_eq!(*begin_count.lock().expect("begin lock"), 1);
+        assert_eq!(*end_count.lock().expect("end lock"), 1);
+        *mounted.lock().expect("mount") = node_for(id, &live, &changes, &commits, &begin, &end);
+        assert_eq!(
+            mounted
+                .lock()
+                .expect("mount")
+                .children
+                .iter()
+                .skip(1)
+                .flat_map(|row| row.children.iter().skip(1))
+                .find(|cell| cell.id.as_deref() == Some(cutoff_id.as_str()))
+                .expect("rebuilt cutoff cell")
+                .a11y
+                .label
+                .as_deref(),
+            Some("LFO to Cutoff, disabled, 0.80, range 0.00 to 1.00"),
+            "the mounted tree projects the scrubbed amount"
+        );
+
+        // Keyboard grid map: arrows navigate with backend focus following,
+        // Home/End target row bounds, Control pairs target grid bounds,
+        // Space toggles, and PageUp/PageDown nudge by the cell step.
+        driver.focus_element(&cutoff_id);
+        driver.keyboard_key(&cutoff_id, "left");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&pitch_id),
+            Some(true),
+            "arrow navigation moves real backend focus"
+        );
+        driver.keyboard_key(&pitch_id, "down");
+        assert_eq!(matrix_focus(&live), (Some(1), Some(0)));
+        let env_pitch_id = cell_id(id, "env", "pitch");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&env_pitch_id),
+            Some(true)
+        );
+        driver.keyboard_key(&env_pitch_id, "end");
+        let env_cutoff_id = cell_id(id, "env", "cutoff");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&env_cutoff_id),
+            Some(true),
+            "End targets the row bound"
+        );
+        driver.keyboard_key(&env_cutoff_id, "ctrl-home");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&pitch_id),
+            Some(true),
+            "Control+Home targets the grid start"
+        );
+        driver.keyboard_key(&pitch_id, "ctrl-end");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&env_cutoff_id),
+            Some(true),
+            "Control+End targets the grid end"
+        );
+        let toggle_before = live
+            .lock()
+            .expect("matrix machine")
+            .machine
+            .cells
+            .iter()
+            .find(|cell| cell.source_id == "env" && cell.destination_id == "cutoff")
+            .expect("env cutoff cell")
+            .enabled;
+        assert!(toggle_before);
+        driver.keyboard_key(&env_cutoff_id, "space");
+        let toggled = live
+            .lock()
+            .expect("matrix machine")
+            .machine
+            .cells
+            .iter()
+            .find(|cell| cell.source_id == "env" && cell.destination_id == "cutoff")
+            .expect("env cutoff cell")
+            .clone();
+        assert!(!toggled.enabled);
+        assert_eq!(
+            changes
+                .lock()
+                .expect("changes lock")
+                .last()
+                .expect("a toggle change")
+                .enabled,
+            false
+        );
+        assert_eq!(
+            commits
+                .lock()
+                .expect("commits lock")
+                .last()
+                .expect("a toggle commit")
+                .enabled,
+            false,
+            "an atomic toggle reports change and commit together"
+        );
+        driver.keyboard_key(&env_cutoff_id, "up");
+        driver.keyboard_key(&cutoff_id, "pageup");
+        let nudged = commits
+            .lock()
+            .expect("commits lock")
+            .last()
+            .expect("a nudge commit")
+            .clone();
+        assert!(
+            (nudged.amount - 0.85).abs() < 1e-9,
+            "PageUp nudges by the focused cell step: {}",
+            nudged.amount
+        );
+        driver.keyboard_key(&cutoff_id, "shift-pagedown");
+        let fined = commits
+            .lock()
+            .expect("commits lock")
+            .last()
+            .expect("a fine nudge commit")
+            .clone();
+        assert!(
+            (fined.amount - 0.845).abs() < 1e-9,
+            "Shift uses one tenth step: {}",
+            fined.amount
+        );
+        // Keyboard activation focuses without editing: Enter synthesizes the
+        // cell click, which carries no value change.
+        let changes_before = changes.lock().expect("changes lock").len();
+        driver.keyboard_key(&pitch_id, "enter");
+        assert_eq!(
+            matrix_focus(&live),
+            (Some(0), Some(0)),
+            "keyboard activation focuses the cell"
+        );
+        assert_eq!(
+            changes.lock().expect("changes lock").len(),
+            changes_before,
+            "activation alone edits nothing"
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+
+    // A disabled grid blocks activation, navigation, and edits.
+    run_headless(|cx| {
+        let id = "matrix-disabled";
+        let mut context = seed_context();
+        context.disabled = true;
+        let live = Arc::new(Mutex::new(ModMatrixLive::new(context)));
+        let changes: Arc<Mutex<Vec<ModMatrixCell>>> = Arc::new(Mutex::new(Vec::new()));
+        let commits: Arc<Mutex<Vec<ModMatrixCell>>> = Arc::new(Mutex::new(Vec::new()));
+        let (begin, begin_count) = counting_handler();
+        let (end, _) = counting_handler();
+        let mounted = Arc::new(Mutex::new(node_for(
+            id, &live, &changes, &commits, &begin, &end,
+        )));
+        assert!(
+            cells_of(&mounted.lock().expect("mount"))
+                .iter()
+                .all(|cell| !cell.interaction.focusable),
+            "disabled cells leave the focus chain"
+        );
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 240.0);
+        driver.draw_frame();
+        let target = cell_id(id, "lfo", "cutoff");
+        driver.pointer_activate_id(&target);
+        driver.focus_element(&target);
+        driver.dispatch_key_raw("right");
+        driver.dispatch_key_raw("space");
+        driver.dispatch_key_raw("pageup");
+        assert!(changes.lock().expect("changes lock").is_empty());
+        assert!(commits.lock().expect("commits lock").is_empty());
+        assert_eq!(*begin_count.lock().expect("begin lock"), 0);
+        assert!(
+            live.lock()
+                .expect("matrix machine")
+                .machine
+                .focus_row
+                .is_none(),
+            "disabled activation never focuses"
+        );
     });
 }

@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `49e51813857e05aaf8cdfe57fc6b9a950470400d`
+Evidence commit (execution identity from the execution record, not the checkout): `5daa515b9e23f4e371554c6ce27068a713b2c6c1`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
@@ -14,10 +14,10 @@ Construction is not functional completion. A passing route, a test name, or one 
 <!-- g18-census-summary -->
 ## Summary
 
-Rows with at least one admitted capability: **172**/175.
-Fully admitted rows: **168**/175.
-Missing by axis: semantic 3; events 4; pointer 4; keyboard_focus 4; accessibility 3; visual 5.
-Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **29**.
+Rows with at least one admitted capability: **175**/175.
+Fully admitted rows: **171**/175.
+Missing by axis: semantic 0; events 1; pointer 1; keyboard_focus 1; accessibility 0; visual 2.
+Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **26**.
 
 ## Rows
 
@@ -185,14 +185,14 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **29**.
 | MeterSurface | not-applicable (web-only) | — | — | — | — |
 | AudioSwitch | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/AudioSwitch--first-mounted-parity-audio-switch.json` |
 | DragNumberField | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/DragNumberField--drag-number-field-scrub-keyboard-bounds-and-entry-rebuild-the-host-spec.json` |
-| EnvelopeEditor | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
+| EnvelopeEditor | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/EnvelopeEditor--first-mounted-parity-envelope-editor.json` |
 | Fader | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Fader--fader-mounted-parity-through-production-dispatch.json` |
 | GainReductionMeter | semantic; accessibility; visual | semantic (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/GainReductionMeter--first-mounted-parity-gain-reduction-meter.json` |
 | Keyboard | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Keyboard--keyboard-pointer-computer-key-and-held-notes-rebuild-the-host-spec.json` |
 | Knob | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Knob--knob-mounted-parity-through-production-dispatch.json` |
-| ModMatrixGrid | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
+| ModMatrixGrid | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ModMatrixGrid--first-mounted-parity-mod-matrix-grid.json` |
 | ValueReadout | semantic; accessibility; visual | semantic (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ValueReadout--first-mounted-parity-value-readout.json` |
-| WaveformDisplay | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
+| WaveformDisplay | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/WaveformDisplay--first-mounted-parity-waveform-display.json` |
 | XYPad | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/XYPad--xy-pad-mounted-parity-through-production-dispatch.json` |
 | AgentMessage | semantic; keyboard_focus; accessibility; visual | semantic (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/AgentMessage--first-mounted-parity-agent-message.json` |
 | AgentPlan | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-a1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/AgentPlan--agent-plan-decisions-rebuild-the-host-spec-through-mounted-input.json` |
@@ -229,15 +229,11 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **29**.
 - SidebarNav: Expected test sidebar_nav_instance_scopes_keep_same_value_rows_distinct proves no events claim; events stays missing.
 - SidebarNav: Expected test sidebar_nav_wrapped_label_keeps_the_end_label_on_its_first_line proves no events claim; events stays missing.
 - SidebarNav: Expected test sidebar_nav_end_label_counts_paint_tabular proves no events claim; events stays missing.
-- EnvelopeEditor: No validated receipt and no retained expected test for EnvelopeEditor; every required capability stays missing.
-- ModMatrixGrid: No validated receipt and no retained expected test for ModMatrixGrid; every required capability stays missing.
-- WaveformDisplay: No validated receipt and no retained expected test for WaveformDisplay; every required capability stays missing.
 
 ## Missing-capability groups
 
 Shared-substrate groupings for repair-tranche compilation. Grouping only; no tranche is planned here.
 
-- general-composite: 3 components (EnvelopeEditor, ModMatrixGrid, WaveformDisplay); missing semantic 3; events 3; pointer 3; keyboard_focus 3; accessibility 3; visual 3
 - layout-primitive: 2 components (ListGrid, Tooltip); missing semantic 0; events 1; pointer 0; keyboard_focus 0; accessibility 0; visual 1
 - text-display: 1 components (Code); missing semantic 0; events 0; pointer 1; keyboard_focus 1; accessibility 0; visual 0
 - drag-resize-reorder: 1 components (CardToggleGroup); missing semantic 0; events 0; pointer 0; keyboard_focus 0; accessibility 0; visual 1

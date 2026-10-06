@@ -274,6 +274,9 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   EmbedInput: "embed_input_url_entry_validation_and_preview_rebuild_the_host_spec",
   AgentQuestionRecord: "agent_question_record_answer_display_rebuilds_the_host_spec",
   Keyboard: "keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec",
+  EnvelopeEditor: "first_mounted_parity_envelope_editor",
+  ModMatrixGrid: "first_mounted_parity_mod_matrix_grid",
+  WaveformDisplay: "first_mounted_parity_waveform_display",
 };
 
 /** The map's size when g16.062 stopped promoting from it. Fixed: the live

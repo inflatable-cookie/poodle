@@ -3,27 +3,6 @@
   "task": "g18.001",
   "groups": [
     {
-      "substrate": "general-composite",
-      "components": [
-        "EnvelopeEditor",
-        "ModMatrixGrid",
-        "WaveformDisplay"
-      ],
-      "missingTally": {
-        "semantic": 3,
-        "events": 3,
-        "pointer": 3,
-        "keyboard_focus": 3,
-        "accessibility": 3,
-        "visual": 3
-      },
-      "contracts": [
-        "docs/contracts/components/envelope-editor.md",
-        "docs/contracts/components/mod-matrix-grid.md",
-        "docs/contracts/components/waveform-display.md"
-      ]
-    },
-    {
       "substrate": "layout-primitive",
       "components": [
         "ListGrid",

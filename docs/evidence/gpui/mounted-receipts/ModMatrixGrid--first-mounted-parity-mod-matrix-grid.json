@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "Tabs",
-  "test": "tabs_drag_keyboard_and_identity_rebuild_the_host_spec",
+  "component": "ModMatrixGrid",
+  "test": "first_mounted_parity_mod_matrix_grid",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -19,28 +19,28 @@
       "production-mount"
     ],
     "events": [
-      "assert_eq!(\n            beta_changes.lock().unwrap().as_slice(),\n            [\"other\"],\n            \"Pointer activation on alpha instance must not fire beta change",
-      "assert!(\n            alpha_changes.lock().unwrap().is_empty(),\n            \"Keyboard navigation on beta instance must not fire alpha change",
-      "assert_eq!(\n            live.lock().unwrap().as_str(),\n            \"two\",\n            \"Manual mode: Enter commit"
+      "counting_handler",
+      "assert_eq!(\n            commits\n                .lock()\n                .expect(\"commits lock\")\n                .last()\n                .expect(\"a toggle commit\")\n                .enabled,\n            false,\n            \"an atomic toggle reports change and commit",
+      "assert_eq!(\n            changes\n                .lock()\n                .expect(\"changes lock\")\n                .last()\n                .expect(\"a toggle change"
     ],
     "pointer": [
       "pointer_activate",
       "pointer_press"
     ],
     "keyboard_focus": [
-      "focus_handle_for",
       "focus_state_for",
-      "focus_element"
+      "focus_element",
+      "dispatch_key"
     ],
     "accessibility": [
       "a11y\n                .",
-      "accessible",
+      "a11y\n            .",
       "NodeRole"
     ],
     "visual": [
-      "resolve_opacity",
       "resolve_color",
-      "resolve_space"
+      "rem_to_px",
+      "_geometry"
     ]
   },
   "production_path_observation": {
@@ -48,7 +48,7 @@
     "mount": "HeadlessDriver",
     "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::tabs_with_panel",
+    "renderer": "poodle_render::presentation",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -59,9 +59,9 @@
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "20f7852a-cc71-441a-8b01-12d2f349b188",
+    "run_id": "poodle-122-869c45e",
     "outcome": "passed",
-    "body_sha256": "da05d65fa635a8f08cf17703f7f18cc89f25824e15ea94362117eacd8b7aae60"
+    "body_sha256": "273121e4e986a97839964dc342a340ea540850e74fcf8a32a6cfa69c82562bec"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
