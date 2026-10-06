@@ -20574,6 +20574,321 @@ fn simple_controls_paint_focus_rings_only_for_keyboard_origin() {
     }
 }
 
+/// Composite focus treatment follows the same window-scoped keyboard-origin
+/// signal as standalone controls. A pointer focus paints none of it;
+/// keyboard-origin focus paints the declared tokens; a later pointer press
+/// removes it. The test ring is the common observation for recipes that
+/// express focus as a border, fill or shadow patch.
+#[test]
+fn composites_paint_focus_treatment_only_for_keyboard_origin() {
+    use poodle_specs::{
+        CalendarSpec, EditableLabelSpec, MenuEntry, MenubarEntry, MenubarSpec, NavigationMenuEntry,
+        NavigationMenuSpec, NumberInputSpec, OrderByField, OrderBySpec, PickerItemSpec,
+        PopoverInitialFocus, PopoverSpec, RangeSliderSpec, RefKind, RefOption, RefSelectSpec,
+        RelationPickerSpec, ResizeHandleSpec, SortDirection, SortField, SplitButtonSpec,
+        ThemeOption, ThemeSelectSpec, ThemeSwatch,
+    };
+
+    #[derive(Clone, Copy)]
+    enum FocusTarget {
+        Role(NodeRole),
+        RuntimeSuffix(&'static str),
+        Id(&'static str),
+    }
+
+    fn install_test_ring(
+        node: &mut Node,
+        target: FocusTarget,
+        id: &str,
+        token_color: ColorValue,
+    ) -> Option<ColorValue> {
+        let matched = match target {
+            FocusTarget::Role(role) => node.a11y.role == Some(role),
+            FocusTarget::RuntimeSuffix(suffix) => node
+                .runtime_id
+                .as_deref()
+                .is_some_and(|runtime_id| runtime_id.ends_with(suffix)),
+            FocusTarget::Id(expected) => node.id.as_deref() == Some(expected),
+        };
+        if matched && node.interaction.focusable {
+            node.id = Some(id.to_owned());
+            node.runtime_id = Some(id.to_owned());
+            let existing_ring = node.style.focus_ring;
+            let focus_color = existing_ring
+                .map(|ring| ring.color)
+                .or_else(|| node.style.focus.and_then(|patch| patch.border_color))
+                .or_else(|| node.style.focus.and_then(|patch| patch.background))
+                .unwrap_or(token_color);
+            let ring = existing_ring.unwrap_or(FocusRing {
+                color: focus_color,
+                width: 2.0,
+                offset: 2.0,
+            });
+            node.style.focus_ring = Some(ring);
+            return Some(ring.color);
+        }
+        node.children
+            .iter_mut()
+            .find_map(|child| install_test_ring(child, target, id, token_color))
+    }
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let focus_color = ctx.theme().resolve_color("color.accent.focusRing");
+
+    let cases = vec![
+        (
+            "focus-visible-menu",
+            FocusTarget::Role(NodeRole::MenuItem),
+            poodle_render::menu(
+                &poodle_specs::MenuSpec::new(vec![
+                    MenuEntry::new("new", "New file"),
+                    MenuEntry::new("save", "Save"),
+                ]),
+                &ctx,
+                None,
+            ),
+        ),
+        (
+            "focus-visible-menubar",
+            FocusTarget::Role(NodeRole::MenuItem),
+            poodle_render::menubar(
+                &MenubarSpec::new(vec![MenubarEntry::new(
+                    "file",
+                    "File",
+                    vec![MenuEntry::new("new", "New")],
+                )]),
+                &ctx,
+                poodle_render::MenubarHandlers::default(),
+            ),
+        ),
+        (
+            "focus-visible-navigation-menu",
+            FocusTarget::Role(NodeRole::Button),
+            poodle_render::navigation_menu(
+                &NavigationMenuSpec::new(vec![
+                    NavigationMenuEntry::new("home", "Home"),
+                    NavigationMenuEntry::new("docs", "Docs"),
+                ]),
+                &ctx,
+                poodle_render::NavigationMenuHandlers::default(),
+            ),
+        ),
+        (
+            "focus-visible-split-button",
+            FocusTarget::Role(NodeRole::Button),
+            poodle_render::split_button(
+                &SplitButtonSpec::new().with_label("Save"),
+                &ctx,
+                poodle_render::SplitButtonHandlers::default(),
+            ),
+        ),
+        (
+            "focus-visible-popover-trigger",
+            FocusTarget::Role(NodeRole::Button),
+            poodle_render::popover(
+                &PopoverSpec::new(),
+                &ctx,
+                &poodle_render::PopoverHandlers::default(),
+                Some(Node::text("Open")),
+                Some(Node::text("Panel")),
+            ),
+        ),
+        (
+            "focus-visible-popover-surface",
+            FocusTarget::Role(NodeRole::Dialog),
+            poodle_render::popover(
+                &PopoverSpec::new()
+                    .with_open(true)
+                    .with_initial_focus(PopoverInitialFocus::Content)
+                    .with_aria_label("Options"),
+                &ctx,
+                &poodle_render::PopoverHandlers {
+                    instance_id: Some("popover-surface".to_owned()),
+                    ..poodle_render::PopoverHandlers::default()
+                },
+                Some(Node::text("Open")),
+                Some(Node::text("Panel")),
+            ),
+        ),
+        (
+            "focus-visible-ref-select",
+            FocusTarget::Role(NodeRole::ListBoxOption),
+            poodle_render::ref_select_with_handlers(
+                &RefSelectSpec::new()
+                    .with_refs(vec![
+                        RefOption::new("main", "main").with_kind(RefKind::Branch),
+                        RefOption::new("feature", "feature").with_kind(RefKind::Branch),
+                    ])
+                    .with_value("main")
+                    .with_open(true),
+                &ctx,
+                poodle_render::RefSelectHandlers {
+                    instance_id: "ref-focus".to_owned(),
+                    ..poodle_render::RefSelectHandlers::default()
+                },
+            ),
+        ),
+        (
+            "focus-visible-relation-picker",
+            FocusTarget::Role(NodeRole::Button),
+            poodle_render::relation_picker(
+                &RelationPickerSpec::new(vec![
+                    PickerItemSpec::new("alpha", "Alpha"),
+                    PickerItemSpec::new("beta", "Beta"),
+                ])
+                .with_show_footer(false),
+                &ctx,
+                poodle_render::RelationPickerHandlers::new("relation-focus"),
+            ),
+        ),
+        (
+            "focus-visible-theme-select",
+            FocusTarget::Role(NodeRole::ListBoxOption),
+            poodle_render::theme_select_with_handlers(
+                &ThemeSelectSpec::new()
+                    .with_themes(vec![
+                        ThemeOption::new(
+                            "eclipse",
+                            "Eclipse",
+                            ThemeSwatch::new("#0e1012", "#15181b", "#f0b24d", "#eef2f6", "#333"),
+                        ),
+                        ThemeOption::new(
+                            "iceberg",
+                            "Iceberg",
+                            ThemeSwatch::new("#e7eef5", "#dbe5ef", "#2d86f3", "#131a22", "#75869b"),
+                        ),
+                    ])
+                    .with_value("eclipse")
+                    .with_open(true),
+                &ctx,
+                poodle_render::ThemeSelectHandlers {
+                    instance_id: "theme-focus".to_owned(),
+                    ..poodle_render::ThemeSelectHandlers::default()
+                },
+            ),
+        ),
+        (
+            "focus-visible-calendar",
+            FocusTarget::Role(NodeRole::Cell),
+            poodle_render::calendar(
+                &CalendarSpec::new()
+                    .with_today("2026-03-12")
+                    .with_value("2026-03-14")
+                    .with_visible_month("2026-03"),
+                &ctx,
+                poodle_render::CalendarHandlers::default(),
+            ),
+        ),
+        (
+            "focus-visible-number-input",
+            FocusTarget::Role(NodeRole::SpinButton),
+            poodle_render::number_input(
+                &NumberInputSpec::new(Some(5.0)).with_id("qty"),
+                &ctx,
+                poodle_render::NumberInputHandlers::default(),
+            ),
+        ),
+        (
+            "focus-visible-range-slider",
+            // Embedded thumbs share one absolute `right` offset on the group,
+            // so the later (upper) thumb is the painted hit target.
+            FocusTarget::Id("range-slider-upper"),
+            poodle_render::range_slider(
+                &RangeSliderSpec::new(20.0, 80.0)
+                    .with_variant(poodle_specs::SliderVariant::Embedded),
+                &ctx,
+                poodle_render::RangeSliderHandlers::default(),
+            ),
+        ),
+        (
+            "focus-visible-resize-handle",
+            FocusTarget::Role(NodeRole::Splitter),
+            poodle_render::resize_handle(&ResizeHandleSpec::new("editor:sidebar"), &ctx, None),
+        ),
+        (
+            "focus-visible-editable-label",
+            FocusTarget::Role(NodeRole::Button),
+            poodle_render::editable_label(&EditableLabelSpec::new().with_value("Kick"), &ctx, None),
+        ),
+        (
+            "focus-visible-order-by",
+            FocusTarget::RuntimeSuffix(":handle"),
+            poodle_render::order_by(
+                &OrderBySpec::new()
+                    .with_fields(vec![
+                        SortField::new("name", "Name"),
+                        SortField::new("date", "Date"),
+                    ])
+                    .with_value(vec![
+                        OrderByField::new("name", SortDirection::Asc),
+                        OrderByField::new("date", SortDirection::Desc),
+                    ])
+                    .with_open(true),
+                &ctx,
+                poodle_render::OrderByHandlers::new("sort-focus"),
+            ),
+        ),
+    ];
+
+    for (id, target, mut node) in cases {
+        let expected_color = install_test_ring(&mut node, target, id, focus_color)
+            .unwrap_or_else(|| panic!("no focusable target in {id}"));
+        run_headless(|cx| {
+            let node = Arc::new(Mutex::new(node));
+            let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 720.0, 560.0);
+            driver.wait_for_focus_handle(id);
+
+            driver.pointer_activate_id(id);
+            assert_eq!(
+                poodle_gpui_node_backend::focus_state_for(id),
+                Some(true),
+                "pointer focus reaches {id}"
+            );
+            assert_eq!(
+                poodle_gpui_node_backend::painted_ring_for(id),
+                None,
+                "pointer focus leaves {id} without a ring"
+            );
+            assert!(
+                !driver.with_window(|window, _| window.last_input_was_keyboard()),
+                "pointer modality is active after pressing {id}"
+            );
+
+            driver.dispatch_key_raw("tab");
+            assert!(
+                driver.with_window(|window, _| window.last_input_was_keyboard()),
+                "keyboard modality is active for {id}"
+            );
+            driver.focus_element(id);
+            assert_eq!(
+                poodle_gpui_node_backend::painted_ring_for(id)
+                    .expect("keyboard-focused composite paints its ring")
+                    .ring
+                    .color,
+                expected_color,
+                "{id} uses its focus token color"
+            );
+
+            driver.pointer_activate_id(id);
+            assert!(
+                !driver.with_window(|window, _| window.last_input_was_keyboard()),
+                "a pointer press clears keyboard modality for {id}"
+            );
+            assert_eq!(
+                poodle_gpui_node_backend::focus_state_for(id),
+                Some(true),
+                "pointer focus remains on {id} after its ring clears"
+            );
+            assert_eq!(
+                poodle_gpui_node_backend::painted_ring_for(id),
+                None,
+                "the pointer press removes {id}'s ring"
+            );
+        });
+    }
+}
+
 // ── Component-owned focus rings: bare IconButton and Collapsible trigger ──
 //
 // The compositions no longer stamp focus patches over these components:

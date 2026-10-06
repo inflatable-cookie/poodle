@@ -208,9 +208,10 @@ fn should_focus_initial_overlay_node(node: &Node, id: &str) -> bool {
         && super::claim_initial_focus(id)
 }
 
-/// The first native focus-visible rollout covers standalone controls. Their
-/// focus treatment follows GPUI's window input-modality signal; composite
-/// containers keep their existing focus behavior for the follow-up work.
+/// Focus rings and composite focus treatment follow GPUI's window-scoped
+/// input-modality signal (`last_input_was_keyboard` / `focus_visible`).
+/// Roles here are the focus-bearing parts whose contracts and Svelte
+/// implementations gate that treatment on keyboard origin.
 pub(super) fn uses_keyboard_origin_focus(role: Option<NodeRole>) -> bool {
     matches!(
         role,
@@ -223,6 +224,14 @@ pub(super) fn uses_keyboard_origin_focus(role: Option<NodeRole>) -> bool {
                 | NodeRole::Tab
                 | NodeRole::TextInput
                 | NodeRole::SearchBox
+                | NodeRole::MenuItem
+                | NodeRole::MenuItemCheckBox
+                | NodeRole::MenuItemRadio
+                | NodeRole::Cell
+                | NodeRole::SpinButton
+                | NodeRole::Splitter
+                | NodeRole::ListBoxOption
+                | NodeRole::Dialog
         )
     )
 }
