@@ -9,7 +9,9 @@ const REPO = new URL("../../../..", import.meta.url).pathname;
 const MANIFEST = join(PREVIEW, "Cargo.toml");
 const BIN = join(PREVIEW, "target", "debug", "poodle-window-capture");
 const PROBE_SOURCE = join(REPO, "test/native-visual/gpui-ax-probe.swift");
+const PROOF_WINDOW_TITLE = "Poodle GPUI AX proof";
 const PROBE_TIMEOUT_MS = 9_000;
+const PROBE_ATTEMPT_TIMEOUT_MS = 2_000;
 const EXIT_TIMEOUT_MS = 15_000;
 
 type Element = {
@@ -63,8 +65,21 @@ function build(command: string, args: string[], label: string): void {
 async function probeUntilReady(pid: number, probePath: string): Promise<ProbeResult> {
   const deadline = Date.now() + PROBE_TIMEOUT_MS;
   let last: ProbeResult | undefined;
+  let lastProbeError: string | undefined;
   while (Date.now() < deadline) {
-    const result = spawnSync(probePath, [String(pid)], { encoding: "utf8" });
+    const attemptTimeoutMs = Math.min(PROBE_ATTEMPT_TIMEOUT_MS, Math.max(1, deadline - Date.now()));
+    const result = spawnSync(probePath, [String(pid), PROOF_WINDOW_TITLE], {
+      encoding: "utf8",
+      timeout: attemptTimeoutMs,
+    });
+    if (result.error?.code === "ETIMEDOUT") {
+      lastProbeError = `AXUIElement probe exceeded ${attemptTimeoutMs}ms`;
+      await Bun.sleep(250);
+      continue;
+    }
+    if (result.error) {
+      throw new Error(`AXUIElement probe could not run: ${result.error.message}`);
+    }
     if (result.status === 3) {
       throw new Error(
         `AXUIElement probe is not trusted:\n${result.stdout.trim()}\n${result.stderr.trim()}`,
@@ -78,12 +93,17 @@ async function probeUntilReady(pid: number, probePath: string): Promise<ProbeRes
     } catch {
       throw new Error(`AXUIElement probe returned invalid JSON: ${result.stdout}`);
     }
+    lastProbeError = undefined;
+    if (last.status === "walk_error") {
+      throw new Error(`AXUIElement tree walk failed: ${last.reason}`);
+    }
     if (last.status === "ready") return last;
     await Bun.sleep(250);
   }
+  const lastFailure = [last?.reason, lastProbeError].filter(Boolean).join("; ");
   throw new Error(
-    `no Poodle content appeared in the non-activating platform tree within ${PROBE_TIMEOUT_MS}ms` +
-      (last ? ` (${last.reason})` : ""),
+    `proof window root and named Poodle content did not become ready in the non-activating platform tree within ${PROBE_TIMEOUT_MS}ms` +
+      (lastFailure ? ` (${lastFailure})` : ""),
   );
 }
 
@@ -107,7 +127,7 @@ function isTrue(value: string): boolean {
 function meaningfulUnnamed(elements: Element[]): Element[] {
   return elements.filter(
     (element) =>
-      element.depth >= 3 &&
+      element.depth >= 2 &&
       !STRUCTURAL_ROLES.has(element.role) &&
       !SYSTEM_ROLES.has(element.role) &&
       element.name.trim() === "",

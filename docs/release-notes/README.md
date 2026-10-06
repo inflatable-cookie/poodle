@@ -20,6 +20,8 @@ exists yet.
 
 ## Versions
 
+- [0.4.11](0.4.11.md) — 2026-10-06 — patch candidate fixing drag and drop for
+  releases off the handle; core and Svelte publication set
 - [0.4.10](0.4.10.md) — 2026-10-06 — patch candidate fixing Collapsible and
   Accordion opening to zero height; core and Svelte publication set
 - [0.4.9](0.4.9.md) — 2026-10-05 — patch candidate with ContextMenu focus

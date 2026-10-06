@@ -25,6 +25,8 @@ struct Result: Encodable {
     let elements: [Element]
 }
 
+let maximumTreeDepth = 80
+
 func write(_ result: Result, exitCode: Int32 = 0) -> Never {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys]
@@ -36,10 +38,13 @@ func write(_ result: Result, exitCode: Int32 = 0) -> Never {
 }
 
 let args = CommandLine.arguments
-guard args.count == 2, let pid = pid_t(args[1]) else {
-    FileHandle.standardError.write("usage: gpui-ax-probe <pid>\n".data(using: .utf8)!)
+guard args.count == 3,
+      let pid = pid_t(args[1]),
+      !args[2].isEmpty else {
+    FileHandle.standardError.write("usage: gpui-ax-probe <pid> <proof-window-title>\n".data(using: .utf8)!)
     exit(2)
 }
+let expectedWindowTitle = args[2]
 
 guard AXIsProcessTrusted() else {
     write(Result(status: "error", reason: "AXIsProcessTrusted returned false", elements: []), exitCode: 3)
@@ -64,23 +69,32 @@ func attributeNames(_ element: AXUIElement) -> [String] {
     return raw as? [String] ?? []
 }
 
-var ancestors: [AXUIElement] = []
 var elements: [Element] = []
-var encounteredCycle = false
-var hitDepthLimit = false
+var visited: [CFHashCode: [AXUIElement]] = [:]
+var walkIssue: String?
+
+func describe(_ element: AXUIElement, depth: Int) -> String {
+    let role = string(element, kAXRoleAttribute as String)
+    let subrole = string(element, kAXSubroleAttribute as String)
+    let title = string(element, kAXTitleAttribute as String)
+    let description = string(element, kAXDescriptionAttribute as String)
+    let name = title.isEmpty ? description : title
+    return "depth=\(depth) cfHash=\(CFHash(element)) role=\(String(reflecting: role)) subrole=\(String(reflecting: subrole)) name=\(String(reflecting: name))"
+}
 
 func walk(_ element: AXUIElement, depth: Int) {
-    if ancestors.contains(where: { CFEqual($0, element) }) {
-        encounteredCycle = true
-        return
-    }
-    guard depth <= 40 else {
-        hitDepthLimit = true
+    guard walkIssue == nil else { return }
+    guard depth <= maximumTreeDepth else {
+        walkIssue = "depth limit \(maximumTreeDepth) exceeded at \(describe(element, depth: depth))"
         return
     }
 
-    ancestors.append(element)
-    defer { ancestors.removeLast() }
+    let identityHash = CFHash(element)
+    if visited[identityHash]?.contains(where: { CFEqual($0, element) }) == true {
+        walkIssue = "cycle or repeated element at \(describe(element, depth: depth))"
+        return
+    }
+    visited[identityHash, default: []].append(element)
 
     let title = string(element, kAXTitleAttribute as String)
     let description = string(element, kAXDescriptionAttribute as String)
@@ -105,15 +119,45 @@ func walk(_ element: AXUIElement, depth: Int) {
     else { return }
     for child in children {
         walk(child, depth: depth + 1)
+        if walkIssue != nil { return }
     }
 }
 
-walk(AXUIElementCreateApplication(pid), depth: 0)
-if encounteredCycle || hitDepthLimit {
-    write(Result(status: "not_ready", reason: "tree walk encountered a cycle or depth limit", elements: elements))
+let application = AXUIElementCreateApplication(pid)
+guard let windows = attribute(application, kAXWindowsAttribute as String) as? [AXUIElement] else {
+    write(Result(status: "not_ready", reason: "AXWindows is not available for pid \(pid)", elements: []))
 }
-guard elements.contains(where: { $0.role == "AXWindow" }),
-      elements.contains(where: { $0.depth >= 3 && !$0.name.isEmpty }) else {
-    write(Result(status: "not_ready", reason: "window content is not exposed yet", elements: elements))
+guard let proofWindow = windows.first(where: {
+    string($0, kAXTitleAttribute as String) == expectedWindowTitle
+}) else {
+    let titles = windows.map { string($0, kAXTitleAttribute as String) }
+    let observedTitles = titles.map { String(reflecting: $0) }.joined(separator: ", ")
+    write(Result(
+        status: "not_ready",
+        reason: "proof window title \(String(reflecting: expectedWindowTitle)) is not in AXWindows; observed titles: \(observedTitles)",
+        elements: []
+    ))
+}
+walk(proofWindow, depth: 0)
+if let walkIssue {
+    write(Result(status: "walk_error", reason: walkIssue, elements: elements))
+}
+
+guard let root = elements.first,
+      root.role == "AXWindow",
+      root.name == expectedWindowTitle else {
+    let observed = elements.first.map { describe(proofWindow, depth: $0.depth) } ?? "no root element"
+    write(Result(
+        status: "not_ready",
+        reason: "expected root role=AXWindow name=\(String(reflecting: expectedWindowTitle)); observed \(observed)",
+        elements: elements
+    ))
+}
+guard elements.contains(where: { $0.name == "GPUI AX proof: Save" }) else {
+    write(Result(
+        status: "not_ready",
+        reason: "proof window root is ready but named Poodle content is not exposed yet",
+        elements: elements
+    ))
 }
 write(Result(status: "ready", reason: "", elements: elements))

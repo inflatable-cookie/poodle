@@ -7,6 +7,31 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.4.11] - 2026-10-06
+
+`0.4.11` is a patch candidate with one fix and no API change.
+
+### Fixed
+
+- **Drag and drop commits fast or off-handle releases.** When a pointer drag
+  was released away from its handle, browsers could deliver
+  `lostpointercapture` before `pointerup`; the shared drag controller treated
+  that as a lost transport and cancelled, so the drop did nothing. A capture
+  lost after the button is already released now counts as the release and
+  commits the drop; a capture lost while the button is still down still
+  cancels. This fixes every web drag-and-drop component (Tabs, EditableList,
+  OrderBy, ModelCatalogueEditor, BlockEditor and others) in Svelte and React.
+
+### Changed
+
+- **Web package dependency ranges.** Svelte and React require core
+  `>=0.4.11 <0.5`. Svelte, React, React DOM and Marked peer ranges stay
+  unchanged.
+- **Release status.** Core and Svelte are the `0.4.11` npm publication set.
+  React follows the web version for paired validation and remains private.
+  Native work since `0.4.10` (AccessKit, keyboard-origin focus on GPUI)
+  belongs to the native train, which has no release procedure yet.
+
 ## [0.4.10] - 2026-10-06
 
 `0.4.10` is a patch candidate with one fix and no API change.
@@ -744,6 +769,7 @@ supersedes `0.4.3`, which was never published.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.4.11]: docs/release-notes/0.4.11.md
 [0.4.10]: docs/release-notes/0.4.10.md
 [0.4.9]: docs/release-notes/0.4.9.md
 [0.4.8]: docs/release-notes/0.4.8.md
