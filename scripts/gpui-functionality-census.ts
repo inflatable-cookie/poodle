@@ -1598,7 +1598,7 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
             {
               axis: "accessibility",
               kind: "A2-platform-hold",
-              note: "This component is not fully covered by the current live platform-tree proof; retain its A2 hold until its own platform semantics are verified.",
+              note: "No live platform-tree assertion yet.",
               ref: "docs/contracts/003-native-accessibility.md",
             },
           ],
@@ -1750,7 +1750,7 @@ export function censusMarkdown(doc: CensusDoc): string {
   lines.push("Each portable row requires the axes its contract declares; `not-applicable` needs an exact contract section and can never cite platform state.");
   const a2Cleared = doc.rows.filter((row) => row.portable && row.holds.length === 0).map((row) => row.component);
   lines.push(
-    `Live macOS AXUIElement proof clears A2 for ${a2Cleared.length === 0 ? "no components" : a2Cleared.join(", ")}; every other portable row retains its hold until its platform semantics are verified.`,
+    `Live macOS AXUIElement proof clears A2 for ${a2Cleared.length === 0 ? "no components" : a2Cleared.join(", ")}; every other portable row retains its hold because no live platform-tree assertion covers it yet.`,
   );
   lines.push("Admitted capabilities trace to validated Nucleus M1/A1/V1 receipts or to retained expected tests whose individual execution records identify the source and dependency they ran against, mount the production renderer plus GPUI node backend, and show the claimed axis signals in their bodies.");
   lines.push("Construction is not functional completion. A passing route, a test name, or one passing test never marks a component complete.");
