@@ -317,9 +317,6 @@ fn to_gpui_impl(node: &Node) -> AnyElement {
     if !node.roles.is_empty() {
         record_probe_channel("semantic.token-roles.received");
     }
-    if let Some(role) = node.a11y.role {
-        let _ = a11y::record_role(role);
-    }
     if node.a11y.toggled.is_some() {
         record_probe_channel("toggle.received");
     }
@@ -614,7 +611,8 @@ where
     let el = apply_paint(el, node);
     let el = apply_text(el, node);
     let el = apply_cursor(el, node);
-    let needs_wrapper = node.style.hover.is_some()
+    let needs_wrapper = a11y::has_accesskit_role(node)
+        || node.style.hover.is_some()
         || node.style.active.is_some()
         || node.style.focus_ring.is_some()
         || node.interaction.focusable
@@ -652,7 +650,8 @@ fn build_svg_leaf(node: &Node, el: gpui::Svg) -> AnyElement {
     // animation channels then — opacity only, so an identified spinning leaf
     // keeps its clock but not its rotation; no production tree identifies an
     // animated icon, and the capture host freezes motion regardless.
-    let needs_wrapper = node.style.hover.is_some()
+    let needs_wrapper = a11y::has_accesskit_role(node)
+        || node.style.hover.is_some()
         || node.style.active.is_some()
         || node.style.focus_ring.is_some()
         || node.interaction.focusable
@@ -712,7 +711,7 @@ fn build_box(node: &Node, base: Div) -> AnyElement {
         // control share one focus handle.
         let id = element_id(node);
         let id_string = element_id_text(&id);
-        let el = base.id(id);
+        let el = a11y::apply(base.id(id), node);
         let el = apply_shared(el, node, &id_string);
         let el = apply_listeners(el, node, &id_string);
         // Deferred overlays paint later; without occlude, pointer events fall
@@ -740,7 +739,8 @@ fn build_box(node: &Node, base: Div) -> AnyElement {
 }
 
 fn needs_state(node: &Node) -> bool {
-    node.interaction.focusable
+    a11y::has_accesskit_role(node)
+        || node.interaction.focusable
         || node.interaction.on_activate.is_some()
         || node.interaction.copy_text.is_some()
         || node.interaction.on_activate_modified.is_some()
@@ -1294,12 +1294,9 @@ where
 
 // ── Accessibility ───────────────────────────────────────────────────
 //
-// NodeA11y (role, label, expanded, selected, toggled, level) is intentionally
-// NOT mapped: GPUI 1.22 exposes AccessKit, but Poodle's backend does not yet
-// project node accessibility metadata into it. The native accessibility
-// contract records the remaining gap and task #127 owns the mapping
-// and platform-tree proof. The channels are walked here so the omission stays
-// visible rather than drifting silently.
+// The node accessibility record is attached to stateful GPUI elements in
+// `a11y`; those elements publish it through AccessKit when platform
+// accessibility is active.
 
 mod ime;
 mod input_text;

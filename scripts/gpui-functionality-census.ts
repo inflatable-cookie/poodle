@@ -1546,7 +1546,7 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
         {
           axis: "accessibility",
           kind: "A2-platform-hold",
-          note: "Assistive-technology projection waits on the published gpui-apple crate and live platform-tree proof; node-level semantics above are still payable and proved where admitted.",
+          note: "The live platform-tree proof is blocked by local macOS Accessibility trust; no platform content has been verified for this component.",
           ref: "docs/contracts/003-native-accessibility.md",
         },
       ],
@@ -1606,7 +1606,7 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
       admittedRows,
       fullyAdmittedRows,
       missingTally,
-      holdCount: rows.filter((row) => row.portable).length,
+      holdCount: rows.reduce((count, row) => count + row.holds.length, 0),
       refusalCount,
     },
     groups,
@@ -1678,6 +1678,10 @@ export function validateCensusDoc(doc: CensusDoc): void {
   if (doc.rows.length !== doc.denominator.public) {
     throw new Error(`Census must carry exactly ${doc.denominator.public} rows, found ${doc.rows.length}.`);
   }
+  const holdCount = doc.rows.reduce((count, row) => count + row.holds.length, 0);
+  if (doc.summary.holdCount !== holdCount) {
+    throw new Error(`Census A2 hold count is ${doc.summary.holdCount}, but its rows carry ${holdCount}.`);
+  }
 }
 
 export function censusMarkdown(doc: CensusDoc): string {
@@ -1692,6 +1696,7 @@ export function censusMarkdown(doc: CensusDoc): string {
   lines.push("");
   lines.push("Capability axes are closed: `semantic`, `events`, `pointer`, `keyboard_focus`, `accessibility`, `visual`.");
   lines.push("Each portable row requires the axes its contract declares; `not-applicable` needs an exact contract section and can never cite platform state.");
+  lines.push("Every portable row retains the A2 platform hold until live component content is read through macOS AXUIElement.");
   lines.push("Admitted capabilities trace to validated Nucleus M1/A1/V1 receipts or to retained expected tests whose individual execution records identify the source and dependency they ran against, mount the production renderer plus GPUI node backend, and show the claimed axis signals in their bodies.");
   lines.push("Construction is not functional completion. A passing route, a test name, or one passing test never marks a component complete.");
   lines.push("");

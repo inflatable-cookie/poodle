@@ -8,6 +8,7 @@ Denominator: **176** public / **175** portable; `MeterSurface` is the single con
 
 Capability axes are closed: `semantic`, `events`, `pointer`, `keyboard_focus`, `accessibility`, `visual`.
 Each portable row requires the axes its contract declares; `not-applicable` needs an exact contract section and can never cite platform state.
+Every portable row retains the A2 platform hold until live component content is read through macOS AXUIElement.
 Admitted capabilities trace to validated Nucleus M1/A1/V1 receipts or to retained expected tests whose individual execution records identify the source and dependency they ran against, mount the production renderer plus GPUI node backend, and show the claimed axis signals in their bodies.
 Construction is not functional completion. A passing route, a test name, or one passing test never marks a component complete.
 

@@ -38,8 +38,8 @@ use std::time::{Duration, Instant};
 
 use anyhow::{bail, Context as _, Result};
 use gpui::{
-    px, size, App, AppContext as _, AssetSource, AsyncApp, Bounds, Entity, Point, Render,
-    VisualContext as _, Window, WindowBounds, WindowOptions,
+    px, size, App, AppContext as _, AssetSource, AsyncApp, Bounds, Entity, Point, Render, Window,
+    WindowBounds, WindowOptions,
 };
 use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 use serde::Serialize;
@@ -90,6 +90,10 @@ const SETTLE_POLL: Duration = Duration::from_millis(10);
 /// several times this many. A run that somehow recorded fewer has not
 /// watched the foreground long enough to say anything about it.
 pub const MIN_FOREGROUND_SAMPLES: u64 = 8;
+
+/// How long the live accessibility proof keeps its non-activating window open
+/// for the external AXUIElement reader.
+pub const ACCESSIBILITY_PROOF_HOLD: Duration = Duration::from_secs(12);
 
 /// What a scene's frame hook reports about its own readiness.
 pub enum Settled {
@@ -437,6 +441,102 @@ pub fn capture_batch<V: Render, A: AssetSource>(
     // produced no capture, which is a failure rather than a silent success.
     fail(anyhow::anyhow!(
         "the GPUI application exited before the capture completed"
+    ));
+}
+
+/// Open one real GPUI window with the same non-activating options as capture,
+/// keep the application event loop running while AXUIElement reads it, then
+/// require foreground samples to prove that this process never became frontmost.
+pub fn accessibility_window<V: Render, A: AssetSource>(
+    assets: A,
+    fonts: Vec<Cow<'static, [u8]>>,
+    build: Box<dyn FnOnce(&mut Window, &mut App) -> Entity<V>>,
+) -> ! {
+    if !cfg!(target_os = "macos") {
+        fail(anyhow::anyhow!(
+            "the live accessibility proof requires macOS AXUIElement"
+        ));
+    }
+
+    let monitor = Arc::new(ForegroundMonitor::start());
+    gpui_platform::application()
+        .with_assets(assets)
+        .run(move |cx: &mut App| {
+            if !fonts.is_empty() {
+                if let Err(error) = cx
+                    .text_system()
+                    .add_fonts(fonts)
+                    .with_context(|| "load the accessibility proof fonts")
+                {
+                    fail(error);
+                }
+            }
+
+            let bounds = Bounds {
+                origin: Point {
+                    x: px(0.0),
+                    y: px(0.0),
+                },
+                size: size(px(720.0), px(280.0)),
+            };
+            if let Err(error) = cx.open_window(
+                WindowOptions {
+                    window_bounds: Some(WindowBounds::Windowed(bounds)),
+                    titlebar: None,
+                    focus: false,
+                    show: true,
+                    is_movable: false,
+                    is_resizable: false,
+                    is_minimizable: false,
+                    ..Default::default()
+                },
+                build,
+            ) {
+                monitor.stop();
+                fail(error.context("open the non-activating accessibility proof window"));
+            }
+
+            println!(
+                "GPUI_AX_WINDOW pid={} hold_ms={}",
+                std::process::id(),
+                ACCESSIBILITY_PROOF_HOLD.as_millis()
+            );
+
+            let monitor = Arc::clone(&monitor);
+            cx.spawn(async move |cx: &mut AsyncApp| {
+                cx.background_executor()
+                    .timer(ACCESSIBILITY_PROOF_HOLD)
+                    .await;
+
+                let foreground = monitor.evidence();
+                monitor.stop();
+                match foreground.verdict {
+                    ForegroundVerdict::Proved => {
+                        println!(
+                            "GPUI_AX_COMPLETE foreground=proved samples={} failed_reads={}",
+                            foreground.samples, foreground.failed_reads
+                        );
+                        std::process::exit(0);
+                    }
+                    ForegroundVerdict::SelfFrontmost => fail(anyhow::anyhow!(
+                        "accessibility proof pid {} became frontmost: baseline {:?}, observed {:?}",
+                        foreground.capturer_pid,
+                        foreground.baseline,
+                        foreground.observed
+                    )),
+                    ForegroundVerdict::Unprovable => fail(anyhow::anyhow!(
+                        "accessibility proof cannot establish non-activation: baseline {:?}, {} samples, {} failed reads",
+                        foreground.baseline,
+                        foreground.samples,
+                        foreground.failed_reads
+                    )),
+                }
+            })
+            .detach();
+        });
+
+    fail(anyhow::anyhow!(
+        "the GPUI application exited before the accessibility proof completed"
     ));
 }
 

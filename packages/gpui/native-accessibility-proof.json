@@ -12,6 +12,14 @@
     "assistiveTechnologyEvidence": "missing",
     "limitation": "This artifact does not prove broad native semantics, focus, keyboard, announcement, or assistive-technology parity."
   },
+  "livePlatformProofAttempt": {
+    "selector": "effigy test:gpui-ax",
+    "outcome": "blocked",
+    "mechanism": "macOS AXUIElement",
+    "launch": "The window-capture transport opened the preview with focus:false. Its foreground monitor recorded 230 successful samples, no failed reads, and proved the process was never frontmost.",
+    "reason": "AXIsProcessTrusted returned false for the probe process. macOS returned no content tree, so the role, name, state, value, and planted-name assertions could not run.",
+    "a2ClearedComponents": []
+  },
   "comparisonSource": "packages/svelte/preview/src/accessibility.ts",
   "sectionIds": [
     "form-suite",
@@ -190,7 +198,7 @@
     "Native assistive-technology traces should capture real focus movement, announcement timing, and shell-region naming rather than relying on browser inference."
   ],
   "deltaRegister": [
-    "GPUI 1.22.0 exposes AccessKit, but Poodle's GPUI backend does not yet map node metadata into it. This artifact records missing platform-tree proof, not accepted parity. See docs/contracts/003-native-accessibility.md and task #127.",
+    "Poodle's GPUI backend maps direct node roles, names, states, and values into AccessKit; ID-based controls, labelled_by, and described_by relationships are not projected because the GPUI backend does not translate their shared string IDs to AccessKit node IDs. No platform content was verified because macOS Accessibility trust was unavailable to the AXUIElement probe. All GPUI census A2 holds remain. See docs/contracts/003-native-accessibility.md.",
     "Browser live-region and semantic HTML behavior still does work automatically in Svelte that GPUI must reproduce with native accessible-tree and announcement plumbing.",
     "Overlay, menu, command palette, and picker focus containment remain the highest-risk cross-runtime delta because browser focus-scope behavior does not transfer automatically to GPUI.",
     "Structured table, media preview, and workstation shell narration remain more runtime-specific than direct-parity visual comparison alone can prove."

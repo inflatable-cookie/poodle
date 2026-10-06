@@ -70,7 +70,7 @@ function censusDoc(overrides: Partial<CensusDoc> = {}): CensusDoc {
         {
           axis: "accessibility" as CensusAxis,
           kind: "A2-platform-hold" as const,
-          note: "Assistive-technology projection waits on the gpui-apple publication gate.",
+          note: "The live platform-tree proof is blocked by local macOS Accessibility trust; no platform content has been verified for this component.",
           ref: "docs/contracts/003-native-accessibility.md",
         },
       ],
