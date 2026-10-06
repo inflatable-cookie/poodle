@@ -1,7 +1,7 @@
 # Tabs
 
 Status: detailed contract
-Updated: 2026-09-10
+Updated: 2026-10-06
 
 ## 1. Purpose
 
@@ -1132,6 +1132,10 @@ surface-filled card without a border:
 | Features | inactive |
 | Pricing | inactive |
 | FAQ | disabled |
+
+Tom confirmed the visible inactive card shape and selected fill-only inactive
+cards on 2026-09-10. Keeping the surface distinguishes the card variant while
+the active edge or fill remains the selection cue.
 
 ### Card variant (solid fill)
 

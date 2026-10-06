@@ -1,7 +1,7 @@
 # Slider
 
 Status: approved contract — g18.026 shared-family implementation queued
-Updated: 2026-09-12
+Updated: 2026-10-06
 
 
 ## 1. Purpose
@@ -31,7 +31,9 @@ capsule/track, fill segments, center markers, handles, text clipping, pointer
 coordinates and layout-neutral effective targets. Slider keeps its one-value,
 one-focus-stop machine; RangeSlider keeps its ordered pair and two focus stops.
 A presentation repair to the shared foundation is therefore a family change,
-not a component-local copy.
+not a component-local copy. Tom chose to keep Slider and RangeSlider as
+separate public components on 2026-09-12 because their value models and focus
+stops have different semantics.
 
 ## 2. Anatomy
 
@@ -62,6 +64,10 @@ Block variant (`variant="block"`, the default; horizontal form shown):
 
 Vertical block uses the same paint stack on the block axis. Its text remains
 upright: value at the physical top and optional label centered.
+
+Tom's 2026-09-11 decision chose rounded-square block-family corners and fixed
+split-colour in-track text so label and value stay readable as the fill and
+thumb move.
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
@@ -97,6 +103,11 @@ upright: value at the physical top and optional label centered.
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
+
+Tom chose the breaking `block`/`embedded` variant API and rejected aliases for
+the removed `appearance`, `standard`, and `track` vocabulary on 2026-09-11.
+Keeping one presentation switch avoids carrying overlapping public mode
+systems before v1.0.
 
 ### Controlled And Uncontrolled
 

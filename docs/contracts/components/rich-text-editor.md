@@ -1,7 +1,7 @@
 # RichTextEditor
 
 Status: implemented web-admitted (g18.003) — not parity-complete
-Updated: 2026-09-11
+Updated: 2026-10-06
 
 ## 1. Purpose
 
@@ -129,7 +129,9 @@ contains one or more heading commands, the toolbar projects them as one text-mod
 select at the first heading command's position. Its options are Normal text plus
 the exact admitted heading levels; a consumer may expose any subset of levels
 1–6. Normal text is intrinsic selector behavior rather than a separate public
-command. Other commands retain their relative order.
+command. Other commands retain their relative order. On 2026-09-11, Tom chose
+this single dropdown with consumer-configurable heading levels because products
+may admit only a subset of H1–H6.
 
 The `images` module uses the standard image node attributes `src`, `alt`, and
 optional `title`. It does not upload, browse, proxy, rewrite, or persist assets.
@@ -203,7 +205,10 @@ plugins, and extension objects never appear in public event payloads.
   Poodle control primitives: real control chrome, icons or short conventional
   glyphs, tooltips, accessible names, pressed state where relevant, a
   destructive tone without changed semantics, and grouped command clusters.
-  The toolbar keeps one logical relationship to the editor.
+  The toolbar keeps one logical relationship to the editor. Tom required real
+  RichTextEditor controls, using MarkdownEditor as the Poodle reference, on
+  2026-09-11 so commands remain operable and named rather than becoming a row
+  of passive labels.
 - Admitted heading commands render as one Poodle Select rather than separate
   heading buttons. The stable trigger shows Normal text, the active heading, or
   Mixed for a selection spanning different text modes. Menu options keep plain

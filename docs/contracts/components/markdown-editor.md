@@ -1,7 +1,7 @@
 # MarkdownEditor and MarkdownRenderer
 
 Status: detailed contract
-Updated: 2026-09-11
+Updated: 2026-10-06
 
 ## 1. Purpose
 
@@ -95,6 +95,11 @@ mounts a textarea, toolbar, editor state, or contenteditable surface.
 | `density` | `ControlDensity \| null` | `null` | no | Explicit spacing-density override for rendered prose |
 
 ### Shared HTML Policy
+
+Tom's 2026-09-11 decision made safe sanitization the default for both components
+and reserved the bypass for explicit `htmlPolicy="trusted"`. Built-in and
+custom parsers can both produce executable HTML, so parser choice alone cannot
+confer trust.
 
 - `safe` is the default for both components and both parser paths. It sanitizes
   the complete HTML result after built-in `marked` parsing or custom

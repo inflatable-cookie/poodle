@@ -39,6 +39,9 @@ prefer the narrower current authority and repair the stale document.
   both Svelte and React catalogue pages before the task is complete; excluding
   native parity does not exclude preview documentation. Distinct public editor
   and renderer exports each get their own page.
+- Operator decision (Tom, 2026-09-10): the CodeEditor and RichTextEditor web
+  admissions each need both Svelte and React catalogue pages because each is a
+  paired web admission, not a single-framework component.
 - Catalogue specimens are human-facing documentation. Their first job is to
   show what a component is for, what is available, and how it is normally
   composed.
@@ -341,6 +344,12 @@ Use Effigy as the command surface. Match proof cost to the delivery stage:
    behavior; candidate mode owns archive certification; publish mode verifies
    and ships those same bytes. Do not stack a local aggregate board, candidate
    run, tag dry run and rebuilt publish proof.
+
+The GPUI window-capture monitor may record unrelated foreground-app changes
+during a background run, but the capture process must never become frontmost
+and its window must remain unfocused, non-key, and inactive. Tom's 2026-09-08
+decision permits ordinary desktop use during a long capture batch without
+weakening the proof that capture itself did not activate.
 
 A broad selector subsumes the narrower selectors in its task graph. Do not run
 `docs:check`, `ci:web`, `qa`, and release gates serially to restate the same

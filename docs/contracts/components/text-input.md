@@ -1,7 +1,7 @@
 # Text Input
 
 Status: detailed contract
-Updated: 2026-08-15
+Updated: 2026-10-06
 
 ## 1. Purpose
 
@@ -370,6 +370,10 @@ cannot drift between targets.
 - GPUI-native accessibility mapping notes: GPUI must expose role/control type,
   accessible name, value, readonly/disabled/invalid state, selection/caret
   behavior, and IME-safe text entry semantics through native accessibility APIs
+- `type="search"` carries the semantic SearchBox role (`searchbox` on web and
+  in native role projection) as well as its search-specific affordances. Tom's
+  2026-09-05 ruling added `NodeRole::SearchBox` so query entry remains distinct
+  from ordinary text entry in the shared accessibility tree.
 
 ## 7. Layout
 
