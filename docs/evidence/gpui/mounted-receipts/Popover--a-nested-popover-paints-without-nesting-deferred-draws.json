@@ -58,7 +58,7 @@
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "gpui-unofficial-1.22.0-126-20261006",
+    "run_id": "review-5428205753-native",
     "outcome": "passed",
     "body_sha256": "4b8923e4da153a6fc63525dc295d655acca06abf01d767a54bb6691d5c595871"
   },

@@ -482,6 +482,8 @@ export type ExecutionRecord = {
   lockfile: string;
   lockfile_sha256: string;
   run_id: string;
+  selector_outcome: "passed" | "failed" | "not-run";
+  selector_summary?: string;
   /** Overrides the default full-selector identity for a named test execution.
    * Named reruns never rewrite the record-wide full-selector identity. */
   results: Record<
@@ -1137,6 +1139,8 @@ function validateRecordedIdentity(
   root: string,
   test: string,
 ): void {
+  const identity = `${root}\n${sourceCommit}\n${lockfile}\n${lockfileSha256}`;
+  if (VALIDATED_EXECUTION_IDENTITIES.has(identity)) return;
   if (!/^[0-9a-f]{40}$/.test(sourceCommit)) {
     throw new Error(`Execution record for ${test} needs a 40-hex source commit.`);
   }
@@ -1145,7 +1149,10 @@ function validateRecordedIdentity(
   if (lockText === undefined || sha256Hex(lockText) !== lockfileSha256) {
     throw new Error(`Execution record for ${test} does not match the lockfile at ${sourceCommit}.`);
   }
+  VALIDATED_EXECUTION_IDENTITIES.add(identity);
 }
+
+const VALIDATED_EXECUTION_IDENTITIES = new Set<string>();
 
 /** Old v1 records stored one shared source/lock identity even for named runs.
  * Recover each differing run's identity from the evidence commit that first
@@ -1190,6 +1197,12 @@ export function validateExecutionRecord(record: ExecutionRecord, root: string): 
   if (record.schema !== EXECUTION_SCHEMA) throw new Error(`Execution record schema is ${record.schema}.`);
   if (!/^[0-9a-f]{40}$/.test(record.source_commit)) throw new Error("Execution record needs a 40-hex source commit.");
   if (record.command !== NATIVE_SELECTOR) throw new Error(`Execution record must cite ${NATIVE_SELECTOR}.`);
+  if (!["passed", "failed", "not-run"].includes(record.selector_outcome)) {
+    throw new Error("Execution record needs an explicit full-selector outcome.");
+  }
+  if (record.selector_outcome !== "passed" && !record.selector_summary?.trim()) {
+    throw new Error("A failed or unrun full selector needs a summary.");
+  }
   validateRecordedIdentity(record.source_commit, record.lockfile_sha256, record.lockfile, root, "default selector");
   const bodyHashBaselineCommit = record.body_hash_baseline_commit ?? record.source_commit;
   if (!/^[0-9a-f]{40}$/.test(bodyHashBaselineCommit)) {
@@ -1272,16 +1285,50 @@ export function recordExpectedTestExecution(testNames: string[], runId: string, 
   return record;
 }
 
-/** Restore the last full-selector identity after a legacy named rerun moved
- * the shared source/lock fields. The named results retain their own identity. */
-export function restoreDefaultExecutionIdentity(sourceCommit: string, root = ROOT): ExecutionRecord {
+/** Record one full-selector result without allowing a named run to be confused
+ * with it. The expected census tests inherit that selector result only when
+ * they were among its passing tests. */
+export function recordSelectorResult(
+  sourceCommit: string,
+  selectorRunId: string,
+  selectorOutcome: "passed" | "failed" | "not-run",
+  selectorSummary: string,
+  failedTests: string[],
+  root = ROOT,
+): ExecutionRecord {
+  if (selectorRunId.trim().length === 0) throw new Error("Execution recording needs a non-empty run id.");
+  if (selectorOutcome !== "passed" && selectorSummary.trim().length === 0) {
+    throw new Error("A failed or unrun full selector needs a summary.");
+  }
   const record = loadExecutionRecord(root);
-  const lockText = sourceTextAtCommit(root, record.lockfile, sourceCommit);
-  if (lockText === undefined) throw new Error(`Cannot read ${record.lockfile} at ${sourceCommit}.`);
+  const expectedTests = new Set(
+    Object.values(EXPECTED_MOUNTED_BEHAVIOUR_TESTS).flatMap((tests) => (Array.isArray(tests) ? tests : [tests])),
+  );
+  const sourceLock = sourceTextAtCommit(root, record.lockfile, sourceCommit);
+  if (sourceLock === undefined) throw new Error(`Cannot read ${record.lockfile} at ${sourceCommit}.`);
+  const sourceTests = sourceTextAtCommit(root, HEADLESS_TEST_FILE, sourceCommit);
+  if (sourceTests === undefined) throw new Error(`Cannot read ${HEADLESS_TEST_FILE} at ${sourceCommit}.`);
+  const failed = new Set(failedTests);
+  if (failed.size !== failedTests.length) throw new Error("Execution recording contains duplicate failed tests.");
+  for (const test of failedTests) {
+    if (!/^[A-Za-z0-9_]+$/.test(test)) throw new Error(`Execution recording has an invalid failed test name ${test}.`);
+    if (!sourceTests.includes(`fn ${test}(`)) throw new Error(`Failed test ${test} is absent at ${sourceCommit}.`);
+  }
   record.schema = EXECUTION_SCHEMA;
   record.source_commit = sourceCommit;
-  record.lockfile_sha256 = sha256Hex(lockText);
-  migrateNamedRunIdentities(record, root);
+  record.lockfile_sha256 = sha256Hex(sourceLock);
+  record.run_id = selectorRunId;
+  record.command = NATIVE_SELECTOR;
+  record.selector_outcome = selectorOutcome;
+  record.selector_summary = selectorSummary;
+  for (const test of expectedTests) {
+    const sourceBody = extractTestBodyFromSource(sourceTests, test);
+    if (sourceBody === undefined) throw new Error(`Expected test ${test} is absent at ${sourceCommit}.`);
+    record.results[test] = {
+      outcome: failed.has(test) ? "failed" : "passed",
+      body_sha256: sha256Hex(sourceBody),
+    };
+  }
   validateExecutionRecord(record, root);
   writeFile(root, EXECUTION_RECORD_PATH, `${JSON.stringify(record, null, 2)}\n`);
   return record;
@@ -1847,16 +1894,19 @@ export function checkCensusArtifacts(root = ROOT): void {
 
 function main(): void {
   const args = process.argv.slice(2);
-  if (args[0] === "--restore-default-selector") {
-    const [sourceCommit] = args.slice(1);
-    if (sourceCommit === undefined) {
-      throw new Error("Usage: gpui-functionality-census.ts --restore-default-selector <full-selector-source-commit>");
+  if (args[0] === "--record-selector-result") {
+    const [sourceCommit, selectorRunId, outcome, summary, ...failedTests] = args.slice(1);
+    if (sourceCommit === undefined || selectorRunId === undefined || outcome === undefined || summary === undefined) {
+      throw new Error("Usage: gpui-functionality-census.ts --record-selector-result <source-commit> <run-id> <passed|failed|not-run> <summary> <failed-test>...");
     }
-    const record = restoreDefaultExecutionIdentity(sourceCommit);
+    if (outcome !== "passed" && outcome !== "failed" && outcome !== "not-run") {
+      throw new Error(`Unsupported full-selector outcome ${outcome}.`);
+    }
+    const record = recordSelectorResult(sourceCommit, selectorRunId, outcome, summary, failedTests);
     const stats = writeCensusArtifacts();
     checkCensusArtifacts();
     console.log(
-      `gpui-functionality-census: restored default selector ${record.command} at ${record.source_commit}; ${stats.rows} rows, ${stats.admitted} admitted, ${stats.receipts} mounted receipts.`,
+      `gpui-functionality-census: recorded default selector ${record.selector_outcome} at ${record.source_commit}; ${stats.rows} rows, ${stats.admitted} admitted, ${stats.receipts} mounted receipts.`,
     );
     return;
   }

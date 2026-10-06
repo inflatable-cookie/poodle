@@ -40,9 +40,9 @@
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "20f7852a-cc71-441a-8b01-12d2f349b188",
+    "run_id": "review-5428205753-native",
     "outcome": "passed",
-    "body_sha256": "4020cd4a869504b91485a8ff647e29ba6e99dd888b817c3dd132ca9a2cf16efd"
+    "body_sha256": "0ad8d424f897d687fe247a9cc8274a8228bd3676dd5af9f8f0575bb37361d0b3"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

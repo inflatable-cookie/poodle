@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `139a1108f4995d1b1e615b96b41f5e444ccb3c2d`
+Default full-selector source commit (individual mounted receipts carry their own execution identity): `139a1108f4995d1b1e615b96b41f5e444ccb3c2d`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
@@ -8,7 +8,7 @@ Denominator: **176** public / **175** portable; `MeterSurface` is the single con
 
 Capability axes are closed: `semantic`, `events`, `pointer`, `keyboard_focus`, `accessibility`, `visual`.
 Each portable row requires the axes its contract declares; `not-applicable` needs an exact contract section and can never cite platform state.
-Admitted capabilities trace to validated Nucleus M1/A1/V1 receipts or to retained expected tests that ran green on the recorded source and dependency identity, mount the production renderer plus GPUI node backend, and show the claimed axis signals in their bodies.
+Admitted capabilities trace to validated Nucleus M1/A1/V1 receipts or to retained expected tests whose individual execution records identify the source and dependency they ran against, mount the production renderer plus GPUI node backend, and show the claimed axis signals in their bodies.
 Construction is not functional completion. A passing route, a test name, or one passing test never marks a component complete.
 
 <!-- g18-census-summary -->

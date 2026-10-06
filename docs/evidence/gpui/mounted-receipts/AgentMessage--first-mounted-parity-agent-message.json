@@ -46,7 +46,7 @@
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "03281ee2-cdd7-488b-83c7-f897e05e401f",
+    "run_id": "review-5428205753-native",
     "outcome": "passed",
     "body_sha256": "120de7ef4b63e21e387532b652065c5400c4335370699ff48f7513f4f73520f7"
   },
