@@ -32,6 +32,8 @@
 //! - `--cohort <scenario-id> --state <initial|after-actions> --out <png>
 //!   --receipt <json>` renders one of the 29 closed Nucleus cohort scenarios
 //!   (`window_capture/cohort_capture.rs`);
+//! - `--a11y-proof [--plant-unnamed]` holds a non-activating preview window
+//!   open while the Effigy selector reads its real macOS accessibility tree;
 //! - without either, the single-Button smoke contract below applies.
 //!
 //! One-shot contract: every invocation captures once and writes a PNG plus a
@@ -68,6 +70,9 @@ mod inventory;
 
 #[path = "window_capture/transport.rs"]
 mod transport;
+
+#[path = "window_capture/a11y_proof.rs"]
+mod a11y_proof;
 
 // The activation-boundary check reads these sources back and asserts that no
 // focus-taking API appears in any code line. It is the one check that can
@@ -168,10 +173,16 @@ enum CaptureMode {
     /// focus-capable application per fixture.
     Batch(Vec<fixture_capture::FixtureArgs>),
     FocusEvidence(focus_evidence::FocusEvidenceArgs),
+    AccessibilityProof {
+        plant_unnamed: bool,
+    },
 }
 
 fn parse_cli(argv: &[String]) -> Result<CaptureMode> {
-    if argv.iter().any(|arg| arg == "--cohort") {
+    if argv.iter().any(|arg| arg == "--a11y-proof") {
+        a11y_proof::parse_args(argv)
+            .map(|plant_unnamed| CaptureMode::AccessibilityProof { plant_unnamed })
+    } else if argv.iter().any(|arg| arg == "--cohort") {
         cohort_capture::parse_args(argv).map(CaptureMode::Cohort)
     } else if argv.iter().any(|arg| arg == "--batch") {
         parse_batch_args(argv).map(CaptureMode::Batch)
@@ -621,6 +632,7 @@ fn main() -> ! {
         CaptureMode::Batch(batch) => fixture_capture::run_batch(&batch),
         CaptureMode::InsetEvidence(args) => inset_evidence::run(&args),
         CaptureMode::FocusEvidence(args) => focus_evidence::run(&args),
+        CaptureMode::AccessibilityProof { plant_unnamed } => a11y_proof::run(plant_unnamed),
     }
 }
 

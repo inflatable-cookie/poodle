@@ -8,6 +8,7 @@ Denominator: **176** public / **175** portable; `MeterSurface` is the single con
 
 Capability axes are closed: `semantic`, `events`, `pointer`, `keyboard_focus`, `accessibility`, `visual`.
 Each portable row requires the axes its contract declares; `not-applicable` needs an exact contract section and can never cite platform state.
+Live macOS AXUIElement proof clears A2 for Slider; every other portable row retains its hold until its platform semantics are verified.
 Admitted capabilities trace to validated Nucleus M1/A1/V1 receipts or to retained expected tests whose individual execution records identify the source and dependency they ran against, mount the production renderer plus GPUI node backend, and show the claimed axis signals in their bodies.
 Construction is not functional completion. A passing route, a test name, or one passing test never marks a component complete.
 
@@ -17,7 +18,7 @@ Construction is not functional completion. A passing route, a test name, or one 
 Rows with at least one admitted capability: **175**/175.
 Fully admitted rows: **173**/175.
 Missing by axis: semantic 0; events 0; pointer 0; keyboard_focus 0; accessibility 0; visual 2.
-Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **22**.
+Accessibility platform holds (A2, narrow): **174**. Refusals recorded: **22**.
 
 ## Rows
 
@@ -93,7 +94,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **22**.
 | Separator | semantic; keyboard_focus; accessibility; visual | semantic (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Separator--first-mounted-parity-separator.json` |
 | SplitButton | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/SplitButton--split-button-halves-menu-keyboard-and-dismissal-through-mounted-backend.json` |
 | Skeleton | semantic; accessibility; visual | semantic (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Skeleton--first-mounted-parity-skeleton.json` |
-| Slider | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Slider--slider-axis-keyboard-and-disabled-rebuild-the-host-spec.json` |
+| Slider | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | — | `docs/evidence/gpui/mounted-receipts/Slider--slider-axis-keyboard-and-disabled-rebuild-the-host-spec.json` |
 | Spinner | semantic; accessibility; visual | semantic (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Spinner--first-mounted-parity-spinner.json` |
 | Spacer | semantic; accessibility; visual | semantic (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Spacer--first-mounted-parity-spacer.json` |
 | Stack | semantic; accessibility; visual | semantic (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Stack--first-mounted-parity-stack.json` |

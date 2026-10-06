@@ -12,6 +12,39 @@
     "assistiveTechnologyEvidence": "missing",
     "limitation": "This artifact does not prove broad native semantics, focus, keyboard, announcement, or assistive-technology parity."
   },
+  "livePlatformProofAttempt": {
+    "selector": "effigy test:gpui-ax",
+    "outcome": "passed",
+    "mechanism": "macOS AXUIElement",
+    "launch": "Both proof windows used the window-capture transport with focus:false. The clean window remained non-frontmost for 239 successful samples with no failed reads; the planted window remained non-frontmost for 240 successful samples with no failed reads.",
+    "cleanTree": {
+      "outcome": "passed",
+      "elementCount": 10,
+      "unnamedMeaningfulElements": 0
+    },
+    "plantedUnnamedControl": {
+      "outcome": "passed",
+      "elementCount": 11,
+      "detected": "AXButton@3"
+    },
+    "verifiedSignals": [
+      "A toggled Poodle Button retains its AXTitle and AXValue; accesskit_macos exposes it as AXCheckBox with AXToggle subrole.",
+      "A disclosure Poodle Button is present as AXButton with its AXTitle; AXExpanded is not listed by the current macOS element.",
+      "A mixed Poodle Checkbox is present as AXCheckBox with its AXTitle and an AXValue; the checked-versus-mixed distinction was not proven.",
+      "A Poodle Slider is present as AXSlider with its AXTitle, horizontal orientation, minimum 0, maximum 100, and value text 42.5 percent.",
+      "A selected AccessKit Tab is present as AXRadioButton with AXTabButton subrole and selected state in AXValue.",
+      "A disabled Button is present with AXEnabled false."
+    ],
+    "a2ClearedComponents": [
+      "Slider"
+    ],
+    "remainingLimits": [
+      "Button A2 remains because the disclosure state was not exposed as AXExpanded.",
+      "Checkbox A2 remains because this proof did not distinguish the mixed state from checked in AXValue.",
+      "controls, labelled_by, and described_by string-ID relationships are not translated to AccessKit node IDs.",
+      "All other portable components retain A2 pending component-specific live platform evidence."
+    ]
+  },
   "comparisonSource": "packages/svelte/preview/src/accessibility.ts",
   "sectionIds": [
     "form-suite",
@@ -190,7 +223,7 @@
     "Native assistive-technology traces should capture real focus movement, announcement timing, and shell-region naming rather than relying on browser inference."
   ],
   "deltaRegister": [
-    "GPUI 1.22.0 exposes AccessKit, but Poodle's GPUI backend does not yet map node metadata into it. This artifact records missing platform-tree proof, not accepted parity. See docs/contracts/003-native-accessibility.md and task #127.",
+    "Poodle's GPUI backend maps direct node roles, names, states, and values into AccessKit; ID-based controls, labelled_by, and described_by relationships are not projected because the GPUI backend does not translate their shared string IDs to AccessKit node IDs. No platform content was verified because macOS Accessibility trust was unavailable to the AXUIElement probe. All GPUI census A2 holds remain. See docs/contracts/003-native-accessibility.md.",
     "Browser live-region and semantic HTML behavior still does work automatically in Svelte that GPUI must reproduce with native accessible-tree and announcement plumbing.",
     "Overlay, menu, command palette, and picker focus containment remain the highest-risk cross-runtime delta because browser focus-scope behavior does not transfer automatically to GPUI.",
     "Structured table, media preview, and workstation shell narration remain more runtime-specific than direct-parity visual comparison alone can prove."

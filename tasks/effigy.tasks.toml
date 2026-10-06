@@ -181,6 +181,7 @@
 "test:nucleus-parity-receipts" = "bun test scripts/nucleus-parity-receipts.test.ts"
 "check:gpui-census" = "bun scripts/gpui-functionality-census.ts --check"
 "test:gpui-census" = "bun test scripts/gpui-functionality-census.test.ts"
+"update:gpui-census" = "bun scripts/gpui-functionality-census.ts"
 
 # CI gates — light, ubuntu-only. No native (gpui/jetstream) crates, no vite
 # preview builds. The GitHub workflows bootstrap their pinned runtimes and
@@ -543,6 +544,10 @@
 # Reads the preview's real macOS accessibility tree through AXUIElement.
 # Local-only: needs a window server and Accessibility permission.
 "test:jetstream-ax" = "bun test/native-visual/ax-audit.ts"
+# Reads named Poodle controls from a live GPUI AccessKit tree through
+# AXUIElement. Its focus:false window is monitored and never activated; the
+# selector also proves its name audit rejects a planted unnamed control.
+"test:gpui-ax" = "bun packages/gpui/preview/scripts/gpui-ax-audit.ts"
 "jetstream-ax:dump" = "bun test/native-visual/ax-audit.ts --dump"
 # Projects every specimen's accessibility tree headlessly — no window, no
 # display, all 132 specimens. Complements test:jetstream-ax, which proves the
