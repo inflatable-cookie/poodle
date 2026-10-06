@@ -56,7 +56,7 @@ pub const TRANSPORT: &str = "macos-window-server-nonactivating";
 /// The published GPUI identity these pixels come from. A consumer reading a
 /// receipt must be able to tell that Poodle used the registry crate.
 pub const GPUI_SOURCE: &str = "crates.io";
-pub const GPUI_VERSION: &str = "0.2.2";
+pub const GPUI_VERSION: &str = "1.22.0";
 
 /// How many drawn frames a scene with nothing to read back waits for. One is
 /// not enough: the first frame can land before layout has settled.
@@ -487,7 +487,6 @@ async fn capture_one<V: Render>(
                 build,
             )
         })
-        .with_context(|| format!("open the capture window for {label}"))?
         .with_context(|| format!("open the capture window for {label}"))?;
 
     let opened = Instant::now();
