@@ -3204,15 +3204,21 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     if (moveFrame === -1) moveFrame = frame;
   }
 
-  function onPointerUp(event: Event): void {
-    if (!(event instanceof PointerEvent) || !gesture || event.pointerId !== gesture.pointerId) return;
-
+  /**
+   * End the live gesture at a pointer release position — the one terminal a
+   * physical release and a capture dropped *by* that release share.
+   *
+   * The last position is resolved first: a release can complete a gesture that
+   * had not yet crossed its activation threshold (a touch that travelled on the
+   * final move), and an unarmed gesture is abandoned exactly as before.
+   */
+  function endPointerGesture(x: number, y: number): void {
     pendingMove = null;
     if (moveFrame !== null && connectedWindow) {
       connectedWindow.cancelAnimationFrame(moveFrame);
       moveFrame = null;
     }
-    flushMove(event.clientX, event.clientY);
+    flushMove(x, y);
     if (!gesture) return;
 
     const sessionId = gesture.sessionId;
@@ -3238,6 +3244,11 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     dispatch({ type: "CANCEL", sessionId });
   }
 
+  function onPointerUp(event: Event): void {
+    if (!(event instanceof PointerEvent) || !gesture || event.pointerId !== gesture.pointerId) return;
+    endPointerGesture(event.clientX, event.clientY);
+  }
+
   function onPointerCancel(event: Event): void {
     if (!(event instanceof PointerEvent) || !gesture || event.pointerId !== gesture.pointerId) return;
     if (!gesture.activated) {
@@ -3253,6 +3264,20 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   function onLostCapture(event: Event): void {
     if (!(event instanceof PointerEvent) || !gesture || event.pointerId !== gesture.pointerId) return;
     if (!gesture.activated) return;
+
+    // A capture dropped by the release arrives before `pointerup` when the
+    // pointer comes up away from the captured element, and the browser reports
+    // the button as already up (`buttons === 0`). That is the release, not a
+    // lost transport: commit at the position the browser gives us instead of
+    // cancelling a drop the user made. Deferring the loss by a task would race
+    // the browser's own `pointerup` task, so `buttons` — the physical state at
+    // this event — is the discriminator. Only a capture lost while the button
+    // is still down (element gone, another capture taken) is transport loss.
+    if (event.buttons === 0) {
+      endPointerGesture(event.clientX, event.clientY);
+      return;
+    }
+
     const sessionId = gesture.sessionId;
     dispatch({ type: "TRANSPORT_LOST", sessionId });
   }

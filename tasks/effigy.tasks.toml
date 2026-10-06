@@ -329,6 +329,11 @@
   { task = "test:drag-drop-browser-chromium" },
   { task = "test:drag-drop-browser-webkit" },
 ]
+# poodle#131 fast off-handle release: a ModelCatalogueEditor row released away
+# from its handle must commit even when the browser drops pointer capture
+# before `pointerup`. Chromium only; stays out of ci:web like the substrate
+# probe it shares a fixture with.
+"test:drag-drop-fast-release-chromium" = "bun test/drag-drop/fast-release.ts --browser=chromium"
 # g16.035 MarkdownEditor bounded preview scroll: headless Chromium + WebKit
 # geometry/scroll proof over paired Svelte and React fixtures. Needs playwright
 # browsers; stays out of ci:web like the other real-browser probes.
