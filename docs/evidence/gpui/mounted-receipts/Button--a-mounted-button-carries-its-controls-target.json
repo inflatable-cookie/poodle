@@ -28,7 +28,7 @@
     "keyboard_focus": [
       "focus_state_for",
       "focus_element",
-      "keyboard_"
+      "dispatch_key"
     ],
     "accessibility": [
       "NodeRole",
@@ -45,15 +45,15 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "139a1108f4995d1b1e615b96b41f5e444ccb3c2d",
+  "source_commit": "e63b7fcad7ed551f72b46b1fdb7371bb36a03bfe",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "ef7fcc5ac27dc6567fe41b53d4ea07565bc3f3dbf592835fc2479a601e98e5c8",
   "distribution": "workspace",
   "execution": {
-    "command": "effigy regressions:native",
-    "run_id": "review-5428205753-native",
+    "command": "effigy regressions:native a_mounted_button_carries_its_controls_target -- --exact",
+    "run_id": "worker-dced7c30-button-focus-20261006",
     "outcome": "passed",
-    "body_sha256": "b85fb86b01827dd047e630ff8d42144251532b1db0bb2fdacffb99effeaae0d4"
+    "body_sha256": "150ed9d3c74f62597a710c814b36c6e5a72eb7ef90536f80138da36a45743d1b"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

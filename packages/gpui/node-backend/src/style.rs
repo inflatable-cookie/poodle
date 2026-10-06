@@ -463,7 +463,14 @@ pub(super) fn apply_state_patches<E: InteractiveElement>(mut el: E, node: &Node,
         // ring — a focused field lost its ring the moment you moved the mouse
         // over it. Fold the focus patch back on top inside the hover closure
         // while this node actually holds focus, so the last word is focus's.
-        let focus_patch = node.style.focus.filter(|_| is_focused(id));
+        let focus_patch = node
+            .style
+            .focus
+            .filter(|_| is_focused(id))
+            // Simple controls now use GPUI's native `focus_visible` style.
+            // Reapplying their plain focus patch here would restore the ring
+            // on pointer focus after the hover refinement.
+            .filter(|_| !super::interaction::uses_keyboard_origin_focus(node.a11y.role));
         el = el.hover(move |s| {
             let s = apply_patch(s, patch);
             match focus_patch {

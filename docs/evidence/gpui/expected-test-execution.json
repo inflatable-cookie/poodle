@@ -8,7 +8,11 @@
   "results": {
     "a_mounted_button_carries_its_controls_target": {
       "outcome": "passed",
-      "body_sha256": "b85fb86b01827dd047e630ff8d42144251532b1db0bb2fdacffb99effeaae0d4"
+      "body_sha256": "150ed9d3c74f62597a710c814b36c6e5a72eb7ef90536f80138da36a45743d1b",
+      "run_id": "worker-dced7c30-button-focus-20261006",
+      "command": "effigy regressions:native a_mounted_button_carries_its_controls_target -- --exact",
+      "source_commit": "e63b7fcad7ed551f72b46b1fdb7371bb36a03bfe",
+      "lockfile_sha256": "ef7fcc5ac27dc6567fe41b53d4ea07565bc3f3dbf592835fc2479a601e98e5c8"
     },
     "checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec": {
       "outcome": "passed",
