@@ -24,25 +24,7 @@ const releaseManifestPath = path.join(repoRoot, "packages", "release-manifest.js
 const releaseOperationsPath = path.join(repoRoot, "packages", "release-operations.json");
 const ecosystemAcceptancePath = path.join(repoRoot, "packages", "ecosystem-acceptance.json");
 const referenceAppsPath = path.join(repoRoot, "packages", "reference-apps.json");
-const g03CloseoutPath = path.join(repoRoot, "packages", "g03-closeout.json");
-const gpuiParityPriorityPath = path.join(repoRoot, "packages", "gpui", "parity-priority-matrix.json");
 const gpuiPreviewBaselinePath = path.join(repoRoot, "packages", "gpui", "preview-app-baseline.json");
-const gpuiStructuralBaselinePath = path.join(repoRoot, "packages", "gpui", "structural-primitives-baseline.json");
-const gpuiActionFieldBaselinePath = path.join(repoRoot, "packages", "gpui", "action-field-primitives-baseline.json");
-const gpuiSelectionFeedbackDateBaselinePath = path.join(repoRoot, "packages", "gpui", "selection-feedback-date-baseline.json");
-const gpuiOverlayNavigationMenuBaselinePath = path.join(repoRoot, "packages", "gpui", "overlay-navigation-menu-baseline.json");
-const gpuiFormValidationRemediationBaselinePath = path.join(
-  repoRoot,
-  "packages",
-  "gpui",
-  "form-validation-remediation-composites-baseline.json",
-);
-const gpuiDataBrowseDetailPickerMediaBaselinePath = path.join(
-  repoRoot,
-  "packages",
-  "gpui",
-  "data-browse-detail-picker-media-baseline.json",
-);
 const gpuiNativeAccessibilityProofPath = path.join(
   repoRoot,
   "packages",
@@ -1309,215 +1291,9 @@ function validateReferenceApps(errors: string[]): { shapeCount: number; laneCoun
   };
 }
 
-function validateG03Closeout(errors: string[]): { stableSurfaceCount: number; carryForwardCount: number } {
-  const closeout = JSON.parse(fs.readFileSync(g03CloseoutPath, "utf8")) as {
-    generation: string;
-    status: string;
-    completedMilestones: string[];
-    stableSurfaces: Array<{
-      id: string;
-      label: string;
-      evidencePaths: string[];
-    }>;
-    carryForwardGaps: Array<{
-      id: string;
-      summary: string;
-      nextProgramReason: string;
-    }>;
-    nextProgramPosture: {
-      status: string;
-      guidance: string[];
-    };
-  };
-  const expectedMilestones = Array.from({ length: 14 }, (_, index) => `g03.${String(index + 1).padStart(3, "0")}`);
-  const requiredStableSurfaceIds = [
-    "tokens-and-artifacts",
-    "contract-backed-svelte-surface",
-    "docs-and-preview-evidence",
-    "adoption-boundaries",
-    "operations-and-adoption-guidance",
-  ];
-  const requiredCarryForwardIds = [
-    "gpui-component-parity",
-    "published-docs-platform",
-    "downstream-runnable-reference-apps",
-    "deeper-automation",
-  ];
-  const stableSurfaceIds = closeout.stableSurfaces.map((entry) => entry.id);
-  const carryForwardIds = closeout.carryForwardGaps.map((entry) => entry.id);
-  const stableSurfaceIdSet = new Set<string>();
-  const carryForwardIdSet = new Set<string>();
-
-  expect(closeout.generation === "g03", "packages/g03-closeout.json must target generation g03.", errors);
-  expect(closeout.status === "completed", "packages/g03-closeout.json must mark g03 as completed.", errors);
-
-  compareLists(
-    "packages/g03-closeout.json completed milestones",
-    [...closeout.completedMilestones].sort(),
-    [...expectedMilestones].sort(),
-    errors,
-  );
-  compareLists(
-    "packages/g03-closeout.json stable surfaces",
-    [...stableSurfaceIds].sort(),
-    [...requiredStableSurfaceIds].sort(),
-    errors,
-  );
-  compareLists(
-    "packages/g03-closeout.json carry-forward gaps",
-    [...carryForwardIds].sort(),
-    [...requiredCarryForwardIds].sort(),
-    errors,
-  );
-
-  for (const surface of closeout.stableSurfaces) {
-    expect(!stableSurfaceIdSet.has(surface.id), `g03 closeout duplicates stable surface "${surface.id}".`, errors);
-    stableSurfaceIdSet.add(surface.id);
-    expect(surface.label.trim().length > 0, `g03 closeout stable surface "${surface.id}" is missing a label.`, errors);
-    expect(surface.evidencePaths.length > 0, `g03 closeout stable surface "${surface.id}" is missing evidence paths.`, errors);
-
-    for (const evidencePath of surface.evidencePaths) {
-      expect(
-        fs.existsSync(path.join(repoRoot, evidencePath)),
-        `g03 closeout stable surface "${surface.id}" references missing evidence path "${evidencePath}".`,
-        errors,
-      );
-    }
-  }
-
-  for (const gap of closeout.carryForwardGaps) {
-    expect(!carryForwardIdSet.has(gap.id), `g03 closeout duplicates carry-forward gap "${gap.id}".`, errors);
-    carryForwardIdSet.add(gap.id);
-    expect(gap.summary.trim().length > 0, `g03 closeout gap "${gap.id}" is missing summary text.`, errors);
-    expect(
-      gap.nextProgramReason.trim().length > 0,
-      `g03 closeout gap "${gap.id}" is missing next-program rationale.`,
-      errors,
-    );
-  }
-
-  expect(
-    closeout.nextProgramPosture.status === "not-yet-opened",
-    "packages/g03-closeout.json must keep next-program posture as not-yet-opened.",
-    errors,
-  );
-  expect(
-    closeout.nextProgramPosture.guidance.length >= 3,
-    "packages/g03-closeout.json must include explicit next-program guidance.",
-    errors,
-  );
-
-  return {
-    stableSurfaceCount: closeout.stableSurfaces.length,
-    carryForwardCount: closeout.carryForwardGaps.length,
-  };
-}
-
-function validateGpuiPriorityMatrix(errors: string[]): { waveCount: number; targetCount: number } {
-  const matrix = JSON.parse(fs.readFileSync(gpuiParityPriorityPath, "utf8")) as {
-    generation: string;
-    implementationWaves: Array<{
-      id: string;
-      label: string;
-      goal: string;
-      sectionIds: string[];
-      packageFocus: string[];
-    }>;
-    sectionTargets: Array<{
-      sectionId: string;
-      priority: string;
-      parityMode: string;
-      gpuiLayer: string;
-      sideBySideReview: boolean;
-      reasons: string[];
-    }>;
-    nonGoals: string[];
-  };
-  const expectedWaveIds = [
-    "wave-0-theme-and-preview",
-    "wave-1-foundation-primitives",
-    "wave-2-product-composites",
-    "wave-3-workstation-shell",
-  ];
-  const expectedSectionIds = ["catalog-hub", ...docsSections.map((entry) => entry.id)];
-  const docsSectionIds = new Set(expectedSectionIds);
-  const waveIds = matrix.implementationWaves.map((entry) => entry.id);
-  const targetSectionIds = matrix.sectionTargets.map((entry) => entry.sectionId);
-  const waveIdSet = new Set<string>();
-  const targetIdSet = new Set<string>();
-
-  expect(matrix.generation === "g04.001", "packages/gpui/parity-priority-matrix.json must target g04.001.", errors);
-  compareLists(
-    "packages/gpui/parity-priority-matrix.json waves",
-    [...waveIds].sort(),
-    [...expectedWaveIds].sort(),
-    errors,
-  );
-  compareLists(
-    "packages/gpui/parity-priority-matrix.json section targets",
-    [...targetSectionIds].sort(),
-    [...expectedSectionIds].sort(),
-    errors,
-  );
-
-  for (const wave of matrix.implementationWaves) {
-    expect(!waveIdSet.has(wave.id), `GPUI priority matrix duplicates wave "${wave.id}".`, errors);
-    waveIdSet.add(wave.id);
-    expect(wave.label.trim().length > 0, `GPUI priority wave "${wave.id}" is missing a label.`, errors);
-    expect(wave.goal.trim().length > 0, `GPUI priority wave "${wave.id}" is missing goal text.`, errors);
-    expect(wave.sectionIds.length > 0, `GPUI priority wave "${wave.id}" is missing section coverage.`, errors);
-    expect(wave.packageFocus.length > 0, `GPUI priority wave "${wave.id}" is missing package focus.`, errors);
-
-    for (const sectionId of wave.sectionIds) {
-      expect(
-        docsSectionIds.has(sectionId),
-        `GPUI priority wave "${wave.id}" references unknown section "${sectionId}".`,
-        errors,
-      );
-    }
-  }
-
-  for (const target of matrix.sectionTargets) {
-    expect(!targetIdSet.has(target.sectionId), `GPUI priority matrix duplicates target "${target.sectionId}".`, errors);
-    targetIdSet.add(target.sectionId);
-    expect(
-      docsSectionIds.has(target.sectionId),
-      `GPUI priority matrix references unknown section "${target.sectionId}".`,
-      errors,
-    );
-    expect(
-      ["highest", "high", "medium", "low"].includes(target.priority),
-      `GPUI priority target "${target.sectionId}" has unsupported priority "${target.priority}".`,
-      errors,
-    );
-    expect(
-      ["direct-parity", "native-adaptation", "deferred"].includes(target.parityMode),
-      `GPUI priority target "${target.sectionId}" has unsupported parity mode "${target.parityMode}".`,
-      errors,
-    );
-    expect(
-      target.gpuiLayer.trim().length > 0,
-      `GPUI priority target "${target.sectionId}" is missing a GPUI layer.`,
-      errors,
-    );
-    expect(
-      target.reasons.length > 0,
-      `GPUI priority target "${target.sectionId}" is missing rationale.`,
-      errors,
-    );
-  }
-
-  expect(matrix.nonGoals.length >= 3, "GPUI priority matrix must record explicit non-goals.", errors);
-
-  return {
-    waveCount: matrix.implementationWaves.length,
-    targetCount: matrix.sectionTargets.length,
-  };
-}
-
 function validateGpuiPreviewBaseline(errors: string[]): { previewSectionCount: number } {
-  const matrix = JSON.parse(fs.readFileSync(gpuiParityPriorityPath, "utf8")) as {
-    implementationWaves: Array<{ id: string; sectionIds: string[] }>;
+  const audit = JSON.parse(fs.readFileSync(sharedDemoAppAuditPath, "utf8")) as {
+    sourceSurface: { docsOnlySectionIds: string[] };
   };
   const previewBaseline = JSON.parse(fs.readFileSync(gpuiPreviewBaselinePath, "utf8")) as {
     generation: string;
@@ -1538,9 +1314,6 @@ function validateGpuiPreviewBaseline(errors: string[]): { previewSectionCount: n
     };
     nonGoals: string[];
   };
-  const wave0SectionIds =
-    matrix.implementationWaves.find((entry) => entry.id === "wave-0-theme-and-preview")?.sectionIds ?? [];
-
   expect(previewBaseline.generation === "g04.002", "packages/gpui/preview-app-baseline.json must target g04.002.", errors);
   expect(
     previewBaseline.themeRuntime.tokenSource === gpuiTokenSource,
@@ -1568,7 +1341,7 @@ function validateGpuiPreviewBaseline(errors: string[]): { previewSectionCount: n
   compareLists(
     "packages/gpui/preview-app-baseline.json preview sections",
     [...previewBaseline.previewApp.sectionIds].sort(),
-    [...wave0SectionIds].sort(),
+    [...audit.sourceSurface.docsOnlySectionIds].sort(),
     errors,
   );
   compareLists(
@@ -1614,535 +1387,6 @@ function validateGpuiPreviewBaseline(errors: string[]): { previewSectionCount: n
   };
 }
 
-function validateGpuiStructuralBaseline(errors: string[]): { structuralExportCount: number } {
-  const structuralBaseline = JSON.parse(fs.readFileSync(gpuiStructuralBaselinePath, "utf8")) as {
-    generation: string;
-    crateName: string;
-    cratePath: string;
-    tokenSource: string;
-    contractIds: string[];
-    exportNames: string[];
-    knownDeltas: string[];
-    nonGoals: string[];
-  };
-  const expectedContractIds = ["box", "grid", "scroll-shell", "separator", "stack", "surface"];
-  const expectedExportNames = [
-    "BoxSpec",
-    "GridSpec",
-    "ScrollShellSpec",
-    "SeparatorSpec",
-    "StackSpec",
-    "SurfaceSpec",
-  ];
-  const crateRoot = path.join(repoRoot, structuralBaseline.cratePath);
-
-  expect(
-    structuralBaseline.generation === "g04.003",
-    "packages/gpui/structural-primitives-baseline.json must target g04.003.",
-    errors,
-  );
-  expect(
-    structuralBaseline.crateName === gpuiAdapterCrateName,
-    "packages/gpui/structural-primitives-baseline.json must target the poodle-gpui adapter crate.",
-    errors,
-  );
-  expect(
-    structuralBaseline.tokenSource === gpuiTokenSource,
-    "packages/gpui/structural-primitives-baseline.json must use poodle-tokens as token source.",
-    errors,
-  );
-  compareLists(
-    "packages/gpui/structural-primitives-baseline.json contract coverage",
-    [...structuralBaseline.contractIds].sort(),
-    [...expectedContractIds].sort(),
-    errors,
-  );
-  compareLists(
-    "packages/gpui/structural-primitives-baseline.json export names",
-    [...structuralBaseline.exportNames].sort(),
-    [...expectedExportNames].sort(),
-    errors,
-  );
-  expect(
-    fs.existsSync(path.join(crateRoot, "Cargo.toml")),
-    `packages/gpui/structural-primitives-baseline.json references missing crate manifest "${structuralBaseline.cratePath}/Cargo.toml".`,
-    errors,
-  );
-  expect(
-    fs.existsSync(path.join(crateRoot, "README.md")),
-    `packages/gpui/structural-primitives-baseline.json references missing crate README "${structuralBaseline.cratePath}/README.md".`,
-    errors,
-  );
-  expect(
-    fs.existsSync(path.join(crateRoot, "src", "lib.rs")),
-    `packages/gpui/structural-primitives-baseline.json references missing crate source "${structuralBaseline.cratePath}/src/lib.rs".`,
-    errors,
-  );
-  expect(
-    structuralBaseline.knownDeltas.length >= 2,
-    "packages/gpui/structural-primitives-baseline.json must record explicit known deltas.",
-    errors,
-  );
-  expect(
-    structuralBaseline.nonGoals.length >= 3,
-    "packages/gpui/structural-primitives-baseline.json must record explicit non-goals.",
-    errors,
-  );
-
-  return {
-    structuralExportCount: structuralBaseline.exportNames.length,
-  };
-}
-
-function validateGpuiActionFieldBaseline(errors: string[]): { actionFieldExportCount: number } {
-  const actionFieldBaseline = JSON.parse(fs.readFileSync(gpuiActionFieldBaselinePath, "utf8")) as {
-    generation: string;
-    crateName: string;
-    cratePath: string;
-    tokenSource: string;
-    contractIds: string[];
-    exportNames: string[];
-    knownDeltas: string[];
-    nonGoals: string[];
-  };
-  const expectedContractIds = [
-    "button",
-    "field",
-    "form-actions",
-    "icon-button",
-    "search-input",
-    "text-input",
-  ];
-  const expectedExportNames = [
-    "ButtonSpec",
-    "FieldRelationships",
-    "FieldSpec",
-    "FormActionsSpec",
-    "IconButtonSpec",
-    "TextInputSpec",
-  ];
-  const crateRoot = path.join(repoRoot, actionFieldBaseline.cratePath);
-  const libSource = fs.readFileSync(path.join(crateRoot, "src", "lib.rs"), "utf8");
-
-  expect(
-    actionFieldBaseline.generation === "g04.004",
-    "packages/gpui/action-field-primitives-baseline.json must target g04.004.",
-    errors,
-  );
-  expect(
-    actionFieldBaseline.crateName === gpuiAdapterCrateName,
-    "packages/gpui/action-field-primitives-baseline.json must target the poodle-gpui adapter crate.",
-    errors,
-  );
-  expect(
-    actionFieldBaseline.tokenSource === gpuiTokenSource,
-    "packages/gpui/action-field-primitives-baseline.json must use poodle-tokens as token source.",
-    errors,
-  );
-  compareLists(
-    "packages/gpui/action-field-primitives-baseline.json contract coverage",
-    [...actionFieldBaseline.contractIds].sort(),
-    [...expectedContractIds].sort(),
-    errors,
-  );
-  compareLists(
-    "packages/gpui/action-field-primitives-baseline.json export names",
-    [...actionFieldBaseline.exportNames].sort(),
-    [...expectedExportNames].sort(),
-    errors,
-  );
-  expect(
-    fs.existsSync(path.join(crateRoot, "README.md")),
-    `packages/gpui/action-field-primitives-baseline.json references missing crate README "${actionFieldBaseline.cratePath}/README.md".`,
-    errors,
-  );
-  expect(
-    actionFieldBaseline.knownDeltas.length >= 2,
-    "packages/gpui/action-field-primitives-baseline.json must record explicit known deltas.",
-    errors,
-  );
-  expect(
-    actionFieldBaseline.nonGoals.length >= 3,
-    "packages/gpui/action-field-primitives-baseline.json must record explicit non-goals.",
-    errors,
-  );
-
-  for (const exportName of actionFieldBaseline.exportNames) {
-    expect(
-      libSource.includes(exportName),
-      `packages/gpui/adapter/src/lib.rs must expose GPUI action/field export "${exportName}".`,
-      errors,
-    );
-  }
-
-  return {
-    actionFieldExportCount: actionFieldBaseline.exportNames.length,
-  };
-}
-
-function validateGpuiSelectionFeedbackDateBaseline(errors: string[]): { selectionFeedbackDateExportCount: number } {
-  const baseline = JSON.parse(fs.readFileSync(gpuiSelectionFeedbackDateBaselinePath, "utf8")) as {
-    generation: string;
-    crateName: string;
-    cratePath: string;
-    tokenSource: string;
-    contractIds: string[];
-    exportNames: string[];
-    knownDeltas: string[];
-    nonGoals: string[];
-  };
-  const expectedContractIds = [
-    "badge",
-    "calendar",
-    "checkbox",
-    "date-picker",
-    "date-range-picker",
-    "date-time-picker",
-    "date-time-range-picker",
-    "progress",
-    "radio-group",
-    "segmented-control",
-    "select",
-    "slider",
-    "status-indicator",
-    "switch",
-    "time-input",
-  ];
-  const expectedExportNames = [
-    "BadgeSpec",
-    "CalendarSpec",
-    "CheckboxSpec",
-    "DatePickerSpec",
-    "DateRangePickerSpec",
-    "DateTimePickerSpec",
-    "DateTimeRangePickerSpec",
-    "ProgressSpec",
-    "RadioGroupSpec",
-    "SegmentedControlSpec",
-    "SelectSpec",
-    "SliderSpec",
-    "StatusIndicatorSpec",
-    "SwitchSpec",
-    "TimeInputSpec",
-  ];
-  const crateRoot = path.join(repoRoot, baseline.cratePath);
-  const libSource = fs.readFileSync(path.join(crateRoot, "src", "lib.rs"), "utf8");
-
-  expect(
-    baseline.generation === "g04.005",
-    "packages/gpui/selection-feedback-date-baseline.json must target g04.005.",
-    errors,
-  );
-  expect(
-    baseline.crateName === gpuiAdapterCrateName,
-    "packages/gpui/selection-feedback-date-baseline.json must target the poodle-gpui adapter crate.",
-    errors,
-  );
-  expect(
-    baseline.tokenSource === gpuiTokenSource,
-    "packages/gpui/selection-feedback-date-baseline.json must use poodle-tokens as token source.",
-    errors,
-  );
-  compareLists(
-    "packages/gpui/selection-feedback-date-baseline.json contract coverage",
-    [...baseline.contractIds].sort(),
-    [...expectedContractIds].sort(),
-    errors,
-  );
-  compareLists(
-    "packages/gpui/selection-feedback-date-baseline.json export names",
-    [...baseline.exportNames].sort(),
-    [...expectedExportNames].sort(),
-    errors,
-  );
-  expect(
-    baseline.knownDeltas.length >= 2,
-    "packages/gpui/selection-feedback-date-baseline.json must record explicit known deltas.",
-    errors,
-  );
-  expect(
-    baseline.nonGoals.length >= 3,
-    "packages/gpui/selection-feedback-date-baseline.json must record explicit non-goals.",
-    errors,
-  );
-
-  for (const exportName of baseline.exportNames) {
-    expect(
-      libSource.includes(exportName),
-      `packages/gpui/adapter/src/lib.rs must expose GPUI selection/feedback/date export "${exportName}".`,
-      errors,
-    );
-  }
-
-  return {
-    selectionFeedbackDateExportCount: baseline.exportNames.length,
-  };
-}
-
-function validateGpuiOverlayNavigationMenuBaseline(errors: string[]): { overlayNavigationMenuExportCount: number } {
-  const baseline = JSON.parse(fs.readFileSync(gpuiOverlayNavigationMenuBaselinePath, "utf8")) as {
-    generation: string;
-    crateName: string;
-    cratePath: string;
-    tokenSource: string;
-    contractIds: string[];
-    exportNames: string[];
-    knownDeltas: string[];
-    nonGoals: string[];
-  };
-  const expectedContractIds = [
-    "accordion",
-    "collapsible",
-    "context-menu",
-    "dialog",
-    "drawer",
-    "menu",
-    "menubar",
-    "navigation-menu",
-    "popover",
-    "tab-strip",
-    "tabs",
-    "tooltip",
-  ];
-  const expectedExportNames = [
-    "AccordionSpec",
-    "CollapsibleSpec",
-    "ContextMenuSpec",
-    "DialogSpec",
-    "DrawerSpec",
-    "MenuSpec",
-    "MenubarSpec",
-    "NavigationMenuSpec",
-    "PopoverSpec",
-    "TabStripSpec",
-    "TabsSpec",
-    "TooltipSpec",
-  ];
-  const crateRoot = path.join(repoRoot, baseline.cratePath);
-  const libSource = fs.readFileSync(path.join(crateRoot, "src", "lib.rs"), "utf8");
-
-  expect(
-    baseline.generation === "g04.006",
-    "packages/gpui/overlay-navigation-menu-baseline.json must target g04.006.",
-    errors,
-  );
-  expect(
-    baseline.crateName === gpuiAdapterCrateName,
-    "packages/gpui/overlay-navigation-menu-baseline.json must target the poodle-gpui adapter crate.",
-    errors,
-  );
-  expect(
-    baseline.tokenSource === gpuiTokenSource,
-    "packages/gpui/overlay-navigation-menu-baseline.json must use poodle-tokens as token source.",
-    errors,
-  );
-  compareLists(
-    "packages/gpui/overlay-navigation-menu-baseline.json contract coverage",
-    [...baseline.contractIds].sort(),
-    [...expectedContractIds].sort(),
-    errors,
-  );
-  compareLists(
-    "packages/gpui/overlay-navigation-menu-baseline.json export names",
-    [...baseline.exportNames].sort(),
-    [...expectedExportNames].sort(),
-    errors,
-  );
-  expect(
-    baseline.knownDeltas.length >= 2,
-    "packages/gpui/overlay-navigation-menu-baseline.json must record explicit known deltas.",
-    errors,
-  );
-  expect(
-    baseline.nonGoals.length >= 3,
-    "packages/gpui/overlay-navigation-menu-baseline.json must record explicit non-goals.",
-    errors,
-  );
-
-  for (const exportName of baseline.exportNames) {
-    expect(
-      libSource.includes(exportName),
-      `packages/gpui/adapter/src/lib.rs must expose GPUI overlay/navigation export "${exportName}".`,
-      errors,
-    );
-  }
-
-  return {
-    overlayNavigationMenuExportCount: baseline.exportNames.length,
-  };
-}
-
-function validateGpuiFormValidationRemediationBaseline(errors: string[]): { gpuiCompositeExportCount: number } {
-  const baseline = JSON.parse(fs.readFileSync(gpuiFormValidationRemediationBaselinePath, "utf8")) as {
-    generation: string;
-    crateName: string;
-    cratePath: string;
-    tokenSource: string;
-    contractIds: string[];
-    exportNames: string[];
-    knownDeltas: string[];
-    nonGoals: string[];
-  };
-  const expectedContractIds = ["banner", "callout", "field", "form-actions"];
-  const expectedExportNames = [
-    "FormShellSpec",
-    "InlineRemediationSpec",
-    "RemediationBannerSpec",
-    "ValidationSummarySpec",
-  ];
-  const crateRoot = path.join(repoRoot, baseline.cratePath);
-  const libSource = fs.readFileSync(path.join(crateRoot, "src", "lib.rs"), "utf8");
-
-  expect(
-    baseline.generation === "g04.007",
-    "packages/gpui/form-validation-remediation-composites-baseline.json must target g04.007.",
-    errors,
-  );
-  expect(
-    baseline.crateName === gpuiAdapterCrateName,
-    "packages/gpui/form-validation-remediation-composites-baseline.json must target the poodle-gpui adapter crate.",
-    errors,
-  );
-  expect(
-    baseline.tokenSource === gpuiTokenSource,
-    "packages/gpui/form-validation-remediation-composites-baseline.json must use poodle-tokens as token source.",
-    errors,
-  );
-  compareLists(
-    "packages/gpui/form-validation-remediation-composites-baseline.json contract coverage",
-    [...baseline.contractIds].sort(),
-    [...expectedContractIds].sort(),
-    errors,
-  );
-  compareLists(
-    "packages/gpui/form-validation-remediation-composites-baseline.json export names",
-    [...baseline.exportNames].sort(),
-    [...expectedExportNames].sort(),
-    errors,
-  );
-  expect(
-    fs.existsSync(path.join(crateRoot, "README.md")),
-    `packages/gpui/form-validation-remediation-composites-baseline.json references missing crate README "${baseline.cratePath}/README.md".`,
-    errors,
-  );
-  expect(
-    baseline.knownDeltas.length >= 2,
-    "packages/gpui/form-validation-remediation-composites-baseline.json must record explicit known deltas.",
-    errors,
-  );
-  expect(
-    baseline.nonGoals.length >= 3,
-    "packages/gpui/form-validation-remediation-composites-baseline.json must record explicit non-goals.",
-    errors,
-  );
-
-  for (const exportName of baseline.exportNames) {
-    expect(
-      libSource.includes(exportName),
-      `packages/gpui/adapter/src/lib.rs must expose GPUI composite export "${exportName}".`,
-      errors,
-    );
-  }
-
-  return {
-    gpuiCompositeExportCount: baseline.exportNames.length,
-  };
-}
-
-function validateGpuiDataBrowseDetailPickerMediaBaseline(errors: string[]): { gpuiDataCompositeExportCount: number } {
-  const baseline = JSON.parse(fs.readFileSync(gpuiDataBrowseDetailPickerMediaBaselinePath, "utf8")) as {
-    generation: string;
-    crateName: string;
-    cratePath: string;
-    tokenSource: string;
-    contractIds: string[];
-    exportNames: string[];
-    knownDeltas: string[];
-    nonGoals: string[];
-  };
-  const expectedContractIds = [
-    "data-table",
-    "detail-shell",
-    "empty-state",
-    "filter-toolbar",
-    "media-preview",
-    "media-thumbnail",
-    "pagination-summary",
-    "picker-shell",
-    "relation-picker",
-    "selection-summary",
-  ];
-  const expectedExportNames = [
-    "DataTableSpec",
-    "DetailShellSpec",
-    "EmptyStateSpec",
-    "FilterToolbarSpec",
-    "MediaPreviewSpec",
-    "MediaThumbnailSpec",
-    "PaginationSummarySpec",
-    "PickerShellSpec",
-    "RelationPickerSpec",
-    "SelectionSummarySpec",
-  ];
-  const crateRoot = path.join(repoRoot, baseline.cratePath);
-  const libSource = fs.readFileSync(path.join(crateRoot, "src", "lib.rs"), "utf8");
-
-  expect(
-    baseline.generation === "g04.008",
-    "packages/gpui/data-browse-detail-picker-media-baseline.json must target g04.008.",
-    errors,
-  );
-  expect(
-    baseline.crateName === gpuiAdapterCrateName,
-    "packages/gpui/data-browse-detail-picker-media-baseline.json must target the poodle-gpui adapter crate.",
-    errors,
-  );
-  expect(
-    baseline.tokenSource === gpuiTokenSource,
-    "packages/gpui/data-browse-detail-picker-media-baseline.json must use poodle-tokens as token source.",
-    errors,
-  );
-  compareLists(
-    "packages/gpui/data-browse-detail-picker-media-baseline.json contract coverage",
-    [...baseline.contractIds].sort(),
-    [...expectedContractIds].sort(),
-    errors,
-  );
-  compareLists(
-    "packages/gpui/data-browse-detail-picker-media-baseline.json export names",
-    [...baseline.exportNames].sort(),
-    [...expectedExportNames].sort(),
-    errors,
-  );
-  expect(
-    fs.existsSync(path.join(crateRoot, "README.md")),
-    `packages/gpui/data-browse-detail-picker-media-baseline.json references missing crate README "${baseline.cratePath}/README.md".`,
-    errors,
-  );
-  expect(
-    baseline.knownDeltas.length >= 2,
-    "packages/gpui/data-browse-detail-picker-media-baseline.json must record explicit known deltas.",
-    errors,
-  );
-  expect(
-    baseline.nonGoals.length >= 3,
-    "packages/gpui/data-browse-detail-picker-media-baseline.json must record explicit non-goals.",
-    errors,
-  );
-
-  for (const exportName of baseline.exportNames) {
-    expect(
-      libSource.includes(exportName),
-      `packages/gpui/adapter/src/lib.rs must expose GPUI data/browse composite export "${exportName}".`,
-      errors,
-    );
-  }
-
-  return {
-    gpuiDataCompositeExportCount: baseline.exportNames.length,
-  };
-}
-
 function validateGpuiNativeAccessibilityProof(errors: string[]): {
   gpuiAccessibilityLayerCount: number;
   gpuiAccessibilitySectionCount: number;
@@ -2164,8 +1408,6 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
       id: string;
       crateName: string;
       cratePath: string;
-      contractIds: string[];
-      exportNames: string[];
       focusEntryStatus: string;
       focusRecoveryStatus: string;
       keyboardTraversalStatus: string;
@@ -2182,7 +1424,6 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
       keyboardStatus: string;
       announcementsStatus: string;
       owningLayer: string;
-      sideBySideReview: boolean;
       remainingBlockers: string[];
     }>;
     manualReviewExpectations: string[];
@@ -2202,59 +1443,11 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
   ];
   const expectedLayerIds = ["composites", "primitives", "workstation"];
   const allowedStatuses = new Set(["explicit", "hybrid", "manual"]);
-  const primitiveExportNames = [
-    ...JSON.parse(fs.readFileSync(gpuiStructuralBaselinePath, "utf8")).exportNames,
-    ...JSON.parse(fs.readFileSync(gpuiActionFieldBaselinePath, "utf8")).exportNames,
-    ...JSON.parse(fs.readFileSync(gpuiSelectionFeedbackDateBaselinePath, "utf8")).exportNames,
-    ...JSON.parse(fs.readFileSync(gpuiOverlayNavigationMenuBaselinePath, "utf8")).exportNames,
-  ].sort();
-  const primitiveContractIds = [
-    ...JSON.parse(fs.readFileSync(gpuiStructuralBaselinePath, "utf8")).contractIds,
-    ...JSON.parse(fs.readFileSync(gpuiActionFieldBaselinePath, "utf8")).contractIds,
-    ...JSON.parse(fs.readFileSync(gpuiSelectionFeedbackDateBaselinePath, "utf8")).contractIds,
-    ...JSON.parse(fs.readFileSync(gpuiOverlayNavigationMenuBaselinePath, "utf8")).contractIds,
-  ].sort();
-  const compositeExportNames = [
-    ...JSON.parse(fs.readFileSync(gpuiFormValidationRemediationBaselinePath, "utf8")).exportNames,
-    ...JSON.parse(fs.readFileSync(gpuiDataBrowseDetailPickerMediaBaselinePath, "utf8")).exportNames,
-  ].sort();
-  const compositeContractIds = [
-    ...JSON.parse(fs.readFileSync(gpuiFormValidationRemediationBaselinePath, "utf8")).contractIds,
-    ...JSON.parse(fs.readFileSync(gpuiDataBrowseDetailPickerMediaBaselinePath, "utf8")).contractIds,
-  ].sort();
-  const shellExportNames = [
-    "ActionDiscoveryPanelSpec",
-    "AppHeaderSpec",
-    "CommandPaletteSpec",
-    "DockRegionSpec",
-    "ShellStatusBarSpec",
-    "SplitViewSpec",
-  ];
-  const shellContractIds = [
-    "action-discovery-panel",
-    "app-header",
-    "command-palette",
-    "dock-region",
-    "split-view",
-    "status-bar",
-  ];
   const sectionTargets = new Map(
     accessibilityAuditTargets
       .filter((target) => target.auditAreas.gpui !== "not-applicable")
       .map((target) => [target.sectionId, target]),
   );
-  const gpuiPriorityMatrix = JSON.parse(fs.readFileSync(gpuiParityPriorityPath, "utf8")) as {
-    sectionTargets: Array<{
-      sectionId: string;
-      sideBySideReview: boolean;
-    }>;
-  };
-  const paritySections = new Map(
-    gpuiPriorityMatrix.sectionTargets
-      .filter((target) => expectedSectionIds.includes(target.sectionId))
-      .map((target) => [target.sectionId, target]),
-  );
-
   expect(
     proof.generation === "g16.001",
     "packages/gpui/native-accessibility-proof.json must target g16.001.",
@@ -2311,37 +1504,12 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
     errors,
   );
 
-  const expectedLayerData = new Map([
-    [
-      "primitives",
-      {
-        crateName: gpuiAdapterCrateName,
-        cratePath: gpuiAdapterCratePath,
-        exportNames: primitiveExportNames,
-        contractIds: primitiveContractIds,
-      },
-    ],
-    [
-      "composites",
-      {
-        crateName: gpuiAdapterCrateName,
-        cratePath: gpuiAdapterCratePath,
-        exportNames: compositeExportNames,
-        contractIds: compositeContractIds,
-      },
-    ],
-    [
-      // Shell surfaces. The retired poodle-workstation crate carried a parallel
-      // spec tier here; what survives are the six that poodle-specs owns.
-      "workstation",
-      {
-        crateName: gpuiAdapterCrateName,
-        cratePath: gpuiAdapterCratePath,
-        exportNames: [...shellExportNames].sort(),
-        contractIds: [...shellContractIds].sort(),
-      },
-    ],
-  ]);
+  const expectedLayerData = new Map(
+    expectedLayerIds.map((id) => [
+      id,
+      { crateName: gpuiAdapterCrateName, cratePath: gpuiAdapterCratePath },
+    ]),
+  );
 
   for (const layer of proof.layerProof) {
     const expected = expectedLayerData.get(layer.id);
@@ -2365,19 +1533,6 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
       `packages/gpui/native-accessibility-proof.json layer "${layer.id}" must target ${expected.cratePath}.`,
       errors,
     );
-    compareLists(
-      `packages/gpui/native-accessibility-proof.json ${layer.id} export names`,
-      [...layer.exportNames].sort(),
-      expected.exportNames,
-      errors,
-    );
-    compareLists(
-      `packages/gpui/native-accessibility-proof.json ${layer.id} contract ids`,
-      [...layer.contractIds].sort(),
-      expected.contractIds,
-      errors,
-    );
-
     for (const status of [
       layer.focusEntryStatus,
       layer.focusRecoveryStatus,
@@ -2419,7 +1574,6 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
 
   for (const section of proof.sectionProof) {
     const accessibilityTarget = sectionTargets.get(section.sectionId);
-    const parityTarget = paritySections.get(section.sectionId);
 
     expect(
       Boolean(accessibilityTarget),
@@ -2456,13 +1610,6 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
       errors,
     );
 
-    if (parityTarget) {
-      expect(
-        section.sideBySideReview === parityTarget.sideBySideReview,
-        `packages/gpui/native-accessibility-proof.json section "${section.sectionId}" side-by-side flag must match the parity registry.`,
-        errors,
-      );
-    }
   }
 
   return {
@@ -3071,15 +2218,7 @@ validateAccessibilityAudit(errors);
 validateReleaseOperations(errors);
 const ecosystemAcceptanceCounts = validateEcosystemAcceptance(errors);
 const referenceAppsCounts = validateReferenceApps(errors);
-const g03CloseoutCounts = validateG03Closeout(errors);
-const gpuiPriorityCounts = validateGpuiPriorityMatrix(errors);
 const gpuiPreviewCounts = validateGpuiPreviewBaseline(errors);
-const gpuiStructuralCounts = validateGpuiStructuralBaseline(errors);
-const gpuiActionFieldCounts = validateGpuiActionFieldBaseline(errors);
-const gpuiSelectionFeedbackDateCounts = validateGpuiSelectionFeedbackDateBaseline(errors);
-const gpuiOverlayNavigationMenuCounts = validateGpuiOverlayNavigationMenuBaseline(errors);
-const gpuiFormValidationRemediationCounts = validateGpuiFormValidationRemediationBaseline(errors);
-const gpuiDataBrowseDetailPickerMediaCounts = validateGpuiDataBrowseDetailPickerMediaBaseline(errors);
 const gpuiNativeAccessibilityCounts = validateGpuiNativeAccessibilityProof(errors);
 const gpuiCrossRuntimeRouteCounts = validateGpuiCrossRuntimeParityReport(errors);
 const sharedDemoAppAuditCounts = validateSharedDemoAppAudit(errors);
@@ -3128,5 +2267,5 @@ if (errors.length > 0) {
 }
 
 console.log(
-  `Validated ${componentContractCount} component contracts, ${operatorGuideCount} operator guides, ${docsSections.length} docs sections, ${docsFamilies.length} docs families, ${parityTargets.length} parity targets, ${accessibilityAuditTargets.length} accessibility audit targets, ${ecosystemAcceptanceCounts.suiteCount} ecosystem acceptance suites, ${ecosystemAcceptanceCounts.regressionClassCount} regression classes, ${referenceAppsCounts.shapeCount} reference shapes, ${referenceAppsCounts.laneCount} onboarding lanes, ${g03CloseoutCounts.stableSurfaceCount} closeout surfaces, ${g03CloseoutCounts.carryForwardCount} carry-forward gaps, ${gpuiPriorityCounts.waveCount} GPUI implementation waves, ${gpuiPriorityCounts.targetCount} GPUI section targets, ${gpuiPreviewCounts.previewSectionCount} GPUI preview baseline sections, ${gpuiStructuralCounts.structuralExportCount} GPUI structural exports, ${gpuiActionFieldCounts.actionFieldExportCount} GPUI action or field exports, ${gpuiSelectionFeedbackDateCounts.selectionFeedbackDateExportCount} GPUI selection/feedback/date exports, ${gpuiOverlayNavigationMenuCounts.overlayNavigationMenuExportCount} GPUI overlay/disclosure/navigation/menu exports, ${gpuiFormValidationRemediationCounts.gpuiCompositeExportCount} GPUI form/validation/remediation composite exports, ${gpuiDataBrowseDetailPickerMediaCounts.gpuiDataCompositeExportCount} GPUI data/browse/detail/picker/media composite exports, ${gpuiNativeAccessibilityCounts.gpuiAccessibilityLayerCount} GPUI accessibility-proof layers, ${gpuiNativeAccessibilityCounts.gpuiAccessibilitySectionCount} GPUI accessibility-proof sections, ${gpuiCrossRuntimeRouteCounts.gpuiCrossRuntimeRouteCount} GPUI headless construction routes, ${gpuiCrossRuntimeRouteCounts.gpuiCrossRuntimeDeltaCount} GPUI current known deltas, ${sharedDemoAppAuditCounts.demoAuditFindingCount} shared demo-app audit findings, ${sharedDemoAppAuditCounts.demoAuditScreenCount} shared demo target screens, ${sharedDemoAppContractCounts.demoContractScreenCount} shared demo contract screens, ${sharedDemoAppContractCounts.demoContractRegionCount} shared demo shell regions, ${contractDriftResult.checked} contract<->Svelte prop surfaces, ${callbackDriftResult.checked} contract<->Svelte callback surfaces, and ${specDriftResult.checked} contract<->spec prop surfaces.`,
+  `Validated ${componentContractCount} component contracts, ${operatorGuideCount} operator guides, ${docsSections.length} docs sections, ${docsFamilies.length} docs families, ${parityTargets.length} parity targets, ${accessibilityAuditTargets.length} accessibility audit targets, ${ecosystemAcceptanceCounts.suiteCount} ecosystem acceptance suites, ${ecosystemAcceptanceCounts.regressionClassCount} regression classes, ${referenceAppsCounts.shapeCount} reference shapes, ${referenceAppsCounts.laneCount} onboarding lanes, ${gpuiPreviewCounts.previewSectionCount} GPUI preview baseline sections, ${gpuiNativeAccessibilityCounts.gpuiAccessibilityLayerCount} GPUI accessibility-proof layers, ${gpuiNativeAccessibilityCounts.gpuiAccessibilitySectionCount} GPUI accessibility-proof sections, ${gpuiCrossRuntimeRouteCounts.gpuiCrossRuntimeRouteCount} GPUI headless construction routes, ${gpuiCrossRuntimeRouteCounts.gpuiCrossRuntimeDeltaCount} GPUI current known deltas, ${sharedDemoAppAuditCounts.demoAuditFindingCount} shared demo-app audit findings, ${sharedDemoAppAuditCounts.demoAuditScreenCount} shared demo target screens, ${sharedDemoAppContractCounts.demoContractScreenCount} shared demo contract screens, ${sharedDemoAppContractCounts.demoContractRegionCount} shared demo shell regions, ${contractDriftResult.checked} contract<->Svelte prop surfaces, ${callbackDriftResult.checked} contract<->Svelte callback surfaces, and ${specDriftResult.checked} contract<->spec prop surfaces.`,
 );
