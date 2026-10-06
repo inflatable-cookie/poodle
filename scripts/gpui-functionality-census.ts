@@ -89,15 +89,6 @@ export const WITHHELD_AXES: Record<string, Partial<Record<CensusAxis, string>>> 
     visual:
       "narrow-container clamp needs a shared min(100%, max(…)) layout capability",
   },
-  Code: {
-    // Planner split ruling 2026-10-05 (brief v3): the copy press reaches
-    // the backend clipboard channel, but the Copied feedback latch and
-    // its scheduled reset stay host-owned. The copy button is Code's only
-    // pointer/keyboard surface, so both axes wait for the follow-up task.
-    pointer: "copy feedback through production AppState scheduling: follow-up task",
-    keyboard_focus:
-      "copy feedback through production AppState scheduling: follow-up task",
-  },
   ListGrid: {
     // Same clamp class as the CardToggleGroup ruling above: the contract's
     // `min(minItemWidth, 100%)` / `min(100%, max(…))` track floor stays

@@ -246,7 +246,10 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   AudioSwitch: "first_mounted_parity_audio_switch",
   GainReductionMeter: "first_mounted_parity_gain_reduction_meter",
   ValueReadout: "first_mounted_parity_value_readout",
-  Code: "first_mounted_parity_code",
+  Code: [
+    "code_copy_feedback_through_production_app_state_scheduling",
+    "first_mounted_parity_code",
+  ],
   Eyebrow: "first_mounted_parity_eyebrow",
   TextLink: "first_mounted_parity_text_link",
   IconProvider: "first_mounted_parity_icon_provider",

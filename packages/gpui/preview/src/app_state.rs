@@ -226,6 +226,11 @@ pub const CONTRAST_MAX: f32 = 1.0;
 /// neutral ramp is the one most of the component work is judged against.
 pub const CONTRAST_DEFAULT: f32 = 0.25;
 
+/// Held duration for code-copy feedback (contract §4). Production scheduling
+/// and the mounted regression both use this constant; tests advance the
+/// headless clock by it rather than sleeping.
+pub const COPY_FEEDBACK_DURATION: std::time::Duration = std::time::Duration::from_secs(2);
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TokenPanel {
     Summary,
@@ -1220,6 +1225,43 @@ impl AppState {
         }
     }
 
+    /// Clear copy feedback if `generation` is still the latest press for
+    /// `key`. A repeat press bumps the generation so a stale timer returns
+    /// false and leaves the latch up for the full duration.
+    pub fn clear_copy_if_current(&mut self, key: &str, generation: u64) -> bool {
+        if self.copy_generations.get(key).copied() == Some(generation) {
+            self.specimens.set_toggle(key, false);
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Latch-clearing timers for code-copy feedback (contract §4: the 2s
+    /// `copied` swap, adapter-owned). One task per press: after two seconds
+    /// it clears the specimen latch and notifies the root so the idle
+    /// affordance repaints. Mirrors the file-pick task seam above.
+    ///
+    /// `apply` is the host's generation-guarded clear (`clear_copy_if_current`
+    /// on this state). PreviewRoot and the mounted regression both pass that
+    /// function so the timer, duration, and guard stay this seam.
+    pub fn start_copy_resets<T: 'static>(
+        &mut self,
+        window: &mut gpui::Window,
+        cx: &mut App,
+        root: &gpui::WeakEntity<T>,
+        apply: fn(&mut T, &str, u64) -> bool,
+    ) {
+        for (key, generation) in std::mem::take(&mut self.pending_copy_resets) {
+            let root = root.clone();
+            window
+                .spawn(cx, async move |cx| {
+                    deliver_copy_reset(root, key, generation, cx, apply).await;
+                })
+                .detach();
+        }
+    }
+
     /// Open the OS prompts for every pending pick (g15.007).
     ///
     /// Each prompt's oneshot receiver is **awaited** in a GPUI task — dialog
@@ -1229,26 +1271,6 @@ impl AppState {
     /// `{key}-name` / `{key}-base64` / `{key}-error`, guarded by the
     /// generation captured at spawn: a route change after the dialog opened
     /// makes the result stale and it is dropped.
-    /// Latch-clearing timers for code-copy feedback (contract §4: the 2s
-    /// `copied` swap, adapter-owned). One task per press: after two seconds
-    /// it clears the specimen latch and notifies the root so the idle
-    /// affordance repaints. Mirrors the file-pick task seam above.
-    pub fn start_copy_resets(
-        &mut self,
-        window: &mut gpui::Window,
-        cx: &mut App,
-        root: &gpui::WeakEntity<crate::PreviewRoot>,
-    ) {
-        for (key, generation) in std::mem::take(&mut self.pending_copy_resets) {
-            let root = root.clone();
-            window
-                .spawn(cx, async move |cx| {
-                    deliver_copy_reset(&root, key, generation, cx).await;
-                })
-                .detach();
-        }
-    }
-
     pub fn start_file_picks(
         &mut self,
         window: &mut gpui::Window,
@@ -1304,6 +1326,27 @@ impl AppState {
     }
 }
 
+/// Latch-clearing end of a code-copy press: after two seconds the
+/// specimen latch returns to idle and the root repaints.
+pub async fn deliver_copy_reset<T: 'static>(
+    root: gpui::WeakEntity<T>,
+    key: String,
+    generation: u64,
+    cx: &mut gpui::AsyncApp,
+    apply: fn(&mut T, &str, u64) -> bool,
+) {
+    cx.background_executor().timer(COPY_FEEDBACK_DURATION).await;
+    let _ = cx.update(|cx| {
+        root.update(cx, |this, cx| {
+            // A repeat press scheduled a newer window; the stale task
+            // clears nothing so feedback lasts the full duration.
+            if apply(this, &key, generation) {
+                cx.notify();
+            }
+        })
+    });
+}
+
 /// The completion-driven landing seam for one OS pick (g15.007).
 ///
 /// Awaits the prompt's oneshot receiver — a dialog result *schedules* this
@@ -1313,27 +1356,6 @@ impl AppState {
 /// captured at spawn: a route change after the dialog opened drops the
 /// result entirely. This is the exact seam `start_file_picks` runs; tests
 /// drive it with an injected receiver completed after the first frame.
-/// Latch-clearing end of a code-copy press: after two seconds the
-/// specimen latch returns to idle and the root repaints.
-pub async fn deliver_copy_reset(
-    root: &gpui::WeakEntity<crate::PreviewRoot>,
-    key: String,
-    generation: u64,
-    cx: &mut gpui::AsyncApp,
-) {
-    gpui::Timer::after(std::time::Duration::from_secs(2)).await;
-    let _ = cx.update(|cx| {
-        root.update(cx, |this, cx| {
-            // A repeat press scheduled a newer window; the stale task
-            // clears nothing so feedback lasts the full duration.
-            if this.state.copy_generations.get(&key).copied() == Some(generation) {
-                this.state.specimens.set_toggle(&key, false);
-                cx.notify();
-            }
-        })
-    });
-}
-
 pub async fn deliver_os_pick(
     root: &gpui::WeakEntity<crate::PreviewRoot>,
     receiver: futures::channel::oneshot::Receiver<anyhow::Result<Option<Vec<std::path::PathBuf>>>>,

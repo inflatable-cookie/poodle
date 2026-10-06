@@ -79,23 +79,16 @@ mod nucleus_a11y;
 #[path = "../src/block_slider_host.rs"]
 mod block_slider_host;
 
-mod app_state {
-    #[derive(Clone, Debug)]
-    pub enum NodeSpecimenEvent {
-        FileBrowse {
-            key: String,
-            spec: poodle_gpui_node_backend::file_capability::SingleFilePickSpec,
-            failed_message: Option<String>,
-        },
-        SetToggle {
-            key: String,
-            value: bool,
-        },
-        SetValue {
-            key: String,
-            value: String,
-        },
-    }
+#[path = "../src/presentation_axes.rs"]
+mod presentation_axes;
+
+#[path = "../src/app_state.rs"]
+mod app_state;
+
+/// Stand-in so path-included `app_state` can name the file-pick host type.
+/// Copy-reset scheduling is generic and does not construct this.
+struct PreviewRoot {
+    state: app_state::AppState,
 }
 
 #[path = "../src/node_compat.rs"]
@@ -59063,11 +59056,10 @@ fn first_mounted_parity_agent_message() {
 /// copy button), line numbers, highlight bleed, token surfaces, and the inline
 /// wrap contract — all through the mounted GPUI backend.
 ///
-/// Production-path scope only: the copy press is proved through the
-/// backend clipboard channel on the default adapter path. The Copied
-/// feedback latch and its 2s scheduled reset live in the preview host
-/// (AppState) and move to their own task; the pointer and keyboard_focus
-/// axes stay missing for that reason.
+/// The copy press is proved through the backend clipboard channel on the
+/// default adapter path. Copied feedback through production `live_code` /
+/// AppState scheduling is
+/// `code_copy_feedback_through_production_app_state_scheduling`.
 #[test]
 fn first_mounted_parity_code() {
     use node_compat::IntoCompatNode;
@@ -62367,5 +62359,170 @@ fn first_mounted_parity_mod_matrix_grid() {
                 .is_none(),
             "disabled activation never focuses"
         );
+    });
+}
+
+/// Copied feedback for block and inline Code through production `live_code` /
+/// AppState scheduling: a press latches "Copied", a repeat press restarts the
+/// generation-guarded 2s window, and the latch clears once after the latest
+/// copy. The headless clock is `HeadlessDriver::advance_clock`; no test-owned
+/// timer or manual copied rebuild.
+#[test]
+fn code_copy_feedback_through_production_app_state_scheduling() {
+    use gpui::{
+        div, px, AppContext as _, Context, IntoElement, ParentElement as _, Render, Styled as _,
+    };
+    use poodle_specs::CodeSpec;
+
+    struct LiveCodeHost {
+        state: app_state::AppState,
+    }
+
+    impl LiveCodeHost {
+        fn apply_copy_reset(&mut self, key: &str, generation: u64) -> bool {
+            self.state.clear_copy_if_current(key, generation)
+        }
+    }
+
+    impl Render for LiveCodeHost {
+        fn render(
+            &mut self,
+            window: &mut gpui::Window,
+            cx: &mut Context<Self>,
+        ) -> impl IntoElement {
+            self.state.drain_node_events();
+            let root = cx.entity().downgrade();
+            self.state
+                .start_copy_resets(window, cx, &root, LiveCodeHost::apply_copy_reset);
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                .child(node_compat::Code::live_code(
+                    CodeSpec::new()
+                        .with_content("echo hi")
+                        .with_language("bash"),
+                    "code-copy-block-ts",
+                    &self.state,
+                    &self.state.theme,
+                ))
+                .child(node_compat::Code::live_code(
+                    CodeSpec::new()
+                        .with_content("npm install")
+                        .with_inline(true),
+                    "code-copy-inline-npm",
+                    &self.state,
+                    &self.state.theme,
+                ))
+        }
+    }
+
+    run_headless(|cx| {
+        let host_cell: Rc<RefCell<Option<gpui::Entity<LiveCodeHost>>>> =
+            Rc::new(RefCell::new(None));
+        let build = {
+            let host_cell = Rc::clone(&host_cell);
+            Rc::new(move || match host_cell.borrow().as_ref() {
+                Some(host) => host.clone().into_any_element(),
+                None => div().into_any_element(),
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 480.0, 200.0);
+        let host = driver.update_app(|cx| {
+            cx.new(|_| LiveCodeHost {
+                state: app_state::AppState::new(),
+            })
+        });
+        *host_cell.borrow_mut() = Some(host);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        driver.wait_for_element("poodle-code-copy");
+        driver.wait_for_element("poodle-code-copy-inline");
+
+        let copy_label = |id: &str| {
+            poodle_gpui_node_backend::painted_node_for(id).and_then(|node| node.a11y_label.clone())
+        };
+        assert_eq!(
+            copy_label("poodle-code-copy").as_deref(),
+            Some("Copy to clipboard")
+        );
+        assert_eq!(
+            copy_label("poodle-code-copy-inline").as_deref(),
+            Some("Copy to clipboard")
+        );
+
+        driver.pointer_activate_id("poodle-code-copy");
+        assert_eq!(
+            copy_label("poodle-code-copy").as_deref(),
+            Some("Copied"),
+            "block copy latches feedback through production AppState"
+        );
+        assert_eq!(
+            copy_label("poodle-code-copy-inline").as_deref(),
+            Some("Copy to clipboard"),
+            "inline copy stays idle while the block latch is up"
+        );
+
+        let almost_done = app_state::COPY_FEEDBACK_DURATION - std::time::Duration::from_millis(1);
+        driver.advance_clock(almost_done);
+        driver.draw_frame();
+        assert_eq!(
+            copy_label("poodle-code-copy").as_deref(),
+            Some("Copied"),
+            "feedback survives until the full production duration"
+        );
+
+        driver.pointer_activate_id("poodle-code-copy");
+        assert_eq!(
+            copy_label("poodle-code-copy").as_deref(),
+            Some("Copied"),
+            "a repeat copy keeps the latch up"
+        );
+        driver.advance_clock(std::time::Duration::from_millis(1));
+        driver.draw_frame();
+        assert_eq!(
+            copy_label("poodle-code-copy").as_deref(),
+            Some("Copied"),
+            "the stale first timer must not clear the restarted window"
+        );
+
+        driver.advance_clock(almost_done - std::time::Duration::from_millis(1));
+        driver.draw_frame();
+        assert_eq!(
+            copy_label("poodle-code-copy").as_deref(),
+            Some("Copied"),
+            "restarted feedback lasts the full duration after the latest copy"
+        );
+        driver.advance_clock(std::time::Duration::from_millis(1));
+        driver.draw_frame();
+        assert_eq!(
+            copy_label("poodle-code-copy").as_deref(),
+            Some("Copy to clipboard"),
+            "feedback clears once when the latest production timer fires"
+        );
+
+        driver.focus_element("poodle-code-copy-inline");
+        driver.keyboard_activate("poodle-code-copy-inline");
+        assert_eq!(
+            copy_label("poodle-code-copy-inline").as_deref(),
+            Some("Copied"),
+            "inline copy latches through the same AppState path"
+        );
+        driver.advance_clock(almost_done);
+        driver.draw_frame();
+        assert_eq!(
+            copy_label("poodle-code-copy-inline").as_deref(),
+            Some("Copied")
+        );
+        driver.advance_clock(std::time::Duration::from_millis(1));
+        driver.draw_frame();
+        assert_eq!(
+            copy_label("poodle-code-copy-inline").as_deref(),
+            Some("Copy to clipboard"),
+            "inline feedback clears once after the production duration"
+        );
+
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }

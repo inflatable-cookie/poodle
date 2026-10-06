@@ -7,6 +7,8 @@
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
     "semantic",
+    "pointer",
+    "keyboard_focus",
     "accessibility",
     "visual"
   ],
@@ -14,6 +16,14 @@
     "semantic": [
       "assert",
       "production-mount"
+    ],
+    "pointer": [
+      "pointer_activate"
+    ],
+    "keyboard_focus": [
+      "focus_state_for",
+      "focus_element",
+      "keyboard_"
     ],
     "accessibility": [
       "NodeRole",
@@ -35,18 +45,20 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "5daa515b9e23f4e371554c6ce27068a713b2c6c1",
+  "source_commit": "daa45b2dd0d74926271c645588c0cbf11c8ea4b4",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "poodle-116-197271e1",
+    "run_id": "7e4855e6-c5ae-45a0-9f69-6824479c82bb",
     "outcome": "passed",
     "body_sha256": "15a14a0905c8d71ead92da664aecf57abfcef0153be81215b27af5936e76cdf0"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
+    "drove real pointer activation through the mounted GPUI node backend",
+    "drove real keyboard input or backend focus through the mounted tree",
     "asserted node-level role, label, state, or focusability in the mounted tree",
     "asserted resolved token values or mounted geometry"
   ],

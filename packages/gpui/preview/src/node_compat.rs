@@ -49,7 +49,7 @@ use poodle_specs::{
 };
 use poodle_tokens::typed::ColorValue;
 
-use crate::app_state::NodeSpecimenEvent;
+use crate::app_state::{AppState, NodeSpecimenEvent};
 use poodle_gpui_node_backend::file_capability::SingleFilePickSpec;
 
 type OpenChangeHandler = Rc<dyn Fn(bool, &mut Window, &mut App)>;
@@ -4374,6 +4374,27 @@ impl Code {
     pub(crate) fn on_copy(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
         self.on_copy = Some(handler);
         self
+    }
+
+    /// Block or inline Code with live copy feedback: the press reports
+    /// through the node-event queue and the latch renders until the host's
+    /// 2s reset task clears it (contract §4, adapter-owned).
+    pub(crate) fn live_code(
+        spec: CodeSpec,
+        key: &str,
+        state: &AppState,
+        theme: &GpuiThemeProvider,
+    ) -> Self {
+        let events = state.node_events.clone();
+        let key = key.to_string();
+        let press_key = key.clone();
+        Self::from_spec(spec.with_copied(state.specimens.is_on(&key)), theme).on_copy(Arc::new(
+            move || {
+                events.lock().unwrap().push(NodeSpecimenEvent::CodeCopy {
+                    key: press_key.clone(),
+                });
+            },
+        ))
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {

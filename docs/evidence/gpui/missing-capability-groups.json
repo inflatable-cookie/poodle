@@ -22,23 +22,6 @@
       ]
     },
     {
-      "substrate": "text-display",
-      "components": [
-        "Code"
-      ],
-      "missingTally": {
-        "semantic": 0,
-        "events": 0,
-        "pointer": 1,
-        "keyboard_focus": 1,
-        "accessibility": 0,
-        "visual": 0
-      },
-      "contracts": [
-        "docs/contracts/components/code.md"
-      ]
-    },
-    {
       "substrate": "drag-resize-reorder",
       "components": [
         "CardToggleGroup"
