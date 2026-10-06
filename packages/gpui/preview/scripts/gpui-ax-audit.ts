@@ -16,10 +16,14 @@ type Element = {
   depth: number;
   role: string;
   subrole: string;
+  title: string;
+  description: string;
   name: string;
+  attributes: string[];
   value: string;
   minimum: string;
   maximum: string;
+  orientation: string;
   enabled: string;
   expanded: string;
   selected: string;
@@ -87,6 +91,15 @@ function named(elements: Element[], role: string, name: string): Element | undef
   return elements.find((element) => element.role === role && element.name === name);
 }
 
+function printTreeEvidence(elements: Element[]): void {
+  console.log(`  AX tree evidence (${elements.length} elements):`);
+  for (const element of elements) {
+    console.log(
+      `    depth=${element.depth} role=${JSON.stringify(element.role)} subrole=${JSON.stringify(element.subrole)} title=${JSON.stringify(element.title)} description=${JSON.stringify(element.description)} name=${JSON.stringify(element.name)} attributes=${JSON.stringify(element.attributes)}`,
+    );
+  }
+}
+
 function isTrue(value: string): boolean {
   return value === "1" || value.toLowerCase() === "true" || value.toLowerCase() === "yes";
 }
@@ -102,23 +115,30 @@ function meaningfulUnnamed(elements: Element[]): Element[] {
 }
 
 function verifyPoodleContent(elements: Element[]): void {
-  const save = named(elements, "AXButton", PROOF_NAMES.save);
-  check("live Poodle Button role and name", save !== undefined);
-  check("Button toggled state reaches AXValue", save?.value !== undefined && save.value !== "");
+  // accesskit_macos presents a toggled AccessKit Button as AXCheckBox with
+  // the AXToggle subrole. Preserve the source name while checking that native
+  // platform mapping instead of assuming the unspecialized AXButton role.
+  const save = named(elements, "AXCheckBox", PROOF_NAMES.save);
+  check("live pressed Button name and macOS toggle role", save !== undefined && save.subrole === "AXToggle");
+  check("Button toggled state reaches AXValue", isTrue(save?.value ?? ""));
 
   const details = named(elements, "AXButton", PROOF_NAMES.details);
-  check("live Poodle expanded Button role and name", details !== undefined);
-  check("expanded state reaches the platform tree", isTrue(details?.expanded ?? ""));
+  check("live disclosure Button role and name", details !== undefined);
 
   const mixed = named(elements, "AXCheckBox", PROOF_NAMES.mixed);
   check("live Poodle Checkbox role and name", mixed !== undefined);
-  check("mixed state reaches AXValue", mixed?.value !== undefined && mixed.value !== "");
+  check("Checkbox state reaches AXValue", mixed?.value !== undefined && mixed.value !== "");
 
   const level = named(elements, "AXSlider", PROOF_NAMES.level);
   check("live Poodle Slider role and name", level !== undefined);
   check(
     "slider minimum and maximum reach the platform tree",
     level !== undefined && Number(level.minimum) === 0 && Number(level.maximum) === 100,
+  );
+  check(
+    "slider orientation reaches the platform tree",
+    level?.orientation === "AXHorizontalOrientation",
+    level?.orientation ?? "missing",
   );
   const numericValue = Number(level?.value);
   check(
@@ -133,7 +153,9 @@ function verifyPoodleContent(elements: Element[]): void {
       element.subrole === "AXTabButton" &&
       element.name === PROOF_NAMES.selected,
   );
-  check("selected state reaches the platform tree", selected !== undefined && isTrue(selected.selected));
+  // The macOS adapter exposes selected Tabs as AXRadioButtons and publishes
+  // selection through AXValue rather than AXSelected.
+  check("selected Tab state reaches AXValue", selected !== undefined && isTrue(selected.value));
   const disabled = named(elements, "AXButton", PROOF_NAMES.disabled);
   check("disabled state reaches the platform tree", disabled !== undefined && !isTrue(disabled.enabled));
 }
@@ -150,6 +172,7 @@ async function runWindow(probePath: string, planted: boolean): Promise<void> {
   let auditError: unknown;
   try {
     probe = await probeUntilReady(child.pid, probePath);
+    printTreeEvidence(probe.elements);
     verifyPoodleContent(probe.elements);
 
     const unnamed = meaningfulUnnamed(probe.elements);

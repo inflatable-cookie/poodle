@@ -27,6 +27,7 @@ export const CENSUS_MD_PATH = `${CENSUS_DIR}/gpui-functionality-census.md`;
 export const GROUPS_PATH = `${CENSUS_DIR}/missing-capability-groups.json`;
 export const EXECUTION_RECORD_PATH = `${CENSUS_DIR}/expected-test-execution.json`;
 export const CROSS_RUNTIME_REPORT = "packages/gpui/cross-runtime-parity-report.json";
+export const NATIVE_ACCESSIBILITY_PROOF_PATH = "packages/gpui/native-accessibility-proof.json";
 
 export const CENSUS_SCHEMA = "poodle.g18-gpui-functionality-census.v1";
 export const RECEIPT_SCHEMA = "poodle.g18-gpui-mounted-receipt.v1";
@@ -160,6 +161,45 @@ export type CensusDoc = {
   groups: MissingGroup[];
   crossRuntime: { constructionClaim: string; mountedScope: string; note: string };
 };
+
+export type LivePlatformProofAttempt = {
+  outcome: "blocked" | "passed";
+  cleanTree?: { outcome?: string };
+  plantedUnnamedControl?: { outcome?: string };
+  a2ClearedComponents: unknown;
+};
+
+/** Only a passing clean-tree read plus the planted unnamed-control case can
+ * release a component's generated A2 hold. The artifact remains the single
+ * source of the component allowlist; callers cannot silently promote a name
+ * absent from the portable census roster. */
+export function deriveLiveA2Clearances(
+  attempt: LivePlatformProofAttempt,
+  portableComponents: string[],
+): Set<string> {
+  if (!Array.isArray(attempt.a2ClearedComponents) || attempt.a2ClearedComponents.some((name) => typeof name !== "string")) {
+    throw new Error("Live platform proof must carry a string a2ClearedComponents list.");
+  }
+  const cleared = attempt.a2ClearedComponents as string[];
+  if (new Set(cleared).size !== cleared.length) {
+    throw new Error("Live platform proof duplicates an A2-cleared component.");
+  }
+  if (attempt.outcome === "blocked") {
+    if (cleared.length > 0) throw new Error("A blocked live platform proof cannot clear A2 holds.");
+    return new Set();
+  }
+  if (attempt.outcome !== "passed") {
+    throw new Error(`Unsupported live platform proof outcome ${String(attempt.outcome)}.`);
+  }
+  if (attempt.cleanTree?.outcome !== "passed" || attempt.plantedUnnamedControl?.outcome !== "passed") {
+    throw new Error("Live platform proof can clear A2 only after both tree assertions pass.");
+  }
+  const portable = new Set(portableComponents);
+  for (const component of cleared) {
+    if (!portable.has(component)) throw new Error(`Live platform proof clears non-portable or unknown component ${component}.`);
+  }
+  return new Set(cleared);
+}
 
 /** The component itself is a static display surface; any interactions belong
  * to composed children. These contract-backed boundaries stay local so they
@@ -1408,6 +1448,16 @@ export function expectedTestReceiptContent(input: ExpectedTestReceiptInput): str
 
 export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{ file: string; content: string }> } {
   const roster = deriveLiveRoster(root);
+  const proofArtifact = JSON.parse(read(root, NATIVE_ACCESSIBILITY_PROOF_PATH)) as {
+    livePlatformProofAttempt?: LivePlatformProofAttempt;
+  };
+  if (proofArtifact.livePlatformProofAttempt === undefined) {
+    throw new Error(`${NATIVE_ACCESSIBILITY_PROOF_PATH} has no livePlatformProofAttempt.`);
+  }
+  const liveA2Clearances = deriveLiveA2Clearances(
+    proofArtifact.livePlatformProofAttempt,
+    roster.filter((component) => component.portable).map((component) => component.name),
+  );
   const manifest = deriveCapabilityManifest(root);
   validateCapabilityManifest(manifest);
   validateManifestRefs(manifest, root);
@@ -1542,14 +1592,16 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
       required: [...entry.required],
       admitted,
       missing,
-      holds: [
-        {
-          axis: "accessibility",
-          kind: "A2-platform-hold",
-          note: "The live platform-tree proof is blocked by local macOS Accessibility trust; no platform content has been verified for this component.",
-          ref: "docs/contracts/003-native-accessibility.md",
-        },
-      ],
+      holds: liveA2Clearances.has(component.name)
+        ? []
+        : [
+            {
+              axis: "accessibility",
+              kind: "A2-platform-hold",
+              note: "This component is not fully covered by the current live platform-tree proof; retain its A2 hold until its own platform semantics are verified.",
+              ref: "docs/contracts/003-native-accessibility.md",
+            },
+          ],
       receipts: files,
       refusals,
     };
@@ -1696,7 +1748,10 @@ export function censusMarkdown(doc: CensusDoc): string {
   lines.push("");
   lines.push("Capability axes are closed: `semantic`, `events`, `pointer`, `keyboard_focus`, `accessibility`, `visual`.");
   lines.push("Each portable row requires the axes its contract declares; `not-applicable` needs an exact contract section and can never cite platform state.");
-  lines.push("Every portable row retains the A2 platform hold until live component content is read through macOS AXUIElement.");
+  const a2Cleared = doc.rows.filter((row) => row.portable && row.holds.length === 0).map((row) => row.component);
+  lines.push(
+    `Live macOS AXUIElement proof clears A2 for ${a2Cleared.length === 0 ? "no components" : a2Cleared.join(", ")}; every other portable row retains its hold until its platform semantics are verified.`,
+  );
   lines.push("Admitted capabilities trace to validated Nucleus M1/A1/V1 receipts or to retained expected tests whose individual execution records identify the source and dependency they ran against, mount the production renderer plus GPUI node backend, and show the claimed axis signals in their bodies.");
   lines.push("Construction is not functional completion. A passing route, a test name, or one passing test never marks a component complete.");
   lines.push("");

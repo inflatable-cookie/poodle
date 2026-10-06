@@ -60,7 +60,8 @@ impl Render for A11yProofRoot {
         let mixed = poodle_render::checkbox(
             &CheckboxSpec::new()
                 .with_mixed(true)
-                .with_label("GPUI AX proof: Mixed state"),
+                .with_label("GPUI AX proof: Mixed state")
+                .with_aria_label("GPUI AX proof: Mixed state"),
             &ctx,
             None,
         );

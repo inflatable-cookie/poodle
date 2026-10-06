@@ -14,11 +14,36 @@
   },
   "livePlatformProofAttempt": {
     "selector": "effigy test:gpui-ax",
-    "outcome": "blocked",
+    "outcome": "passed",
     "mechanism": "macOS AXUIElement",
-    "launch": "The window-capture transport opened the preview with focus:false. Its foreground monitor recorded 230 successful samples, no failed reads, and proved the process was never frontmost.",
-    "reason": "AXIsProcessTrusted returned false for the probe process. macOS returned no content tree, so the role, name, state, value, and planted-name assertions could not run.",
-    "a2ClearedComponents": []
+    "launch": "Both proof windows used the window-capture transport with focus:false. The clean window remained non-frontmost for 239 successful samples with no failed reads; the planted window remained non-frontmost for 240 successful samples with no failed reads.",
+    "cleanTree": {
+      "outcome": "passed",
+      "elementCount": 10,
+      "unnamedMeaningfulElements": 0
+    },
+    "plantedUnnamedControl": {
+      "outcome": "passed",
+      "elementCount": 11,
+      "detected": "AXButton@3"
+    },
+    "verifiedSignals": [
+      "A toggled Poodle Button retains its AXTitle and AXValue; accesskit_macos exposes it as AXCheckBox with AXToggle subrole.",
+      "A disclosure Poodle Button is present as AXButton with its AXTitle; AXExpanded is not listed by the current macOS element.",
+      "A mixed Poodle Checkbox is present as AXCheckBox with its AXTitle and an AXValue; the checked-versus-mixed distinction was not proven.",
+      "A Poodle Slider is present as AXSlider with its AXTitle, horizontal orientation, minimum 0, maximum 100, and value text 42.5 percent.",
+      "A selected AccessKit Tab is present as AXRadioButton with AXTabButton subrole and selected state in AXValue.",
+      "A disabled Button is present with AXEnabled false."
+    ],
+    "a2ClearedComponents": [
+      "Slider"
+    ],
+    "remainingLimits": [
+      "Button A2 remains because the disclosure state was not exposed as AXExpanded.",
+      "Checkbox A2 remains because this proof did not distinguish the mixed state from checked in AXValue.",
+      "controls, labelled_by, and described_by string-ID relationships are not translated to AccessKit node IDs.",
+      "All other portable components retain A2 pending component-specific live platform evidence."
+    ]
   },
   "comparisonSource": "packages/svelte/preview/src/accessibility.ts",
   "sectionIds": [

@@ -13,6 +13,7 @@ import {
   admitTestAxes,
   CENSUS_JSON_PATH,
   deriveCapabilityManifest,
+  deriveLiveA2Clearances,
   expectedTestReceiptContent,
   extractTestBody,
   loadExecutionRecord,
@@ -398,6 +399,29 @@ describe("g18.001 census oracles", () => {
       },
     ];
     expect(() => validateCensusDoc(doc)).toThrow(/hold/i);
+  });
+
+  it("A2 oracle: clearance needs both live tree assertions and a portable component", () => {
+    const passed = {
+      outcome: "passed" as const,
+      cleanTree: { outcome: "passed" },
+      plantedUnnamedControl: { outcome: "passed" },
+      a2ClearedComponents: ["Slider"],
+    };
+    expect(deriveLiveA2Clearances(passed, ["Button", "Slider"])).toEqual(new Set(["Slider"]));
+    expect(() =>
+      deriveLiveA2Clearances(
+        { ...passed, plantedUnnamedControl: { outcome: "failed" }, a2ClearedComponents: ["Slider"] },
+        ["Button", "Slider"],
+      ),
+    ).toThrow(/both tree assertions/);
+    expect(() => deriveLiveA2Clearances(passed, ["Button"])).toThrow(/non-portable or unknown/);
+    expect(() =>
+      deriveLiveA2Clearances(
+        { ...passed, outcome: "blocked", a2ClearedComponents: ["Slider"] },
+        ["Button", "Slider"],
+      ),
+    ).toThrow(/blocked live platform proof/);
   });
 
   it("receipt-text oracle: pointer-only prose never admits keyboard_focus", () => {

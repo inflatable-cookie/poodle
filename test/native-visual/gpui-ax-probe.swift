@@ -6,10 +6,14 @@ struct Element: Encodable {
     let depth: Int
     let role: String
     let subrole: String
+    let title: String
+    let description: String
     let name: String
+    let attributes: [String]
     let value: String
     let minimum: String
     let maximum: String
+    let orientation: String
     let enabled: String
     let expanded: String
     let selected: String
@@ -54,6 +58,12 @@ func string(_ element: AXUIElement, _ name: String) -> String {
     return ""
 }
 
+func attributeNames(_ element: AXUIElement) -> [String] {
+    var raw: CFArray?
+    guard AXUIElementCopyAttributeNames(element, &raw) == .success else { return [] }
+    return raw as? [String] ?? []
+}
+
 var ancestors: [AXUIElement] = []
 var elements: [Element] = []
 var encounteredCycle = false
@@ -78,10 +88,14 @@ func walk(_ element: AXUIElement, depth: Int) {
         depth: depth,
         role: string(element, kAXRoleAttribute as String),
         subrole: string(element, kAXSubroleAttribute as String),
+        title: title,
+        description: description,
         name: title.isEmpty ? description : title,
+        attributes: attributeNames(element),
         value: string(element, kAXValueAttribute as String),
         minimum: string(element, kAXMinValueAttribute as String),
         maximum: string(element, kAXMaxValueAttribute as String),
+        orientation: string(element, kAXOrientationAttribute as String),
         enabled: string(element, kAXEnabledAttribute as String),
         expanded: string(element, kAXExpandedAttribute as String),
         selected: string(element, kAXSelectedAttribute as String)

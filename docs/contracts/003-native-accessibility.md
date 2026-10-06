@@ -10,21 +10,26 @@ Applies to: every contract with ARIA requirements, on the GPUI and Jetstream tar
 **The two native runtimes are at different stages of AccessKit adoption.**
 Jetstream projects its rendered tree into a live platform accessibility tree.
 Poodle's GPUI backend now maps direct node roles, names, states, and values
-through GPUI 1.22.0's AccessKit path. The non-activating preview launch was
-proved not to become frontmost, but macOS denied the AXUIElement probe because
-it was not trusted. No content tree was read, and no GPUI A2 hold is cleared.
+through GPUI 1.22.0's AccessKit path. The live, non-activating AXUIElement
+proof read a 10-element Poodle tree with no unnamed meaningful elements, and
+its planted control case detected an unnamed `AXButton` at depth 3. Both
+windows remained non-frontmost. The proof clears A2 for Slider only.
 ID-based relationships (`controls`, `labelled_by`, and `described_by`) are
 also not projected yet; the GPUI node backend has no translation from their
 shared string IDs to AccessKit node IDs.
+Button A2 remains because the disclosure `AXExpanded` attribute was absent
+from the live element, and Checkbox A2 remains because this proof did not
+distinguish mixed from checked through `AXValue`.
 
 | Runtime | State | Evidence |
 |---------|-------|----------|
-| gpui-unofficial 1.22.0 | **AccessKit mapping implemented; live tree read blocked.** The backend maps direct node roles, names, states, and values. ID-based relationships are not projected. The non-activating launch proved its process never became frontmost, but `AXIsProcessTrusted` returned false and no content tree was read. | `packages/gpui/native-accessibility-proof.json#livePlatformProofAttempt`; all portable components retain the census A2 hold. |
+| gpui-unofficial 1.22.0 | **AccessKit live; bounded platform proof.** The selector read named controls without foreground activation and detected its planted unnamed control. Slider role, name, range, orientation, and value are verified, clearing Slider A2 only. Button disclosure and Checkbox mixed-state evidence remain incomplete; ID-based relationships are not projected. | `packages/gpui/native-accessibility-proof.json#livePlatformProofAttempt`; other portable components retain the census A2 hold. |
 | Jetstream | **AccessKit, live.** `jetstream-ui::accessibility` projects the retained `UiTree` into an `accesskit::TreeUpdate`; `jetstream-platform` owns an `accesskit_winit` adapter and routes action requests back through the same handlers pointer input uses. | `jetstream` commit `7e997892`, and measured: its preview exposes **471 elements of our own UI, 467 named**, read out of macOS through `AXUIElement`. |
 
-The Jetstream measurement is live platform evidence. GPUI's non-activating
-launch is evidence only about foreground behavior; the untrusted AX probe read
-no Poodle content.
+The Jetstream measurement is broad live platform evidence. GPUI's bounded
+fixture proves its named Poodle content reaches the macOS tree without
+foreground activation; it does not clear A2 outside the component rows its
+assertions cover.
 
 The earlier version of this document said neither runtime had an API and
 recommended not scheduling the work at all. That was right about GPUI 0.2.2
@@ -46,9 +51,10 @@ the target:
 - **GPUI** carries the metadata through the shared renderer into
   `poodle-node`, and its node backend projects direct roles, names, states,
   and values into AccessKit; ID-based relationships remain unprojected.
-  `effigy test:gpui-ax` is the live platform check,
-  but this run could not read its tree because the AXUIElement client was not
-  trusted by macOS. No component has live platform evidence yet.
+  `effigy test:gpui-ax` reads a bounded live platform tree, checks names and
+  representative semantics, and verifies a planted unnamed control is found.
+  Slider is the only component whose A2 hold this proof clears; Button and
+  Checkbox retain their holds for the limits above.
 
 So the field is no longer uniformly inert on native. Do not write "native
 targets do not consume `aria_label`" — one of them does.
@@ -86,8 +92,10 @@ crates.io `gpui` 0.2.2 to `gpui-unofficial`, pinned to an exact stable release
 (1.22.0 at the time of the ruling), then adopt its AccessKit path. Tasks #126
 and #127 switched the dependency and wired Poodle's node metadata into
 AccessKit. Task #127 added a bounded live, non-activating platform-tree
-selector; its probe could not read content because `AXIsProcessTrusted`
-returned false, so the A2 hold remains. Re-checked the same day:
+selector. After macOS Accessibility trust was granted to Paseo, the selector
+read clean and planted-control trees while proving neither window became
+frontmost. It clears A2 for Slider; other component holds remain until their
+platform semantics are verified. Re-checked the same day:
 `gpui-apple-gpui-unofficial` 1.22.0 bundles its
 own `gpui` source and resolves it inside its crate directory, clearing the
 September sibling-path gate; the `bzip2-1.0.6` licence is allowed in
@@ -100,13 +108,16 @@ Deltas remain upstream items.
 ## Consequences For Planning
 
 - **Do not claim GPUI A2 from the dependency switch or mapping code alone.**
-  No GPUI component has live platform-tree evidence yet; all portable rows
-  retain the census A2 hold. The in-memory test platform exposes no live
-  accessibility tree; do not use its snapshots as platform proof.
+  The live GPUI proof clears A2 for Slider only. Every other portable row
+  retains the census A2 hold pending its own platform evidence. The in-memory
+  test platform exposes no live accessibility tree; do not use its snapshots
+  as platform proof.
 - **Continue component-level accessibility work below A2.** Poodle can still
   prove roles, labels, state, value, keyboard operation, and focus in its
-  mounted node/backend path. The AccessKit mapping is implemented, but no
-  live platform-tree content has been verified yet.
+  mounted node/backend path. The AccessKit mapping is implemented, and the
+  live tree verifies bounded Button, Checkbox, Slider, Tab, and disabled
+  control examples. Button expanded and Checkbox mixed semantics remain
+  unverified at the platform boundary.
 - **Do not read the GPUI accessibility artifacts as runtime proof.**
   `packages/gpui/native-accessibility-proof.json` is explicit about this in its
   own non-goals — it forbids claiming "mounted assistive-technology proof for
@@ -130,37 +141,37 @@ Deltas remain upstream items.
 
 ## What Would Change The GPUI Half
 
-The source API and Poodle's direct role/name/state/value mapping are in place;
-ID-based relationships remain unprojected. The non-activating launch
-proved the GPUI process never became frontmost, but the local AXUIElement
-client was not trusted and read no content. Run the selector in an
-Accessibility-trusted environment while preserving its focus:false launch;
-only content the live tree actually exposes can clear census A2 holds.
-Re-check each `gpui-unofficial` release; do not infer A2 from headless node
-snapshots.
+The source API and Poodle's direct role/name/state/value mapping are in place.
+The trusted AXUIElement proof read both the clean and planted-control trees
+without bringing either window to the foreground; it clears A2 for Slider
+only. Button expanded-state exposure, Checkbox mixed-state distinction, and
+ID-based relationships remain gaps. Run the selector for each further
+component claim; do not infer A2 from headless node snapshots.
 
-For all GPUI components, A2 remains a **forced acceptance**, in the sense the
-Tree contract already uses. Component-level node semantics, keyboard, focus,
-and assistive-technology quality remain payable work and are governed by the
-active GPUI runway.
+For GPUI components other than Slider, A2 remains a **forced acceptance**, in
+the sense the Tree contract already uses. Component-level node semantics,
+keyboard, focus, and assistive-technology quality remain payable work and are
+governed by the active GPUI runway.
 
 ## The 48 Contracts This Governs
 
 **48 component contracts carry ARIA requirements inside their GPUI Notes
-section.** Poodle's GPUI backend now maps direct node roles, names, states,
-and values through AccessKit, but the live macOS tree has not been read.
+section.** Poodle's GPUI backend maps direct node roles, names, states, and
+values through AccessKit. The live proof verified a bounded set of Poodle
+controls and clears the Slider row only; the other portable rows retain A2.
 ID-based relationships remain unprojected.
 `checkbox.md` is
 representative: it requires the indeterminate state to be "accessible to
 assistive technology as `aria-checked="mixed"`", and requires exposing "state,
 and accessible name through the native accessibility tree". Poodle content
-is projected into AccessKit, but the untrusted AXUIElement probe returned no
-platform content. Every portable census row retains the A2 hold.
+is projected into AccessKit and the live AXUIElement tree verifies bounded
+named controls. Button and Checkbox remain held for the state limits above;
+Slider is the only cleared portable row.
 
 Those requirements are not deleted or softened. They describe what each
 component must do and remain the specification its implementation is measured
-against. The mapping is implemented, but platform evidence has not yet cleared
-any of their census A2 holds.
+against. The mapping is implemented; only Slider's census A2 hold is cleared
+by the current platform evidence.
 
 On Jetstream the same requirements *are* binding — `aria-checked="mixed"` maps
 to `accesskit::Toggled::Mixed`, which `JsEl::aria_checked` sets. A reviewer
