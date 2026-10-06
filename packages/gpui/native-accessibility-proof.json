@@ -16,7 +16,7 @@
     "selector": "effigy test:gpui-ax",
     "outcome": "passed",
     "mechanism": "macOS AXUIElement",
-    "launch": "Both proof windows used the window-capture transport with focus:false. Each remained non-frontmost for 239 successful samples with no failed reads.",
+    "launch": "Both proof windows used the window-capture transport with focus:false. The clean window remained non-frontmost for 241 successful samples and the planted window for 243; neither had failed reads.",
     "cleanTree": {
       "outcome": "passed",
       "elementCount": 10,

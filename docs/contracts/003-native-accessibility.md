@@ -12,8 +12,9 @@ Jetstream projects its rendered tree into a live platform accessibility tree.
 Poodle's GPUI backend maps direct node roles, names, states, and values
 through GPUI 1.22.0's AccessKit path. The live, non-activating AXUIElement
 proof read a 10-element Poodle tree with no unnamed meaningful elements, and
-its planted-control case detected an unnamed `AXButton` at depth 3. Both
-windows stayed non-frontmost for 239 successful samples, with no failed reads.
+its planted-control case detected an unnamed `AXButton` at depth 3. The clean
+window stayed non-frontmost for 241 successful samples and the planted window
+for 243; neither had failed reads.
 It verifies Button role, name, and toggled `AXValue`; disclosure Button role
 and name; Checkbox role, name, and nonempty `AXValue`; Slider role, name,
 range, orientation, and value text; and a selected Tab's role, name, and
