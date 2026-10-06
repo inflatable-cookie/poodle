@@ -10977,7 +10977,10 @@ fn agent_transcript_dependency_observation() -> headless_driver::MountedObservat
         facts.loading_structure = poodle_gpui_node_backend::painted_node_for(spinner_id)
             .zip(poodle_gpui_node_backend::painted_node_for(label_id))
             .is_some_and(|(spinner, label)| {
-                spinner.a11y_role == Some(NodeRole::Status)
+                // Match Svelte and React: AgentTranscript's visible activity
+                // label carries the status; its unlabeled Spinner is decorative.
+                spinner.a11y_role.is_none()
+                    && spinner.a11y_hidden == Some(true)
                     && spinner.child_layout_directions.len() == 3
                     && label.texts == ["Working"]
                     && label.text_wrap
@@ -11018,7 +11021,11 @@ fn agent_transcript_dependency_observation() -> headless_driver::MountedObservat
     {
         blockers.push("posture dependencies did not reach the mounted GPUI backend");
     }
-    assert!(blockers.is_empty(), "{}", blockers.join("; "));
+    assert!(
+        blockers.is_empty(),
+        "{}; mounted facts: {mounted:?}",
+        blockers.join("; ")
+    );
     mounted
         .observation
         .expect("mounted dependency observation follows terminal assertions")

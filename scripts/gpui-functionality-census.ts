@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { execSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { deriveLiveRoster, EXPECTED_MOUNTED_BEHAVIOUR_TESTS } from "./parity-evidence-ledger";
@@ -30,7 +30,7 @@ export const CROSS_RUNTIME_REPORT = "packages/gpui/cross-runtime-parity-report.j
 
 export const CENSUS_SCHEMA = "poodle.g18-gpui-functionality-census.v1";
 export const RECEIPT_SCHEMA = "poodle.g18-gpui-mounted-receipt.v1";
-export const EXECUTION_SCHEMA = "poodle.g18-expected-test-execution.v1";
+export const EXECUTION_SCHEMA = "poodle.g18-expected-test-execution.v2";
 export const MANIFEST_SCHEMA = "poodle.g18-capability-manifest.v1";
 
 export const CENSUS_AXES = ["semantic", "events", "pointer", "keyboard_focus", "accessibility", "visual"] as const;
@@ -482,10 +482,19 @@ export type ExecutionRecord = {
   lockfile: string;
   lockfile_sha256: string;
   run_id: string;
-  /** `run_id` on a result names the run that executed that test when it
-   * differs from the record's shared run, so recording new tests never
-   * reattributes the receipts of tests an earlier run executed. */
-  results: Record<string, { outcome: "passed" | "failed" | "not-run"; body_sha256: string; run_id?: string }>;
+  /** Overrides the default full-selector identity for a named test execution.
+   * Named reruns never rewrite the record-wide full-selector identity. */
+  results: Record<
+    string,
+    {
+      outcome: "passed" | "failed" | "not-run";
+      body_sha256: string;
+      run_id?: string;
+      command?: string;
+      source_commit?: string;
+      lockfile_sha256?: string;
+    }
+  >;
 };
 
 export function sha256Hex(text: string): string {
@@ -1105,21 +1114,89 @@ export function loadExecutionRecord(root = ROOT): ExecutionRecord {
   return JSON.parse(read(root, EXECUTION_RECORD_PATH)) as ExecutionRecord;
 }
 
+function namedRegressionCommand(test: string): string {
+  return `${NATIVE_SELECTOR} ${test} -- --exact`;
+}
+
+function sourceTextAtCommit(root: string, relativePath: string, commit: string): string | undefined {
+  try {
+    return execFileSync("git", ["show", `${commit}:${relativePath}`], {
+      cwd: root,
+      encoding: "utf8",
+      maxBuffer: 32 * 1024 * 1024,
+    });
+  } catch {
+    return undefined;
+  }
+}
+
+function validateRecordedIdentity(
+  sourceCommit: string,
+  lockfileSha256: string,
+  lockfile: string,
+  root: string,
+  test: string,
+): void {
+  if (!/^[0-9a-f]{40}$/.test(sourceCommit)) {
+    throw new Error(`Execution record for ${test} needs a 40-hex source commit.`);
+  }
+  validatePinAncestry(sourceCommit, root);
+  const lockText = sourceTextAtCommit(root, lockfile, sourceCommit);
+  if (lockText === undefined || sha256Hex(lockText) !== lockfileSha256) {
+    throw new Error(`Execution record for ${test} does not match the lockfile at ${sourceCommit}.`);
+  }
+}
+
+/** Old v1 records stored one shared source/lock identity even for named runs.
+ * Recover each differing run's identity from the evidence commit that first
+ * recorded its run id, then persist it on that test before validation. */
+function migrateNamedRunIdentities(record: ExecutionRecord, root: string): void {
+  for (const [test, result] of Object.entries(record.results)) {
+    if (result.run_id === undefined || result.run_id === record.run_id || result.source_commit !== undefined) continue;
+    const needle = `"run_id": "${result.run_id}"`;
+    const commits = execFileSync(
+      "git",
+      ["log", "--all", "--format=%H", "-S", needle, "--", EXECUTION_RECORD_PATH],
+      { cwd: root, encoding: "utf8", maxBuffer: 8 * 1024 * 1024 },
+    )
+      .trim()
+      .split("\n")
+      .filter((commit) => /^[0-9a-f]{40}$/.test(commit))
+      .reverse();
+    let recovered:
+      | { source_commit: string; lockfile_sha256: string }
+      | undefined;
+    for (const commit of commits) {
+      const snapshotText = sourceTextAtCommit(root, EXECUTION_RECORD_PATH, commit);
+      if (snapshotText === undefined) continue;
+      const snapshot = JSON.parse(snapshotText) as ExecutionRecord;
+      if (snapshot.results[test]?.run_id !== result.run_id) continue;
+      recovered = {
+        source_commit: snapshot.source_commit,
+        lockfile_sha256: snapshot.lockfile_sha256,
+      };
+      break;
+    }
+    if (recovered === undefined) {
+      throw new Error(`Cannot recover named execution identity for ${test} (${result.run_id}).`);
+    }
+    result.command = namedRegressionCommand(test);
+    result.source_commit = recovered.source_commit;
+    result.lockfile_sha256 = recovered.lockfile_sha256;
+  }
+}
+
 export function validateExecutionRecord(record: ExecutionRecord, root: string): void {
   if (record.schema !== EXECUTION_SCHEMA) throw new Error(`Execution record schema is ${record.schema}.`);
   if (!/^[0-9a-f]{40}$/.test(record.source_commit)) throw new Error("Execution record needs a 40-hex source commit.");
   if (record.command !== NATIVE_SELECTOR) throw new Error(`Execution record must cite ${NATIVE_SELECTOR}.`);
-  validatePinAncestry(record.source_commit, root);
+  validateRecordedIdentity(record.source_commit, record.lockfile_sha256, record.lockfile, root, "default selector");
   const bodyHashBaselineCommit = record.body_hash_baseline_commit ?? record.source_commit;
   if (!/^[0-9a-f]{40}$/.test(bodyHashBaselineCommit)) {
     throw new Error("Execution record needs a 40-hex body-hash baseline commit.");
   }
   validatePinAncestry(bodyHashBaselineCommit, root);
   const baselineSource = testSourceAtCommit(root, bodyHashBaselineCommit);
-  const lockfile = read(root, record.lockfile);
-  if (sha256Hex(lockfile) !== record.lockfile_sha256) {
-    throw new Error("GPUI lockfile changed since the recorded execution; re-run the expected tests and regenerate the census.");
-  }
   const expectedTests = Object.values(EXPECTED_MOUNTED_BEHAVIOUR_TESTS).flatMap((tests) =>
     Array.isArray(tests) ? tests : [tests],
   );
@@ -1127,6 +1204,21 @@ export function validateExecutionRecord(record: ExecutionRecord, root: string): 
     const entry = record.results[test];
     if (entry === undefined) throw new Error(`Execution record has no result for expected test ${test}.`);
     if (entry.outcome !== "passed") throw new Error(`Expected test ${test} did not pass in the recorded execution.`);
+    const named = entry.run_id !== undefined && entry.run_id !== record.run_id;
+    if (named && (entry.command === undefined || entry.source_commit === undefined || entry.lockfile_sha256 === undefined)) {
+      throw new Error(`Named execution for ${test} has no independent command/source/lockfile identity.`);
+    }
+    const command = entry.command ?? record.command;
+    if (command !== record.command && command !== namedRegressionCommand(test)) {
+      throw new Error(`Execution command for ${test} is not its full selector or exact named selector.`);
+    }
+    validateRecordedIdentity(
+      entry.source_commit ?? record.source_commit,
+      entry.lockfile_sha256 ?? record.lockfile_sha256,
+      record.lockfile,
+      root,
+      test,
+    );
     const current = testBodySha256(root, test);
     if (current === undefined) throw new Error(`Expected test ${test} is stale: it no longer exists in ${HEADLESS_TEST_FILE}.`);
     if (testIsIgnored(root, test)) throw new Error(`Expected test ${test} is ignored and never executes.`);
@@ -1158,20 +1250,38 @@ export function recordExpectedTestExecution(testNames: string[], runId: string, 
   }
 
   const record = loadExecutionRecord(root);
+  record.schema = EXECUTION_SCHEMA;
+  migrateNamedRunIdentities(record, root);
   const sourceCommit = execSync("git rev-parse HEAD", { cwd: root, encoding: "utf8" }).trim();
   const lockfile = read(root, GPUI_LOCKFILE);
   record.body_hash_baseline_commit ??= record.source_commit;
-  record.source_commit = sourceCommit;
-  record.lockfile_sha256 = sha256Hex(lockfile);
-  const sharedRun = record.run_id;
   for (const test of testNames) {
     const bodySha = testBodySha256(root, test);
     if (bodySha === undefined) throw new Error(`Expected test ${test} disappeared after execution.`);
-    record.results[test] =
-      sharedRun === runId
-        ? { outcome: "passed", body_sha256: bodySha }
-        : { outcome: "passed", body_sha256: bodySha, run_id: runId };
+    record.results[test] = {
+      outcome: "passed",
+      body_sha256: bodySha,
+      run_id: runId,
+      command: namedRegressionCommand(test),
+      source_commit: sourceCommit,
+      lockfile_sha256: sha256Hex(lockfile),
+    };
   }
+  validateExecutionRecord(record, root);
+  writeFile(root, EXECUTION_RECORD_PATH, `${JSON.stringify(record, null, 2)}\n`);
+  return record;
+}
+
+/** Restore the last full-selector identity after a legacy named rerun moved
+ * the shared source/lock fields. The named results retain their own identity. */
+export function restoreDefaultExecutionIdentity(sourceCommit: string, root = ROOT): ExecutionRecord {
+  const record = loadExecutionRecord(root);
+  const lockText = sourceTextAtCommit(root, record.lockfile, sourceCommit);
+  if (lockText === undefined) throw new Error(`Cannot read ${record.lockfile} at ${sourceCommit}.`);
+  record.schema = EXECUTION_SCHEMA;
+  record.source_commit = sourceCommit;
+  record.lockfile_sha256 = sha256Hex(lockText);
+  migrateNamedRunIdentities(record, root);
   validateExecutionRecord(record, root);
   writeFile(root, EXECUTION_RECORD_PATH, `${JSON.stringify(record, null, 2)}\n`);
   return record;
@@ -1359,14 +1469,14 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
         content: expectedTestReceiptContent({
           component: component.name,
           test,
-          command: record.command,
+          command: record.results[test].command ?? record.command,
           axes,
           signals: admission.signals,
           driver: observedDriver(body, headlessSource, test),
           renderer: observedRenderer(body, headlessSource, test),
           packageVersion,
-          sourceCommit: record.source_commit,
-          lockfileSha256: record.lockfile_sha256,
+          sourceCommit: record.results[test].source_commit ?? record.source_commit,
+          lockfileSha256: record.results[test].lockfile_sha256 ?? record.lockfile_sha256,
           runId: record.results[test].run_id ?? record.run_id,
           bodySha256: record.results[test].body_sha256,
         }),
@@ -1527,7 +1637,7 @@ export function censusMarkdown(doc: CensusDoc): string {
   const lines: string[] = [];
   lines.push("# g18.001 — Contract-bound GPUI functionality census");
   lines.push("");
-  lines.push(`Evidence commit (execution identity from the execution record, not the checkout): \`${doc.source_commit}\``);
+  lines.push(`Default full-selector source commit (individual mounted receipts carry their own execution identity): \`${doc.source_commit}\``);
   lines.push(`Denominator: **${doc.denominator.public}** public / **${doc.denominator.portable}** portable; \`${doc.denominator.notApplicable[0]}\` is the single contract-approved non-portable row.`);
   lines.push("");
   lines.push("<!-- g18-census-method -->");
@@ -1535,7 +1645,7 @@ export function censusMarkdown(doc: CensusDoc): string {
   lines.push("");
   lines.push("Capability axes are closed: `semantic`, `events`, `pointer`, `keyboard_focus`, `accessibility`, `visual`.");
   lines.push("Each portable row requires the axes its contract declares; `not-applicable` needs an exact contract section and can never cite platform state.");
-  lines.push("Admitted capabilities trace to validated Nucleus M1/A1/V1 receipts or to retained expected tests that ran green on the recorded source and dependency identity, mount the production renderer plus GPUI node backend, and show the claimed axis signals in their bodies.");
+  lines.push("Admitted capabilities trace to validated Nucleus M1/A1/V1 receipts or to retained expected tests whose individual execution records identify the source and dependency they ran against, mount the production renderer plus GPUI node backend, and show the claimed axis signals in their bodies.");
   lines.push("Construction is not functional completion. A passing route, a test name, or one passing test never marks a component complete.");
   lines.push("");
   lines.push("<!-- g18-census-summary -->");
@@ -1624,7 +1734,7 @@ function validateReceiptFile(content: string, root: string, baselineSource: stri
     package_version?: unknown;
     source_commit?: string;
     lockfile_sha256?: string;
-    execution?: { outcome?: string; body_sha256?: string };
+    execution?: { command?: string; outcome?: string; body_sha256?: string };
     production_path_observation?: { driver?: unknown; renderer?: unknown };
   };
   if (receipt.schema !== RECEIPT_SCHEMA) throw new Error(`Mounted receipt schema is ${receipt.schema}.`);
@@ -1640,11 +1750,20 @@ function validateReceiptFile(content: string, root: string, baselineSource: stri
   }
   validateReceiptPackageVersion(receipt.package_version, loadPreviewPackageVersion(root), receipt.component);
   if (!/^[0-9a-f]{40}$/.test(receipt.source_commit ?? "")) throw new Error("Mounted receipt needs a 40-hex source commit.");
-  const lockText = read(root, GPUI_LOCKFILE);
-  if (sha256Hex(lockText) !== receipt.lockfile_sha256) {
-    throw new Error(`Mounted receipt for ${receipt.component} predates the current GPUI lockfile; regenerate.`);
+  const command = receipt.execution?.command;
+  if (command !== NATIVE_SELECTOR && command !== namedRegressionCommand(receipt.test)) {
+    throw new Error(`Mounted receipt for ${receipt.component} has no full or exact named Effigy selector.`);
   }
-  if (receipt.execution?.outcome !== "passed") throw new Error(`Mounted receipt for ${receipt.component} has no passing execution.`);
+  validateRecordedIdentity(
+    receipt.source_commit,
+    receipt.lockfile_sha256 ?? "",
+    GPUI_LOCKFILE,
+    root,
+    receipt.test,
+  );
+  if (receipt.execution?.outcome !== "passed") {
+    throw new Error(`Mounted receipt for ${receipt.component} has no passing execution.`);
+  }
   const body = extractTestBody(root, receipt.test);
   if (body === undefined) throw new Error(`Mounted receipt test ${receipt.test} is stale.`);
   if (testIsIgnored(root, receipt.test)) throw new Error(`Mounted receipt test ${receipt.test} is ignored.`);
@@ -1728,6 +1847,19 @@ export function checkCensusArtifacts(root = ROOT): void {
 
 function main(): void {
   const args = process.argv.slice(2);
+  if (args[0] === "--restore-default-selector") {
+    const [sourceCommit] = args.slice(1);
+    if (sourceCommit === undefined) {
+      throw new Error("Usage: gpui-functionality-census.ts --restore-default-selector <full-selector-source-commit>");
+    }
+    const record = restoreDefaultExecutionIdentity(sourceCommit);
+    const stats = writeCensusArtifacts();
+    checkCensusArtifacts();
+    console.log(
+      `gpui-functionality-census: restored default selector ${record.command} at ${record.source_commit}; ${stats.rows} rows, ${stats.admitted} admitted, ${stats.receipts} mounted receipts.`,
+    );
+    return;
+  }
   if (args[0] === "--record-passed") {
     const [runId, ...testNames] = args.slice(1);
     if (runId === undefined) throw new Error("Usage: gpui-functionality-census.ts --record-passed <run-id> <expected-test>...");
@@ -1735,7 +1867,7 @@ function main(): void {
     const stats = writeCensusArtifacts();
     checkCensusArtifacts();
     console.log(
-      `gpui-functionality-census: recorded ${testNames.length} expected tests as ${record.run_id}; ${stats.rows} rows, ${stats.admitted} admitted, ${stats.receipts} mounted receipts.`,
+      `gpui-functionality-census: recorded ${testNames.length} expected tests as ${runId}; ${stats.rows} rows, ${stats.admitted} admitted, ${stats.receipts} mounted receipts.`,
     );
     return;
   }
