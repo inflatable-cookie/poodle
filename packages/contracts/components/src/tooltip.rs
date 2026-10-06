@@ -1,8 +1,11 @@
+use std::fmt;
+use std::sync::Arc;
+
 use poodle_tokens::semantic;
 
 use crate::types::OverlayPlacement;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone)]
 pub struct TooltipSpec {
     pub content: Option<String>,
     pub open: Option<bool>,
@@ -10,7 +13,41 @@ pub struct TooltipSpec {
     pub delay_ms: u16,
     pub placement: OverlayPlacement,
     pub aria_label: Option<String>,
+    /// Called when user interaction changes the tooltip's open state.
+    pub on_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 }
+
+impl fmt::Debug for TooltipSpec {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("TooltipSpec")
+            .field("content", &self.content)
+            .field("open", &self.open)
+            .field("default_open", &self.default_open)
+            .field("delay_ms", &self.delay_ms)
+            .field("placement", &self.placement)
+            .field("aria_label", &self.aria_label)
+            .field("on_open_change", &self.on_open_change.is_some())
+            .finish()
+    }
+}
+
+impl PartialEq for TooltipSpec {
+    fn eq(&self, other: &Self) -> bool {
+        self.content == other.content
+            && self.open == other.open
+            && self.default_open == other.default_open
+            && self.delay_ms == other.delay_ms
+            && self.placement == other.placement
+            && self.aria_label == other.aria_label
+            && match (&self.on_open_change, &other.on_open_change) {
+                (Some(left), Some(right)) => Arc::ptr_eq(left, right),
+                (None, None) => true,
+                _ => false,
+            }
+    }
+}
+
+impl Eq for TooltipSpec {}
 
 impl Default for TooltipSpec {
     fn default() -> Self {
@@ -21,6 +58,7 @@ impl Default for TooltipSpec {
             delay_ms: 300,
             placement: OverlayPlacement::Top,
             aria_label: None,
+            on_open_change: None,
         }
     }
 }
@@ -57,6 +95,11 @@ impl TooltipSpec {
 
     pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
         self.aria_label = Some(aria_label.into());
+        self
+    }
+
+    pub fn with_on_open_change(mut self, handler: impl Fn(bool) + Send + Sync + 'static) -> Self {
+        self.on_open_change = Some(Arc::new(handler));
         self
     }
 

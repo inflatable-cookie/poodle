@@ -12,7 +12,7 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeKey, NodeRole, NodeToggled, ShadowLayer, StylePatch,
 };
-use poodle_specs::{IconSize, SegmentedControlSpec};
+use poodle_specs::{IconSize, SegmentedControlSpec, TooltipSpec};
 
 use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
 use crate::context::RenderContext;
@@ -274,7 +274,11 @@ pub fn segmented_control(
             seg.a11y.label = Some(name.to_string());
         }
         if let Some(title) = option.tooltip_text() {
-            seg.tooltip = Some(title.to_string());
+            crate::tooltip::project_node_tooltip(
+                &mut seg,
+                &TooltipSpec::new().with_content(title),
+                ctx,
+            );
         }
 
         el = el.child(seg);

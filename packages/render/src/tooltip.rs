@@ -75,3 +75,18 @@ pub fn tooltip(spec: &TooltipSpec, ctx: &RenderContext<'_>) -> Node {
     bubble.a11y.role = Some(NodeRole::Tooltip);
     bubble
 }
+
+/// Project the shared tooltip recipe onto a node that exposes native hover
+/// help. The node backend owns interaction and placement; the component
+/// renderer owns token resolution and supplies the bubble it should paint.
+pub fn project_node_tooltip(node: &mut Node, spec: &TooltipSpec, ctx: &RenderContext<'_>) {
+    if spec.has_content() {
+        node.tooltip = spec.content.clone();
+        node.tooltip_bubble = Some(Box::new(tooltip(spec, ctx)));
+        node.tooltip_open_change = spec.on_open_change.clone();
+    } else {
+        node.tooltip = None;
+        node.tooltip_bubble = None;
+        node.tooltip_open_change = None;
+    }
+}

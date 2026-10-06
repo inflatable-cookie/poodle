@@ -19,7 +19,7 @@ use poodle_node::{
 };
 use poodle_specs::{
     ActiveEdge, ActiveFill, Orientation, TabActivationMode, TabDefinition, TabVariant, TabsLayout,
-    TabsSpec,
+    TabsSpec, TooltipSpec,
 };
 
 use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
@@ -606,7 +606,9 @@ fn wire_collection_semantics(
         .or_else(|| spec.current_value());
     node.interaction.disabled = tab.is_disabled;
     node.interaction.focusable = !tab.is_disabled;
-    node.tooltip = tab_tooltip_text(spec, tab);
+    if let Some(content) = tab_tooltip_text(spec, tab) {
+        crate::tooltip::project_node_tooltip(node, &TooltipSpec::new().with_content(content), ctx);
+    }
     if !tab.is_disabled {
         node.style.focus = Some(StylePatch {
             border_color: Some(ctx.theme().resolve_color(spec.focus_ring_color_token())),

@@ -60697,13 +60697,24 @@ fn tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui() {
     assert_eq!(label.style.line_height, Some(1.35));
 
     fn anchor(handler: Option<Arc<dyn Fn() + Send + Sync>>) -> Node {
-        let mut node = poodle_render::button(
-            &ButtonSpec::new().with_label("Save"),
-            &RenderContext::new(&theme()),
-            handler,
-        );
+        anchor_with_open_change(handler, None)
+    }
+
+    fn anchor_with_open_change(
+        handler: Option<Arc<dyn Fn() + Send + Sync>>,
+        on_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    ) -> Node {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let mut node = poodle_render::button(&ButtonSpec::new().with_label("Save"), &ctx, handler);
         node.id = Some(ANCHOR.to_owned());
-        node.tooltip = Some("Save document".to_owned());
+        let tooltip_spec = match on_open_change {
+            Some(handler) => TooltipSpec::new()
+                .with_content("Save document")
+                .with_on_open_change(move |open| handler(open)),
+            None => TooltipSpec::new().with_content("Save document"),
+        };
+        poodle_render::tooltip::project_node_tooltip(&mut node, &tooltip_spec, &ctx);
         node
     }
 
@@ -60763,8 +60774,16 @@ fn tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui() {
 
     // ── Mounted: hover opens through the delay; leave dismisses ─────────
     run_headless(|cx| {
-        let mut driver =
-            HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(anchor(None))), 420.0, 140.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let open_sink = Arc::clone(&payloads);
+        let node = anchor_with_open_change(
+            None,
+            Some(Arc::new(move |open| {
+                open_sink.lock().expect("open-change payloads").push(open);
+            })),
+        );
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(node)), 420.0, 140.0);
         driver.wait_for_focus_handle(ANCHOR);
         driver.pointer_hover(payload_frac(ANCHOR, 0.5, 0.5));
         assert!(is_tooltip_pending(ANCHOR), "hover starts the open delay");
@@ -60784,14 +60803,66 @@ fn tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui() {
             "the painted description stays bound to its anchor"
         );
         assert_eq!(painted.text, "Save document");
+        let painted_bubble =
+            poodle_gpui_node_backend::painted_node_for(&format!("poodle-tooltip-bubble-{ANCHOR}"))
+                .expect("the active GPUI bubble is the shared recipe node");
+        assert_eq!(painted_bubble.a11y_role, Some(NodeRole::Tooltip));
+        assert_eq!(
+            painted_bubble.style.background, bubble.style.descriptor.background,
+            "the mounted bubble keeps the recipe's resolved fill"
+        );
+        assert_eq!(
+            painted_bubble.style.background,
+            Some(poodle_render::color::mix_srgb(
+                theme_provider.resolve_color("color.background.elevated"),
+                theme_provider.resolve_color("color.background.panel"),
+                0.98,
+            )),
+            "the mounted fill uses resolved theme tokens"
+        );
+        assert_eq!(
+            painted_bubble.style.corner_radii.top_left,
+            bubble.style.descriptor.corner_radii.top_left,
+            "the mounted bubble keeps the recipe's resolved radius"
+        );
+        assert_eq!(
+            painted_bubble.style.layout.spacing.padding,
+            bubble.style.descriptor.layout.spacing.padding,
+            "the mounted bubble keeps the recipe's padding"
+        );
+        let painted_label =
+            poodle_gpui_node_backend::painted_node_for(&format!("poodle-tooltip-label-{ANCHOR}"))
+                .expect("the active bubble label reaches the GPUI paint pass");
+        assert_eq!(
+            painted_label.text_size,
+            Some(poodle_render::presentation::rem_to_px(0.6875))
+        );
+        assert_eq!(painted_label.line_height, Some(1.35));
+        assert_eq!(
+            painted_label.style.text_color,
+            Some(theme_provider.resolve_color("color.text.primary"))
+        );
         driver.pointer_hover(point(px(8.0), px(8.0)));
         assert!(painted_tooltip().is_none(), "leave hides in the same frame");
+        assert_eq!(
+            *payloads.lock().expect("open-change payloads"),
+            vec![true, false],
+            "hover and pointer leave emit open-change events"
+        );
+        poodle_gpui_node_backend::take_probe_capture();
     });
 
     // ── Mounted: focus opens; focus departure hides ─────────────────────
     run_headless(|cx| {
-        let mut driver =
-            HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(anchor(None))), 420.0, 140.0);
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let open_sink = Arc::clone(&payloads);
+        let node = anchor_with_open_change(
+            None,
+            Some(Arc::new(move |open| {
+                open_sink.lock().expect("open-change payloads").push(open);
+            })),
+        );
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(node)), 420.0, 140.0);
         driver.wait_for_focus_handle(ANCHOR);
         driver.focus_element(ANCHOR);
         assert!(is_tooltip_pending(ANCHOR), "focus starts the open delay");
@@ -60801,12 +60872,24 @@ fn tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui() {
         driver.blur_element_focus(ANCHOR);
         assert!(!is_tooltip_visible(ANCHOR), "focus departure hides");
         assert!(painted_tooltip().is_none());
+        assert_eq!(
+            *payloads.lock().expect("open-change payloads"),
+            vec![true, false],
+            "focus and blur emit open-change events"
+        );
     });
 
     // ── Mounted: Escape dismisses the visible tooltip ──────────────────
     run_headless(|cx| {
-        let mut driver =
-            HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(anchor(None))), 420.0, 140.0);
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let open_sink = Arc::clone(&payloads);
+        let node = anchor_with_open_change(
+            None,
+            Some(Arc::new(move |open| {
+                open_sink.lock().expect("open-change payloads").push(open);
+            })),
+        );
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(node)), 420.0, 140.0);
         driver.wait_for_focus_handle(ANCHOR);
         driver.pointer_hover(payload_frac(ANCHOR, 0.5, 0.5));
         driver.advance_clock(TOOLTIP_DELAY);
@@ -60819,6 +60902,11 @@ fn tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui() {
         assert!(
             painted_tooltip().is_none(),
             "Escape dismisses the visible tooltip"
+        );
+        assert_eq!(
+            *payloads.lock().expect("open-change payloads"),
+            vec![true, false],
+            "Escape emits the close event"
         );
     });
 

@@ -15,7 +15,7 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeRole, StylePatch, TextChangeHandler,
 };
-use poodle_specs::{ButtonVariant, IconButtonSpec, MarkdownEditorSpec};
+use poodle_specs::{ButtonVariant, IconButtonSpec, MarkdownEditorSpec, TooltipSpec};
 
 use crate::color::with_alpha;
 use crate::context::RenderContext;
@@ -165,7 +165,11 @@ pub fn markdown_editor_with_handlers(
         // icon-only discarded it and left a row of unnamed buttons.
         btn.a11y.label = Some((*label).to_string());
         btn.a11y.role = Some(NodeRole::Button);
-        btn.tooltip = Some((*label).to_string());
+        crate::tooltip::project_node_tooltip(
+            &mut btn,
+            &TooltipSpec::new().with_content(*label),
+            ctx,
+        );
         {
             let s = &mut btn.style;
             s.descriptor.layout.width = LayoutSizing::Fixed(tool_size);

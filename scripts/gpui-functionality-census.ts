@@ -100,15 +100,6 @@ export const WITHHELD_AXES: Record<string, Partial<Record<CensusAxis, string>>> 
     visual:
       "narrow-container floor clamp needs a shared container-relative layout capability",
   },
-  Tooltip: {
-    // Svelte's `onOpenChange` has no projection in the Rust TooltipSpec or
-    // the Node.tooltip backend runtime: open/close transitions are observable
-    // only as painted/is-visible state, and the anchor activation handler in
-    // the retained test proves trigger liveness, not tooltip open-change.
-    // Projecting the callback needs node-handler work planned as its own task.
-    events:
-      "open-change callback needs a production handler projection for tooltip transitions",
-  },
 };
 
 const RECEIPT_TEXT_SIGNALS: Record<Exclude<CensusAxis, "semantic">, RegExp> = {
