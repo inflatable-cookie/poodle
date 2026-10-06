@@ -4,7 +4,7 @@
   "currentPosture": {
     "nativeNotApplicable": ["MeterSurface"],
     "status": "manual",
-    "specEvidence": "layerProof and sectionProof remain section/layer evidence only",
+    "specEvidence": "Component-level parity lives in docs/evidence/gpui/gpui-functionality-census.json; this artifact records only broad posture and section/layer evidence.",
     "mountedEvidence": [
       "packages/gpui/preview/tests/headless_regressions.rs",
       "effigy regressions:native"
@@ -29,88 +29,6 @@
       "id": "primitives",
       "crateName": "poodle-gpui",
       "cratePath": "packages/gpui/adapter",
-      "contractIds": [
-        "accordion",
-        "badge",
-        "box",
-        "button",
-        "calendar",
-        "checkbox",
-        "collapsible",
-        "context-menu",
-        "date-picker",
-        "date-range-picker",
-        "date-time-picker",
-        "date-time-range-picker",
-        "dialog",
-        "drawer",
-        "field",
-        "form-actions",
-        "grid",
-        "icon-button",
-        "menu",
-        "menubar",
-        "navigation-menu",
-        "popover",
-        "progress",
-        "radio-group",
-        "scroll-shell",
-        "search-input",
-        "segmented-control",
-        "select",
-        "separator",
-        "slider",
-        "stack",
-        "status-indicator",
-        "surface",
-        "switch",
-        "tab-strip",
-        "tabs",
-        "text-input",
-        "time-input",
-        "tooltip"
-      ],
-      "exportNames": [
-        "AccordionSpec",
-        "BadgeSpec",
-        "BoxSpec",
-        "ButtonSpec",
-        "CalendarSpec",
-        "CheckboxSpec",
-        "CollapsibleSpec",
-        "ContextMenuSpec",
-        "DatePickerSpec",
-        "DateRangePickerSpec",
-        "DateTimePickerSpec",
-        "DateTimeRangePickerSpec",
-        "DialogSpec",
-        "DrawerSpec",
-        "FieldRelationships",
-        "FieldSpec",
-        "FormActionsSpec",
-        "GridSpec",
-        "IconButtonSpec",
-        "MenuSpec",
-        "MenubarSpec",
-        "NavigationMenuSpec",
-        "PopoverSpec",
-        "ProgressSpec",
-        "RadioGroupSpec",
-        "ScrollShellSpec",
-        "SegmentedControlSpec",
-        "SelectSpec",
-        "SeparatorSpec",
-        "SliderSpec",
-        "StackSpec",
-        "StatusIndicatorSpec",
-        "SurfaceSpec",
-        "SwitchSpec",
-        "TabStripSpec",
-        "TabsSpec",
-        "TextInputSpec",
-        "TimeInputSpec",
-        "TooltipSpec"
-      ],
       "focusEntryStatus": "explicit",
       "focusRecoveryStatus": "hybrid",
       "keyboardTraversalStatus": "hybrid",
@@ -130,38 +48,6 @@
       "id": "composites",
       "crateName": "poodle-gpui",
       "cratePath": "packages/gpui/adapter",
-      "contractIds": [
-        "banner",
-        "callout",
-        "data-table",
-        "detail-shell",
-        "empty-state",
-        "field",
-        "filter-toolbar",
-        "form-actions",
-        "media-preview",
-        "media-thumbnail",
-        "pagination-summary",
-        "picker-shell",
-        "relation-picker",
-        "selection-summary"
-      ],
-      "exportNames": [
-        "DataTableSpec",
-        "DetailShellSpec",
-        "EmptyStateSpec",
-        "FilterToolbarSpec",
-        "FormShellSpec",
-        "InlineRemediationSpec",
-        "MediaPreviewSpec",
-        "MediaThumbnailSpec",
-        "PaginationSummarySpec",
-        "PickerShellSpec",
-        "RelationPickerSpec",
-        "RemediationBannerSpec",
-        "SelectionSummarySpec",
-        "ValidationSummarySpec"
-      ],
       "focusEntryStatus": "hybrid",
       "focusRecoveryStatus": "hybrid",
       "keyboardTraversalStatus": "hybrid",
@@ -181,22 +67,6 @@
       "id": "workstation",
       "crateName": "poodle-gpui",
       "cratePath": "packages/gpui/adapter",
-      "contractIds": [
-        "action-discovery-panel",
-        "app-header",
-        "command-palette",
-        "dock-region",
-        "split-view",
-        "status-bar"
-      ],
-      "exportNames": [
-        "ActionDiscoveryPanelSpec",
-        "AppHeaderSpec",
-        "CommandPaletteSpec",
-        "DockRegionSpec",
-        "ShellStatusBarSpec",
-        "SplitViewSpec"
-      ],
       "focusEntryStatus": "hybrid",
       "focusRecoveryStatus": "hybrid",
       "keyboardTraversalStatus": "explicit",
@@ -221,7 +91,6 @@
       "keyboardStatus": "hybrid",
       "announcementsStatus": "hybrid",
       "owningLayer": "primitives-plus-composites",
-      "sideBySideReview": true,
       "remainingBlockers": [
         "Mounted field, text-entry, and validation-summary review surfaces are still required before native assistive-technology conformance can be promoted beyond manual proof."
       ]
@@ -233,7 +102,6 @@
       "keyboardStatus": "hybrid",
       "announcementsStatus": "manual",
       "owningLayer": "composites",
-      "sideBySideReview": true,
       "remainingBlockers": [
         "Native table narration, row selection narration, and sort-state exposure still need mounted GPUI evidence."
       ]
@@ -245,7 +113,6 @@
       "keyboardStatus": "hybrid",
       "announcementsStatus": "manual",
       "owningLayer": "composites",
-      "sideBySideReview": true,
       "remainingBlockers": [
         "Browse-shell focus order, filter recovery, and loading or result-count announcement posture remain native runtime review work."
       ]
@@ -257,7 +124,6 @@
       "keyboardStatus": "hybrid",
       "announcementsStatus": "manual",
       "owningLayer": "composites",
-      "sideBySideReview": true,
       "remainingBlockers": [
         "Metadata narration, action ordering, and companion-pane traversal still need mounted native verification."
       ]
@@ -269,7 +135,6 @@
       "keyboardStatus": "hybrid",
       "announcementsStatus": "hybrid",
       "owningLayer": "composites",
-      "sideBySideReview": true,
       "remainingBlockers": [
         "Modal or popover focus containment, active-item narration, and close recovery still require mounted GPUI proof."
       ]
@@ -281,7 +146,6 @@
       "keyboardStatus": "manual",
       "announcementsStatus": "manual",
       "owningLayer": "composites",
-      "sideBySideReview": false,
       "remainingBlockers": [
         "Media playback, document preview, and unavailable-preview fallback narration remain the most runtime-specific accessibility debt in the current GPUI surface."
       ]
@@ -293,7 +157,6 @@
       "keyboardStatus": "explicit",
       "announcementsStatus": "hybrid",
       "owningLayer": "primitives-plus-composites",
-      "sideBySideReview": true,
       "remainingBlockers": [
         "Native toast timing, queue narration, and escalation between polite and assertive announcement posture still need mounted evidence."
       ]
@@ -305,7 +168,6 @@
       "keyboardStatus": "explicit",
       "announcementsStatus": "hybrid",
       "owningLayer": "workstation",
-      "sideBySideReview": true,
       "remainingBlockers": [
         "Modal command focus recovery, active-result narration, and execution feedback traces remain native review work."
       ]
@@ -317,7 +179,6 @@
       "keyboardStatus": "hybrid",
       "announcementsStatus": "manual",
       "owningLayer": "workstation",
-      "sideBySideReview": true,
       "remainingBlockers": [
         "Dock-region naming, multi-panel traversal, and layout-change narration still require mounted GPUI shell evidence."
       ]
@@ -325,7 +186,7 @@
   ],
   "manualReviewExpectations": [
     "Mounted GPUI review surfaces must still be exercised for focus entry, focus recovery, keyboard traversal, and announcement quality before any section can be promoted from manual proof to explicit assistive-technology conformance.",
-    "Side-by-side review against the Svelte preview remains mandatory for the sections marked as side-by-side review targets in the parity matrix.",
+    "Cross-runtime comparison follows the screen-level comparison modes in packages/shared-demo-app-contract.json.",
     "Native assistive-technology traces should capture real focus movement, announcement timing, and shell-region naming rather than relying on browser inference."
   ],
   "deltaRegister": [

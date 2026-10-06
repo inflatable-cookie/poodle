@@ -75,7 +75,7 @@
       "summary": "Catalog, token summary, and token inspector are useful docs utilities but should not sit inside the target app GPUI is trying to match.",
       "evidence": [
         "packages/svelte/preview/src/App.svelte",
-        "packages/gpui/parity-priority-matrix.json"
+        "packages/shared-demo-app-contract.json"
       ],
       "impact": "Side-by-side review gets diluted by sections that are not the main shared Loophole-facing UI target."
     },
@@ -85,7 +85,7 @@
       "summary": "The current review surface is organized as section demos rather than a coherent app with screens, flows, and stable region ownership.",
       "evidence": [
         "packages/svelte/preview/src/App.svelte",
-        "docs/knowledge/specs/archive/049-gpui-theme-runtime-and-native-preview-app-baseline.md"
+        "packages/shared-demo-app-contract.json"
       ],
       "impact": "The current surface demonstrates parts, but not one believable app that both Svelte and GPUI can implement as the same UI."
     },

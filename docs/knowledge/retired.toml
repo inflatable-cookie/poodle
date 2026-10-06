@@ -82,3 +82,38 @@ terms = [
 ]
 config_keys = ["SOURCE_PATHS"]
 allow = ["CHANGELOG.md"]
+
+[[retired]]
+id = "historical-generation-baselines"
+retired = "2026-10-06"
+replacement = "The GPUI functionality census and generated component denominator carry current component-level parity evidence; packages/shared-demo-app-contract.json owns the current demo target. The GPUI preview shell retains its separate preview-app baseline."
+owner = "docs/evidence/gpui/gpui-functionality-census.md"
+terms = [
+  "g03 generation closeout record",
+  "GPUI parity priority matrix",
+  "GPUI structural primitives baseline",
+  "GPUI action field primitives baseline",
+  "GPUI selection feedback date baseline",
+  "GPUI overlay navigation menu baseline",
+  "GPUI form validation remediation baseline",
+  "GPUI data browse detail picker media baseline",
+]
+paths = [
+  "packages/g03-closeout.json",
+  "packages/gpui/parity-priority-matrix.json",
+  "packages/gpui/structural-primitives-baseline.json",
+  "packages/gpui/action-field-primitives-baseline.json",
+  "packages/gpui/selection-feedback-date-baseline.json",
+  "packages/gpui/overlay-navigation-menu-baseline.json",
+  "packages/gpui/form-validation-remediation-composites-baseline.json",
+  "packages/gpui/data-browse-detail-picker-media-baseline.json",
+  "docs/knowledge/specs/archive/047-generation-closeout-and-next-program-posture.md",
+  "docs/knowledge/specs/archive/048-gpui-contract-audit-priority-and-side-by-side-review-baseline.md",
+  "docs/knowledge/specs/archive/050-gpui-structural-primitives-baseline.md",
+  "docs/knowledge/specs/archive/051-gpui-action-text-entry-and-field-primitives-baseline.md",
+  "docs/knowledge/specs/archive/052-gpui-selection-feedback-and-date-time-primitives-baseline.md",
+  "docs/knowledge/specs/archive/053-gpui-overlay-disclosure-navigation-and-menu-primitives-baseline.md",
+  "docs/knowledge/specs/archive/054-gpui-form-validation-and-remediation-composite-baseline.md",
+  "docs/knowledge/specs/archive/055-gpui-data-browse-detail-picker-and-media-composite-baseline.md",
+]
+allow = ["docs/knowledge/specs/archive/"]
