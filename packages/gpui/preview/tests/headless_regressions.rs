@@ -60862,6 +60862,9 @@ fn tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui() {
             "disablement keeps the tooltip inert"
         );
         assert!(!is_tooltip_visible(ANCHOR));
+    });
+}
+
 /// EnvelopeEditor proves its mounted GPUI parity: normalized point geometry
 /// and the sampled curve render, draggable points with real pointer-derived
 /// deltas, keyboard nudging and deletion, snap hooks, and committed value

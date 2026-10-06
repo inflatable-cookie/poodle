@@ -300,8 +300,8 @@ component entries across 158 named tests** to
 `mounted`. The map remains planning input and is shown for traceability only;
 the current component ledger consumes validated receipts, so expected-without-
 receipt remains `missing`.
-The map now lists 157 component entries across
-173 named tests.
+The map now lists 160 component entries across
+176 named tests.
 
 | Component | Expected test name(s) | Execution status |
 | --- | --- | --- |

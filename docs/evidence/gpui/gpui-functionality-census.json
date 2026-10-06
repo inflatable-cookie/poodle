@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "f9e0c22a701f14fdc1d2bb54dd76b721a4ad1f8b",
+  "source_commit": "5daa515b9e23f4e371554c6ce27068a713b2c6c1",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -1710,21 +1710,27 @@
       "substrate": "general-composite",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_field_set"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_field_set"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_field_set"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -1733,10 +1739,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for FieldSet; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/FieldSet--first-mounted-parity-field-set.json"
+      ],
+      "refusals": []
     },
     {
       "component": "FileUpload",
@@ -2320,19 +2326,22 @@
       "substrate": "layout-primitive",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_list_grid"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_list_grid"
+        }
+      ],
       "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
         "visual"
       ],
       "holds": [
@@ -2343,9 +2352,12 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/ListGrid--first-mounted-parity-list-grid.json"
+      ],
       "refusals": [
-        "No validated receipt and no retained expected test for ListGrid; every required capability stays missing."
+        "Expected test first_mounted_parity_list_grid shows visual signals, but visual is withheld: narrow-container floor clamp needs a shared container-relative layout capability.",
+        "Expected test first_mounted_parity_list_grid proves no visual claim; visual stays missing."
       ]
     },
     {
@@ -5263,14 +5275,35 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui"
+        }
+      ],
       "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+        "events"
       ],
       "holds": [
         {
@@ -5280,9 +5313,12 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Tooltip--tooltip-hover-focus-escape-and-bubble-reach-mounted-gpui.json"
+      ],
       "refusals": [
-        "No validated receipt and no retained expected test for Tooltip; every required capability stays missing."
+        "Expected test tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui shows events signals, but events is withheld: open-change callback needs a production handler projection for tooltip transitions.",
+        "Expected test tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui proves no events claim; events stays missing."
       ]
     },
     {
@@ -9616,18 +9652,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 172,
-    "fullyAdmittedRows": 170,
+    "admittedRows": 175,
+    "fullyAdmittedRows": 171,
     "missingTally": {
-      "semantic": 3,
-      "events": 3,
-      "pointer": 4,
-      "keyboard_focus": 4,
-      "accessibility": 3,
-      "visual": 4
+      "semantic": 0,
+      "events": 1,
+      "pointer": 1,
+      "keyboard_focus": 1,
+      "accessibility": 0,
+      "visual": 2
     },
     "holdCount": 175,
-    "refusalCount": 25
+    "refusalCount": 26
   },
   "groups": [
     {
@@ -9637,12 +9673,12 @@
         "Tooltip"
       ],
       "missingTally": {
-        "semantic": 2,
-        "events": 2,
-        "pointer": 2,
-        "keyboard_focus": 2,
-        "accessibility": 2,
-        "visual": 2
+        "semantic": 0,
+        "events": 1,
+        "pointer": 0,
+        "keyboard_focus": 0,
+        "accessibility": 0,
+        "visual": 1
       },
       "contracts": [
         "docs/contracts/components/list-grid.md",
@@ -9664,23 +9700,6 @@
       },
       "contracts": [
         "docs/contracts/components/code.md"
-      ]
-    },
-    {
-      "substrate": "general-composite",
-      "components": [
-        "FieldSet"
-      ],
-      "missingTally": {
-        "semantic": 1,
-        "events": 1,
-        "pointer": 1,
-        "keyboard_focus": 1,
-        "accessibility": 1,
-        "visual": 1
-      },
-      "contracts": [
-        "docs/contracts/components/field-set.md"
       ]
     },
     {

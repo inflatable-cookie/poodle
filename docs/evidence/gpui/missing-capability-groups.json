@@ -9,12 +9,12 @@
         "Tooltip"
       ],
       "missingTally": {
-        "semantic": 2,
-        "events": 2,
-        "pointer": 2,
-        "keyboard_focus": 2,
-        "accessibility": 2,
-        "visual": 2
+        "semantic": 0,
+        "events": 1,
+        "pointer": 0,
+        "keyboard_focus": 0,
+        "accessibility": 0,
+        "visual": 1
       },
       "contracts": [
         "docs/contracts/components/list-grid.md",
@@ -36,23 +36,6 @@
       },
       "contracts": [
         "docs/contracts/components/code.md"
-      ]
-    },
-    {
-      "substrate": "general-composite",
-      "components": [
-        "FieldSet"
-      ],
-      "missingTally": {
-        "semantic": 1,
-        "events": 1,
-        "pointer": 1,
-        "keyboard_focus": 1,
-        "accessibility": 1,
-        "visual": 1
-      },
-      "contracts": [
-        "docs/contracts/components/field-set.md"
       ]
     },
     {
