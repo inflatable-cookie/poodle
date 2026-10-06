@@ -135,6 +135,61 @@ describe("web motion runtime", () => {
     expect(element.style.height).toBe("");
   });
 
+  test("finished open animation releases its forwards fill so the panel settles to auto height", async () => {
+    // Regression for poodle#130: the open target measured 0px while the
+    // content was still hidden, and the finished animation kept pinning that
+    // height through `fill: "forwards"` after settle() cleared the inline
+    // style. The fake below is faithful where it matters: finishing applies
+    // the endpoint fill, and cancel() releases it even after finish.
+    let fill: string | null = null;
+    let finishAnimation!: () => void;
+    const element = {
+      style: {} as CSSStyleDeclaration,
+      scrollHeight: 0,
+      animate(keyframes: Keyframe[]) {
+        let settled = false;
+        let resolve!: (value: unknown) => void;
+        let reject!: (reason?: unknown) => void;
+        const finished = new Promise((res, fail) => {
+          resolve = res;
+          reject = fail;
+        });
+        finishAnimation = () => {
+          if (settled) {
+            return;
+          }
+          settled = true;
+          const endpoint = keyframes.at(-1) as { height?: unknown } | undefined;
+          fill = typeof endpoint?.height === "string" ? endpoint.height : null;
+          resolve(undefined);
+        };
+        return {
+          cancel() {
+            fill = null;
+            if (settled) {
+              return;
+            }
+            settled = true;
+            reject(new DOMException("The user aborted a request.", "AbortError"));
+          },
+          finished,
+        };
+      },
+    } as unknown as HTMLElement;
+    const decision = playClippedHeight(element, {
+      owner: "panel",
+      open: true,
+      policy: "full",
+      initial: false,
+    });
+    expect(decision.schedule).toBe(true);
+    finishAnimation();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(element.style.height).toBe("");
+    expect(fill).toBeNull();
+  });
+
   test("unsupported WAAPI paints the endpoint without retaining a clock", () => {
     const element = { style: {} as CSSStyleDeclaration } as unknown as HTMLElement;
     const trace = createMotionTrace("full");
