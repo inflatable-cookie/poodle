@@ -71,6 +71,20 @@ preserve the result. "No API to build against" is no longer true of upstream,
 only of the crates.io 0.2.2 pin. Adoption still waits on a buildable published
 `gpui-apple` crate and live platform-tree proof.
 
+## Update 2026-10-06
+
+Operator ruling (Tom, 2026-10-06): switch Poodle's GPUI dependency from
+crates.io `gpui` 0.2.2 to `gpui-unofficial`, pinned to an exact stable release
+(1.22.0 at the time of the ruling), and adopt its AccessKit path. Re-checked
+the same day: `gpui-apple-gpui-unofficial` 1.22.0 bundles its own `gpui`
+source and resolves it inside its crate directory, so the September
+sibling-path gate looks cleared; the `bzip2-1.0.6` licence is allowed in
+`deny.toml`. The remaining gate is a live, non-activating platform-tree read.
+Pre-release (`-pre`) tags are not pinned; upgrades are deliberate, one stable
+tag at a time. GPUI 1.22.0 still has only `Definite`/`Auto` lengths and
+`Normal`/`Nowrap` white space, so the two recorded layout and wrapping Known
+Deltas remain upstream items.
+
 ## Consequences For Planning
 
 - **Do not schedule A2 against the crates.io 0.2.2 pin.** Upstream GPUI now has
