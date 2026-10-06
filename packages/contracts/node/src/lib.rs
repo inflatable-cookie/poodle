@@ -76,8 +76,13 @@ pub struct Node {
     pub interaction: Interaction,
     pub a11y: NodeA11y,
     /// Hover tooltip text. Backends project this as native tooltip chrome
-    /// (HTML `title`, GPUI `.tooltip()`). Not the Tooltip overlay component.
+    /// (HTML `title`, GPUI overlay). Not the Tooltip overlay component.
     pub tooltip: Option<String>,
+    /// Shared-recipe bubble for `tooltip`, resolved by the component renderer
+    /// while its theme is available.
+    pub tooltip_bubble: Option<Box<Node>>,
+    /// Reports native tooltip open/close transitions to the host.
+    pub tooltip_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
     /// Machine-readable ISO 8601 value for semantic time text, matching the
     /// web `<time datetime>` attribute. It does not change the visible text.
     pub datetime: Option<String>,

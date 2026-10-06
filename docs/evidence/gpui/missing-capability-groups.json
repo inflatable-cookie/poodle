@@ -5,20 +5,18 @@
     {
       "substrate": "layout-primitive",
       "components": [
-        "ListGrid",
-        "Tooltip"
+        "ListGrid"
       ],
       "missingTally": {
         "semantic": 0,
-        "events": 1,
+        "events": 0,
         "pointer": 0,
         "keyboard_focus": 0,
         "accessibility": 0,
         "visual": 1
       },
       "contracts": [
-        "docs/contracts/components/list-grid.md",
-        "docs/contracts/components/tooltip.md"
+        "docs/contracts/components/list-grid.md"
       ]
     },
     {

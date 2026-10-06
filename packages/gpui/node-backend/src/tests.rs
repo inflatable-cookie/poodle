@@ -498,6 +498,8 @@ fn tooltip_state_reset_increments_generation_and_clears_fields() {
             origin: gpui::point(gpui::px(10.0), gpui::px(20.0)),
             size: gpui::size(gpui::px(100.0), gpui::px(40.0)),
         }),
+        bubble: None,
+        on_open_change: None,
         generation: 41,
         is_visible: true,
         is_hovered: true,
@@ -511,6 +513,8 @@ fn tooltip_state_reset_increments_generation_and_clears_fields() {
     assert_eq!(state.target_id, None);
     assert_eq!(state.text, None);
     assert_eq!(state.target_bounds, None);
+    assert!(state.bubble.is_none());
+    assert!(state.on_open_change.is_none());
     assert_eq!(state.generation, 42);
     assert!(!state.is_visible);
     assert!(!state.is_hovered);

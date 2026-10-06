@@ -10,7 +10,7 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use poodle_node::Node;
-use poodle_specs::TimeAgoSpec;
+use poodle_specs::{TimeAgoSpec, TooltipSpec};
 
 use crate::context::RenderContext;
 
@@ -27,7 +27,11 @@ pub fn time_ago(spec: &TimeAgoSpec, ctx: &RenderContext<'_>) -> Node {
     label.style.descriptor.text_color = Some(text_color);
     if !spec.timestamp.is_empty() {
         label.datetime = Some(spec.timestamp.clone());
-        label.tooltip = Some(spec.timestamp.clone());
+        crate::tooltip::project_node_tooltip(
+            &mut label,
+            &TooltipSpec::new().with_content(spec.timestamp.clone()),
+            ctx,
+        );
     }
 
     if !spec.inherits_typography() {

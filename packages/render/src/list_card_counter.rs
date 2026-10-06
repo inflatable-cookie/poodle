@@ -14,7 +14,7 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, Node, NodeRole,
     StylePatch,
 };
-use poodle_specs::{IconSpec, ListCardCounterSpec};
+use poodle_specs::{IconSpec, ListCardCounterSpec, TooltipSpec};
 
 use crate::context::RenderContext;
 use crate::icon::icon;
@@ -75,7 +75,11 @@ pub fn list_card_counter(
         });
         if let Some(tooltip) = spec.tooltip.as_deref() {
             if !tooltip.is_empty() {
-                row.tooltip = Some(tooltip.to_string());
+                crate::tooltip::project_node_tooltip(
+                    &mut row,
+                    &TooltipSpec::new().with_content(tooltip),
+                    ctx,
+                );
             }
         }
         row.style.descriptor.cursor = CursorHint::Pointer;

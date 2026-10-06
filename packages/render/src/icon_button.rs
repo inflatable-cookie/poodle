@@ -15,7 +15,7 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, MainAxisAlignment,
     Node, NodeAnimation, NodeRole, NodeToggled, StylePatch,
 };
-use poodle_specs::{ButtonTone, ButtonVariant, IconButtonSpec, IconSize};
+use poodle_specs::{ButtonTone, ButtonVariant, IconButtonSpec, IconSize, TooltipSpec};
 
 use crate::color::{mix_srgb, BLACK, TRANSPARENT, WHITE};
 use crate::context::RenderContext;
@@ -244,7 +244,13 @@ pub fn icon_button_with_handlers(
     }
     el.a11y.expanded = spec.is_expanded;
     el.a11y.controls = spec.controls.clone();
-    el.tooltip = projected_tooltip(spec);
+    if let Some(content) = projected_tooltip(spec) {
+        crate::tooltip::project_node_tooltip(
+            &mut el,
+            &TooltipSpec::new().with_content(content),
+            ctx,
+        );
+    }
     el
 }
 

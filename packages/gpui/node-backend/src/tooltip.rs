@@ -14,17 +14,21 @@
 
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::sync::Arc;
 use std::time::Duration;
 
 use gpui::{
     deferred, div, px, AnyElement, AnyWindowHandle, App, InteractiveElement, IntoElement,
-    ParentElement, SharedString, Styled, Subscription, Task, Window,
+    ParentElement, Styled, Subscription, Task, Window,
 };
+use poodle_node::Node;
 
 use crate::record_probe_channel;
 
 /// Open delay for non-empty node tooltips (contract: 300ms).
 pub const TOOLTIP_DELAY: Duration = Duration::from_millis(300);
+
+pub(crate) type TooltipOpenChangeHandler = Arc<dyn Fn(bool) + Send + Sync>;
 
 /// What the tooltip paint pass last painted: target element id, text, and bounds.
 #[derive(Clone, Debug, PartialEq)]
@@ -40,6 +44,8 @@ pub(crate) struct WindowTooltipState {
     pub target_id: Option<String>,
     pub text: Option<String>,
     pub target_bounds: Option<gpui::Bounds<gpui::Pixels>>,
+    pub bubble: Option<Node>,
+    pub on_open_change: Option<TooltipOpenChangeHandler>,
     pub generation: u64,
     pub is_visible: bool,
     pub is_hovered: bool,
@@ -53,6 +59,8 @@ impl WindowTooltipState {
         self.target_id = None;
         self.text = None;
         self.target_bounds = None;
+        self.bubble = None;
+        self.on_open_change = None;
         self.generation = self.generation.wrapping_add(1);
         self.is_visible = false;
         self.is_hovered = false;
@@ -224,15 +232,23 @@ pub(crate) fn prepare_tooltip_frame(handle: AnyWindowHandle) {
 /// Frame boundary hook: called from `overlay_frame_end_for` for one window.
 /// Cancels that window's tooltip when its target was not painted this frame.
 pub(crate) fn sweep_unpainted_tooltips(handle: AnyWindowHandle) {
-    WINDOW_TOOLTIPS.with(|cell| {
+    let close_handler = WINDOW_TOOLTIPS.with(|cell| {
         let mut map = cell.borrow_mut();
         if let Some(state) = map.get_mut(&handle) {
             if state.target_id.is_some() && !state.painted_this_frame {
                 record_probe_channel("tooltip.lifecycle.removed");
+                let close_handler = (state.is_visible || state.task.is_some())
+                    .then(|| state.on_open_change.clone())
+                    .flatten();
                 state.reset();
+                return close_handler;
             }
         }
+        None
     });
+    if let Some(handler) = close_handler {
+        handler(false);
+    }
 }
 
 /// Record paint presence, bounds, and disabled status for an element with a tooltip.
@@ -244,13 +260,17 @@ pub(crate) fn record_tooltip_target_paint(
     disabled: bool,
 ) {
     let handle = window.window_handle();
-    WINDOW_TOOLTIPS.with(|cell| {
+    let close_handler = WINDOW_TOOLTIPS.with(|cell| {
         let mut map = cell.borrow_mut();
         if let Some(state) = map.get_mut(&handle) {
             if state.target_id.as_deref() == Some(target_id) {
                 if disabled || text.is_empty() {
                     record_probe_channel("tooltip.lifecycle.disabled");
+                    let close_handler = (state.is_visible || state.task.is_some())
+                        .then(|| state.on_open_change.clone())
+                        .flatten();
                     state.reset();
+                    return close_handler;
                 } else {
                     state.painted_this_frame = true;
                     state.text = Some(text.to_owned());
@@ -258,15 +278,27 @@ pub(crate) fn record_tooltip_target_paint(
                 }
             }
         }
+        None
     });
+    if let Some(handler) = close_handler {
+        handler(false);
+    }
 }
 
 /// Pointer hover enter: start the 300ms timer for a target element.
-pub(crate) fn on_pointer_enter(window: &mut Window, cx: &mut App, target_id: &str, text: &str) {
+pub(crate) fn on_pointer_enter(
+    window: &mut Window,
+    cx: &mut App,
+    target_id: &str,
+    text: &str,
+    bubble: Option<Node>,
+    on_open_change: Option<TooltipOpenChangeHandler>,
+) {
     if text.is_empty() {
         return;
     }
     let handle = window.window_handle();
+    let mut superseded_handler = None;
     WINDOW_TOOLTIPS.with(|cell| {
         let mut map = cell.borrow_mut();
         let state = map.entry(handle).or_default();
@@ -274,14 +306,25 @@ pub(crate) fn on_pointer_enter(window: &mut Window, cx: &mut App, target_id: &st
         if state.target_id.as_deref() == Some(target_id) {
             state.is_hovered = true;
             state.painted_this_frame = true;
+            if bubble.is_some() {
+                state.bubble = bubble;
+            }
+            if on_open_change.is_some() {
+                state.on_open_change = on_open_change;
+            }
             return;
         }
 
         // New target supersedes any previous generation.
+        if state.is_visible || state.task.is_some() {
+            superseded_handler = state.on_open_change.clone();
+        }
         state.generation = state.generation.wrapping_add(1);
         let gen = state.generation;
         state.target_id = Some(target_id.to_owned());
         state.text = Some(text.to_owned());
+        state.bubble = bubble;
+        state.on_open_change = on_open_change;
         state.is_visible = false;
         state.is_hovered = true;
         state.painted_this_frame = true;
@@ -298,38 +341,53 @@ pub(crate) fn on_pointer_enter(window: &mut Window, cx: &mut App, target_id: &st
         state.task = Some(task);
         record_probe_channel("tooltip.lifecycle.pending");
     });
+    if let Some(handler) = superseded_handler {
+        handler(false);
+    }
 }
 
 /// Pointer hover leave: cancel pending timer or hide visible tooltip immediately.
 pub(crate) fn on_pointer_leave(window: &mut Window, cx: &mut App, target_id: &str) {
     let handle = window.window_handle();
-    let changed = WINDOW_TOOLTIPS.with(|cell| {
+    let (changed, close_handler) = WINDOW_TOOLTIPS.with(|cell| {
         let mut map = cell.borrow_mut();
         let Some(state) = map.get_mut(&handle) else {
-            return false;
+            return (false, None);
         };
         if state.target_id.as_deref() == Some(target_id) {
             state.is_hovered = false;
             let was_active = state.is_visible || state.task.is_some();
+            let close_handler = was_active.then(|| state.on_open_change.clone()).flatten();
             state.reset();
-            was_active
+            (was_active, close_handler)
         } else {
-            false
+            (false, None)
         }
     });
     if changed {
         record_probe_channel("tooltip.lifecycle.hidden");
+        if let Some(handler) = close_handler {
+            handler(false);
+        }
         window.refresh();
         cx.refresh_windows();
     }
 }
 
 /// Keyboard focus enter: start the 300ms timer for a focusable target element.
-pub(crate) fn on_focus_enter(window: &mut Window, cx: &mut App, target_id: &str, text: &str) {
+pub(crate) fn on_focus_enter(
+    window: &mut Window,
+    cx: &mut App,
+    target_id: &str,
+    text: &str,
+    bubble: Option<Node>,
+    on_open_change: Option<TooltipOpenChangeHandler>,
+) {
     if text.is_empty() {
         return;
     }
     let handle = window.window_handle();
+    let mut superseded_handler = None;
     WINDOW_TOOLTIPS.with(|cell| {
         let mut map = cell.borrow_mut();
         let state = map.entry(handle).or_default();
@@ -337,14 +395,25 @@ pub(crate) fn on_focus_enter(window: &mut Window, cx: &mut App, target_id: &str,
         if state.target_id.as_deref() == Some(target_id) {
             state.is_focused = true;
             state.painted_this_frame = true;
+            if bubble.is_some() {
+                state.bubble = bubble;
+            }
+            if on_open_change.is_some() {
+                state.on_open_change = on_open_change;
+            }
             return;
         }
 
         // Focus supersedes any previous generation.
+        if state.is_visible || state.task.is_some() {
+            superseded_handler = state.on_open_change.clone();
+        }
         state.generation = state.generation.wrapping_add(1);
         let gen = state.generation;
         state.target_id = Some(target_id.to_owned());
         state.text = Some(text.to_owned());
+        state.bubble = bubble;
+        state.on_open_change = on_open_change;
         state.is_visible = false;
         state.is_focused = true;
         state.painted_this_frame = true;
@@ -361,27 +430,34 @@ pub(crate) fn on_focus_enter(window: &mut Window, cx: &mut App, target_id: &str,
         state.task = Some(task);
         record_probe_channel("tooltip.lifecycle.pending");
     });
+    if let Some(handler) = superseded_handler {
+        handler(false);
+    }
 }
 
 /// Keyboard focus departure (blur): cancel pending timer or hide visible tooltip immediately.
 pub(crate) fn on_focus_departure(window: &mut Window, cx: &mut App, target_id: &str) {
     let handle = window.window_handle();
-    let changed = WINDOW_TOOLTIPS.with(|cell| {
+    let (changed, close_handler) = WINDOW_TOOLTIPS.with(|cell| {
         let mut map = cell.borrow_mut();
         let Some(state) = map.get_mut(&handle) else {
-            return false;
+            return (false, None);
         };
         if state.target_id.as_deref() == Some(target_id) {
             state.is_focused = false;
             let was_active = state.is_visible || state.task.is_some();
+            let close_handler = was_active.then(|| state.on_open_change.clone()).flatten();
             state.reset();
-            was_active
+            (was_active, close_handler)
         } else {
-            false
+            (false, None)
         }
     });
     if changed {
         record_probe_channel("tooltip.lifecycle.hidden");
+        if let Some(handler) = close_handler {
+            handler(false);
+        }
         window.refresh();
         cx.refresh_windows();
     }
@@ -390,21 +466,25 @@ pub(crate) fn on_focus_departure(window: &mut Window, cx: &mut App, target_id: &
 /// Dismiss any pending or visible tooltip in this window (Escape key, pointer press).
 pub(crate) fn dismiss_tooltip(window: &mut Window, cx: &mut App) -> bool {
     let handle = window.window_handle();
-    let changed = WINDOW_TOOLTIPS.with(|cell| {
+    let (changed, close_handler) = WINDOW_TOOLTIPS.with(|cell| {
         let mut map = cell.borrow_mut();
         let Some(state) = map.get_mut(&handle) else {
-            return false;
+            return (false, None);
         };
         if state.target_id.is_some() {
             let was_active = state.is_visible || state.task.is_some();
+            let close_handler = was_active.then(|| state.on_open_change.clone()).flatten();
             state.reset();
-            was_active
+            (was_active, close_handler)
         } else {
-            false
+            (false, None)
         }
     });
     if changed {
         record_probe_channel("tooltip.lifecycle.hidden");
+        if let Some(handler) = close_handler {
+            handler(false);
+        }
         window.refresh();
         cx.refresh_windows();
     }
@@ -419,10 +499,10 @@ pub(crate) fn on_timer_fired(
     window: &mut Window,
     cx: &mut App,
 ) {
-    let should_show = WINDOW_TOOLTIPS.with(|cell| {
+    let (should_show, open_handler) = WINDOW_TOOLTIPS.with(|cell| {
         let mut map = cell.borrow_mut();
         let Some(state) = map.get_mut(&window_handle) else {
-            return false;
+            return (false, None);
         };
         if state.generation == generation
             && state.target_id.as_deref() == Some(target_id)
@@ -431,13 +511,16 @@ pub(crate) fn on_timer_fired(
         {
             state.is_visible = true;
             state.task = None;
-            true
+            (true, state.on_open_change.clone())
         } else {
-            false
+            (false, None)
         }
     });
     if should_show {
         record_probe_channel("tooltip.lifecycle.shown");
+        if let Some(handler) = open_handler {
+            handler(true);
+        }
         window.refresh();
         cx.refresh_windows();
     }
@@ -457,10 +540,17 @@ pub(crate) fn render_active_tooltip(handle: AnyWindowHandle) -> Option<AnyElemen
         let bounds = state
             .target_bounds
             .or_else(|| crate::layers::bounds_for(target_id));
-        bounds.map(|bounds| (target_id.clone(), text.clone(), bounds))
+        bounds.map(|bounds| {
+            (
+                target_id.clone(),
+                text.clone(),
+                bounds,
+                state.bubble.clone(),
+            )
+        })
     })?;
 
-    let (target_id, text, bounds) = active_info;
+    let (target_id, text, bounds, bubble_node) = active_info;
 
     let top = bounds.origin.y + bounds.size.height + px(4.0);
     let left = bounds.origin.x;
@@ -489,24 +579,24 @@ pub(crate) fn render_active_tooltip(handle: AnyWindowHandle) -> Option<AnyElemen
     .left(px(0.0))
     .size_full();
 
-    let bubble = div()
-        .px(px(8.0))
-        .py(px(4.0))
-        .rounded(px(6.0))
-        .bg(gpui::hsla(0.0, 0.0, 0.12, 0.96))
-        .text_color(gpui::hsla(0.0, 0.0, 0.96, 1.0))
-        .text_sm()
-        .line_height(px(14.0))
-        .child(SharedString::from(text));
-
-    let tooltip_node = div()
+    let mut tooltip_node = div()
         .id("poodle-active-tooltip")
         .absolute()
         .top(top)
         .left(left)
         .occlude()
-        .child(canvas_record)
-        .child(bubble);
+        .child(canvas_record);
+
+    if let Some(mut bubble_node) = bubble_node {
+        // The backend wrapper is the deferred overlay; avoid nesting a
+        // second deferred element from the recipe node inside its paint pass.
+        bubble_node.style.overlay = false;
+        bubble_node.id = Some(format!("poodle-tooltip-bubble-{target_id}"));
+        if let Some(label_node) = bubble_node.children.first_mut() {
+            label_node.id = Some(format!("poodle-tooltip-label-{target_id}"));
+        }
+        tooltip_node = tooltip_node.child(crate::to_gpui(&bubble_node));
+    }
 
     Some(deferred(tooltip_node).with_priority(999).into_any_element())
 }

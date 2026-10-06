@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `daa45b2dd0d74926271c645588c0cbf11c8ea4b4`
+Evidence commit (execution identity from the execution record, not the checkout): `ca5bc14a7e179ddbcfa80e2384b380518c91d505`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
@@ -15,9 +15,9 @@ Construction is not functional completion. A passing route, a test name, or one 
 ## Summary
 
 Rows with at least one admitted capability: **175**/175.
-Fully admitted rows: **172**/175.
-Missing by axis: semantic 0; events 1; pointer 0; keyboard_focus 0; accessibility 0; visual 2.
-Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **24**.
+Fully admitted rows: **173**/175.
+Missing by axis: semantic 0; events 0; pointer 0; keyboard_focus 0; accessibility 0; visual 2.
+Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **22**.
 
 ## Rows
 
@@ -120,7 +120,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **24**.
 | ThemeSelect | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ThemeSelect--first-mounted-parity-theme-select.json` |
 | ToggleGroup | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ToggleGroup--toggle-group-result-focus-identity-and-disabled-paths.json` |
 | Toolbar | semantic; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Toolbar--first-mounted-parity-toolbar.json` |
-| Tooltip | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | events | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Tooltip--tooltip-hover-focus-escape-and-bubble-reach-mounted-gpui.json` |
+| Tooltip | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Tooltip--tooltip-hover-focus-escape-and-bubble-reach-mounted-gpui.json` |
 | TriStateSwitch | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/TriStateSwitch--tri-state-switch-value-focus-identity-and-disabled-paths.json` |
 | Menubar | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Menubar--menubar-trigger-open-select-and-dismissal-through-mounted-backend.json` |
 | UiPresentationProvider | semantic; keyboard_focus; accessibility; visual | semantic (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/UiPresentationProvider--first-mounted-parity-ui-presentation-provider.json` |
@@ -209,8 +209,6 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **24**.
 - ListGrid: Expected test first_mounted_parity_list_grid proves no visual claim; visual stays missing.
 - NumberInput: Expected test number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value proves no pointer claim; pointer stays missing.
 - NumberInput: Expected test number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value proves no visual claim; visual stays missing.
-- Tooltip: Expected test tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui shows events signals, but events is withheld: open-change callback needs a production handler projection for tooltip transitions.
-- Tooltip: Expected test tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui proves no events claim; events stays missing.
 - CardToggleGroup: Expected test first_mounted_parity_card_toggle_group shows visual signals, but visual is withheld: narrow-container clamp needs a shared min(100%, max(…)) layout capability.
 - CardToggleGroup: Expected test first_mounted_parity_card_toggle_group proves no visual claim; visual stays missing.
 - LicenceSeats: Expected test licence_seats_release_flows_through_confirm_in_a_mounted_window proves no events claim; events stays missing.
@@ -232,5 +230,5 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **24**.
 
 Shared-substrate groupings for repair-tranche compilation. Grouping only; no tranche is planned here.
 
-- layout-primitive: 2 components (ListGrid, Tooltip); missing semantic 0; events 1; pointer 0; keyboard_focus 0; accessibility 0; visual 1
+- layout-primitive: 1 components (ListGrid); missing semantic 0; events 0; pointer 0; keyboard_focus 0; accessibility 0; visual 1
 - drag-resize-reorder: 1 components (CardToggleGroup); missing semantic 0; events 0; pointer 0; keyboard_focus 0; accessibility 0; visual 1

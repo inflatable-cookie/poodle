@@ -7794,9 +7794,21 @@ impl IntoElement for Tooltip {
                 placement_index(self.spec.placement),
             ))
             .child(self.trigger.unwrap_or_else(|| div().into_any_element()));
-        if let Some(handler) = self.on_open_change {
+        let on_open_change = self.on_open_change.or_else(|| {
+            self.spec.on_open_change.clone().map(|handler| {
+                Rc::new(move |open, _window: &mut Window, _cx: &mut App| handler(open))
+                    as OpenChangeHandler
+            })
+        });
+        if let Some(handler) = on_open_change {
+            let hover_handler = handler.clone();
             trigger = trigger.on_hover(move |hovered, window, cx| {
-                handler(*hovered, window, cx);
+                hover_handler(*hovered, window, cx);
+            });
+            trigger = trigger.on_key_down(move |event, window, cx| {
+                if event.keystroke.key.as_str() == "escape" {
+                    handler(false, window, cx);
+                }
             });
         }
         let bubble = (self.spec.current_open() && self.spec.has_content()).then(|| {

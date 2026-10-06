@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "daa45b2dd0d74926271c645588c0cbf11c8ea4b4",
+  "source_commit": "ca5bc14a7e179ddbcfa80e2384b380518c91d505",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -5288,6 +5288,11 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui"
+        },
+        {
           "axis": "pointer",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui"
@@ -5308,9 +5313,7 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui"
         }
       ],
-      "missing": [
-        "events"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -5322,10 +5325,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Tooltip--tooltip-hover-focus-escape-and-bubble-reach-mounted-gpui.json"
       ],
-      "refusals": [
-        "Expected test tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui shows events signals, but events is withheld: open-change callback needs a production handler projection for tooltip transitions.",
-        "Expected test tooltip_hover_focus_escape_and_bubble_reach_mounted_gpui proves no events claim; events stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "TriStateSwitch",
@@ -9659,36 +9659,34 @@
   ],
   "summary": {
     "admittedRows": 175,
-    "fullyAdmittedRows": 172,
+    "fullyAdmittedRows": 173,
     "missingTally": {
       "semantic": 0,
-      "events": 1,
+      "events": 0,
       "pointer": 0,
       "keyboard_focus": 0,
       "accessibility": 0,
       "visual": 2
     },
     "holdCount": 175,
-    "refusalCount": 24
+    "refusalCount": 22
   },
   "groups": [
     {
       "substrate": "layout-primitive",
       "components": [
-        "ListGrid",
-        "Tooltip"
+        "ListGrid"
       ],
       "missingTally": {
         "semantic": 0,
-        "events": 1,
+        "events": 0,
         "pointer": 0,
         "keyboard_focus": 0,
         "accessibility": 0,
         "visual": 1
       },
       "contracts": [
-        "docs/contracts/components/list-grid.md",
-        "docs/contracts/components/tooltip.md"
+        "docs/contracts/components/list-grid.md"
       ]
     },
     {

@@ -287,6 +287,8 @@ pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> State
         let on_focus_change = node.interaction.on_focus_change.clone();
         let painted_id = input_text::painted_key(node, &id);
         let focus_tooltip = node.tooltip.clone();
+        let focus_tooltip_bubble = node.tooltip_bubble.as_deref().cloned();
+        let focus_tooltip_open_change = node.tooltip_open_change.clone();
         let focus_disabled = node.interaction.disabled;
         el = el.child(
             gpui::canvas(
@@ -387,7 +389,14 @@ pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> State
                         {
                             if !focus_disabled {
                                 if now {
-                                    crate::tooltip::on_focus_enter(window, cx, &id, tooltip_text);
+                                    crate::tooltip::on_focus_enter(
+                                        window,
+                                        cx,
+                                        &id,
+                                        tooltip_text,
+                                        focus_tooltip_bubble.clone(),
+                                        focus_tooltip_open_change.clone(),
+                                    );
                                 } else {
                                     crate::tooltip::on_focus_departure(window, cx, &id);
                                 }
@@ -565,6 +574,8 @@ pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> State
         let target_id = id.to_owned();
         let is_disabled = node.interaction.disabled;
         let tooltip_text = text.clone();
+        let tooltip_bubble = node.tooltip_bubble.as_deref().cloned();
+        let tooltip_open_change = node.tooltip_open_change.clone();
         el = el.child(
             gpui::canvas(
                 move |bounds, window, _cx| {
@@ -590,7 +601,14 @@ pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> State
             let hover_text = text.clone();
             el = el.on_hover(move |hovered: &bool, window: &mut Window, cx: &mut App| {
                 if *hovered {
-                    crate::tooltip::on_pointer_enter(window, cx, &enter_id, &hover_text);
+                    crate::tooltip::on_pointer_enter(
+                        window,
+                        cx,
+                        &enter_id,
+                        &hover_text,
+                        tooltip_bubble.clone(),
+                        tooltip_open_change.clone(),
+                    );
                 } else {
                     crate::tooltip::on_pointer_leave(window, cx, &leave_id);
                 }
