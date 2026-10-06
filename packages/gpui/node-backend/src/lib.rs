@@ -794,7 +794,7 @@ where
     let el = apply_paint(el, node);
     let el = apply_text(el, node);
     let el = apply_cursor(el, node);
-    let el = apply_state_patches(el, node, id);
+    let el = apply_state_patches(el, node);
     // Inset shadow bands paint under the node's own children, so the painter
     // goes in before them (g16.005: crates.io `BoxShadow` has no inset flag,
     // so the backend paints these layers itself).
