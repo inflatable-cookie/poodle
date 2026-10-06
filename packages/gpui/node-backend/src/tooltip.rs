@@ -1,7 +1,7 @@
 //! Window-owned tooltip lifecycle runtime (spec 013, card g16.066).
 //!
-//! Replaces GPUI 0.2.2's hardcoded 500ms hover-only `.tooltip()` with one
-//! Poodle-owned backend runtime.
+//! Replaces GPUI's built-in tooltip behavior with one Poodle-owned backend
+//! runtime.
 //!
 //! # Lifecycle Contract
 //! - 300ms open delay on hover or focus.
@@ -54,6 +54,13 @@ pub(crate) struct WindowTooltipState {
     pub task: Option<Task<()>>,
 }
 
+#[derive(Default)]
+struct TooltipHoverPointer {
+    target_id: Option<String>,
+    position: Option<gpui::Point<gpui::Pixels>>,
+    suppressed_rehit: Option<(String, gpui::Point<gpui::Pixels>)>,
+}
+
 impl WindowTooltipState {
     pub fn reset(&mut self) {
         self.target_id = None;
@@ -75,6 +82,11 @@ thread_local! {
     static WINDOW_TOOLTIPS: RefCell<HashMap<AnyWindowHandle, WindowTooltipState>> =
         RefCell::new(HashMap::new());
 
+    /// Tracks real pointer movement so a re-hit caused only by layout changes
+    /// does not transfer a removed target's pending hover to its neighbor.
+    static HOVER_POINTERS: RefCell<HashMap<AnyWindowHandle, TooltipHoverPointer>> =
+        RefCell::new(HashMap::new());
+
     /// Last painted tooltip per window, rebuilt each frame for that window.
     static PAINTED_TOOLTIPS: RefCell<HashMap<AnyWindowHandle, PaintedTooltip>> =
         RefCell::new(HashMap::new());
@@ -91,6 +103,7 @@ thread_local! {
 /// when the focus/backend registries are reset. This is not window teardown.
 pub fn reset_tooltip_registry() {
     WINDOW_TOOLTIPS.with(|cell| cell.borrow_mut().clear());
+    HOVER_POINTERS.with(|cell| cell.borrow_mut().clear());
     PAINTED_TOOLTIPS.with(|cell| cell.borrow_mut().clear());
     WINDOW_TEARDOWNS.with(|cell| cell.borrow_mut().clear());
 }
@@ -153,7 +166,7 @@ pub(crate) fn bind_window_teardown(handle: AnyWindowHandle, cx: &mut App) {
     if already_bound {
         return;
     }
-    let subscription = cx.on_window_closed(move |app| {
+    let subscription = cx.on_window_closed(move |app, _window_id| {
         if handle.update(app, |_, _, _| {}).is_err() {
             teardown_window_tooltips(handle);
             crate::scroll::teardown_window_scroll(handle);
@@ -186,6 +199,9 @@ pub fn teardown_window_tooltips(handle: AnyWindowHandle) {
         })
     });
     PAINTED_TOOLTIPS.with(|cell| {
+        cell.borrow_mut().remove(&handle);
+    });
+    HOVER_POINTERS.with(|cell| {
         cell.borrow_mut().remove(&handle);
     });
     if had_activity == Some(true) {
@@ -298,6 +314,33 @@ pub(crate) fn on_pointer_enter(
         return;
     }
     let handle = window.window_handle();
+    let position = window.mouse_position();
+    let suppress_rehit = HOVER_POINTERS.with(|cell| {
+        let mut pointers = cell.borrow_mut();
+        let pointer = pointers.entry(handle).or_default();
+        if pointer
+            .suppressed_rehit
+            .as_ref()
+            .is_some_and(|(suppressed, at)| suppressed == target_id && *at == position)
+        {
+            return true;
+        }
+        if pointer
+            .target_id
+            .as_deref()
+            .is_some_and(|previous| previous != target_id && pointer.position == Some(position))
+        {
+            pointer.suppressed_rehit = Some((target_id.to_owned(), position));
+            return true;
+        }
+        pointer.target_id = Some(target_id.to_owned());
+        pointer.position = Some(position);
+        pointer.suppressed_rehit = None;
+        false
+    });
+    if suppress_rehit {
+        return;
+    }
     let mut superseded_handler = None;
     WINDOW_TOOLTIPS.with(|cell| {
         let mut map = cell.borrow_mut();
@@ -349,6 +392,19 @@ pub(crate) fn on_pointer_enter(
 /// Pointer hover leave: cancel pending timer or hide visible tooltip immediately.
 pub(crate) fn on_pointer_leave(window: &mut Window, cx: &mut App, target_id: &str) {
     let handle = window.window_handle();
+    let position = window.mouse_position();
+    HOVER_POINTERS.with(|cell| {
+        if let Some(pointer) = cell.borrow_mut().get_mut(&handle) {
+            if pointer.position != Some(position) {
+                pointer.target_id = None;
+                pointer.position = Some(position);
+                pointer.suppressed_rehit = None;
+            } else if pointer.target_id.as_deref() != Some(target_id) {
+                pointer.target_id = None;
+                pointer.suppressed_rehit = None;
+            }
+        }
+    });
     let (changed, close_handler) = WINDOW_TOOLTIPS.with(|cell| {
         let mut map = cell.borrow_mut();
         let Some(state) = map.get_mut(&handle) else {
@@ -371,6 +427,41 @@ pub(crate) fn on_pointer_leave(window: &mut Window, cx: &mut App, target_id: &st
         }
         window.refresh();
         cx.refresh_windows();
+    }
+}
+
+/// A suppressed re-hit starts normally once the pointer actually moves over
+/// the new target.
+pub(crate) fn on_pointer_move(
+    window: &mut Window,
+    cx: &mut App,
+    target_id: &str,
+    text: &str,
+    bubble: Option<Node>,
+    on_open_change: Option<TooltipOpenChangeHandler>,
+    position: gpui::Point<gpui::Pixels>,
+) {
+    let handle = window.window_handle();
+    let resume = HOVER_POINTERS.with(|cell| {
+        let mut pointers = cell.borrow_mut();
+        let Some(pointer) = pointers.get_mut(&handle) else {
+            return false;
+        };
+        let moved_from_suppressed_target = pointer
+            .suppressed_rehit
+            .as_ref()
+            .is_some_and(|(suppressed, at)| suppressed == target_id && *at != position);
+        if moved_from_suppressed_target {
+            pointer.suppressed_rehit = None;
+            pointer.target_id = Some(target_id.to_owned());
+            pointer.position = Some(position);
+        } else if pointer.target_id.as_deref() == Some(target_id) {
+            pointer.position = Some(position);
+        }
+        moved_from_suppressed_target
+    });
+    if resume {
+        on_pointer_enter(window, cx, target_id, text, bubble, on_open_change);
     }
 }
 

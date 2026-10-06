@@ -33,7 +33,7 @@
 //! keyed by `AnyWindowHandle`; a frame in one window cannot cancel or paint
 //! another window's tooltip or discard its live focus handles.
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 
 use gpui::{
     AnyWindowHandle, App, Bounds, KeyDownEvent, MouseButton, MouseDownEvent, Pixels, Point, Window,
@@ -72,8 +72,11 @@ thread_local! {
         RefCell::new(std::collections::HashMap::new());
     /// Focus requests queued by component hosts (machine focus effects):
     /// applied by the target element's paint-time focus canvas, once.
-    static FOCUS_REQUESTS: RefCell<std::collections::HashSet<String>> =
-        RefCell::new(std::collections::HashSet::new());
+    static FOCUS_REQUESTS: RefCell<std::collections::HashMap<String, u64>> =
+        RefCell::new(std::collections::HashMap::new());
+    /// Focus requests age by overlay frame, not effect cycle. GPUI 1.22 can
+    /// run deferred cleanup before the next paint pass.
+    static FOCUS_FRAME_GENERATION: Cell<u64> = const { Cell::new(0) };
     /// Ordered tab stops per open layer, rebuilt each frame in tree order.
     /// The window Tab/Shift+Tab trap walks this instead of the window-wide
     /// traversal while its layer is open (the web surface's
@@ -97,6 +100,7 @@ thread_local! {
 /// paint applies them. [`overlay_frame_end`] drops whatever was never
 /// applied.
 fn overlay_frame_begin_common() {
+    FOCUS_FRAME_GENERATION.with(|generation| generation.set(generation.get().wrapping_add(1)));
     // Safety net for a previous cycle that never called overlay_frame_end.
     // Same-frame lost-host cancel is overlay_frame_end after this paint.
     crate::interaction::sweep_lost_continuous_host();
@@ -136,13 +140,20 @@ pub fn overlay_frame_begin_for(handle: AnyWindowHandle, cx: &mut App) {
     crate::tooltip::bind_window_teardown(handle, cx);
 }
 
-/// End a rendered frame: drop unused focus requests, then cancel a
-/// continuous-value gesture whose owner was not rebuilt in this paint.
+/// End a rendered frame: expire focus requests that survived two frame
+/// boundaries, then cancel a continuous-value gesture whose owner was not
+/// rebuilt in this paint. Event requests must reach the next paint pass even
+/// when this cleanup runs at the end of the current effect cycle.
 /// Production hosts defer [`overlay_frame_end_for`] to the end of the same
 /// effect cycle as [`overlay_frame_begin_for`] so removal cancels without a
 /// next-frame delay.
 fn overlay_frame_end_common() {
-    FOCUS_REQUESTS.with(|requests| requests.borrow_mut().clear());
+    let generation = FOCUS_FRAME_GENERATION.with(Cell::get);
+    FOCUS_REQUESTS.with(|requests| {
+        requests
+            .borrow_mut()
+            .retain(|_, queued_at| generation.wrapping_sub(*queued_at) < 2);
+    });
     crate::interaction::sweep_lost_continuous_host();
 }
 
@@ -166,15 +177,18 @@ pub fn overlay_frame_end_for(handle: AnyWindowHandle) {
 /// tracked), so requests made during event dispatch land after the frame
 /// that mounts the target.
 pub fn request_focus(element_id: &str) {
+    let generation = FOCUS_FRAME_GENERATION.with(Cell::get);
     FOCUS_REQUESTS.with(|requests| {
-        requests.borrow_mut().insert(element_id.to_owned());
+        requests
+            .borrow_mut()
+            .insert(element_id.to_owned(), generation);
     });
 }
 
 /// Claim a pending focus request for the element, if any. Called by the
 /// element's focus canvas in the paint pass, which owns the window.
 pub fn take_focus_request(element_id: &str) -> bool {
-    FOCUS_REQUESTS.with(|requests| requests.borrow_mut().remove(element_id))
+    FOCUS_REQUESTS.with(|requests| requests.borrow_mut().remove(element_id).is_some())
 }
 
 /// The rendered bounds of the element with this id, as of the last frame.
@@ -429,11 +443,11 @@ where
                     dismiss_innermost(cx);
                 }
                 "tab" => {
-                    if !trap_tab_in_innermost_layer(window, event.keystroke.modifiers.shift) {
+                    if !trap_tab_in_innermost_layer(window, cx, event.keystroke.modifiers.shift) {
                         if event.keystroke.modifiers.shift {
-                            window.focus_prev();
+                            window.focus_prev(cx);
                         } else {
-                            window.focus_next();
+                            window.focus_next(cx);
                         }
                     }
                     cx.refresh_windows();
@@ -454,7 +468,7 @@ where
 /// `trapFocusKeydown`). Returns true when the trap consumed the key.
 /// Without an innermost trapping layer, or with no live stops in it, the
 /// window-wide traversal still runs — an untrapped surface lets Tab blur out.
-fn trap_tab_in_innermost_layer(window: &mut Window, reverse: bool) -> bool {
+fn trap_tab_in_innermost_layer(window: &mut Window, cx: &mut App, reverse: bool) -> bool {
     let trapped = LAYERS.with(|layers| {
         layers
             .borrow()
@@ -500,6 +514,6 @@ fn trap_tab_in_innermost_layer(window: &mut Window, reverse: bool) -> bool {
     let Some(handle) = super::focus_handle_for(&target) else {
         return false;
     };
-    handle.focus(window);
+    handle.focus(window, cx);
     true
 }

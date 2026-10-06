@@ -287,10 +287,10 @@ A consumer wanting a hairline divider sets `--poodle-resize-handle-thickness:
   component supplies its own scope and derives the divider's from it — SplitView
   derives `{scope}:divider`.
 - `aria_value_now` / `aria_value_min` / `aria_value_max` reach the node's
-  accessibility range and stop there: gpui 0.2.2 exposes no platform
-  accessibility attributes (`docs/contracts/003-native-accessibility.md`), so
-  nothing announces them yet. The declaration is still the component's job —
-  it is what the backend will project the day upstream ships an API.
+  accessibility range and stop there: GPUI 1.22.0 exposes AccessKit, but the
+  Poodle backend does not yet project these values
+  (`docs/contracts/003-native-accessibility.md`). The declaration is still the
+  component's job; task #127 owns the mapping and platform-tree proof.
 
 ## 10a. Jetstream Notes
 

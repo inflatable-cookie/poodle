@@ -15,14 +15,11 @@
 //! Observation uses GPUI's test-only `debug_selector` markers, which compile
 //! to no-ops outside `test-support` builds. Nothing here is a published API.
 //!
-//! One test-platform limitation shapes the sweep: gpui 0.2.2's
-//! `Frame::clear` does not clear `debug_bounds`, so selector entries
-//! accumulate for the life of a window. Each route therefore gets a fresh
-//! window (and a fresh root, which is also the route-state reset); only the
-//! `TestAppContext` is reused.
+//! Each route gets a fresh window and root so route and retained specimen
+//! state stay isolated; only the `TestAppContext` is reused.
 
 // Explicit imports only: a glob would pull in gpui's `test` proc macro and
-// shadow the built-in `#[test]` (gpui-macros 0.2.2 crashes on current rustc).
+// shadow the built-in `#[test]` used by this binary.
 // Same discipline as `file_pick_tests` in `main.rs`.
 use crate::component_registry::CANONICAL_COMPONENTS;
 use crate::{specimens, PreviewRoot};
@@ -90,10 +87,8 @@ fn probe_viewport() -> Size<Pixels> {
 /// before the first draw, so the window never pays for the catalogue landing
 /// page or a resize redraw.
 ///
-/// A fresh window per route is required: gpui 0.2.2's `Frame::clear` does not
-/// clear `debug_bounds`, so a reused window would keep reporting an earlier
-/// route's tabs. A fresh root is also the route-state reset — no specimen's
-/// retained tab or toggle can leak into another route.
+/// A fresh window and root keep route selectors and retained specimen state
+/// isolated — no specimen's tab or toggle can leak into another route.
 ///
 /// The caller must close the window with [`close_route_window`] once the
 /// route's assertions are done: a live window keeps its `PreviewRoot`
@@ -437,10 +432,8 @@ fn canonical_catalogue_constructs_every_route_and_axis_pane_4() {
 /// Open a route in a window tall enough for the whole page to paint, and keep
 /// the root entity so retained specimen state can be read back.
 ///
-/// `debug_bounds` cannot answer that question here: gpui 0.2.2 never clears
-/// `debug_bounds` between frames, so a selector keyed by the current value
-/// would still report the value it held three clicks ago. The retained map is
-/// the thing under test anyway.
+/// `debug_bounds` reports geometry, not retained state, so read the component
+/// state from its root entity.
 fn open_stateful_route_window(
     app: &TestAppContext,
     slug: &str,

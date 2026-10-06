@@ -2,15 +2,13 @@
  * g16.005 — downstream dual-dependency proof.
  *
  * Builds `consumer/`, a crate written the way an ordinary crates.io user
- * would write it: it declares `gpui = "0.2.2"` for itself AND depends on
- * `poodle-gpui-node-backend`, then passes GPUI values across the boundary in
- * both directions. If Poodle resolves `gpui` from anywhere but crates.io,
- * Cargo gives the two crates different identities and this stops compiling.
- * That is the v0.2.1 defect, reproduced as a gate.
+ * would write it: it declares the exact `gpui-unofficial` pin for itself AND
+ * depends on `poodle-gpui-node-backend`, then passes GPUI values across the
+ * boundary in both directions. A second GPUI source or version gives the two
+ * crates different identities and this stops compiling.
  *
- * The crate is copied to a temporary directory before building, so no
- * lockfile and no target directory ever land in the repository, and the
- * `path` dependencies are rewritten to absolute paths into this checkout.
+ * The crate, lockfile, and target directory live inside one fresh temporary
+ * directory; the `path` dependencies point back to this checkout.
  *
  * A negative control runs after the real proof: the same crate with one
  * deliberately wrong type annotation must FAIL. A proof that cannot fail is
@@ -58,24 +56,19 @@ function stage(dir: string, corrupt: boolean): void {
   }
 }
 
-// One stable target directory outside the repository. The consumer crate is
-// staged fresh every run, but its dependency graph is the same GPUI build
-// every time, so a shared cache turns a multi-minute cold compile into a
-// seconds-long recheck without ever writing into the checkout.
-const TARGET_DIR = join(tmpdir(), "poodle-dual-dependency-target");
-
-function compile(dir: string): { status: number | null; stderr: string } {
+function compile(dir: string, targetDir: string): { status: number | null; stderr: string } {
   const result = spawnSync("cargo", ["check", "--quiet", "--manifest-path", join(dir, "Cargo.toml")], {
     encoding: "utf8",
-    env: { ...process.env, CARGO_TARGET_DIR: TARGET_DIR },
+    env: { ...process.env, CARGO_TARGET_DIR: targetDir },
   });
   return { status: result.status, stderr: result.stderr ?? "" };
 }
 
-console.log("## downstream consumer: crates.io gpui 0.2.2 + poodle-gpui-node-backend");
+console.log("## downstream consumer: gpui-unofficial 1.22.0 + poodle-gpui-node-backend");
 const work = mkdtempSync(join(tmpdir(), "poodle-dual-dependency-"));
 try {
   const proof = join(work, "proof");
+  const target = join(work, "target");
   stage(proof, false);
 
   const manifest = readFileSync(join(proof, "Cargo.toml"), "utf8");
@@ -85,28 +78,31 @@ try {
     .split("\n")
     .filter((line) => !line.trimStart().startsWith("#"))
     .join("\n");
-  check('the consumer declares gpui = "0.2.2" itself', active.includes('gpui = "0.2.2"'));
+  check(
+    "the consumer declares gpui-unofficial =1.22.0 itself",
+    active.includes('package = "gpui-unofficial", version = "=1.22.0"'),
+  );
   check(
     "the consumer uses no patch, replace, or override section",
     !/\[patch|\[replace|\bpaths\s*=/.test(active),
     "an override would make the proof meaningless",
   );
 
-  const built = compile(proof);
+  const built = compile(proof, target);
   check(
-    "the consumer compiles against Poodle and its own crates.io gpui",
+    "the consumer compiles against Poodle and its own gpui-unofficial pin",
     built.status === 0,
     built.stderr.trim(),
   );
 
-  // The lockfile Cargo just produced is the resolution evidence: exactly one
-  // gpui, from the registry.
+  // The lockfile Cargo just produced is the resolution evidence: one pinned
+  // GPUI package identity, with its package family from the registry.
   const lock = readFileSync(join(proof, "Cargo.lock"), "utf8");
   const gpuiEntries = [...lock.matchAll(/\[\[package\]\]\nname = "(gpui[^"]*)"\nversion = "([^"]+)"\nsource = "([^"]+)"/g)];
-  const gpuiCore = gpuiEntries.filter(([, name]) => name === "gpui");
+  const gpuiCore = gpuiEntries.filter(([, name]) => name === "gpui-unofficial");
   check(
-    "the resolved graph contains exactly one gpui",
-    gpuiCore.length === 1,
+    "the resolved graph contains exactly one gpui-unofficial 1.22.0",
+    gpuiCore.length === 1 && gpuiCore[0][2] === "1.22.0",
     gpuiCore.map(([, , version, source]) => `${version} ${source}`).join(", "),
   );
   check(
@@ -114,7 +110,7 @@ try {
     gpuiEntries.length > 0 && gpuiEntries.every(([, , , source]) => source.startsWith("registry+")),
     gpuiEntries.map(([, name, , source]) => `${name}: ${source}`).join("\n"),
   );
-  if (gpuiCore.length === 1) console.log(`  resolved: gpui ${gpuiCore[0][2]} from ${gpuiCore[0][3]}`);
+  if (gpuiCore.length === 1) console.log(`  resolved: gpui-unofficial ${gpuiCore[0][2]} from ${gpuiCore[0][3]}`);
 
   console.log("## transitive shape — the graph must compile tinyvec with std (g16.092)");
   // tinyvec 1.13.0 broke its alloc-only build: the new `with_initial_len` calls
@@ -128,7 +124,7 @@ try {
   const tinyvecShape = spawnSync(
     "cargo",
     ["tree", "--manifest-path", join(proof, "Cargo.toml"), "--invert", "tinyvec", "--edges", "features"],
-    { encoding: "utf8", env: { ...process.env, CARGO_TARGET_DIR: TARGET_DIR } },
+    { encoding: "utf8", env: { ...process.env, CARGO_TARGET_DIR: target } },
   );
   const tinyvecTree = tinyvecShape.stdout ?? "";
   const tinyvecVersion = tinyvecTree.match(/^tinyvec v(\S+)/m);
@@ -142,7 +138,7 @@ try {
   console.log("## negative control — the proof must be able to fail");
   const negative = join(work, "negative");
   stage(negative, true);
-  const broken = compile(negative);
+  const broken = compile(negative, target);
   check(
     "a wrong GPUI type annotation fails the compile",
     broken.status !== 0,

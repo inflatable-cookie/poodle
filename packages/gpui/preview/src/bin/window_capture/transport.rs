@@ -38,8 +38,8 @@ use std::time::{Duration, Instant};
 
 use anyhow::{bail, Context as _, Result};
 use gpui::{
-    px, size, App, AppContext as _, Application, AssetSource, AsyncApp, Bounds, Entity, Point,
-    Render, VisualContext as _, Window, WindowBounds, WindowOptions,
+    px, size, App, AppContext as _, AssetSource, AsyncApp, Bounds, Entity, Point, Render,
+    VisualContext as _, Window, WindowBounds, WindowOptions,
 };
 use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 use serde::Serialize;
@@ -405,7 +405,7 @@ pub fn capture_batch<V: Render, A: AssetSource>(
     // Baseline BEFORE the application exists, let alone a window.
     let monitor = Arc::new(ForegroundMonitor::start());
 
-    Application::new()
+    gpui_platform::application()
         .with_assets(assets)
         .run(move |cx: &mut App| {
             if !fonts.is_empty() {

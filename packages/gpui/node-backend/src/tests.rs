@@ -171,10 +171,8 @@ fn generated_identity_counters_are_isolated_per_thread() {
 }
 
 // ── Shadow projection ───────────────────────────────────────────────
-// crates.io gpui 0.2.2 `BoxShadow` has no inset flag, so the refinement
-// carries drop layers only and `inset_shadow` paints the inset ones. The two
-// halves are complementary: no layer is lost. `inset_shadow`'s own tests pin
-// the band geometry; these pin the split.
+// The `BoxShadow` refinement carries drop layers only and `inset_shadow`
+// retains the established inset band geometry. These tests pin that split.
 
 /// The ring is its own paint channel: declaring one must not disturb the
 /// element's shadow stack (or any other refinement) — composition, not
@@ -364,7 +362,7 @@ fn gpui_animation_maps_loop_modes_and_easing() {
     looping.loop_mode = AnimLoop::Loop;
     assert!(!gpui_animation(&looping).oneshot);
 
-    // PingPong degrades to Loop (documented gpui 0.2.2 gap).
+    // PingPong degrades to Loop because GPUI only exposes repeating playback.
     let mut pingpong = spin_anim();
     pingpong.loop_mode = AnimLoop::PingPong;
     assert!(!gpui_animation(&pingpong).oneshot);

@@ -135,7 +135,7 @@ impl Element for ViewportOverlay {
         );
         host.layout_as_root(space, window, cx);
         if self.defer_paint {
-            window.defer_draw(host, Point::default(), 1);
+            window.defer_draw(host, Point::default(), 1, None);
             None
         } else {
             host.prepaint_at(point(px(0.), px(0.)), window, cx);

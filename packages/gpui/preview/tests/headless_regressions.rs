@@ -209,7 +209,7 @@ fn planted_wait_for_missing_element_fails_by_name() {
 
 // ── Driver infrastructure ──────────────────────────────────────────────────
 
-/// The mount box has never clipped hit testing in gpui 0.2.2: a press below a
+/// The mount box has never clipped hit testing in GPUI: a press below a
 /// 160x60 box still dispatches. What does clip is the window viewport, and on
 /// a clipped or off-screen element `pointer_activate_id` used to fall back to
 /// `pointer_activate_at(0.92)` — or press the element's stale center — and pass
@@ -2214,8 +2214,8 @@ fn app_header_resolves_structure_token_styling_and_layout_through_mounted_backen
 /// g15.041: Button disclosure targets (contract §3 `controls`) ride the same
 /// renderer-neutral node channel as IconButton's — a Button built with
 /// `with_controls(...)` mounts through the real backend carrying
-/// `a11y.controls`. Structural evidence only: gpui 0.2.2 projects no
-/// platform accessibility attributes from this field.
+/// `a11y.controls`. Structural evidence only: Poodle's GPUI backend does not
+/// yet project this field into AccessKit.
 #[test]
 fn a_mounted_button_carries_its_controls_target() {
     run_headless(|cx| {
@@ -31942,8 +31942,10 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
             assert_eq!(host.right.queries.last().map(String::as_str), Some("ban"));
         }
         let search_value = format!("{right_search}-value");
-        driver.pointer_press(payload_frac(&search_value, 0.2, 0.5));
-        driver.pointer_release(payload_frac(&search_value, 0.2, 0.5));
+        // Keep the pointer inside the short query text across GPUI font-metric
+        // changes; at 20% the click can land after all three glyphs.
+        driver.pointer_press(payload_frac(&search_value, 0.1, 0.5));
+        driver.pointer_release(payload_frac(&search_value, 0.1, 0.5));
         {
             let host = host.lock().expect("host lock");
             assert_ne!(
