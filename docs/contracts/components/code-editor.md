@@ -1,7 +1,7 @@
 # CodeEditor
 
 Status: detailed contract
-Updated: 2026-09-28
+Updated: 2026-10-06
 
 ## 1. Purpose
 
@@ -112,6 +112,8 @@ language loaders and is constructed through the substrate adapter subpath
 `@inflatable-cookie/poodle-react/editor/codemirror`), whose loaders are typed
 to resolve a CodeMirror `LanguageSupport`. Consumers install exactly the
 grammar packages their loaders name; Poodle ships none.
+Tom's 2026-09-11 decision kept language support extensible because Poodle
+cannot own every language grammar.
 
 Registry construction and resolution fail closed: empty ids, non-function
 loaders, duplicate ids, a built-in `plain-text` entry, unknown ids, rejected
@@ -199,7 +201,8 @@ transaction.
   editing-state border. The first text-editing intent, including composition,
   paste, cut, undo, or redo, removes it while the caret and selection remain
   visible. Ordinary typing must not recreate it merely because the document's
-  last input modality is keyboard.
+  last input modality is keyboard. Tom confirmed this behavior on 2026-09-11
+  so editing does not retain a stale keyboard-focus cue.
 - Focus leaving the component resets this local entry state. A later Tab or
   Shift+Tab entry may show the treatment again. Internal search and toolbar
   controls keep their own `:focus-visible` treatment.
@@ -227,7 +230,10 @@ transaction.
 ## 8. Token Usage
 
 The g18.023 dual syntax palettes are the shipped token revision; the mapping
-described below is the implemented contract, not a pending target.
+described below is the implemented contract, not a pending target. On
+2026-09-12, Tom chose distinct dark and light base palettes with selective
+Poodle-theme overrides after the shipped samples read as accent and white
+rather than a useful syntax hierarchy.
 
 | Part | Semantic token purpose |
 | --- | --- |

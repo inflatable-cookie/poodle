@@ -1,7 +1,7 @@
 # 022 Packaging Versioning And Release Channel Rules
 
 Status: active
-Updated: 2026-09-13
+Updated: 2026-10-06
 Depends on: `archive/021-public-package-api-stability-and-parity-debt-baseline.md`
 
 ## Purpose
@@ -62,6 +62,11 @@ This metadata may live in:
 ## Current Package Baseline
 
 The current release posture is:
+
+The private root package version is repository release metadata and moves in
+lockstep with the web release versions. Tom ruled on 2026-09-12 that it must
+stay current even though it is unpublished, because Effigy reads it as the
+repository version and a stale value is misleading.
 
 ### Preview Channel Public-Intent Packages
 
