@@ -282,6 +282,12 @@ export function playClippedHeight(
     element.style.height = options.open ? "" : "0px";
     element.style.overflow = options.open ? "" : "hidden";
   };
+  // Captured after scheduling: the finish handler below releases it so the
+  // finished animation's `fill: "forwards"` cannot pin the measured height.
+  // Without the release the endpoint fill keeps applying after settle()
+  // clears the inline style, so an open measured at 0px stays clipped and
+  // later content growth cannot resize the panel under CSS `height: auto`.
+  let scheduled: Animation | undefined;
   const decision = playWebAnimation(
     trace,
     intent,
@@ -290,6 +296,7 @@ export function playClippedHeight(
     "ease-out",
     (status) => {
       if (status === "finish") {
+        scheduled?.cancel();
         settle();
       }
       options.onComplete?.(status);
@@ -302,6 +309,7 @@ export function playClippedHeight(
     }
     return decision;
   }
+  scheduled = animations.get(key);
   const handle = handles.get(key);
   const originalCancel = handle?.cancel;
   if (handle && originalCancel) {
