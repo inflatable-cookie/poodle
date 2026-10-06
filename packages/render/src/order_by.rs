@@ -347,6 +347,7 @@ pub fn order_by(spec: &OrderBySpec, ctx: &RenderContext<'_>, handlers: OrderByHa
                     s.text_size = Some(rem_to_px(0.75));
                 }
                 handle.interaction.focusable = true;
+                handle.a11y.role = Some(NodeRole::Button);
                 // A focusable node without a declared focus ring is not a
                 // tracked focus destination, and Alt+Arrow needs one.
                 handle.style.focus = Some(StylePatch {
