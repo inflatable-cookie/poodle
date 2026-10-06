@@ -140,10 +140,13 @@ function copyDeclarations(staging: string, dist: string): void {
   }
 }
 
-export function generateSvelteComponentDeclarations(packageRoot: string): void {
+export function generateSvelteComponentDeclarations(
+  packageRoot: string,
+  outDir: string = join(packageRoot, "dist"),
+): void {
   const tools = ensureDeclarationTools();
   const staging = join(packageRoot, ".declaration-staging");
-  const dist = join(packageRoot, "dist");
+  const dist = outDir;
   rmSync(staging, { recursive: true, force: true });
   mkdirSync(staging, { recursive: true });
 

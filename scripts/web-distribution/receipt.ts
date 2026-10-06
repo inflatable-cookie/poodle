@@ -103,13 +103,18 @@ export function collectInputs(packageRoot: string, spec: PackageBuildSpec): stri
   return sorted;
 }
 
-export function collectOutputs(packageRoot: string): ReceiptOutput[] {
-  const distDir = join(packageRoot, "dist");
+export function collectOutputs(
+  packageRoot: string,
+  distDirectory: string = join(packageRoot, "dist"),
+): ReceiptOutput[] {
   const outputs: ReceiptOutput[] = [];
-  for (const abs of walk(distDir)) {
-    const rel = packageRelative(packageRoot, abs);
-    if (rel === posix.join("dist", RECEIPT_NAME)) continue;
-    outputs.push({ path: rel, sha256: sha256File(abs) });
+  for (const abs of walk(distDirectory)) {
+    // Receipt output paths are package-relative `dist/...` paths whatever
+    // directory the tree was staged in, so a staged build records the same
+    // receipt as an in-place one.
+    const rel = relative(distDirectory, abs).split("\\").join("/");
+    if (rel === RECEIPT_NAME) continue;
+    outputs.push({ path: posix.join("dist", rel), sha256: sha256File(abs) });
   }
   outputs.sort((left, right) => (left.path < right.path ? -1 : left.path > right.path ? 1 : 0));
   return outputs;
@@ -120,13 +125,15 @@ export function writeReceipt(options: {
   packageRoot: string;
   spec: PackageBuildSpec;
   tools: BuildReceipt["tools"];
+  distDir?: string;
 }): BuildReceipt {
+  const distDirectory = options.distDir ?? join(options.packageRoot, "dist");
   const receipt: BuildReceipt = {
     cssPolicy: options.spec.cssPolicy,
     inputs: collectInputs(options.packageRoot, options.spec),
     lanes: [...options.spec.lanes],
     markdownPolicy: options.spec.markdownPolicy,
-    outputs: collectOutputs(options.packageRoot),
+    outputs: collectOutputs(options.packageRoot, distDirectory),
     package: options.spec.packageName,
     schemaVersion: 1,
     sourceCommit: sourceCommit(options.repoRoot),
@@ -141,7 +148,7 @@ export function writeReceipt(options: {
   if (encoded.includes(options.repoRoot) || encoded.includes("/Users/")) {
     throw new Error("receipt serialization introduced an absolute path");
   }
-  writeFileSync(join(options.packageRoot, "dist", RECEIPT_NAME), encoded);
+  writeFileSync(join(distDirectory, RECEIPT_NAME), encoded);
   return receipt;
 }
 
