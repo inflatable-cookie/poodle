@@ -2245,6 +2245,7 @@ fn a_mounted_button_carries_its_controls_target() {
 
         // The real backend focus handle, not a renderer-side flag, owns the
         // keyboard focus state and the visible contract focus ring.
+        driver.dispatch_key_raw("tab");
         driver.focus_element(FIXTURE_ID);
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for(FIXTURE_ID),
@@ -20664,8 +20665,10 @@ fn bare_icon_button_and_collapsible_trigger_take_tab_and_focus_requests() {
 
 /// Traverse the window's real tab stops until `element_id` holds focus.
 /// Fails after a bounded number of hops, so a control that never enters the
-/// tab order is a loud failure, not a silent pass.
+/// tab order is a loud failure, not a silent pass. Dispatch a real Tab first
+/// so GPUI marks focus as keyboard-origin before the harness advances stops.
 fn tab_until_focused(driver: &mut HeadlessDriver, element_id: &str) {
+    driver.dispatch_key_raw("tab");
     for _ in 0..8 {
         driver.focus_next_tab_stop();
         if poodle_gpui_node_backend::focus_state_for(element_id) == Some(true) {
@@ -20877,6 +20880,7 @@ fn two_unstamped_buttons_hold_independent_focus_identities() {
         driver.draw_frame();
 
         // Keyboard entry: the first button is the first tab stop.
+        driver.dispatch_key_raw("tab");
         driver.focus_next_tab_stop();
         let rings = poodle_gpui_node_backend::painted_rings();
         assert_eq!(rings.len(), 1, "exactly one ring is on screen");
