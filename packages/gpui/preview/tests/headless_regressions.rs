@@ -21348,7 +21348,9 @@ fn a_removed_focused_node_leaves_no_painted_ring() {
         let node = Arc::new(Mutex::new(ring_proof_node(true)));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
         driver.wait_for_focus_handle("ring-proof");
+        driver.dispatch_key_raw("tab");
         driver.focus_element("ring-proof");
+        driver.draw_frame();
         assert!(poodle_gpui_node_backend::painted_ring_for("ring-proof").is_some());
 
         let mut empty = Node::container();
@@ -37487,7 +37489,9 @@ fn toast_host_exact_tones_composition_axes_and_focus_reach_mounted_paint() {
 
         let dismiss_id = "toast-host:tokens:toast:danger:dismiss";
         driver.wait_for_focus_handle(dismiss_id);
+        driver.dispatch_key_raw("tab");
         driver.focus_element(dismiss_id);
+        driver.draw_frame();
         let painted_ring = poodle_gpui_node_backend::painted_ring_for(dismiss_id)
             .expect("focused dismiss paints its ring");
         assert_eq!(
@@ -42615,14 +42619,20 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
         driver.pointer_activate_id(&agent_chat_editor_id("subject"));
         assert!(host.state("subject").focused);
         assert!(!host.state("witness").focused);
-        assert!(
-            poodle_gpui_node_backend::painted_ring_for(&agent_chat_part_id("subject", "field"))
-                .is_some(),
-            "the mounted field paints its focus-within ring"
+        assert_eq!(
+            poodle_gpui_node_backend::painted_ring_for(&agent_chat_part_id("subject", "field")),
+            None,
+            "pointer focus leaves the mounted field without its focus-within ring"
         );
         host.take_log();
         driver.dispatch_key_raw("end");
         assert_eq!(host.state("subject").selection, (5, 5));
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::painted_ring_for(&agent_chat_part_id("subject", "field"))
+                .is_some(),
+            "keyboard-origin focus paints the mounted field's focus-within ring"
+        );
         host.take_log();
         assert_eq!(
             poodle_gpui_node_backend::painted_text_for(&agent_chat_editor_value_id("subject"))
@@ -54948,6 +54958,7 @@ fn first_mounted_parity_validation_summary() {
         );
         assert!(theme_provider.resolve_space("space.panel.x") > 0.0);
 
+        driver.dispatch_key_raw("tab");
         driver.focus_element(LINK);
         driver.draw_frame();
         let ring = poodle_gpui_node_backend::painted_ring_for(LINK)
@@ -60029,7 +60040,9 @@ fn first_mounted_parity_text_link() {
         assert!(f32::from(bounds.size.width) > 0.0);
         assert!(f32::from(bounds.size.height) > 0.0);
 
+        driver.dispatch_key_raw("tab");
         driver.focus_element("text-link-docs");
+        driver.draw_frame();
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for("text-link-docs"),
             Some(true)
