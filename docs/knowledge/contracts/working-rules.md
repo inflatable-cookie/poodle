@@ -30,6 +30,10 @@ prefer the narrower current authority and repair the stale document.
 
 ## Catalogue Specimens
 
+- The Svelte and React preview headers follow the specimen Size selection
+  (xs–xl) and ambient density, so every header control resolves the same
+  shared ladder stop. This supersedes the g18.025 fixed-`md` header (operator
+  ruling 2026-10-06).
 - Component and portable-route counts are derived from one generated source
   that every gate consumes; adding a public component never needs a
   hand-bumped count in several files (operator ruling 2026-09-29).
