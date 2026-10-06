@@ -1,0 +1,22 @@
+{
+  "schema": "poodle.web-candidate-evidence.v1",
+  "version": "0.4.10",
+  "source_commit": "45b61fc185d290a4417b131ebc066fc388b52112",
+  "base_commit": "92201016410f8ece9762531bc4457997e6749daf",
+  "payload_commits": [
+    "b73df406e7eee862a4f0ce6ea77196e9b02f0115"
+  ],
+  "publication_set": [
+    "@inflatable-cookie/poodle-core",
+    "@inflatable-cookie/poodle-svelte"
+  ],
+  "native_train_changed": false,
+  "operator_acceptance": "Tom approved cutting and publishing 0.4.10 on 2026-10-06 (Queue decision 0016d9fa: \"Cut and publish 0.4.10 now\").",
+  "focused_evidence": {
+    "milestone_qa": "Queue project.qa.run fd488e56 (effigy ci:fresh) passed on 922010164, the exact base; local check:gpui passed.",
+    "disclosure_height": "PR #389 measures Collapsible/Accordion open height after the content is shown and releases the finished animation; core motion-runtime regression and a headless browser check of opened panels pass.",
+    "frozen_lockfile": "effigy lock:workspaces-refresh updated the bun.lock workspace slice to 0.4.10 and core ranges >=0.4.10 <0.5; docs:lint lock:workspaces-check passes.",
+    "bun_toolchain": "packageManager bun@1.4.2; CI installs through bun-version-file from package.json",
+    "diff_check": "clean"
+  }
+}

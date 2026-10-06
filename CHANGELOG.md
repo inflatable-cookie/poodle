@@ -7,6 +7,31 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.4.10] - 2026-10-06
+
+`0.4.10` is a patch candidate with one fix and no API change.
+
+### Fixed
+
+- **Collapsible and Accordion open at full height.** Opening a Collapsible or
+  an Accordion item showed an empty panel: the open animation measured the
+  content while it was still hidden, animated from 0px to 0px, and the
+  finished animation held the panel at 0px. The height is now measured after
+  the content is shown, and a finished animation no longer pins it, so the
+  panel follows its content. This also fixes components built on them, such as
+  ModelCatalogueEditor's hidden models. Present since the shared motion
+  runtime (2026-09-01).
+
+### Changed
+
+- **Web package dependency ranges.** Svelte and React require core
+  `>=0.4.10 <0.5`. Svelte, React, React DOM and Marked peer ranges stay
+  unchanged.
+- **Release status.** Core and Svelte are the `0.4.10` npm publication set.
+  React follows the web version for paired validation and remains private.
+  Native work since `0.4.9`, including the move to `gpui-unofficial` 1.22.0,
+  belongs to the native train, which has no release procedure yet.
+
 ## [0.4.9] - 2026-10-05
 
 `0.4.9` is a patch candidate with one behaviour change and no breaking API
@@ -719,6 +744,7 @@ supersedes `0.4.3`, which was never published.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.4.10]: docs/release-notes/0.4.10.md
 [0.4.9]: docs/release-notes/0.4.9.md
 [0.4.8]: docs/release-notes/0.4.8.md
 [0.4.7]: docs/release-notes/0.4.7.md
