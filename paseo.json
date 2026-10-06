@@ -1,6 +1,6 @@
 {
   "worktree": {
-    "setup": "effigy skill run --path \"${NORTHSTAR_SKILL_PATH:-$HOME/.agents/skills/northstar}\" paseo:worktree -- prepare && effigy bootstrap:deps && effigy web:dist && effigy skill run --path \"${NORTHSTAR_SKILL_PATH:-$HOME/.agents/skills/northstar}\" paseo:worktree -- link",
+    "setup": "if [ -n \"${JETSTREAM_REPO_PATH:-}\" ]; then effigy skill run --path \"${NORTHSTAR_SKILL_PATH:-$HOME/.agents/skills/northstar}\" paseo:worktree -- prepare \"${JETSTREAM_REPO_PATH}=jetstream\"; elif [ -d \"$HOME/Dev/projects/jetstream\" ]; then effigy skill run --path \"${NORTHSTAR_SKILL_PATH:-$HOME/.agents/skills/northstar}\" paseo:worktree -- prepare \"$HOME/Dev/projects/jetstream=jetstream\"; else effigy skill run --path \"${NORTHSTAR_SKILL_PATH:-$HOME/.agents/skills/northstar}\" paseo:worktree -- prepare; fi && effigy bootstrap:deps && effigy web:dist && effigy skill run --path \"${NORTHSTAR_SKILL_PATH:-$HOME/.agents/skills/northstar}\" paseo:worktree -- link",
     "teardown": "effigy skill run --path \"${NORTHSTAR_SKILL_PATH:-$HOME/.agents/skills/northstar}\" paseo:worktree -- unlink"
   },
   "scripts": {

@@ -85,8 +85,11 @@ also do not share executable behaviour across the TypeScript/Rust boundary.
 Svelte, React, and GPUI are the current implementation cohort. Jetstream
 remains a target, but its backend integration is deferred until a dedicated
 admission runway can exercise real renderer behaviour without requiring every
-Poodle worktree to clone or link the sibling engine repository. Deferral does
-not make Jetstream passing.
+Poodle worktree to clone or link the sibling engine repository. Paseo setup
+links an available checkout for worktrees on hosts that have it, and skips the
+link when the default checkout is absent; ordinary worktrees and the default
+QA board remain independent of Jetstream. Deferral does not make Jetstream
+passing.
 
 `CodeEditor` has one narrower staged admission by operator decision on
 2026-09-10. Its Svelte and React wrappers may ship together over CodeMirror 6
