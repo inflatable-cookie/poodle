@@ -219,6 +219,57 @@ describe("createDragDropController", () => {
     controller.destroy();
   });
 
+  it("commits the drop when lostpointercapture arrives before the pointerup", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onEnd = vi.fn();
+    const controller = createDragDropController({ createSessionId: () => "s1" });
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ onDragEnd: onEnd }));
+    controller.registerTarget(targetEl, targetReg({ onDrop }));
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    sourceEl.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+
+    // Released away from the handle: the browser drops capture first, with the
+    // button already up, and only then dispatches `pointerup`.
+    document.dispatchEvent(pointer("lostpointercapture", { clientX: 30, clientY: 90, buttons: 0 }));
+    expect(onDrop).toHaveBeenCalledTimes(1);
+    expect(onEnd).toHaveBeenCalledWith({
+      status: "committed",
+      intent: { targetId: "dst", position: "inside", operation: "move" },
+    });
+    expect(controller.getSnapshot().phase).toBe("idle");
+    expect(sourceEl.hasAttribute("data-poodle-drag-source")).toBe(false);
+    expect(targetEl.hasAttribute("data-poodle-drop-target")).toBe(false);
+
+    // The pointerup that follows must not end the session a second time.
+    document.dispatchEvent(pointer("pointerup", { clientX: 30, clientY: 90 }));
+    expect(onDrop).toHaveBeenCalledTimes(1);
+    expect(onEnd).toHaveBeenCalledTimes(1);
+    controller.destroy();
+  });
+
+  it("still cancels when capture is lost while the button is down", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const controller = createDragDropController({ createSessionId: () => "s1" });
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg({ onDrop }));
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    sourceEl.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+
+    // The element went away or another capture took over: the button is still
+    // down, so the gesture is a lost transport, not a release.
+    document.dispatchEvent(pointer("lostpointercapture", { clientX: 30, clientY: 90, buttons: 1 }));
+    expect(onDrop).not.toHaveBeenCalled();
+    expect(sourceEl.hasAttribute("data-poodle-drag-source")).toBe(false);
+    expect(targetEl.hasAttribute("data-poodle-drop-target")).toBe(false);
+    controller.destroy();
+  });
+
   it("treats a mouse press that never travels as a tap", () => {
     const onStart = vi.fn();
     const controller = createDragDropController();
