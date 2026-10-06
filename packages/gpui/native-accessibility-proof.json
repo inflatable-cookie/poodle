@@ -15,17 +15,17 @@
   "livePlatformProofAttempt": {
     "selector": "effigy test:gpui-ax",
     "outcome": "passed",
-    "mechanism": "macOS AXUIElement",
-    "launch": "Both proof windows used the window-capture transport with focus:false. The clean window remained non-frontmost for 241 successful samples and the planted window for 243; neither had failed reads.",
+    "mechanism": "macOS AXUIElement on the AXWindow subtree selected by the proof window title",
+    "launch": "Both proof windows used the window-capture transport with focus:false. The clean window remained non-frontmost for 239 successful samples and the planted window for 237; neither had failed reads.",
     "cleanTree": {
       "outcome": "passed",
-      "elementCount": 10,
+      "elementCount": 9,
       "unnamedMeaningfulElements": 0
     },
     "plantedUnnamedControl": {
       "outcome": "passed",
-      "elementCount": 11,
-      "detected": "AXButton@3"
+      "elementCount": 10,
+      "detected": "AXButton@2"
     },
     "verifiedSignals": [
       "The pressed Poodle Button is AXCheckBox with AXToggle subrole and its AXTitle; its toggled state reaches AXValue as true.",
@@ -34,7 +34,7 @@
       "The Poodle Slider is AXSlider with its AXTitle, horizontal orientation, minimum 0, maximum 100, and value text 42.5 percent.",
       "The selected AccessKit Tab is AXRadioButton with AXTabButton subrole, its accessible name, and selected state in AXValue.",
       "The disabled Button is present as AXButton with AXEnabled false.",
-      "The clean-tree name audit found no unnamed meaningful elements; the planted unnamed control was detected as AXButton@3."
+      "The clean-tree name audit found no unnamed meaningful elements; the planted unnamed control was detected as AXButton@2 in the proof window subtree."
     ],
     "a2ClearedComponents": [
       "Button",

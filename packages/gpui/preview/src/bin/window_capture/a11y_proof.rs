@@ -13,6 +13,7 @@ use std::path::PathBuf;
 use crate::{fixture_capture::FixtureAssets, transport};
 
 const USAGE: &str = "usage: poodle-window-capture --a11y-proof [--plant-unnamed]";
+const PROOF_WINDOW_TITLE: &str = "Poodle GPUI AX proof";
 
 pub fn parse_args(args: &[String]) -> Result<bool> {
     let mut proof_seen = false;
@@ -124,7 +125,8 @@ pub fn run(plant_unnamed: bool) -> ! {
             base: PathBuf::from(env!("CARGO_MANIFEST_DIR")),
         },
         Vec::new(),
-        Box::new(move |_window, cx: &mut App| {
+        Box::new(move |window, cx: &mut App| {
+            window.set_window_title(PROOF_WINDOW_TITLE);
             cx.new(|_| A11yProofRoot {
                 theme,
                 plant_unnamed,
