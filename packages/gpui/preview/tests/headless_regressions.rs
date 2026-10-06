@@ -20410,6 +20410,169 @@ fn a_borderless_node_paints_the_declared_ring_without_a_resting_border() {
     });
 }
 
+/// Standalone controls follow GPUI's per-window input modality: a pointer
+/// focus has no ring, keyboard-origin focus paints the declared token ring,
+/// and the next pointer press removes it again. The test ring is added to
+/// controls whose shared recipe expresses focus as a border patch so the
+/// mounted backend ring painter provides one common pixel-level observation.
+#[test]
+fn simple_controls_paint_focus_rings_only_for_keyboard_origin() {
+    use poodle_specs::{
+        ButtonSpec, CheckboxSpec, RadioSpec, SwitchSpec, TabDefinition, TabsSpec, TextInputSpec,
+    };
+
+    fn install_test_ring(
+        node: &mut Node,
+        role: NodeRole,
+        id: &str,
+        token_color: ColorValue,
+    ) -> Option<ColorValue> {
+        if node.a11y.role == Some(role) && node.interaction.focusable {
+            node.id = Some(id.to_owned());
+            node.runtime_id = Some(id.to_owned());
+            let existing_ring = node.style.focus_ring;
+            let focus_color = existing_ring
+                .map(|ring| ring.color)
+                .or_else(|| node.style.focus.and_then(|patch| patch.border_color))
+                .unwrap_or(token_color);
+            let ring = existing_ring.unwrap_or(FocusRing {
+                color: focus_color,
+                width: 2.0,
+                offset: 2.0,
+            });
+            node.style.focus_ring = Some(ring);
+            return Some(ring.color);
+        }
+        node.children
+            .iter_mut()
+            .find_map(|child| install_test_ring(child, role, id, token_color))
+    }
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let focus_color = ctx.theme().resolve_color("color.accent.focusRing");
+    let mut tabs_spec = TabsSpec::new(vec![
+        TabDefinition::new("one", "One"),
+        TabDefinition::new("two", "Two"),
+    ]);
+    tabs_spec.value = Some("one".to_owned());
+
+    let cases = vec![
+        (
+            "focus-visible-button",
+            NodeRole::Button,
+            poodle_render::button(&ButtonSpec::new().with_label("Button"), &ctx, None),
+        ),
+        (
+            "focus-visible-icon-button",
+            NodeRole::Button,
+            poodle_render::icon_button(
+                &IconButtonSpec::new()
+                    .with_icon("plus")
+                    .with_aria_label("Add"),
+                &ctx,
+                None,
+            ),
+        ),
+        (
+            "focus-visible-checkbox",
+            NodeRole::CheckBox,
+            poodle_render::checkbox(&CheckboxSpec::new().with_label("Checkbox"), &ctx, None),
+        ),
+        (
+            "focus-visible-radio",
+            NodeRole::RadioButton,
+            poodle_render::radio(&RadioSpec::new().with_label("Radio"), &ctx, None),
+        ),
+        (
+            "focus-visible-switch",
+            NodeRole::Switch,
+            poodle_render::switch(&SwitchSpec::new().with_label("Switch"), &ctx, None),
+        ),
+        (
+            "focus-visible-slider",
+            NodeRole::Slider,
+            poodle_render::slider(
+                &SliderSpec::new(50.0)
+                    .with_bounds(0.0, 100.0)
+                    .with_variant(poodle_specs::SliderVariant::Embedded),
+                &ctx,
+                &SliderHandlers::default(),
+            ),
+        ),
+        (
+            "focus-visible-tab",
+            NodeRole::Tab,
+            poodle_render::tabs(&tabs_spec, &ctx, None, None),
+        ),
+        (
+            "focus-visible-text-input",
+            NodeRole::TextInput,
+            poodle_render::text_input(&TextInputSpec::new().with_value("text"), &ctx, None),
+        ),
+    ];
+
+    for (id, role, mut node) in cases {
+        let expected_color = install_test_ring(&mut node, role, id, focus_color)
+            .unwrap_or_else(|| panic!("no focusable {role:?} target in {id}"));
+        run_headless(|cx| {
+            let node = Arc::new(Mutex::new(node));
+            let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+            driver.wait_for_focus_handle(id);
+
+            driver.pointer_activate_id(id);
+            assert_eq!(
+                poodle_gpui_node_backend::focus_state_for(id),
+                Some(true),
+                "pointer focus reaches {id}"
+            );
+            assert_eq!(
+                poodle_gpui_node_backend::painted_ring_for(id),
+                None,
+                "pointer focus leaves {id} without a ring"
+            );
+            assert!(
+                !driver.with_window(|window, _| window.last_input_was_keyboard()),
+                "pointer modality is active after pressing {id}"
+            );
+
+            // A real key event updates GPUI's window-scoped modality signal;
+            // restoring this exact target then verifies focus-visible paint
+            // without relying on a synthetic focus callback.
+            driver.dispatch_key_raw("tab");
+            assert!(
+                driver.with_window(|window, _| window.last_input_was_keyboard()),
+                "keyboard modality is active for {id}"
+            );
+            driver.focus_element(id);
+            assert_eq!(
+                poodle_gpui_node_backend::painted_ring_for(id)
+                    .expect("keyboard-focused control paints its ring")
+                    .ring
+                    .color,
+                expected_color,
+                "{id} uses its focus token color"
+            );
+
+            driver.pointer_activate_id(id);
+            assert!(
+                !driver.with_window(|window, _| window.last_input_was_keyboard()),
+                "a pointer press clears keyboard modality for {id}"
+            );
+            assert_eq!(
+                poodle_gpui_node_backend::focus_state_for(id),
+                Some(true),
+                "pointer focus remains on {id} after its ring clears"
+            );
+            assert_eq!(
+                poodle_gpui_node_backend::painted_ring_for(id),
+                None,
+                "the pointer press removes {id}'s ring"
+            );
+        });
+    }
+}
+
 // ── Component-owned focus rings: bare IconButton and Collapsible trigger ──
 //
 // The compositions no longer stamp focus patches over these components:
