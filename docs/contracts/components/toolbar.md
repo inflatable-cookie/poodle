@@ -189,6 +189,13 @@ never touched by density.
 - Roving focus must be implemented using GPUI focus management primitives
 - The border color-mix and background color-mix formulas should be replicated
 - Vertical orientation maps to column layout with stretch alignment
+- GPUI generated focus ids derive from the Toolbar instance scope
+  (`ToolbarSpec::with_instance_id`), falling back to the aria label. Svelte
+  needs no equivalent: every mounted `<div role="toolbar">` is its own DOM
+  node, while a flat element-id registry collides when two toolbars share a
+  label (or have none). A host mounting several toolbars in one window sets a
+  distinct instance id on each, which keeps their roving tab stops and focus
+  handles independent.
 
 ## 11. Parity Checklist
 
@@ -262,5 +269,8 @@ never touched by density.
 - approvers: pending
 - downstream adopters: formatting bars, shell utility rows, compact tool groups,
   panel headers
+- implemented 2026-10-06: native Toolbar focus ids take a caller-scoped
+  instance identity (`ToolbarSpec::with_instance_id`); two toolbars sharing a
+  label or having none keep independent roving focus
 - future follow-up: consider separator/divider support within toolbar if needed;
   keep product-specific shell headers in composite or workstation contracts

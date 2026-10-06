@@ -1294,16 +1294,54 @@ thread_local! {
     /// Enter/Space handled by `on_key_activate` on the way down, whose key-up
     /// must suppress the click synthesis. Window-scoped state, not element
     /// state: the handler's own transition usually rebuilds the tree or moves
-    /// focus, so the matching key-up reaches a different element. The window
-    /// host (`attach_overlay_host`) consumes it via [`suppress_key_activation_click`].
-    static KEY_ACTIVATED: std::cell::RefCell<std::collections::BTreeSet<String>> =
-        const { std::cell::RefCell::new(std::collections::BTreeSet::new()) };
+    /// focus, so the matching key-up reaches a different element. Keyed by
+    /// window as well, so one window's pending activation can never consume a
+    /// key-up dispatched in another. The window host (`attach_overlay_host`)
+    /// consumes it via [`suppress_key_activation_click`]; a closed window drops
+    /// its whole entry via [`teardown_window_key_activation`].
+    static KEY_ACTIVATED: RefCell<
+        std::collections::HashMap<AnyWindowHandle, std::collections::BTreeSet<String>>,
+    > = RefCell::new(std::collections::HashMap::new());
 }
 
-/// Whether this key-up closes a keyboard activation already handled on the
-/// way down; the host then prevents GPUI's Enter/Space click synthesis.
-pub(crate) fn suppress_key_activation_click(key: &str) -> bool {
-    KEY_ACTIVATED.with(|keys| keys.borrow_mut().remove(key))
+/// Record a handled Enter/Space key-down for this window.
+fn record_key_activation(window: &Window, key: &str) {
+    let handle = window.window_handle();
+    KEY_ACTIVATED.with(|keys| {
+        keys.borrow_mut()
+            .entry(handle)
+            .or_default()
+            .insert(key.to_owned());
+    });
+}
+
+/// Whether this key-up closes a keyboard activation already handled on the way
+/// down in *this* window; the host then prevents GPUI's Enter/Space click
+/// synthesis. Another window's pending activation is never consulted.
+pub(crate) fn suppress_key_activation_click(window: &Window, key: &str) -> bool {
+    let handle = window.window_handle();
+    KEY_ACTIVATED.with(|keys| {
+        let mut keys = keys.borrow_mut();
+        let suppressed = keys.get_mut(&handle).is_some_and(|set| set.remove(key));
+        if keys.get(&handle).is_some_and(|set| set.is_empty()) {
+            keys.remove(&handle);
+        }
+        suppressed
+    })
+}
+
+/// Drop a closed window's pending activation keys. Called from the window
+/// close hook beside the other per-window teardowns.
+pub(crate) fn teardown_window_key_activation(handle: AnyWindowHandle) {
+    KEY_ACTIVATED.with(|keys| {
+        keys.borrow_mut().remove(&handle);
+    });
+}
+
+/// Clear every window's pending activation keys. Called from
+/// [`crate::reset_focus_registry`], which starts a fresh headless mount.
+pub(crate) fn reset_key_activation() {
+    KEY_ACTIVATED.with(|keys| keys.borrow_mut().clear());
 }
 
 /// Modifier-aware activation, secondary activation, and navigation keys.
@@ -1335,7 +1373,7 @@ fn apply_selection_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div
                 && !event.is_held
                 && !(m.platform || m.control || m.alt || m.shift)
             {
-                KEY_ACTIVATED.with(|keys| keys.borrow_mut().insert(key.to_owned()));
+                record_key_activation(window, key);
                 if let Some(target) = activate() {
                     if let Some(handle) = focus_handle_for(&target) {
                         handle.focus(window, cx);

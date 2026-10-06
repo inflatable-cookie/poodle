@@ -49,7 +49,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(
                     Toolbar::from_spec(
-                        ToolbarSpec::new().with_aria_label("Formatting toolbar"),
+                        ToolbarSpec::new()
+                            .with_aria_label("Formatting toolbar")
+                            .with_instance_id("formatting"),
                         theme,
                     )
                     .child(
@@ -134,7 +136,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(
                     Toolbar::from_spec(
-                        ToolbarSpec::new().with_aria_label("Actions toolbar"),
+                        ToolbarSpec::new()
+                            .with_aria_label("Actions toolbar")
+                            .with_instance_id("actions"),
                         theme,
                     )
                     .child(
@@ -190,7 +194,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     Toolbar::from_spec(
                         ToolbarSpec::new()
                             .with_orientation(Orientation::Vertical)
-                            .with_aria_label("Vertical toolbar"),
+                            .with_aria_label("Vertical toolbar")
+                            .with_instance_id("vertical"),
                         theme,
                     )
                     .child(
@@ -246,7 +251,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 Toolbar::from_spec(
                     ToolbarSpec::new()
                         .with_size(size)
-                        .with_aria_label("Toolbar"),
+                        .with_aria_label("Toolbar")
+                        .with_instance_id(format!("size-{size:?}")),
                     theme,
                 )
                 .child(
@@ -275,7 +281,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 Toolbar::from_spec(
                     ToolbarSpec::new()
                         .with_density(density)
-                        .with_aria_label("Toolbar"),
+                        .with_aria_label("Toolbar")
+                        .with_instance_id(format!("density-{density:?}")),
                     theme,
                 )
                 .child(

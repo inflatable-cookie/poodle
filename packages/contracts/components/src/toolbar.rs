@@ -16,6 +16,10 @@ pub struct ToolbarSpec {
     pub size_role: SemanticControlSizeRole,
     /// `None` inherits from the presentation context; an explicit value wins.
     pub density: Option<ControlDensity>,
+    /// Stable native instance scope for generated focus ids. Two toolbars can
+    /// share an aria label (or have none); unscoped ids are unique only under
+    /// the one-unscoped-toolbar-per-window rule.
+    pub instance_id: Option<String>,
 }
 
 impl Default for ToolbarSpec {
@@ -28,6 +32,7 @@ impl Default for ToolbarSpec {
             size: None,
             size_role: SemanticControlSizeRole::Chrome,
             density: None,
+            instance_id: None,
         }
     }
 }
@@ -54,6 +59,14 @@ impl ToolbarSpec {
 
     pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
         self.aria_label = Some(aria_label.into());
+        self
+    }
+
+    /// Name this toolbar's native instance scope. Generated focus ids derive
+    /// from it, so two toolbars sharing a label (or both unlabelled) stay
+    /// distinct for focus and roving state.
+    pub fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.instance_id = Some(instance_id.into());
         self
     }
 

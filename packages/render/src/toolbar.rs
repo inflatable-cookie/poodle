@@ -53,6 +53,18 @@ fn collect_focus_targets(
     }
 }
 
+/// Generated-id scope for one Toolbar instance. The caller's instance id wins;
+/// otherwise the aria label is the fallback. Svelte has no equivalent id
+/// registry — every mounted `<div role="toolbar">` is its own DOM node — so a
+/// flat element-id backend needs the caller to name the instance when two
+/// toolbars share a label (or have none).
+pub fn toolbar_scope(instance_id: Option<&str>, label: &str) -> String {
+    match instance_id.filter(|scope| !scope.is_empty()) {
+        Some(scope) => format!("toolbar:{scope}"),
+        None => format!("toolbar:{}", label.to_ascii_lowercase().replace(' ', "-")),
+    }
+}
+
 pub fn toolbar(spec: &ToolbarSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> Node {
     let panel_raw = ctx.theme().resolve_color(spec.bg_token());
     let bg = with_alpha(panel_raw, panel_raw.3 * 0.94);
@@ -73,7 +85,7 @@ pub fn toolbar(spec: &ToolbarSpec, ctx: &RenderContext<'_>, children: Vec<Node>)
 
     let is_vertical = spec.orientation == Orientation::Vertical;
     let label = spec.aria_label.as_deref().unwrap_or("Toolbar");
-    let scope = format!("toolbar:{}", label.to_ascii_lowercase().replace(' ', "-"));
+    let scope = toolbar_scope(spec.instance_id.as_deref(), label);
     let focus_state = Arc::new(Mutex::new(None));
     let mut children = children;
     let mut focus_targets = Vec::new();
