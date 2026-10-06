@@ -1,0 +1,22 @@
+{
+  "schema": "poodle.web-candidate-evidence.v1",
+  "version": "0.4.11",
+  "source_commit": "a84898b6098d5ba80276c57bfa3607d5997ba35f",
+  "base_commit": "835ecdbbd11b806ab76a3c7e90617a8c50cc6216",
+  "payload_commits": [
+    "ffc0e8c84b3309c3863443cce1d75efc5460e93b"
+  ],
+  "publication_set": [
+    "@inflatable-cookie/poodle-core",
+    "@inflatable-cookie/poodle-svelte"
+  ],
+  "native_train_changed": false,
+  "operator_acceptance": "Tom approved the next release on 2026-10-06 (\"Yeah go for it with the next release\", Queue decision ccf5d4bf).",
+  "focused_evidence": {
+    "milestone_qa": "Queue project.qa.run 154d00e3 (effigy ci:fresh) passed on a9595b3c6 and local check:gpui passed; no web package changed between a9595b3c6 and the base 835ecdbbd; confirming run d795850e targets the base.",
+    "drag_release": "PR #393 commits a drop whose pointer capture is lost after release; core regression (lostpointercapture with buttons 0 before pointerup) and a 20-run headless browser drag check pass.",
+    "frozen_lockfile": "effigy lock:workspaces-refresh updated the bun.lock workspace slice to 0.4.11 and core ranges >=0.4.11 <0.5; docs:lint lock:workspaces-check passes.",
+    "bun_toolchain": "packageManager bun@1.4.2; CI installs through bun-version-file from package.json",
+    "diff_check": "clean"
+  }
+}
