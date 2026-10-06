@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `5daa515b9e23f4e371554c6ce27068a713b2c6c1`
+Evidence commit (execution identity from the execution record, not the checkout): `daa45b2dd0d74926271c645588c0cbf11c8ea4b4`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
@@ -15,9 +15,9 @@ Construction is not functional completion. A passing route, a test name, or one 
 ## Summary
 
 Rows with at least one admitted capability: **175**/175.
-Fully admitted rows: **171**/175.
-Missing by axis: semantic 0; events 1; pointer 1; keyboard_focus 1; accessibility 0; visual 2.
-Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **26**.
+Fully admitted rows: **172**/175.
+Missing by axis: semantic 0; events 1; pointer 0; keyboard_focus 0; accessibility 0; visual 2.
+Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **24**.
 
 ## Rows
 
@@ -35,7 +35,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **26**.
 | Callout | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Callout--callout-dismiss-rebuilds-the-host-spec-through-mounted-input.json` |
 | RemediationBanner | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/RemediationBanner--remediation-banner-action-and-dismiss-rebuild-the-host-spec.json` |
 | Card | semantic; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Card--first-mounted-parity-card.json` |
-| Code | semantic; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); accessibility (expected-test); visual (expected-test) | pointer; keyboard_focus | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Code--first-mounted-parity-code.json` |
+| Code | semantic; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Code--code-copy-feedback-through-production-app-state-scheduling.json`; `docs/evidence/gpui/mounted-receipts/Code--first-mounted-parity-code.json` |
 | ColorPicker | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ColorPicker--first-mounted-parity-color-picker.json` |
 | Checkbox | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Checkbox--checkbox-toggle-readonly-and-disabled-rebuild-the-host-spec.json` |
 | Calendar | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Calendar--first-mounted-parity-calendar.json` |
@@ -203,10 +203,8 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **26**.
 <!-- g18-census-refusals -->
 ## Refusals
 
-- Code: Expected test first_mounted_parity_code shows pointer signals, but pointer is withheld: copy feedback through production AppState scheduling: follow-up task.
-- Code: Expected test first_mounted_parity_code shows keyboard_focus signals, but keyboard_focus is withheld: copy feedback through production AppState scheduling: follow-up task.
-- Code: Expected test first_mounted_parity_code proves no pointer claim; pointer stays missing.
-- Code: Expected test first_mounted_parity_code proves no keyboard_focus claim; keyboard_focus stays missing.
+- Code: Expected test code_copy_feedback_through_production_app_state_scheduling proves no accessibility claim; accessibility stays missing.
+- Code: Expected test code_copy_feedback_through_production_app_state_scheduling proves no visual claim; visual stays missing.
 - ListGrid: Expected test first_mounted_parity_list_grid shows visual signals, but visual is withheld: narrow-container floor clamp needs a shared container-relative layout capability.
 - ListGrid: Expected test first_mounted_parity_list_grid proves no visual claim; visual stays missing.
 - NumberInput: Expected test number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value proves no pointer claim; pointer stays missing.
@@ -235,5 +233,4 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **26**.
 Shared-substrate groupings for repair-tranche compilation. Grouping only; no tranche is planned here.
 
 - layout-primitive: 2 components (ListGrid, Tooltip); missing semantic 0; events 1; pointer 0; keyboard_focus 0; accessibility 0; visual 1
-- text-display: 1 components (Code); missing semantic 0; events 0; pointer 1; keyboard_focus 1; accessibility 0; visual 0
 - drag-resize-reorder: 1 components (CardToggleGroup); missing semantic 0; events 0; pointer 0; keyboard_focus 0; accessibility 0; visual 1

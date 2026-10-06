@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "5daa515b9e23f4e371554c6ce27068a713b2c6c1",
+  "source_commit": "daa45b2dd0d74926271c645588c0cbf11c8ea4b4",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -692,7 +692,17 @@
         {
           "axis": "semantic",
           "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_code"
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#code_copy_feedback_through_production_app_state_scheduling"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#code_copy_feedback_through_production_app_state_scheduling"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#code_copy_feedback_through_production_app_state_scheduling"
         },
         {
           "axis": "accessibility",
@@ -705,10 +715,7 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_code"
         }
       ],
-      "missing": [
-        "pointer",
-        "keyboard_focus"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -718,13 +725,12 @@
         }
       ],
       "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Code--code-copy-feedback-through-production-app-state-scheduling.json",
         "docs/evidence/gpui/mounted-receipts/Code--first-mounted-parity-code.json"
       ],
       "refusals": [
-        "Expected test first_mounted_parity_code shows pointer signals, but pointer is withheld: copy feedback through production AppState scheduling: follow-up task.",
-        "Expected test first_mounted_parity_code shows keyboard_focus signals, but keyboard_focus is withheld: copy feedback through production AppState scheduling: follow-up task.",
-        "Expected test first_mounted_parity_code proves no pointer claim; pointer stays missing.",
-        "Expected test first_mounted_parity_code proves no keyboard_focus claim; keyboard_focus stays missing."
+        "Expected test code_copy_feedback_through_production_app_state_scheduling proves no accessibility claim; accessibility stays missing.",
+        "Expected test code_copy_feedback_through_production_app_state_scheduling proves no visual claim; visual stays missing."
       ]
     },
     {
@@ -9653,17 +9659,17 @@
   ],
   "summary": {
     "admittedRows": 175,
-    "fullyAdmittedRows": 171,
+    "fullyAdmittedRows": 172,
     "missingTally": {
       "semantic": 0,
       "events": 1,
-      "pointer": 1,
-      "keyboard_focus": 1,
+      "pointer": 0,
+      "keyboard_focus": 0,
       "accessibility": 0,
       "visual": 2
     },
     "holdCount": 175,
-    "refusalCount": 26
+    "refusalCount": 24
   },
   "groups": [
     {
@@ -9683,23 +9689,6 @@
       "contracts": [
         "docs/contracts/components/list-grid.md",
         "docs/contracts/components/tooltip.md"
-      ]
-    },
-    {
-      "substrate": "text-display",
-      "components": [
-        "Code"
-      ],
-      "missingTally": {
-        "semantic": 0,
-        "events": 0,
-        "pointer": 1,
-        "keyboard_focus": 1,
-        "accessibility": 0,
-        "visual": 0
-      },
-      "contracts": [
-        "docs/contracts/components/code.md"
       ]
     },
     {
