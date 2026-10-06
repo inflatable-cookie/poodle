@@ -98,6 +98,26 @@ export const WITHHELD_AXES: Record<string, Partial<Record<CensusAxis, string>>> 
     keyboard_focus:
       "copy feedback through production AppState scheduling: follow-up task",
   },
+  ListGrid: {
+    // Same clamp class as the CardToggleGroup ruling above: the contract's
+    // `min(minItemWidth, 100%)` / `min(100%, max(…))` track floor stays
+    // normative, and the static flex vocabulary cannot clamp the tile floor
+    // to the container width, so a sub-floor host overflows where Svelte
+    // collapses to one full-width column. Withheld pending the same shared
+    // container-relative layout capability; the cap, gap, and token proofs
+    // stay asserted in the retained test as regression value.
+    visual:
+      "narrow-container floor clamp needs a shared container-relative layout capability",
+  },
+  Tooltip: {
+    // Svelte's `onOpenChange` has no projection in the Rust TooltipSpec or
+    // the Node.tooltip backend runtime: open/close transitions are observable
+    // only as painted/is-visible state, and the anchor activation handler in
+    // the retained test proves trigger liveness, not tooltip open-change.
+    // Projecting the callback needs node-handler work planned as its own task.
+    events:
+      "open-change callback needs a production handler projection for tooltip transitions",
+  },
 };
 
 const RECEIPT_TEXT_SIGNALS: Record<Exclude<CensusAxis, "semantic">, RegExp> = {
@@ -380,6 +400,43 @@ const STATIC_DISPLAY_NOT_APPLICABLE: Record<string, ManifestNotApplicable[]> = {
       axis: "events",
       reason: "DetailSection is a grouping composite with no component-owned events; slotted actions own theirs.",
       contractRef: "docs/contracts/components/detail-section.md#5. Events",
+    },
+  ],
+  ListGrid: [
+    {
+      axis: "events",
+      reason: "ListGrid is a styled-only layout primitive with no component-owned events.",
+      contractRef: "docs/contracts/components/list-grid.md#Behavior Machine",
+    },
+    {
+      axis: "pointer",
+      reason:
+        "ListGrid renders layout only and has no pointer interaction; grid items own theirs.",
+      contractRef: "docs/contracts/components/list-grid.md#2. Accessibility",
+    },
+    {
+      axis: "keyboard_focus",
+      reason: "ListGrid is styled-only and never a focus stop; it has no keyboard behavior.",
+      contractRef: "docs/contracts/components/list-grid.md#Behavior Machine",
+    },
+  ],
+  FieldSet: [
+    {
+      axis: "events",
+      reason:
+        "FieldSet groups controls and owns no callbacks or events; validation and submission stay host-owned.",
+      contractRef: "docs/contracts/components/field-set.md#1. Purpose",
+    },
+    {
+      axis: "pointer",
+      reason: "FieldSet owns grouping layout only; pointer interaction belongs to the grouped controls.",
+      contractRef: "docs/contracts/components/field-set.md#5. Accessibility",
+    },
+    {
+      axis: "keyboard_focus",
+      reason:
+        "FieldSet adds no keyboard behavior and is not a focus stop; grouped controls keep their own focus targets.",
+      contractRef: "docs/contracts/components/field-set.md#5. Accessibility",
     },
   ],
   UiPresentationProvider: [

@@ -65,6 +65,8 @@ pub fn tooltip(spec: &TooltipSpec, ctx: &RenderContext<'_>) -> Node {
     let mut label = Node::text(content);
     label.style.descriptor.text_color = Some(text_color);
     label.style.text_size = Some(font_size);
+    // Contract §8: the bubble sets 1.35 line height for compact descriptive text.
+    label.style.line_height = Some(1.35);
     bubble = bubble.child(label);
 
     if let Some(aria) = spec.aria_label.as_deref() {

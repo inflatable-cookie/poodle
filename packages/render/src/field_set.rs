@@ -3,11 +3,16 @@
 //! Contract: `docs/contracts/components/field-set.md`
 //! Ported from: `packages/jetstream/components/src/field_set.rs`.
 
-use poodle_node::{LayoutDirection, LayoutSizing, Node};
+use poodle_node::{LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::FieldSetSpec;
 
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
+
+/// Gap reservation below one exact column share, so a multi-column grid keeps
+/// its configured count as the wrap's upper bound. Same device (and value) as
+/// ListGrid's cap share and CardToggleGroup's `GRID_GAP_SHARE`.
+const COLUMN_COUNT_GAP_SHARE: f32 = 0.03;
 
 pub fn field_set(spec: &FieldSetSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> Node {
     let col_gap = spec
@@ -22,6 +27,13 @@ pub fn field_set(spec: &FieldSetSpec, ctx: &RenderContext<'_>, children: Vec<Nod
     root.style.descriptor.layout.direction = LayoutDirection::Column;
     root.style.fill_width = true;
     root.style.self_stretch = true;
+    // Contract §5: the Svelte root is a native `<fieldset>`, so the node
+    // carries group semantics with the legend as its accessible name, the
+    // same grouping relationship accordion and card-option groups project.
+    root.a11y.role = Some(NodeRole::Group);
+    if let Some(ref legend) = spec.legend {
+        root.a11y.label = Some(legend.clone());
+    }
 
     if let Some(ref legend) = spec.legend {
         let mut l = Node::text(legend.to_uppercase());
@@ -39,6 +51,10 @@ pub fn field_set(spec: &FieldSetSpec, ctx: &RenderContext<'_>, children: Vec<Nod
         d.style.descriptor.text_color =
             Some(ctx.theme().resolve_color(spec.description_color_token()));
         d.style.text_size = Some(ctx.theme().resolve_space(spec.description_size_token()));
+        // Contract §6: the description pulls up under the legend by
+        // `space-stack-sm * -0.5` and leaves `space-stack-md` below.
+        d.style.descriptor.layout.spacing.margin.top =
+            -0.5 * ctx.theme().resolve_space(spec.legend_margin_bottom_token());
         d.style.descriptor.layout.spacing.margin.bottom = ctx
             .theme()
             .resolve_space(spec.description_margin_bottom_token());
@@ -69,10 +85,14 @@ pub fn field_set(spec: &FieldSetSpec, ctx: &RenderContext<'_>, children: Vec<Nod
         // The old builder chains .child() before layout config; children order
         // is what matters and the adapter emits fields, not call order.
         if cols > 1 {
-            // GPUI's `.flex_1()` is grow + zero basis, which gives each
-            // child an equal share of the wrapping row.
+            // Svelte's `repeat(columns, minmax(0, 1fr))` holds the configured
+            // count: seed each cell just under one column share — the same
+            // gap reservation ListGrid and CardToggleGroup use — so an extra
+            // child wraps instead of growing a further column. `flex-grow`
+            // then shares the row the way `1fr` tracks do.
             wrapper.style.flex_grow = Some(1.0);
-            wrapper.style.flex_basis = Some(0.0);
+            wrapper.style.flex_basis_pct = Some(1.0 / f32::from(cols) - COLUMN_COUNT_GAP_SHARE);
+            wrapper.style.flex_basis = None;
         } else {
             wrapper.style.descriptor.layout.width = LayoutSizing::Grow;
             wrapper.style.fill_width = true;
