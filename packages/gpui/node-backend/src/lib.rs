@@ -241,6 +241,7 @@ pub fn reset_focus_registry() {
     poodle_node::note_focus_landed(None);
     poodle_node::note_focus_transit(None);
     interaction::reset_continuous_value_session();
+    interaction::reset_key_activation();
     tooltip::reset_tooltip_registry();
 }
 

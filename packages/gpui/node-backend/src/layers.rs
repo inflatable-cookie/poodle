@@ -432,7 +432,10 @@ where
             },
         )
         .capture_key_up(move |event: &gpui::KeyUpEvent, window, _cx| {
-            if crate::interaction::suppress_key_activation_click(event.keystroke.key.as_str()) {
+            if crate::interaction::suppress_key_activation_click(
+                window,
+                event.keystroke.key.as_str(),
+            ) {
                 window.prevent_default();
             }
         })

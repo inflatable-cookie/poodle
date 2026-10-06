@@ -2313,6 +2313,65 @@ fn one_enter_activates_a_focused_control_exactly_once() {
     });
 }
 
+/// poodle#138. A key activation handled on the way down in one GPUI window
+/// must not suppress the synthesized click of a key-up dispatched in another.
+/// The pending-activation set was a thread-local keyed only by key name, so
+/// window A's Enter key-down consumed window B's key-up: B's Enter silently
+/// did nothing and A's deferred key-up then fired A's click instead.
+///
+/// The two windows keep distinct element ids so each owns its own focus
+/// handle; only the activation-suppression state is shared by the bug.
+#[test]
+fn two_window_key_activation_does_not_suppress_the_other_window() {
+    run_headless(|cx| {
+        let build = |id: &str, label: &str, handler: Arc<dyn Fn() + Send + Sync>| {
+            let mut node = poodle_render::button(
+                &poodle_specs::ButtonSpec::new().with_label(label),
+                &RenderContext::new(&theme()),
+                Some(handler),
+            );
+            node.id = Some(id.to_owned());
+            node
+        };
+
+        let (alpha_handler, alpha_hits) = counting_handler();
+        let mut alpha = build("window-alpha-button", "alpha", alpha_handler);
+        // A control whose Enter/Space is handled on the way down (menubar,
+        // navigation menu): its own key-up must suppress the synthesized
+        // click, because the activation already ran.
+        alpha.interaction.on_key_activate = Some(Arc::new(|| None));
+
+        let (beta_handler, beta_hits) = counting_handler();
+        let beta = build("window-beta-button", "beta", beta_handler);
+
+        let mut cx_beta = cx.clone();
+        let mut alpha_driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(alpha)));
+        let mut beta_driver = HeadlessDriver::new(&mut cx_beta, Arc::new(Mutex::new(beta)));
+        alpha_driver.wait_for_focus_handle("window-alpha-button");
+        beta_driver.wait_for_focus_handle("window-beta-button");
+        alpha_driver.focus_element("window-alpha-button");
+        beta_driver.focus_element("window-beta-button");
+
+        // Window A: Enter down, activation handled, key-up deferred.
+        alpha_driver.dispatch_key_press("enter");
+        // Window B: a complete Enter of its own.
+        beta_driver.keyboard_key("window-beta-button", "enter");
+        // Window A: the deferred key-up closes A's own activation.
+        alpha_driver.dispatch_key_release("enter");
+
+        assert_eq!(
+            *beta_hits.lock().expect("beta hits"),
+            1,
+            "window B's Enter activates window B's button, not suppressed by window A's pending key"
+        );
+        assert_eq!(
+            *alpha_hits.lock().expect("alpha hits"),
+            0,
+            "window A's own key-up still suppresses its already-handled activation"
+        );
+    });
+}
+
 /// g14.003 retained regression. A scrub is press → drag → release, and the
 /// drag has to keep arriving after the pointer leaves the thin track. Bound
 /// through `on_mouse_move` the gesture detached a few pixels out; the backend
@@ -9269,6 +9328,101 @@ fn first_mounted_parity_toolbar() {
         assert!(driver.mounted_observation().is_valid());
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
+}
+
+/// poodle#138. Two Toolbars in one window — same aria label, or none — keep
+/// independent focus scopes and roving state. Generated focus ids derived
+/// from the aria label alone, so the second toolbar's items shared the first's
+/// element ids and focus handles. The instance scope is the caller's; each
+/// mounted regression below derives every id from the built tree, so with the
+/// bug the two toolbars' ids are literally equal and the mounted assertions
+/// fail.
+#[test]
+fn two_toolbars_with_the_same_label_rove_independently() {
+    fn rove_independently(label: Option<&str>) {
+        use poodle_render::{button, toolbar, RenderContext};
+        use poodle_specs::{ButtonSpec, ToolbarSpec};
+
+        run_headless(|cx| {
+            let theme_provider = theme();
+            let ctx = RenderContext::new(&theme_provider);
+            let build = |instance: &str| {
+                let mut spec = ToolbarSpec::new().with_instance_id(instance);
+                if let Some(label) = label {
+                    spec = spec.with_aria_label(label);
+                }
+                let bold = button(&ButtonSpec::new().with_label("Bold"), &ctx, None);
+                let italic = button(&ButtonSpec::new().with_label("Italic"), &ctx, None);
+                toolbar(&spec, &ctx, vec![bold, italic])
+            };
+
+            let alpha = build("alpha");
+            let beta = build("beta");
+            let alpha_root = alpha.runtime_id.clone().expect("alpha root id");
+            let alpha_first = alpha.children[0]
+                .runtime_id
+                .clone()
+                .expect("alpha first item id");
+            let alpha_second = alpha.children[1]
+                .runtime_id
+                .clone()
+                .expect("alpha second item id");
+            let beta_root = beta.runtime_id.clone().expect("beta root id");
+            let beta_first = beta.children[0]
+                .runtime_id
+                .clone()
+                .expect("beta first item id");
+            let beta_second = beta.children[1]
+                .runtime_id
+                .clone()
+                .expect("beta second item id");
+
+            let mut root = Node::container();
+            root.style.descriptor.layout.direction = LayoutDirection::Column;
+            let root = root.child(alpha).child(beta);
+            let mut driver =
+                HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(root)), 360.0, 200.0);
+            driver.wait_for_focus_handle(&alpha_first);
+            driver.wait_for_focus_handle(&beta_first);
+
+            // Two rights inside the first toolbar reach its own second item.
+            driver.focus_element(&alpha_root);
+            driver.dispatch_key_raw("right");
+            assert_eq!(
+                poodle_gpui_node_backend::focus_state_for(&alpha_first),
+                Some(true),
+                "the first right enters the first toolbar's first item"
+            );
+            driver.dispatch_key_raw("right");
+            assert_eq!(
+                poodle_gpui_node_backend::focus_state_for(&alpha_second),
+                Some(true),
+                "the second right moves within the first toolbar"
+            );
+            assert_eq!(
+                poodle_gpui_node_backend::focus_state_for(&beta_second),
+                Some(false),
+                "the first toolbar's roving never focuses the second toolbar"
+            );
+
+            // The second toolbar roves to its own item, not the first's.
+            driver.focus_element(&beta_root);
+            driver.dispatch_key_raw("right");
+            assert_eq!(
+                poodle_gpui_node_backend::focus_state_for(&beta_first),
+                Some(true),
+                "the second toolbar roves to its own first item"
+            );
+            assert_eq!(
+                poodle_gpui_node_backend::focus_state_for(&alpha_first),
+                Some(false),
+                "the second toolbar's roving leaves the first toolbar's items alone"
+            );
+        });
+    }
+
+    rove_independently(Some("Formatting"));
+    rove_independently(None);
 }
 
 /// TimeZoneSelect forwards its searchable Select state through mounted GPUI

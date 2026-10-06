@@ -51,7 +51,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     // ── Formatting toolbar (contract §13): ghost icon buttons grouped by a
     //    vertical separator into text-style and alignment clusters. ──
     let formatting = js_toolbar(
-        &ToolbarSpec::new().with_aria_label("Formatting toolbar"),
+        &ToolbarSpec::new()
+            .with_aria_label("Formatting toolbar")
+            .with_instance_id("formatting"),
         theme,
         vec![
             ib(theme, "bold", "Bold"),
@@ -67,7 +69,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     // ── Actions toolbar (contract §13): secondary text buttons, a separator,
     //    then the primary action. ──
     let actions = js_toolbar(
-        &ToolbarSpec::new().with_aria_label("Actions toolbar"),
+        &ToolbarSpec::new()
+            .with_aria_label("Actions toolbar")
+            .with_instance_id("actions"),
         theme,
         vec![
             js_button(
@@ -117,7 +121,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .child(js_toolbar(
                     &ToolbarSpec::new()
                         .with_size(size)
-                        .with_aria_label(format!("Toolbar {name}")),
+                        .with_aria_label(format!("Toolbar {name}"))
+                        .with_instance_id(format!("size-{name}")),
                     theme,
                     vec![
                         js_icon_button(
@@ -173,7 +178,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .child(js_toolbar(
                     &ToolbarSpec::new()
                         .with_density(density)
-                        .with_aria_label(format!("Toolbar {name}")),
+                        .with_aria_label(format!("Toolbar {name}"))
+                        .with_instance_id(format!("density-{name}")),
                     theme,
                     vec![
                         ib(theme, "bold", "Bold"),
@@ -194,7 +200,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     let vertical = js_toolbar(
         &ToolbarSpec::new()
             .with_orientation(Orientation::Vertical)
-            .with_aria_label("Vertical toolbar"),
+            .with_aria_label("Vertical toolbar")
+            .with_instance_id("vertical"),
         theme,
         vec![
             ib(theme, "align-left", "Align left"),
