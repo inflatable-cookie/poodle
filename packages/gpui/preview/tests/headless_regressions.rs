@@ -20338,8 +20338,7 @@ fn assert_ring_bounds(id: &str, expected: [f32; 4]) -> poodle_gpui_node_backend:
 
 /// Bordered node: the ring draws OUTSIDE the resting 1px border — the
 /// border is preserved, not widened or recoloured — only while the real
-/// handle holds focus, alongside an existing shadow stack, and a hover patch
-/// cannot overwrite it.
+/// handle holds keyboard-origin focus, alongside an existing shadow stack.
 #[test]
 fn a_declared_ring_paints_outside_a_bordered_node_only_while_focused() {
     run_headless(|cx| {
@@ -20353,6 +20352,7 @@ fn a_declared_ring_paints_outside_a_bordered_node_only_while_focused() {
         );
 
         driver.wait_for_focus_handle("ring-proof");
+        driver.dispatch_key_raw("tab");
         driver.focus_element("ring-proof");
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for("ring-proof"),
@@ -20372,11 +20372,14 @@ fn a_declared_ring_paints_outside_a_bordered_node_only_while_focused() {
         assert_eq!(node.style.descriptor.border.width, 1.0);
         drop(node);
 
-        // Hover applies its own patch and the ring survives it.
+        // Pointer movement changes the window's input modality, so focus
+        // remains but its keyboard-only ring clears while hover applies its
+        // own patch.
         driver.pointer_hover(headless_driver::mount_box_center());
-        assert!(
-            poodle_gpui_node_backend::painted_ring_for("ring-proof").is_some(),
-            "hover must not overwrite the ring",
+        assert_eq!(
+            poodle_gpui_node_backend::painted_ring_for("ring-proof"),
+            None,
+            "pointer modality clears the ring without blurring focus",
         );
 
         driver.blur_element_focus("ring-proof");
@@ -20400,6 +20403,7 @@ fn a_borderless_node_paints_the_declared_ring_without_a_resting_border() {
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
 
         driver.wait_for_focus_handle("ring-proof");
+        driver.dispatch_key_raw("tab");
         driver.focus_element("ring-proof");
         assert_ring_bounds("ring-proof", [58.0, 38.0, 108.0, 48.0]);
 
