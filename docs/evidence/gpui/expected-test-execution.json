@@ -2,9 +2,9 @@
   "schema": "poodle.g18-expected-test-execution.v1",
   "command": "effigy regressions:native",
   "run_id": "20f7852a-cc71-441a-8b01-12d2f349b188",
-  "source_commit": "ca5bc14a7e179ddbcfa80e2384b380518c91d505",
+  "source_commit": "139a1108f4995d1b1e615b96b41f5e444ccb3c2d",
   "lockfile": "packages/gpui/preview/Cargo.lock",
-  "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
+  "lockfile_sha256": "ef7fcc5ac27dc6567fe41b53d4ea07565bc3f3dbf592835fc2479a601e98e5c8",
   "results": {
     "a_mounted_button_carries_its_controls_target": {
       "outcome": "passed",
@@ -160,7 +160,8 @@
     },
     "a_nested_popover_paints_without_nesting_deferred_draws": {
       "outcome": "passed",
-      "body_sha256": "1b94bdad4c563403ad28b576a428fb941387e9e30b2547716f273dfc6c7c5e4d"
+      "body_sha256": "4b8923e4da153a6fc63525dc295d655acca06abf01d767a54bb6691d5c595871",
+      "run_id": "gpui-unofficial-1.22.0-126-20261006"
     },
     "a_grouped_code_input_types_and_completes_through_the_real_tree": {
       "outcome": "passed",
@@ -212,7 +213,8 @@
     },
     "select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds": {
       "outcome": "passed",
-      "body_sha256": "b728df42b69b9622cb0dd7f4c15b7b3b13c9458d9432c1e39cc6ff6ec2de831c"
+      "body_sha256": "8ae680e02202424aeed4a0486a5d356eb730c8648fd2f1f2055bcabb40ca7cdb",
+      "run_id": "gpui-unofficial-1.22.0-126-20261006"
     },
     "update_status_confirm_then_install_through_the_real_tree": {
       "outcome": "passed",
