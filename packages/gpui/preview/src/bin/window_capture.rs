@@ -100,8 +100,8 @@ mod focus_evidence;
 #[path = "window_capture/inset_evidence.rs"]
 mod inset_evidence;
 
-    #[path = "window_capture/cohort_capture.rs"]
-    mod cohort_capture;
+#[path = "window_capture/cohort_capture.rs"]
+mod cohort_capture;
 
 use presentation_axes::{ControlSize, ThemePreset};
 
@@ -173,14 +173,15 @@ enum CaptureMode {
     /// focus-capable application per fixture.
     Batch(Vec<fixture_capture::FixtureArgs>),
     FocusEvidence(focus_evidence::FocusEvidenceArgs),
-    AccessibilityProof { plant_unnamed: bool },
+    AccessibilityProof {
+        plant_unnamed: bool,
+    },
 }
 
 fn parse_cli(argv: &[String]) -> Result<CaptureMode> {
     if argv.iter().any(|arg| arg == "--a11y-proof") {
-        a11y_proof::parse_args(argv).map(|plant_unnamed| CaptureMode::AccessibilityProof {
-            plant_unnamed,
-        })
+        a11y_proof::parse_args(argv)
+            .map(|plant_unnamed| CaptureMode::AccessibilityProof { plant_unnamed })
     } else if argv.iter().any(|arg| arg == "--cohort") {
         cohort_capture::parse_args(argv).map(CaptureMode::Cohort)
     } else if argv.iter().any(|arg| arg == "--batch") {

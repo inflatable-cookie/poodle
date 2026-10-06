@@ -67,7 +67,9 @@ pub(super) fn accesskit_role(role: NodeRole) -> Option<Role> {
 }
 
 pub(super) fn has_accesskit_role(node: &Node) -> bool {
-    node.a11y.role.is_some_and(|role| accesskit_role(role).is_some())
+    node.a11y
+        .role
+        .is_some_and(|role| accesskit_role(role).is_some())
 }
 
 /// Attach the node record to an identified GPUI element. The public fluent
@@ -149,7 +151,10 @@ mod tests {
     fn common_roles_map_to_accesskit_and_presentation_stays_omitted() {
         assert_eq!(accesskit_role(NodeRole::Heading), Some(Role::Heading));
         assert_eq!(accesskit_role(NodeRole::SearchBox), Some(Role::SearchInput));
-        assert_eq!(accesskit_role(NodeRole::ProgressIndicator), Some(Role::ProgressIndicator));
+        assert_eq!(
+            accesskit_role(NodeRole::ProgressIndicator),
+            Some(Role::ProgressIndicator)
+        );
         assert_eq!(accesskit_role(NodeRole::Presentation), None);
     }
 }

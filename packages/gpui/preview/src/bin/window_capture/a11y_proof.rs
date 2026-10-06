@@ -108,9 +108,8 @@ impl Render for A11yProofRoot {
             .child(tabs)
             .child(disabled);
         if self.plant_unnamed {
-            let unnamed: AnyElement = poodle_gpui_node_backend::to_gpui(
-                &Node::container().role(NodeRole::Button),
-            );
+            let unnamed: AnyElement =
+                poodle_gpui_node_backend::to_gpui(&Node::container().role(NodeRole::Button));
             root = root.child(unnamed);
         }
         root
