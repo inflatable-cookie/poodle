@@ -129,6 +129,39 @@ const ordinaryCargoLockBase = [
   'version = "0.2.3"',
   "",
 ].join("\n");
+const JETSTREAM_PREVIEW_CARGO_MANIFEST = "packages/jetstream/preview/Cargo.toml";
+const JETSTREAM_PREVIEW_CARGO_BASE = [
+  "[package]",
+  'name = "poodle-jetstream-preview"',
+  'version = "0.4.12"',
+  'edition = "2024"',
+  "publish = false",
+  "",
+  "[dependencies]",
+  'poodle-node = { path = "../../contracts/node" }',
+  "",
+].join("\n");
+
+async function plantJetstreamPreviewCargoRange(
+  patchEntry: string,
+): Promise<{ root: string; base: string; head: string }> {
+  const root = await initPlant();
+  await writeFiles(root, {
+    [JETSTREAM_PREVIEW_CARGO_MANIFEST]: `${JETSTREAM_PREVIEW_CARGO_BASE}\n`,
+  });
+  const base = await commitAll(root, "Jetstream preview Cargo base");
+  await writeFiles(root, {
+    [JETSTREAM_PREVIEW_CARGO_MANIFEST]: [
+      JETSTREAM_PREVIEW_CARGO_BASE,
+      '# Jetstream adapter shares the current local Node type.',
+      '[patch."https://github.com/inflatable-cookie/poodle.git"]',
+      patchEntry,
+      "",
+    ].join("\n"),
+  });
+  const head = await commitAll(root, "Jetstream preview Node patch");
+  return { root, base, head };
+}
 
 const ORDINARY_JS_MANIFEST = "packages/svelte/components/package.json";
 const ordinaryJsManifestBase = JSON.stringify(
@@ -447,6 +480,23 @@ describe("installed-package scope routing", () => {
         ),
       );
     }
+  });
+
+  test("ordinary unpublished Jetstream preview admits only its local Node patch", async () => {
+    const { root, base, head } = await plantJetstreamPreviewCargoRange(
+      'poodle-node = { path = "../../contracts/node" }',
+    );
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.changedPaths).toEqual([JETSTREAM_PREVIEW_CARGO_MANIFEST]);
+
+    const wrongPatch = await plantJetstreamPreviewCargoRange(
+      'poodle-node = { path = "../../other/node" }',
+    );
+    await expect(
+      assertInstalledScope(wrongPatch.root, wrongPatch.base, wrongPatch.head, "ordinary"),
+    ).rejects.toThrow(
+      `certification scope rejected forbidden registry surface: ${JETSTREAM_PREVIEW_CARGO_MANIFEST}`,
+    );
   });
 
   test("ordinary exact pinned dependency and export additions are not a version surface", async () => {
