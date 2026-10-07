@@ -11,8 +11,12 @@ Poodle has two release trains. The rules behind this procedure are in
   and `@inflatable-cookie/poodle-svelte`, published to npm. The private React
   package follows the same version but is never published. The publication set
   is `packages/release-manifest.json`.
-- **Native train** — Cargo crates, distributed from source and tags. It has no
-  release procedure or tag authority yet; an npm candidate never bumps Cargo
+- **Native train** — Cargo crates, distributed by git tag only: the crates
+  stay `publish = false` and nothing goes to crates.io; consumers depend on a
+  Poodle tag, the same git-tag protocol as the other inflatable-cookie Rust
+  libraries (for example Longhorn). Operator ruling 2026-10-06 (decision
+  08d56e2a). Its step-by-step procedure isn't written yet (lane
+  `native-release-train`); until it is, an npm candidate never bumps Cargo
   manifests, locks, GPUI receipts or native evidence.
 
 Versions stay `0.x`. Breaking changes may ship in a minor release and must be
