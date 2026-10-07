@@ -1418,6 +1418,8 @@ struct CliArgs {
     density: Option<Density>,
     control_size: Option<ControlSize>,
     screenshot: Option<String>,
+    /// Initial window origin and size in logical points: x, y, width, height.
+    window_bounds: Option<[f32; 4]>,
     /// Machine-readable proof of the resolved capture axis.
     capture_receipt: Option<String>,
     /// Points to click, in window coordinates, before capturing.
@@ -1434,6 +1436,24 @@ struct CliArgs {
     hold_ms: u64,
 }
 
+fn parse_window_bounds(value: &str) -> Result<[f32; 4], String> {
+    let values: Result<Vec<f32>, _> = value.split(',').map(|part| part.trim().parse()).collect();
+    let values = values.map_err(|_| "--window-bounds expects numeric x,y,w,h".to_string())?;
+    let [x, y, width, height] = values.as_slice() else {
+        return Err("--window-bounds expects x,y,w,h in logical points".to_string());
+    };
+    if ![x, y, width, height]
+        .into_iter()
+        .all(|value| value.is_finite())
+    {
+        return Err("--window-bounds values must be finite logical points".to_string());
+    }
+    if *width <= 0.0 || *height <= 0.0 {
+        return Err("--window-bounds width and height must be positive".to_string());
+    }
+    Ok([*x, *y, *width, *height])
+}
+
 fn parse_cli_args() -> CliArgs {
     let args: Vec<String> = std::env::args().collect();
     let mut section = None;
@@ -1445,6 +1465,7 @@ fn parse_cli_args() -> CliArgs {
     let mut density = None;
     let mut control_size = None;
     let mut screenshot = None;
+    let mut window_bounds = None;
     let mut capture_receipt = None;
     let mut clicks: Vec<DriverAction> = Vec::new();
     let mut print_state = None;
@@ -1546,6 +1567,17 @@ fn parse_cli_args() -> CliArgs {
                     i += 1;
                 }
             }
+            "--window-bounds" => {
+                let Some(value) = args.get(i + 1) else {
+                    eprintln!("--window-bounds requires x,y,w,h");
+                    std::process::exit(2);
+                };
+                window_bounds = Some(parse_window_bounds(value).unwrap_or_else(|message| {
+                    eprintln!("{message}");
+                    std::process::exit(2);
+                }));
+                i += 1;
+            }
             "--capture-receipt" => {
                 if let Some(val) = args.get(i + 1) {
                     capture_receipt = Some(val.clone());
@@ -1641,6 +1673,7 @@ fn parse_cli_args() -> CliArgs {
         density,
         control_size,
         screenshot,
+        window_bounds,
         capture_receipt,
         clicks,
         print_state,
@@ -2345,7 +2378,11 @@ fn main() {
 
         // Use a taller window in screenshot mode so all specimen sections fit.
         let window_height = if cli.screenshot.is_some() { 1600.0 } else { 800.0 };
-        let bounds = Bounds::centered(None, size(px(1280.0), px(window_height)), cx);
+        let bounds = if let Some([x, y, width, height]) = cli.window_bounds {
+            Bounds::new(point(px(x), px(y)), size(px(width), px(height)))
+        } else {
+            Bounds::centered(None, size(px(1280.0), px(window_height)), cx)
+        };
         cx.open_window(
             WindowOptions {
                 window_bounds: Some(WindowBounds::Windowed(bounds)),
@@ -2541,6 +2578,21 @@ fn main() {
         }
     });
 }
+#[cfg(test)]
+mod window_bounds_tests {
+    use crate::parse_window_bounds;
+
+    #[test]
+    fn window_bounds_parse_logical_position_and_size() {
+        assert_eq!(
+            parse_window_bounds("-120,24,640,480").expect("valid bounds"),
+            [-120.0, 24.0, 640.0, 480.0]
+        );
+        assert!(parse_window_bounds("0,0,0,480").is_err());
+        assert!(parse_window_bounds("0,0,640").is_err());
+    }
+}
+
 #[cfg(test)]
 mod file_pick_tests {
     // Explicit imports only: `use super::*` would glob in gpui's `test` proc

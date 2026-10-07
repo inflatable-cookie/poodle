@@ -81,8 +81,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 "Fixed 20rem",
                 js_popover(
                     &PopoverSpec::new()
-                        .with_surface_min_width_rem(20.0)
-                        .with_surface_max_width_rem(20.0)
+                        .with_surface_min_width("20rem")
+                        .with_surface_max_width("20rem")
                         .with_aria_label("Fixed-width popover"),
                     theme,
                     Some(div().child(para("Surface min-width and max-width are pinned to 20rem."))),

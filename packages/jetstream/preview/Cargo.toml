@@ -45,6 +45,12 @@ image = { version = "0.25", default-features = false, features = ["png"] }
 env_logger = "0.11"
 log = "0.4"
 
+# Jetstream's adapter pins Poodle's Node vocabulary to v0.4.6. Use this
+# workspace's source for the same dependency so every renderer emits the same
+# Node type while the preview is built against the current Poodle contracts.
+[patch."https://github.com/inflatable-cookie/poodle.git"]
+poodle-node = { path = "../../contracts/node" }
+
 [package.metadata.poodle]
 public-intent = false
 channel = "internal"

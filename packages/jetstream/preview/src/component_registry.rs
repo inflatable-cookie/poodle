@@ -49,6 +49,27 @@ pub fn specimen_count() -> usize {
         .count()
 }
 
+/// Resolve a catalogue slug to the index used by `AppState` and ensure this
+/// runtime has a specimen for it. CLI callers run this before constructing a
+/// platform window, so an invalid deep link fails without opening one.
+pub fn resolve_specimen(slug: &str) -> Result<usize, String> {
+    let Some((index, component)) = all_components()
+        .iter()
+        .enumerate()
+        .find(|(_, component)| component.slug == slug)
+    else {
+        return Err(format!("unknown component slug {slug:?}"));
+    };
+
+    if !component.has_specimen {
+        return Err(format!(
+            "component slug {slug:?} has no Jetstream preview specimen"
+        ));
+    }
+
+    Ok(index)
+}
+
 fn jetstream_has_specimen(slug: &str) -> bool {
     !matches!(
         slug,
