@@ -1,6 +1,6 @@
 [package]
 name = "poodle-node"
-version = "0.4.11"
+version = "0.4.12"
 edition = "2021"
 license = "MIT"
 rust-version = "1.95"
@@ -16,10 +16,10 @@ publish = false
 # kernel's own types (`DragSubject`, `DropIntent`, `DropPosition`, terminal
 # outcome) rather than mirroring them. `poodle-headless` is pure — no gpui, no
 # engine, no renderer — so this stays a contracts-to-contracts edge.
-poodle-headless = { version = "0.4.11", path = "../headless" }
-poodle-layout = { version = "0.4.11", path = "../layout" }
-poodle-style = { version = "0.4.11", path = "../style" }
-poodle-tokens = { version = "0.4.11", path = "../tokens" }
+poodle-headless = { version = "0.4.12", path = "../headless" }
+poodle-layout = { version = "0.4.12", path = "../layout" }
+poodle-style = { version = "0.4.12", path = "../style" }
+poodle-tokens = { version = "0.4.12", path = "../tokens" }
 
 [package.metadata.poodle]
 public-intent = true

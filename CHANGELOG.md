@@ -7,6 +7,38 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.4.12] - 2026-10-07
+
+`0.4.12` is the first coordinated release of both trains: the npm/web
+packages and the native Rust crates move together under one `v0.4.12` tag.
+Web packages carry no behaviour change.
+
+### Added
+
+- **Native release train.** The Rust and GPUI crates release by git tag,
+  never crates.io. An application pins public crates (`poodle-node`,
+  `poodle-render`, `poodle-gpui`, `poodle-gpui-node-backend` and the contract
+  crates) to `tag = "v0.4.12"` and uses `gpui-unofficial =1.22.0` so both
+  sides share GPUI's types. `effigy release:bump` moves npm and Cargo
+  versions together.
+- **`toolbar_scope` and `ToolbarSpec::instance_id` (native).** Two Toolbars
+  with the same label, or none, no longer share generated focus ids. Name the
+  instance with `with_instance_id`; the aria label stays the fallback.
+
+### Fixed
+
+- **GPUI keyboard activation is scoped per window.** Suppressing a repeated
+  key activation in one window no longer swallows the same key in another.
+- **GPUI composite focus shows only for keyboard focus.** Pointer-focused
+  composites no longer draw the focus ring, matching Svelte.
+
+### Changed
+
+- **Web package dependency ranges.** Svelte and React require core
+  `>=0.4.12 <0.5`. Peer ranges stay unchanged.
+- **Cargo crates move to `0.4.12`** (they were `0.4.0` at the `v0.4.11`
+  tag) with internal path pins at the same exact version.
+
 ## [0.4.11] - 2026-10-06
 
 `0.4.11` is a patch candidate with one fix and no API change.
@@ -769,6 +801,7 @@ supersedes `0.4.3`, which was never published.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.4.12]: docs/release-notes/0.4.12.md
 [0.4.11]: docs/release-notes/0.4.11.md
 [0.4.10]: docs/release-notes/0.4.10.md
 [0.4.9]: docs/release-notes/0.4.9.md

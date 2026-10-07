@@ -1,18 +1,14 @@
 {
   "schema": "poodle.g18-expected-test-execution.v2",
   "command": "effigy regressions:native",
-  "run_id": "review-5428205753-native",
-  "source_commit": "139a1108f4995d1b1e615b96b41f5e444ccb3c2d",
+  "run_id": "release-0.4.12-native",
+  "source_commit": "5c769632f3e5bc5552e67abb60a0c80b1b744dcf",
   "lockfile": "packages/gpui/preview/Cargo.lock",
-  "lockfile_sha256": "ef7fcc5ac27dc6567fe41b53d4ea07565bc3f3dbf592835fc2479a601e98e5c8",
+  "lockfile_sha256": "f59caef49f0922e1e3e7b0d0093a02557c7e0ab23e588685b975e35d8b980817",
   "results": {
     "a_mounted_button_carries_its_controls_target": {
       "outcome": "passed",
-      "body_sha256": "150ed9d3c74f62597a710c814b36c6e5a72eb7ef90536f80138da36a45743d1b",
-      "run_id": "worker-dced7c30-button-focus-20261006",
-      "command": "effigy regressions:native a_mounted_button_carries_its_controls_target -- --exact",
-      "source_commit": "e63b7fcad7ed551f72b46b1fdb7371bb36a03bfe",
-      "lockfile_sha256": "ef7fcc5ac27dc6567fe41b53d4ea07565bc3f3dbf592835fc2479a601e98e5c8"
+      "body_sha256": "150ed9d3c74f62597a710c814b36c6e5a72eb7ef90536f80138da36a45743d1b"
     },
     "checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec": {
       "outcome": "passed",
@@ -520,11 +516,7 @@
     },
     "first_mounted_parity_validation_summary": {
       "outcome": "passed",
-      "body_sha256": "72891d82028242a1019e7dc38414c8d101bb65b8368207196df2d30422dde84d",
-      "run_id": "review-5433843000-focus-regressions",
-      "command": "effigy regressions:native first_mounted_parity_validation_summary -- --exact",
-      "source_commit": "bfbc288b063fcdfcb6fecd60daf24008f26634ff",
-      "lockfile_sha256": "ef7fcc5ac27dc6567fe41b53d4ea07565bc3f3dbf592835fc2479a601e98e5c8"
+      "body_sha256": "72891d82028242a1019e7dc38414c8d101bb65b8368207196df2d30422dde84d"
     },
     "agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport": {
       "outcome": "passed",
@@ -676,11 +668,7 @@
     },
     "first_mounted_parity_text_link": {
       "outcome": "passed",
-      "body_sha256": "a11052bb1315e0ed5cc665a1ae2504f7fd0139935f756b92c1172f1fdab86607",
-      "run_id": "review-5433843000-focus-regressions",
-      "command": "effigy regressions:native first_mounted_parity_text_link -- --exact",
-      "source_commit": "bfbc288b063fcdfcb6fecd60daf24008f26634ff",
-      "lockfile_sha256": "ef7fcc5ac27dc6567fe41b53d4ea07565bc3f3dbf592835fc2479a601e98e5c8"
+      "body_sha256": "a11052bb1315e0ed5cc665a1ae2504f7fd0139935f756b92c1172f1fdab86607"
     },
     "first_mounted_parity_icon_provider": {
       "outcome": "passed",
@@ -728,6 +716,6 @@
     }
   },
   "body_hash_baseline_commit": "539057155aa20e720e9e4d60fe97a8afa58f69b6",
-  "selector_outcome": "failed",
-  "selector_summary": "378 passed, 2 failed: agent_transcript_dependencies_are_structural_not_metadata and agent_transcript_records_rebuild_through_production_mounted_input; review 5428205753"
+  "selector_outcome": "passed",
+  "selector_summary": "effigy regressions:native passed"
 }

@@ -1,0 +1,30 @@
+{
+  "schema": "poodle.web-candidate-evidence.v1",
+  "version": "0.4.12",
+  "source_commit": "5c769632f3e5bc5552e67abb60a0c80b1b744dcf",
+  "base_commit": "598a1200c54411e753903bb589da77c8816f32b7",
+  "payload_commits": [
+    "77c119c245a86735ddfe731a1f12b50bc19bfcb6",
+    "fd2802ad6c995749d666fca10ba7b899cc2e1ca2",
+    "0ef13915dff7adc2d6b19fc7790ef4358379cffc",
+    "051ba37f11cc3c1649fb5bc9c2bb30da98bbd1ea",
+    "598a1200c54411e753903bb589da77c8816f32b7"
+  ],
+  "publication_set": [
+    "@inflatable-cookie/poodle-core",
+    "@inflatable-cookie/poodle-svelte"
+  ],
+  "native_train_changed": true,
+  "operator_acceptance": "Tom approved cutting 0.4.12 as the first coordinated native release, consumed by the Longhorn gpui-composition prototype, on 2026-10-07 (\"I'll go with your recommendation\", Queue decision 865621aa).",
+  "focused_evidence": {
+    "milestone_qa": "Queue project.qa.run 45db7747 (effigy ci:fresh on 598a1200c) did not launch: Queue QA refuses the env-resolved Jetstream sibling in paseo.json setup; reported to the Queue Chatterbox. Native and web gates below ran locally on the freeze.",
+    "native_check_gpui": "effigy check:gpui passed on 5c769632f.",
+    "native_regressions": "effigy regressions:native passed on 5c769632f: 385 passed, 0 failed (run id release-0.4.12-native).",
+    "native_consumer": "effigy release:gpui-consumer built a clean consumer against 5c769632f via a disposable local tag v0.4.12 with gpui-unofficial =1.22.0.",
+    "gpui_census": "effigy update:gpui-census recorded the passed selector at 5c769632f (176 rows, 175 admitted, 177 mounted receipts); test:gpui-census and check:gpui-census pass on 410cd5234.",
+    "gpui_ax": "effigy test:gpui-ax passed on 410cd5234 (census-only change from 5c769632f): foreground proved, 241 samples, 0 failed reads.",
+    "frozen_lockfile": "effigy release:bump updated the bun.lock workspace slice, core ranges >=0.4.12 <0.5, every Cargo manifest and both GPUI locks; docs:lint passes.",
+    "bun_toolchain": "packageManager bun@1.4.2; CI installs through bun-version-file from package.json",
+    "diff_check": "clean"
+  }
+}
