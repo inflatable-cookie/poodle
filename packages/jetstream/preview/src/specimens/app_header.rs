@@ -13,6 +13,7 @@ use crate::compat::js_icon_button;
 use crate::compat::{js_app_header, js_app_header_with_slots};
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
+use poodle_render::RenderContext;
 
 use poodle_specs::{
     AppHeaderSpec, ButtonSpec, ButtonVariant, ControlDensity, ControlSize, IconButtonSpec,
@@ -66,7 +67,7 @@ fn destination_row(theme: &JetstreamThemeProvider) -> El {
 /// The shared demo header used by both ladders: a "My Application" title with
 /// New/Open ghost actions and a settings utility icon (mirrors GPUI `demo_header`).
 fn demo_header(spec: AppHeaderSpec, theme: &JetstreamThemeProvider) -> El {
-    let size = spec.effective_size();
+    let size = spec.effective_size(RenderContext::new(theme).base_size(spec.size));
     js_app_header_with_slots(
         &spec,
         theme,

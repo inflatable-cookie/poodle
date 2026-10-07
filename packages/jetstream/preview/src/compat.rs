@@ -135,10 +135,10 @@ pub fn js_app_header_with_slots(
     // eagerly, so the already-built node is wrapped in the slot builder the
     // shared renderer now requires. The internal scope cannot reach it until
     // this preview defers construction; no parity claim is made.
-    let identity = identity.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
-    let center = center.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
-    let actions = actions.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
-    let utility = utility.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
+    let identity = identity.map(eager_slot);
+    let center = center.map(eager_slot);
+    let actions = actions.map(eager_slot);
+    let utility = utility.map(eager_slot);
     El(pr::app_header(
         spec,
         &pr::RenderContext::new(theme),
@@ -147,6 +147,10 @@ pub fn js_app_header_with_slots(
         actions,
         utility,
     ))
+}
+
+fn eager_slot(el: El) -> pr::SlotBuilder<'static> {
+    Box::new(move |_ctx: &pr::RenderContext<'_>| Node::from(el))
 }
 
 pub fn js_audio_player(spec: &AudioPlayerSpec, theme: &JetstreamThemeProvider) -> El {
@@ -410,11 +414,15 @@ pub fn js_detail_section(
 
 pub fn js_detail_section_group(
     spec: &DetailSectionGroupSpec,
-    _theme: &JetstreamThemeProvider,
+    theme: &JetstreamThemeProvider,
     children: Vec<El>,
 ) -> El {
     let children: Vec<Node> = children.into_iter().map(Node::from).collect();
-    El(pr::detail_section_group(spec, _theme, children))
+    El(pr::detail_section_group(
+        spec,
+        &pr::RenderContext::new(theme),
+        children,
+    ))
 }
 
 pub fn js_detail_shell(
@@ -562,7 +570,7 @@ pub fn js_field(spec: &FieldSpec, theme: &JetstreamThemeProvider, control: Optio
     // eagerly, so the already-built node is wrapped in the slot builder the
     // shared renderer now requires. The internal scope cannot reach it until
     // this preview defers construction; no parity claim is made.
-    let control = control.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
+    let control = control.map(eager_slot);
     El(pr::field(spec, &pr::RenderContext::new(theme), control))
 }
 
@@ -603,13 +611,9 @@ pub fn js_filter_toolbar(
     // eagerly, so the already-built node is wrapped in the slot builder the
     // shared renderer now requires. The internal scope cannot reach it until
     // this preview defers construction; no parity claim is made.
-    let children: Vec<pr::SlotBuilder<'static>> = children
-        .into_iter()
-        .map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>)
-        .collect();
-    let actions = actions.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
-    let secondary =
-        secondary.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
+    let children: Vec<pr::SlotBuilder<'static>> = children.into_iter().map(eager_slot).collect();
+    let actions = actions.map(eager_slot);
+    let secondary = secondary.map(eager_slot);
     El(pr::filter_toolbar(
         spec,
         &pr::RenderContext::new(theme),
@@ -634,6 +638,7 @@ pub fn js_floating_overlay(
         placement,
         anchor_h,
         anchor_w,
+        pr::floating_overlay::OVERLAY_GAP_PX,
     ))
 }
 
@@ -940,10 +945,9 @@ pub fn js_page_header_with_slots(
     // eagerly, so the already-built node is wrapped in the slot builder the
     // shared renderer now requires. The internal scope cannot reach it until
     // this preview defers construction; no parity claim is made.
-    let breadcrumbs =
-        breadcrumbs.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
-    let actions = actions.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
-    let meta = meta.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
+    let breadcrumbs = breadcrumbs.map(eager_slot);
+    let actions = actions.map(eager_slot);
+    let meta = meta.map(eager_slot);
     El(pr::page_header(
         spec,
         &pr::RenderContext::new(theme),
@@ -1015,7 +1019,13 @@ pub fn js_pill(spec: &PillSpec, theme: &JetstreamThemeProvider) -> El {
 
 pub fn js_popover(spec: &PopoverSpec, theme: &JetstreamThemeProvider, content: Option<El>) -> El {
     let content: Option<Node> = content.map(Node::from);
-    El(pr::popover(spec, &pr::RenderContext::new(theme), content))
+    El(pr::popover(
+        spec,
+        &pr::RenderContext::new(theme),
+        &pr::PopoverHandlers::default(),
+        None,
+        content,
+    ))
 }
 
 pub fn js_progress(spec: &ProgressSpec, theme: &JetstreamThemeProvider) -> El {
@@ -1393,6 +1403,7 @@ pub fn js_list_card_with_slots(
         &pr::RenderContext::new(theme),
         pr::ListCardSlots {
             leading: leading.map(Node::from),
+            eyebrow: None,
             badges: badges.into_iter().map(Node::from).collect(),
             footer: footer.map(Node::from),
             actions: actions.map(Node::from),
@@ -1441,10 +1452,8 @@ pub fn js_list_container_with_slots(
             filters: filters.map(Node::from),
             batch: batch.map(Node::from),
             // Eager-`El` compile-only wrap, same caveat as above.
-            breadcrumbs: breadcrumbs
-                .map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>),
-            actions: actions
-                .map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>),
+            breadcrumbs: breadcrumbs.map(eager_slot),
+            actions: actions.map(eager_slot),
         },
         instance_id,
         None,

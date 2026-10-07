@@ -59,6 +59,7 @@ impl Section {
 /// Available theme presets.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ThemePreset {
+    Default,
     Eclipse,
     Iceberg,
     Graphite,
@@ -93,6 +94,7 @@ impl ThemePreset {
     /// shared so the swatch builder and the renderer cannot drift apart.
     pub fn theme_definition(self) -> &'static poodle_tokens::themes::ThemeDefinition {
         match self {
+            ThemePreset::Default => &poodle_tokens::themes::ICEBERG,
             ThemePreset::Eclipse => &poodle_tokens::themes::ECLIPSE,
             ThemePreset::Iceberg => &poodle_tokens::themes::ICEBERG,
             ThemePreset::Graphite => &poodle_tokens::themes::GRAPHITE,
@@ -110,6 +112,7 @@ impl ThemePreset {
 
     pub fn label(self) -> &'static str {
         match self {
+            ThemePreset::Default => "default",
             ThemePreset::Eclipse => "eclipse",
             ThemePreset::Iceberg => "iceberg",
             ThemePreset::Graphite => "graphite",

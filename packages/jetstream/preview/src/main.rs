@@ -3,7 +3,7 @@
 //!
 //! Run with: `cargo run -p poodle-jetstream-preview`
 
-use poodle_jetstream_preview::{app_state, shell, theme_bridge};
+use poodle_jetstream_preview::{app_state, component_registry, shell, theme_bridge};
 use theme_bridge::build_draw_theme;
 
 use glam::Mat4;
@@ -143,6 +143,7 @@ impl PreviewState {
         width: u32,
         height: u32,
         scale_factor: f64,
+        app: AppState,
     ) -> Self {
         // width/height from PlatformFrame.window_width/height are already
         // in logical pixels (physical / scale_factor). Don't divide again.
@@ -216,7 +217,7 @@ impl PreviewState {
         let text_atlas_textures = Vec::new();
 
         let mut state = Self {
-            app: AppState::new(),
+            app,
             theme: poodle_theme,
             game_ui,
             ui_pass,
@@ -261,6 +262,7 @@ impl PreviewState {
     fn rebuild_shell(&mut self) {
         // Update the theme provider to match the selected preset.
         let theme_def = match self.app.theme_preset {
+            ThemePreset::Default => &poodle_tokens::themes::ICEBERG,
             ThemePreset::Eclipse => &poodle_tokens::themes::ECLIPSE,
             ThemePreset::Iceberg => &poodle_tokens::themes::ICEBERG,
             ThemePreset::Graphite => &poodle_tokens::themes::GRAPHITE,
@@ -1545,16 +1547,179 @@ impl PreviewState {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct WindowBounds {
+    x: i32,
+    y: i32,
+    width: u32,
+    height: u32,
+}
+
+#[derive(Debug)]
+struct CliArgs {
+    component_index: Option<usize>,
+    theme: Option<ThemePreset>,
+    size: Option<ControlSize>,
+    window_bounds: Option<WindowBounds>,
+}
+
+fn parse_window_bounds(value: &str) -> Result<WindowBounds, String> {
+    let parts: Vec<&str> = value.split(',').map(str::trim).collect();
+    let [x, y, width, height] = parts.as_slice() else {
+        return Err("--window-bounds expects x,y,w,h in logical points".to_string());
+    };
+    let x = x
+        .parse::<i32>()
+        .map_err(|_| "--window-bounds x must be a whole logical point".to_string())?;
+    let y = y
+        .parse::<i32>()
+        .map_err(|_| "--window-bounds y must be a whole logical point".to_string())?;
+    let width = width
+        .parse::<u32>()
+        .ok()
+        .filter(|width| *width > 0)
+        .ok_or_else(|| {
+            "--window-bounds width must be a positive whole logical point".to_string()
+        })?;
+    let height = height
+        .parse::<u32>()
+        .ok()
+        .filter(|height| *height > 0)
+        .ok_or_else(|| {
+            "--window-bounds height must be a positive whole logical point".to_string()
+        })?;
+    Ok(WindowBounds {
+        x,
+        y,
+        width,
+        height,
+    })
+}
+
+fn parse_theme(value: &str) -> Option<ThemePreset> {
+    Some(match value {
+        "default" => ThemePreset::Default,
+        "eclipse" => ThemePreset::Eclipse,
+        "iceberg" => ThemePreset::Iceberg,
+        "graphite" => ThemePreset::Graphite,
+        "midnight" => ThemePreset::Midnight,
+        "nord" => ThemePreset::Nord,
+        "rose" => ThemePreset::Rose,
+        "forest" => ThemePreset::Forest,
+        "solarized" => ThemePreset::Solarized,
+        "hornet" => ThemePreset::Hornet,
+        "cobalt" => ThemePreset::Cobalt,
+        "clay" => ThemePreset::Clay,
+        "meadow" => ThemePreset::Meadow,
+        _ => return None,
+    })
+}
+
+fn parse_control_size(value: &str) -> Option<ControlSize> {
+    Some(match value {
+        "xs" => ControlSize::Xs,
+        "sm" => ControlSize::Sm,
+        "md" => ControlSize::Md,
+        "lg" => ControlSize::Lg,
+        "xl" => ControlSize::Xl,
+        _ => return None,
+    })
+}
+
+fn parse_cli_args(args: impl IntoIterator<Item = String>) -> Result<CliArgs, String> {
+    let mut args = args.into_iter();
+    let mut parsed = CliArgs {
+        component_index: None,
+        theme: None,
+        size: None,
+        window_bounds: None,
+    };
+
+    while let Some(arg) = args.next() {
+        match arg.as_str() {
+            "--component" => {
+                let slug = args
+                    .next()
+                    .ok_or_else(|| "--component requires a component slug".to_string())?;
+                parsed.component_index = Some(component_registry::resolve_specimen(&slug)?);
+            }
+            "--theme" => {
+                let value = args
+                    .next()
+                    .ok_or_else(|| "--theme requires a theme name".to_string())?;
+                parsed.theme = Some(
+                    parse_theme(&value)
+                        .ok_or_else(|| format!("unknown Jetstream preview theme {value:?}"))?,
+                );
+            }
+            "--size" | "--control-size" => {
+                let value = args
+                    .next()
+                    .ok_or_else(|| format!("{arg} requires a size name"))?;
+                parsed.size = Some(parse_control_size(&value).ok_or_else(|| {
+                    format!(
+                        "unknown Jetstream preview size {value:?}; expected xs, sm, md, lg, or xl"
+                    )
+                })?);
+            }
+            "--window-bounds" => {
+                let value = args
+                    .next()
+                    .ok_or_else(|| "--window-bounds requires x,y,w,h".to_string())?;
+                parsed.window_bounds = Some(parse_window_bounds(&value)?);
+            }
+            _ => {}
+        }
+    }
+
+    Ok(parsed)
+}
+
 fn main() {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
+    let cli = match parse_cli_args(std::env::args().skip(1)) {
+        Ok(cli) => cli,
+        Err(message) => {
+            eprintln!("{message}");
+            std::process::exit(2);
+        }
+    };
+
     log::info!("Starting Poodle Jetstream Preview...");
+
+    let mut app = AppState::new();
+    if let Some(theme) = cli.theme {
+        app.set_theme(theme);
+    }
+    if let Some(size) = cli.size {
+        app.set_control_size(size);
+    }
+    if let Some(component_index) = cli.component_index {
+        app.set_active_component(Some(component_index));
+    }
+    let mut app = Some(app);
+
+    let (window_x, window_y, window_width, window_height) =
+        cli.window_bounds.map_or((None, None, 1280, 800), |bounds| {
+            (Some(bounds.x), Some(bounds.y), bounds.width, bounds.height)
+        });
+    if let (Some(x), Some(y)) = (window_x, window_y) {
+        // SAFETY: the preview sets placement before `Platform::run` starts its
+        // event loop or creates any worker threads; Jetstream's platform reads
+        // these supported configuration variables while creating its window.
+        unsafe {
+            std::env::set_var("JETSTREAM_WINDOW_X", x.to_string());
+            std::env::set_var("JETSTREAM_WINDOW_Y", y.to_string());
+            std::env::set_var("JETSTREAM_WINDOW_MONITOR", "");
+        }
+    }
 
     let config = PlatformConfig {
         window: WindowConfig {
             title: "Poodle — Jetstream Preview".to_string(),
-            width: 1280,
-            height: 800,
+            width: window_width,
+            height: window_height,
             resizable: true,
             vsync: VSyncMode::Off,
         },
@@ -1571,9 +1736,49 @@ fn main() {
                 frame.window_width,
                 frame.window_height,
                 frame.scale_factor,
+                app.take()
+                    .expect("preview state initializes on the first frame"),
             )
         });
 
         state.update_and_render(frame)
     });
+}
+
+#[cfg(test)]
+mod cli_tests {
+    use super::{WindowBounds, component_registry, parse_cli_args, parse_window_bounds};
+
+    #[test]
+    fn component_slug_resolves_before_platform_creation() {
+        let cli = parse_cli_args(["--component".to_string(), "button".to_string()])
+            .expect("known specimen slug resolves");
+        assert_eq!(
+            cli.component_index,
+            component_registry::all_components()
+                .iter()
+                .position(|component| component.slug == "button")
+        );
+    }
+
+    #[test]
+    fn unknown_component_slug_fails_during_cli_resolution() {
+        let error = parse_cli_args(["--component".to_string(), "not-a-component".to_string()])
+            .expect_err("unknown slug must fail before main creates the platform");
+        assert!(error.contains("unknown component slug"));
+    }
+
+    #[test]
+    fn window_bounds_parse_as_logical_points() {
+        assert_eq!(
+            parse_window_bounds("-120,24,640,480").expect("valid bounds"),
+            WindowBounds {
+                x: -120,
+                y: 24,
+                width: 640,
+                height: 480,
+            }
+        );
+        assert!(parse_window_bounds("0,0,0,480").is_err());
+    }
 }

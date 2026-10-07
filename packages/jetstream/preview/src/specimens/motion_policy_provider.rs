@@ -10,6 +10,8 @@ use poodle_specs::SpinnerSpec;
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     div()
         .flex_col()
-        .child(div().child("full / reduced / frozen — Jetstream paints a static spinner"))
+        .child(div().child(label(
+            "full / reduced / frozen — Jetstream paints a static spinner",
+        )))
         .child(js_spinner(&SpinnerSpec::new(), theme))
 }

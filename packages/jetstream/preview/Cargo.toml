@@ -45,6 +45,12 @@ image = { version = "0.25", default-features = false, features = ["png"] }
 env_logger = "0.11"
 log = "0.4"
 
+# Jetstream's adapter consumes Poodle through Git while this preview uses local
+# renderer crates. Patch the Poodle Git dependency to the same local Node source
+# so every renderer emits the same Node type.
+[patch."https://github.com/inflatable-cookie/poodle.git"]
+poodle-node = { path = "../../contracts/node" }
+
 [package.metadata.poodle]
 public-intent = false
 channel = "internal"

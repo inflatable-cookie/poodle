@@ -162,6 +162,7 @@
 # Preflight names a missing or stale sibling checkout instead of cargo's
 # unresolved path error. Poodle does not vendor Jetstream.
 "jetstream:build" = "bun scripts/jetstream-build.ts"
+"check:jetstream-preview" = "cargo check -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
 "jetstream:run" = "cargo run -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
 "jetstream:test" = "cd packages/jetstream/adapter && cargo test"
 "jetstream:preview" = [{ task = "jetstream:run" }]
@@ -881,6 +882,7 @@
 # new modules would silently escape. Runtime recorded 2026-09-30 (warm
 # checkout): 8s wall, 1.6s of test time.
 "test:gpui-preview" = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview"
+"test:jetstream-preview" = "cargo test --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin poodle-jetstream-preview"
 # `check:jetstream` and `test:jetstream` are gone: they drove
 # `poodle-jetstream-components`, deleted in `ee704699` when Jetstream moved onto
 # `poodle-render` nodes. The render probes they ran live in
