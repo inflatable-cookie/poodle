@@ -181,7 +181,7 @@
 "test:nucleus-parity-receipts" = "bun test scripts/nucleus-parity-receipts.test.ts"
 "check:gpui-census" = "bun scripts/gpui-functionality-census.ts --check"
 "test:gpui-census" = "bun test scripts/gpui-functionality-census.test.ts"
-"update:gpui-census" = "bun scripts/gpui-functionality-census.ts"
+"update:gpui-census" = "bun scripts/gpui-functionality-census.ts {args}"
 
 # CI gates — light, ubuntu-only. No native (gpui/jetstream) crates, no vite
 # preview builds. The GitHub workflows bootstrap their pinned runtimes and
@@ -202,7 +202,11 @@
 "release:web-admission" = "bun test/package-install/web-admission.ts"
 # One lockstep version path for the npm packages and every tagged Rust crate.
 # The command refuses targets that do not increase the shared pre-1.0 version.
-"release:bump" = "bun scripts/release-version.ts {args}"
+"release:bump" = [
+  { run = "bun scripts/release-version.ts {args}" },
+  { task = "ir:build" },
+  { task = "catalogue:build" },
+]
 # Build a disposable GPUI downstream crate from a clean local bare tag of HEAD.
 "release:gpui-consumer" = "bun scripts/gpui-consumer-smoke.ts"
 # Certificate mode builds and packs exactly once and writes the candidate

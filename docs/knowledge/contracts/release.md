@@ -60,9 +60,10 @@ process failure, not a discovery: stop and return to planning.
    must be a greater pre-1.0 version than the current root version. This single
    selector updates root, core, Svelte and React manifests, current-minor core
    ranges, every Rust crate version and internal Poodle path pin, the Bun
-   workspace lock slice, and the two tracked GPUI `Cargo.lock` files. It
-   refuses a non-increasing version and does not refresh third-party lock
-   resolutions. Add the `CHANGELOG.md` entry and one
+   workspace lock slice, and the two tracked GPUI `Cargo.lock` files. It then
+   runs `ir:build` and `catalogue:build` to restamp generated outputs with the
+   new `poodle-codegen` version. It refuses a non-increasing version and does
+   not refresh third-party lock resolutions. Add the `CHANGELOG.md` entry and one
    `docs/release-notes/<version>.md`, and list it in
    `docs/release-notes/README.md`. Nothing else may change except generated
    stamps and evidence that release policy admits. In a second
@@ -109,13 +110,22 @@ release after that baseline must use a strictly greater version, such as
    every JS manifest, Cargo manifest, and tracked GPUI lock to carry the same
    source-to-target transition in that one commit. It admits only the version
    fields, internal dependency pins, and local Poodle lock entries; an
-   unrelated Rust or lockfile change is rejected. Do not add a crates.io
-   publication step or `publish = true`.
+   unrelated Rust or lockfile change is rejected. `release:bump` also runs
+   `ir:build` and `catalogue:build`, so generated codegen stamps in this commit
+   match the new Cargo package version. Do not refresh the GPUI census yet: its
+   receipts record their source commit and native test run, so refresh them
+   after this freeze commit exists. Do not add a crates.io publication step or
+   `publish = true`.
 2. **Certify.** Run the existing web certificate and the native gates against
    the same frozen candidate: `effigy release:web-certificate`,
    `effigy ci:rust`, `effigy check:gpui`, `effigy regressions:native`,
-   `effigy test:gpui-census`, `effigy check:gpui-census`, and
-   `effigy release:gpui-consumer`. The consumer selector creates a disposable
+   and `effigy release:gpui-consumer`. Capture the successful full native
+   regression run ID, then refresh the census against the frozen commit with
+   `effigy update:gpui-census --record-selector-result <freeze-commit> <run-id> passed "effigy regressions:native passed"`.
+   Commit those generated census artifacts as an evidence-only follow-up and
+   run `effigy test:gpui-census` and `effigy check:gpui-census` on that commit.
+   This updates receipt package versions while binding test and source
+   identities to the frozen candidate. The consumer selector creates a disposable
    local bare repository, tags the exact candidate commit, and compiles a
    fresh consumer using `poodle-gpui-node-backend` plus the same GPUI crate
    identity. It does not create a tag in the working repository.

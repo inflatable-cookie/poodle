@@ -182,6 +182,15 @@ function fixture(): string {
 }
 
 describe("lockstep release version bump", () => {
+  test("release:bump restamps codegen outputs and census updates accept evidence arguments", () => {
+    const tasks = readFileSync(new URL("../tasks/effigy.tasks.toml", import.meta.url), "utf8");
+    const bump = /"release:bump"\s*=\s*\[([\s\S]*?)\n\]/.exec(tasks)?.[1] ?? "";
+    expect(bump).toContain("bun scripts/release-version.ts {args}");
+    expect(bump).toContain('{ task = "ir:build" }');
+    expect(bump).toContain('{ task = "catalogue:build" }');
+    expect(tasks).toContain('"update:gpui-census" = "bun scripts/gpui-functionality-census.ts {args}"');
+  });
+
   test("updates each JS and Rust version source and only the lockfile version slices", () => {
     const root = fixture();
     const lockBefore = readFileSync(join(root, "bun.lock"), "utf8");
