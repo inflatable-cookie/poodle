@@ -95,6 +95,19 @@ describe("audio controls (react)", () => {
     expect(onNoteOff).toHaveBeenCalledWith(60);
   });
 
+  it("lays out and hit-tests equal rows through the same partial scroll offset", () => {
+    const onNoteOn = vi.fn();
+    const view = render(<Keyboard firstNote={60} lastNote={62} orientation="vertical" keyLayout="equal-rows" rowHeightPx={10} scrollOffsetPx={5} onNoteOn={onNoteOn} />);
+    const keyboard = view.getByRole("toolbar") as HTMLDivElement;
+    keyboard.getBoundingClientRect = () => ({ left: 0, top: 0, width: 100, height: 30, right: 100, bottom: 30, x: 0, y: 0, toJSON: () => ({}) });
+    keyboard.setPointerCapture = vi.fn();
+    expect(keyboard.getAttribute("data-key-layout")).toBe("equal-rows");
+    expect(view.container.querySelector('[data-note="62"]')?.getAttribute("style")).toContain("top: -5px; height: 10px");
+    expect(view.container.querySelector('[data-note="61"]')?.getAttribute("style")).toContain("top: 5px; height: 10px");
+    fireEvent.pointerDown(keyboard, { pointerId: 1, button: 0, clientX: 90, clientY: 7 });
+    expect(onNoteOn).toHaveBeenCalledWith(61, 114);
+  });
+
   it("moves the waveform cursor and exposes selection text", () => {
     const onCursorChange = vi.fn();
     const view = render(<WaveformDisplay pyramid={waveform} cursorSample={1} selection={{ start: 1, end: 2 }} onCursorChange={onCursorChange} ariaLabel="Clip" />);

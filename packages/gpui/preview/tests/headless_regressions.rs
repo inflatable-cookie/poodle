@@ -56476,6 +56476,141 @@ fn keyboard_pointer_computer_key_and_held_notes_rebuild_the_host_spec() {
     });
 }
 
+#[test]
+fn keyboard_equal_rows_align_visual_and_pointer_through_partial_scroll() {
+    use poodle_headless::audio::{keyboard_visual_state, KeyboardContext, KeyboardOrientation};
+    use poodle_specs::{KeyboardKeyLayout, KeyboardSpec};
+
+    const ROOT: &str = "keyboard-equal-rows";
+    let theme_provider = theme();
+    let context = KeyboardContext {
+        first_note: 60,
+        last_note: 62,
+        orientation: KeyboardOrientation::Vertical,
+        ..KeyboardContext::default()
+    };
+    let spec = KeyboardSpec::new(keyboard_visual_state(&context))
+        .with_key_layout(KeyboardKeyLayout::EqualRows)
+        .with_row_height_px(10.0)
+        .with_scroll_offset_px(5.0);
+    let live = Arc::new(Mutex::new(poodle_render::KeyboardLive::from_context(
+        context.clone(),
+    )));
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let events = Arc::clone(&payloads);
+        let off_events = Arc::clone(&payloads);
+        let node = poodle_render::keyboard_with_handlers(
+            &spec,
+            &RenderContext::new(&theme_provider),
+            &poodle_render::KeyboardHandlers::new(ROOT)
+                .on_note_on(Arc::new(move |note, velocity| {
+                    events
+                        .lock()
+                        .expect("keyboard event payloads")
+                        .push(format!("noteOn:{note}:{velocity}"));
+                }))
+                .on_note_off(Arc::new(move |note| {
+                    off_events
+                        .lock()
+                        .expect("keyboard event payloads")
+                        .push(format!("noteOff:{note}"));
+                })),
+            &live,
+        );
+        assert_eq!(
+            node.style.descriptor.layout.overflow_y,
+            poodle_node::LayoutOverflow::Hidden,
+            "equal-pitch rows clip at the keyboard viewport"
+        );
+        let clipped_note = node
+            .children
+            .iter()
+            .find(|child| child.id.as_deref() == Some("keyboard-equal-rows:visual-62"))
+            .expect("the partially clipped high note is rendered");
+        assert_eq!(
+            clipped_note.style.descriptor.layout.height,
+            LayoutSizing::Fixed(10.0)
+        );
+        assert_eq!(
+            clipped_note.position,
+            NodePosition::Absolute {
+                top: Some(-5.0),
+                left: Some(0.0),
+                right: None,
+                bottom: None,
+            }
+        );
+        let note = node
+            .children
+            .iter()
+            .find(|child| child.id.as_deref() == Some("keyboard-equal-rows:visual-61"))
+            .expect("the black semitone row is rendered");
+        assert_eq!(
+            note.style.descriptor.layout.height,
+            LayoutSizing::Fixed(10.0)
+        );
+        assert_eq!(
+            note.position,
+            NodePosition::Absolute {
+                top: Some(5.0),
+                left: Some(0.0),
+                right: None,
+                bottom: None,
+            }
+        );
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 400.0);
+        driver.wait_for_focus_handle(ROOT);
+        let bounds = poodle_gpui_node_backend::bounds_for(ROOT).expect("keyboard bounds");
+        let at_y = |y| {
+            point(
+                px(f32::from(bounds.origin.x) + f32::from(bounds.size.width) * 0.1),
+                px(f32::from(bounds.origin.y) + y),
+            )
+        };
+        driver.pointer_press(at_y(2.0));
+        assert!(
+            live.lock()
+                .expect("keyboard live state")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.1 == 62),
+            "pointer y=2px resolves the partially visible high-note row"
+        );
+        driver.pointer_release(at_y(2.0));
+        assert!(
+            live.lock()
+                .expect("keyboard live state")
+                .machine
+                .active_inputs
+                .is_empty(),
+            "releasing the partial row closes its note"
+        );
+        driver.pointer_press(at_y(7.0));
+        assert!(
+            live.lock()
+                .expect("keyboard live state")
+                .machine
+                .active_inputs
+                .iter()
+                .any(|active| active.1 == 61),
+            "pointer y=7px and 5px scroll offset resolve the 61 row"
+        );
+        assert_eq!(
+            *payloads.lock().expect("keyboard event payloads"),
+            vec![
+                "noteOn:62:14".to_owned(),
+                "noteOff:62".to_owned(),
+                "noteOn:61:14".to_owned(),
+            ]
+        );
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
 /// DetailShell keeps its named section, renders the title only as a header-slot
 /// fallback, resolves spacing tokens, and mounts usable header actions.
 #[test]

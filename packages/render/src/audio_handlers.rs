@@ -29,6 +29,7 @@ use poodle_specs::{
     ModMatrixGridSpec, Orientation, WaveformDisplaySpec, XYPadSpec,
 };
 
+use crate::audio::keyboard_dimensions;
 use crate::color::with_alpha;
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
@@ -1986,6 +1987,9 @@ fn apply_host_keyboard(
         effects.extend(more);
     }
     machine.orientation = state.orientation;
+    machine.key_layout = state.key_layout;
+    machine.row_height_px = state.row_height_px;
+    machine.scroll_offset_px = state.scroll_offset_px;
     machine.external_held_notes = state.external_held_notes.clone();
     (machine, effects)
 }
@@ -1997,7 +2001,6 @@ pub fn bind_keyboard(
     handlers: &KeyboardHandlers,
     live: &Arc<Mutex<KeyboardLive>>,
 ) {
-    let _ = ctx;
     node.id = Some(audio_root_id(&handlers.instance_id));
     run_keyboard(live, |machine| apply_host_keyboard(machine, spec), handlers);
     let enabled = {
@@ -2007,7 +2010,15 @@ pub fn bind_keyboard(
     if !enabled {
         return;
     }
-    bind_keyboard_pointer(node, Arc::clone(live), handlers.clone());
+    let size = ctx.resolve_size(spec.size, spec.size_role);
+    let (width, height) = keyboard_dimensions(size, spec.visual_state.orientation);
+    let major_axis_px =
+        if spec.visual_state.orientation == poodle_headless::audio::KeyboardOrientation::Vertical {
+            height
+        } else {
+            width
+        };
+    bind_keyboard_pointer(node, Arc::clone(live), handlers.clone(), major_axis_px);
     bind_computer_keys(node, Arc::clone(live), handlers.clone());
     let keys = spec.visual_state.keys.clone();
     let mut key_index = 0usize;
@@ -2033,6 +2044,7 @@ fn bind_keyboard_pointer(
     node: &mut Node,
     live: Arc<Mutex<KeyboardLive>>,
     handlers: KeyboardHandlers,
+    major_axis_px: f32,
 ) {
     node.interaction.on_continuous_value =
         Some(Arc::new(move |event: &NodeContinuousValueEvent| {
@@ -2042,7 +2054,12 @@ fn bind_keyboard_pointer(
                 let runtime = live.lock().expect("keyboard machine");
                 (
                     runtime.machine.orientation,
-                    keyboard_hit_test(&runtime.machine, x_from_left, y_from_top),
+                    keyboard_hit_test(
+                        &runtime.machine,
+                        x_from_left,
+                        y_from_top,
+                        f64::from(major_axis_px),
+                    ),
                 )
             };
             let velocity = keyboard_velocity_at_point(orientation, x_from_left, y_from_top);

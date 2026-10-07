@@ -1789,12 +1789,37 @@ pub enum KeyboardOrientation {
     Vertical,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum KeyboardKeyLayout {
+    #[default]
+    Piano,
+    EqualRows,
+}
+
+pub fn normalize_keyboard_row_height_px(height: f64) -> f64 {
+    if height.is_finite() {
+        height.max(1.0)
+    } else {
+        16.0
+    }
+}
+
+pub fn normalize_keyboard_scroll_offset_px(offset: f64) -> f64 {
+    if offset.is_finite() {
+        offset.max(0.0)
+    } else {
+        0.0
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct KeyboardKeyVisualState {
     pub note: u8,
     pub black: bool,
     pub start_norm: f64,
     pub length_norm: f64,
+    pub start_px: Option<f64>,
+    pub length_px: Option<f64>,
     pub breadth_norm: f64,
     pub held: bool,
     pub externally_held: bool,
@@ -1805,6 +1830,9 @@ pub struct KeyboardKeyVisualState {
 #[derive(Clone, Debug, PartialEq)]
 pub struct KeyboardVisualState {
     pub orientation: KeyboardOrientation,
+    pub key_layout: KeyboardKeyLayout,
+    pub row_height_px: f64,
+    pub scroll_offset_px: f64,
     pub first_note: u8,
     pub last_note: u8,
     pub octave_shift: i8,
@@ -1819,6 +1847,9 @@ pub struct KeyboardContext {
     pub first_note: u8,
     pub last_note: u8,
     pub orientation: KeyboardOrientation,
+    pub key_layout: KeyboardKeyLayout,
+    pub row_height_px: f64,
+    pub scroll_offset_px: f64,
     pub octave_shift: i8,
     /// Base MIDI note for computer-key offsets (contract `computerBaseNote`, default 60).
     pub computer_base_note: u8,
@@ -1837,6 +1868,9 @@ impl Default for KeyboardContext {
             first_note: 48,
             last_note: 72,
             orientation: KeyboardOrientation::Horizontal,
+            key_layout: KeyboardKeyLayout::Piano,
+            row_height_px: 16.0,
+            scroll_offset_px: 0.0,
             octave_shift: 0,
             computer_base_note: 60,
             computer_key_map: default_computer_key_map(),
@@ -2052,6 +2086,7 @@ pub fn keyboard_hit_test(
     context: &KeyboardContext,
     x_from_left: f64,
     y_from_top: f64,
+    major_axis_px: f64,
 ) -> Option<u8> {
     let (axis, depth) = match context.orientation {
         KeyboardOrientation::Horizontal => (x_from_left, y_from_top),
@@ -2059,6 +2094,31 @@ pub fn keyboard_hit_test(
     };
     if !(0.0..=1.0).contains(&axis) || !(0.0..=1.0).contains(&depth) {
         return None;
+    }
+    if context.key_layout == KeyboardKeyLayout::EqualRows {
+        let count = usize::from(context.last_note - context.first_note) + 1;
+        if context.orientation == KeyboardOrientation::Horizontal {
+            let column = ((axis * count as f64).floor() as usize).min(count - 1);
+            return Some(context.first_note + column as u8);
+        }
+        if !major_axis_px.is_finite() || major_axis_px <= 0.0 {
+            return None;
+        }
+        let y = axis * major_axis_px;
+        let keys = keyboard_visual_state(context).keys;
+        if let Some(key) = keys.iter().find(|key| {
+            key.start_px
+                .zip(key.length_px)
+                .is_some_and(|(start, length)| y >= start && y < start + length)
+        }) {
+            return Some(key.note);
+        }
+        let bottom_key = keys.iter().find(|key| key.note == context.first_note)?;
+        return bottom_key
+            .start_px
+            .zip(bottom_key.length_px)
+            .filter(|(start, length)| y == start + length)
+            .map(|_| context.first_note);
     }
     let keys = keyboard_visual_state(context).keys;
     keys.iter()
@@ -2166,13 +2226,21 @@ pub fn keyboard_visual_state(context: &KeyboardContext) -> KeyboardVisualState {
         .copied()
         .filter(|note| !black_note(*note))
         .collect();
+    let equal_rows = context.key_layout == KeyboardKeyLayout::EqualRows;
     let white_length = 1.0 / white.len().max(1) as f64;
+    let row_length = 1.0 / notes.len().max(1) as f64;
     let keys = notes
         .iter()
         .map(|note| {
             let black = black_note(*note);
             let preceding = white.iter().filter(|candidate| **candidate < *note).count();
-            let logical_start = if black {
+            let logical_start = if equal_rows {
+                if context.orientation == KeyboardOrientation::Vertical {
+                    f64::from(context.last_note - *note) * row_length
+                } else {
+                    f64::from(*note - context.first_note) * row_length
+                }
+            } else if black {
                 ((preceding as f64 - 0.32) * white_length).max(0.0)
             } else {
                 white
@@ -2181,7 +2249,9 @@ pub fn keyboard_visual_state(context: &KeyboardContext) -> KeyboardVisualState {
                     .unwrap_or(0) as f64
                     * white_length
             };
-            let length_norm = if black {
+            let length_norm = if equal_rows {
+                row_length
+            } else if black {
                 white_length * 0.64
             } else {
                 white_length
@@ -2195,13 +2265,29 @@ pub fn keyboard_visual_state(context: &KeyboardContext) -> KeyboardVisualState {
             KeyboardKeyVisualState {
                 note: *note,
                 black,
-                start_norm: if context.orientation == KeyboardOrientation::Vertical {
+                start_norm: if equal_rows {
+                    logical_start
+                } else if context.orientation == KeyboardOrientation::Vertical {
                     1.0 - logical_start - length_norm
                 } else {
                     logical_start
                 },
                 length_norm,
-                breadth_norm: if black { 0.62 } else { 1.0 },
+                start_px: if equal_rows && context.orientation == KeyboardOrientation::Vertical {
+                    Some(
+                        f64::from(context.last_note - *note)
+                            * normalize_keyboard_row_height_px(context.row_height_px)
+                            - normalize_keyboard_scroll_offset_px(context.scroll_offset_px),
+                    )
+                } else {
+                    None
+                },
+                length_px: if equal_rows && context.orientation == KeyboardOrientation::Vertical {
+                    Some(normalize_keyboard_row_height_px(context.row_height_px))
+                } else {
+                    None
+                },
+                breadth_norm: if black && !equal_rows { 0.62 } else { 1.0 },
                 held: velocity.is_some(),
                 externally_held: context.external_held_notes.contains(note),
                 velocity,
@@ -2221,6 +2307,9 @@ pub fn keyboard_visual_state(context: &KeyboardContext) -> KeyboardVisualState {
     external.dedup();
     KeyboardVisualState {
         orientation: context.orientation,
+        key_layout: context.key_layout,
+        row_height_px: normalize_keyboard_row_height_px(context.row_height_px),
+        scroll_offset_px: normalize_keyboard_scroll_offset_px(context.scroll_offset_px),
         first_note: context.first_note,
         last_note: context.last_note,
         octave_shift: context.octave_shift,
@@ -2229,6 +2318,72 @@ pub fn keyboard_visual_state(context: &KeyboardContext) -> KeyboardVisualState {
         external_held_notes: external,
         enabled: !context.disabled,
     }
+}
+
+/// Repositions a native visual state when a KeyboardSpec builder changes its
+/// layout, preserving held/focused state while keeping renderer geometry core-owned.
+pub fn keyboard_visual_state_with_layout(
+    mut state: KeyboardVisualState,
+    key_layout: KeyboardKeyLayout,
+) -> KeyboardVisualState {
+    state.key_layout = key_layout;
+    let count = usize::from(state.last_note - state.first_note) + 1;
+    let whites = (state.first_note..=state.last_note)
+        .filter(|note| !black_note(*note))
+        .collect::<Vec<_>>();
+    let white_length = 1.0 / whites.len().max(1) as f64;
+    let row_length = 1.0 / count.max(1) as f64;
+    for key in &mut state.keys {
+        let logical_start = if key_layout == KeyboardKeyLayout::EqualRows {
+            if state.orientation == KeyboardOrientation::Vertical {
+                f64::from(state.last_note - key.note) * row_length
+            } else {
+                f64::from(key.note - state.first_note) * row_length
+            }
+        } else if key.black {
+            let preceding = whites.iter().filter(|note| **note < key.note).count();
+            ((preceding as f64 - 0.32) * white_length).max(0.0)
+        } else {
+            whites
+                .iter()
+                .position(|note| *note == key.note)
+                .unwrap_or(0) as f64
+                * white_length
+        };
+        let length_norm = if key_layout == KeyboardKeyLayout::EqualRows {
+            row_length
+        } else if key.black {
+            white_length * 0.64
+        } else {
+            white_length
+        };
+        key.start_norm = if key_layout == KeyboardKeyLayout::EqualRows {
+            logical_start
+        } else if state.orientation == KeyboardOrientation::Vertical {
+            1.0 - logical_start - length_norm
+        } else {
+            logical_start
+        };
+        key.length_norm = length_norm;
+        if key_layout == KeyboardKeyLayout::EqualRows
+            && state.orientation == KeyboardOrientation::Vertical
+        {
+            key.start_px = Some(
+                f64::from(state.last_note - key.note) * state.row_height_px
+                    - state.scroll_offset_px,
+            );
+            key.length_px = Some(state.row_height_px);
+        } else {
+            key.start_px = None;
+            key.length_px = None;
+        }
+        key.breadth_norm = if key.black && key_layout == KeyboardKeyLayout::Piano {
+            0.62
+        } else {
+            1.0
+        };
+    }
+    state
 }
 
 pub const WAVEFORM_MAX_COLUMNS: usize = 4096;
@@ -2665,24 +2820,57 @@ mod tests {
             last_note: 61,
             ..KeyboardContext::default()
         };
-        assert_eq!(keyboard_hit_test(&horizontal, 0.5, 0.9), Some(60));
-        assert_eq!(keyboard_hit_test(&horizontal, -0.1, 0.9), None);
-        assert_eq!(keyboard_hit_test(&horizontal, 1.1, 0.9), None);
-        assert_eq!(keyboard_hit_test(&horizontal, 0.5, -0.1), None);
-        assert_eq!(keyboard_hit_test(&horizontal, 0.5, 1.1), None);
+        assert_eq!(keyboard_hit_test(&horizontal, 0.5, 0.9, 100.0), Some(60));
+        assert_eq!(keyboard_hit_test(&horizontal, -0.1, 0.9, 100.0), None);
+        assert_eq!(keyboard_hit_test(&horizontal, 1.1, 0.9, 100.0), None);
+        assert_eq!(keyboard_hit_test(&horizontal, 0.5, -0.1, 100.0), None);
+        assert_eq!(keyboard_hit_test(&horizontal, 0.5, 1.1, 100.0), None);
         let vertical = KeyboardContext {
             first_note: 60,
             last_note: 61,
             orientation: KeyboardOrientation::Vertical,
             ..KeyboardContext::default()
         };
-        assert_eq!(keyboard_hit_test(&vertical, 0.9, 0.75), Some(60));
+        assert_eq!(keyboard_hit_test(&vertical, 0.9, 0.75, 100.0), Some(60));
         let moved = keyboard_move_focus(KeyboardContext::default(), 1);
         assert_eq!(moved.focused_note, Some(48));
         let (released, effects) =
             keyboard_release_all(keyboard_press(KeyboardContext::default(), "pointer", 60, 64).0);
         assert_eq!(effects, vec![KeyboardEffect::NoteOff { note: 60 }]);
         assert!(released.active_inputs.is_empty());
+    }
+
+    #[test]
+    fn equal_row_geometry_and_hit_testing_share_a_partial_scroll_offset() {
+        let context = KeyboardContext {
+            first_note: 60,
+            last_note: 62,
+            orientation: KeyboardOrientation::Vertical,
+            key_layout: KeyboardKeyLayout::EqualRows,
+            row_height_px: 10.0,
+            scroll_offset_px: 5.0,
+            ..KeyboardContext::default()
+        };
+        let visual = keyboard_visual_state(&context);
+        let key = |note| visual.keys.iter().find(|key| key.note == note).unwrap();
+        assert_eq!(key(62).start_norm, 0.0);
+        assert_eq!(key(61).start_norm, 1.0 / 3.0);
+        assert_eq!(key(60).start_norm, 2.0 / 3.0);
+        assert!(visual
+            .keys
+            .iter()
+            .all(|key| key.length_norm == 1.0 / 3.0 && key.breadth_norm == 1.0));
+        assert_eq!(keyboard_hit_test(&context, 0.9, 0.0, 30.0), Some(62));
+        assert_eq!(keyboard_hit_test(&context, 0.1, 7.0 / 30.0, 30.0), Some(61));
+        assert_eq!(
+            keyboard_hit_test(&context, 0.9, 20.0 / 30.0, 30.0),
+            Some(60)
+        );
+        assert_eq!(keyboard_hit_test(&context, 0.9, 1.0, 30.0), None);
+        assert_eq!(
+            keyboard_velocity_at_point(KeyboardOrientation::Vertical, 0.9, 0.4),
+            114
+        );
     }
 
     #[test]
