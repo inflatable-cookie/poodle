@@ -9,6 +9,7 @@
     createIconGeometryRuntime,
     type GeometryEndpoint,
   } from "../../../core/src/icons/geometry-runtime";
+  import { realize } from "../../../core/src/icons/geometry-realize";
   import type { MotionPolicy } from "@inflatable-cookie/poodle-core";
 
   let {
@@ -28,40 +29,24 @@
   } = $props();
 
   const runtime = createIconGeometryRuntime("full");
+  const svgAttributes = realize({ name: "frame", frame: null }).svgAttributes;
 
-  function paintFromProps(): { closed: boolean; d: string }[] {
+  function paintFromProps(): { d: string }[] {
     setIconGeometryPolicy(runtime, policy);
     const decision = activateIconGeometry(runtime, { owner, pairId, target, initial });
     if (progress !== null) {
       sampleIconGeometry(runtime, decision.key, progress);
     }
-    const current = currentIconGeometryFrame(runtime);
-    if (!current) return [];
-    return current.contours.map((contour) => ({
-      closed: contour.closed,
-      d: contourPath(contour.closed, contour.points, contour.count),
-    }));
+    return realize({
+      name: "frame",
+      frame: currentIconGeometryFrame(runtime),
+    }).paths;
   }
 
   let paths = $state(paintFromProps());
 
   function snapshot() {
     paths = paintFromProps();
-  }
-
-  function contourPath(
-    closed: boolean,
-    points: readonly (readonly [number, number])[],
-    count: number,
-  ): string {
-    if (count === 0) return "";
-    const commands: string[] = [];
-    for (let index = 0; index < count; index += 1) {
-      const point = points[index]!;
-      commands.push(`${index === 0 ? "M" : "L"}${point[0] / 10_000} ${point[1] / 10_000}`);
-    }
-    if (closed) commands.push("Z");
-    return commands.join(" ");
   }
 
   $effect(() => {
@@ -75,13 +60,10 @@
       return;
     }
     return startIconGeometryFrameLoop(runtime, decision.key, () => {
-      const current = currentIconGeometryFrame(runtime);
-      paths = current
-        ? current.contours.map((contour) => ({
-            closed: contour.closed,
-            d: contourPath(contour.closed, contour.points, contour.count),
-          }))
-        : [];
+      paths = realize({
+        name: "frame",
+        frame: currentIconGeometryFrame(runtime),
+      }).paths;
     });
   });
 
@@ -92,22 +74,7 @@
   });
 </script>
 
-<svg
-  class="poodle-icon-geometry"
-  data-poodle-icon-geometry=""
-  data-size="md"
-  xmlns="http://www.w3.org/2000/svg"
-  width="24"
-  height="24"
-  viewBox="0 0 24 24"
-  fill="none"
-  stroke="currentColor"
-  stroke-width="2"
-  stroke-linecap="round"
-  stroke-linejoin="round"
-  role="presentation"
-  aria-hidden="true"
->
+<svg {...svgAttributes}>
   {#each paths as contour, index (index)}
     <path d={contour.d} />
   {/each}

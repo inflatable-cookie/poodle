@@ -368,6 +368,7 @@ export function coreLibraryEntries(): LibraryEntry[] {
   const entries: LibraryEntry[] = [
     { name: "index", source: "src/index.ts", outputExt: ".js" },
     { name: "icons/index", source: "src/icons/index.ts", outputExt: ".js" },
+    { name: "icons/geometry-realize", source: "src/icons/geometry-realize.ts", outputExt: ".js" },
     ...CORE_ICON_MODULES.map((name) => ({
       name: `icons/icons/${name}`,
       source: `src/icons/icons/${name}.ts`,
@@ -408,6 +409,7 @@ export function corePublicJsFiles(): string[] {
   return [
     "dist/index.js",
     "dist/icons/index.js",
+    "dist/icons/geometry-realize.js",
     "dist/icons/build.mjs",
     ...CORE_ICON_MODULES.map((name) => `dist/icons/icons/${name}.js`),
     "dist/tokens/index.js",
@@ -430,6 +432,7 @@ export function corePublicDeclarationFiles(): string[] {
   return [
     "dist/index.d.ts",
     "dist/icons/index.d.ts",
+    "dist/icons/geometry-realize.d.ts",
     "dist/icons/build.d.mts",
     ...CORE_ICON_MODULES.map((name) => `dist/icons/icons/${name}.d.ts`),
     "dist/tokens/index.d.ts",
@@ -450,6 +453,10 @@ export function corePackageExports(): Record<string, string | JsExportMap> {
     ".": jsExport("./dist/index.js", "./dist/index.d.ts"),
     "./icons": jsExport("./dist/icons/index.js", "./dist/icons/index.d.ts"),
     "./icons/build": jsExport("./dist/icons/build.mjs", "./dist/icons/build.d.mts"),
+    "./icons/geometry-realize": jsExport(
+      "./dist/icons/geometry-realize.js",
+      "./dist/icons/geometry-realize.d.ts",
+    ),
     "./icons/*": jsExport("./dist/icons/icons/*.js", "./dist/icons/icons/*.d.ts"),
     "./tokens": jsExport("./dist/tokens/index.js", "./dist/tokens/index.d.ts"),
     "./tokens/runtime": jsExport("./dist/tokens/runtime.js", "./dist/tokens/runtime.d.ts"),

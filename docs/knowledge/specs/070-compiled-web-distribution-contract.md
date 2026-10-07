@@ -313,6 +313,11 @@ Conditionless string targets are CSS-only.
     "import": "./dist/icons/build.mjs",
     "default": "./dist/icons/build.mjs"
   },
+  "./icons/geometry-realize": {
+    "types": "./dist/icons/geometry-realize.d.ts",
+    "import": "./dist/icons/geometry-realize.js",
+    "default": "./dist/icons/geometry-realize.js"
+  },
   "./icons/*": {
     "types": "./dist/icons/icons/*.d.ts",
     "import": "./dist/icons/icons/*.js",
@@ -359,6 +364,7 @@ below. CSS rows stay strings.
 | `.` | `./dist/index.js` + `./dist/index.d.ts` |
 | `./icons` | `./dist/icons/index.js` + `./dist/icons/index.d.ts` |
 | `./icons/build` | `./dist/icons/build.mjs` + `./dist/icons/build.d.mts` |
+| `./icons/geometry-realize` | `./dist/icons/geometry-realize.js` + `./dist/icons/geometry-realize.d.ts`; named-state icon-geometry test support |
 | `./icons/*` | `./dist/icons/icons/*.js` + matching `.d.ts`; only the 108 icon modules below |
 | `./tokens` | `./dist/tokens/index.js` + `./dist/tokens/index.d.ts` |
 | `./tokens/runtime` | `./dist/tokens/runtime.js` + `.d.ts` |

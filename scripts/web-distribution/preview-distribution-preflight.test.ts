@@ -590,24 +590,31 @@ async function fetchFirstOk(urls: string[]): Promise<{ url: string; body: string
   throw new Error(`no served module responded:\n${errors.join("\n")}`);
 }
 
-async function importNamed(source: string, name: string): Promise<"present" | "missing"> {
+async function importNamed(modulePath: string, name: string): Promise<"present" | "missing"> {
   const dir = mkdtempSync(join(SCRATCH_BASE, "poodle-served-mod-"));
-  const modPath = join(dir, "mod.mjs");
   const probePath = join(dir, "probe.mjs");
-  writeFileSync(modPath, source);
+  // Keep the copied module beside its chunks. Vite's transformed `/@fs` URLs
+  // are browser paths, while the preview's build graph may contain relative
+  // imports to shared chunks.
+  const probeModulePath = join(
+    dirname(modulePath),
+    `.poodle-module-probe-${Date.now()}-${Math.random().toString(36).slice(2)}.mjs`,
+  );
+  copyFileSync(modulePath, probeModulePath);
   writeFileSync(
     probePath,
-    `import { ${name} } from ${JSON.stringify(pathToFileURL(modPath).href)};\nvoid ${name};\n`,
+    `import { ${name} } from ${JSON.stringify(pathToFileURL(probeModulePath).href)};\nvoid ${name};\n`,
   );
   try {
     await import(`${pathToFileURL(probePath).href}?t=${Date.now()}`);
-    rmSync(dir, { recursive: true, force: true });
     return "present";
   } catch (error) {
-    rmSync(dir, { recursive: true, force: true });
     const text = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
     if (text.includes(name)) return "missing";
     throw error;
+  } finally {
+    rmSync(probeModulePath, { force: true });
+    rmSync(dir, { recursive: true, force: true });
   }
 }
 
@@ -621,7 +628,7 @@ async function assertServedMismatch(
   expect(engine.body, engine.url).toContain(PLANTED_EXPORT);
   const core = await fetchFirstOk(candidateFsUrls(root, CORE_DIST_INDEX, port));
   expect(core.body, core.url).not.toMatch(new RegExp(`export\\s*\\{[\\s\\S]*\\b${PLANTED_EXPORT}\\b`));
-  expect(await importNamed(core.body, PLANTED_EXPORT)).toBe("missing");
+  expect(await importNamed(join(root, CORE_DIST_INDEX), PLANTED_EXPORT)).toBe("missing");
 }
 
 async function assertServedFresh(
@@ -635,7 +642,7 @@ async function assertServedFresh(
   expect(engine.body, engine.url).toContain(PLANTED_EXPORT);
   const core = await fetchFirstOk(candidateFsUrls(root, CORE_DIST_INDEX, port));
   expect(core.body, core.url).toMatch(new RegExp(`export\\s*\\{[\\s\\S]*\\b${PLANTED_EXPORT}\\b`));
-  expect(await importNamed(core.body, PLANTED_EXPORT)).toBe("present");
+  expect(await importNamed(join(root, CORE_DIST_INDEX), PLANTED_EXPORT)).toBe("present");
   const editor = await fetchFirstOk(candidateFsUrls(root, editorRel, port));
   expect(editor.body, editor.url).not.toContain(STALE_EDITOR_MARKER);
   expect(editor.body, editor.url).toContain(PLANTED_EXPORT);
