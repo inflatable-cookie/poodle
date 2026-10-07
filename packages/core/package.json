@@ -44,6 +44,11 @@
       "import": "./dist/icons/build.mjs",
       "default": "./dist/icons/build.mjs"
     },
+    "./icons/geometry-realize": {
+      "types": "./dist/icons/geometry-realize.d.ts",
+      "import": "./dist/icons/geometry-realize.js",
+      "default": "./dist/icons/geometry-realize.js"
+    },
     "./icons/*": {
       "types": "./dist/icons/icons/*.d.ts",
       "import": "./dist/icons/icons/*.js",

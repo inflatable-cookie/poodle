@@ -266,6 +266,10 @@
 # startup, and process/port cleanup. Does not touch live ignored output.
 "test:preview-preflight" = "bun test scripts/web-distribution/preview-distribution-preflight.test.ts test/visual/server.test.ts"
 "test:core" = "bun run --cwd packages/core test"
+"test:core-icon-geometry-realize" = [
+  { run = "bun test --timeout 120000 packages/core/test/icon-geometry-realize.test.ts" },
+  { run = "bun test --timeout 120000 --test-name-pattern 'geometry realization support is exported for sibling test hosts' scripts/web-distribution/core-build.test.ts" },
+]
 # Component-shell smoke + interaction tests (Svelte + React) via vitest/happy-dom.
 # Verifies the machine -> DOM wiring the framework packages add on top of the
 # @inflatable-cookie/poodle-core machines (which test:core covers).

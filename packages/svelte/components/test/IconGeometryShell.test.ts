@@ -2,6 +2,7 @@ import { tick } from "svelte";
 import { fireEvent, render } from "@testing-library/svelte";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { realize } from "../../../core/src/icons/geometry-realize";
 import IconGeometryShell from "./IconGeometryShell.svelte";
 import IconGeometryShellFocusHarness from "./IconGeometryShellFocusHarness.svelte";
 
@@ -17,7 +18,24 @@ function svgOf(container: HTMLElement): SVGSVGElement {
   return svg;
 }
 
+function attributesOf(element: Element): Record<string, string> {
+  return Object.fromEntries(Array.from(element.attributes, ({ name, value }) => [name, value]));
+}
+
 describe("IconGeometryShell (svelte, private)", () => {
+  it("paints the SVG attributes returned by realize", () => {
+    const expected = realize({ name: "endpoint-from", pairId: PAIR });
+    const view = render(IconGeometryShell, {
+      props: { pairId: PAIR, target: "to", progress: 0 },
+    });
+    const root = svgOf(view.container);
+
+    expect(attributesOf(root)).toEqual(expected.svgAttributes);
+    expect(Array.from(root.querySelectorAll("path"), attributesOf)).toEqual(
+      expected.paths.map((path) => ({ d: path.d })),
+    );
+  });
+
   it("keeps one svg root across start, mid, end, reverse, and frozen", async () => {
     const view = render(IconGeometryShell, {
       props: { pairId: PAIR, target: "to", progress: 0 },

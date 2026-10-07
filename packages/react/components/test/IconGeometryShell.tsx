@@ -1,4 +1,4 @@
-import { createElement, useEffect, useRef, useState } from "react";
+import { createElement, useEffect, useRef, useState, type SVGProps } from "react";
 
 import {
   activateIconGeometry,
@@ -11,6 +11,7 @@ import {
   type GeometryEndpoint,
   type IconGeometryRuntime,
 } from "../../../core/src/icons/geometry-runtime";
+import { realize } from "../../../core/src/icons/geometry-realize";
 import type { MotionPolicy } from "@inflatable-cookie/poodle-core";
 
 export interface IconGeometryShellProps {
@@ -22,31 +23,29 @@ export interface IconGeometryShellProps {
   initial?: boolean;
 }
 
-function contourPath(
-  closed: boolean,
-  points: readonly (readonly [number, number])[],
-  count: number,
-): string {
-  if (count === 0) return "";
-  const commands: string[] = [];
-  for (let index = 0; index < count; index += 1) {
-    const point = points[index]!;
-    commands.push(`${index === 0 ? "M" : "L"}${point[0] / 10_000} ${point[1] / 10_000}`);
-  }
-  if (closed) commands.push("Z");
-  return commands.join(" ");
-}
-
-type PathSnapshot = { closed: boolean; d: string };
+type PathSnapshot = { d: string };
 
 function snapshotFrame(runtime: IconGeometryRuntime): PathSnapshot[] {
-  const current = currentIconGeometryFrame(runtime);
-  if (!current) return [];
-  return current.contours.map((contour) => ({
-    closed: contour.closed,
-    d: contourPath(contour.closed, contour.points, contour.count),
-  }));
+  return realize({
+    name: "frame",
+    frame: currentIconGeometryFrame(runtime),
+  }).paths;
 }
+
+const REACT_ATTRIBUTE_NAMES: Record<string, string> = {
+  class: "className",
+  "stroke-width": "strokeWidth",
+  "stroke-linecap": "strokeLinecap",
+  "stroke-linejoin": "strokeLinejoin",
+};
+
+function reactSvgProps(attributes: Readonly<Record<string, string>>): SVGProps<SVGSVGElement> {
+  return Object.fromEntries(
+    Object.entries(attributes).map(([name, value]) => [REACT_ATTRIBUTE_NAMES[name] ?? name, value]),
+  ) as SVGProps<SVGSVGElement>;
+}
+
+const SVG_PROPS = reactSvgProps(realize({ name: "frame", frame: null }).svgAttributes);
 
 export function IconGeometryShell({
   owner = "icon-geometry-shell",
@@ -93,22 +92,7 @@ export function IconGeometryShell({
 
   return createElement(
     "svg",
-    {
-      className: "poodle-icon-geometry",
-      "data-poodle-icon-geometry": "",
-      "data-size": "md",
-      xmlns: "http://www.w3.org/2000/svg",
-      width: 24,
-      height: 24,
-      viewBox: "0 0 24 24",
-      fill: "none",
-      stroke: "currentColor",
-      strokeWidth: 2,
-      strokeLinecap: "round",
-      strokeLinejoin: "round",
-      role: "presentation",
-      "aria-hidden": true,
-    },
+    SVG_PROPS,
     paths.map((contour, index) => createElement("path", { key: index, d: contour.d })),
   );
 }

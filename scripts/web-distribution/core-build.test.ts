@@ -7,6 +7,7 @@ import { join } from "node:path";
 import {
   CORE_ICON_MODULES,
   CORE_STYLE_FILES,
+  coreLibraryEntries,
   corePackageExports,
   corePublicCssFiles,
   corePublicDeclarationFiles,
@@ -113,6 +114,33 @@ describe("core compiled distribution", () => {
     expect(JSON.stringify(manifest.exports)).not.toContain('"main"');
     expect(JSON.stringify(manifest)).not.toMatch(/"marked"\s*:/);
     expect(() => assertCoreManifest(repoRoot)).not.toThrow();
+  });
+
+  test("geometry realization support is exported for sibling test hosts", async () => {
+    expect(coreLibraryEntries()).toContainEqual({
+      name: "icons/geometry-realize",
+      source: "src/icons/geometry-realize.ts",
+      outputExt: ".js",
+    });
+    expect(corePackageExports()["./icons/geometry-realize"]).toEqual({
+      types: "./dist/icons/geometry-realize.d.ts",
+      import: "./dist/icons/geometry-realize.js",
+      default: "./dist/icons/geometry-realize.js",
+    });
+    expect(corePublicJsFiles()).toContain("dist/icons/geometry-realize.js");
+    expect(corePublicDeclarationFiles()).toContain("dist/icons/geometry-realize.d.ts");
+
+    const built = await buildCore(repoRoot);
+    expect(built.receipt.outputs.map((output) => output.path)).toContain(
+      "dist/icons/geometry-realize.js",
+    );
+    const support = await import("../../packages/core/dist/icons/geometry-realize.js");
+    const result = support.realize({
+      name: "endpoint-from",
+      pairId: "chevron-left-to-chevron-right",
+    });
+    expect(result.svgAttributes.viewBox).toBe("0 0 24 24");
+    expect(result.paths.length).toBeGreaterThan(0);
   });
 
   test("two clean core builds match file-for-file and hash-for-hash", async () => {

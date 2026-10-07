@@ -4,6 +4,7 @@ import { renderToString } from "react-dom/server";
 import { fireEvent, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { realize } from "../../../core/src/icons/geometry-realize";
 import { IconGeometryShell } from "./IconGeometryShell";
 
 afterEach(() => {
@@ -18,7 +19,22 @@ function svgOf(container: HTMLElement): SVGSVGElement {
   return svg;
 }
 
+function attributesOf(element: Element): Record<string, string> {
+  return Object.fromEntries(Array.from(element.attributes, ({ name, value }) => [name, value]));
+}
+
 describe("IconGeometryShell (react, private)", () => {
+  it("paints the SVG attributes returned by realize", () => {
+    const expected = realize({ name: "endpoint-from", pairId: PAIR });
+    const view = render(<IconGeometryShell pairId={PAIR} target="to" progress={0} />);
+    const root = svgOf(view.container);
+
+    expect(attributesOf(root)).toEqual(expected.svgAttributes);
+    expect(Array.from(root.querySelectorAll("path"), attributesOf)).toEqual(
+      expected.paths.map((path) => ({ d: path.d })),
+    );
+  });
+
   it("keeps one svg root across start, mid, end, reverse, and frozen", () => {
     const view = render(<IconGeometryShell pairId={PAIR} target="to" progress={0} />);
     const root = svgOf(view.container);

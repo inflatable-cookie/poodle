@@ -12,7 +12,14 @@ Depends on: [Semantic motion policy](012-semantic-motion-policy.md),
 Poodle's first icon-geometry capability is an internal, renderer-neutral
 normalization and registry layer. It is a generated projection of the existing
 Poodle-owned Lucide manifest. It does not change `Icon`, `IconProvider`, the
-named `NodeKind::Icon`, package exports, or public runtime behavior.
+named `NodeKind::Icon`, component/runtime package APIs, or public runtime
+behavior.
+
+The core package has one test-support subpath,
+`@inflatable-cookie/poodle-core/icons/geometry-realize`. In-repo and sibling
+geometry hosts use it to realize named fixture states into the SVG attributes
+painted by the private web shells. It does not expose the geometry registry or
+runtime operations as product API.
 
 The layer has two parts:
 
@@ -132,6 +139,8 @@ excluding notice text.
 ## Ownership and boundary
 
 - `poodle-core` owns the pure TypeScript normalizer and authored manifest.
+- `@inflatable-cookie/poodle-core/icons/geometry-realize` is the narrow,
+  compiled test-support route for private shell and sibling-host SVG parity.
 - `poodle-specs` owns the paired pure Rust normalizer and generated internal
   Rust projection. The module stays `pub(crate)`; it is not a public component
   API, even as `pub mod`.
