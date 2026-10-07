@@ -1698,6 +1698,7 @@ fn main() {
     if let Some(component_index) = cli.component_index {
         app.set_active_component(Some(component_index));
     }
+    let mut app = Some(app);
 
     let (window_x, window_y, window_width, window_height) =
         cli.window_bounds.map_or((None, None, 1280, 800), |bounds| {
@@ -1735,7 +1736,8 @@ fn main() {
                 frame.window_width,
                 frame.window_height,
                 frame.scale_factor,
-                app,
+                app.take()
+                    .expect("preview state initializes on the first frame"),
             )
         });
 
