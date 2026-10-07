@@ -5,9 +5,9 @@
 // applies one generic law:
 //
 //   1. the target is a greater pre-1.0 semantic version of the base;
-//   2. root, core, Svelte and React move in exact lockstep;
-//   3. internal web dependency requirements are the current-minor range
-//      (`>=<version> <0.<minor+1>`) and `bun.lock` resolves at the target;
+//   2. root, web packages and all Rust crates move in exact lockstep;
+//   3. internal web and path-dependency requirements are updated, with Bun
+//      and Cargo locks preserving every non-Poodle resolution;
 //   4. the changelog and one matching release note describe the target;
 //   5. exactly one commit changes the release-input set, and every later
 //      change is generated evidence bound to that commit;
@@ -18,6 +18,8 @@
 
 import {
   assertInstalledScope,
+  assertCandidateCargoLockHonesty,
+  assertCandidateCargoManifestHonesty,
   changedJsonLeafPaths,
   changedPathsForCommitRange,
   changelogInventory,
@@ -26,6 +28,8 @@ import {
   internalJsDependencies,
   internalJsDependencyRange,
   isJsonRecord,
+  LOCKSTEP_CARGO_LOCK_PATHS,
+  LOCKSTEP_CARGO_MANIFEST_PATHS,
   recordedSourceCommits,
   requireExactCommit,
   runCapture,
@@ -122,6 +126,8 @@ export function webCandidateReleaseInputPaths(
     RELEASE_NOTES_INDEX_PATH,
     `docs/release-notes/${targetVersion}.md`,
     ...WEB_CANDIDATE_JS_MANIFEST_PATHS,
+    ...LOCKSTEP_CARGO_MANIFEST_PATHS,
+    ...LOCKSTEP_CARGO_LOCK_PATHS,
   ]);
 }
 
@@ -473,6 +479,25 @@ export async function assertWebCandidateScope(
   await assertJsLockstep(checkoutRoot, requiredBaseCommit, sourceCommit, changedPaths, versions);
   await assertBunLock(checkoutRoot, requiredBaseCommit, sourceCommit, versions);
   await assertReleaseNotes(checkoutRoot, sourceCommit, versions);
+  await assertCandidateCargoManifestHonesty(
+    checkoutRoot,
+    requiredBaseCommit,
+    sourceCommit,
+    changedPaths,
+    {
+      cargoManifestPaths: LOCKSTEP_CARGO_MANIFEST_PATHS,
+      sourceVersion: versions.sourceVersion,
+      targetVersion: versions.targetVersion,
+    },
+  );
+  await assertCandidateCargoLockHonesty(
+    checkoutRoot,
+    requiredBaseCommit,
+    sourceCommit,
+    changedPaths,
+    versions.sourceVersion,
+    versions.targetVersion,
+  );
   const frozenReleaseInputCommit = await assertFrozenReleaseInputRange(
     checkoutRoot,
     requiredBaseCommit,

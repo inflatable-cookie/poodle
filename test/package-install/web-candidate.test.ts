@@ -1,14 +1,19 @@
 // g18.032 / spec 071: focused laws for version-independent web-candidate
-// admission. Synthetic ranges prove a future target version is admitted and
-// that partial, stale, source, workflow, registry and native changes fail
-// closed before any build.
+// admission. Synthetic ranges prove a future target version and its native
+// lockstep transition are admitted, while partial, stale, source, workflow,
+// registry and uncoordinated Cargo changes fail closed before any build.
 
 import { afterAll, describe, expect, test, setDefaultTimeout } from "bun:test";
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { internalJsDependencyRange, requireExactCommit } from "./scope";
+import {
+  internalJsDependencyRange,
+  LOCKSTEP_CARGO_LOCK_PATHS,
+  LOCKSTEP_CARGO_MANIFEST_PATHS,
+  requireExactCommit,
+} from "./scope";
 import {
   assertWebCandidateScope,
   assertWebPreviewScope,
@@ -181,27 +186,86 @@ function bunLock(version: string): string {
   )}\n`;
 }
 
+const CARGO_CRATE_NAMES: Record<string, string> = {
+  "packages/codegen/Cargo.toml": "poodle-codegen",
+  "packages/contracts/adapter/Cargo.toml": "poodle-adapter",
+  "packages/contracts/components/Cargo.toml": "poodle-specs",
+  "packages/contracts/events/Cargo.toml": "poodle-events",
+  "packages/contracts/headless/Cargo.toml": "poodle-headless",
+  "packages/contracts/ir/Cargo.toml": "poodle-ir",
+  "packages/contracts/layout/Cargo.toml": "poodle-layout",
+  "packages/contracts/markdown/Cargo.toml": "poodle-markdown",
+  "packages/contracts/node/Cargo.toml": "poodle-node",
+  "packages/contracts/style/Cargo.toml": "poodle-style",
+  "packages/contracts/tokens/Cargo.toml": "poodle-tokens",
+  "packages/gpui/adapter/Cargo.toml": "poodle-gpui",
+  "packages/gpui/node-backend/Cargo.toml": "poodle-gpui-node-backend",
+  "packages/gpui/preview/Cargo.toml": "poodle-gpui-preview",
+  "packages/jetstream/adapter/Cargo.toml": "poodle-jetstream",
+  "packages/jetstream/preview/Cargo.toml": "poodle-jetstream-preview",
+  "packages/render/Cargo.toml": "poodle-render",
+};
+
+function cargoManifests(version: string): Record<string, string> {
+  return Object.fromEntries(
+    LOCKSTEP_CARGO_MANIFEST_PATHS.map((path) => [
+      path,
+      [
+        "[package]",
+        'name = "' + CARGO_CRATE_NAMES[path] + '"',
+        'version = "' + version + '"',
+        "publish = false",
+        "",
+        ...(path === "packages/render/Cargo.toml"
+          ? [
+              "[dependencies]",
+              'poodle-node = { version = "' + version + '", path = "../contracts/node" }',
+              "",
+            ]
+          : []),
+      ].join("\n"),
+    ]),
+  );
+}
+
+function cargoLock(version: string, localPackages: string[]): string {
+  return [
+    "# generated fixture Cargo lock",
+    "version = 4",
+    "",
+    ...localPackages.flatMap((name, index) => [
+      "[[package]]",
+      'name = "' + name + '"',
+      'version = "' + version + '"',
+      ...(index === 0 && localPackages.length > 1
+        ? ["dependencies = [", ' "' + localPackages[1] + " " + version + '"', "]"]
+        : []),
+      "",
+    ]),
+    "[[package]]",
+    'name = "serde"',
+    'version = "1.0.0"',
+    'source = "registry+https://github.com/rust-lang/crates.io-index"',
+    'checksum = "unchanged"',
+    "",
+  ].join("\n");
+}
+
+function cargoLocks(version: string): Record<string, string> {
+  return {
+    [LOCKSTEP_CARGO_LOCK_PATHS[0]]: cargoLock(version, ["poodle-gpui-node-backend", "poodle-node"]),
+    [LOCKSTEP_CARGO_LOCK_PATHS[1]]: cargoLock(version, ["poodle-gpui-preview", "poodle-gpui-node-backend"]),
+  };
+}
+
 function baseFiles(): Record<string, string> {
   return {
     ...jsManifests("0.4.0"),
     "bun.lock": bunLock("0.4.0"),
     "CHANGELOG.md": changelog(null),
     "docs/release-notes/README.md": "# Release notes\n",
-    "packages/render/Cargo.toml": [
-      "[package]",
-      'name = "poodle-render"',
-      'version = "0.4.0"',
-      "publish = false",
-      "",
-    ].join("\n"),
-    "packages/render/Cargo.lock": [
-      "version = 4",
-      "",
-      "[[package]]",
-      'name = "poodle-render"',
-      'version = "0.4.0"',
-      "",
-    ].join("\n"),
+    ...cargoManifests("0.4.0"),
+    ...cargoLocks("0.4.0"),
   };
 }
 
@@ -212,6 +276,8 @@ function frozenFiles(target: string): Record<string, string> {
     "CHANGELOG.md": changelog(target),
     "docs/release-notes/README.md": `# Release notes\n\n- [${target}]\n`,
     [`docs/release-notes/${target}.md`]: `# Poodle ${target}\n`,
+    ...cargoManifests(target),
+    ...cargoLocks(target),
   };
 }
 
@@ -271,8 +337,8 @@ describe("web candidate admission", () => {
     expect(proof.sourceVersion).toBe("0.4.0");
     expect(proof.targetVersion).toBe("0.4.1");
     expect(proof.releaseNotePath).toBe("docs/release-notes/0.4.1.md");
-    expect(proof.changedPaths).not.toContain("packages/render/Cargo.toml");
-    expect(proof.changedPaths).not.toContain("packages/render/Cargo.lock");
+    expect(proof.changedPaths).toContain("packages/render/Cargo.toml");
+    expect(proof.changedPaths).toContain(LOCKSTEP_CARGO_LOCK_PATHS[0]);
   });
 
   test("admit a synthetic 0.5.0 candidate", async () => {
@@ -389,20 +455,31 @@ describe("web candidate admission", () => {
     );
   });
 
-  test("reject a native Cargo change that rides the bump", async () => {
+  test("reject an uncoordinated Cargo publication change in the frozen bump", async () => {
     const { root, base, head } = await plantCandidate("0.5.0", {
-      evidenceExtra: {
-        "packages/render/Cargo.toml": [
-          "[package]",
-          'name = "poodle-render"',
-          'version = "0.5.0"',
+      frozenExtra: {
+        "packages/render/Cargo.toml": cargoManifests("0.5.0")["packages/render/Cargo.toml"]!.replace(
           "publish = false",
-          "",
-        ].join("\n"),
+          "publish = true",
+        ),
       },
     });
     await expect(assertWebCandidateScope(root, base, head)).rejects.toThrow(
-      /native|release-input|Cargo/,
+      /Cargo publication\/registry\/source content/,
+    );
+  });
+
+  test("reject third-party Cargo lock drift beside the coordinated Poodle bump", async () => {
+    const { root, base, head } = await plantCandidate("0.5.0", {
+      frozenExtra: {
+        [LOCKSTEP_CARGO_LOCK_PATHS[0]]: cargoLocks("0.5.0")[LOCKSTEP_CARGO_LOCK_PATHS[0]]!.replace(
+          'version = "1.0.0"',
+          'version = "1.0.1"',
+        ),
+      },
+    });
+    await expect(assertWebCandidateScope(root, base, head)).rejects.toThrow(
+      /contains changes beyond local Poodle version entries/,
     );
   });
 

@@ -934,7 +934,12 @@ function validateReleaseOperations(errors: string[]): void {
         `${cargoPath} version must be present and 0.x semver (got ${String(cargoVersion)}).`,
         errors,
       );
-      if (manifestEntry.channel === "preview" && typeof cargoVersion === "string" && cargoVersion !== "0.0.0") {
+      if (
+        manifestEntry.channel === "preview" &&
+        typeof cargoVersion === "string" &&
+        cargoVersion !== "0.0.0" &&
+        cargoReleaseNoteRequired(cargoVersion)
+      ) {
         const notePath = path.join(repoRoot, "docs", "release-notes", `${cargoVersion}.md`);
         if (!fs.existsSync(notePath)) {
           errors.push(`${manifestEntry.name} is at ${cargoVersion} but docs/release-notes/${cargoVersion}.md is missing.`);
@@ -988,6 +993,37 @@ function validateReleaseOperations(errors: string[]): void {
         }
       }
     }
+  }
+}
+
+/**
+ * A shared npm/native version does not make an older web-only release into a
+ * native release. Use its candidate evidence to preserve that historical
+ * boundary; new or malformed evidence remains fail-closed and requires the
+ * native packages to appear in the release note.
+ */
+function cargoReleaseNoteRequired(version: string): boolean {
+  const evidencePath = path.join(
+    repoRoot,
+    "docs",
+    "evidence",
+    "releases",
+    `v${version}-candidate.json`,
+  );
+  if (!fs.existsSync(evidencePath)) return true;
+  try {
+    const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8")) as {
+      schema?: unknown;
+      version?: unknown;
+      native_train_changed?: unknown;
+    };
+    return !(
+      evidence.schema === "poodle.web-candidate-evidence.v1" &&
+      evidence.version === version &&
+      evidence.native_train_changed === false
+    );
+  } catch {
+    return true;
   }
 }
 

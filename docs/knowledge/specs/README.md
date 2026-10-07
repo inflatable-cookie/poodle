@@ -57,9 +57,9 @@ Current cross-cutting references:
 - `070-compiled-web-distribution-contract.md` — exact compiled `dist`
   inventories, Svelte client/server and React export maps, receipt schemas,
   source-free archive law, and the root-to-`./markdown` break
-- `071-fast-validation-and-npm-release-pipeline.md` — separate npm/native
-  trains, generic candidate admission, observable bounded full-suite execution,
-  one-build archives and two hosted release runs
+- `071-fast-validation-and-npm-release-pipeline.md` — lockstep npm/native
+  candidate admission, the web-only npm workflow, bounded validation, and
+  one-build archives
 
 Specs are normative constraints, not task queues. Execution status lives in
 Queue.

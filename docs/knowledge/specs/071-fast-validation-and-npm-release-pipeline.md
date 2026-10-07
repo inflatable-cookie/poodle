@@ -1,7 +1,7 @@
 # 071 Fast Validation And npm Release Pipeline
 
 Status: active
-Updated: 2026-09-27
+Updated: 2026-10-07
 Depends on: `022-packaging-versioning-and-release-channel-rules.md`,
 `044-deprecation-change-control-and-release-channel-operations.md`,
 `070-compiled-web-distribution-contract.md`
@@ -12,19 +12,14 @@ Make validation observable and bounded, and make npm release a short packaging
 operation over an already reviewed web candidate. The complete headless board
 may include native and GPUI proof, but the npm lane never does.
 
-## Release trains
+## Release channels
 
-Poodle has separate release trains:
-
-- the npm/web train contains the root release version, core, Svelte and the
-  private React validation package;
-- the native train contains Cargo packages and needs separate future release
-  and tag authority.
-
-The npm tag `vX.Y.Z` names the web train. An npm candidate must not bump Cargo
-manifests, Cargo locks, GPUI receipts, native census artifacts or native
-evidence. React remains unpublished but follows the web version so paired web
-certification stays truthful.
+The npm packages and native Cargo crates share one version and one immutable
+`vX.Y.Z` release tag. The npm workflow remains a bounded web-only operation:
+it builds and publishes core and Svelte archives, while the native gates and
+tag-based consumer proof run separately under the procedure in
+[`release.md`](../contracts/release.md). React remains unpublished but follows
+the shared version so paired web certification stays truthful.
 
 The machine-readable npm publication set belongs in
 `packages/release-manifest.json`. Scripts and workflow checks derive it from
@@ -39,18 +34,22 @@ The classifier derives base and target versions from the compared commits and
 admits a candidate only when:
 
 - the target is a valid greater pre-1.0 semantic version;
-- root, core, Svelte and React move in exact lockstep;
+- root, core, Svelte, React and every Cargo crate move in exact lockstep;
 - Svelte and React require `@inflatable-cookie/poodle-core` as the
   current-minor range (`>=<target> <0.<minor+1>`), and `bun.lock` resolves
   those packages at the target; an exact or wrong-floor requirement fails
   closed;
+- Rust manifests change only crate versions and versioned intra-repository
+  Poodle path pins; the two tracked GPUI locks change only local Poodle package
+  versions and their explicit version references;
 - the changelog and one matching release note describe the target;
 - every other change is a bounded release input or execution record declared
   by release policy.
 
 Partial bumps, arbitrary source, workflow, registry, package-membership or
-native changes fail closed with the specific violated rule. Historical
-release-specific modes are evidence, not templates for the next release.
+uncoordinated native changes fail closed with the specific violated rule.
+Historical release-specific modes are evidence, not templates for the next
+release.
 
 ## Validation graph
 

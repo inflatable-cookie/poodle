@@ -1,6 +1,12 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import {
+  LOCKSTEP_CARGO_LOCK_PATHS as RELEASE_CARGO_LOCK_PATHS,
+  LOCKSTEP_CARGO_MANIFEST_PATHS as RELEASE_CARGO_MANIFEST_PATHS,
+  assertCargoLockVersionTransition,
+  cargoPackageIdentity,
+} from "../../scripts/release-versioning";
 
 export const CERTIFICATION_WRITABLE_PATHS = [
   "PAPERCUTS.md",
@@ -20,30 +26,8 @@ export const CANDIDATE_SCOPE_MODES = [
 export type CandidateScopeMode = (typeof CANDIDATE_SCOPE_MODES)[number];
 export const CERTIFICATION_SCOPE_MODE_ENV = "POODLE_WEB_PACK_INSTALL_SCOPE_MODE";
 
-export const LOCKSTEP_CARGO_MANIFEST_PATHS = [
-  "packages/codegen/Cargo.toml",
-  "packages/contracts/adapter/Cargo.toml",
-  "packages/contracts/components/Cargo.toml",
-  "packages/contracts/events/Cargo.toml",
-  "packages/contracts/headless/Cargo.toml",
-  "packages/contracts/ir/Cargo.toml",
-  "packages/contracts/layout/Cargo.toml",
-  "packages/contracts/markdown/Cargo.toml",
-  "packages/contracts/node/Cargo.toml",
-  "packages/contracts/style/Cargo.toml",
-  "packages/contracts/tokens/Cargo.toml",
-  "packages/gpui/adapter/Cargo.toml",
-  "packages/gpui/node-backend/Cargo.toml",
-  "packages/gpui/preview/Cargo.toml",
-  "packages/jetstream/adapter/Cargo.toml",
-  "packages/jetstream/preview/Cargo.toml",
-  "packages/render/Cargo.toml",
-] as const;
-
-export const LOCKSTEP_CARGO_LOCK_PATHS = [
-  "packages/gpui/node-backend/Cargo.lock",
-  "packages/gpui/preview/Cargo.lock",
-] as const;
+export const LOCKSTEP_CARGO_MANIFEST_PATHS = RELEASE_CARGO_MANIFEST_PATHS;
+export const LOCKSTEP_CARGO_LOCK_PATHS = RELEASE_CARGO_LOCK_PATHS;
 
 export const LOCKSTEP_JS_MANIFEST_PATHS = [
   "packages/core/package.json",
@@ -1089,6 +1073,65 @@ async function ordinaryAdmitsPrecursorRootAlignment(
   return changes.length === 1 && changes[0] === "version";
 }
 
+const NATIVE_CARGO_ALIGNMENT_SOURCE = "0.4.0";
+const NATIVE_CARGO_ALIGNMENT_TARGET = "0.4.11";
+
+/** The one-time Rust version alignment onto the existing 0.4.11 web train. */
+async function ordinaryAdmitsNativeVersionAlignment(
+  checkoutRoot: string,
+  requiredBaseCommit: string,
+  sourceCommit: string,
+  changedPaths: string[],
+): Promise<boolean> {
+  const nativePaths = sortedUnique([
+    ...LOCKSTEP_CARGO_MANIFEST_PATHS,
+    ...LOCKSTEP_CARGO_LOCK_PATHS,
+  ]);
+  const changedCargoPaths = sortedUnique(changedPaths.filter(isCargoManifestOrLockPath));
+  if (
+    changedCargoPaths.length !== nativePaths.length ||
+    changedCargoPaths.some((path, index) => path !== nativePaths[index])
+  ) {
+    return false;
+  }
+  const baseRoot = await gitShowFile(checkoutRoot, requiredBaseCommit, ROOT_MANIFEST_PATH);
+  const sourceRoot = await gitShowFile(checkoutRoot, sourceCommit, ROOT_MANIFEST_PATH);
+  if (baseRoot === null || sourceRoot === null) return false;
+  try {
+    const baseVersion = (JSON.parse(baseRoot) as Record<string, unknown>).version;
+    const sourceVersion = (JSON.parse(sourceRoot) as Record<string, unknown>).version;
+    if (
+      baseVersion !== NATIVE_CARGO_ALIGNMENT_TARGET ||
+      sourceVersion !== NATIVE_CARGO_ALIGNMENT_TARGET
+    ) {
+      return false;
+    }
+    const policy = {
+      sourceVersion: NATIVE_CARGO_ALIGNMENT_SOURCE,
+      targetVersion: NATIVE_CARGO_ALIGNMENT_TARGET,
+      cargoManifestPaths: LOCKSTEP_CARGO_MANIFEST_PATHS,
+    };
+    await assertCandidateCargoManifestHonesty(
+      checkoutRoot,
+      requiredBaseCommit,
+      sourceCommit,
+      changedPaths,
+      policy,
+    );
+    await assertCandidateCargoLockHonesty(
+      checkoutRoot,
+      requiredBaseCommit,
+      sourceCommit,
+      changedPaths,
+      NATIVE_CARGO_ALIGNMENT_SOURCE,
+      NATIVE_CARGO_ALIGNMENT_TARGET,
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * g18.009: the hosted release wrapper is workflow-only.
  *
@@ -1605,16 +1648,29 @@ export function cargoIntraRepoRequirements(text: string): Map<string, InlineCarg
   return requirements;
 }
 
-async function assertCandidateCargoManifestHonesty(
+export async function assertCandidateCargoManifestHonesty(
   checkoutRoot: string,
   requiredBaseCommit: string,
   sourceCommit: string,
   changedPaths: string[],
-  policy: CandidatePolicy,
+  policy: Pick<CandidatePolicy, "sourceVersion" | "targetVersion" | "cargoManifestPaths">,
 ): Promise<void> {
   const cargoPaths = policy.cargoManifestPaths;
   for (const path of cargoPaths) {
     if (!changedPaths.includes(path)) continue;
+    const baseText = await runCapture(
+      ["git", "show", `${requiredBaseCommit}:${path}`],
+      checkoutRoot,
+    );
+    const sourceText = await runCapture(
+      ["git", "show", `${sourceCommit}:${path}`],
+      checkoutRoot,
+    );
+    const beforePackage = cargoPackageIdentity(baseText, path);
+    const afterPackage = cargoPackageIdentity(sourceText, path);
+    if (beforePackage.name !== afterPackage.name) {
+      throw new Error(`candidate scope rejected renamed Cargo package in ${path}`);
+    }
     const diff = await runCapture(
       [
         "git",
@@ -1647,10 +1703,6 @@ async function assertCandidateCargoManifestHonesty(
         `candidate scope rejected unpaired Cargo manifest content in ${path}; only version and exact intra-repository Poodle requirements may change`,
       );
     }
-    const sourceText = await runCapture(
-      ["git", "show", `${sourceCommit}:${path}`],
-      checkoutRoot,
-    );
     for (let index = 0; index < removed.length; index += 1) {
       const oldLine = removed[index];
       const newLine = added[index].line;
@@ -1673,10 +1725,16 @@ async function assertCandidateCargoManifestHonesty(
         );
       }
     }
-    const baseText = await runCapture(
-      ["git", "show", `${requiredBaseCommit}:${path}`],
-      checkoutRoot,
-    );
+    if (beforePackage.version !== policy.sourceVersion) {
+      throw new Error(
+        `candidate scope requires ${path} to begin at version ${policy.sourceVersion}`,
+      );
+    }
+    if (afterPackage.version !== policy.targetVersion) {
+      throw new Error(
+        `candidate scope requires ${path} package version ${policy.targetVersion}`,
+      );
+    }
     const beforeRequirements = cargoIntraRepoRequirements(baseText);
     const afterRequirements = cargoIntraRepoRequirements(sourceText);
     for (const key of sortedUnique([
@@ -1713,6 +1771,55 @@ async function assertCandidateCargoManifestHonesty(
         );
       }
     }
+  }
+}
+
+/** Require every tracked Cargo lock to carry only the same local crate transition. */
+export async function assertCandidateCargoLockHonesty(
+  checkoutRoot: string,
+  requiredBaseCommit: string,
+  sourceCommit: string,
+  changedPaths: string[],
+  sourceVersion: string,
+  targetVersion: string,
+): Promise<void> {
+  const crateNames = new Set<string>();
+  for (const path of LOCKSTEP_CARGO_MANIFEST_PATHS) {
+    const baseText = await gitShowFile(checkoutRoot, requiredBaseCommit, path);
+    const sourceText = await gitShowFile(checkoutRoot, sourceCommit, path);
+    if (baseText === null || sourceText === null) {
+      throw new Error(`candidate scope requires ${path} at both commits`);
+    }
+    const before = cargoPackageIdentity(baseText, path);
+    const after = cargoPackageIdentity(sourceText, path);
+    if (
+      before.name !== after.name ||
+      before.version !== sourceVersion ||
+      after.version !== targetVersion
+    ) {
+      throw new Error(
+        `candidate scope requires ${path} to carry the coordinated ${sourceVersion} -> ${targetVersion} transition`,
+      );
+    }
+    crateNames.add(before.name);
+  }
+  for (const path of LOCKSTEP_CARGO_LOCK_PATHS) {
+    if (!changedPaths.includes(path)) {
+      throw new Error(`candidate scope requires coordinated Cargo lock update ${path}`);
+    }
+    const before = await gitShowFile(checkoutRoot, requiredBaseCommit, path);
+    const after = await gitShowFile(checkoutRoot, sourceCommit, path);
+    if (before === null || after === null) {
+      throw new Error(`candidate scope requires ${path} at both commits`);
+    }
+    assertCargoLockVersionTransition(
+      before,
+      after,
+      crateNames,
+      sourceVersion,
+      targetVersion,
+      path,
+    );
   }
 }
 
@@ -2164,6 +2271,20 @@ export async function assertInstalledScope(
         changedPaths,
       )),
     );
+    if (
+      await ordinaryAdmitsNativeVersionAlignment(
+        checkoutRoot,
+        requiredBaseCommit,
+        sourceCommit,
+        changedPaths,
+      )
+    ) {
+      forbidden = forbidden.filter(
+        ({ path, surface }) =>
+          surface !== "version" ||
+          !LOCKSTEP_CARGO_MANIFEST_PATHS.some((manifestPath) => manifestPath === path),
+      );
+    }
     forbidden.push(
       ...(await ordinaryJsForbiddenSurfaces(
         checkoutRoot,

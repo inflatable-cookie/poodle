@@ -1,7 +1,7 @@
 # 022 Packaging Versioning And Release Channel Rules
 
 Status: active
-Updated: 2026-10-06
+Updated: 2026-10-07
 Depends on: `archive/021-public-package-api-stability-and-parity-debt-baseline.md`
 
 ## Purpose
@@ -121,14 +121,18 @@ Each release-capable tranche should document:
 - whether the change is additive, behavioral, or breaking
 - what downstream evaluators should re-check
 
-## Release Train Rule
+## Lockstep Release Rule
 
-Npm/web and native are separate release trains. The npm `vX.Y.Z` tag and root
-release version cover core, Svelte and the private paired React build. Core and
-Svelte are the only npm publications. Cargo packages, locks and native evidence
-do not move merely because an npm version moves; a native release needs its own
-future publication and tag decision. See
-[`071-fast-validation-and-npm-release-pipeline.md`](071-fast-validation-and-npm-release-pipeline.md).
+The npm packages and native Cargo crates share one pre-1.0 version and one
+immutable `vX.Y.Z` tag. A candidate moves the root, core, Svelte, private React
+validation package and every Rust crate together; internal npm ranges and Rust
+path pins, `bun.lock`'s workspace slice and the committed GPUI lock entries
+move with them. Core and Svelte are the only npm publications. Cargo crates
+remain `publish = false` and are consumed from the Poodle git tag; nothing is
+published to crates.io. See
+[`release.md`](../contracts/release.md) for the candidate gates and tag steps,
+and [`071-fast-validation-and-npm-release-pipeline.md`](071-fast-validation-and-npm-release-pipeline.md)
+for the npm workflow boundary.
 
 ## Native Dependency Licence And Source Rule
 

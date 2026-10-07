@@ -1523,6 +1523,135 @@ describe("g18.031 precursor root version alignment", () => {
   });
 });
 
+describe("native Cargo alignment to the existing 0.4.11 web train", () => {
+  const nativeCrateNames: Record<string, string> = {
+    "packages/codegen/Cargo.toml": "poodle-codegen",
+    "packages/contracts/adapter/Cargo.toml": "poodle-adapter",
+    "packages/contracts/components/Cargo.toml": "poodle-specs",
+    "packages/contracts/events/Cargo.toml": "poodle-events",
+    "packages/contracts/headless/Cargo.toml": "poodle-headless",
+    "packages/contracts/ir/Cargo.toml": "poodle-ir",
+    "packages/contracts/layout/Cargo.toml": "poodle-layout",
+    "packages/contracts/markdown/Cargo.toml": "poodle-markdown",
+    "packages/contracts/node/Cargo.toml": "poodle-node",
+    "packages/contracts/style/Cargo.toml": "poodle-style",
+    "packages/contracts/tokens/Cargo.toml": "poodle-tokens",
+    "packages/gpui/adapter/Cargo.toml": "poodle-gpui",
+    "packages/gpui/node-backend/Cargo.toml": "poodle-gpui-node-backend",
+    "packages/gpui/preview/Cargo.toml": "poodle-gpui-preview",
+    "packages/jetstream/adapter/Cargo.toml": "poodle-jetstream",
+    "packages/jetstream/preview/Cargo.toml": "poodle-jetstream-preview",
+    "packages/render/Cargo.toml": "poodle-render",
+  };
+
+  function nativeManifest(path: string, version: string): string {
+    return [
+      "[package]",
+      'name = "' + nativeCrateNames[path] + '"',
+      'version = "' + version + '"',
+      'edition = "2021"',
+      "publish = false",
+      "",
+      ...(path === "packages/render/Cargo.toml"
+        ? [
+            "[dependencies]",
+            'poodle-node = { version = "' + version + '", path = "../contracts/node" }',
+            "",
+          ]
+        : []),
+    ].join("\n");
+  }
+
+  function nativeLock(version: string, names: string[]): string {
+    return [
+      "# generated fixture",
+      "version = 4",
+      "",
+      ...names.flatMap((name, index) => [
+        "[[package]]",
+        'name = "' + name + '"',
+        'version = "' + version + '"',
+        ...(index === 0 && names.length > 1
+          ? ["dependencies = [", ' "' + names[1] + " " + version + '"', "]"]
+          : []),
+        "",
+      ]),
+      "[[package]]",
+      'name = "serde"',
+      'version = "1.0.0"',
+      'source = "registry+https://github.com/rust-lang/crates.io-index"',
+      'checksum = "unchanged"',
+      "",
+    ].join("\n");
+  }
+
+  async function plantNativeAlignment(options: {
+    extraManifestChange?: boolean;
+    externalLockDrift?: boolean;
+    removeManifest?: string;
+  } = {}): Promise<{ root: string; base: string; head: string }> {
+    const root = await initPlant();
+    const webManifest = {
+      name: "poodle",
+      version: "0.4.11",
+      private: true,
+      scripts: { test: "vitest run" },
+    };
+    await writeFiles(root, { "package.json": JSON.stringify(webManifest, null, 2) + "\n" });
+    for (const path of LOCKSTEP_CARGO_MANIFEST_PATHS) {
+      await writeFiles(root, { [path]: nativeManifest(path, "0.4.0") });
+    }
+    await writeFiles(root, {
+      [LOCKSTEP_CARGO_LOCK_PATHS[0]]: nativeLock("0.4.0", ["poodle-gpui-node-backend", "poodle-node"]),
+      [LOCKSTEP_CARGO_LOCK_PATHS[1]]: nativeLock("0.4.0", ["poodle-gpui-preview", "poodle-gpui-node-backend"]),
+    });
+    const base = await commitAll(root, "native version alignment base");
+    for (const path of LOCKSTEP_CARGO_MANIFEST_PATHS) {
+      let text = nativeManifest(path, "0.4.11");
+      if (path === "packages/render/Cargo.toml" && options.extraManifestChange) {
+        text += "[package.metadata.planted]\nextra = true\n";
+      }
+      await writeFiles(root, { [path]: text });
+    }
+    const locks = {
+      [LOCKSTEP_CARGO_LOCK_PATHS[0]]: nativeLock("0.4.11", ["poodle-gpui-node-backend", "poodle-node"]),
+      [LOCKSTEP_CARGO_LOCK_PATHS[1]]: nativeLock("0.4.11", ["poodle-gpui-preview", "poodle-gpui-node-backend"]),
+    };
+    if (options.externalLockDrift) {
+      locks[LOCKSTEP_CARGO_LOCK_PATHS[0]] = locks[LOCKSTEP_CARGO_LOCK_PATHS[0]].replace(
+        'version = "1.0.0"',
+        'version = "1.0.1"',
+      );
+    }
+    await writeFiles(root, locks);
+    if (options.removeManifest) {
+      await runGit(root, ["rm", "--quiet", "-f", options.removeManifest]);
+    }
+    const head = await commitAll(root, "align native Cargo release versions");
+    return { root, base, head };
+  }
+
+  test("ordinary CI admits the exact native 0.4.0 -> web 0.4.11 alignment", async () => {
+    const { root, base, head } = await plantNativeAlignment();
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.changedPaths).toContain("packages/gpui/node-backend/Cargo.toml");
+    expect(proof.changedPaths).toContain(LOCKSTEP_CARGO_LOCK_PATHS[0]);
+  });
+
+  test("ordinary CI rejects extra Cargo edits, lock drift, or an incomplete alignment", async () => {
+    for (const options of [
+      { extraManifestChange: true },
+      { externalLockDrift: true },
+      { removeManifest: "packages/gpui/preview/Cargo.toml" },
+    ]) {
+      const { root, base, head } = await plantNativeAlignment(options);
+      await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+        /certification scope rejected|forbidden version surface/,
+      );
+    }
+  });
+});
+
 describe("ordinary root manifest devDependency scope", () => {
   const rootManifest = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
     name: "poodle",

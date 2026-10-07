@@ -239,13 +239,15 @@ This exception preserves upstream document authority and a configurable seam:
 ## Release Certification
 
 A release run that fails is a process failure, not a discovery (operator
-rule, 2026-09-04). Npm and native are separate release trains. Before an npm
-tag exists, the exact merged web candidate must have green required PR CI and
-one green `release.yml` candidate run that uploads the certified core/Svelte
-archives. The matching tag is then published from those exact archives in one
-second run; there is no tag dry run or publish-time rebuild. The npm workflow
-has a ten-minute hard ceiling and never runs aggregate, Rust, native, GPUI or
-Jetstream gates. A red or over-budget run stops the lane and returns to
+rule, 2026-09-04). Npm archives and native crates share one lockstep candidate
+and immutable tag. Before that tag exists, the exact merged candidate must
+have green required PR CI, one green `release.yml` candidate run that uploads
+the certified core/Svelte archives, and the native gates recorded in
+[`release.md`](release.md). The matching tag is then published from those
+exact archives in one second run; there is no tag dry run or publish-time
+rebuild. The npm workflow has a ten-minute hard ceiling and never runs
+aggregate, Rust, native, GPUI or Jetstream gates. Native consumers use that
+same tag by git. A red or over-budget run stops the lane and returns to
 planning; the tag is retracted only when nothing was published from it. See
 spec 071.
 

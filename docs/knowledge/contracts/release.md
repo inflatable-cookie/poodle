@@ -1,6 +1,7 @@
 # Release
 
-Poodle has two release trains. The rules behind this procedure are in
+Poodle has two distribution paths under one lockstep version and tag. The
+rules behind this procedure are in
 [spec 071](../specs/071-fast-validation-and-npm-release-pipeline.md) (pipeline),
 [spec 022](../specs/022-packaging-versioning-and-release-channel-rules.md)
 (versioning and channels) and
@@ -11,24 +12,24 @@ Poodle has two release trains. The rules behind this procedure are in
   and `@inflatable-cookie/poodle-svelte`, published to npm. The private React
   package follows the same version but is never published. The publication set
   is `packages/release-manifest.json`.
-- **Native train** — Cargo crates, distributed by git tag only: the crates
-  stay `publish = false` and nothing goes to crates.io; consumers depend on a
-  Poodle tag, the same git-tag protocol as the other inflatable-cookie Rust
-  libraries (for example Longhorn). Operator ruling 2026-10-06 (decision
-  08d56e2a). Its step-by-step procedure isn't written yet (lane
-  `native-release-train`); until it is, an npm candidate never bumps Cargo
-  manifests, locks, GPUI receipts or native evidence.
+- **Native train** — the Poodle Cargo crates stay `publish = false`; nothing
+  goes to crates.io. Applications depend on one coordinated Poodle git tag,
+  using the same tag protocol as the other inflatable-cookie Rust libraries
+  (for example Longhorn). This follows operator ruling 2026-10-06 (decision
+  08d56e2a). The npm and native packages move together in one candidate and
+  one `vX.Y.Z` tag.
 
 Versions stay `0.x`. Breaking changes may ship in a minor release and must be
 called out in the changelog and release note.
 
-Shared libraries are declared as ranges, never exact pins (operator ruling
-2026-09-27), both by consumers and between libraries, so a patch never forces
-a release elsewhere. Svelte and React require `@inflatable-cookie/poodle-core`
-within the current minor, for example `>=0.4.4 <0.5`, while the four web
-versions still move in lockstep. Third-party runtime dependencies use ranges
-unless a stated reason keeps one exact. Release admission requires that
-range shape.
+Shared JavaScript library dependencies are declared as ranges, never exact
+pins (operator ruling 2026-09-27), both by consumers and between libraries,
+so a patch never forces a release elsewhere. Svelte and React require
+`@inflatable-cookie/poodle-core` within the current minor, for example
+`>=0.4.4 <0.5`, while the four web versions still move in lockstep. Native
+Poodle path dependencies carry the shared exact crate version, and native
+consumers pin that set by tag. Third-party runtime dependencies use ranges
+unless a stated reason keeps one exact. Release admission requires these shapes.
 
 `CHANGELOG.md` and `docs/release-notes/` are release surfaces. Ordinary PR CI
 (`test:web-pack-install` scope) rejects any change to them, so feature and
@@ -55,20 +56,23 @@ process failure, not a discovery: stop and return to planning.
 
 ## Steps (npm/web)
 
-1. **Candidate PR.** On a branch, bump root, core, Svelte and React to the same
-   target version, retarget the current-minor core ranges, refresh `bun.lock`
-   workspace versions and intra-repo ranges with `effigy lock:workspaces-refresh`
-   (Bun 1.4.2 leaves that slice stale through `bun install`, `--force` and
-   `--lockfile-only`; `--frozen-lockfile` still passes),
-   add the `CHANGELOG.md` entry and one `docs/release-notes/<version>.md`, and
-   list it in `docs/release-notes/README.md`. Nothing else may change except
-   generated stamps and evidence that release policy admits. In a second
+1. **Candidate PR.** On a branch, run `effigy release:bump X.Y.Z`. The target
+   must be a greater pre-1.0 version than the current root version. This single
+   selector updates root, core, Svelte and React manifests, current-minor core
+   ranges, every Rust crate version and internal Poodle path pin, the Bun
+   workspace lock slice, and the two tracked GPUI `Cargo.lock` files. It then
+   runs `ir:build` and `catalogue:build` to restamp generated outputs with the
+   new `poodle-codegen` version. It refuses a non-increasing version and does
+   not refresh third-party lock resolutions. Add the `CHANGELOG.md` entry and one
+   `docs/release-notes/<version>.md`, and list it in
+   `docs/release-notes/README.md`. Nothing else may change except generated
+   stamps and evidence that release policy admits. In a second
    commit, bind `docs/evidence/releases/v<version>-candidate.json`
    (`poodle.web-candidate-evidence.v1`): the freeze commit as
    `source_commit`, the base, the payload commits since the previous tag, the
-   publication set, `native_train_changed`, the operator acceptance and the
-   focused evidence. The `0.4.2` candidate (`a28c99f44`, `d2438aef7`) is the
-   reference.
+   publication set, `native_train_changed: true`, the operator acceptance,
+   and focused evidence for both distribution paths. The `0.4.2` candidate
+   (`a28c99f44`, `d2438aef7`) is the web evidence reference.
 2. **Local proof.** Run `effigy release:web-certificate` once on the stable
    candidate. It admits the changed range (`release:web-admission`), then
    builds, packs and source-free-installs one archive set
@@ -91,6 +95,75 @@ process failure, not a discovery: stop and return to planning.
    archives, verifies tag, commit, version, package names and hashes, then
    publishes those exact tarballs with npm trusted publishing. It never
    rebuilds.
+
+## Steps (native crates)
+
+The Rust crates are not published to crates.io. Their release is the same
+immutable `vX.Y.Z` tag used by the npm release. All Cargo manifests and the
+two committed GPUI locks are aligned to the current web version, `0.4.11`;
+the existing `v0.4.11` tag is not moved or recreated. The first coordinated
+release after that baseline must use a strictly greater version, such as
+`0.4.12`.
+
+1. **Freeze.** Use `effigy release:bump X.Y.Z` as part of the candidate's
+   frozen release-input commit. The generic web-candidate admission requires
+   every JS manifest, Cargo manifest, and tracked GPUI lock to carry the same
+   source-to-target transition in that one commit. It admits only the version
+   fields, internal dependency pins, and local Poodle lock entries; an
+   unrelated Rust or lockfile change is rejected. `release:bump` also runs
+   `ir:build` and `catalogue:build`, so generated codegen stamps in this commit
+   match the new Cargo package version. Do not refresh the GPUI census yet: its
+   receipts record their source commit and native test run, so refresh them
+   after this freeze commit exists. Do not add a crates.io publication step or
+   `publish = true`.
+2. **Certify.** Run the existing web certificate and the native gates against
+   the same frozen candidate: `effigy release:web-certificate`,
+   `effigy ci:rust`, `effigy check:gpui`, `effigy regressions:native`,
+   and `effigy release:gpui-consumer`. Capture the successful full native
+   regression run ID, then refresh the census against the frozen commit with
+   `effigy update:gpui-census --record-selector-result <freeze-commit> <run-id> passed "effigy regressions:native passed"`.
+   Commit those generated census artifacts as an evidence-only follow-up and
+   run `effigy test:gpui-census` and `effigy check:gpui-census` on that commit.
+   This updates receipt package versions while binding test and source
+   identities to the frozen candidate. The consumer selector creates a disposable
+   local bare repository, tags the exact candidate commit, and compiles a
+   fresh consumer using `poodle-gpui-node-backend` plus the same GPUI crate
+   identity. It does not create a tag in the working repository.
+3. **Accessibility evidence.** Run `effigy test:gpui-ax` on a macOS host with
+   Accessibility permission for its AXUIElement probe executable. If the
+   candidate worker lacks that trust, the operator runs this gate during
+   milestone QA on the exact frozen candidate commit. Record the commit and
+   result in the candidate evidence; do not substitute a different head.
+4. **Review and tag.** Require green PR CI, candidate evidence for every web
+   and native gate, and operator approval. After merge, create the annotated
+   `vX.Y.Z` tag on the certified candidate commit used by the npm candidate
+   run. The existing workflow continues to certify and publish only the npm
+   archives; the immutable tag is the Rust release. Never move or reuse a tag.
+
+### Crates and consumer address
+
+Every Cargo package remains `publish = false`. The tag-addressable public
+contract crates are `poodle-tokens`, `poodle-events`, `poodle-headless`,
+`poodle-layout`, `poodle-style`, `poodle-markdown`, `poodle-ir`,
+`poodle-specs`, `poodle-adapter`, and `poodle-node`, plus `poodle-render`,
+`poodle-gpui`, and `poodle-gpui-node-backend`. `poodle-jetstream` retains its
+public-intent metadata for Jetstream consumers; it is not required by GPUI
+applications. The internal-only packages are `poodle-codegen`,
+`poodle-gpui-preview`, and `poodle-jetstream-preview`.
+
+An application pins public packages from one release tag. For example:
+
+```toml
+[dependencies]
+poodle-node = { git = "https://github.com/inflatable-cookie/poodle", tag = "vX.Y.Z", package = "poodle-node" }
+poodle-gpui-node-backend = { git = "https://github.com/inflatable-cookie/poodle", tag = "vX.Y.Z", package = "poodle-gpui-node-backend" }
+gpui = { package = "gpui-unofficial", version = "=1.22.0" }
+```
+
+The GPUI backend pins `gpui-unofficial =1.22.0`; the application must use that
+same exact release so both sides share GPUI's Rust type identity. The native
+packages are pre-1.0; breaking changes follow the repository's 0.x version
+policy and ship only under a new coordinated tag.
 
 If the tagged workflow wrapper itself fails before publication, a reviewed
 wrapper-only repair may dispatch publish from `main` with `release-tag` set to
