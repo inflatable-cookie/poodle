@@ -135,6 +135,10 @@ output so Jetstream can consume the same authority later. Reports must label
 Jetstream deferred until its admission gate passes; they must not report it as
 passing, complete, or an accepted absence.
 
+One exception (Tom, 2026-10-07): the Jetstream preview must compile and open
+a component by name, because the poodle-lab side-by-side specimen view hosts
+it. That repair is not admission; parity reporting stays deferred.
+
 Distinguish two things that sound alike:
 
 - **Active-cohort component parity is required.** Every component has a
