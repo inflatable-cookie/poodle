@@ -4,10 +4,12 @@
 //! component contracts under `docs/contracts/components/`.
 
 use poodle_adapter::ThemeProvider as _;
-use poodle_headless::audio::{format_value, AudioSwitchMode, AudioValueFormat};
+use poodle_headless::audio::{
+    format_value, AudioSwitchMode, AudioValueFormat, KeyboardKeyLayout, KeyboardOrientation,
+};
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, FocusRing, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, NodeKind, NodePosition, NodeRole, NodeToggled,
+    ColorValue, CrossAxisAlignment, FocusRing, LayoutDirection, LayoutOverflow, LayoutSizing,
+    MainAxisAlignment, Node, NodeKind, NodePosition, NodeRole, NodeToggled,
 };
 use poodle_specs::{
     AudioMeterSpec, AudioMeterStyle, AudioSwitchSpec, ControlDensity, ControlSize,
@@ -15,7 +17,7 @@ use poodle_specs::{
     KnobSpec, ModMatrixGridSpec, Orientation, ValueReadoutSpec, WaveformDisplaySpec, XYPadSpec,
 };
 
-use crate::color::{mix_srgb, with_alpha, BLACK, WHITE};
+use crate::color::{mix_srgb, with_alpha, WHITE};
 use crate::context::RenderContext;
 use crate::presentation::{rem_to_px, size_font_rem};
 
@@ -27,6 +29,18 @@ fn audio_size_rem(size: ControlSize, values: [f32; 5]) -> f32 {
         ControlSize::Lg => 3,
         ControlSize::Xl => 4,
     }]
+}
+
+pub(crate) fn keyboard_dimensions(
+    size: ControlSize,
+    orientation: KeyboardOrientation,
+) -> (f32, f32) {
+    let long = rem_to_px(audio_size_rem(size, [14.0, 18.0, 22.0, 26.0, 30.0]));
+    let short = rem_to_px(audio_size_rem(size, [4.0, 5.5, 7.0, 8.5, 10.0]));
+    match orientation {
+        KeyboardOrientation::Horizontal => (long, short),
+        KeyboardOrientation::Vertical => (short, long),
+    }
 }
 
 fn density_metric(density: ControlDensity, values: [f32; 3]) -> f32 {
@@ -760,14 +774,8 @@ pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
     let state = &spec.visual_state;
     let size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
-    let horizontal = state.orientation == poodle_headless::audio::KeyboardOrientation::Horizontal;
-    let long = rem_to_px(audio_size_rem(size, [14.0, 18.0, 22.0, 26.0, 30.0]));
-    let short = rem_to_px(audio_size_rem(size, [4.0, 5.5, 7.0, 8.5, 10.0]));
-    let (width, height) = if horizontal {
-        (long, short)
-    } else {
-        (short, long)
-    };
+    let horizontal = state.orientation == KeyboardOrientation::Horizontal;
+    let (width, height) = keyboard_dimensions(size, state.orientation);
     let accent = ctx.theme().resolve_color("color.accent.base");
     let white_idle = keyboard_recipe_color(
         ctx,
@@ -814,6 +822,9 @@ pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
     root.id = Some("keyboard-root".into());
     root.style.descriptor.layout.width = LayoutSizing::Fixed(width);
     root.style.descriptor.layout.height = LayoutSizing::Fixed(height);
+    if !horizontal && state.key_layout == KeyboardKeyLayout::EqualRows {
+        root.style.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+    }
     root.style.descriptor.background = Some(fill);
     root.style.descriptor.border.width = density_metric(density, [0.5, 1.0, 2.0]);
     root.style.descriptor.border.color = container_border;
@@ -873,6 +884,17 @@ pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
             visual.style.descriptor.layout.height =
                 LayoutSizing::Fixed(key.breadth_norm as f32 * height);
             absolute(&mut visual, key.start_norm as f32 * width, 0.0);
+        } else if state.key_layout == KeyboardKeyLayout::EqualRows {
+            let row_top = key
+                .start_px
+                .expect("equal-row vertical keys carry pixel geometry");
+            let row_height = key
+                .length_px
+                .expect("equal-row vertical keys carry pixel geometry");
+            visual.style.descriptor.layout.width =
+                LayoutSizing::Fixed(key.breadth_norm as f32 * width);
+            visual.style.descriptor.layout.height = LayoutSizing::Fixed(row_height as f32);
+            absolute(&mut visual, 0.0, row_top as f32);
         } else {
             visual.style.descriptor.layout.width =
                 LayoutSizing::Fixed(key.breadth_norm as f32 * width);

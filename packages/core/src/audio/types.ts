@@ -65,12 +65,15 @@ export interface GainReductionMeterVisualState extends AudioMeterVisualState {
 }
 
 export type KeyboardOrientation = "horizontal" | "vertical";
+export type KeyboardKeyLayout = "piano" | "equal-rows";
 
 export interface KeyboardKeyVisualState {
   note: number;
   kind: "white" | "black";
   startNorm: number;
   lengthNorm: number;
+  startPx: number | null;
+  lengthPx: number | null;
   breadthNorm: number;
   held: boolean;
   externallyHeld: boolean;
@@ -80,6 +83,9 @@ export interface KeyboardKeyVisualState {
 
 export interface KeyboardVisualState {
   orientation: KeyboardOrientation;
+  keyLayout: KeyboardKeyLayout;
+  rowHeightPx: number;
+  scrollOffsetPx: number;
   firstNote: number;
   lastNote: number;
   octaveShift: number;

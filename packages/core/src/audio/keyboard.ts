@@ -2,6 +2,7 @@ import type {
   AudioPoint,
   AudioRect,
   KeyboardKeyVisualState,
+  KeyboardKeyLayout,
   KeyboardOrientation,
   KeyboardVisualState,
 } from "./types";
@@ -15,6 +16,9 @@ export interface KeyboardContext {
   firstNote: number;
   lastNote: number;
   orientation: KeyboardOrientation;
+  keyLayout: KeyboardKeyLayout;
+  rowHeightPx: number;
+  scrollOffsetPx: number;
   octaveShift: number;
   computerBaseNote: number;
   computerKeyMap: Record<string, number>;
@@ -47,6 +51,8 @@ export interface KeyboardResult { context: KeyboardContext; effects: KeyboardEff
 const clampMidiNote = (note: number): number => Math.min(Math.max(Math.round(Number.isFinite(note) ? note : 0), 0), 127);
 const clampVelocity = (velocity: number): number => Math.min(Math.max(Math.round(Number.isFinite(velocity) ? velocity : 1), 1), 127);
 const isBlackNote = (note: number): boolean => [1, 3, 6, 8, 10].includes(((note % 12) + 12) % 12);
+const normalizeRowHeight = (height: number | undefined): number => height !== undefined && Number.isFinite(height) ? Math.max(height, 1) : 16;
+const normalizeScrollOffset = (offset: number | undefined): number => offset !== undefined && Number.isFinite(offset) ? Math.max(offset, 0) : 0;
 
 function normalizedRange(firstNote: number, lastNote: number): [number, number] {
   const first = clampMidiNote(Math.min(firstNote, lastNote));
@@ -64,6 +70,9 @@ export function createKeyboardContext(input: Partial<KeyboardContext> = {}): Key
     firstNote,
     lastNote,
     orientation: input.orientation ?? "horizontal",
+    keyLayout: input.keyLayout ?? "piano",
+    rowHeightPx: normalizeRowHeight(input.rowHeightPx),
+    scrollOffsetPx: normalizeScrollOffset(input.scrollOffsetPx),
     octaveShift: Math.trunc(input.octaveShift ?? 0),
     computerBaseNote: clampMidiNote(input.computerBaseNote ?? 60),
     computerKeyMap: { ...DEFAULT_COMPUTER_KEY_MAP, ...(input.computerKeyMap ?? {}) },
@@ -169,9 +178,34 @@ export function keyboardTransition(context: KeyboardContext, event: KeyboardEven
   }
 }
 
-export function keyboardKeyGeometry(firstNote: number, lastNote: number, orientation: KeyboardOrientation): KeyboardKeyVisualState[] {
+export function keyboardKeyGeometry(
+  firstNote: number,
+  lastNote: number,
+  orientation: KeyboardOrientation,
+  keyLayout: KeyboardKeyLayout = "piano",
+  rowHeightPx = 16,
+  scrollOffsetPx = 0,
+): KeyboardKeyVisualState[] {
   const [first, last] = normalizedRange(firstNote, lastNote);
   const notes = Array.from({ length: last - first + 1 }, (_, index) => first + index);
+  if (keyLayout === "equal-rows") {
+    const lengthNorm = 1 / notes.length;
+    return notes.map((note) => ({
+      note,
+      kind: isBlackNote(note) ? "black" : "white",
+      startNorm: orientation === "vertical" ? (last - note) * lengthNorm : (note - first) * lengthNorm,
+      lengthNorm,
+      startPx: orientation === "vertical"
+        ? (last - note) * normalizeRowHeight(rowHeightPx) - normalizeScrollOffset(scrollOffsetPx)
+        : null,
+      lengthPx: orientation === "vertical" ? normalizeRowHeight(rowHeightPx) : null,
+      breadthNorm: 1,
+      held: false,
+      externallyHeld: false,
+      velocity: null,
+      focused: false,
+    }));
+  }
   const whiteNotes = notes.filter((note) => !isBlackNote(note));
   const whiteIndex = new Map(whiteNotes.map((note, index) => [note, index]));
   const whiteLength = 1 / Math.max(whiteNotes.length, 1);
@@ -187,6 +221,8 @@ export function keyboardKeyGeometry(firstNote: number, lastNote: number, orienta
       kind: black ? "black" : "white",
       startNorm: orientation === "vertical" ? 1 - logicalStart - lengthNorm : logicalStart,
       lengthNorm,
+      startPx: null,
+      lengthPx: null,
       breadthNorm: black ? 0.62 : 1,
       held: false,
       externallyHeld: false,
@@ -202,10 +238,20 @@ export function keyboardVisualState(context: KeyboardContext): KeyboardVisualSta
   const external = new Set(context.externalHeldNotes);
   return {
     orientation: context.orientation,
+    keyLayout: context.keyLayout,
+    rowHeightPx: context.rowHeightPx,
+    scrollOffsetPx: context.scrollOffsetPx,
     firstNote: context.firstNote,
     lastNote: context.lastNote,
     octaveShift: context.octaveShift,
-    keys: keyboardKeyGeometry(context.firstNote, context.lastNote, context.orientation).map((key) => ({
+    keys: keyboardKeyGeometry(
+      context.firstNote,
+      context.lastNote,
+      context.orientation,
+      context.keyLayout,
+      context.rowHeightPx,
+      context.scrollOffsetPx,
+    ).map((key) => ({
       ...key,
       held: held.has(key.note),
       externallyHeld: external.has(key.note),
@@ -233,6 +279,23 @@ export function keyboardHitTest(context: KeyboardContext, point: AudioPoint, rec
     ? (point.y - rect.top) / Math.max(rect.height, 1)
     : (point.x - rect.left) / Math.max(rect.width, 1);
   if (axis < 0 || axis > 1 || depth < 0 || depth > 1) return null;
+  if (context.keyLayout === "equal-rows") {
+    const count = context.lastNote - context.firstNote + 1;
+    if (context.orientation === "vertical") {
+      const y = point.y - rect.top;
+      const keys = keyboardVisualState(context).keys;
+      const visibleKey = keys.find((key) => key.startPx !== null && key.lengthPx !== null
+        && y >= key.startPx && y < key.startPx + key.lengthPx);
+      if (visibleKey) return visibleKey.note;
+      const bottomKey = keys.find((key) => key.note === context.firstNote);
+      return bottomKey && bottomKey.startPx !== null && bottomKey.lengthPx !== null
+        && y === bottomKey.startPx + bottomKey.lengthPx
+        ? context.firstNote
+        : null;
+    }
+    const column = Math.min(Math.floor(axis * count), count - 1);
+    return context.firstNote + column;
+  }
   const keys = keyboardKeyGeometry(context.firstNote, context.lastNote, context.orientation);
   const black = keys.find((key) => key.kind === "black" && depth <= key.breadthNorm && axis >= key.startNorm && axis <= key.startNorm + key.lengthNorm);
   return black?.note ?? keys.find((key) => key.kind === "white" && axis >= key.startNorm && axis <= key.startNorm + key.lengthNorm)?.note ?? null;

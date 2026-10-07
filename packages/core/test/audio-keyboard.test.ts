@@ -74,6 +74,35 @@ describe("audio keyboard machine", () => {
     expect(keyboardHitTest(vertical, { x: 90, y: 75 }, rect)).toBe(60);
   });
 
+  test("equal rows share pixel geometry and hit testing across a partial scrolled row", () => {
+    const context = createKeyboardContext({
+      firstNote: 60,
+      lastNote: 62,
+      orientation: "vertical",
+      keyLayout: "equal-rows",
+      rowHeightPx: 10,
+      scrollOffsetPx: 5,
+    });
+    const visual = keyboardVisualState(context);
+    expect(visual.keys.map(({ note, startNorm, lengthNorm }) => ({ note, startNorm, lengthNorm }))).toEqual([
+      { note: 60, startNorm: 2 / 3, lengthNorm: 1 / 3 },
+      { note: 61, startNorm: 1 / 3, lengthNorm: 1 / 3 },
+      { note: 62, startNorm: 0, lengthNorm: 1 / 3 },
+    ]);
+    expect(visual.keys.map(({ note, startPx, lengthPx }) => ({ note, startPx, lengthPx }))).toEqual([
+      { note: 60, startPx: 15, lengthPx: 10 },
+      { note: 61, startPx: 5, lengthPx: 10 },
+      { note: 62, startPx: -5, lengthPx: 10 },
+    ]);
+    expect(visual.keys.every((key) => key.breadthNorm === 1)).toBe(true);
+    const rect = { left: 0, top: 0, width: 100, height: 30 };
+    expect(keyboardHitTest(context, { x: 90, y: 0 }, rect)).toBe(62);
+    expect(keyboardHitTest(context, { x: 90, y: 7 }, rect)).toBe(61);
+    expect(keyboardHitTest(context, { x: 10, y: 20 }, rect)).toBe(60);
+    expect(keyboardHitTest(context, { x: 101, y: 7 }, rect)).toBeNull();
+    expect(keyboardHitTest(context, { x: 90, y: 30 }, rect)).toBeNull();
+  });
+
   test("range and disable changes close held notes", () => {
     let context = keyboardTransition(createKeyboardContext({ firstNote: 48, lastNote: 72 }), {
       type: "PRESS", inputId: "pointer", note: 60, velocity: 127,

@@ -25,6 +25,7 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   EnvelopeEditor: { ariaLabel: "Envelope" },
   Fader: { ariaLabel: "Fader value" },
   GainReductionMeter: { ariaLabel: "Gain reduction" },
+  Keyboard: { firstNote: 60, lastNote: 72, orientation: "vertical", keyLayout: "equal-rows", rowHeightPx: 12, scrollOffsetPx: 5 },
   Knob: { ariaLabel: "Knob value" },
   XYPad: { ariaLabel: "XY position" },
   // Agent transcript set. AgentMessage and ChangedFiles both render nothing

@@ -1,5 +1,6 @@
 //! Renderer-neutral native specs for the audio component family.
 
+pub use poodle_headless::audio::KeyboardKeyLayout;
 use poodle_headless::audio::{
     AudioControlVisualState, AudioMeterVisualState, AudioSwitchMode, AudioSwitchVisualState,
     AudioValueFormat, AudioValueLaw, EnvelopeVisualState, GainReductionVisualState,
@@ -398,6 +399,36 @@ impl KeyboardSpec {
             visual_state,
             aria_label: "Keyboard".into(),
         }
+    }
+
+    pub fn with_row_height_px(mut self, row_height_px: f64) -> Self {
+        self.visual_state.row_height_px =
+            poodle_headless::audio::normalize_keyboard_row_height_px(row_height_px);
+        let key_layout = self.visual_state.key_layout;
+        self.visual_state = poodle_headless::audio::keyboard_visual_state_with_layout(
+            self.visual_state,
+            key_layout,
+        );
+        self
+    }
+
+    pub fn with_key_layout(mut self, key_layout: KeyboardKeyLayout) -> Self {
+        self.visual_state = poodle_headless::audio::keyboard_visual_state_with_layout(
+            self.visual_state,
+            key_layout,
+        );
+        self
+    }
+
+    pub fn with_scroll_offset_px(mut self, scroll_offset_px: f64) -> Self {
+        self.visual_state.scroll_offset_px =
+            poodle_headless::audio::normalize_keyboard_scroll_offset_px(scroll_offset_px);
+        let key_layout = self.visual_state.key_layout;
+        self.visual_state = poodle_headless::audio::keyboard_visual_state_with_layout(
+            self.visual_state,
+            key_layout,
+        );
+        self
     }
 }
 

@@ -139,6 +139,22 @@ describe("audio controls", () => {
     expect(onNoteOff).toHaveBeenCalledWith(60);
   });
 
+  it("Keyboard equal rows position and hit-test the same partially scrolled pitches", async () => {
+    const onNoteOn = vi.fn();
+    const { getByRole, container } = render(Keyboard, { props: {
+      firstNote: 60, lastNote: 62, orientation: "vertical", keyLayout: "equal-rows",
+      rowHeightPx: 10, scrollOffsetPx: 5, onNoteOn,
+    } });
+    const root = getByRole("toolbar") as HTMLDivElement;
+    root.getBoundingClientRect = () => ({ left: 0, top: 0, width: 100, height: 30, right: 100, bottom: 30, x: 0, y: 0, toJSON: () => ({}) });
+    root.setPointerCapture = vi.fn();
+    expect(root.getAttribute("data-key-layout")).toBe("equal-rows");
+    expect(container.querySelector('[data-note="62"]')?.getAttribute("style")).toContain("top: -5px; height: 10px");
+    expect(container.querySelector('[data-note="61"]')?.getAttribute("style")).toContain("top: 5px; height: 10px");
+    await fireEvent.pointerDown(root, { pointerId: 1, button: 0, clientX: 90, clientY: 7 });
+    expect(onNoteOn).toHaveBeenCalledWith(61, 114);
+  });
+
   it("WaveformDisplay owns keyboard cursor state", async () => {
     const onCursorChange = vi.fn(); const pyramid = { sampleCount: 4, levels: [{ samplesPerPeak: 1, peaks: [{ min: -.2, max: .3 }, { min: -.5, max: .6 }, { min: -.1, max: .2 }, { min: -.7, max: .8 }] }] };
     const { getByRole } = render(WaveformDisplay, { props: { pyramid, cursorSample: 1, ariaLabel: "Clip", onCursorChange } });

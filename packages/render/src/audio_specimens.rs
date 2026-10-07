@@ -13,8 +13,9 @@ use poodle_headless::audio::{
     format_value, switch_visual_state, AudioControlVisualState, AudioMeterVisualState,
     AudioSwitchMode, AudioValueFormat, AudioValueLaw, AutomationState, DragState,
     EnvelopeVisualPoint, EnvelopeVisualState, GainReductionVisualState, KeyboardContext,
-    KeyboardOrientation, ModMatrixCell, ModMatrixCellParameters, ModMatrixContext, ModMatrixHeader,
-    WaveformContext, WaveformPeakLevel, WaveformPeakPair, WaveformPeakPyramid, XYPadVisualState,
+    KeyboardKeyLayout, KeyboardOrientation, ModMatrixCell, ModMatrixCellParameters,
+    ModMatrixContext, ModMatrixHeader, WaveformContext, WaveformPeakLevel, WaveformPeakPair,
+    WaveformPeakPyramid, XYPadVisualState,
 };
 use poodle_node::{LayoutDirection, Node};
 use poodle_specs::{
@@ -1195,9 +1196,14 @@ fn keyboard_spec(orientation: KeyboardOrientation, enabled: bool) -> KeyboardSpe
     };
     if orientation == KeyboardOrientation::Vertical {
         context.first_note = 48;
-        context.last_note = 60;
+        context.last_note = 84;
+        context.key_layout = KeyboardKeyLayout::EqualRows;
+        context.row_height_px = 16.0;
+        context.scroll_offset_px = 5.0;
     }
     KeyboardSpec::new(poodle_headless::audio::keyboard_visual_state(&context))
+        .with_row_height_px(context.row_height_px)
+        .with_scroll_offset_px(context.scroll_offset_px)
 }
 
 fn keyboard_examples(ctx: &RenderContext<'_>) -> Node {
@@ -1209,7 +1215,7 @@ fn keyboard_examples(ctx: &RenderContext<'_>) -> Node {
                 vec![super::keyboard(&base, ctx)],
             ),
             (
-                "Vertical piano-roll gutter",
+                "Vertical equal-pitch gutter",
                 vec![super::keyboard(
                     &keyboard_spec(KeyboardOrientation::Vertical, true),
                     ctx,

@@ -27,6 +27,9 @@ Updated: 2026-09-28
 | `density` | `ControlDensity \| null` | `null` | compact, default, or comfortable treatment |
 | `firstNote`, `lastNote` | `number` | `48`, `72` | inclusive MIDI range, clamped to `0..127` |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | vertical is high-to-low, top-to-bottom gutter |
+| `keyLayout` | `"piano" \| "equal-rows"` | `"piano"` | piano uses white-key proportions; equal-rows gives each semitone equal pitch-axis space |
+| `rowHeightPx` | `number` | `16` | equal-rows vertical semitone height; finite values clamp to at least `1` px |
+| `scrollOffsetPx` | `number` | `0` | equal-rows vertical offset from the high-note edge; positive values move rows up; finite values clamp to at least `0` px |
 | `octaveShift` | `number` | `0` | computer-map shift in octaves |
 | `computerBaseNote` | `number` | `60` | base MIDI note for computer-key offsets |
 | `computerKeyMap` | `Record<string, number>` | chromatic A–K map | key to semitone offset |
@@ -56,8 +59,17 @@ Multiple input sources may hold one note; `noteOff` occurs only on final local
 release. Range changes, disablement, and cancellation close active gestures.
 
 Horizontal keys run low to high left-to-right. Vertical gutter keys run high
-to low top-to-bottom and use left-to-right depth for velocity. External held
-notes are a separate highlight set and do not enter gesture accounting.
+to low top-to-bottom and use left-to-right depth for velocity. `keyLayout="piano"`
+keeps the white-key-proportional geometry. `keyLayout="equal-rows"` gives each
+semitone the same space on the pitch axis. Vertically, each row is
+`rowHeightPx` high and `scrollOffsetPx` is measured from the top edge of the
+full high-to-low range; a fractional-row offset can partially clip the top
+row. The visual clips rows to the Keyboard viewport, and hit testing adds the
+same offset before resolving the row. Horizontally, equal-rows uses equal-width
+columns and ignores `rowHeightPx` and `scrollOffsetPx`. Equal rows keep the
+white/black key colors and use the full cross-axis for each semitone; velocity
+still follows cross-axis depth. External held notes are a separate highlight
+set and do not enter gesture accounting.
 
 ## 5. Effects
 
@@ -75,8 +87,9 @@ Space and Enter press and release the focused note. Drawing is aria-hidden.
 ## 7. Layout
 
 Core geometry describes key order, kind, normalized start, length, and depth.
-Black-key precedence belongs to core hit testing. Renderers do not calculate
-note geometry.
+Equal-row hit testing uses the same semitone boundaries, row height, and
+scroll offset as the vertical visual. Piano-layout black-key precedence
+belongs to core hit testing. Renderers do not calculate note geometry.
 
 ## 8. Token Usage
 
@@ -111,7 +124,7 @@ and accessibility tree.
 
 - same range, octave map, velocity quantization, pointer retargeting,
   held-note accounting, and paired note effects
-- same horizontal and vertical geometry and external highlighting
+- same piano and equal-row geometry, scroll alignment, and external highlighting
 - same note names, focus order, and press semantics
 - renderer never reads machine context
 
