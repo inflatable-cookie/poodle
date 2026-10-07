@@ -2344,7 +2344,7 @@ dependencies = [
 
 [[package]]
 name = "poodle-gpui-node-backend"
-version = "0.4.0"
+version = "0.4.11"
 dependencies = [
  "anyhow",
  "futures",
@@ -2356,18 +2356,18 @@ dependencies = [
 
 [[package]]
 name = "poodle-headless"
-version = "0.4.0"
+version = "0.4.11"
 
 [[package]]
 name = "poodle-layout"
-version = "0.4.0"
+version = "0.4.11"
 dependencies = [
  "poodle-tokens",
 ]
 
 [[package]]
 name = "poodle-node"
-version = "0.4.0"
+version = "0.4.11"
 dependencies = [
  "poodle-headless",
  "poodle-layout",
@@ -2377,7 +2377,7 @@ dependencies = [
 
 [[package]]
 name = "poodle-style"
-version = "0.4.0"
+version = "0.4.11"
 dependencies = [
  "poodle-layout",
  "poodle-tokens",
@@ -2385,7 +2385,7 @@ dependencies = [
 
 [[package]]
 name = "poodle-tokens"
-version = "0.4.0"
+version = "0.4.11"
 
 [[package]]
 name = "postage"
