@@ -20,6 +20,8 @@ exists yet.
 
 ## Versions
 
+- [0.4.14](0.4.14.md) — 2026-10-08 — Listbox composite across Svelte, React,
+  shared Rust and GPUI.
 - [0.4.13](0.4.13.md) — 2026-10-08 — Keyboard equal-row layout, icon-geometry
   realize helper, native preview window bounds and Jetstream preview repair.
 - [0.4.12](0.4.12.md) — 2026-10-07 — first coordinated npm/web and native
