@@ -1459,7 +1459,8 @@ struct CliArgs {
     screenshot: Option<String>,
     /// Render the selected specimen's Examples pane without preview chrome.
     specimen_capture: bool,
-    /// Initial window origin and size in logical points: x, y, width, height.
+    /// Outer frame origin and size in logical points: x, y, width, height.
+    /// Titled windows reduce content height by the native title-bar height.
     window_bounds: Option<[f32; 4]>,
     /// Machine-readable proof of the resolved capture axis.
     capture_receipt: Option<String>,
@@ -1512,6 +1513,44 @@ fn parse_window_bounds(value: &str) -> Result<[f32; 4], String> {
         return Err("--window-bounds width and height must be positive".to_string());
     }
     Ok([*x, *y, *width, *height])
+}
+
+/// Ask AppKit for the title-bar height of the same titled, resizable style
+/// used by the preview instead of baking a platform-specific value into the
+/// CLI geometry.
+fn native_titlebar_height() -> f32 {
+    use objc2::MainThreadMarker;
+    use objc2_app_kit::{NSWindow, NSWindowStyleMask};
+    use objc2_foundation::{NSPoint, NSRect, NSSize};
+
+    let marker = MainThreadMarker::new().expect("preview window setup runs on the AppKit thread");
+    let content_rect = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(100.0, 100.0));
+    let style = NSWindowStyleMask::Titled
+        | NSWindowStyleMask::Closable
+        | NSWindowStyleMask::Resizable
+        | NSWindowStyleMask::Miniaturizable;
+    let frame_rect = NSWindow::frameRectForContentRect_styleMask(content_rect, style, marker);
+
+    (frame_rect.size.height - content_rect.size.height) as f32
+}
+
+/// Convert the requested outer frame to GPUI bounds. GPUI keeps the frame
+/// origin but interprets the size as content, so titled windows reserve the
+/// title bar inside the requested frame height.
+fn gpui_bounds_for_outer_frame(
+    [x, y, width, height]: [f32; 4],
+    titlebar_height: f32,
+) -> Result<Bounds<Pixels>, String> {
+    let content_height = height - titlebar_height;
+    if content_height <= 0.0 {
+        return Err(format!(
+            "--window-bounds height must exceed the native title-bar height ({titlebar_height})"
+        ));
+    }
+    Ok(Bounds::new(
+        point(px(x), px(y)),
+        size(px(width), px(content_height)),
+    ))
 }
 
 fn parse_motion_policy(value: &str) -> Result<MotionPolicy, String> {
@@ -1650,6 +1689,8 @@ fn parse_cli_args(args: &[String]) -> Result<CliArgs, String> {
                 i += 1;
             }
             "--window-bounds" => {
+                // x,y,w,h names the outer frame; titled windows subtract the
+                // title-bar height from their content height.
                 let Some(value) = args.get(i + 1) else {
                     eprintln!("--window-bounds requires x,y,w,h");
                     std::process::exit(2);
@@ -2534,8 +2575,19 @@ fn main() {
         } else {
             800.0
         };
-        let bounds = if let Some([x, y, width, height]) = cli.window_bounds {
-            Bounds::new(point(px(x), px(y)), size(px(width), px(height)))
+        let bounds = if let Some(outer_frame) = cli.window_bounds {
+            if specimen_capture {
+                let [x, y, width, height] = outer_frame;
+                // Capture windows have no title bar: preserve their established
+                // content/frame geometry exactly.
+                Bounds::new(point(px(x), px(y)), size(px(width), px(height)))
+            } else {
+                gpui_bounds_for_outer_frame(outer_frame, native_titlebar_height())
+                    .unwrap_or_else(|message| {
+                        eprintln!("{message}");
+                        std::process::exit(2);
+                    })
+            }
         } else {
             Bounds::centered(None, size(px(window_width), px(window_height)), cx)
         };
@@ -2754,7 +2806,7 @@ fn main() {
 }
 #[cfg(test)]
 mod window_bounds_tests {
-    use crate::parse_window_bounds;
+    use super::{gpui_bounds_for_outer_frame, parse_window_bounds, point, px, size};
 
     #[test]
     fn window_bounds_parse_logical_position_and_size() {
@@ -2764,6 +2816,25 @@ mod window_bounds_tests {
         );
         assert!(parse_window_bounds("0,0,0,480").is_err());
         assert!(parse_window_bounds("0,0,640").is_err());
+    }
+
+    #[test]
+    fn window_bounds_preserve_the_outer_frame_and_subtract_titlebar_from_content() {
+        let titlebar_height = 32.0;
+        let bounds = gpui_bounds_for_outer_frame([-120.0, 739.0, 1552.0, 701.0], titlebar_height)
+            .expect("frame leaves positive content height");
+
+        assert_eq!(bounds.origin, point(px(-120.0), px(739.0)));
+        assert_eq!(bounds.size, size(px(1552.0), px(669.0)));
+        assert_eq!(
+            (
+                bounds.origin.x,
+                bounds.origin.y,
+                bounds.size.width,
+                bounds.size.height + px(titlebar_height),
+            ),
+            (px(-120.0), px(739.0), px(1552.0), px(701.0))
+        );
     }
 }
 
