@@ -287,9 +287,7 @@ fn unknown_dispatch_paints_the_fallback_marker() {
         let (root, cx) = app.add_window_view(|_window, cx| PreviewRoot::new(cx));
         cx.update(|_window, app: &mut App| {
             root.update(app, |root, cx| {
-                let base_motion_context = poodle_render::RenderContext::new(&root.state.theme);
-                let motion_context =
-                    base_motion_context.with_first_frame_committed(root.first_frame_committed);
+                let motion_context = root.state.motion_context();
                 specimens::render_single_specimen(
                     "not-a-catalogue-route",
                     &root.state,

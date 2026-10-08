@@ -100,9 +100,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             "Bottom-end (sticky danger)",
             surface(
                 theme,
-                ToastHost::from_spec(
+                ToastHost::from_spec_with_context(
                     ToastHostSpec::new().with_placement(ToastHostPlacement::BottomEnd),
                     theme,
+                    &state.motion_context(),
                 )
                 .toasts(bottom_end_toasts),
             ),
@@ -112,9 +113,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             "Bottom-start",
             surface(
                 theme,
-                ToastHost::from_spec(
+                ToastHost::from_spec_with_context(
                     ToastHostSpec::new().with_placement(ToastHostPlacement::BottomStart),
                     theme,
+                    &state.motion_context(),
                 )
                 .toasts(bottom_start_toasts),
             ),
@@ -124,9 +126,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             "Top-end",
             surface(
                 theme,
-                ToastHost::from_spec(
+                ToastHost::from_spec_with_context(
                     ToastHostSpec::new().with_placement(ToastHostPlacement::TopEnd),
                     theme,
+                    &state.motion_context(),
                 )
                 .toasts(top_end_toasts),
             ),
@@ -136,9 +139,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             "Top-start",
             surface(
                 theme,
-                ToastHost::from_spec(
+                ToastHost::from_spec_with_context(
                     ToastHostSpec::new().with_placement(ToastHostPlacement::TopStart),
                     theme,
+                    &state.motion_context(),
                 )
                 .toasts(top_start_toasts),
             ),
@@ -148,9 +152,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             "With action",
             surface(
                 theme,
-                ToastHost::from_spec(
+                ToastHost::from_spec_with_context(
                     ToastHostSpec::new().with_placement(ToastHostPlacement::BottomEnd),
                     theme,
+                    &state.motion_context(),
                 )
                 .toasts(action_toasts),
             ),
@@ -160,9 +165,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             "Same-id settle",
             surface(
                 theme,
-                ToastHost::from_spec(
+                ToastHost::from_spec_with_context(
                     ToastHostSpec::new().with_placement(ToastHostPlacement::BottomEnd),
                     theme,
+                    &state.motion_context(),
                 )
                 .toasts(vec![Toast::new("publish", "Published")
                     .with_tone(ToastTone::Success)
@@ -180,22 +186,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .with_sizes(|size, theme: &GpuiThemeProvider| {
                 surface(
                     theme,
-                    ToastHost::from_spec(ToastHostSpec::new().with_size(size), theme).toasts(vec![
-                        Toast::new("axis-size", "Saved")
-                            .with_tone(ToastTone::Success)
-                            .with_message("Your changes were saved."),
-                    ]),
+                    ToastHost::from_spec_with_context(
+                        ToastHostSpec::new().with_size(size),
+                        theme,
+                        &state.motion_context(),
+                    )
+                    .toasts(vec![Toast::new("axis-size", "Saved")
+                        .with_tone(ToastTone::Success)
+                        .with_message("Your changes were saved.")]),
                 )
                 .into_any_element()
             })
             .with_densities(|density, theme: &GpuiThemeProvider| {
                 surface(
                     theme,
-                    ToastHost::from_spec(ToastHostSpec::new().with_density(density), theme).toasts(
-                        vec![Toast::new("axis-density", "Saved")
-                            .with_tone(ToastTone::Success)
-                            .with_message("Your changes were saved.")],
-                    ),
+                    ToastHost::from_spec_with_context(
+                        ToastHostSpec::new().with_density(density),
+                        theme,
+                        &state.motion_context(),
+                    )
+                    .toasts(vec![Toast::new("axis-density", "Saved")
+                        .with_tone(ToastTone::Success)
+                        .with_message("Your changes were saved.")]),
                 )
                 .into_any_element()
             }),

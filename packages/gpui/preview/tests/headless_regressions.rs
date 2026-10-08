@@ -37902,6 +37902,50 @@ fn mounted_motion_policy_construction_does_not_invent_clocks() {
     });
 }
 
+/// The preview's frozen root policy reaches an animated spinner on its first
+/// committed frame: the canonical ring endpoint mounts and schedules no clock.
+#[test]
+fn frozen_preview_root_spinner_mounts_endpoint_without_motion_clock() {
+    run_headless(|cx| {
+        let provider = theme();
+        let context = RenderContext::new_with_motion_policy(&provider, MotionPolicy::Frozen, true);
+        let mut spinner_node = spinner(&SpinnerSpec::new(), &context);
+        assert!(matches!(
+            &spinner_node.kind,
+            NodeKind::Icon { name, .. } if name == "spinner"
+        ));
+        assert!(spinner_node.style.animation.is_none());
+        spinner_node.id = Some("frozen-preview-root-spinner".to_string());
+
+        let capture = Arc::new(Mutex::new(Vec::<&'static str>::new()));
+        let tree = Arc::new(Mutex::new(spinner_node));
+        let build = {
+            let capture = Arc::clone(&capture);
+            let tree = Arc::clone(&tree);
+            Rc::new(move || {
+                let node = tree.lock().expect("spinner node").clone();
+                poodle_gpui_node_backend::begin_probe_capture();
+                use gpui::{IntoElement as _, ParentElement as _};
+                let element = gpui::div()
+                    .child(poodle_gpui_node_backend::to_gpui(&node))
+                    .into_any_element();
+                *capture.lock().expect("capture") = poodle_gpui_node_backend::take_probe_capture();
+                element
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        assert!(
+            !capture
+                .lock()
+                .expect("capture")
+                .contains(&"surface.animation.scheduled"),
+            "a frozen preview root paints the spinner endpoint without a live clock"
+        );
+    });
+}
+
 /// g16.091. Production ToastHost placement owns the authored viewport inset;
 /// the composed stack cannot shift itself again inside that host.
 #[test]

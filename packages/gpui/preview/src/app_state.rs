@@ -11,6 +11,7 @@ use poodle_headless::model_connection::{
     model_catalogue_fixtures, model_connection_picker_fixtures, ModelCatalogueItem,
     ModelConnectionSetupStage,
 };
+use poodle_headless::motion_policy::MotionPolicy;
 use poodle_specs::{reorder_nodes, DropPosition, TreeNode};
 use std::collections::HashMap;
 
@@ -844,6 +845,10 @@ pub enum ChromeEvent {
 /// Global application state.
 pub struct AppState {
     pub section: Section,
+    /// Root motion policy and committed-frame state shared by component
+    /// specimens that construct nodes during preview rendering.
+    pub motion_policy: MotionPolicy,
+    pub first_frame_committed: bool,
     pub theme: GpuiThemeProvider,
     pub theme_preset: ThemePreset,
     pub density: Density,
@@ -922,6 +927,8 @@ impl AppState {
 
         Self {
             section: Section::Components,
+            motion_policy: MotionPolicy::Full,
+            first_frame_committed: false,
             theme,
             theme_preset: preset,
             density,
@@ -949,6 +956,14 @@ impl AppState {
             active_file_keys: Vec::new(),
             file_generation: 0,
         }
+    }
+
+    pub fn motion_context(&self) -> poodle_render::RenderContext<'_> {
+        poodle_render::RenderContext::new_with_motion_policy(
+            &self.theme,
+            self.motion_policy,
+            self.first_frame_committed,
+        )
     }
 
     /// Apply queued node-specimen events to the specimen state. Called at the

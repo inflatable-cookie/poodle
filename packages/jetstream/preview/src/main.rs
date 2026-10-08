@@ -23,6 +23,7 @@ use jetstream_ui::*;
 use wgpu::util::DeviceExt;
 
 use app_state::{AppState, ControlSize, DemoScreen, Density, Section, ThemePreset};
+use poodle_headless::motion_policy::MotionPolicy;
 
 /// Maximum number of glyph instances per frame.
 const MAX_TEXT_INSTANCES: usize = 16384;
@@ -89,6 +90,7 @@ fn rects_eq(a: &Rect, b: &Rect) -> bool {
 /// Persistent state across frames.
 struct PreviewState {
     app: AppState,
+    motion_policy: MotionPolicy,
     theme: poodle_jetstream::JetstreamThemeProvider,
     game_ui: GameUi,
     ui_pass: UiPass,
@@ -144,6 +146,7 @@ impl PreviewState {
         height: u32,
         scale_factor: f64,
         app: AppState,
+        motion_policy: MotionPolicy,
     ) -> Self {
         // width/height from PlatformFrame.window_width/height are already
         // in logical pixels (physical / scale_factor). Don't divide again.
@@ -218,6 +221,7 @@ impl PreviewState {
 
         let mut state = Self {
             app,
+            motion_policy,
             theme: poodle_theme,
             game_ui,
             ui_pass,
@@ -693,7 +697,9 @@ impl PreviewState {
         // Tick transitions/animations and re-run layout (animated size/rotate
         // affects geometry) — only while something is actually in motion.
         let dt = frame.dt.as_secs_f32();
-        if self.game_ui.tree.has_active_animations() {
+        // Jetstream's preview clock has no role-tagged reduced-motion
+        // declarations yet, so reduced and frozen both keep captures static.
+        if self.motion_policy == MotionPolicy::Full && self.game_ui.tree.has_active_animations() {
             self.game_ui.advance_animations(dt);
         }
 
@@ -1561,6 +1567,7 @@ struct CliArgs {
     theme: Option<ThemePreset>,
     size: Option<ControlSize>,
     window_bounds: Option<WindowBounds>,
+    motion_policy: MotionPolicy,
 }
 
 fn parse_window_bounds(value: &str) -> Result<WindowBounds, String> {
@@ -1626,6 +1633,15 @@ fn parse_control_size(value: &str) -> Option<ControlSize> {
     })
 }
 
+fn parse_motion_policy(value: &str) -> Option<MotionPolicy> {
+    Some(match value {
+        "full" => MotionPolicy::Full,
+        "reduced" => MotionPolicy::Reduced,
+        "frozen" => MotionPolicy::Frozen,
+        _ => return None,
+    })
+}
+
 fn parse_cli_args(args: impl IntoIterator<Item = String>) -> Result<CliArgs, String> {
     let mut args = args.into_iter();
     let mut parsed = CliArgs {
@@ -1633,6 +1649,7 @@ fn parse_cli_args(args: impl IntoIterator<Item = String>) -> Result<CliArgs, Str
         theme: None,
         size: None,
         window_bounds: None,
+        motion_policy: MotionPolicy::Full,
     };
 
     while let Some(arg) = args.next() {
@@ -1667,6 +1684,14 @@ fn parse_cli_args(args: impl IntoIterator<Item = String>) -> Result<CliArgs, Str
                     .next()
                     .ok_or_else(|| "--window-bounds requires x,y,w,h".to_string())?;
                 parsed.window_bounds = Some(parse_window_bounds(&value)?);
+            }
+            "--motion-policy" => {
+                let value = args.next().ok_or_else(|| {
+                    "--motion-policy requires full, reduced, or frozen".to_string()
+                })?;
+                parsed.motion_policy = parse_motion_policy(&value).ok_or_else(|| {
+                    format!("unknown motion policy {value:?}; expected full, reduced, or frozen")
+                })?;
             }
             _ => {}
         }
@@ -1738,6 +1763,7 @@ fn main() {
                 frame.scale_factor,
                 app.take()
                     .expect("preview state initializes on the first frame"),
+                cli.motion_policy,
             )
         });
 
@@ -1747,7 +1773,9 @@ fn main() {
 
 #[cfg(test)]
 mod cli_tests {
-    use super::{WindowBounds, component_registry, parse_cli_args, parse_window_bounds};
+    use super::{
+        MotionPolicy, WindowBounds, component_registry, parse_cli_args, parse_window_bounds,
+    };
 
     #[test]
     fn component_slug_resolves_before_platform_creation() {
@@ -1780,5 +1808,33 @@ mod cli_tests {
             }
         );
         assert!(parse_window_bounds("0,0,0,480").is_err());
+    }
+
+    #[test]
+    fn motion_policy_parses_all_modes_defaults_to_full_and_rejects_invalid_values() {
+        for (value, expected) in [
+            ("full", MotionPolicy::Full),
+            ("reduced", MotionPolicy::Reduced),
+            ("frozen", MotionPolicy::Frozen),
+        ] {
+            let cli = parse_cli_args(["--motion-policy".to_string(), value.to_string()])
+                .expect("valid motion policy");
+            assert_eq!(cli.motion_policy, expected);
+        }
+
+        assert_eq!(
+            parse_cli_args([]).expect("default args").motion_policy,
+            MotionPolicy::Full
+        );
+        assert!(
+            parse_cli_args(["--motion-policy".to_string(), "instant".to_string()])
+                .expect_err("invalid motion policy is rejected")
+                .contains("expected full, reduced, or frozen")
+        );
+        assert!(
+            parse_cli_args(["--motion-policy".to_string()])
+                .expect_err("missing motion policy is rejected")
+                .contains("requires full, reduced, or frozen")
+        );
     }
 }

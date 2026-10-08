@@ -32,7 +32,8 @@ fn node_icon_button(
     state: &AppState,
     on_click: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> IconButton {
-    let mut button = IconButton::from_spec(spec, &state.theme);
+    let context = state.motion_context();
+    let mut button = IconButton::from_spec_with_context(spec, &state.theme, &context);
     if let Some(handler) = on_click {
         button = button.on_click(handler);
     }

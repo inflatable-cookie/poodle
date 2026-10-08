@@ -50,9 +50,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Indeterminate"),
                     theme,
                 ))
-                .child(Progress::from_spec(
+                .child(Progress::from_spec_with_context(
                     ProgressSpec::new().with_indeterminate(true),
-                    theme,
+                    &state.motion_context(),
                 )),
         )
         // --- Custom max ---

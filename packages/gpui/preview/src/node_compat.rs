@@ -14,6 +14,7 @@ use gpui::{
 };
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
+use poodle_headless::motion_policy::MotionPolicy;
 use poodle_render::{AccordionHandlers, RenderContext, SlotBuilder};
 use poodle_specs::{
     AccordionSelectionValue, AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec,
@@ -863,6 +864,8 @@ pub(crate) struct ToastStack {
     spec: ToastStackSpec,
     theme: GpuiThemeProvider,
     handlers: poodle_render::ToastStackHandlers,
+    motion_policy: MotionPolicy,
+    first_frame_committed: bool,
 }
 
 pub(crate) struct ToastHost {
@@ -870,6 +873,8 @@ pub(crate) struct ToastHost {
     stack_spec: ToastStackSpec,
     theme: GpuiThemeProvider,
     handlers: poodle_render::ToastStackHandlers,
+    motion_policy: MotionPolicy,
+    first_frame_committed: bool,
 }
 
 pub(crate) struct MessageCenter {
@@ -1612,7 +1617,20 @@ impl ToastStack {
             spec,
             theme: theme.clone(),
             handlers: poodle_render::ToastStackHandlers::default(),
+            motion_policy: MotionPolicy::Full,
+            first_frame_committed: false,
         }
+    }
+
+    pub(crate) fn from_spec_with_context(
+        spec: ToastStackSpec,
+        theme: &GpuiThemeProvider,
+        context: &RenderContext<'_>,
+    ) -> Self {
+        let mut stack = Self::from_spec(spec, theme);
+        stack.motion_policy = context.motion_policy();
+        stack.first_frame_committed = context.first_frame_committed();
+        stack
     }
 
     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
@@ -1645,9 +1663,14 @@ impl IntoElement for ToastStack {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
+        let context = RenderContext::new_with_motion_policy(
+            &self.theme,
+            self.motion_policy,
+            self.first_frame_committed,
+        );
         poodle_gpui_node_backend::to_gpui(&poodle_render::toast_stack(
             &self.spec,
-            &RenderContext::new(&self.theme),
+            &context,
             self.handlers,
         ))
     }
@@ -1660,7 +1683,20 @@ impl ToastHost {
             stack_spec: ToastStackSpec::new(),
             theme: theme.clone(),
             handlers: poodle_render::ToastStackHandlers::default(),
+            motion_policy: MotionPolicy::Full,
+            first_frame_committed: false,
         }
+    }
+
+    pub(crate) fn from_spec_with_context(
+        spec: ToastHostSpec,
+        theme: &GpuiThemeProvider,
+        context: &RenderContext<'_>,
+    ) -> Self {
+        let mut host = Self::from_spec(spec, theme);
+        host.motion_policy = context.motion_policy();
+        host.first_frame_committed = context.first_frame_committed();
+        host
     }
 
     pub(crate) fn toasts(mut self, toasts: Vec<poodle_specs::Toast>) -> Self {
@@ -1688,9 +1724,14 @@ impl IntoElement for ToastHost {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
+        let context = RenderContext::new_with_motion_policy(
+            &self.theme,
+            self.motion_policy,
+            self.first_frame_committed,
+        );
         poodle_gpui_node_backend::to_gpui(&poodle_render::toast_host(
             &self.spec,
-            &RenderContext::new(&self.theme),
+            &context,
             &self.stack_spec,
             self.handlers,
         ))
@@ -3763,6 +3804,13 @@ impl Progress {
             spec,
             theme: theme.clone(),
         }
+    }
+
+    pub(crate) fn from_spec_with_context(
+        spec: ProgressSpec,
+        context: &RenderContext<'_>,
+    ) -> AnyElement {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::progress(&spec, context))
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
@@ -8802,6 +8850,8 @@ pub(crate) struct IconButton {
     id_suffix: Option<String>,
     on_click: Option<Arc<dyn Fn() + Send + Sync>>,
     on_pressed_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    motion_policy: MotionPolicy,
+    first_frame_committed: bool,
 }
 
 impl IconButton {
@@ -8812,7 +8862,20 @@ impl IconButton {
             id_suffix: None,
             on_click: None,
             on_pressed_change: None,
+            motion_policy: MotionPolicy::Full,
+            first_frame_committed: false,
         }
+    }
+
+    pub(crate) fn from_spec_with_context(
+        spec: IconButtonSpec,
+        theme: &GpuiThemeProvider,
+        context: &RenderContext<'_>,
+    ) -> Self {
+        let mut button = Self::from_spec(spec, theme);
+        button.motion_policy = context.motion_policy();
+        button.first_frame_committed = context.first_frame_committed();
+        button
     }
 
     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
@@ -8848,7 +8911,12 @@ impl IconButton {
 
     fn into_node(self) -> poodle_node::Node {
         let theme = self.theme.clone();
-        self.into_node_with(&RenderContext::new(&theme))
+        let context = RenderContext::new_with_motion_policy(
+            &theme,
+            self.motion_policy,
+            self.first_frame_committed,
+        );
+        self.into_node_with(&context)
     }
 
     /// Deferred construction for a scoped slot (architecture 010): the

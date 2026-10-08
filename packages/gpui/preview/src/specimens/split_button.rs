@@ -24,7 +24,6 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
-use poodle_render::RenderContext;
 use poodle_render::{split_button, SplitButtonHandlers};
 use poodle_specs::{ButtonTone, ButtonVariant, EyebrowSpec, SplitButtonSpec, SplitMenuItem};
 
@@ -34,7 +33,7 @@ fn node_split_button(
     state: &AppState,
     handlers: SplitButtonHandlers,
 ) -> AnyElement {
-    let node = split_button(&spec, &RenderContext::new(&state.theme), handlers);
+    let node = split_button(&spec, &state.motion_context(), handlers);
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
@@ -251,7 +250,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         "split-button",
         examples,
         SpecimenAxes::examples_only()
-            .with_sizes(|size, theme: &GpuiThemeProvider| {
+            .with_sizes(|size, _theme: &GpuiThemeProvider| {
                 let node = split_button(
                     &SplitButtonSpec::new()
                         .with_variant(ButtonVariant::Secondary)
@@ -261,12 +260,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             SplitMenuItem::action("a", "Action A"),
                             SplitMenuItem::action("b", "Action B"),
                         ]),
-                    &RenderContext::new(theme),
+                    &state.motion_context(),
                     SplitButtonHandlers::default(),
                 );
                 poodle_gpui_node_backend::to_gpui(&node)
             })
-            .with_densities(|density, theme: &GpuiThemeProvider| {
+            .with_densities(|density, _theme: &GpuiThemeProvider| {
                 let node = split_button(
                     &SplitButtonSpec::new()
                         .with_variant(ButtonVariant::Secondary)
@@ -276,7 +275,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             SplitMenuItem::action("b", "Action B"),
                         ])
                         .with_density(density),
-                    &RenderContext::new(theme),
+                    &state.motion_context(),
                     SplitButtonHandlers::default(),
                 );
                 poodle_gpui_node_backend::to_gpui(&node)

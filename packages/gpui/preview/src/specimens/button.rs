@@ -32,7 +32,7 @@ fn node_button(
     state: &AppState,
     on_click: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> AnyElement {
-    let node = button(&spec, &RenderContext::new(&state.theme), on_click);
+    let node = button(&spec, &state.motion_context(), on_click);
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
@@ -304,12 +304,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_label("Disabled"),
                             theme,
                         ))
-                        .child(node_button_static(
+                        .child(node_button(
                             ButtonSpec::new()
                                 .with_variant(ButtonVariant::Primary)
                                 .with_loading(true)
                                 .with_label("Loading"),
-                            theme,
+                            state,
+                            None,
                         ))
                         .child(node_button(
                             ButtonSpec::new()

@@ -74,7 +74,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             theme,
             "Tones",
             surface(
-                ToastStack::from_spec(ToastStackSpec::new().with_toasts(tone_toasts), theme),
+                ToastStack::from_spec_with_context(
+                    ToastStackSpec::new().with_toasts(tone_toasts),
+                    theme,
+                    &state.motion_context(),
+                ),
                 260.0,
             ),
         ))
@@ -92,9 +96,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(surface(
-                    ToastStack::from_spec(
+                    ToastStack::from_spec_with_context(
                         ToastStackSpec::new().with_toasts(interactive_toasts),
                         theme,
+                        &state.motion_context(),
                     ),
                     260.0,
                 )),
@@ -113,11 +118,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child("Pending used this same id. Toast copy has no percent; Progress stays on the host."),
                 )
                 .child(surface(
-                    ToastStack::from_spec(
+                    ToastStack::from_spec_with_context(
                         ToastStackSpec::new().with_toasts(vec![Toast::new("publish", "Published")
                             .with_tone(ToastTone::Success)
                             .with_message("Your article is live.")]),
                         theme,
+                        &state.motion_context(),
                     ),
                     120.0,
                 )),
@@ -132,7 +138,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         SpecimenAxes::examples_only()
             .with_sizes(|size, theme: &GpuiThemeProvider| {
                 surface(
-                    ToastStack::from_spec(
+                    ToastStack::from_spec_with_context(
                         ToastStackSpec::new().with_toasts(vec![
                             Toast::new(format!("size-{}-1", size_key(size)), "Toast")
                                 .with_tone(ToastTone::Info)
@@ -143,6 +149,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_action_label("View"),
                         ]),
                         theme,
+                        &state.motion_context(),
                     )
                     .with_size(size),
                     120.0,
@@ -151,7 +158,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             })
             .with_densities(|density, theme: &GpuiThemeProvider| {
                 surface(
-                    ToastStack::from_spec(
+                    ToastStack::from_spec_with_context(
                         ToastStackSpec::new().with_toasts(vec![
                             Toast::new(
                                 format!("density-{}-1", density_key(density)),
@@ -170,6 +177,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_action_label("Retry"),
                         ]),
                         theme,
+                        &state.motion_context(),
                     )
                     .with_density(density),
                     120.0,
