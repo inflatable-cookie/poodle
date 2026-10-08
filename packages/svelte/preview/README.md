@@ -18,6 +18,28 @@ effigy svelte:preview
 `svelte:run` is the low-level Vite command and can serve stale ignored dist
 output. Then open `http://localhost:4173`.
 
+## Specimen Capture
+
+Open a component without the preview shell or specimen tab strip:
+
+```text
+http://localhost:4173/?capture=specimen#components/button
+```
+
+Capture mode renders the Examples content in the shared 1280 × 900 logical
+frame with 24 pixels of padding. A Playwright context should use the reference
+device scale of 1. Once the specimen is ready, its frame exposes
+`data-capture-ready="<slug>"` and `data-capture-device-scale="<value>"`; the
+marker is set after `document.fonts.ready` and two animation frames. The shared
+frame values and scale notes are in the
+[preview specimen capture guide](../../../docs/guides/preview-specimen-capture.md).
+
+The headless browser proof for Button and Keyboard capture mode runs with:
+
+```sh
+effigy test:svelte-specimen-capture
+```
+
 To validate the docs baseline before a publish candidate:
 
 ```sh

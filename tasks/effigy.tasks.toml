@@ -142,6 +142,7 @@
 # Public selector: rebuild core + Svelte package, then Vite. Fail-closed.
 "svelte:preview" = [{ task = "svelte:package" }, { task = "svelte:run"}]
 "svelte:surface-audit" = "bun packages/svelte/components/scripts/surface-audit.ts"
+"test:svelte-specimen-capture" = "bun packages/svelte/preview/scripts/specimen-capture.test.ts"
 
 # React preview (component gallery, mirrors the Svelte preview)
 "react:build" = "bun run --cwd packages/react/preview build"

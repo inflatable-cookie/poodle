@@ -223,9 +223,8 @@ impl Density {
 /// toggle group here, which could not express the values between them.
 pub const CONTRAST_MIN: f32 = 0.0;
 pub const CONTRAST_MAX: f32 = 1.0;
-/// Where the preview starts. Lower than the tokens' own midpoint: the flatter
-/// neutral ramp is the one most of the component work is judged against.
-pub const CONTRAST_DEFAULT: f32 = 0.25;
+/// Neutral starting point shared with the Svelte preview.
+pub const CONTRAST_DEFAULT: f32 = 0.5;
 
 /// Held duration for code-copy feedback (contract §4). Production scheduling
 /// and the mounted regression both use this constant; tests advance the
@@ -845,6 +844,8 @@ pub enum ChromeEvent {
 /// Global application state.
 pub struct AppState {
     pub section: Section,
+    /// Render only the selected specimen's Examples content for lab captures.
+    pub specimen_capture: bool,
     /// Root motion policy and committed-frame state shared by component
     /// specimens that construct nodes during preview rendering.
     pub motion_policy: MotionPolicy,
@@ -853,8 +854,8 @@ pub struct AppState {
     pub theme_preset: ThemePreset,
     pub density: Density,
     pub control_size: ControlSize,
-    /// Neutral-contrast knob, 0.0..=1.0. Starts at `CONTRAST_DEFAULT`, which is
-    /// the preview's starting point rather than the tokens' own midpoint (0.5).
+    /// Neutral-contrast knob, 0.0..=1.0. Starts at `CONTRAST_DEFAULT`, matching
+    /// Svelte's neutral preview value.
     pub contrast: f32,
     pub component_search: String,
     /// Caret/selection in the header search box, and whether it holds focus.
@@ -927,6 +928,7 @@ impl AppState {
 
         Self {
             section: Section::Components,
+            specimen_capture: false,
             motion_policy: MotionPolicy::Full,
             first_frame_committed: false,
             theme,

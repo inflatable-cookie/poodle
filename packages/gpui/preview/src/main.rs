@@ -31,6 +31,7 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 use std::path::PathBuf;
+use std::sync::OnceLock;
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
@@ -41,6 +42,7 @@ use poodle_specs::{
     SemanticControlSizeRole, SidebarNavGroup, SidebarNavItem, SidebarNavSpec, SliderSpec,
     TabDefinition, TabVariant, TabsSpec, TextInputSpec, ThemeSelectSpec,
 };
+use serde::Deserialize;
 
 /// Asset source that loads files from the preview app's directory.
 struct PreviewAssets {
@@ -193,6 +195,7 @@ impl Render for CatalogueSidebar {
 
         let mut sidebar = div()
             .id("catalogue-sidebar")
+            .debug_selector(|| "preview-shell-sidebar".to_string())
             .size_full()
             .overflow_y_scroll()
             .border_r_1()
@@ -448,6 +451,35 @@ impl Render for PreviewRoot {
         poodle_gpui_node_backend::reset_element_ids();
         let theme = &self.state.theme;
 
+        if self.state.specimen_capture {
+            let frame = specimen_capture_frame();
+            let canvas_bg = theme.resolve_color("color.background.canvas");
+            let text_primary = theme.resolve_color("color.text.primary");
+            let slug = self
+                .state
+                .active_component_slug
+                .as_deref()
+                .expect("specimen capture requires a selected component");
+            let capture = div()
+                .w(px(frame.logical_width))
+                .h(px(frame.logical_height))
+                .p(px(frame.padding))
+                .flex()
+                .flex_col()
+                .font_family("Inter")
+                .bg(color_to_hsla(canvas_bg))
+                .text_color(color_to_hsla(text_primary))
+                .child(self.render_component_specimen(slug, cx))
+                .debug_selector(|| "specimen-capture-frame".to_string());
+            let drag = self.drag.clone();
+            let drag_host = self.drag_host.clone();
+            return poodle_gpui_node_backend::drag_drop_window_host(&drag_host, || {
+                poodle_gpui_node_backend::drag_drop_provider(&drag, || {
+                    poodle_gpui_node_backend::attach_overlay_host(capture, window_handle)
+                })
+            });
+        }
+
         let canvas_bg = theme.resolve_color("color.background.canvas");
         let elevated_bg = theme.resolve_color("color.background.elevated");
         let panel_bg = theme.resolve_color("color.background.panel");
@@ -483,6 +515,7 @@ impl Render for PreviewRoot {
                         .size_full()
                         .flex()
                         .flex_col()
+                        .debug_selector(|| "preview-shell-root".to_string())
                         .font_family("Inter")
                         .bg(color_to_hsla(canvas_bg))
                         .text_color(color_to_hsla(text_primary))
@@ -491,6 +524,7 @@ impl Render for PreviewRoot {
                             div()
                                 .w_full()
                                 .h(top_bar_h)
+                                .debug_selector(|| "preview-shell-topbar".to_string())
                                 .flex()
                                 .items_center()
                                 .gap(px(16.0))
@@ -515,15 +549,18 @@ impl Render for PreviewRoot {
                                 .child(self.render_status_pills(text_secondary, border)),
                         )
                         // ── Display controls bar ─────────────────────────────────
-                        .child(self.render_display_controls(
-                            text_secondary,
-                            accent,
-                            border,
-                            border_subtle,
-                            panel_bg,
-                            controls_h,
-                            cx,
-                        ))
+                        .child(
+                            self.render_display_controls(
+                                text_secondary,
+                                accent,
+                                border,
+                                border_subtle,
+                                panel_bg,
+                                controls_h,
+                                cx,
+                            )
+                            .debug_selector(|| "preview-shell-controls".to_string()),
+                        )
                         // ── Main content area ────────────────────────────────────
                         // Section content is a direct child of root — no intermediate wrapper.
                         // Each section is given an explicit pixel height so overflow_y_scroll
@@ -1420,6 +1457,8 @@ struct CliArgs {
     density: Option<Density>,
     control_size: Option<ControlSize>,
     screenshot: Option<String>,
+    /// Render the selected specimen's Examples pane without preview chrome.
+    specimen_capture: bool,
     /// Initial window origin and size in logical points: x, y, width, height.
     window_bounds: Option<[f32; 4]>,
     /// Machine-readable proof of the resolved capture axis.
@@ -1438,6 +1477,23 @@ struct CliArgs {
     /// appears when a press spans frames. `--hold 0` restores the old
     /// single-frame behaviour for runs that only need speed.
     hold_ms: u64,
+}
+
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct SpecimenCaptureFrame {
+    logical_width: f32,
+    logical_height: f32,
+    padding: f32,
+    device_scale: f32,
+}
+
+fn specimen_capture_frame() -> &'static SpecimenCaptureFrame {
+    static FRAME: OnceLock<SpecimenCaptureFrame> = OnceLock::new();
+    FRAME.get_or_init(|| {
+        serde_json::from_str(include_str!("../../../preview-capture/specimen-frame.json"))
+            .expect("shared specimen capture frame is valid JSON")
+    })
 }
 
 fn parse_window_bounds(value: &str) -> Result<[f32; 4], String> {
@@ -1479,6 +1535,7 @@ fn parse_cli_args(args: &[String]) -> Result<CliArgs, String> {
     let mut density = None;
     let mut control_size = None;
     let mut screenshot = None;
+    let mut specimen_capture = false;
     let mut window_bounds = None;
     let mut capture_receipt = None;
     let mut motion_policy = MotionPolicy::Full;
@@ -1581,6 +1638,16 @@ fn parse_cli_args(args: &[String]) -> Result<CliArgs, String> {
                     screenshot = Some(val.clone());
                     i += 1;
                 }
+            }
+            "--capture-mode" => {
+                let Some(value) = args.get(i + 1) else {
+                    return Err("--capture-mode requires specimen".to_string());
+                };
+                match value.as_str() {
+                    "specimen" => specimen_capture = true,
+                    _ => return Err(format!("unknown capture mode {value:?}; expected specimen")),
+                }
+                i += 1;
             }
             "--window-bounds" => {
                 let Some(value) = args.get(i + 1) else {
@@ -1685,6 +1752,29 @@ fn parse_cli_args(args: &[String]) -> Result<CliArgs, String> {
         i += 1;
     }
 
+    if specimen_capture {
+        let Some(slug) = component.as_deref() else {
+            return Err("--capture-mode specimen requires --component <slug>".to_string());
+        };
+        if find_component(slug).is_none() {
+            return Err(format!("unknown specimen component {slug:?}"));
+        }
+        let frame = specimen_capture_frame();
+        if let Some([_, _, width, height]) = window_bounds {
+            if width != frame.logical_width || height != frame.logical_height {
+                return Err(format!(
+                    "--capture-mode specimen uses the shared {}x{} logical frame",
+                    frame.logical_width, frame.logical_height
+                ));
+            }
+        }
+        if screenshot.is_some() && capture_receipt.is_none() {
+            return Err(
+                "--capture-mode specimen screenshots require --capture-receipt".to_string(),
+            );
+        }
+    }
+
     Ok(CliArgs {
         section,
         component,
@@ -1695,6 +1785,7 @@ fn parse_cli_args(args: &[String]) -> Result<CliArgs, String> {
         density,
         control_size,
         screenshot,
+        specimen_capture,
         window_bounds,
         capture_receipt,
         motion_policy,
@@ -1704,11 +1795,17 @@ fn parse_cli_args(args: &[String]) -> Result<CliArgs, String> {
     })
 }
 
-fn capture_receipt(control_size: &str, motion_policy: MotionPolicy) -> serde_json::Value {
+fn capture_receipt(
+    control_size: &str,
+    motion_policy: MotionPolicy,
+    device_scale: f32,
+) -> serde_json::Value {
     serde_json::json!({
         "schema": "native-visual-axis-receipt.v1",
         "controlSize": control_size,
         "motionPolicy": motion_policy.as_str(),
+        "deviceScale": device_scale,
+        "referenceDeviceScale": specimen_capture_frame().device_scale,
     })
 }
 
@@ -2364,6 +2461,20 @@ fn schedule_frames_drawn(window: &mut Window, remaining: u32) {
     });
 }
 
+fn disable_capture_window_shadow() {
+    use objc2::MainThreadMarker;
+    use objc2_app_kit::NSApplication;
+
+    let marker = MainThreadMarker::new().expect("capture window setup runs on the AppKit thread");
+    let application = NSApplication::sharedApplication(marker);
+    let window = application
+        .windows()
+        .iter()
+        .next()
+        .expect("capture mode opened its AppKit window");
+    window.setHasShadow(false);
+}
+
 fn main() {
     let cli_args: Vec<String> = std::env::args().skip(1).collect();
     let cli = parse_cli_args(&cli_args).unwrap_or_else(|message| {
@@ -2381,6 +2492,7 @@ fn main() {
         .run(move |cx: &mut App| {
         // Taken before the window closure consumes `cli`.
         let driver_screenshot = cli.screenshot.clone();
+        let specimen_capture = cli.specimen_capture;
         let has_driver_actions = !cli.clicks.is_empty();
         // Load Inter font family — static weights for reliable rendering
         // (GPUI doesn't support variable font weight axes)
@@ -2411,19 +2523,43 @@ fn main() {
         cx.on_action(|_: &Quit, cx| cx.quit());
         cx.on_action(|_: &CloseWindow, cx| cx.quit());
 
-        // Use a taller window in screenshot mode so all specimen sections fit.
-        let window_height = if cli.screenshot.is_some() { 1600.0 } else { 800.0 };
+        let frame = specimen_capture_frame();
+        let window_width = if specimen_capture { frame.logical_width } else { 1280.0 };
+        // Normal visual captures keep their existing tall window. Specimen
+        // captures use the shared fixed frame that the browser preview uses.
+        let window_height = if specimen_capture {
+            frame.logical_height
+        } else if cli.screenshot.is_some() {
+            1600.0
+        } else {
+            800.0
+        };
         let bounds = if let Some([x, y, width, height]) = cli.window_bounds {
             Bounds::new(point(px(x), px(y)), size(px(width), px(height)))
         } else {
-            Bounds::centered(None, size(px(1280.0), px(window_height)), cx)
+            Bounds::centered(None, size(px(window_width), px(window_height)), cx)
         };
+        let mut window_options = WindowOptions {
+            window_bounds: Some(WindowBounds::Windowed(bounds)),
+            ..Default::default()
+        };
+        if specimen_capture {
+            // GPUI maps a missing titlebar to a full-size content window with
+            // no traffic lights; the frame then equals the declared logical
+            // content size. The shadow is disabled after AppKit creates it.
+            window_options.titlebar = None;
+            window_options.focus = false;
+            window_options.is_movable = false;
+            window_options.is_resizable = false;
+            window_options.is_minimizable = false;
+        }
         cx.open_window(
-            WindowOptions {
-                window_bounds: Some(WindowBounds::Windowed(bounds)),
-                ..Default::default()
-            },
+            window_options,
             move |window, cx| {
+                let device_scale = window.scale_factor();
+                if cli.specimen_capture {
+                    disable_capture_window_shadow();
+                }
                 // Screenshot mode waits on this rather than on a fixed delay:
                 // it flips once the window reports several frames actually
                 // drawn. A guessed 1.5s sometimes captured a half-painted
@@ -2466,6 +2602,7 @@ fn main() {
                         root.state.control_size = s;
                     }
                     root.state.motion_policy = cli.motion_policy;
+                    root.state.specimen_capture = cli.specimen_capture;
                     // Rebuild theme with all overrides applied together
                     root.state.rebuild_theme();
                     if let Some(ref receipt_path) = cli.capture_receipt {
@@ -2476,6 +2613,7 @@ fn main() {
                         let receipt = capture_receipt(
                             root.state.control_size.label(),
                             root.state.motion_policy,
+                            device_scale,
                         );
                         std::fs::write(
                             path,
@@ -2667,10 +2805,50 @@ mod motion_policy_tests {
     }
 
     #[test]
+    fn specimen_capture_flag_requires_and_selects_a_catalogue_component() {
+        let args = vec![
+            "--capture-mode".to_string(),
+            "specimen".to_string(),
+            "--component".to_string(),
+            "button".to_string(),
+        ];
+        assert!(
+            parse_cli_args(&args)
+                .expect("valid specimen capture arguments")
+                .specimen_capture
+        );
+        assert!(parse_cli_args(&["--capture-mode".to_string()])
+            .err()
+            .expect("capture mode requires a value")
+            .contains("requires specimen"));
+        assert!(
+            parse_cli_args(&["--capture-mode".to_string(), "specimen".to_string()])
+                .err()
+                .expect("capture mode requires a component")
+                .contains("requires --component")
+        );
+        assert!(parse_cli_args(&[
+            "--capture-mode".to_string(),
+            "unknown".to_string(),
+            "--component".to_string(),
+            "button".to_string(),
+        ])
+        .err()
+        .expect("unknown capture modes are rejected")
+        .contains("expected specimen"));
+    }
+
+    #[test]
     fn capture_receipt_records_the_effective_motion_policy() {
-        let receipt = capture_receipt("md", MotionPolicy::Frozen);
+        let receipt = capture_receipt("md", MotionPolicy::Frozen, 2.0);
         assert_eq!(receipt["controlSize"], "md");
         assert_eq!(receipt["motionPolicy"], "frozen");
+        assert_eq!(receipt["deviceScale"], 2.0);
+    }
+
+    #[test]
+    fn preview_contrast_starts_at_sveltes_neutral_value() {
+        assert_eq!(AppState::new().contrast, 0.5);
     }
 
     #[test]

@@ -15,18 +15,26 @@
     type IconSet,
   } from "@inflatable-cookie/poodle-svelte";
   import iconNodes from "lucide-static/icon-nodes.json";
-  import { onMount } from "svelte";
+  import { onMount, setContext, tick } from "svelte";
 
   import DisplayControls from "./components/DisplayControls.svelte";
   import ComponentsSection from "./sections/ComponentsSection.svelte";
   import TokensSection from "./sections/TokensSection.svelte";
   import { parseRoute, type Route, type SectionId } from "./router";
+  import { findComponent } from "./component-registry";
+  import { specimenMap } from "./specimens/registry";
+  import { SPECIMEN_CAPTURE_CONTEXT } from "./specimen-capture-context";
   import { previewShell } from "./generated/preview-shell";
+  import specimenCaptureFrame from "../../../preview-capture/specimen-frame.json";
 
   type ThemeName = keyof typeof themes;
   type DensityName = keyof typeof densityModes;
   type ControlSizeName = keyof typeof controlSizes;
   type SemanticTokenPath = keyof typeof cssVars;
+
+  const initialSearch = typeof window === "undefined" ? "" : window.location.search;
+  const startsInSpecimenCapture = new URLSearchParams(initialSearch).get("capture") === "specimen";
+  setContext(SPECIMEN_CAPTURE_CONTEXT, startsInSpecimenCapture);
 
   // Navigation labels come from the scene (card 035 R4): the shell's top
   // tabs are the scene's layout sections, never authored text here.
@@ -45,12 +53,17 @@
   let controlSize: ControlSizeName = $state("sm");
   let contrast = $state(0.5);
   let componentSearch = $state("");
-  let route: Route = $state({ section: "components" });
+  let route: Route = $state(
+    typeof window === "undefined" ? { section: "components" } : parseRoute(window.location.hash),
+  );
+  let captureMode = $state(startsInSpecimenCapture);
   let liveTokenValues: Partial<Record<SemanticTokenPath, string>> = $state({});
   let appliedPreviewModeKey = "";
   let hasMounted = $state(false);
 
   let activeSection = $derived(route.section);
+  let captureEntry = $derived(captureMode && route.component ? findComponent(route.component) : undefined);
+  let captureSpecimen = $derived(captureEntry ? specimenMap[captureEntry.slug] ?? null : null);
   // ── Theme application ───────────────────────────────────────────────
 
   function readSemanticTokenValues(element: HTMLElement): Partial<Record<SemanticTokenPath, string>> {
@@ -87,6 +100,7 @@
     const params = new URLSearchParams(window.location.search);
 
     route = parseRoute(hash);
+    captureMode = params.get("capture") === "specimen";
 
     const paramTheme = params.get("theme");
     const paramDensity = params.get("density");
@@ -110,6 +124,7 @@
         density,
         controlSize,
       });
+      if (captureMode) searchParams.set("capture", "specimen");
       const hash = window.location.hash || "#components";
       const nextUrl = `${window.location.pathname}?${searchParams.toString()}${hash}`;
       const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
@@ -123,6 +138,29 @@
     syncCurrentLocation();
     hasMounted = true;
     refreshPreviewSurface();
+
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    const originalBodyOverflow = document.body.style.overflow;
+    if (captureMode) {
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+      void (async () => {
+        await tick();
+        await document.fonts.ready;
+        await tick();
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        if (captureEntry && captureSpecimen && appShell) {
+          appShell.dataset.captureReady = captureEntry.slug;
+          appShell.dataset.captureDeviceScale = String(window.devicePixelRatio);
+        }
+      })();
+    }
+
+    return () => {
+      document.documentElement.style.overflow = originalHtmlOverflow;
+      document.body.style.overflow = originalBodyOverflow;
+    };
   });
 </script>
 
@@ -136,59 +174,89 @@
 />
 
 <UiPresentationProvider density={density} sizeScale={controlSize}>
-  <div class="poodle-app-shell" style:--poodle-contrast={contrast === 0.5 ? undefined : contrast} bind:this={appShell}>
-    <header class="poodle-app-top-bar">
-      <div class="poodle-app-top-bar__title">
-        <strong>Poodle</strong>
-        <span class="poodle-app-top-bar__framework">Svelte</span>
-      </div>
-      <Tabs
-        value={activeSection}
-        items={topTabs}
-        variant="pill"
-        ariaLabel="Main navigation"
-        onValueChange={(value) => navigateToSection(value as SectionId)}
-      />
-      <div class="poodle-app-top-bar__pills">
-        <Pill>{theme}</Pill>
-        <Pill>{density}</Pill>
-        <Pill>{controlSize}</Pill>
-      </div>
-    </header>
-
-    <DisplayControls
-      {theme}
-      {density}
-      {controlSize}
-      search={componentSearch}
-      onThemeChange={(value) => (theme = value as ThemeName)}
-      onDensityChange={(value) => (density = value as DensityName)}
-      onControlSizeChange={(value) => (controlSize = value as ControlSizeName)}
-      {contrast}
-      onContrastChange={(value) => (contrast = Math.round(value * 100) / 100)}
-      onSearchChange={(value) => {
-        componentSearch = value;
-        if (activeSection !== "components") {
-          navigateToSection("components");
-        }
-      }}
-    />
-
-    <main class="poodle-app-main">
-      {#key `${theme}:${activeSection}`}
+  {#if captureMode}
+    {#if captureEntry && captureSpecimen}
+      {@const Specimen = captureSpecimen as any}
+      <main
+        class="poodle-specimen-capture-frame"
+        data-specimen-capture={captureEntry.slug}
+        data-capture-reference-device-scale={specimenCaptureFrame.deviceScale}
+        style:--specimen-capture-width={`${specimenCaptureFrame.logicalWidth}px`}
+        style:--specimen-capture-height={`${specimenCaptureFrame.logicalHeight}px`}
+        style:--specimen-capture-padding={`${specimenCaptureFrame.padding}px`}
+        style:--poodle-contrast={contrast === 0.5 ? undefined : contrast}
+        bind:this={appShell}
+      >
         <IconProvider icons={iconNodes as unknown as IconSet}>
-          {#if activeSection === "components"}
-            <ComponentsSection activeComponent={route.component} search={componentSearch} />
-          {:else if activeSection === "tokens"}
-            <TokensSection {liveTokenValues} />
-          {/if}
+          <Specimen slug={captureEntry.slug} />
         </IconProvider>
-      {/key}
-    </main>
-  </div>
+      </main>
+    {/if}
+  {:else}
+    <div class="poodle-app-shell" style:--poodle-contrast={contrast === 0.5 ? undefined : contrast} bind:this={appShell}>
+      <header class="poodle-app-top-bar">
+        <div class="poodle-app-top-bar__title">
+          <strong>Poodle</strong>
+          <span class="poodle-app-top-bar__framework">Svelte</span>
+        </div>
+        <Tabs
+          value={activeSection}
+          items={topTabs}
+          variant="pill"
+          ariaLabel="Main navigation"
+          onValueChange={(value) => navigateToSection(value as SectionId)}
+        />
+        <div class="poodle-app-top-bar__pills">
+          <Pill>{theme}</Pill>
+          <Pill>{density}</Pill>
+          <Pill>{controlSize}</Pill>
+        </div>
+      </header>
+
+      <DisplayControls
+        {theme}
+        {density}
+        {controlSize}
+        search={componentSearch}
+        onThemeChange={(value) => (theme = value as ThemeName)}
+        onDensityChange={(value) => (density = value as DensityName)}
+        onControlSizeChange={(value) => (controlSize = value as ControlSizeName)}
+        {contrast}
+        onContrastChange={(value) => (contrast = Math.round(value * 100) / 100)}
+        onSearchChange={(value) => {
+          componentSearch = value;
+          if (activeSection !== "components") {
+            navigateToSection("components");
+          }
+        }}
+      />
+
+      <main class="poodle-app-main">
+        {#key `${theme}:${activeSection}`}
+          <IconProvider icons={iconNodes as unknown as IconSet}>
+            {#if activeSection === "components"}
+              <ComponentsSection activeComponent={route.component} search={componentSearch} />
+            {:else if activeSection === "tokens"}
+              <TokensSection {liveTokenValues} />
+            {/if}
+          </IconProvider>
+        {/key}
+      </main>
+    </div>
+  {/if}
 </UiPresentationProvider>
 
 <style>
+  .poodle-specimen-capture-frame {
+    box-sizing: border-box;
+    width: var(--specimen-capture-width);
+    height: var(--specimen-capture-height);
+    padding: var(--specimen-capture-padding);
+    overflow: hidden;
+    background: var(--poodle-color-background-canvas);
+    color: var(--poodle-color-text-primary);
+  }
+
   .poodle-app-shell {
     display: flex;
     flex-direction: column;
