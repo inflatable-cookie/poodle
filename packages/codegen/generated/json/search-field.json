@@ -30,7 +30,7 @@
     }
   ],
   "generated": {
-    "generator": "poodle-codegen 0.4.12",
+    "generator": "poodle-codegen 0.4.13",
     "ir_schema_version": 1,
     "source": "packages/codegen/fixtures/synthetic-model.json"
   },
