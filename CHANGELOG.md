@@ -7,6 +7,38 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.4.14] - 2026-10-08
+
+`0.4.14` adds the `Listbox` composite across Svelte, React, shared Rust and
+GPUI. Additive only.
+
+### Added
+
+- **`Listbox`.** Listbox semantics over host-rendered rows: `role="listbox"`
+  with `role="option"` children, `aria-selected`, one tab stop with roving
+  focus, typeahead, `selectionMode` `"single"` or `"multiple"` (Shift-arrow
+  ranges, Ctrl/Cmd+A), `"vertical"` or `"horizontal"` orientation, per-option
+  and root `disabled`, `onValueChange` / `onValuesChange`, and `onActivate`
+  on Enter or double-click. Controlled (`value` / `values`) or uncontrolled
+  (`defaultValue` / `defaultValues`). Row content is the host's and must not
+  be interactive. Svelte, React (`items` plus a row renderer), core machine,
+  `ListboxSpec` with `with_*` builders, `poodle-render` and GPUI. 2D card-grid
+  navigation, filtering and virtualization are out of scope. Use it instead
+  of a non-interactive `ListCard` inside a host `role="option"` element.
+
+### Fixed
+
+- **Listbox focus ring stays visible on stacked rows.** The option ring is
+  inset, and the focused option paints above its siblings on web; GPUI insets
+  by the focus-ring width.
+
+### Changed
+
+- **Web package dependency ranges.** Svelte and React require core
+  `>=0.4.14 <0.5`. Peer ranges stay unchanged.
+- **Cargo crates move to `0.4.14`** with internal path pins at the same exact
+  version.
+
 ## [0.4.13] - 2026-10-08
 
 `0.4.13` is a coordinated npm/web and native release with additive API only.
@@ -837,6 +869,7 @@ supersedes `0.4.3`, which was never published.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.4.14]: docs/release-notes/0.4.14.md
 [0.4.13]: docs/release-notes/0.4.13.md
 [0.4.12]: docs/release-notes/0.4.12.md
 [0.4.11]: docs/release-notes/0.4.11.md
