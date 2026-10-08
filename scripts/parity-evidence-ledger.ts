@@ -122,6 +122,7 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   XYPad: "xy_pad_mounted_parity_through_production_dispatch",
   Tabs: "tabs_drag_keyboard_and_identity_rebuild_the_host_spec",
   Tree: "tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec",
+  Listbox: "listbox_keyboard_selection_and_focus_rebuild_the_host_spec",
   SidebarNav: [
     "sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item",
     "sidebar_nav_foo_and_foo_end_label_values_keep_distinct_ids",
@@ -565,7 +566,7 @@ function expectedComponentRow(
     if (ROSTER_NATIVE_DEFERRED_NAMES.includes(name)) {
       const reason = `native implementation of ${name} is deferred to its follow-up task`;
       base["Shared Rust surface"] = cell("deferred", `${reason}; no Rust spec or renderer is claimed in this task`);
-      base["GPUI construction"] = cell("deferred", `${reason}; Listbox is outside the ${portableCount}-route native probe`);
+      base["GPUI construction"] = cell("deferred", `${reason}; ${name} is outside the ${portableCount}-route native probe`);
       base["GPUI mounted behaviour"] = cell("deferred", `${reason}; no GPUI mounted target is claimed`);
       base["GPUI accessibility"] = cell("deferred", `${reason}; no GPUI accessibility target is claimed`);
       base["GPUI visual"] = cell("deferred", `${reason}; no GPUI pixel target is claimed`);
@@ -884,8 +885,8 @@ runtime.
 - Portable native components: **${portableCount}**, derived from the generated catalogue.
 - Native \`not-applicable\`: **MeterSurface** only, by the fixed web-only
   boundary. It remains in the ${publicCount}-component public denominator.
-- Native implementation deferred: **Listbox**, pending its follow-up implementation task;
-  its web contract and Svelte/React surfaces are in this task.
+- Jetstream specimen deferred: **Listbox**; the shared Rust and GPUI
+  implementation is admitted, while Jetstream remains outside the task scope.
 - Jetstream: one program-level \`deferred\` target. Shared Rust composition and
   the in-repo adapter do not make the sibling backend pass.
 
@@ -912,8 +913,8 @@ ${summaryMarkdown(rows)}
 | --- | --- | --- |
 | Svelte | reference implementation; focused component tests and Svelte axe sweep are present | \`test/a11y/component-a11y.test.ts\` |
 | React | implementation and focused tests are present; React axe sweep is missing | no React axe equivalent; Svelte axe evidence does not transfer |
-| Shared Rust | ${portableCount} renderer-neutral surfaces present; MeterSurface is not-applicable; Listbox is deferred | \`packages/contracts/components/src/\`; \`packages/render/src/\` |
-| GPUI | ${portableCount}/${portableCount} portable specimen routes construct headlessly; Listbox is deferred; mounted behaviour is bounded | \`packages/gpui/preview/src/specimen_probe.rs\`; \`packages/gpui/preview/tests/headless_regressions.rs\` |
+| Shared Rust | ${portableCount} renderer-neutral surfaces present; MeterSurface is not-applicable | \`packages/contracts/components/src/\`; \`packages/render/src/\` |
+| GPUI | ${portableCount}/${portableCount} portable specimen routes construct headlessly; mounted behaviour is bounded | \`packages/gpui/preview/src/specimen_probe.rs\`; \`packages/gpui/preview/tests/headless_regressions.rs\` |
 | Jetstream | deferred at program level | \`packages/jetstream/cross-runtime-parity-report.json\` |
 
 ## Component evidence ledger

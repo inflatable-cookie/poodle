@@ -238,9 +238,10 @@ Double-click calls `onActivate` for an enabled option.
 - `aria-activedescendant` is not used. Focus moves onto the option element.
 - Live-region or announcement behavior: none; role, selected state, and DOM
   focus are exposed through the accessibility tree.
-- GPUI-native accessibility mapping: expose the list and option roles, labels,
-  selected/disabled state, and focused option; `aria_label` remains inert under
-  shared native accessibility rule 003.
+- GPUI-native accessibility mapping: expose the list and option roles, direct
+  labels, selected/disabled state, multiple-selection state, and focused
+  option. The `ariaLabelledby` ID relationship is not projected under shared
+  native accessibility rule 003.
 
 The `items` order is the linear navigation order. A host may arrange card rows
 in a CSS grid, but Listbox still navigates that sequence along one axis; 2D
@@ -280,11 +281,13 @@ Option selection visuals are host-owned; the renderer receives `selected` and
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `ListboxSpec` and the shared behavior machine
-  are added by the native implementation task after this contract lands.
+- Expected crate/module surface: `poodle_specs::ListboxSpec` with `with_*`
+  builders, `poodle_headless::listbox` for the machine mirror, and
+  `poodle_render::listbox` / `listbox_with_rows` for semantic composition.
 - Theme access strategy: use shared focus-ring tokens and host-provided row content.
 - Implementation-only details: native focus and selection effects map to the same contract transitions.
-- Known GPUI-native deltas: none admitted by this contract.
+- Known GPUI-native deltas: ID-based `ariaLabelledby` is carried by the spec
+  but is not projected to AccessKit; direct `ariaLabel` is projected.
 
 ## 11. Parity Checklist
 
@@ -312,7 +315,7 @@ Option selection visuals are host-owned; the renderer receives `selected` and
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| none | | | |
+| GPUI carries `ariaLabelledby` but does not project its ID relationship to AccessKit. | Shared native accessibility rule 003; direct labels and list/option semantics are projected. | Recorded in this contract. | Project ID relationships when the shared native node vocabulary maps stable IDs to AccessKit node IDs. |
 
 ## Example
 

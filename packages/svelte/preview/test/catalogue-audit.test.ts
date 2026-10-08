@@ -89,7 +89,6 @@ describe("preview catalogue audit", () => {
       "code-editor",
       "rich-text-editor",
       "rich-text-renderer",
-      "listbox",
       "markdown-renderer",
     ]);
     for (const slug of webOnlySlugs) {

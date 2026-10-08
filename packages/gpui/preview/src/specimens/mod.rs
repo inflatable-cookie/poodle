@@ -144,6 +144,7 @@ mod list_card;
 mod list_card_counter;
 mod list_container_specimen;
 mod list_grid;
+mod listbox;
 mod log_list_specimen;
 mod markdown_editor_specimen;
 mod media_browse_panel_specimen;
@@ -364,6 +365,7 @@ pub fn render_single_specimen(
             specimen_card("TriStateSwitch", theme, tri_state_switch::render(state, cx))
         }
         "select" => specimen_card("Select", theme, select::render(state, cx)),
+        "listbox" => specimen_card("Listbox", theme, listbox::render(state, cx)),
         "segmented-control" => specimen_card(
             "SegmentedControl",
             theme,

@@ -73,7 +73,10 @@ pub fn resolve_specimen(slug: &str) -> Result<usize, String> {
 fn jetstream_has_specimen(slug: &str) -> bool {
     !matches!(
         slug,
-        "radio"
+        // Listbox's shared component is admitted on GPUI first; Jetstream
+        // remains deferred until it has its own specimen and parity proof.
+        "listbox"
+            | "radio"
             | "time-input"
             | "status-bar"
             | "agent-message"

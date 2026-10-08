@@ -488,6 +488,8 @@ pub enum NodeSpecimenEvent {
     /// specimen — selection, focus, expansion, rename, drag and menu — so it
     /// gets its own event rather than a dozen flat variants.
     Tree(TreeEvent),
+    /// A Listbox machine transition, including the host-applied effects.
+    Listbox(poodle_headless::listbox::ListboxResult),
     /// The generic single-file browse seam reported a request (g15.007). The
     /// host opens the OS prompt on its next frame and awaits the result; the
     /// outcome lands in the specimen keys below.
@@ -511,6 +513,33 @@ pub enum NodeSpecimenEvent {
     LicenceSeats(LicenceSeatsEvent),
     /// A model-connection family interaction (picker, setup, card, catalogue).
     ModelConnection(ModelConnectionEvent),
+}
+
+/// Interaction state owned by the GPUI Listbox specimen host.
+pub struct ListboxPreviewState {
+    pub context: poodle_headless::listbox::ListboxContext,
+    pub last_activation: Option<String>,
+}
+
+impl ListboxPreviewState {
+    pub fn new() -> Self {
+        use poodle_headless::listbox::{ListboxItem, ListboxSelectionMode};
+
+        let mut context = poodle_headless::listbox::ListboxContext::new(vec![
+            ListboxItem::new("ambient", "Ambient textures"),
+            ListboxItem::new("drums", "Drum loops"),
+            ListboxItem::new("keys", "Keyboard layers"),
+            ListboxItem::new("vocals", "Vocal phrases").with_disabled(true),
+        ]);
+        context.selection_mode = ListboxSelectionMode::Multiple;
+        context.selected_values = vec!["ambient".into()];
+        context.focused_value = Some("ambient".into());
+        context.anchor_value = Some("ambient".into());
+        Self {
+            context,
+            last_activation: None,
+        }
+    }
 }
 
 /// State changes the model-connection specimens can request. One enum for the
@@ -850,6 +879,7 @@ pub struct AppState {
         >,
     >,
     pub tree: TreePreviewState,
+    pub listbox: ListboxPreviewState,
     /// LicenceSeats specimen host state.
     pub licence_seats: LicencePreviewState,
     /// Model-connection family specimen host state.
@@ -909,6 +939,7 @@ impl AppState {
             node_events: std::sync::Arc::new(std::sync::Mutex::new(Vec::new())),
             time_input_live: std::sync::Arc::new(std::sync::Mutex::new(HashMap::new())),
             tree: TreePreviewState::new(),
+            listbox: ListboxPreviewState::new(),
             licence_seats: LicencePreviewState::mixed(),
             model_connection: ModelConnectionPreviewState::new(),
             agent_transcript_scroll: poodle_gpui_node_backend::TrackedScrollState::new(),
@@ -1051,6 +1082,17 @@ impl AppState {
                         self.tree.clear_drop();
                     }
                 },
+                NodeSpecimenEvent::Listbox(result) => {
+                    if let Some(value) = result.effects.iter().find_map(|effect| match effect {
+                        poodle_headless::listbox::ListboxEffect::Activate { value } => {
+                            Some(value.clone())
+                        }
+                        _ => None,
+                    }) {
+                        self.listbox.last_activation = Some(value);
+                    }
+                    self.listbox.context = result.context;
+                }
                 NodeSpecimenEvent::FileBrowse {
                     key,
                     spec,

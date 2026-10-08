@@ -127,6 +127,180 @@ fn run_headless(body: impl FnOnce(&mut TestAppContext)) {
     });
 }
 
+/// The native Listbox routes real keyboard and pointer input through the
+/// shared renderer and Listbox machine while the host rebuilds controlled
+/// selection and focus state. Rich row content remains inside the semantic
+/// option, and the mounted tree reports the same roles and states.
+#[test]
+fn listbox_keyboard_selection_and_focus_rebuild_the_host_spec() {
+    use poodle_headless::listbox::{
+        ListboxContext, ListboxEffect, ListboxItem, ListboxSelectionMode,
+    };
+    use poodle_node::{CrossAxisAlignment, NodeRole};
+    use poodle_render::{listbox_option_focus_id, listbox_with_rows, ListboxHandlers};
+    use poodle_specs::{ListboxOrientation, ListboxSpec};
+
+    struct Host {
+        context: ListboxContext,
+        activations: Vec<String>,
+    }
+
+    fn spec_of(host: &Host) -> ListboxSpec {
+        ListboxSpec::new(host.context.items.clone())
+            .with_selection_mode(host.context.selection_mode)
+            .with_orientation(host.context.orientation)
+            .with_values(host.context.selected_values.clone())
+            .with_interaction_state(&host.context)
+            .with_aria_label("Library categories")
+    }
+
+    fn build(host: &Arc<Mutex<Host>>, mounted: &Arc<Mutex<Node>>) -> Node {
+        let rebuild = {
+            let host = Arc::clone(host);
+            let mounted = Arc::clone(mounted);
+            move || {
+                *mounted.lock().expect("mount lock") = build(&host, &mounted);
+            }
+        };
+        let spec = spec_of(&host.lock().expect("host lock"));
+        let transition_host = Arc::clone(host);
+        let transition_rebuild = rebuild.clone();
+        let handlers = ListboxHandlers::new("gpui-proof").on_transition(Arc::new(move |result| {
+            {
+                let mut host = transition_host.lock().expect("host lock");
+                host.context = result.context.clone();
+                for effect in &result.effects {
+                    if let ListboxEffect::Activate { value } = effect {
+                        host.activations.push(value.clone());
+                    }
+                }
+            }
+            for effect in &result.effects {
+                if let ListboxEffect::Focus { value } = effect {
+                    poodle_gpui_node_backend::request_focus(&listbox_option_focus_id(
+                        "gpui-proof",
+                        value,
+                    ));
+                }
+            }
+            transition_rebuild();
+        }));
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        listbox_with_rows(&spec, &ctx, &handlers, |item, selected, focused| {
+            let mut row = Node::container();
+            row.style.descriptor.layout.height = LayoutSizing::Fixed(36.0);
+            row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            row.style.fill_width = true;
+            let state = if selected {
+                "selected"
+            } else if focused {
+                "focused"
+            } else {
+                "idle"
+            };
+            row.child(Node::text(format!("{} — {state}", item.label)))
+        })
+    }
+
+    run_headless(|cx| {
+        let mut context = ListboxContext::new(vec![
+            ListboxItem::new("ambient", "Ambient textures"),
+            ListboxItem::new("drums", "Drum loops"),
+            ListboxItem::new("vocals", "Vocal phrases").with_disabled(true),
+            ListboxItem::new("keys", "Keyboard layers"),
+        ]);
+        context.selection_mode = ListboxSelectionMode::Multiple;
+        context.orientation = ListboxOrientation::Vertical;
+        context.selected_values = vec!["ambient".into()];
+        context.focused_value = Some("ambient".into());
+        context.anchor_value = Some("ambient".into());
+
+        let host = Arc::new(Mutex::new(Host {
+            context,
+            activations: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 380.0, 220.0);
+        driver.draw_frame();
+
+        let root = mounted.lock().expect("mount lock").clone();
+        let focus_color = RenderContext::new(&theme())
+            .theme()
+            .resolve_color("color.accent.focusRing");
+        let focus_width = RenderContext::new(&theme())
+            .theme()
+            .resolve_border_width("border.width.focus");
+        assert_eq!(root.a11y.role, Some(NodeRole::ListBox));
+        assert_eq!(root.a11y.label.as_deref(), Some("Library categories"));
+        assert_eq!(root.a11y.multiselectable, Some(true));
+        assert_eq!(
+            root.children[0].style.focus_ring.as_ref().unwrap().color,
+            focus_color
+        );
+        assert_eq!(
+            root.children[0].style.focus_ring.as_ref().unwrap().width,
+            focus_width
+        );
+        assert!(root.children[2].interaction.disabled);
+
+        let ambient_id = listbox_option_focus_id("gpui-proof", "ambient");
+        let keys_id = listbox_option_focus_id("gpui-proof", "keys");
+        driver.wait_for_focus_handle(&ambient_id);
+        driver.focus_element(&ambient_id);
+        driver.keyboard_key(&ambient_id, "down");
+        driver.keyboard_key(
+            &listbox_option_focus_id("gpui-proof", "drums"),
+            "shift-down",
+        );
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.context.focused_value.as_deref(), Some("keys"));
+            assert_eq!(host.context.selected_values, ["ambient", "drums", "keys"]);
+        }
+
+        let nodes = driver.accessibility_nodes();
+        let listbox = nodes
+            .iter()
+            .find(|node| node.role == NodeRole::ListBox)
+            .expect("mounted accessibility tree includes the listbox");
+        assert_eq!(listbox.label.as_deref(), Some("Library categories"));
+        let keys = nodes
+            .iter()
+            .find(|node| node.element_id == keys_id)
+            .expect("mounted accessibility tree includes the focused option");
+        assert_eq!(keys.role, NodeRole::ListBoxOption);
+        assert_eq!(keys.label.as_deref(), Some("Keyboard layers"));
+        assert_eq!(keys.selected, Some(true));
+        assert_eq!(keys.tab_index, Some(0));
+        assert_eq!(keys.focused, Some(true));
+        let vocals = nodes
+            .iter()
+            .find(|node| node.element_id == listbox_option_focus_id("gpui-proof", "vocals"))
+            .expect("disabled option remains represented");
+        assert!(vocals.disabled);
+        assert_eq!(vocals.tab_index, Some(-1));
+
+        driver.pointer_activate_id(&keys_id);
+        assert_eq!(
+            host.lock().expect("host lock").context.selected_values,
+            ["keys"]
+        );
+        driver.keyboard_key(&keys_id, "enter");
+        assert_eq!(host.lock().expect("host lock").activations, ["keys"]);
+        assert_eq!(
+            host.lock()
+                .expect("host lock")
+                .activations
+                .last()
+                .map(String::as_str),
+            Some("keys"),
+            "the native activation callback receives the focused option value"
+        );
+    });
+}
+
 fn theme() -> GpuiThemeProvider {
     GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE)
 }

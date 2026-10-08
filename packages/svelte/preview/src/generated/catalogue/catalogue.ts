@@ -244,6 +244,15 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
+		slug: "listbox",
+		displayName: "Listbox",
+		description: "Selectable list with host-rendered rows, roving focus and single or multiple selection.",
+		section: "foundations",
+		family: "text-value-entry",
+		kind: "input",
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
+	},
+	{
 		slug: "number-input",
 		displayName: "NumberInput",
 		description: "Numeric input with optional steppers.",

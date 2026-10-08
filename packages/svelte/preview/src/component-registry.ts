@@ -15,14 +15,14 @@ export type ComponentEntry = CatalogueNavEntry & {
 };
 
 /**
- * Web-only and native-deferred catalogue entries.
+ * Web-only catalogue entries.
  *
  * The canonical catalogue is the portable component inventory and also feeds
- * the GPUI and Jetstream preview catalogues. Surfaces without a current native
- * implementation stay in this web catalogue supplement until admitted to the
- * portable inventory. MeterSurface is permanently web-only (spec 068 / g14.024);
- * Listbox's shared Rust and GPUI implementations are deferred to the follow-up
- * native implementation task.
+ * the GPUI and Jetstream preview catalogues. Surfaces without a current shared
+ * native implementation stay in this web catalogue supplement until admitted
+ * to the portable inventory. MeterSurface is permanently web-only (spec 068 /
+ * g14.024). Listbox is now canonical; Jetstream's specimen remains deferred in
+ * its local registry.
  */
 export const webOnlyComponents: CanonicalComponent[] = [
   {
@@ -59,15 +59,6 @@ export const webOnlyComponents: CanonicalComponent[] = [
     section: "composition",
     family: "forms-validation",
     kind: "display",
-    collections: [] as const satisfies readonly CatalogueCollectionId[],
-  },
-  {
-    slug: "listbox",
-    displayName: "Listbox",
-    description: "Selectable list with host-rendered options and roving keyboard focus.",
-    section: "composition",
-    family: "data-collections",
-    kind: "composite",
     collections: [] as const satisfies readonly CatalogueCollectionId[],
   },
   {

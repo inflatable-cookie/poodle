@@ -1,7 +1,7 @@
 # g18.001 — Contract-bound GPUI functionality census
 
 Default full-selector source commit (individual mounted receipts carry their own execution identity): `0184dd5a92bcb58cf86a1a3abb30394df0bb279b`
-Denominator: **177** public / **175** portable; `MeterSurface` is the single contract-approved web-only row; Listbox native implementation is deferred.
+Denominator: **177** public / **176** portable; `MeterSurface` is the single contract-approved web-only row; no native-deferred rows.
 
 <!-- g18-census-method -->
 ## Method
@@ -15,10 +15,10 @@ Construction is not functional completion. A passing route, a test name, or one 
 <!-- g18-census-summary -->
 ## Summary
 
-Rows with at least one admitted capability: **175**/175.
-Fully admitted rows: **173**/175.
+Rows with at least one admitted capability: **176**/176.
+Fully admitted rows: **174**/176.
 Missing by axis: semantic 0; events 0; pointer 0; keyboard_focus 0; accessibility 0; visual 2.
-Accessibility platform holds (A2, narrow): **171**. Refusals recorded: **22**.
+Accessibility platform holds (A2, narrow): **172**. Refusals recorded: **22**.
 
 ## Rows
 
@@ -67,7 +67,7 @@ Accessibility platform holds (A2, narrow): **171**. Refusals recorded: **22**.
 | ListCard | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ListCard--first-mounted-parity-list-card.json` |
 | ListCardCounter | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ListCardCounter--first-mounted-parity-list-card-counter.json` |
 | ListGrid | semantic; accessibility; visual | semantic (expected-test); accessibility (expected-test) | visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ListGrid--first-mounted-parity-list-grid.json` |
-| Listbox | deferred (native implementation follows) | — | — | — | — |
+| Listbox | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Listbox--listbox-keyboard-selection-and-focus-rebuild-the-host-spec.json` |
 | Menu | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | — |
 | MetaBar | semantic; accessibility; visual | semantic (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/MetaBar--first-mounted-parity-meta-bar.json` |
 | MetaItem | semantic; accessibility; visual | semantic (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/MetaItem--first-mounted-parity-meta-item.json` |

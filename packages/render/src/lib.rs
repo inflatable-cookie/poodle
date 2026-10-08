@@ -105,6 +105,7 @@ pub mod list_card;
 pub mod list_card_counter;
 pub mod list_container;
 pub mod list_grid;
+pub mod listbox;
 pub mod log_list;
 pub mod markdown_editor;
 pub mod media_browse_panel;
@@ -338,6 +339,10 @@ pub use list_card::{list_card, ListCardSlots};
 pub use list_card_counter::list_card_counter;
 pub use list_container::{list_container, ListContainerSlots};
 pub use list_grid::list_grid;
+pub use listbox::{
+    listbox, listbox_option_focus_id, listbox_root_id, listbox_with_rows, ListboxHandlers,
+    ListboxRowRenderer, ListboxTransitionResult,
+};
 pub use log_list::{log_list, LogListHandlers};
 pub use markdown_editor::{markdown_editor, markdown_editor_with_handlers, MarkdownEditorHandlers};
 pub use media_browse_panel::media_browse_panel;
