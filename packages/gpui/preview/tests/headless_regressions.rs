@@ -243,7 +243,25 @@ fn listbox_keyboard_selection_and_focus_rebuild_the_host_spec() {
             root.children[0].style.focus_ring.as_ref().unwrap().width,
             focus_width
         );
+        assert_eq!(
+            root.children[0].style.focus_ring.as_ref().unwrap().offset,
+            -1.0,
+            "option focus ring is inset within its row so later siblings cannot cover it"
+        );
         assert!(root.children[2].interaction.disabled);
+
+        let empty_spec = ListboxSpec::new(Vec::new()).with_aria_label("Empty library");
+        let empty = listbox_with_rows(
+            &empty_spec,
+            &RenderContext::new(&theme()),
+            &ListboxHandlers::new("gpui-empty-proof"),
+            |_, _, _| Node::container(),
+        );
+        assert_eq!(
+            empty.style.focus_ring.as_ref().unwrap().offset,
+            2.0,
+            "empty root keeps its outset focus ring"
+        );
 
         let ambient_id = listbox_option_focus_id("gpui-proof", "ambient");
         let keys_id = listbox_option_focus_id("gpui-proof", "keys");

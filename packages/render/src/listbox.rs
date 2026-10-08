@@ -130,7 +130,7 @@ fn option_node(
     row.style.focus_ring = Some(FocusRing {
         color: ctx.theme().resolve_color("color.accent.focusRing"),
         width: ctx.theme().resolve_border_width("border.width.focus"),
-        offset: rem_to_px(0.125),
+        offset: rem_to_px(-0.0625),
     });
     row.interaction.focusable = !disabled;
     row.interaction.disabled = disabled;

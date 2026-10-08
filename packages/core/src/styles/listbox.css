@@ -10,13 +10,15 @@
 }
 
 .poodle-listbox__option {
+  position: relative;
   min-width: 0;
   border-radius: var(--poodle-radius-surface);
 }
 
 .poodle-listbox__option:focus-visible {
+  z-index: 1;
   outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-  outline-offset: 2px;
+  outline-offset: -0.0625rem;
 }
 
 .poodle-listbox:focus-visible {

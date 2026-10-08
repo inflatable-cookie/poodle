@@ -399,6 +399,9 @@
   { task = "test:focus-ring-modality-chromium" },
   { task = "test:focus-ring-modality-webkit" },
 ]
+# poodle#145: focused option rings stay clear of stacked sibling rows, and an
+# empty Listbox root ring remains visible inside the Svelte specimen frame.
+"test:listbox-focus-ring-chromium" = "bun test/listbox-focus-ring/probe.ts"
 # g18.025 preview header control sizing. Paired live-preview journeys prove
 # the DisplayControls chrome resolves fixed md at every specimen Size stop,
 # stays stable through Size/Density/Theme/Contrast/Search/wrapping journeys,

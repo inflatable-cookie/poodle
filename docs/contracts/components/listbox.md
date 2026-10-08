@@ -272,6 +272,17 @@ pattern if spatial grid navigation is required.
 Option selection visuals are host-owned; the renderer receives `selected` and
 `focused` state to style rich content without Listbox taking over row design.
 
+### Focus Ring Geometry
+
+| Part | Outline offset | Paint order |
+|------|----------------|-------------|
+| Option | `-0.0625rem` | The focused option paints above its siblings. |
+| Empty root | `0.125rem` | The root retains its outset ring when it owns the tab stop. |
+
+Inset option rings stay within stacked rows and remain visible over
+host-rendered row backgrounds. The empty root keeps an outset ring because it
+has no option row to overlap.
+
 ## 9. Svelte Notes
 
 - Expected substrate: host `items` plus `children(item, selected, focused)` snippet.
