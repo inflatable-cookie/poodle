@@ -4,7 +4,7 @@
   "source_commit": "0184dd5a92bcb58cf86a1a3abb30394df0bb279b",
   "denominator": {
     "public": 177,
-    "portable": 175,
+    "portable": 176,
     "notApplicable": [
       "MeterSurface"
     ]
@@ -2354,14 +2354,61 @@
     },
     {
       "component": "Listbox",
-      "portable": false,
+      "portable": true,
       "contract": "docs/contracts/components/listbox.md",
-      "substrate": "native-deferred",
-      "required": [],
-      "admitted": [],
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#listbox_keyboard_selection_and_focus_rebuild_the_host_spec"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#listbox_keyboard_selection_and_focus_rebuild_the_host_spec"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#listbox_keyboard_selection_and_focus_rebuild_the_host_spec"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#listbox_keyboard_selection_and_focus_rebuild_the_host_spec"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#listbox_keyboard_selection_and_focus_rebuild_the_host_spec"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#listbox_keyboard_selection_and_focus_rebuild_the_host_spec"
+        }
+      ],
       "missing": [],
-      "holds": [],
-      "receipts": [],
+      "holds": [
+        {
+          "axis": "accessibility",
+          "kind": "A2-platform-hold",
+          "note": "No live platform-tree assertion yet.",
+          "ref": "docs/contracts/003-native-accessibility.md"
+        }
+      ],
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Listbox--listbox-keyboard-selection-and-focus-rebuild-the-host-spec.json"
+      ],
       "refusals": []
     },
     {
@@ -9642,8 +9689,8 @@
     }
   ],
   "summary": {
-    "admittedRows": 175,
-    "fullyAdmittedRows": 173,
+    "admittedRows": 176,
+    "fullyAdmittedRows": 174,
     "missingTally": {
       "semantic": 0,
       "events": 0,
@@ -9652,7 +9699,7 @@
       "accessibility": 0,
       "visual": 2
     },
-    "holdCount": 171,
+    "holdCount": 172,
     "refusalCount": 22
   },
   "groups": [

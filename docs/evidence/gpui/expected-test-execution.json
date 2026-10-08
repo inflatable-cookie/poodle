@@ -713,6 +713,14 @@
     "code_copy_feedback_through_production_app_state_scheduling": {
       "outcome": "passed",
       "body_sha256": "1c7ca53f391f712086b401b413a19c9bec136d15fb5cbf66402dc7aef922282b"
+    },
+    "listbox_keyboard_selection_and_focus_rebuild_the_host_spec": {
+      "outcome": "passed",
+      "body_sha256": "4dbf981f07a9d42ad823e90ee422dd87908617b70247401975d2c045d263d310",
+      "run_id": "28a19cf3-d215-4bf3-b770-b925de86bc82",
+      "command": "effigy regressions:native listbox_keyboard_selection_and_focus_rebuild_the_host_spec -- --exact",
+      "source_commit": "ffda88f1a2b675cf9ae111641d0075dc1c05a9b8",
+      "lockfile_sha256": "32571c5faebf8984822a4da8e96a2a0c742efc53aa9946382bb6db887918523f"
     }
   },
   "body_hash_baseline_commit": "539057155aa20e720e9e4d60fe97a8afa58f69b6",

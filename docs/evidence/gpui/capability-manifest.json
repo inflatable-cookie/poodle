@@ -1519,6 +1519,21 @@
       ]
     },
     {
+      "component": "Listbox",
+      "portable": true,
+      "contract": "docs/contracts/components/listbox.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
       "component": "LogList",
       "portable": true,
       "contract": "docs/contracts/components/log-list.md",

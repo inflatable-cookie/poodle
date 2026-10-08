@@ -1762,7 +1762,10 @@ export function censusMarkdown(doc: CensusDoc): string {
   lines.push("# g18.001 — Contract-bound GPUI functionality census");
   lines.push("");
   lines.push(`Default full-selector source commit (individual mounted receipts carry their own execution identity): \`${doc.source_commit}\``);
-  lines.push(`Denominator: **${doc.denominator.public}** public / **${doc.denominator.portable}** portable; \`${doc.denominator.notApplicable[0]}\` is the single contract-approved web-only row; ${ROSTER_NATIVE_DEFERRED_NAMES.join(", ")} native implementation is deferred.`);
+  const nativeDeferredSummary = ROSTER_NATIVE_DEFERRED_NAMES.length === 0
+    ? "no native-deferred rows"
+    : `${ROSTER_NATIVE_DEFERRED_NAMES.join(", ")} native implementation is deferred`;
+  lines.push(`Denominator: **${doc.denominator.public}** public / **${doc.denominator.portable}** portable; \`${doc.denominator.notApplicable[0]}\` is the single contract-approved web-only row; ${nativeDeferredSummary}.`);
   lines.push("");
   lines.push("<!-- g18-census-method -->");
   lines.push("## Method");
