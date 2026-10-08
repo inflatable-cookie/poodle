@@ -119,11 +119,12 @@ composition into the backend and creates cross-runtime drift.
 
 The preview needs the sibling Jetstream repository configured as expected by
 the local workspace (`../jetstream` from the Poodle root, or the Paseo
-worktree sibling link). Paseo setup links `$JETSTREAM_REPO_PATH` when set, or
-`~/Dev/projects/jetstream` when that default checkout exists, as the `jetstream`
-sibling. If the default checkout is absent, setup skips the link so ordinary
-Poodle worktrees do not require Jetstream. Treat a linked checkout as
-read-only input; make Jetstream changes in its own repository.
+worktree sibling link). Paseo setup links `../jetstream`, resolved from the
+registered primary checkout (so `~/Dev/projects/jetstream`), as the
+`jetstream` sibling. It is required: Queue project QA accepts only a static
+relative sibling source, and the lab hosts the Jetstream preview (2026-10-08).
+Treat the linked checkout as read-only input; make Jetstream changes in its
+own repository.
 `effigy jetstream:build` fails at once if the required checkout is missing or
 stale; Poodle does not vendor Jetstream. From the Poodle repository root:
 

@@ -86,9 +86,9 @@ Svelte, React, and GPUI are the current implementation cohort. Jetstream
 remains a target, but its backend integration is deferred until a dedicated
 admission runway can exercise real renderer behaviour without requiring every
 Poodle worktree to clone or link the sibling engine repository. Paseo setup
-links an available checkout for worktrees on hosts that have it, and skips the
-link when the default checkout is absent; ordinary worktrees and the default
-QA board remain independent of Jetstream. Deferral does not make Jetstream
+links `../jetstream` (relative to the registered primary checkout) in every
+worktree and in Queue project QA, which accepts only a static relative sibling
+source. A host without that checkout cannot set up Poodle worktrees. Deferral does not make Jetstream
 passing.
 
 `CodeEditor` has one narrower staged admission by operator decision on
