@@ -29,17 +29,17 @@ export const PORTABLE_ROUTE_COUNT: number = PORTABLE_ROUTE_SLUGS.length;
 /**
  * Public components outside the portable catalogue.
  *
- * MeterSurface is permanently web-only (spec 068 / g14.024). Listbox is a
- * public web component whose shared Rust and GPUI implementations are deferred
- * to the next lane part; it stays outside the portable catalogue until then.
+ * MeterSurface is permanently web-only (spec 068 / g14.024). Listbox now has
+ * its shared Rust and GPUI implementations in the portable catalogue;
+ * Jetstream's specimen remains deferred in its local preview registry.
  * Other `webOnlyComponents` in the preview registry (`CodeEditor`, the
  * rich-text pair, `MarkdownRenderer`) are web-admitted behind dedicated
  * entries and remain outside the public root roster.
  */
 export const ROSTER_WEB_ONLY_NAMES: readonly string[] = ["MeterSurface"];
 export const ROSTER_WEB_ONLY_ROUTE_SLUGS: readonly string[] = ["meter-surface"];
-export const ROSTER_NATIVE_DEFERRED_NAMES: readonly string[] = ["Listbox"];
-export const ROSTER_NATIVE_DEFERRED_ROUTE_SLUGS: readonly string[] = ["listbox"];
+export const ROSTER_NATIVE_DEFERRED_NAMES: readonly string[] = [];
+export const ROSTER_NATIVE_DEFERRED_ROUTE_SLUGS: readonly string[] = [];
 
 /** Public component denominator: portable catalogue plus staged public surfaces. */
 export const PUBLIC_COMPONENT_NAMES: readonly string[] = [

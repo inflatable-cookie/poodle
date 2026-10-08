@@ -466,6 +466,15 @@ pub const CANONICAL_COMPONENTS: &[CanonicalComponent] = &[
 		collections: &[],
 	},
     CanonicalComponent {
+		slug: "listbox",
+		display_name: "Listbox",
+		description: "Selectable list with host-rendered rows, roving focus and single or multiple selection.",
+		section: CatalogueSectionId::Foundations,
+		family: CatalogueFamilyId::TextValueEntry,
+		kind: CatalogueKindId::Input,
+		collections: &[],
+	},
+    CanonicalComponent {
 		slug: "number-input",
 		display_name: "NumberInput",
 		description: "Numeric input with optional steppers.",

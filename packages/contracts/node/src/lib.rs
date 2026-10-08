@@ -1089,6 +1089,8 @@ pub struct NodeA11y {
     pub label: Option<String>,
     pub expanded: Option<bool>,
     pub selected: Option<bool>,
+    /// Whether a listbox permits more than one selected option.
+    pub multiselectable: Option<bool>,
     /// Hidden from assistive technology (`aria-hidden`) while still painted.
     /// An exit remnant keeps its visual, but leaves accessibility ownership
     /// the moment its item leaves the semantic list; the backend keeps

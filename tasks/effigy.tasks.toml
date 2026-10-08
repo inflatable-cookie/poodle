@@ -738,6 +738,10 @@
   { run = "cargo test --manifest-path packages/contracts/tokens/Cargo.toml" },
   { run = "cargo test --manifest-path packages/contracts/node/Cargo.toml" },
 ]
+# Listbox's Rust machine mirror has an isolated contract suite so native task
+# validation does not need to run the unrelated contract crates above.
+"test:headless-listbox" = "cargo test --quiet --manifest-path packages/contracts/headless/Cargo.toml listbox::tests"
+"test:listbox-spec" = "cargo test --quiet --manifest-path packages/contracts/components/Cargo.toml listbox::tests"
 # Fails if the working tree is dirty. Belongs at the END of any gate that
 # runs a write-mode generator.
 #

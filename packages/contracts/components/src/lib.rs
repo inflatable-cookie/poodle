@@ -49,6 +49,7 @@ mod icon_provider;
 mod list_card;
 mod list_card_counter;
 mod list_grid;
+mod listbox;
 mod menu;
 mod menubar;
 mod meta_bar;
@@ -244,6 +245,10 @@ pub use list_card::{
 };
 pub use list_card_counter::ListCardCounterSpec;
 pub use list_grid::{ListGridSpec, ListGridVariant};
+pub use listbox::{
+    ListboxBoundary, ListboxEvent, ListboxItem, ListboxOrientation, ListboxSelectionMode,
+    ListboxSpec,
+};
 pub use menu::MenuSpec;
 pub use menubar::MenubarSpec;
 pub use meta_bar::MetaBarSpec;

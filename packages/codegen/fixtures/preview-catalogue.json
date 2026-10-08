@@ -343,6 +343,15 @@
       "collections": []
     },
     {
+      "slug": "listbox",
+      "displayName": "Listbox",
+      "description": "Selectable list with host-rendered rows, roving focus and single or multiple selection.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
       "slug": "select",
       "displayName": "Select",
       "description": "Dropdown selection from a list of options.",

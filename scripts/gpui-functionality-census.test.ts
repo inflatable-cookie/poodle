@@ -81,13 +81,26 @@ function censusDoc(overrides: Partial<CensusDoc> = {}): CensusDoc {
     },
     {
       component: "Listbox",
-      portable: false,
+      portable: true,
       contract: "docs/contracts/components/listbox.md",
-      substrate: "native-deferred",
-      required: [],
-      admitted: [],
-      missing: [],
-      holds: [],
+      substrate: "selection-navigation",
+      required: [...axes],
+      admitted: [
+        {
+          axis: "semantic" as CensusAxis,
+          via: "expected-test" as const,
+          ref: "packages/gpui/preview/tests/headless_regressions.rs#listbox_keyboard_selection_and_focus_rebuild_the_host_spec",
+        },
+      ],
+      missing: ["events", "pointer", "keyboard_focus", "accessibility", "visual"] as CensusAxis[],
+      holds: [
+        {
+          axis: "accessibility" as CensusAxis,
+          kind: "A2-platform-hold" as const,
+          note: "The live platform-tree proof does not cover this component yet.",
+          ref: "docs/contracts/003-native-accessibility.md",
+        },
+      ],
       receipts: [],
       refusals: [],
     },
@@ -102,7 +115,14 @@ function censusDoc(overrides: Partial<CensusDoc> = {}): CensusDoc {
       notApplicable: [...ROSTER_WEB_ONLY_NAMES],
     },
     axes: [...axes],
-    manifest: [manifestEntry()],
+    manifest: [
+      manifestEntry(),
+      manifestEntry({
+        component: "Listbox",
+        contract: "docs/contracts/components/listbox.md",
+        substrate: "selection-navigation",
+      }),
+    ],
     rows,
     summary: {
       admittedRows: 1,
@@ -141,10 +161,10 @@ describe("g18.001 census oracles", () => {
     expect(() => validateCensusDoc(doc)).toThrow(/duplicate/i);
   });
 
-  it("denominator oracle: requires a separate row for native-deferred public components", () => {
+  it("denominator oracle: rejects a dropped portable Listbox row", () => {
     const doc = censusDoc({ rows: censusDoc().rows.filter((row) => row.component !== "Listbox") });
-    expect(ROSTER_NATIVE_DEFERRED_NAMES).toEqual(["Listbox"]);
-    expect(() => validateCensusDoc(doc)).toThrow(/native-deferred public component Listbox/);
+    expect(ROSTER_NATIVE_DEFERRED_NAMES).toEqual([]);
+    expect(() => validateCensusDoc(doc)).toThrow(/Census must carry exactly/);
   });
 
   it("stale-test oracle: a renamed expected test admits nothing", () => {

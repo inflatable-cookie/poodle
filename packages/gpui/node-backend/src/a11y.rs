@@ -96,6 +96,13 @@ pub(super) fn apply<E: StatefulInteractiveElement>(mut element: E, node: &Node) 
         if let Some(selected) = a11y.selected {
             node.set_selected(selected);
         }
+        if let Some(multiselectable) = a11y.multiselectable {
+            if multiselectable {
+                node.set_multiselectable();
+            } else {
+                node.clear_multiselectable();
+            }
+        }
         if let Some(toggled) = a11y.toggled {
             node.set_toggled(match toggled {
                 NodeToggled::True => accesskit::Toggled::True,
