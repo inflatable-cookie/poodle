@@ -137,7 +137,7 @@ fn listbox_keyboard_selection_and_focus_rebuild_the_host_spec() {
         ListboxContext, ListboxEffect, ListboxItem, ListboxSelectionMode,
     };
     use poodle_node::{CrossAxisAlignment, NodeRole};
-    use poodle_render::{listbox_with_rows, ListboxHandlers};
+    use poodle_render::{listbox_option_focus_id, listbox_with_rows, ListboxHandlers};
     use poodle_specs::{ListboxOrientation, ListboxSpec};
 
     struct Host {
@@ -177,9 +177,10 @@ fn listbox_keyboard_selection_and_focus_rebuild_the_host_spec() {
             }
             for effect in &result.effects {
                 if let ListboxEffect::Focus { value } = effect {
-                    poodle_gpui_node_backend::request_focus(
-                        &poodle_render::listbox_option_focus_id("gpui-proof", value),
-                    );
+                    poodle_gpui_node_backend::request_focus(&listbox_option_focus_id(
+                        "gpui-proof",
+                        value,
+                    ));
                 }
             }
             transition_rebuild();
@@ -244,13 +245,13 @@ fn listbox_keyboard_selection_and_focus_rebuild_the_host_spec() {
         );
         assert!(root.children[2].interaction.disabled);
 
-        let ambient_id = poodle_render::listbox_option_focus_id("gpui-proof", "ambient");
-        let keys_id = poodle_render::listbox_option_focus_id("gpui-proof", "keys");
+        let ambient_id = listbox_option_focus_id("gpui-proof", "ambient");
+        let keys_id = listbox_option_focus_id("gpui-proof", "keys");
         driver.wait_for_focus_handle(&ambient_id);
         driver.focus_element(&ambient_id);
         driver.keyboard_key(&ambient_id, "down");
         driver.keyboard_key(
-            &poodle_render::listbox_option_focus_id("gpui-proof", "drums"),
+            &listbox_option_focus_id("gpui-proof", "drums"),
             "shift-down",
         );
         {
@@ -276,9 +277,7 @@ fn listbox_keyboard_selection_and_focus_rebuild_the_host_spec() {
         assert_eq!(keys.focused, Some(true));
         let vocals = nodes
             .iter()
-            .find(|node| {
-                node.element_id == poodle_render::listbox_option_focus_id("gpui-proof", "vocals")
-            })
+            .find(|node| node.element_id == listbox_option_focus_id("gpui-proof", "vocals"))
             .expect("disabled option remains represented");
         assert!(vocals.disabled);
         assert_eq!(vocals.tab_index, Some(-1));
