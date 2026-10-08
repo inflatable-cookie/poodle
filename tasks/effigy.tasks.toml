@@ -284,6 +284,7 @@
   { run = "bunx vitest run" },
 ]
 "test:web-pack-install" = "bun test/package-install/web-preview.ts"
+"check:web-pack-install-roster" = "bunx tsc --ignoreConfig --noEmit --strict --target ES2022 --module ESNext --moduleResolution Bundler --types node test/package-install/roster.ts"
 # Compatibility selector for existing downstream handoffs and historical docs.
 "test:svelte-pack-install" = [{ task = "test:web-pack-install" }]
 "audit:security" = [

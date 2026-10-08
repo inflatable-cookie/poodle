@@ -1,8 +1,10 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-export const FROZEN_ROSTER_COUNT = 176;
-export const FROZEN_COMPONENT_COUNT = 171;
+export const FROZEN_ROSTER_COUNT = 177;
+export const FROZEN_COMPONENT_COUNT = 172;
+export const FROZEN_ROSTER_NAMES_SHA256 =
+  "f8268375eb0280def789f46f473ea0c0c8e538487cefe7329befbf18f890be36";
 
 const MARKDOWN_COMPONENT_NAMES = [
   "AgentMessage",

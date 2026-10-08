@@ -96,12 +96,15 @@ wildcard can resolve those two files; the compiled contract closes that leak.
 
 ## Canonical component denominator
 
-The public component denominator is **176** names. One derived list must agree
+The public component denominator is **177** names. One derived list must agree
 across this spec, `docs/evidence/releases/web-package-roster.md`, and
-`test/package-install/roster.ts`. A 175/176 disagreement is a blocking defect.
+`test/package-install/roster.ts`. Any disagreement between those authorities is
+a blocking defect.
 
-Markdown members stay in the 176. They leave shell **root barrels**. They
+Markdown members stay in the 177. They leave shell **root barrels**. They
 remain reachable through `./markdown` and through the direct subpaths below.
+Listbox is the additional web export in this roster. Its Rust specification,
+renderer and GPUI implementation remain native-deferred to lane part 2.
 
 Sorted names:
 
@@ -192,6 +195,7 @@ ListCard
 ListCardCounter
 ListContainer
 ListGrid
+Listbox
 LogList
 MarkdownEditor
 MediaBrowsePanel
@@ -726,15 +730,15 @@ Laws:
 
 - `browser` → client. Node, worker-like, and unknown SSR consumers use
   `default` → server.
-- `./*.svelte` may resolve only the 176 roster names. Extra public matches
+- `./*.svelte` may resolve only the 177 roster names. Extra public matches
   fail.
-- Root `.` exports the 171 non-markdown roster components plus existing helper
+- Root `.` exports the 172 non-markdown roster components plus existing helper
   values/types. It does not export `AgentMessage`, `AgentPlan`,
   `AgentPlanRecord`, `AgentTranscript`, or `MarkdownEditor`.
 - `./markdown` exports those five components and their public types. No root
   alias points at it.
 - `./markdown` additionally exports the web-only `MarkdownRenderer` (g18.019).
-  It has no native counterpart and is not a member of the 176-name roster; it is
+  It has no native counterpart and is not a member of the 177-name roster; it is
   certified through the web-only catalogue supplement and the installed
   `./markdown` SSR/declaration smoke.
 - `./types` is compiled JS plus declarations. Declarations-only fails.
@@ -746,7 +750,7 @@ Laws:
 ## Editor entries
 `CodeEditor` (g18.002) ships behind dedicated `./editor` entries so the
 CodeMirror engine and its admitted language chunks never enter root-only
-consumers. `CodeEditor` is not a member of the 176-name denominator, the root
+consumers. `CodeEditor` is not a member of the 177-name denominator, the root
 barrel, or any successor denominator: the roster, the `./*.svelte` match law,
 and the root `.` law above are unchanged. The svelte and react `./editor`
 shapes are `./dist/editor.d.ts` plus `./dist/editor.client.js` /
@@ -837,7 +841,7 @@ Direct barrels are derived, not a `./*` wildcard: for each frozen name `N`,
 export `./N` → `./dist/N.js` + `./dist/N.d.ts`. A wildcard that can resolve
 `file-upload`, chunks, or other internals fails.
 
-Root `.` keeps today's non-component helpers and the 171 non-markdown
+Root `.` keeps today's non-component helpers and the 172 non-markdown
 components. `AgentMessage`, `AgentPlan`, `AgentPlanRecord`, `AgentTranscript`,
 and `MarkdownEditor` move to `./markdown`. `MarkdownRenderer` (g18.019) is a
 new web-only `./markdown` export with no native counterpart and no roster
@@ -926,8 +930,8 @@ not mutate the certified tree.
   "sourceCommit": "40-char lowercase hex",
   "svelteFloor": "5.56.8",
   "belowFloorNegative": "5.38.6",
-  "rosterDenominator": 176,
-  "rosterNamesSha256": "f497bfa0a47e1627a1ee7076016ac5566d83584d458b3f3693b688885a02a84a",
+  "rosterDenominator": 177,
+  "rosterNamesSha256": "f8268375eb0280def789f46f473ea0c0c8e538487cefe7329befbf18f890be36",
   "artifactSetId": "64-char lowercase hex from the artifactSetId formula",
   "packages": {
     "@inflatable-cookie/poodle-core": {
@@ -954,7 +958,7 @@ by the package name string.
 
 ### `rosterNamesSha256`
 
-SHA-256 (FIPS 180-4) over the UTF-8 bytes of the 176 sorted names in
+SHA-256 (FIPS 180-4) over the UTF-8 bytes of the 177 sorted names in
 **Canonical component denominator**, in that order, with one LF (`0x0A`) after
 every name including the last. No BOM, no CR, no spaces around names, no blank
 lines. Digest is 64-char lowercase hex.
@@ -963,7 +967,7 @@ That payload is a POSIX text. `Array.prototype.join("\n")` without a final LF
 is non-conforming. For the names frozen in this spec the digest is:
 
 ```text
-f497bfa0a47e1627a1ee7076016ac5566d83584d458b3f3693b688885a02a84a
+f8268375eb0280def789f46f473ea0c0c8e538487cefe7329befbf18f890be36
 ```
 
 The same names joined with LF *between* names only hash to
@@ -1082,20 +1086,20 @@ papercuts. Minimal package/build repairs only after explicit review.
 | Floor truthful | `5.56.8` server render fails | floor leg blocks acceptance |
 | Negatives bite | `branchCount` compiles | unsuppressed fixture fails |
 | Receipt matches tree | evidence edit changes package tree | certified tree hash changes |
-| Roster canonical | fixture remains 175, or names disagree with this spec | denominator gate fails |
+| Roster canonical | fixture remains 177, or names disagree with this spec | denominator gate fails |
 | Receipt bytes are exact | `rosterNamesSha256` joins names with LF between them and omits the final LF, or `artifactSetId` pretty-prints JSON, appends LF, or orders core/Svelte/React | installed receipt comparison fails |
 | Dotfile membership | receipt missing from tarball | archive member check fails |
 | Not a release | tag, workflow, or npm change | scope gate fails |
 
 ## Current-state evidence
 
-Inspected at planning base descendant `9e8e646f25a1dfde818083c798ffba53adea3e95`:
+Inspected at the Listbox web-roster update (2026-10-08):
 
 - core, Svelte, and React `files` still include `src`
 - Svelte exports use `svelte` conditions and a top-level `svelte` field
 - Svelte peer is `>=5.38.6 <6`; `marked` is a hard dependency
 - React public exports are `.` only; `private: true` already
-- 178 Svelte `*.svelte` files exist; 176 are roster components
+- 179 Svelte `*.svelte` files exist; 177 are roster components
 - core has `marked` as a devDependency
 
 Successors rewrite to this target. They do not preserve the drifted shape.
