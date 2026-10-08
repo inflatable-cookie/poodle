@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { getContext } from "svelte";
   import { Surface, Tabs, getUiPresentation, type TabItem } from "@inflatable-cookie/poodle-svelte";
   import type { Snippet } from "svelte";
+  import { SPECIMEN_CAPTURE_CONTEXT } from "../specimen-capture-context";
 
   const DEFAULT_CONTROL_SIZES = ["xs", "sm", "md", "lg", "xl"] as const;
   const DEFAULT_CONTROL_DENSITIES = ["compact", "default", "comfortable"] as const;
@@ -29,6 +31,8 @@
     densityValues?: readonly string[];
   } = $props();
 
+  const captureMode = getContext<boolean>(SPECIMEN_CAPTURE_CONTEXT) ?? false;
+
   const tabs: TabItem[] = $derived([
     { value: "examples", label: "Examples" },
     ...(showSizes && sizes ? [{ value: "sizes", label: "Sizes" }] : []),
@@ -49,13 +53,15 @@
 </script>
 
 <div class="poodle-specimen-layout">
-  <Tabs
-    value={activeTab}
-    items={tabs}
-    variant="card"
-    ariaLabel="Specimen view"
-    onValueChange={(value) => (activeTab = value as typeof activeTab)}
-  />
+  {#if !captureMode}
+    <Tabs
+      value={activeTab}
+      items={tabs}
+      variant="card"
+      ariaLabel="Specimen view"
+      onValueChange={(value) => (activeTab = value as typeof activeTab)}
+    />
+  {/if}
 
   <div class="poodle-specimen-layout__content">
     {#if activeTab === "examples"}

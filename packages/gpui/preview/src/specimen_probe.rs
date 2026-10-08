@@ -98,15 +98,36 @@ fn open_route_window(
     app: &TestAppContext,
     slug: &str,
 ) -> (gpui::Entity<PreviewRoot>, VisualTestContext) {
+    open_route_window_with_capture(app, slug, false)
+}
+
+fn open_capture_route_window(
+    app: &TestAppContext,
+    slug: &str,
+) -> (gpui::Entity<PreviewRoot>, VisualTestContext) {
+    open_route_window_with_capture(app, slug, true)
+}
+
+fn open_route_window_with_capture(
+    app: &TestAppContext,
+    slug: &str,
+    specimen_capture: bool,
+) -> (gpui::Entity<PreviewRoot>, VisualTestContext) {
     let root_holder: Rc<RefCell<Option<gpui::Entity<PreviewRoot>>>> = Rc::default();
     let captured_root = Rc::clone(&root_holder);
     let slug = slug.to_string();
+    let frame = crate::specimen_capture_frame();
+    let window_size = if specimen_capture {
+        size(px(frame.logical_width), px(frame.logical_height))
+    } else {
+        probe_viewport()
+    };
     let window = app.update(|app| {
         app.open_window(
             WindowOptions {
                 window_bounds: Some(WindowBounds::Windowed(Bounds {
                     origin: point(px(0.0), px(0.0)),
-                    size: probe_viewport(),
+                    size: window_size,
                 })),
                 ..Default::default()
             },
@@ -114,6 +135,7 @@ fn open_route_window(
                 let root = cx.new(|cx| {
                     let mut root = PreviewRoot::new(cx);
                     root.state.active_component_slug = Some(slug);
+                    root.state.specimen_capture = specimen_capture;
                     root
                 });
                 *captured_root.borrow_mut() = Some(root.clone());
@@ -127,6 +149,40 @@ fn open_route_window(
         .take()
         .expect("probe root captured");
     (root, VisualTestContext::from_window(window.into(), app))
+}
+
+#[test]
+fn specimen_capture_builds_only_the_examples_frame_without_shell_nodes() {
+    let app = TestAppContext::single();
+    let (_root, mut cx) = open_capture_route_window(&app, "button");
+    settle(&mut cx);
+
+    let frame = cx
+        .debug_bounds("specimen-capture-frame")
+        .expect("specimen capture frame paints");
+    let expected = crate::specimen_capture_frame();
+    assert_eq!(f32::from(frame.size.width), expected.logical_width);
+    assert_eq!(f32::from(frame.size.height), expected.logical_height);
+    assert!(
+        cx.debug_bounds(CARD).is_some(),
+        "the button specimen paints"
+    );
+    assert!(cx.debug_bounds("specimen-card-title").is_none());
+    assert!(cx.debug_bounds("specimen-pane-examples").is_some());
+    assert!(cx.debug_bounds("specimen-tab-examples").is_none());
+    for selector in [
+        "preview-shell-root",
+        "preview-shell-topbar",
+        "preview-shell-controls",
+        "preview-shell-sidebar",
+    ] {
+        assert!(
+            cx.debug_bounds(selector).is_none(),
+            "{selector} is absent in capture mode"
+        );
+    }
+
+    close_route_window(&mut cx);
 }
 
 /// Let queued work land, then flush once more so any state it dirtied is

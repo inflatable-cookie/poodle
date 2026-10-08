@@ -34,7 +34,7 @@ use poodle_specs::{ControlDensity, ControlSize};
 
 use crate::app_state::AppState;
 use crate::specimens::specimen_axes::{
-    AxisAdmission, ALL_DENSITIES, ALL_SIZES, DENSITIES_TAB, SIZES_TAB,
+    AxisAdmission, ALL_DENSITIES, ALL_SIZES, DENSITIES_TAB, EXAMPLES_TAB, SIZES_TAB,
 };
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -137,7 +137,11 @@ pub fn specimen_layout(
     let admission = axes.admission();
 
     let key = format!("specimen-layout-tab-{name}");
-    let active_tab = admission.resolve_tab(state.specimens.text.get(&key).map(String::as_str));
+    let active_tab = if state.specimen_capture {
+        EXAMPLES_TAB
+    } else {
+        admission.resolve_tab(state.specimens.text.get(&key).map(String::as_str))
+    };
 
     let border_subtle = theme.resolve_color("color.border.subtle");
     let panel_bg = theme.resolve_color("color.background.panel");
@@ -226,14 +230,19 @@ pub fn specimen_layout(
         _ => div().flex().flex_col().gap(px(16.0)).child(examples),
     };
 
-    div()
-        .flex()
-        .flex_col()
-        .gap(px(12.0))
-        .child(tab_bar)
+    let mut layout = div().flex().flex_col().gap(if state.specimen_capture {
+        px(0.0)
+    } else {
+        px(12.0)
+    });
+    if !state.specimen_capture {
+        layout = layout.child(tab_bar);
+    }
+    layout.child(
         // Test-only marker for the headless specimen probe (g15.026); a no-op
         // outside GPUI's `test-support` builds.
-        .child(body.debug_selector(|| format!("specimen-pane-{active_tab}")))
+        body.debug_selector(|| format!("specimen-pane-{active_tab}")),
+    )
 }
 
 /// The bordered panel both axis panes stack their variant rows inside.
