@@ -243,7 +243,25 @@ fn listbox_keyboard_selection_and_focus_rebuild_the_host_spec() {
             root.children[0].style.focus_ring.as_ref().unwrap().width,
             focus_width
         );
+        assert_eq!(
+            root.children[0].style.focus_ring.as_ref().unwrap().offset,
+            -focus_width,
+            "option focus ring insets its full stroke so later siblings cannot cover it"
+        );
         assert!(root.children[2].interaction.disabled);
+
+        let empty_spec = ListboxSpec::new(Vec::new()).with_aria_label("Empty library");
+        let empty = listbox_with_rows(
+            &empty_spec,
+            &RenderContext::new(&theme()),
+            &ListboxHandlers::new("gpui-empty-proof"),
+            |_, _, _| Node::container(),
+        );
+        assert_eq!(
+            empty.style.focus_ring.as_ref().unwrap().offset,
+            2.0,
+            "empty root keeps its outset focus ring"
+        );
 
         let ambient_id = listbox_option_focus_id("gpui-proof", "ambient");
         let keys_id = listbox_option_focus_id("gpui-proof", "keys");
@@ -259,6 +277,24 @@ fn listbox_keyboard_selection_and_focus_rebuild_the_host_spec() {
             assert_eq!(host.context.focused_value.as_deref(), Some("keys"));
             assert_eq!(host.context.selected_values, ["ambient", "drums", "keys"]);
         }
+        let ring = poodle_gpui_node_backend::painted_ring_for(&keys_id)
+            .expect("keyboard-focused option paints its ring");
+        let option_bounds = poodle_gpui_node_backend::bounds_for(&keys_id)
+            .expect("focused option has mounted bounds");
+        let [ring_x, ring_y, ring_width, ring_height] = ring.bounds;
+        let option_x = f32::from(option_bounds.origin.x);
+        let option_y = f32::from(option_bounds.origin.y);
+        let option_right = option_x + f32::from(option_bounds.size.width);
+        let option_bottom = option_y + f32::from(option_bounds.size.height);
+        assert!(
+            ring_x >= option_x
+                && ring_y >= option_y
+                && ring_x + ring_width <= option_right
+                && ring_y + ring_height <= option_bottom,
+            "the focused option's complete painted ring stays within its bounds: ring={:?}, option={:?}",
+            ring.bounds,
+            option_bounds
+        );
 
         let nodes = driver.accessibility_nodes();
         let listbox = nodes

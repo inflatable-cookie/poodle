@@ -127,10 +127,14 @@ fn option_node(
     row.style.self_stretch = spec.orientation == poodle_specs::ListboxOrientation::Vertical;
     row.style.min_width = Some(0.0);
     row.style.descriptor.cursor = CursorHint::Pointer;
+    let focus_width = ctx.theme().resolve_border_width("border.width.focus");
     row.style.focus_ring = Some(FocusRing {
         color: ctx.theme().resolve_color("color.accent.focusRing"),
-        width: ctx.theme().resolve_border_width("border.width.focus"),
-        offset: rem_to_px(0.125),
+        width: focus_width,
+        // GPUI paints options in tree order and has no sibling z-index layer.
+        // Keep the complete stroke inside this option so later host rows cannot
+        // cover its outer edge.
+        offset: -focus_width,
     });
     row.interaction.focusable = !disabled;
     row.interaction.disabled = disabled;
