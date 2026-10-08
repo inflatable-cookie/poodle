@@ -15,7 +15,10 @@ import {
   PORTABLE_ROUTE_COUNT,
   PUBLIC_COMPONENT_COUNT,
   PUBLIC_COMPONENT_NAMES,
+  ROSTER_NATIVE_DEFERRED_NAMES,
+  ROSTER_NATIVE_DEFERRED_ROUTE_SLUGS,
   ROSTER_WEB_ONLY_NAMES,
+  WEB_COMPONENT_ROUTE_SLUGS,
 } from "./component-denominator";
 
 const root = path.resolve(import.meta.dir, "..");
@@ -25,8 +28,12 @@ setDefaultTimeout(90_000);
 describe("component denominator", () => {
   it("reads both counts from the one generated catalogue", () => {
     expect(PORTABLE_COMPONENT_NAMES).toHaveLength(PORTABLE_ROUTE_COUNT);
-    expect(PUBLIC_COMPONENT_COUNT).toBe(PORTABLE_ROUTE_COUNT + ROSTER_WEB_ONLY_NAMES.length);
+    expect(PUBLIC_COMPONENT_COUNT).toBe(
+      PORTABLE_ROUTE_COUNT + ROSTER_WEB_ONLY_NAMES.length + ROSTER_NATIVE_DEFERRED_NAMES.length,
+    );
     expect(PUBLIC_COMPONENT_NAMES).toHaveLength(PUBLIC_COMPONENT_COUNT);
+    expect(ROSTER_NATIVE_DEFERRED_ROUTE_SLUGS).toEqual(["listbox"]);
+    expect(WEB_COMPONENT_ROUTE_SLUGS).toContain("listbox");
   });
 
   it("accepts the live public barrel", () => {
@@ -66,6 +73,7 @@ describe("g16.001 parity evidence ledger", () => {
       [...PORTABLE_COMPONENT_NAMES].sort(),
     );
     expect(roster.find((component) => component.name === "MeterSurface")?.portable).toBe(false);
+    expect(roster.find((component) => component.name === "Listbox")?.portable).toBe(false);
   });
 
   it("accepts the checked-in ledger", () => {
@@ -145,7 +153,7 @@ describe("g16.001 parity evidence ledger", () => {
 describe("g17.001 Nucleus V1 ledger cells", () => {
   it("moves only V1-backed GPUI visual cells to compared with findings open", () => {
     const ledger = generateLedgerMarkdown(root);
-    expect(ledger).toContain("| GPUI visual | 0 | 0 | 0 | 29 | 0 | 146 | 1 | 0 |");
+    expect(ledger).toContain("| GPUI visual | 0 | 0 | 0 | 29 | 0 | 146 | 1 | 1 |");
     const buttonRow = ledger.split("\n").find((line) => line.startsWith("| Button |"));
     expect(buttonRow).toContain("button--nucleus-shell-button--v1.json#proof_level");
     expect(buttonRow).toContain("retained as open evidence");

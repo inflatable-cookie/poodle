@@ -1,7 +1,7 @@
 # g18.001 — Contract-bound GPUI functionality census
 
 Default full-selector source commit (individual mounted receipts carry their own execution identity): `5c769632f3e5bc5552e67abb60a0c80b1b744dcf`
-Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
+Denominator: **177** public / **175** portable; `MeterSurface` is the single contract-approved web-only row; Listbox native implementation is deferred.
 
 <!-- g18-census-method -->
 ## Method
@@ -67,6 +67,7 @@ Accessibility platform holds (A2, narrow): **171**. Refusals recorded: **22**.
 | ListCard | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ListCard--first-mounted-parity-list-card.json` |
 | ListCardCounter | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ListCardCounter--first-mounted-parity-list-card-counter.json` |
 | ListGrid | semantic; accessibility; visual | semantic (expected-test); accessibility (expected-test) | visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ListGrid--first-mounted-parity-list-grid.json` |
+| Listbox | deferred (native implementation follows) | — | — | — | — |
 | Menu | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | — |
 | MetaBar | semantic; accessibility; visual | semantic (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/MetaBar--first-mounted-parity-meta-bar.json` |
 | MetaItem | semantic; accessibility; visual | semantic (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/MetaItem--first-mounted-parity-meta-item.json` |

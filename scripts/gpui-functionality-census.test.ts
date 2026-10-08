@@ -33,6 +33,7 @@ import {
 import {
   PORTABLE_ROUTE_COUNT,
   PUBLIC_COMPONENT_COUNT,
+  ROSTER_NATIVE_DEFERRED_NAMES,
   ROSTER_WEB_ONLY_NAMES,
 } from "./component-denominator";
 
@@ -76,6 +77,18 @@ function censusDoc(overrides: Partial<CensusDoc> = {}): CensusDoc {
         },
       ],
       receipts: ["docs/evidence/gpui/mounted-receipts/Button--a-mounted-button.json"],
+      refusals: [],
+    },
+    {
+      component: "Listbox",
+      portable: false,
+      contract: "docs/contracts/components/listbox.md",
+      substrate: "native-deferred",
+      required: [],
+      admitted: [],
+      missing: [],
+      holds: [],
+      receipts: [],
       refusals: [],
     },
   ];
@@ -126,6 +139,12 @@ describe("g18.001 census oracles", () => {
     const doc = censusDoc();
     doc.rows.push({ ...doc.rows[0] });
     expect(() => validateCensusDoc(doc)).toThrow(/duplicate/i);
+  });
+
+  it("denominator oracle: requires a separate row for native-deferred public components", () => {
+    const doc = censusDoc({ rows: censusDoc().rows.filter((row) => row.component !== "Listbox") });
+    expect(ROSTER_NATIVE_DEFERRED_NAMES).toEqual(["Listbox"]);
+    expect(() => validateCensusDoc(doc)).toThrow(/native-deferred public component Listbox/);
   });
 
   it("stale-test oracle: a renamed expected test admits nothing", () => {

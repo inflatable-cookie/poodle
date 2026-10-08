@@ -15,15 +15,14 @@ export type ComponentEntry = CatalogueNavEntry & {
 };
 
 /**
- * Web-only catalogue entries.
+ * Web-only and native-deferred catalogue entries.
  *
  * The canonical catalogue is the portable component inventory and also feeds
- * the GPUI and Jetstream preview catalogues, so a web-only rendering
- * coordinator must not enter it (spec 068 / g14.024 fixed decision:
- * `MeterSurface` has no native counterpart — native backends already batch
- * meter nodes in their renderer scene). These entries exist so the Svelte and
- * React catalogues can document and exercise such surfaces without claiming a
- * portable component.
+ * the GPUI and Jetstream preview catalogues. Surfaces without a current native
+ * implementation stay in this web catalogue supplement until admitted to the
+ * portable inventory. MeterSurface is permanently web-only (spec 068 / g14.024);
+ * Listbox's shared Rust and GPUI implementations are deferred to the follow-up
+ * native implementation task.
  */
 export const webOnlyComponents: CanonicalComponent[] = [
   {
@@ -60,6 +59,15 @@ export const webOnlyComponents: CanonicalComponent[] = [
     section: "composition",
     family: "forms-validation",
     kind: "display",
+    collections: [] as const satisfies readonly CatalogueCollectionId[],
+  },
+  {
+    slug: "listbox",
+    displayName: "Listbox",
+    description: "Selectable list with host-rendered options and roving keyboard focus.",
+    section: "composition",
+    family: "data-collections",
+    kind: "composite",
     collections: [] as const satisfies readonly CatalogueCollectionId[],
   },
   {

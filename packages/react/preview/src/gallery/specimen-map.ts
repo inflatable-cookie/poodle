@@ -278,7 +278,7 @@ export const specimenMap: Record<string, ComponentType<{ slug?: string }>> = {
   "list-card-counter": ListCardCounterSpecimen,
   "list-container": ListContainerSpecimen,
   "list-grid": ListGridSpecimen,
-  listbox: ListboxSpecimen,
+  "listbox": ListboxSpecimen,
   "licence-activation": LicenceActivationSpecimen,
   "licence-seats": LicenceSeatsSpecimen,
   "licence-status": LicenceStatusSpecimen,

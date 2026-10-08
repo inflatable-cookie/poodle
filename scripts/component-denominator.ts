@@ -9,7 +9,7 @@
 // A new portable component therefore moves the count by existing in the
 // catalogue; nothing in a gate needs a hand bump. `assertPublicBarrelAgrees`
 // keeps the agreement check: the Svelte public barrel must still name exactly
-// the catalogue components plus the declared web-only supplement.
+// the catalogue components plus its declared web-only and native-deferred rows.
 
 import { canonicalComponents } from "../packages/svelte/preview/src/generated/catalogue/catalogue";
 
@@ -27,32 +27,35 @@ export const PORTABLE_ROUTE_SLUGS: readonly string[] = canonicalComponents.map(
 export const PORTABLE_ROUTE_COUNT: number = PORTABLE_ROUTE_SLUGS.length;
 
 /**
- * Web-only public components.
+ * Public components outside the portable catalogue.
  *
- * They are public in the Svelte (and React) barrels and have web catalogue
- * routes, but they are not portable catalogue entries and have no native
- * counterpart. `MeterSurface` is the only member today (spec 068 / g14.024,
- * and the spec 070 canonical 176-name denominator). The remaining
- * `webOnlyComponents` in the preview registry (`CodeEditor`, the rich-text
- * pair, `MarkdownRenderer`) are web-admitted behind dedicated entries and are
- * deliberately outside the public roster, so they are not listed here.
+ * MeterSurface is permanently web-only (spec 068 / g14.024). Listbox is a
+ * public web component whose shared Rust and GPUI implementations are deferred
+ * to the next lane part; it stays outside the portable catalogue until then.
+ * Other `webOnlyComponents` in the preview registry (`CodeEditor`, the
+ * rich-text pair, `MarkdownRenderer`) are web-admitted behind dedicated
+ * entries and remain outside the public root roster.
  */
 export const ROSTER_WEB_ONLY_NAMES: readonly string[] = ["MeterSurface"];
 export const ROSTER_WEB_ONLY_ROUTE_SLUGS: readonly string[] = ["meter-surface"];
+export const ROSTER_NATIVE_DEFERRED_NAMES: readonly string[] = ["Listbox"];
+export const ROSTER_NATIVE_DEFERRED_ROUTE_SLUGS: readonly string[] = ["listbox"];
 
-/** Public component denominator: portable catalogue plus the web-only roster members. */
+/** Public component denominator: portable catalogue plus staged public surfaces. */
 export const PUBLIC_COMPONENT_NAMES: readonly string[] = [
   ...PORTABLE_COMPONENT_NAMES,
   ...ROSTER_WEB_ONLY_NAMES,
+  ...ROSTER_NATIVE_DEFERRED_NAMES,
 ];
 
 /** Public-component denominator used by the native proofs and the web census. */
 export const PUBLIC_COMPONENT_COUNT: number = PUBLIC_COMPONENT_NAMES.length;
 
-/** Web catalogue routes: portable routes plus the web-only roster routes. */
+/** Web catalogue routes: portable routes plus staged public web routes. */
 export const WEB_COMPONENT_ROUTE_SLUGS: readonly string[] = [
   ...PORTABLE_ROUTE_SLUGS,
   ...ROSTER_WEB_ONLY_ROUTE_SLUGS,
+  ...ROSTER_NATIVE_DEFERRED_ROUTE_SLUGS,
 ];
 
 /**

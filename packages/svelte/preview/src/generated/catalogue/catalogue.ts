@@ -1153,15 +1153,6 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
-		slug: "listbox",
-		displayName: "Listbox",
-		description: "Selectable list with host-rendered options and roving keyboard focus.",
-		section: "composition",
-		family: "data-collections",
-		kind: "composite",
-		collections: [] as const satisfies readonly CatalogueCollectionId[],
-	},
-	{
 		slug: "log-list",
 		displayName: "LogList",
 		description: "Operational log viewer and audit activity list.",

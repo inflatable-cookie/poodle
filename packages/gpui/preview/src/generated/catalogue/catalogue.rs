@@ -1375,15 +1375,6 @@ pub const CANONICAL_COMPONENTS: &[CanonicalComponent] = &[
 		collections: &[],
 	},
     CanonicalComponent {
-		slug: "listbox",
-		display_name: "Listbox",
-		description: "Selectable list with host-rendered options and roving keyboard focus.",
-		section: CatalogueSectionId::Composition,
-		family: CatalogueFamilyId::DataCollections,
-		kind: CatalogueKindId::Composite,
-		collections: &[],
-	},
-    CanonicalComponent {
 		slug: "log-list",
 		display_name: "LogList",
 		description: "Operational log viewer and audit activity list.",

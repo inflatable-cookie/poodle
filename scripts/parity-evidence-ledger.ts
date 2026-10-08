@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { canonicalComponents } from "../packages/svelte/preview/src/generated/catalogue/catalogue";
-import { assertPublicBarrelAgrees } from "./component-denominator";
+import { assertPublicBarrelAgrees, ROSTER_NATIVE_DEFERRED_NAMES } from "./component-denominator";
 import {
   deriveNucleusReceiptRows,
   NUCLEUS_MANIFEST_PATH,
@@ -562,11 +562,20 @@ function expectedComponentRow(
       : cell("present", `${pathRef(contractPath, deltaHeading[1])}; status and runtime reason are contract-owned`);
 
   if (!portable) {
-    base["Shared Rust surface"] = cell("not-applicable", `${pathRef(contractPath, "MeterSurface")}; web-only by the fixed native boundary`);
-    base["GPUI construction"] = cell("not-applicable", `MeterSurface is excluded from the ${portableCount}-route native probe`);
-    base["GPUI mounted behaviour"] = cell("not-applicable", `MeterSurface is web-only and has no GPUI mounted target`);
-    base["GPUI accessibility"] = cell("not-applicable", `MeterSurface is web-only and has no GPUI accessibility target`);
-    base["GPUI visual"] = cell("not-applicable", `MeterSurface is web-only and has no GPUI pixel target`);
+    if (ROSTER_NATIVE_DEFERRED_NAMES.includes(name)) {
+      const reason = `native implementation of ${name} is deferred to its follow-up task`;
+      base["Shared Rust surface"] = cell("deferred", `${reason}; no Rust spec or renderer is claimed in this task`);
+      base["GPUI construction"] = cell("deferred", `${reason}; Listbox is outside the ${portableCount}-route native probe`);
+      base["GPUI mounted behaviour"] = cell("deferred", `${reason}; no GPUI mounted target is claimed`);
+      base["GPUI accessibility"] = cell("deferred", `${reason}; no GPUI accessibility target is claimed`);
+      base["GPUI visual"] = cell("deferred", `${reason}; no GPUI pixel target is claimed`);
+    } else {
+      base["Shared Rust surface"] = cell("not-applicable", `${pathRef(contractPath, "MeterSurface")}; web-only by the fixed native boundary`);
+      base["GPUI construction"] = cell("not-applicable", `MeterSurface is excluded from the ${portableCount}-route native probe`);
+      base["GPUI mounted behaviour"] = cell("not-applicable", `MeterSurface is web-only and has no GPUI mounted target`);
+      base["GPUI accessibility"] = cell("not-applicable", `MeterSurface is web-only and has no GPUI accessibility target`);
+      base["GPUI visual"] = cell("not-applicable", `MeterSurface is web-only and has no GPUI pixel target`);
+    }
   } else {
     const specPath = findRustSpec(root, name);
     const renderPath = findRenderModule(root, name);
@@ -875,6 +884,8 @@ runtime.
 - Portable native components: **${portableCount}**, derived from the generated catalogue.
 - Native \`not-applicable\`: **MeterSurface** only, by the fixed web-only
   boundary. It remains in the ${publicCount}-component public denominator.
+- Native implementation deferred: **Listbox**, pending its follow-up implementation task;
+  its web contract and Svelte/React surfaces are in this task.
 - Jetstream: one program-level \`deferred\` target. Shared Rust composition and
   the in-repo adapter do not make the sibling backend pass.
 
@@ -901,8 +912,8 @@ ${summaryMarkdown(rows)}
 | --- | --- | --- |
 | Svelte | reference implementation; focused component tests and Svelte axe sweep are present | \`test/a11y/component-a11y.test.ts\` |
 | React | implementation and focused tests are present; React axe sweep is missing | no React axe equivalent; Svelte axe evidence does not transfer |
-| Shared Rust | ${portableCount} renderer-neutral surfaces present; MeterSurface is not-applicable | \`packages/contracts/components/src/\`; \`packages/render/src/\` |
-| GPUI | ${portableCount}/${portableCount} portable specimen routes construct headlessly; mounted behaviour is bounded | \`packages/gpui/preview/src/specimen_probe.rs\`; \`packages/gpui/preview/tests/headless_regressions.rs\` |
+| Shared Rust | ${portableCount} renderer-neutral surfaces present; MeterSurface is not-applicable; Listbox is deferred | \`packages/contracts/components/src/\`; \`packages/render/src/\` |
+| GPUI | ${portableCount}/${portableCount} portable specimen routes construct headlessly; Listbox is deferred; mounted behaviour is bounded | \`packages/gpui/preview/src/specimen_probe.rs\`; \`packages/gpui/preview/tests/headless_regressions.rs\` |
 | Jetstream | deferred at program level | \`packages/jetstream/cross-runtime-parity-report.json\` |
 
 ## Component evidence ledger

@@ -3,7 +3,12 @@ import { execFileSync, execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { deriveLiveRoster, EXPECTED_MOUNTED_BEHAVIOUR_TESTS } from "./parity-evidence-ledger";
-import { PORTABLE_ROUTE_COUNT, PUBLIC_COMPONENT_COUNT, ROSTER_WEB_ONLY_NAMES } from "./component-denominator";
+import {
+  PORTABLE_ROUTE_COUNT,
+  PUBLIC_COMPONENT_COUNT,
+  ROSTER_NATIVE_DEFERRED_NAMES,
+  ROSTER_WEB_ONLY_NAMES,
+} from "./component-denominator";
 import { deriveNucleusReceiptRows } from "./nucleus-parity-receipts";
 
 const ROOT = path.resolve(import.meta.dir, "..");
@@ -1482,7 +1487,7 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
         component: component.name,
         portable: false,
         contract: contractPath,
-        substrate: "web-only",
+        substrate: ROSTER_NATIVE_DEFERRED_NAMES.includes(component.name) ? "native-deferred" : "web-only",
         required: [],
         admitted: [],
         missing: [],
@@ -1714,8 +1719,24 @@ export function validateCensusDoc(doc: CensusDoc): void {
           throw new Error(`Census holds must cite the native accessibility contract (${row.component}).`);
         }
       }
-    } else if (row.component !== "MeterSurface") {
-      throw new Error(`Only MeterSurface may be non-portable, found ${row.component}.`);
+    } else {
+      const expectedSubstrate = ROSTER_NATIVE_DEFERRED_NAMES.includes(row.component)
+        ? "native-deferred"
+        : ROSTER_WEB_ONLY_NAMES.includes(row.component)
+          ? "web-only"
+          : null;
+      if (expectedSubstrate === null || row.substrate !== expectedSubstrate) {
+        throw new Error(`Non-portable row ${row.component} has an unexpected native status or substrate.`);
+      }
+      if (row.required.length > 0 || row.admitted.length > 0 || row.missing.length > 0 || row.holds.length > 0) {
+        throw new Error(`Non-portable row ${row.component} must not claim native capability evidence.`);
+      }
+    }
+  }
+  for (const name of ROSTER_NATIVE_DEFERRED_NAMES) {
+    const row = doc.rows.find((candidate) => candidate.component === name);
+    if (row === undefined || row.portable || row.substrate !== "native-deferred") {
+      throw new Error(`Census rows must include native-deferred public component ${name}.`);
     }
   }
   validateCapabilityManifest(doc.manifest);
@@ -1741,7 +1762,7 @@ export function censusMarkdown(doc: CensusDoc): string {
   lines.push("# g18.001 — Contract-bound GPUI functionality census");
   lines.push("");
   lines.push(`Default full-selector source commit (individual mounted receipts carry their own execution identity): \`${doc.source_commit}\``);
-  lines.push(`Denominator: **${doc.denominator.public}** public / **${doc.denominator.portable}** portable; \`${doc.denominator.notApplicable[0]}\` is the single contract-approved non-portable row.`);
+  lines.push(`Denominator: **${doc.denominator.public}** public / **${doc.denominator.portable}** portable; \`${doc.denominator.notApplicable[0]}\` is the single contract-approved web-only row; ${ROSTER_NATIVE_DEFERRED_NAMES.join(", ")} native implementation is deferred.`);
   lines.push("");
   lines.push("<!-- g18-census-method -->");
   lines.push("## Method");
@@ -1769,7 +1790,10 @@ export function censusMarkdown(doc: CensusDoc): string {
   lines.push("| --- | --- | --- | --- | --- | --- |");
   for (const row of doc.rows) {
     if (!row.portable) {
-      lines.push(`| ${row.component} | not-applicable (web-only) | — | — | — | — |`);
+      const status = row.substrate === "native-deferred"
+        ? "deferred (native implementation follows)"
+        : "not-applicable (web-only)";
+      lines.push(`| ${row.component} | ${status} | — | — | — | — |`);
       continue;
     }
     const admitted = row.admitted.length === 0 ? "—" : row.admitted.map((item) => `${item.axis} (${item.via})`).join("; ");
