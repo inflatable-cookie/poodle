@@ -7,7 +7,6 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::model_connection::{model_catalogue_fixtures, ModelConnectionReadiness};
 use poodle_node::Node;
-use poodle_render::RenderContext;
 use poodle_specs::{
     ButtonVariant, EyebrowSpec, IconButtonSpec, ModelCatalogueEditorSpec, ModelConnectionCardSpec,
     PillAppearance, PillSpec, PillTone, SemanticControlSizeRole,
@@ -85,7 +84,7 @@ fn plain(
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let ctx = RenderContext::new(theme);
+    let ctx = crate::node_compat::preview_render_context(theme);
     let queue = Arc::clone(&state.node_events);
     let host = &state.model_connection;
     let _ = cx;

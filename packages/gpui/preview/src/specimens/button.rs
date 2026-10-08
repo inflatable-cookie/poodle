@@ -23,7 +23,6 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
 use poodle_render::button;
-use poodle_render::RenderContext;
 use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec};
 
 /// A node-tier Button with an optional click handler.
@@ -38,7 +37,11 @@ fn node_button(
 
 /// A node-tier Button with no handler (tones / icons / chevrons / states / sizes / densities).
 fn node_button_static(spec: ButtonSpec, theme: &GpuiThemeProvider) -> AnyElement {
-    let node = button(&spec, &RenderContext::new(theme), None);
+    let node = button(
+        &spec,
+        &crate::node_compat::preview_render_context(theme),
+        None,
+    );
     poodle_gpui_node_backend::to_gpui(&node)
 }
 

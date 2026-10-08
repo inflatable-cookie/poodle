@@ -5,7 +5,6 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
-use poodle_render::RenderContext;
 use poodle_specs::ShellStatusBarSpec;
 use poodle_specs::{EyebrowSpec, StatusIndicatorSpec, StatusTone};
 
@@ -18,7 +17,7 @@ fn leading_items(theme: &GpuiThemeProvider) -> CompatRow {
     let diagnostics = StatusIndicatorSpec::new()
         .with_status(StatusTone::Success)
         .with_label("0 errors");
-    let ctx = RenderContext::new(theme);
+    let ctx = crate::node_compat::preview_render_context(theme);
     CompatRow::new()
         .gap(8.0)
         .child(poodle_render::status_indicator(&branch, &ctx))

@@ -10,7 +10,7 @@ use poodle_headless::update::{
     OfferReason, UpdateAvailabilityProjection, UpdateControllerStatus, UpdatePresence,
     UpdateProgressProjection,
 };
-use poodle_render::{update_center, RenderContext, UpdateCenterHandlers};
+use poodle_render::{update_center, UpdateCenterHandlers};
 use poodle_specs::{EyebrowSpec, UpdateCenterSpec};
 
 fn group(theme: &GpuiThemeProvider, label: &str, child: impl IntoElement) -> Div {
@@ -38,7 +38,11 @@ fn center_element(
     theme: &GpuiThemeProvider,
     handlers: UpdateCenterHandlers,
 ) -> AnyElement {
-    poodle_gpui_node_backend::to_gpui(&update_center(&spec, &RenderContext::new(theme), handlers))
+    poodle_gpui_node_backend::to_gpui(&update_center(
+        &spec,
+        &crate::node_compat::preview_render_context(theme),
+        handlers,
+    ))
 }
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {

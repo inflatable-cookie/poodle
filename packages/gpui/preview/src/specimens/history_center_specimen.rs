@@ -635,7 +635,7 @@ fn render_instance(
     handlers.instance_id = Some(instance_id.to_string());
     poodle_gpui_node_backend::to_gpui(&history_center(
         spec,
-        &RenderContext::new(theme),
+        &crate::node_compat::preview_render_context(theme),
         view,
         &handlers,
     ))

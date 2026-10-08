@@ -73,7 +73,7 @@ fn missing_options() -> Vec<ModelConnectionOption> {
 /// Host configuration content. Poodle never sees these values: the host
 /// supplies a builder the field invokes inside its scoped context.
 fn api_key_field(theme: &GpuiThemeProvider, id: &str, value: &str) -> Node {
-    let ctx = RenderContext::new(theme);
+    let ctx = crate::node_compat::preview_render_context(theme);
     let value = value.to_string();
     poodle_render::field(
         &FieldSpec::new(id, "API key"),
@@ -92,7 +92,7 @@ fn api_key_field(theme: &GpuiThemeProvider, id: &str, value: &str) -> Node {
 }
 
 fn endpoint_field(theme: &GpuiThemeProvider, id: &str) -> Node {
-    let ctx = RenderContext::new(theme);
+    let ctx = crate::node_compat::preview_render_context(theme);
     poodle_render::field(
         &FieldSpec::new(id, "Endpoint URL"),
         &ctx,
@@ -113,7 +113,7 @@ fn browser_sign_in(theme: &GpuiThemeProvider) -> Node {
         &ButtonSpec::new()
             .with_label("Sign in with browser")
             .with_variant(ButtonVariant::Secondary),
-        &RenderContext::new(theme),
+        &crate::node_compat::preview_render_context(theme),
         None,
     )
 }

@@ -5,6 +5,7 @@
 //! owns preview-only event wiring and slots; public component behavior remains
 //! in the shared contracts and renderer.
 
+use std::cell::Cell;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
@@ -15,7 +16,7 @@ use gpui::{
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::motion_policy::MotionPolicy;
-use poodle_render::{AccordionHandlers, RenderContext, SlotBuilder};
+use poodle_render::{AccordionHandlers, RenderContext as SharedRenderContext, SlotBuilder};
 use poodle_specs::{
     AccordionSelectionValue, AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec,
     AgentMessageSpec, AgentPlanRecordSpec, AgentPlanSpec, AgentQuestionRecordSpec,
@@ -55,6 +56,93 @@ use poodle_gpui_node_backend::file_capability::SingleFilePickSpec;
 
 type OpenChangeHandler = Rc<dyn Fn(bool, &mut Window, &mut App)>;
 
+/// The preview root context's host-owned motion inputs. Component builders
+/// retain their own theme providers; this state makes every compatibility
+/// facade's fresh RenderContext inherit the root motion policy and frame.
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct PreviewMotionState {
+    motion_policy: MotionPolicy,
+    first_frame_committed: bool,
+}
+
+impl Default for PreviewMotionState {
+    fn default() -> Self {
+        Self {
+            motion_policy: MotionPolicy::Full,
+            first_frame_committed: false,
+        }
+    }
+}
+
+thread_local! {
+    static PREVIEW_MOTION_STATE: Cell<Option<PreviewMotionState>> = const { Cell::new(None) };
+}
+
+pub(crate) struct PreviewRootContextScope {
+    previous: Option<PreviewMotionState>,
+}
+
+impl PreviewRootContextScope {
+    pub(crate) fn enter(context: &SharedRenderContext<'_>) -> Self {
+        Self::enter_state(context.motion_policy(), context.first_frame_committed())
+    }
+
+    pub(crate) fn enter_state(motion_policy: MotionPolicy, first_frame_committed: bool) -> Self {
+        let current = PreviewMotionState {
+            motion_policy,
+            first_frame_committed,
+        };
+        let previous = PREVIEW_MOTION_STATE.with(|state| state.replace(Some(current)));
+        Self { previous }
+    }
+}
+
+impl Drop for PreviewRootContextScope {
+    fn drop(&mut self) {
+        PREVIEW_MOTION_STATE.with(|state| state.set(self.previous));
+    }
+}
+
+impl PreviewMotionState {
+    pub(crate) fn current() -> Self {
+        PREVIEW_MOTION_STATE.with(|state| state.get().unwrap_or_default())
+    }
+
+    pub(crate) fn render_context<'a>(
+        self,
+        theme: &'a dyn ThemeProvider,
+    ) -> SharedRenderContext<'a> {
+        SharedRenderContext::new_with_motion_policy(
+            theme,
+            self.motion_policy,
+            self.first_frame_committed,
+        )
+    }
+}
+
+pub(crate) fn preview_render_context(theme: &dyn ThemeProvider) -> SharedRenderContext<'_> {
+    PreviewMotionState::current().render_context(theme)
+}
+
+/// Constructor facade for compat methods throughout this module. Keeping the
+/// existing `RenderContext::new(theme)` call sites on one factory lets them
+/// inherit the active preview root without per-component policy plumbing.
+struct RenderContext;
+
+impl RenderContext {
+    fn new(theme: &dyn ThemeProvider) -> SharedRenderContext<'_> {
+        preview_render_context(theme)
+    }
+
+    fn new_with_motion_policy(
+        theme: &dyn ThemeProvider,
+        policy: MotionPolicy,
+        first_frame_committed: bool,
+    ) -> SharedRenderContext<'_> {
+        SharedRenderContext::new_with_motion_policy(theme, policy, first_frame_committed)
+    }
+}
+
 pub(crate) struct Eyebrow;
 
 impl Eyebrow {
@@ -88,7 +176,7 @@ impl Skeleton {
 
     pub(crate) fn from_spec_with_context(
         spec: SkeletonSpec,
-        context: &RenderContext<'_>,
+        context: &SharedRenderContext<'_>,
     ) -> AnyElement {
         poodle_gpui_node_backend::to_gpui(&poodle_render::skeleton(&spec, context))
     }
@@ -104,7 +192,7 @@ impl Spinner {
 
     pub(crate) fn from_spec_with_context(
         spec: SpinnerSpec,
-        context: &RenderContext<'_>,
+        context: &SharedRenderContext<'_>,
     ) -> AnyElement {
         poodle_gpui_node_backend::to_gpui(&poodle_render::spinner(&spec, context))
     }
@@ -412,7 +500,7 @@ impl Callout {
 
     pub(crate) fn with_actions(
         mut self,
-        actions: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+        actions: impl FnOnce(&SharedRenderContext<'_>) -> poodle_node::Node + 'static,
     ) -> Self {
         self.handlers.actions = Some(std::boxed::Box::new(actions));
         self
@@ -532,7 +620,7 @@ impl AppHeader {
 
     pub(crate) fn with_primary_actions(
         mut self,
-        actions: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+        actions: impl FnOnce(&SharedRenderContext<'_>) -> poodle_node::Node + 'static,
     ) -> Self {
         self.actions = Some(std::boxed::Box::new(actions));
         self
@@ -540,7 +628,7 @@ impl AppHeader {
 
     pub(crate) fn with_utility_items(
         mut self,
-        utility: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+        utility: impl FnOnce(&SharedRenderContext<'_>) -> poodle_node::Node + 'static,
     ) -> Self {
         self.utility = Some(std::boxed::Box::new(utility));
         self
@@ -548,7 +636,7 @@ impl AppHeader {
 
     pub(crate) fn with_center(
         mut self,
-        center: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+        center: impl FnOnce(&SharedRenderContext<'_>) -> poodle_node::Node + 'static,
     ) -> Self {
         self.center = Some(std::boxed::Box::new(center));
         self
@@ -556,7 +644,7 @@ impl AppHeader {
 
     pub(crate) fn with_identity(
         mut self,
-        identity: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+        identity: impl FnOnce(&SharedRenderContext<'_>) -> poodle_node::Node + 'static,
     ) -> Self {
         self.identity = Some(std::boxed::Box::new(identity));
         self
@@ -564,7 +652,7 @@ impl AppHeader {
 
     pub(crate) fn with_leading(
         self,
-        leading: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+        leading: impl FnOnce(&SharedRenderContext<'_>) -> poodle_node::Node + 'static,
     ) -> Self {
         self.with_identity(leading)
     }
@@ -618,7 +706,7 @@ impl FilterToolbar {
 
     pub(crate) fn with_child(
         mut self,
-        child: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+        child: impl FnOnce(&SharedRenderContext<'_>) -> poodle_node::Node + 'static,
     ) -> Self {
         self.children.push(std::boxed::Box::new(child));
         self
@@ -626,7 +714,7 @@ impl FilterToolbar {
 
     pub(crate) fn with_actions(
         mut self,
-        actions: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+        actions: impl FnOnce(&SharedRenderContext<'_>) -> poodle_node::Node + 'static,
     ) -> Self {
         self.actions = Some(std::boxed::Box::new(actions));
         self
@@ -634,7 +722,7 @@ impl FilterToolbar {
 
     pub(crate) fn with_secondary(
         mut self,
-        secondary: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+        secondary: impl FnOnce(&SharedRenderContext<'_>) -> poodle_node::Node + 'static,
     ) -> Self {
         self.secondary = Some(std::boxed::Box::new(secondary));
         self
@@ -1022,7 +1110,7 @@ impl MediaPreview {
 
     pub(crate) fn with_media_content(
         mut self,
-        content: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+        content: impl FnOnce(&SharedRenderContext<'_>) -> poodle_node::Node + 'static,
     ) -> Self {
         self.media_content = Some(std::boxed::Box::new(content));
         self
@@ -1613,19 +1701,20 @@ impl IntoElement for SidebarNav {
 
 impl ToastStack {
     pub(crate) fn from_spec(spec: ToastStackSpec, theme: &GpuiThemeProvider) -> Self {
+        let motion = PreviewMotionState::current();
         Self {
             spec,
             theme: theme.clone(),
             handlers: poodle_render::ToastStackHandlers::default(),
-            motion_policy: MotionPolicy::Full,
-            first_frame_committed: false,
+            motion_policy: motion.motion_policy,
+            first_frame_committed: motion.first_frame_committed,
         }
     }
 
     pub(crate) fn from_spec_with_context(
         spec: ToastStackSpec,
         theme: &GpuiThemeProvider,
-        context: &RenderContext<'_>,
+        context: &SharedRenderContext<'_>,
     ) -> Self {
         let mut stack = Self::from_spec(spec, theme);
         stack.motion_policy = context.motion_policy();
@@ -1678,20 +1767,21 @@ impl IntoElement for ToastStack {
 
 impl ToastHost {
     pub(crate) fn from_spec(spec: ToastHostSpec, theme: &GpuiThemeProvider) -> Self {
+        let motion = PreviewMotionState::current();
         Self {
             spec,
             stack_spec: ToastStackSpec::new(),
             theme: theme.clone(),
             handlers: poodle_render::ToastStackHandlers::default(),
-            motion_policy: MotionPolicy::Full,
-            first_frame_committed: false,
+            motion_policy: motion.motion_policy,
+            first_frame_committed: motion.first_frame_committed,
         }
     }
 
     pub(crate) fn from_spec_with_context(
         spec: ToastHostSpec,
         theme: &GpuiThemeProvider,
-        context: &RenderContext<'_>,
+        context: &SharedRenderContext<'_>,
     ) -> Self {
         let mut host = Self::from_spec(spec, theme);
         host.motion_policy = context.motion_policy();
@@ -3357,7 +3447,7 @@ impl PageHeader {
 
     pub(crate) fn with_breadcrumbs(
         mut self,
-        breadcrumbs: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+        breadcrumbs: impl FnOnce(&SharedRenderContext<'_>) -> poodle_node::Node + 'static,
     ) -> Self {
         self.breadcrumbs = Some(std::boxed::Box::new(breadcrumbs));
         self
@@ -3365,7 +3455,7 @@ impl PageHeader {
 
     pub(crate) fn with_actions(
         mut self,
-        actions: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+        actions: impl FnOnce(&SharedRenderContext<'_>) -> poodle_node::Node + 'static,
     ) -> Self {
         self.actions = Some(std::boxed::Box::new(actions));
         self
@@ -3373,7 +3463,7 @@ impl PageHeader {
 
     pub(crate) fn with_meta(
         mut self,
-        meta: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+        meta: impl FnOnce(&SharedRenderContext<'_>) -> poodle_node::Node + 'static,
     ) -> Self {
         self.meta = Some(std::boxed::Box::new(meta));
         self
@@ -3808,7 +3898,7 @@ impl Progress {
 
     pub(crate) fn from_spec_with_context(
         spec: ProgressSpec,
-        context: &RenderContext<'_>,
+        context: &SharedRenderContext<'_>,
     ) -> AnyElement {
         poodle_gpui_node_backend::to_gpui(&poodle_render::progress(&spec, context))
     }
@@ -4233,7 +4323,7 @@ impl Pill {
         self
     }
 
-    pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
+    pub(crate) fn into_node_with(self, ctx: &SharedRenderContext<'_>) -> poodle_node::Node {
         let Self {
             spec,
             on_remove,
@@ -4505,7 +4595,7 @@ impl Surface {
         self
     }
 
-    pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
+    pub(crate) fn into_node_with(self, ctx: &SharedRenderContext<'_>) -> poodle_node::Node {
         poodle_render::surface(&self.spec, ctx, self.content.into_iter().collect())
     }
 
@@ -4883,7 +4973,7 @@ impl TextInput {
         self
     }
 
-    pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
+    pub(crate) fn into_node_with(self, ctx: &SharedRenderContext<'_>) -> poodle_node::Node {
         let mut node = poodle_render::text_input_with_handlers(
             &self.spec,
             ctx,
@@ -4964,7 +5054,7 @@ impl Select {
         self
     }
 
-    pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
+    pub(crate) fn into_node_with(self, ctx: &SharedRenderContext<'_>) -> poodle_node::Node {
         let mut handlers = poodle_render::SelectHandlers::new(self.instance_scope);
         if let Some(on_transition) = self.on_transition {
             handlers = handlers.on_transition(on_transition);
@@ -5890,7 +5980,7 @@ impl Breadcrumbs {
         self
     }
 
-    pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
+    pub(crate) fn into_node_with(self, ctx: &SharedRenderContext<'_>) -> poodle_node::Node {
         poodle_render::breadcrumbs(&self.spec, ctx, self.on_navigate)
     }
 
@@ -6805,7 +6895,7 @@ impl EmbedInput {
         }
     }
 
-    pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
+    pub(crate) fn into_node_with(self, ctx: &SharedRenderContext<'_>) -> poodle_node::Node {
         poodle_render::embed_input(&self.spec, ctx)
     }
 
@@ -6854,7 +6944,7 @@ impl Field {
 
     pub(crate) fn with_control(
         mut self,
-        control: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+        control: impl FnOnce(&SharedRenderContext<'_>) -> poodle_node::Node + 'static,
     ) -> Self {
         self.control = Some(std::boxed::Box::new(control));
         self
@@ -6862,7 +6952,7 @@ impl Field {
 
     pub(crate) fn with_embed_control(
         self,
-        control: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+        control: impl FnOnce(&SharedRenderContext<'_>) -> poodle_node::Node + 'static,
     ) -> Self {
         self.with_control(control)
     }
@@ -6923,7 +7013,7 @@ impl Button {
         self
     }
 
-    pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
+    pub(crate) fn into_node_with(self, ctx: &SharedRenderContext<'_>) -> poodle_node::Node {
         let id = self
             .id_suffix
             .unwrap_or_else(|| self.spec.label.clone().unwrap_or_default());
@@ -8856,21 +8946,22 @@ pub(crate) struct IconButton {
 
 impl IconButton {
     pub(crate) fn from_spec(spec: IconButtonSpec, theme: &GpuiThemeProvider) -> Self {
+        let motion = PreviewMotionState::current();
         Self {
             spec,
             theme: theme.clone(),
             id_suffix: None,
             on_click: None,
             on_pressed_change: None,
-            motion_policy: MotionPolicy::Full,
-            first_frame_committed: false,
+            motion_policy: motion.motion_policy,
+            first_frame_committed: motion.first_frame_committed,
         }
     }
 
     pub(crate) fn from_spec_with_context(
         spec: IconButtonSpec,
         theme: &GpuiThemeProvider,
-        context: &RenderContext<'_>,
+        context: &SharedRenderContext<'_>,
     ) -> Self {
         let mut button = Self::from_spec(spec, theme);
         button.motion_policy = context.motion_policy();
@@ -8893,7 +8984,7 @@ impl IconButton {
         self
     }
 
-    pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
+    pub(crate) fn into_node_with(self, ctx: &SharedRenderContext<'_>) -> poodle_node::Node {
         let id = self
             .id_suffix
             .unwrap_or_else(|| self.spec.icon.clone().unwrap_or_default());
@@ -9244,7 +9335,7 @@ impl BlockEditor {
     /// instead of driving it through `spec.blocks`.
     pub(crate) fn with_child(
         mut self,
-        child: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+        child: impl FnOnce(&SharedRenderContext<'_>) -> poodle_node::Node + 'static,
     ) -> Self {
         self.children.push(std::boxed::Box::new(child));
         self

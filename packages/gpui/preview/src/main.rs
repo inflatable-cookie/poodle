@@ -407,6 +407,10 @@ fn sidebar_nav_size(size: ControlSize) -> SpecControlSize {
 
 impl Render for PreviewRoot {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let _root_context_scope = node_compat::PreviewRootContextScope::enter_state(
+            self.state.motion_policy,
+            self.state.first_frame_committed,
+        );
         if !self.state.first_frame_committed && !self.first_frame_commit_scheduled {
             self.first_frame_commit_scheduled = true;
             cx.on_next_frame(window, |root, _window, cx| {
@@ -1400,6 +1404,7 @@ impl PreviewRoot {
     /// Render a single specimen for a specific component by slug.
     fn render_component_specimen(&self, slug: &str, cx: &mut Context<Self>) -> Div {
         let motion_context = self.state.motion_context();
+        let _root_context_scope = node_compat::PreviewRootContextScope::enter(&motion_context);
         specimens::render_single_specimen(slug, &self.state, cx, &motion_context)
     }
 }

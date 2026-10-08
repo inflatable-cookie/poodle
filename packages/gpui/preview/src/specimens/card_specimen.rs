@@ -14,7 +14,6 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{ColorValue, LayoutDirection, Node};
 use poodle_render::presentation::rem_to_px;
-use poodle_render::RenderContext;
 use poodle_specs::{CardSpec, CardVariant, ControlDensity, EyebrowSpec};
 
 fn text(content: &str, size: f32, color: ColorValue, weight: Option<u16>) -> Node {
@@ -46,7 +45,7 @@ fn footer_slot(spec: &CardSpec, theme: &GpuiThemeProvider, content: Node) -> Nod
     slot.style.flex_shrink_zero = true;
     slot.style.border_top_width = Some(1.0);
     slot.style.border_color_top = Some(ColorValue(subtle.0, subtle.1, subtle.2, subtle.3 * 0.52));
-    let density = RenderContext::new(theme).resolve_density(spec.density);
+    let density = crate::node_compat::preview_render_context(theme).resolve_density(spec.density);
     slot.style.descriptor.layout.spacing.padding.top =
         rem_to_px(spec.footer_padding_top_rem(density));
     slot.child(content)
@@ -74,7 +73,11 @@ fn node_card(
     if let Some(footer) = footer {
         children.push(footer_slot(&spec, theme, footer));
     }
-    let mut node = poodle_render::card(&spec, &RenderContext::new(theme), children);
+    let mut node = poodle_render::card(
+        &spec,
+        &crate::node_compat::preview_render_context(theme),
+        children,
+    );
     node.id = Some(id.to_string());
     poodle_gpui_node_backend::to_gpui(&node)
 }

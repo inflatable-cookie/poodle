@@ -288,6 +288,8 @@ fn unknown_dispatch_paints_the_fallback_marker() {
         cx.update(|_window, app: &mut App| {
             root.update(app, |root, cx| {
                 let motion_context = root.state.motion_context();
+                let _root_context_scope =
+                    crate::node_compat::PreviewRootContextScope::enter(&motion_context);
                 specimens::render_single_specimen(
                     "not-a-catalogue-route",
                     &root.state,

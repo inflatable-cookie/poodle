@@ -3,13 +3,12 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::Node;
-use poodle_render::RenderContext;
 use poodle_specs::{PaddingScale, SurfaceBorder, SurfaceRole, SurfaceSpec, SurfaceTone};
 
 fn node_surface(spec: SurfaceSpec, theme: &GpuiThemeProvider, content: Node) -> AnyElement {
     poodle_gpui_node_backend::to_gpui(&poodle_render::surface(
         &spec,
-        &RenderContext::new(theme),
+        &crate::node_compat::preview_render_context(theme),
         vec![content],
     ))
 }

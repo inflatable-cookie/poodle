@@ -16,7 +16,6 @@ use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
-use poodle_render::RenderContext;
 use poodle_specs::{
     CardToggleGroupSpec, CardToggleOption, ControlDensity, ControlSize, EyebrowSpec,
 };
@@ -33,7 +32,11 @@ fn view_options() -> Vec<CardToggleOption> {
 
 /// A node-tier CardToggleGroup with no handlers (this specimen is fully static).
 fn node_card_toggle_group(spec: CardToggleGroupSpec, theme: &GpuiThemeProvider) -> AnyElement {
-    let node = poodle_render::card_toggle_group(&spec, &RenderContext::new(theme), None);
+    let node = poodle_render::card_toggle_group(
+        &spec,
+        &crate::node_compat::preview_render_context(theme),
+        None,
+    );
     poodle_gpui_node_backend::to_gpui(&node)
 }
 

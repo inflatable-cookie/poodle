@@ -548,7 +548,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     }
     let fill_component = poodle_gpui_node_backend::to_gpui(&poodle_render::tabs_with_panel(
         &fill_spec,
-        &poodle_render::RenderContext::new(theme),
+        &crate::node_compat::preview_render_context(theme),
         poodle_render::TabsHandlers {
             on_change: Some(node_value_handler(state, "tabs-fill-value")),
             instance_id: Some("specimen-tabs-fill".to_owned()),

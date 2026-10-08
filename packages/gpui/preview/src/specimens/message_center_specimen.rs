@@ -6,7 +6,7 @@ use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_render::{message_center, MessageCenterHandlers, RenderContext};
+use poodle_render::{message_center, MessageCenterHandlers};
 use poodle_specs::{
     EyebrowSpec, MessageCenterItem, MessageCenterItemProgress, MessageCenterSpec, OverlayPlacement,
     StatusTone,
@@ -131,7 +131,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_placement(OverlayPlacement::BottomStart);
     let center = poodle_gpui_node_backend::to_gpui(&message_center(
         &spec,
-        &RenderContext::new(&state.theme),
+        &crate::node_compat::preview_render_context(&state.theme),
         handlers,
     ));
     let selected = state
@@ -165,7 +165,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     &MessageCenterSpec::new(axis_items())
                         .with_placement(OverlayPlacement::BottomStart)
                         .with_size(size),
-                    &RenderContext::new(theme),
+                    &crate::node_compat::preview_render_context(theme),
                     MessageCenterHandlers::default(),
                 ))
             })
@@ -174,7 +174,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     &MessageCenterSpec::new(axis_items())
                         .with_placement(OverlayPlacement::BottomStart)
                         .with_density(density),
-                    &RenderContext::new(theme),
+                    &crate::node_compat::preview_render_context(theme),
                     MessageCenterHandlers::default(),
                 ))
             }),

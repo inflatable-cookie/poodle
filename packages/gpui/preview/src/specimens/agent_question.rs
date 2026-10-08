@@ -9,7 +9,6 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
-use poodle_render::RenderContext;
 use poodle_specs::{AgentChatInputSpec, AgentChatStatus, AgentQuestionSpec, EyebrowSpec};
 
 fn option(value: &str, label: &str, description: Option<&str>) -> AgentQuestionOption {
@@ -155,7 +154,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         col
     }
 
-    let ctx = RenderContext::new(theme);
+    let ctx = crate::node_compat::preview_render_context(theme);
     let hosted_question = poodle_render::agent_question(
         &AgentQuestionSpec::new(vec![placement()]).with_selections(if hosted_chosen.is_empty() {
             Vec::new()
