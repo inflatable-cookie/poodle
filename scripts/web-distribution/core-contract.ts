@@ -117,6 +117,7 @@ export const CORE_STYLE_FILES = [
   "list-card.css",
   "list-container.css",
   "list-grid.css",
+  "listbox.css",
   "log-list.css",
   "markdown-editor.css",
   "media-browse-panel.css",

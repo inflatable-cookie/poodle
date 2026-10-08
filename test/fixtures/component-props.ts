@@ -113,6 +113,7 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   FormDialog: { title: "Edit", open: true },
   IconButton: { icon: "info", ariaLabel: "Info" },
   ListCard: { title: "Card" },
+  Listbox: { items: opts, ariaLabel: "Choose item" },
   ListContainer: { title: "Items" },
   Menu: { items: menuItems, ariaLabel: "Menu" },
   Menubar: { items: [{ value: "file", label: "File", items: menuItems }] },

@@ -2,49 +2,49 @@
 
 Status: complete — measured by `g15.001`
 Date: 2026-08-16
-Updated: 2026-09-02 — `g16.056` froze 176 as the compiled-distribution denominator and named the root markdown break
+Updated: 2026-09-02 — `g16.056` froze 176 as the compiled-distribution denominator and named the root markdown break; 2026-10-08 — Listbox joined the web roster while native implementation remains deferred to lane part 2
 Card: task g15.001 (Git history)
 Governing refs: task g15.001 (Git history), task g14.022 (Git history), `docs/knowledge/contracts/working-rules.md`, the g14 `conformance-estate` record (Git history), `docs/knowledge/specs/070-compiled-web-distribution-contract.md`
 
 ## Denominator
 
-The live public Svelte denominator is **176 component exports**, enumerated mechanically from `export { default as <Name> } from "./<Name>.svelte"` in `packages/svelte/components/src/index.ts` (176 matches) and verified one-to-one against those 176 component files. Two additional `.svelte` files (`DragDropProvider`, `MenuSurface`) exist as internals and are not denominator members. Packed reachability today still ships `src` through `.`, `./*.svelte`, and `./types`. The compiled `0.3.0` contract in spec 070 keeps the same 176 names: `AgentMessage` and `MarkdownEditor` stay in the denominator, leave shell root barrels for `./markdown`, and remain reachable as Svelte `./<Name>.svelte` and React `./<Name>`. Root-barrel membership becomes 174 components plus helpers. A 175/176 split between this roster, spec 070, and `test/package-install/roster.ts` is a blocking defect. `MotionPolicyProvider` joined the roster in g16.034.
+The live public Svelte denominator is **177 component exports**, enumerated mechanically from `export { default as <Name> } from "./<Name>.svelte"` in `packages/svelte/components/src/index.ts` (177 matches) and verified one-to-one against those 177 component files. Two additional `.svelte` files (`DragDropProvider`, `MenuSurface`) exist as internals and are not denominator members. Packed reachability today still ships `src` through `.`, `./*.svelte`, and `./types`. The compiled-distribution roster in spec 070 keeps the same 177 names: `AgentMessage` and `MarkdownEditor` stay in the denominator, leave shell root barrels for `./markdown`, and remain reachable as Svelte `./<Name>.svelte` and React `./<Name>`; Listbox is the additional public web export, with native implementation deferred to lane part 2. Root-barrel membership is 172 components plus helpers. A mismatch between this roster, spec 070, and `test/package-install/roster.ts` is a blocking defect. `MotionPolicyProvider` joined the roster in g16.034.
 
-Public types and helpers are recorded separately and are **not** part of the denominator: the `types` block and the `file-upload`, `theme-controller`, `date`, `presentation`, `anchored`, `portal`, `embed-input`, `media-workflow`, `persistence`, and `icon-registry` exports. The canonical preview catalogue (175 portable slugs plus the web-only `meter-surface`) maps one-to-one onto this roster.
+Public types and helpers are recorded separately and are **not** part of the denominator: the `types` block and the `file-upload`, `theme-controller`, `date`, `presentation`, `anchored`, `portal`, `embed-input`, `media-workflow`, `persistence`, and `icon-registry` exports. The web route denominator (175 portable slugs, web-only `meter-surface`, and native-deferred `listbox`) maps one-to-one onto this roster.
 
 | Surface | present | missing | not-applicable |
 | --- | ---: | ---: | ---: |
-| Implementation file present (`src/<Name>.svelte`) | 176 | 0 | 0 |
-| Export from index + packed `exports` map | 176 | 0 | 0 |
-| Contract (`docs/contracts/components/<name>.md`) | 176 | 0 | 0 |
-| Svelte preview specimen (dedicated file or scene-shared) | 176 | 0 | 0 |
-| Focused Svelte test (named file/case, beyond anatomy smoke) | 176 | 0 | 0 |
-| React implementation + export | 176 | 0 | 0 |
-| React gallery specimen | 176 | 0 | 0 |
-| Focused React test | 176 | 0 | 0 |
-| Rust declaration (`<Name>Spec`, including documented aliases) | 175 | 0 | 1 |
-| Rust render module (`poodle-render`) | 175 | 0 | 1 |
-| GPUI specimen | 175 | 0 | 1 |
-| `test:web-pack-install` Svelte packed root-import proof | 176 | 0 | 0 |
-| `test:web-pack-install` React packed root-import proof | 176 | 0 | 0 |
-| Downstream consumer use (16 canonical consumers scanned) | 110 | 66 (no use found) | 0 |
+| Implementation file present (`src/<Name>.svelte`) | 177 | 0 | 0 |
+| Export from index + packed `exports` map | 177 | 0 | 0 |
+| Contract (`docs/contracts/components/<name>.md`) | 177 | 0 | 0 |
+| Svelte preview specimen (dedicated file or scene-shared) | 177 | 0 | 0 |
+| Focused Svelte test (named file/case, beyond anatomy smoke) | 177 | 0 | 0 |
+| React implementation + export | 177 | 0 | 0 |
+| React gallery specimen | 177 | 0 | 0 |
+| Focused React test | 177 | 0 | 0 |
+| Rust declaration (`<Name>Spec`, including documented aliases) | 175 | 0 | 2 |
+| Rust render module (`poodle-render`) | 175 | 0 | 2 |
+| GPUI specimen | 175 | 0 | 2 |
+| `test:web-pack-install` Svelte packed root-import proof | 177 | 0 | 0 |
+| `test:web-pack-install` React packed root-import proof | 177 | 0 | 0 |
+| Downstream consumer use (16 canonical consumers scanned) | 110 | 67 (no use found) | 0 |
 | Jetstream | 0 (program-deferred) | — | — |
 
-`not-applicable` is exactly one component on exactly one axis each: `MeterSurface` is web-only by fixed decision (spec 068) and has no Rust declaration, Rust render, or GPUI counterpart. It still counts as a member of the denominator (exported, contracted, implemented, specified in Svelte) and its `not-applicable` rows are recorded as such, not as missing or present.
+`MeterSurface` remains web-only by fixed decision (spec 068). Listbox is a public web component whose Rust specification, renderer and GPUI implementation are deferred to lane part 2. Both remain members of the 177-name web denominator; their native surfaces are recorded as `not-applicable`, not missing.
 
 ## Count Method (reproducible)
 
-- **Implementation / Export**: 175 `export { default as <Name> } from "./<Name>.svelte"` lines in `packages/svelte/components/src/index.ts`, each matched to a file of the same name; package `exports` map and `files` array checked once for packed reachability.
-- **Contract**: one `docs/contracts/components/<kebab>.md` per component (kebab-case from the export name); 175 of 175 present, verified by direct file check.
-- **Specimen**: keys of `specimenMap` in `packages/svelte/preview/src/specimens/registry.ts` against the canonical slugs (174 portable + web-only `meter-surface`); 175 entries. 168 map to a dedicated `*Specimen.svelte`; 7 map to a shared specimen (5 `SceneSpecimen`, 1 `ListCardSpecimen` for `ListCardCounter`, 1 `MetaBarSpecimen` for `MetaItem`).
-- **Focused Svelte test**: component imports resolved across all files in `packages/svelte/components/test/` (`.test.ts` and harness `.svelte` files); a component counts when at least one named test file mounts and asserts it beyond the anatomy smoke. 175 count; 0 record `missing` — `g15.005` closed the final 24 (workstation systems and agent surfaces).
-- **React implementation/export**: named component exports in `packages/react/components/src/index.ts` (175); React gallery: `specimen-map.ts` keys against canonical slugs (175); focused React test: same import-resolution method over `packages/react/components/test/` (175; 0 missing — `g15.005` closed the final 23; `AgentSubagent` already had React evidence).
-- **Rust declaration**: `pub struct <Name>Spec` searched recursively in `packages/contracts/components/src` (174 after `g15.009` closed UpdateStatus, UpdateCenter, SettingsShell, and Radio). Three documented naming discrepancies count as present: `CallOutSpec` (`Callout`), `ShellStatusBarSpec` (`StatusBar`), `TimeFieldSpec` (`TimeInput`). `MeterSurface` has no declaration and records not-applicable per spec 068.
-- **Rust render**: module names in `packages/render/src/lib.rs` (174 after `g15.043`). Documented naming discrepancies count as present: `bx.rs` (`Box`), `shell_status_bar.rs` (`StatusBar`), `time_field.rs` (`TimeInput`), `context.rs` (`UiPresentationProvider`, whose renderer is the crate-root `ui_presentation_provider` cascade boundary), and the batched `audio.rs` covering the 12 audio widgets (13 audio components minus `MeterSurface`). `MeterSurface` records not-applicable.
-- **GPUI specimen**: file presence in `packages/gpui/preview/src/specimens/` per component (174 after `g15.010`). The batched `audio_controls.rs` covers 12 audio widgets; the 12 audio widgets are those covered — `audio_controls.rs` has no `meter_surface` function and `MeterSurface` records not-applicable. Counts do not include the `mod.rs` dispatch fallback (`missing_specimen`).
+- **Implementation / Export**: 177 `export { default as <Name> } from "./<Name>.svelte"` lines in `packages/svelte/components/src/index.ts`, each matched to a file of the same name; package `exports` map and `files` array checked once for packed reachability.
+- **Contract**: one `docs/contracts/components/<kebab>.md` per component (kebab-case from the export name); 177 of 177 present, verified by direct file check.
+- **Specimen**: all 177 roster slugs (175 portable + web-only `meter-surface` + native-deferred `listbox`) have entries in `specimenMap` in `packages/svelte/preview/src/specimens/registry.ts`. The map has four additional web-only preview entries (`code-editor`, `markdown-renderer`, `rich-text-editor`, `rich-text-renderer`), so its total is 181; `SceneSpecimen` is shared by four roster entries.
+- **Focused Svelte test**: component imports resolved across all files in `packages/svelte/components/test/` (`.test.ts` and harness `.svelte` files); a component counts when at least one named test file mounts and asserts it beyond the anatomy smoke. 177 count; 0 record `missing` — `g15.005` closed the final 24 (workstation systems and agent surfaces), with Listbox added in the 2026-10-08 roster update.
+- **React implementation/export**: named component exports in `packages/react/components/src/index.ts` (177); React gallery: `specimen-map.ts` keys against canonical slugs (177); focused React test: same import-resolution method over `packages/react/components/test/` (177; 0 missing — `g15.005` closed the final 23; `AgentSubagent` already had React evidence).
+- **Rust declaration**: `pub struct <Name>Spec` searched recursively in `packages/contracts/components/src` (175 present in the current roster; `MeterSurface` is web-only and Listbox is native-deferred to lane part 2). Three documented naming discrepancies count as present: `CallOutSpec` (`Callout`), `ShellStatusBarSpec` (`StatusBar`), `TimeFieldSpec` (`TimeInput`).
+- **Rust render**: module names in `packages/render/src/lib.rs` (175 present in the current roster; `MeterSurface` is web-only and Listbox is native-deferred to lane part 2). Documented naming discrepancies count as present: `bx.rs` (`Box`), `shell_status_bar.rs` (`StatusBar`), `time_field.rs` (`TimeInput`), `context.rs` (`UiPresentationProvider`, whose renderer is the crate-root `ui_presentation_provider` cascade boundary), and the batched `audio.rs` covering the 12 audio widgets (13 audio components minus `MeterSurface`).
+- **GPUI specimen**: file presence in `packages/gpui/preview/src/specimens/` per component (175 present in the current roster; `MeterSurface` is web-only and Listbox is native-deferred to lane part 2). The batched `audio_controls.rs` covers 12 audio widgets; the 12 audio widgets are those covered — `audio_controls.rs` has no `meter_surface` function. Counts do not include the `mod.rs` dispatch fallback (`missing_specimen`).
 - **Pack-install**: `test:web-pack-install` derives the frozen component names
   from this roster and both package-root indexes, then compares the exact
-  runtime export sets from clean installed tarballs. The proof is 175/175 for
+  runtime export sets from clean installed tarballs. The proof is 177/177 for
   Svelte and React. The retained representative mount set is separate: 9
   Svelte components and 13 React components exercise runtime machinery.
 - **Downstream use**: import statements of `@inflatable-cookie/poodle-svelte` / `-react` resolved (single- and multi-line) across source files of the 16 canonical consumers under `~/Dev/projects`: acowtancy, bovine-accelerator-desktop, compli-me, composer, contact-patch, figmatic, finch, longhorn, loophole, loophole-legacy, nucleus, songsprout, soundcheck, soundcheck-library, underlay, underlay-reference. Excluded: `poodle` itself (source), `jetstream` (program-deferred), worktree/absorbed duplicates (e.g. `soundcheck-wt`, `acowtancy/dairy-card011-worktree`), vendored/build/generated/fixture/example/archive paths, and test directories. No canonical consumer imports `poodle-react`; all component imports resolve to `poodle-svelte`.
@@ -205,6 +205,7 @@ Rust declarations use the documented naming discrepancies where they exist: `Cal
 | `FormDialog` | `docs/contracts/components/form-dialog.md` | `FormDialogSpecimen.svelte` | `FormDialogInitialFocusHarness.svelte` | `test:web-pack-install` | `acowtancy`, `contact-patch`, `underlay`, `underlay-reference` |
 | `FormLayout` | `docs/contracts/components/form-layout.md` | `FormLayoutSpecimen.svelte` | `FormLayout.test.ts` | `test:web-pack-install` | `acowtancy`, `composer` |
 | `InlineListSection` | `docs/contracts/components/inline-list-section.md` | `InlineListSectionSpecimen.svelte` | `InlineListSection.test.ts` | `test:web-pack-install` | `acowtancy`, `longhorn`, `underlay` |
+| `Listbox` | `docs/contracts/components/listbox.md` | `ListboxSpecimen.svelte` | `Listbox.test.ts` | `test:web-pack-install` | no consumer use found (absence is not a release failure) |
 | `DebugDialog` | `docs/contracts/components/debug-dialog.md` | `DebugDialogSpecimen.svelte` | `DebugDialog.test.ts` | `test:web-pack-install` | no consumer use found (absence is not a release failure) |
 | `LicenceActivation` | `docs/contracts/components/licence-activation.md` | `LicenceActivationSpecimen.svelte` | `LicenceActivation.test.ts` | `test:web-pack-install` | `longhorn` |
 | `LicenceSeats` | `docs/contracts/components/licence-seats.md` | `LicenceSeatsSpecimen.svelte` | `LicenceSeats.test.ts` | `test:web-pack-install` | `longhorn` |
@@ -410,6 +411,7 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 | `FormDialog` | complete | complete | `DialogInitialFocus.test.tsx` | `test:web-pack-install` | `FormDialogSpec` (`packages/contracts/components/src/form_dialog.rs`) | `packages/render/src/form_dialog.rs` | `packages/gpui/preview/src/specimens/form_dialog_specimen.rs` |
 | `FormLayout` | complete | complete | `FormLayout.test.tsx` | `test:web-pack-install` | `FormLayoutSpec` (`packages/contracts/components/src/form_layout.rs`) | `packages/render/src/form_layout.rs` | `packages/gpui/preview/src/specimens/form_layout.rs` |
 | `InlineListSection` | complete | complete | `InlineListSection.test.tsx` | `test:web-pack-install` | `InlineListSectionSpec` (`packages/contracts/components/src/inline_list_section.rs`) | `packages/render/src/inline_list_section.rs` | `packages/gpui/preview/src/specimens/inline_list_section_specimen.rs` |
+| `Listbox` | complete | complete | `Listbox.test.tsx` | `test:web-pack-install` | not-applicable — native deferred to lane part 2 | not-applicable — native deferred to lane part 2 | not-applicable — native deferred to lane part 2 |
 | `DebugDialog` | complete | complete | `DebugDialog.test.tsx` | `test:web-pack-install` | `DebugDialogSpec` (`packages/contracts/components/src/debug_dialog.rs`) | `packages/render/src/debug_dialog.rs` | `packages/gpui/preview/src/specimens/debug_dialog_specimen.rs` |
 | `LicenceActivation` | complete | complete | `LicenceActivation.test.tsx` | `test:web-pack-install` | `LicenceActivationSpec` (`packages/contracts/components/src/licence_activation.rs`) | `packages/render/src/licence_activation.rs` | `packages/gpui/preview/src/specimens/licence_activation.rs` |
 | `LicenceSeats` | complete | complete | `LicenceSeats.test.tsx` | `test:web-pack-install` | `LicenceSeatsSpec` (`packages/contracts/components/src/licence_seats.rs`) | `packages/render/src/licence_seats.rs` | `packages/gpui/preview/src/specimens/licence_seats.rs` |

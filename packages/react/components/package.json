@@ -392,6 +392,10 @@
       "types": "./dist/ListGrid.d.ts",
       "default": "./dist/ListGrid.js"
     },
+    "./Listbox": {
+      "types": "./dist/Listbox.d.ts",
+      "default": "./dist/Listbox.js"
+    },
     "./LogList": {
       "types": "./dist/LogList.d.ts",
       "default": "./dist/LogList.js"

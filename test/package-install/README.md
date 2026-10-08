@@ -17,7 +17,7 @@ under their parent so both the top-level and context versions stay locked.
 It checks archive
 members, export targets, build receipts, CSS/parser edges, browser and SSR
 lanes, the Svelte `5.56.8` floor, the visible `5.38.6` below-floor failure,
-declarations under Bundler and NodeNext, and the frozen 176-name roster.
+declarations under Bundler and NodeNext, and the frozen 177-name roster.
 Ordinary source-only and empty `origin/main` ranges are valid. Workflow,
 release, package-manager version, and registry/publish ranges fail before
 build/pack. Ordinary Cargo classification is content-aware: `[package]` and

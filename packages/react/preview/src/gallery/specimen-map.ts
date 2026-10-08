@@ -87,6 +87,7 @@ import { ListCardSpecimen } from "./specimens/ListCardSpecimen";
 import { ListCardCounterSpecimen } from "./specimens/ListCardCounterSpecimen";
 import { ListContainerSpecimen } from "./specimens/ListContainerSpecimen";
 import { ListGridSpecimen } from "./specimens/ListGridSpecimen";
+import { ListboxSpecimen } from "./specimens/ListboxSpecimen";
 import { LicenceActivationSpecimen } from "./specimens/LicenceActivationSpecimen";
 import { LicenceSeatsSpecimen } from "./specimens/LicenceSeatsSpecimen";
 import { LicenceStatusSpecimen } from "./specimens/LicenceStatusSpecimen";
@@ -277,6 +278,7 @@ export const specimenMap: Record<string, ComponentType<{ slug?: string }>> = {
   "list-card-counter": ListCardCounterSpecimen,
   "list-container": ListContainerSpecimen,
   "list-grid": ListGridSpecimen,
+  "listbox": ListboxSpecimen,
   "licence-activation": LicenceActivationSpecimen,
   "licence-seats": LicenceSeatsSpecimen,
   "licence-status": LicenceStatusSpecimen,

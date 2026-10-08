@@ -140,6 +140,7 @@ contract references the rule rather than restating it:
 - `components/list-card-counter.md`
 - `components/list-card.md`
 - `components/list-container.md`
+- `components/listbox.md`
 - `components/list-grid.md`
 - `components/log-list.md`
 - `components/markdown-editor.md`

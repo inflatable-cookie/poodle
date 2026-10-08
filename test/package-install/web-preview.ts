@@ -22,6 +22,8 @@ import { buildReact } from "../../scripts/web-distribution/react-build";
 import { buildSvelte } from "../../scripts/web-distribution/svelte-build";
 import {
   FROZEN_COMPONENT_COUNT,
+  FROZEN_ROSTER_COUNT,
+  FROZEN_ROSTER_NAMES_SHA256,
   buildWebPackageRoster,
   readWebPackageRoster,
   type WebPackageRoster,
@@ -1651,8 +1653,13 @@ const artifactSetId = createHash("sha256").update(JSON.stringify(archiveHashes))
 const rosterNamesSha256 = createHash("sha256")
   .update(roster.frozenNames.map((name) => `${name}\n`).join(""))
   .digest("hex");
-if (roster.frozenNames.length !== 176 || rosterNamesSha256 !== "f497bfa0a47e1627a1ee7076016ac5566d83584d458b3f3693b688885a02a84a") {
-  throw new Error("canonical 176-name roster denominator or digest changed");
+if (
+  roster.frozenNames.length !== FROZEN_ROSTER_COUNT ||
+  rosterNamesSha256 !== FROZEN_ROSTER_NAMES_SHA256
+) {
+  throw new Error(
+    `canonical ${FROZEN_ROSTER_COUNT}-name roster denominator or digest changed`,
+  );
 }
 
 const installedSourcePlant = (() => {
@@ -2354,7 +2361,7 @@ const receipt = certificationRun
       sourceCommit: exactSourceCommit,
       svelteFloor: "5.56.8",
       belowFloorNegative: "5.38.6",
-      rosterDenominator: 176,
+      rosterDenominator: FROZEN_ROSTER_COUNT,
       rosterNamesSha256,
       artifactSetId,
       packages: Object.fromEntries(

@@ -1,5 +1,8 @@
 # ListCard
 
+For selectable collections of host-rendered rows, use the [Listbox
+composite](./listbox.md) to own option semantics and keyboard selection.
+
 > **Surface elevation**: ListCard is a surface consumer (50% strong contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract

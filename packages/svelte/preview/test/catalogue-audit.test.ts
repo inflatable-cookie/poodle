@@ -64,11 +64,11 @@ const FIXED_SHELL = [
 ];
 
 describe("preview catalogue audit", () => {
-  // Web-only entries are catalogued by the web previews but deliberately absent
-  // from the canonical manifest, which is the portable inventory and also feeds
-  // the GPUI/Jetstream catalogues (spec 068 / g14.024: `MeterSurface` has no
-  // native counterpart). They are audited here as their own closed set so the
-  // canonical invariant stays exact rather than loosened to "superset".
+  // Supplement entries are catalogued by the web previews but deliberately
+  // absent from the canonical manifest, which is the portable inventory and
+  // also feeds the GPUI/Jetstream catalogues. They are audited as their own
+  // closed set so the canonical invariant stays exact rather than becoming a
+  // loose "superset" check.
   const webOnlySlugs = webOnlyComponents.map((component) => component.slug);
   const canonicalEntries = allComponents.filter(
     (component) => !webOnlySlugs.includes(component.slug),
@@ -83,12 +83,13 @@ describe("preview catalogue audit", () => {
     );
   });
 
-  it("keeps the web-only supplement out of the canonical manifest", () => {
+  it("keeps the web preview supplement out of the canonical manifest", () => {
     expect(webOnlySlugs).toEqual([
       "meter-surface",
       "code-editor",
       "rich-text-editor",
       "rich-text-renderer",
+      "listbox",
       "markdown-renderer",
     ]);
     for (const slug of webOnlySlugs) {

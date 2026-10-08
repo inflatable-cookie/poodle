@@ -36,6 +36,7 @@ import AxisHelperHiddenRenderers from "../../packages/svelte/preview/test/AxisHe
 import AxisHelperPartialSizes from "../../packages/svelte/preview/test/AxisHelperPartialSizes.svelte";
 import catalogue from "../../packages/codegen/fixtures/preview-catalogue.json";
 import {
+  ROSTER_NATIVE_DEFERRED_ROUTE_SLUGS,
   ROSTER_WEB_ONLY_ROUTE_SLUGS,
   WEB_COMPONENT_ROUTE_SLUGS,
 } from "../../scripts/component-denominator";
@@ -50,9 +51,12 @@ const { components: catalogueComponents } = catalogue as {
 };
 
 /** The web route denominator: the generated portable catalogue entries plus
- *  the declared web-only roster routes (web-only `MeterSurface` from
- *  `component-registry.ts`). */
-const ROUTES = [...catalogueComponents.map((entry) => entry.slug), ...ROSTER_WEB_ONLY_ROUTE_SLUGS];
+ *  declared web-only and native-deferred roster routes. */
+const ROUTES = [
+  ...catalogueComponents.map((entry) => entry.slug),
+  ...ROSTER_WEB_ONLY_ROUTE_SLUGS,
+  ...ROSTER_NATIVE_DEFERRED_ROUTE_SLUGS,
+];
 
 /** The five fixture scenes, all generated from specimens-model.json. These
  *  render through SceneSpecimen, which needs the slug (the fixture data), not

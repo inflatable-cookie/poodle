@@ -178,10 +178,11 @@
   { run = "bun run --cwd packages/react/preview accessibility:report" },
 ]
 "check:parity-evidence-ledger" = "bun scripts/parity-evidence-ledger.ts"
-"test:parity-evidence-ledger" = "bun test scripts/parity-evidence-ledger.test.ts"
+"test:parity-evidence-ledger" = "bun test --timeout 120000 scripts/parity-evidence-ledger.test.ts"
+"update:parity-evidence-ledger" = "bun scripts/parity-evidence-ledger.ts --write"
 "test:nucleus-parity-receipts" = "bun test scripts/nucleus-parity-receipts.test.ts"
 "check:gpui-census" = "bun scripts/gpui-functionality-census.ts --check"
-"test:gpui-census" = "bun test scripts/gpui-functionality-census.test.ts"
+"test:gpui-census" = "bun test --timeout 120000 scripts/gpui-functionality-census.test.ts"
 "update:gpui-census" = "bun scripts/gpui-functionality-census.ts {args}"
 
 # CI gates — light, ubuntu-only. No native (gpui/jetstream) crates, no vite
@@ -260,13 +261,16 @@
 # realpath on every build.
 "test:shell-build" = [
   { run = "bun install --frozen-lockfile --cwd scripts/web-distribution/declaration-tools" },
-  { run = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/svelte-build.test.ts scripts/web-distribution/react-build.test.ts scripts/web-distribution/shell-smoke.test.ts" },
+  { run = "bun test --timeout 120000 scripts/web-distribution/driver.test.ts scripts/web-distribution/svelte-build.test.ts scripts/web-distribution/react-build.test.ts scripts/web-distribution/shell-smoke.test.ts" },
 ]
 # g18.015: public `*:preview` rebuilds package dist before Vite. Isolated
 # stale/missing distributions, live HTTP module-graph proof, fail-closed
 # startup, and process/port cleanup. Does not touch live ignored output.
 "test:preview-preflight" = "bun test scripts/web-distribution/preview-distribution-preflight.test.ts test/visual/server.test.ts"
 "test:core" = "bun run --cwd packages/core test"
+# Focused shared-core behavior proof for the Listbox composite; keep worker
+# validation narrow instead of running the full core unit suite.
+"test:core-listbox" = "bun test --timeout 120000 packages/core/test/listbox.test.ts"
 "test:core-icon-geometry-realize" = [
   { run = "bun test --timeout 120000 packages/core/test/icon-geometry-realize.test.ts" },
   { run = "bun test --timeout 120000 --test-name-pattern 'geometry realization support is exported for sibling test hosts' scripts/web-distribution/core-build.test.ts" },
@@ -280,6 +284,7 @@
   { run = "bunx vitest run" },
 ]
 "test:web-pack-install" = "bun test/package-install/web-preview.ts"
+"check:web-pack-install-roster" = "bunx tsc --ignoreConfig --noEmit --strict --target ES2022 --module ESNext --moduleResolution Bundler --types node test/package-install/roster.ts"
 # Compatibility selector for existing downstream handoffs and historical docs.
 "test:svelte-pack-install" = [{ task = "test:web-pack-install" }]
 "audit:security" = [

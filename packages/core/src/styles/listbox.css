@@ -1,0 +1,29 @@
+.poodle-listbox {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-radius: var(--poodle-radius-surface);
+}
+
+.poodle-listbox[data-orientation="horizontal"] {
+  flex-direction: row;
+}
+
+.poodle-listbox__option {
+  min-width: 0;
+  border-radius: var(--poodle-radius-surface);
+}
+
+.poodle-listbox__option:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 2px;
+}
+
+.poodle-listbox:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 2px;
+}
+
+.poodle-listbox__option[aria-disabled="true"] {
+  cursor: not-allowed;
+}

@@ -49,6 +49,8 @@ export { default as Meter } from "./Meter.svelte";
 export { default as ListCard } from "./ListCard.svelte";
 export { default as ListCardCounter } from "./ListCardCounter.svelte";
 export { default as ListGrid } from "./ListGrid.svelte";
+export { default as Listbox } from "./Listbox.svelte";
+export type { ListboxItem, ListboxOrientation, ListboxSelectionMode } from "@inflatable-cookie/poodle-core";
 export { default as Menu } from "./Menu.svelte";
 export { default as MetaBar } from "./MetaBar.svelte";
 export { default as MetaItem } from "./MetaItem.svelte";

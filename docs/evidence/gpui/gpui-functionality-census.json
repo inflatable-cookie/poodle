@@ -3,7 +3,7 @@
   "task": "g18.001",
   "source_commit": "0184dd5a92bcb58cf86a1a3abb30394df0bb279b",
   "denominator": {
-    "public": 176,
+    "public": 177,
     "portable": 175,
     "notApplicable": [
       "MeterSurface"
@@ -2351,6 +2351,18 @@
         "Expected test first_mounted_parity_list_grid shows visual signals, but visual is withheld: narrow-container floor clamp needs a shared container-relative layout capability.",
         "Expected test first_mounted_parity_list_grid proves no visual claim; visual stays missing."
       ]
+    },
+    {
+      "component": "Listbox",
+      "portable": false,
+      "contract": "docs/contracts/components/listbox.md",
+      "substrate": "native-deferred",
+      "required": [],
+      "admitted": [],
+      "missing": [],
+      "holds": [],
+      "receipts": [],
+      "refusals": []
     },
     {
       "component": "Menu",
