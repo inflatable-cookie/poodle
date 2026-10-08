@@ -307,6 +307,15 @@
       "collections": []
     },
     {
+      "slug": "listbox",
+      "displayName": "Listbox",
+      "description": "Selectable list with host-rendered rows, roving focus and single or multiple selection.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
       "slug": "number-input",
       "displayName": "NumberInput",
       "description": "Numeric input with optional steppers.",
@@ -337,15 +346,6 @@
       "slug": "ref-select",
       "displayName": "RefSelect",
       "description": "Version-control ref chooser with search, a current marker and a loading footer.",
-      "section": "foundations",
-      "family": "text-value-entry",
-      "kind": "input",
-      "collections": []
-    },
-    {
-      "slug": "listbox",
-      "displayName": "Listbox",
-      "description": "Selectable list with host-rendered rows, roving focus and single or multiple selection.",
       "section": "foundations",
       "family": "text-value-entry",
       "kind": "input",
