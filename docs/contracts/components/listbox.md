@@ -276,12 +276,14 @@ Option selection visuals are host-owned; the renderer receives `selected` and
 
 | Part | Outline offset | Paint order |
 |------|----------------|-------------|
-| Option | `-0.0625rem` | The focused option paints above its siblings. |
+| Option (Svelte/React) | `-0.0625rem` | The focused option paints above its siblings. |
+| Option (GPUI) | `-border.width.focus` | The full stroke stays inside the option bounds. |
 | Empty root | `0.125rem` | The root retains its outset ring when it owns the tab stop. |
 
-Inset option rings stay within stacked rows and remain visible over
-host-rendered row backgrounds. The empty root keeps an outset ring because it
-has no option row to overlap.
+Inset option rings remain visible over host-rendered row backgrounds. GPUI
+insets its full focus-ring stroke because it paints options in tree order, so a
+later sibling cannot cover the ring. The empty root keeps an outset ring
+because it has no option row to overlap.
 
 ## 9. Svelte Notes
 
