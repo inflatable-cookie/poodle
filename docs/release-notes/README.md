@@ -20,6 +20,8 @@ exists yet.
 
 ## Versions
 
+- [0.4.13](0.4.13.md) — 2026-10-08 — Keyboard equal-row layout, icon-geometry
+  realize helper, native preview window bounds and Jetstream preview repair.
 - [0.4.12](0.4.12.md) — 2026-10-07 — first coordinated npm/web and native
   git-tag release; native Toolbar instance ids and GPUI focus fixes.
 - [0.4.11](0.4.11.md) — 2026-10-06 — patch candidate fixing drag and drop for
