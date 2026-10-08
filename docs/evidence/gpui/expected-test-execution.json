@@ -716,10 +716,10 @@
     },
     "listbox_keyboard_selection_and_focus_rebuild_the_host_spec": {
       "outcome": "passed",
-      "body_sha256": "91e9de6470d829b6e38d1d94cf3f30c615b617c265e6e141dbdaace7a847f5c7",
-      "run_id": "poodle-145-review-5455970849",
+      "body_sha256": "e962b5234594ad5b7a3ea96ef92ad951729dbbe0b877722eedaa89b25bcc107c",
+      "run_id": "poodle-145-review-5455970849-gpui-bounds-62e8afbc5",
       "command": "effigy regressions:native listbox_keyboard_selection_and_focus_rebuild_the_host_spec -- --exact",
-      "source_commit": "7961618f01b4a43e65850fb78ef4902344b4a875",
+      "source_commit": "62e8afbc5fe8643e43ca1a9dcfafe3baf97bf7a3",
       "lockfile_sha256": "32571c5faebf8984822a4da8e96a2a0c742efc53aa9946382bb6db887918523f"
     }
   },
