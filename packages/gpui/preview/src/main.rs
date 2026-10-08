@@ -35,6 +35,7 @@ use std::path::PathBuf;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
+use poodle_headless::motion_policy::MotionPolicy;
 use poodle_specs::{
     CodeSpec, ControlDensity as SpecControlDensity, ControlSize as SpecControlSize,
     SemanticControlSizeRole, SidebarNavGroup, SidebarNavItem, SidebarNavSpec, SliderSpec,
@@ -97,7 +98,6 @@ actions!(poodle_preview, [Quit, CloseWindow]);
 /// Root view for the preview application.
 struct PreviewRoot {
     state: AppState,
-    first_frame_committed: bool,
     first_frame_commit_scheduled: bool,
     catalogue_sidebar: Entity<CatalogueSidebar>,
     component_page_list: ListState,
@@ -366,7 +366,6 @@ impl PreviewRoot {
         let catalogue_sidebar = cx.new(|_| CatalogueSidebar::new(&state));
         Self {
             state,
-            first_frame_committed: false,
             first_frame_commit_scheduled: false,
             catalogue_sidebar,
             component_page_list: ListState::new(3, ListAlignment::Top, px(256.0)),
@@ -377,7 +376,7 @@ impl PreviewRoot {
     }
 
     fn commit_first_frame(&mut self, cx: &mut Context<Self>) {
-        self.first_frame_committed = true;
+        self.state.first_frame_committed = true;
         self.first_frame_commit_scheduled = false;
         cx.notify();
     }
@@ -408,7 +407,11 @@ fn sidebar_nav_size(size: ControlSize) -> SpecControlSize {
 
 impl Render for PreviewRoot {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        if !self.first_frame_committed && !self.first_frame_commit_scheduled {
+        let _root_context_scope = node_compat::PreviewRootContextScope::enter_state(
+            self.state.motion_policy,
+            self.state.first_frame_committed,
+        );
+        if !self.state.first_frame_committed && !self.first_frame_commit_scheduled {
             self.first_frame_commit_scheduled = true;
             cx.on_next_frame(window, |root, _window, cx| {
                 root.commit_first_frame(cx);
@@ -1400,9 +1403,8 @@ impl PreviewRoot {
 
     /// Render a single specimen for a specific component by slug.
     fn render_component_specimen(&self, slug: &str, cx: &mut Context<Self>) -> Div {
-        let base_motion_context = poodle_render::RenderContext::new(&self.state.theme);
-        let motion_context =
-            base_motion_context.with_first_frame_committed(self.first_frame_committed);
+        let motion_context = self.state.motion_context();
+        let _root_context_scope = node_compat::PreviewRootContextScope::enter(&motion_context);
         specimens::render_single_specimen(slug, &self.state, cx, &motion_context)
     }
 }
@@ -1422,6 +1424,8 @@ struct CliArgs {
     window_bounds: Option<[f32; 4]>,
     /// Machine-readable proof of the resolved capture axis.
     capture_receipt: Option<String>,
+    /// Root motion policy for repeatable preview captures.
+    motion_policy: MotionPolicy,
     /// Points to click, in window coordinates, before capturing.
     clicks: Vec<DriverAction>,
     /// Print every specimen-state entry whose key starts with this, after the
@@ -1454,8 +1458,18 @@ fn parse_window_bounds(value: &str) -> Result<[f32; 4], String> {
     Ok([*x, *y, *width, *height])
 }
 
-fn parse_cli_args() -> CliArgs {
-    let args: Vec<String> = std::env::args().collect();
+fn parse_motion_policy(value: &str) -> Result<MotionPolicy, String> {
+    match value {
+        "full" => Ok(MotionPolicy::Full),
+        "reduced" => Ok(MotionPolicy::Reduced),
+        "frozen" => Ok(MotionPolicy::Frozen),
+        _ => Err(format!(
+            "unknown motion policy {value:?}; expected full, reduced, or frozen"
+        )),
+    }
+}
+
+fn parse_cli_args(args: &[String]) -> Result<CliArgs, String> {
     let mut section = None;
     let mut component = None;
     let mut component_search = None;
@@ -1467,11 +1481,12 @@ fn parse_cli_args() -> CliArgs {
     let mut screenshot = None;
     let mut window_bounds = None;
     let mut capture_receipt = None;
+    let mut motion_policy = MotionPolicy::Full;
     let mut clicks: Vec<DriverAction> = Vec::new();
     let mut print_state = None;
     let mut hold_ms: u64 = 120;
 
-    let mut i = 1;
+    let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
             "--section" => {
@@ -1584,6 +1599,13 @@ fn parse_cli_args() -> CliArgs {
                     i += 1;
                 }
             }
+            "--motion-policy" => {
+                let Some(value) = args.get(i + 1) else {
+                    return Err("--motion-policy requires full, reduced, or frozen".to_string());
+                };
+                motion_policy = parse_motion_policy(value)?;
+                i += 1;
+            }
             // Repeatable: `--click 120,340 --click 120,400` clicks in order.
             // `--click X,Y` or `--click X,Y,N` for an N-times click (2 is a
             // double click, which is how word-select is driven).
@@ -1663,7 +1685,7 @@ fn parse_cli_args() -> CliArgs {
         i += 1;
     }
 
-    CliArgs {
+    Ok(CliArgs {
         section,
         component,
         component_search,
@@ -1675,10 +1697,19 @@ fn parse_cli_args() -> CliArgs {
         screenshot,
         window_bounds,
         capture_receipt,
+        motion_policy,
         clicks,
         print_state,
         hold_ms,
-    }
+    })
+}
+
+fn capture_receipt(control_size: &str, motion_policy: MotionPolicy) -> serde_json::Value {
+    serde_json::json!({
+        "schema": "native-visual-axis-receipt.v1",
+        "controlSize": control_size,
+        "motionPolicy": motion_policy.as_str(),
+    })
 }
 
 /// Set once the window has drawn `FRAMES_BEFORE_CAPTURE` frames.
@@ -2334,7 +2365,11 @@ fn schedule_frames_drawn(window: &mut Window, remaining: u32) {
 }
 
 fn main() {
-    let cli = parse_cli_args();
+    let cli_args: Vec<String> = std::env::args().skip(1).collect();
+    let cli = parse_cli_args(&cli_args).unwrap_or_else(|message| {
+        eprintln!("{message}");
+        std::process::exit(2);
+    });
     let screenshot_mode = cli.screenshot.is_some();
 
     let assets = PreviewAssets {
@@ -2430,6 +2465,7 @@ fn main() {
                     if let Some(s) = cli.control_size {
                         root.state.control_size = s;
                     }
+                    root.state.motion_policy = cli.motion_policy;
                     // Rebuild theme with all overrides applied together
                     root.state.rebuild_theme();
                     if let Some(ref receipt_path) = cli.capture_receipt {
@@ -2437,10 +2473,10 @@ fn main() {
                         if let Some(parent) = path.parent() {
                             let _ = std::fs::create_dir_all(parent);
                         }
-                        let receipt = serde_json::json!({
-                            "schema": "native-visual-axis-receipt.v1",
-                            "controlSize": root.state.control_size.label(),
-                        });
+                        let receipt = capture_receipt(
+                            root.state.control_size.label(),
+                            root.state.motion_policy,
+                        );
                         std::fs::write(
                             path,
                             format!(
@@ -2590,6 +2626,66 @@ mod window_bounds_tests {
         );
         assert!(parse_window_bounds("0,0,0,480").is_err());
         assert!(parse_window_bounds("0,0,640").is_err());
+    }
+}
+
+#[cfg(test)]
+mod motion_policy_tests {
+    use crate::{capture_receipt, parse_cli_args, AppState};
+    use poodle_headless::motion_policy::MotionPolicy;
+    use poodle_specs::SpinnerSpec;
+
+    #[test]
+    fn cli_motion_policy_parses_all_modes_and_rejects_invalid_values() {
+        for (value, expected) in [
+            ("full", MotionPolicy::Full),
+            ("reduced", MotionPolicy::Reduced),
+            ("frozen", MotionPolicy::Frozen),
+        ] {
+            let args = vec!["--motion-policy".to_string(), value.to_string()];
+            assert_eq!(
+                parse_cli_args(&args)
+                    .expect("valid motion policy")
+                    .motion_policy,
+                expected
+            );
+        }
+
+        let invalid = vec!["--motion-policy".to_string(), "instant".to_string()];
+        assert!(parse_cli_args(&invalid)
+            .err()
+            .expect("invalid motion policy is rejected")
+            .contains("expected full, reduced, or frozen"));
+        assert!(parse_cli_args(&["--motion-policy".to_string()])
+            .err()
+            .expect("missing motion policy is rejected")
+            .contains("requires full, reduced, or frozen"));
+        assert_eq!(
+            parse_cli_args(&[]).expect("default args").motion_policy,
+            MotionPolicy::Full
+        );
+    }
+
+    #[test]
+    fn capture_receipt_records_the_effective_motion_policy() {
+        let receipt = capture_receipt("md", MotionPolicy::Frozen);
+        assert_eq!(receipt["controlSize"], "md");
+        assert_eq!(receipt["motionPolicy"], "frozen");
+    }
+
+    #[test]
+    fn frozen_preview_root_renders_spinner_endpoint_without_a_motion_clock() {
+        let mut state = AppState::new();
+        state.motion_policy = MotionPolicy::Frozen;
+        state.first_frame_committed = true;
+        let context = state.motion_context();
+        let spinner = poodle_render::spinner(&SpinnerSpec::new(), &context);
+
+        assert!(matches!(
+            &spinner.kind,
+            poodle_node::NodeKind::Icon { name, .. } if name == "spinner"
+        ));
+        assert!(spinner.style.animation.is_none());
     }
 }
 

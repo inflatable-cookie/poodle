@@ -63,7 +63,7 @@ fn group(label: &str, theme: &GpuiThemeProvider, child: impl IntoElement) -> Div
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let ctx = RenderContext::new(theme);
+    let ctx = crate::node_compat::preview_render_context(theme);
 
     // Root defaults: no provider; omitted inputs resolve to md/default.
     let root_row = plain_row(&ctx, "Root md/default");
@@ -164,7 +164,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 &UiPresentationProviderSpec::new()
                     .with_size_scale(ControlSize::Md)
                     .with_density(density),
-                &RenderContext::new(theme),
+                &crate::node_compat::preview_render_context(theme),
                 density_key(density),
             )
             .into_any_element()

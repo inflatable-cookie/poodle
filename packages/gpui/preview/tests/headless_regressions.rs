@@ -56,13 +56,13 @@ use poodle_render::{
     WaveformHandlers, XYPadHandlers, XYPadLive,
 };
 use poodle_specs::{
-    AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ChoiceOption, CodeSpec, CodeWrap,
-    CollapsibleSpec, ControlDensity, ControlSize, FaderSpec, HistoryCenterRejection,
-    HistoryCenterSpec, IconButtonSpec, KnobSpec, Orientation, PopoverSpec, RadioGroupSpec,
-    RangeSliderSpec, RatingSpec, SelectSpec, SkeletonSpec, SliderDirection, SliderSpec,
-    SpinnerSpec, TabActivationMode, TabDefinition, TabPin, TabVariant, TabsSpec, TextSpec,
-    TextWrap, TimeInputSpec, Toast, ToastStackSpec, ToastTone, TriStateSwitchSpec, TriStateValue,
-    UiPresentationProviderSpec, XYPadSpec,
+    AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ButtonSpec, ChoiceOption, CodeSpec,
+    CodeWrap, CollapsibleSpec, ControlDensity, ControlSize, EmbedPreviewSpec, FaderSpec,
+    FormActionsSpec, HistoryCenterRejection, HistoryCenterSpec, IconButtonSpec, KnobSpec,
+    Orientation, PopoverSpec, RadioGroupSpec, RangeSliderSpec, RatingSpec, SelectSpec,
+    SkeletonSpec, SliderDirection, SliderSpec, SpinnerSpec, TabActivationMode, TabDefinition,
+    TabPin, TabVariant, TabsSpec, TextSpec, TextWrap, TimeInputSpec, Toast, ToastStackSpec,
+    ToastTone, TriStateSwitchSpec, TriStateValue, UiPresentationProviderSpec, XYPadSpec,
 };
 
 #[path = "../src/headless_driver.rs"]
@@ -37898,6 +37898,132 @@ fn mounted_motion_policy_construction_does_not_invent_clocks() {
         assert!(
             f32::from(animated.origin.y) > f32::from(rested.origin.y) + 1.0,
             "the enter treatment really displaces the row: {animated:?} vs {rested:?}"
+        );
+    });
+}
+
+/// The preview's frozen root policy reaches an animated spinner on its first
+/// committed frame: the canonical ring endpoint mounts and schedules no clock.
+#[test]
+fn frozen_preview_root_spinner_mounts_endpoint_without_motion_clock() {
+    run_headless(|cx| {
+        let provider = theme();
+        let context = RenderContext::new_with_motion_policy(&provider, MotionPolicy::Frozen, true);
+        let mut spinner_node = spinner(&SpinnerSpec::new(), &context);
+        assert!(matches!(
+            &spinner_node.kind,
+            NodeKind::Icon { name, .. } if name == "spinner"
+        ));
+        assert!(spinner_node.style.animation.is_none());
+        spinner_node.id = Some("frozen-preview-root-spinner".to_string());
+
+        let capture = Arc::new(Mutex::new(Vec::<&'static str>::new()));
+        let tree = Arc::new(Mutex::new(spinner_node));
+        let build = {
+            let capture = Arc::clone(&capture);
+            let tree = Arc::clone(&tree);
+            Rc::new(move || {
+                let node = tree.lock().expect("spinner node").clone();
+                poodle_gpui_node_backend::begin_probe_capture();
+                use gpui::{IntoElement as _, ParentElement as _};
+                let element = gpui::div()
+                    .child(poodle_gpui_node_backend::to_gpui(&node))
+                    .into_any_element();
+                *capture.lock().expect("capture") = poodle_gpui_node_backend::take_probe_capture();
+                element
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        assert!(
+            !capture
+                .lock()
+                .expect("capture")
+                .contains(&"surface.animation.scheduled"),
+            "a frozen preview root paints the spinner endpoint without a live clock"
+        );
+    });
+}
+
+/// Frozen preview scope reaches motion nested inside compat-built composites.
+#[test]
+fn frozen_preview_root_context_reaches_nested_motion_specs() {
+    run_headless(|cx| {
+        use crate::node_compat::{Button, EmbedPreview, FormActions, IntoCompatNode};
+
+        let provider = theme();
+        let root_context =
+            RenderContext::new_with_motion_policy(&provider, MotionPolicy::Frozen, true);
+        let _root_context_scope = node_compat::PreviewRootContextScope::enter(&root_context);
+
+        let form_actions = FormActions::from_spec(FormActionsSpec::new(), &provider)
+            .with_action(Button::from_spec(
+                ButtonSpec::new().with_label("Saving").with_loading(true),
+                &provider,
+            ))
+            .into_compat_node();
+        let embed_preview =
+            EmbedPreview::from_spec(EmbedPreviewSpec::new().with_loading(true), &provider)
+                .into_compat_node();
+
+        fn count_motion(node: &Node, spinner_icons: &mut usize, animations: &mut usize) {
+            if matches!(&node.kind, NodeKind::Icon { name, .. } if name == "spinner") {
+                *spinner_icons += 1;
+            }
+            if node.style.animation.is_some() {
+                *animations += 1;
+            }
+            for child in &node.children {
+                count_motion(child, spinner_icons, animations);
+            }
+        }
+
+        let mut spinner_icons = 0;
+        let mut animations = 0;
+        count_motion(&form_actions, &mut spinner_icons, &mut animations);
+        count_motion(&embed_preview, &mut spinner_icons, &mut animations);
+        assert!(
+            spinner_icons >= 1,
+            "the loading button keeps its spinner endpoint"
+        );
+        assert!(embed_preview.children.iter().any(|column| {
+            column.children.iter().any(|skeleton| {
+                matches!(&skeleton.kind, NodeKind::Container)
+                    && skeleton.style.descriptor.background.is_some()
+            })
+        }));
+        assert_eq!(
+            animations, 0,
+            "nested loading motion stays static when frozen"
+        );
+
+        let capture = Arc::new(Mutex::new(Vec::<&'static str>::new()));
+        let nodes = Arc::new(Mutex::new(vec![form_actions, embed_preview]));
+        let build = {
+            let capture = Arc::clone(&capture);
+            let nodes = Arc::clone(&nodes);
+            Rc::new(move || {
+                let nodes = nodes.lock().expect("nested motion nodes");
+                poodle_gpui_node_backend::begin_probe_capture();
+                use gpui::{IntoElement as _, ParentElement as _};
+                let element = gpui::div()
+                    .child(poodle_gpui_node_backend::to_gpui(&nodes[0]))
+                    .child(poodle_gpui_node_backend::to_gpui(&nodes[1]))
+                    .into_any_element();
+                *capture.lock().expect("capture") = poodle_gpui_node_backend::take_probe_capture();
+                element
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        assert!(
+            !capture
+                .lock()
+                .expect("capture")
+                .contains(&"surface.animation.scheduled"),
+            "FormActions and EmbedPreview keep their endpoints without live clocks"
         );
     });
 }

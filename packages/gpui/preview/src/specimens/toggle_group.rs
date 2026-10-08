@@ -22,7 +22,7 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::toggle_group::ToggleGroupValue;
 
-use poodle_render::{toggle_group, RenderContext, ToggleGroupHandlers};
+use poodle_render::{toggle_group, ToggleGroupHandlers};
 use poodle_specs::{EyebrowSpec, ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
 
 fn specimen_text(value: ToggleGroupValue) -> String {
@@ -43,7 +43,7 @@ fn node_toggle_group(spec: ToggleGroupSpec, key: &'static str, state: &AppState)
     });
     let node = toggle_group(
         &spec,
-        &RenderContext::new(&state.theme),
+        &crate::node_compat::preview_render_context(&state.theme),
         ToggleGroupHandlers::new(key).on_value_change(on_value_change),
     );
     poodle_gpui_node_backend::to_gpui(&node)
@@ -56,7 +56,7 @@ fn node_toggle_group_static(
 ) -> AnyElement {
     let node = toggle_group(
         &spec,
-        &RenderContext::new(&state.theme),
+        &crate::node_compat::preview_render_context(&state.theme),
         ToggleGroupHandlers::new(instance_id),
     );
     poodle_gpui_node_backend::to_gpui(&node)
@@ -258,7 +258,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_size(size);
                 poodle_gpui_node_backend::to_gpui(&toggle_group(
                     &spec,
-                    &RenderContext::new(theme),
+                    &crate::node_compat::preview_render_context(theme),
                     ToggleGroupHandlers::new(format!("specimen-size-{size:?}")),
                 ))
             })
@@ -268,7 +268,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_density(density);
                 poodle_gpui_node_backend::to_gpui(&toggle_group(
                     &spec,
-                    &RenderContext::new(theme),
+                    &crate::node_compat::preview_render_context(theme),
                     ToggleGroupHandlers::new(format!("specimen-density-{density:?}")),
                 ))
             }),

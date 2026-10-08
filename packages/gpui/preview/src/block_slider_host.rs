@@ -14,7 +14,7 @@ use poodle_headless::slider::resolved_visible_text;
 use poodle_node::{Node, NodeRole};
 use poodle_render::{
     presentation, range_slider, slider, slider_block, BlockTextMeasure, RangeSliderHandlers,
-    RenderContext, SliderHandlers,
+    SliderHandlers,
 };
 use poodle_specs::{ControlSize, RangeSliderSpec, SliderSpec};
 
@@ -117,11 +117,12 @@ pub fn slider_element(
     let texts = slider_visible_texts(&spec);
     let font_size_px = font_size_px(spec.size);
     let theme: Arc<dyn ThemeProvider + Send + Sync> = Arc::new(theme);
+    let root_motion = crate::node_compat::PreviewMotionState::current();
     measured_node_element(
         texts,
         font_size_px,
         Arc::new(move |span, advance| {
-            let root = RenderContext::new(theme.as_ref());
+            let root = root_motion.render_context(theme.as_ref());
             let ctx = root.with_block_layout(span, as_block_measure(advance));
             let mut node = slider(&spec, &ctx, &handlers);
             if node.id.is_none() {
@@ -142,11 +143,12 @@ pub fn range_slider_element(
     let texts = range_visible_texts(&spec);
     let font_size_px = font_size_px(spec.size);
     let theme: Arc<dyn ThemeProvider + Send + Sync> = Arc::new(theme);
+    let root_motion = crate::node_compat::PreviewMotionState::current();
     measured_node_element(
         texts,
         font_size_px,
         Arc::new(move |span, advance| {
-            let root = RenderContext::new(theme.as_ref());
+            let root = root_motion.render_context(theme.as_ref());
             let ctx = root.with_block_layout(span, as_block_measure(advance));
             let mut node = range_slider(
                 &spec,

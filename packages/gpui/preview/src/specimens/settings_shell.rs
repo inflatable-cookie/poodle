@@ -5,7 +5,7 @@ use crate::node_compat::Eyebrow;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_node::Node;
-use poodle_render::{settings_shell, RenderContext, SettingsShellHandlers};
+use poodle_render::{settings_shell, SettingsShellHandlers};
 use poodle_specs::{EyebrowSpec, SettingsShellSpec, SidebarNavGroup, SidebarNavItem};
 
 fn groups() -> Vec<SidebarNavGroup> {
@@ -85,7 +85,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
     let node = settings_shell(
         &spec,
-        &RenderContext::new(theme),
+        &crate::node_compat::preview_render_context(theme),
         SettingsShellHandlers {
             on_navigate: Some(Arc::new(move |id| {
                 events_nav.lock().unwrap().push(NodeSpecimenEvent::SetText {

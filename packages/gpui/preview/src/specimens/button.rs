@@ -23,7 +23,6 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
 use poodle_render::button;
-use poodle_render::RenderContext;
 use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec};
 
 /// A node-tier Button with an optional click handler.
@@ -32,13 +31,17 @@ fn node_button(
     state: &AppState,
     on_click: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> AnyElement {
-    let node = button(&spec, &RenderContext::new(&state.theme), on_click);
+    let node = button(&spec, &state.motion_context(), on_click);
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
 /// A node-tier Button with no handler (tones / icons / chevrons / states / sizes / densities).
 fn node_button_static(spec: ButtonSpec, theme: &GpuiThemeProvider) -> AnyElement {
-    let node = button(&spec, &RenderContext::new(theme), None);
+    let node = button(
+        &spec,
+        &crate::node_compat::preview_render_context(theme),
+        None,
+    );
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
@@ -304,12 +307,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_label("Disabled"),
                             theme,
                         ))
-                        .child(node_button_static(
+                        .child(node_button(
                             ButtonSpec::new()
                                 .with_variant(ButtonVariant::Primary)
                                 .with_loading(true)
                                 .with_label("Loading"),
-                            theme,
+                            state,
+                            None,
                         ))
                         .child(node_button(
                             ButtonSpec::new()

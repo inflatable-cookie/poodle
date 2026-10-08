@@ -24,7 +24,6 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
 use poodle_render::segmented_control;
-use poodle_render::RenderContext;
 use poodle_specs::{ControlSize, EyebrowSpec, SegmentedControlOption, SegmentedControlSpec};
 
 /// Build a node-tier SegmentedControl whose change handler records the picked
@@ -42,7 +41,11 @@ fn node_segmented_control_keyed(
             value: value.to_string(),
         });
     });
-    let node = segmented_control(&spec, &RenderContext::new(&state.theme), Some(on_change));
+    let node = segmented_control(
+        &spec,
+        &crate::node_compat::preview_render_context(&state.theme),
+        Some(on_change),
+    );
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
@@ -57,7 +60,11 @@ fn node_segmented_control_static(
     spec: SegmentedControlSpec,
     theme: &GpuiThemeProvider,
 ) -> AnyElement {
-    let node = segmented_control(&spec, &RenderContext::new(theme), None);
+    let node = segmented_control(
+        &spec,
+        &crate::node_compat::preview_render_context(theme),
+        None,
+    );
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
@@ -283,7 +290,6 @@ mod icon_only_tests {
     use super::segmented_control;
     use crate::app_state::NodeSpecimenEvent;
     use poodle_gpui::GpuiThemeProvider;
-    use poodle_render::RenderContext;
     use poodle_specs::{ControlSize, SegmentedControlOption, SegmentedControlSpec};
     use std::sync::{Arc, Mutex};
 
@@ -314,7 +320,11 @@ mod icon_only_tests {
         .with_size(ControlSize::Sm)
         .with_equal_width(false);
         spec.aria_label = Some("Plugin kind".to_string());
-        segmented_control(&spec, &RenderContext::new(theme), Some(on_change))
+        segmented_control(
+            &spec,
+            &crate::node_compat::preview_render_context(theme),
+            Some(on_change),
+        )
     }
 
     fn find_icon<'a>(node: &'a poodle_node::Node, icon: &str) -> &'a poodle_node::Node {

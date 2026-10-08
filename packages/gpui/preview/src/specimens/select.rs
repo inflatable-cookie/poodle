@@ -88,7 +88,11 @@ fn node_select(id: &'static str, mut spec: SelectSpec, state: &AppState) -> AnyE
             poodle_gpui_node_backend::request_focus(&trigger_id);
         }
     }));
-    let node = select(&spec, &RenderContext::new(&state.theme), &handlers);
+    let node = select(
+        &spec,
+        &crate::node_compat::preview_render_context(&state.theme),
+        &handlers,
+    );
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
@@ -96,7 +100,7 @@ fn node_select(id: &'static str, mut spec: SelectSpec, state: &AppState) -> AnyE
 fn node_select_static(spec: SelectSpec, state: &AppState) -> AnyElement {
     let node = select(
         &spec,
-        &RenderContext::new(&state.theme),
+        &crate::node_compat::preview_render_context(&state.theme),
         &SelectHandlers::new("select-static"),
     );
     poodle_gpui_node_backend::to_gpui(&node)

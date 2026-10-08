@@ -367,7 +367,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .get("la-password")
         .cloned()
         .unwrap_or_default();
-    let ctx = RenderContext::new(theme);
+    let ctx = crate::node_compat::preview_render_context(theme);
     let email_field = poodle_render::field(
         &FieldSpec::new("la-email", "Email address"),
         &ctx,

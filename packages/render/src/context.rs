@@ -72,6 +72,23 @@ impl<'a> RenderContext<'a> {
         }
     }
 
+    /// The host root context with its effective motion policy and committed
+    /// baseline-frame state already applied.
+    pub fn new_with_motion_policy(
+        theme: &'a dyn ThemeProvider,
+        motion_policy: MotionPolicy,
+        first_frame_committed: bool,
+    ) -> Self {
+        Self {
+            theme,
+            size_scale: ControlSize::Md,
+            density: ControlDensity::Default,
+            motion_policy,
+            first_frame_committed,
+            block_layout: None,
+        }
+    }
+
     /// A nested scope replacing both presentation defaults. Motion is copied
     /// unchanged. The parent is untouched; dropping the derived context
     /// restores it by borrowing.

@@ -9,7 +9,7 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::listbox::{ListboxEffect, ListboxSelectionMode};
 use poodle_node::{LayoutDirection, LayoutSizing, Node};
-use poodle_render::{listbox_option_focus_id, listbox_with_rows, ListboxHandlers, RenderContext};
+use poodle_render::{listbox_option_focus_id, listbox_with_rows, ListboxHandlers};
 use poodle_specs::ListboxSpec;
 
 const INSTANCE_ID: &str = "gpui-preview-listbox";
@@ -111,7 +111,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     }));
     let node = listbox_with_rows(
         &spec,
-        &RenderContext::new(theme),
+        &crate::node_compat::preview_render_context(theme),
         &handlers,
         |item, selected, focused| row_content(item, selected, focused, theme),
     );

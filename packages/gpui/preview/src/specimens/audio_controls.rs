@@ -94,7 +94,7 @@ fn live_fader(state: &AppState, key: &str, orientation: FaderOrientation) -> Any
     let value_key = key.to_owned();
     to_element(fader_with_handlers(
         &spec,
-        &RenderContext::new(&state.theme),
+        &crate::node_compat::preview_render_context(&state.theme),
         &FaderHandlers::new(key).on_value_change(Arc::new(move |value| {
             events.lock().unwrap().push(NodeSpecimenEvent::SetText {
                 key: value_key.clone(),
@@ -112,7 +112,7 @@ fn live_knob(state: &AppState, key: &str) -> AnyElement {
     let value_key = key.to_owned();
     to_element(knob_with_handlers(
         &spec,
-        &RenderContext::new(&state.theme),
+        &crate::node_compat::preview_render_context(&state.theme),
         &KnobHandlers::new(key).on_value_change(Arc::new(move |value| {
             events.lock().unwrap().push(NodeSpecimenEvent::SetText {
                 key: value_key.clone(),
@@ -130,7 +130,7 @@ fn live_pad(state: &AppState, key: &str) -> AnyElement {
     let value_key = key.to_owned();
     to_element(xy_pad_with_handlers(
         &spec,
-        &RenderContext::new(&state.theme),
+        &crate::node_compat::preview_render_context(&state.theme),
         &XYPadHandlers::new(key).on_value_change(Arc::new(move |x, y| {
             events.lock().unwrap().push(NodeSpecimenEvent::SetText {
                 key: value_key.clone(),
@@ -183,9 +183,9 @@ fn interactive_examples(specimen: AudioSpecimen, state: &AppState) -> AnyElement
                         .text_color(muted)
                         .child(format!("Vertical {vertical} · Horizontal {horizontal}")),
                 )
-                .child(to_element(
-                    specimen.examples(&RenderContext::new(&state.theme)),
-                ))
+                .child(to_element(specimen.examples(
+                    &crate::node_compat::preview_render_context(&state.theme),
+                )))
                 .into_any_element()
         }
         AudioSpecimen::Knob => {
@@ -206,9 +206,9 @@ fn interactive_examples(specimen: AudioSpecimen, state: &AppState) -> AnyElement
                         .text_color(muted)
                         .child(format!("Value {value}")),
                 )
-                .child(to_element(
-                    specimen.examples(&RenderContext::new(&state.theme)),
-                ))
+                .child(to_element(specimen.examples(
+                    &crate::node_compat::preview_render_context(&state.theme),
+                )))
                 .into_any_element()
         }
         AudioSpecimen::XyPad => {
@@ -229,12 +229,14 @@ fn interactive_examples(specimen: AudioSpecimen, state: &AppState) -> AnyElement
                         .text_color(muted)
                         .child(format!("Position {value}")),
                 )
-                .child(to_element(
-                    specimen.examples(&RenderContext::new(&state.theme)),
-                ))
+                .child(to_element(specimen.examples(
+                    &crate::node_compat::preview_render_context(&state.theme),
+                )))
                 .into_any_element()
         }
-        _ => to_element(specimen.examples(&RenderContext::new(&state.theme))),
+        _ => {
+            to_element(specimen.examples(&crate::node_compat::preview_render_context(&state.theme)))
+        }
     }
 }
 
@@ -252,10 +254,12 @@ pub(crate) fn render(
         examples,
         SpecimenAxes::examples_only()
             .with_sizes(move |size, theme| {
-                to_element(specimen.size(size, &poodle_render::RenderContext::new(theme)))
+                to_element(specimen.size(size, &crate::node_compat::preview_render_context(theme)))
             })
             .with_densities(move |density, theme| {
-                to_element(specimen.density(density, &poodle_render::RenderContext::new(theme)))
+                to_element(
+                    specimen.density(density, &crate::node_compat::preview_render_context(theme)),
+                )
             }),
     )
 }
