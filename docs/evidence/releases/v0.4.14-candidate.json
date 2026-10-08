@@ -1,0 +1,31 @@
+{
+  "schema": "poodle.web-candidate-evidence.v1",
+  "version": "0.4.14",
+  "source_commit": "5e0594b0e70665548dc6fcec276bf4a834af40f5",
+  "base_commit": "35ea7ea969ef3d087d0849ab2992f5ff770c5b43",
+  "payload_commits": [
+    "3b4d0523f21a138db518f203d6ad7081c4658be7",
+    "ce30b0d646e24e9ad4894e9ed2ee2c72135c9106",
+    "f8a265248fc69c4fd022746dd4ae696199e6505b",
+    "c6431f10db1e09d82c3363f54e3f0fa6d5ae1908",
+    "35ea7ea969ef3d087d0849ab2992f5ff770c5b43"
+  ],
+  "publication_set": [
+    "@inflatable-cookie/poodle-core",
+    "@inflatable-cookie/poodle-svelte"
+  ],
+  "native_train_changed": true,
+  "operator_acceptance": "Tom approved cutting 0.4.14 once the Listbox focus-ring fix landed, 2026-10-08 (\"Yeah, cut when it lands\").",
+  "focused_evidence": {
+    "milestone_qa": "Queue project.qa.run ba656304 (effigy ci:fresh) on the base 35ea7ea96; recorded in the candidate PR when it completes. Previous milestone run d1b38bcd passed on 3b4d0523f.",
+    "native_check_gpui": "effigy check:gpui passed on 5e0594b0e.",
+    "native_regressions": "effigy regressions:native passed on 5e0594b0e: 387 passed, 0 failed (run id release-0.4.14-native).",
+    "native_ci_rust": "effigy ci:rust passed on 5e0594b0e.",
+    "native_consumer": "effigy release:gpui-consumer built a clean consumer against 5e0594b0e via a disposable local tag v0.4.14 with gpui-unofficial =1.22.0.",
+    "gpui_census": "effigy update:gpui-census recorded the passed selector at 5e0594b0e (177 rows, 176 admitted, 178 mounted receipts); test:gpui-census and check:gpui-census pass on c64d79d4f.",
+    "gpui_ax": "effigy test:gpui-ax passed on c64d79d4f (census-only change from 5e0594b0e): foreground proved, 0 failed reads.",
+    "frozen_lockfile": "effigy release:bump updated the bun.lock workspace slice, core ranges >=0.4.14 <0.5, every Cargo manifest and both GPUI locks; docs:lint passes.",
+    "bun_toolchain": "packageManager bun@1.4.2; CI installs through bun-version-file from package.json",
+    "diff_check": "clean"
+  }
+}
