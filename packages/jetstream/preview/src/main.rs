@@ -1553,9 +1553,8 @@ impl PreviewState {
     }
 }
 
-/// `--window-bounds` is the content-area rectangle in logical points. The
-/// titled frame extends above it by the native title-bar height, so callers
-/// tiling previews must leave that space free above the requested y position.
+/// `--window-bounds` is the outer frame rectangle in logical points. Titled
+/// windows reserve the native title-bar height inside the requested height.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct WindowBounds {
     x: i32,
@@ -1575,24 +1574,79 @@ struct CliArgs {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct WindowGeometry {
-    content_origin: Option<(i32, i32)>,
+    window_position: Option<(i32, i32)>,
     content_width: u32,
     content_height: u32,
 }
 
-fn window_geometry(bounds: Option<WindowBounds>) -> WindowGeometry {
+fn window_geometry(
+    bounds: Option<WindowBounds>,
+    titlebar_height: u32,
+) -> Result<WindowGeometry, String> {
     match bounds {
-        Some(bounds) => WindowGeometry {
-            content_origin: Some((bounds.x, bounds.y)),
-            content_width: bounds.width,
-            content_height: bounds.height,
-        },
-        None => WindowGeometry {
-            content_origin: None,
+        Some(bounds) => {
+            let content_height = bounds
+                .height
+                .checked_sub(titlebar_height)
+                .filter(|height| *height > 0)
+                .ok_or_else(|| {
+                    format!(
+                        "--window-bounds height must exceed the native title-bar height ({titlebar_height})"
+                    )
+                })?;
+            let titlebar_offset = i32::try_from(titlebar_height)
+                .map_err(|_| "native title-bar height exceeds the supported range".to_string())?;
+            // macOS winit positions the content area. Other desktop winit
+            // backends position the outer frame directly.
+            let y_offset = if cfg!(target_os = "macos") {
+                titlebar_offset
+            } else {
+                0
+            };
+            let window_y = bounds
+                .y
+                .checked_add(y_offset)
+                .ok_or_else(|| "--window-bounds y plus title-bar height overflows".to_string())?;
+
+            Ok(WindowGeometry {
+                // On macOS, move content down by the title bar; on other
+                // desktop targets, winit positions the requested outer frame.
+                window_position: Some((bounds.x, window_y)),
+                content_width: bounds.width,
+                content_height,
+            })
+        }
+        None => Ok(WindowGeometry {
+            window_position: None,
             content_width: 1280,
             content_height: 800,
-        },
+        }),
     }
+}
+
+#[cfg(target_os = "macos")]
+fn native_titlebar_height() -> u32 {
+    use objc2::MainThreadMarker;
+    use objc2_app_kit::{NSWindow, NSWindowStyleMask};
+    use objc2_foundation::{NSPoint, NSRect, NSSize};
+
+    let marker = MainThreadMarker::new().expect("preview setup runs on the AppKit thread");
+    let content_rect = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(100.0, 100.0));
+    let style = NSWindowStyleMask::Titled
+        | NSWindowStyleMask::Closable
+        | NSWindowStyleMask::Resizable
+        | NSWindowStyleMask::Miniaturizable;
+    let frame_rect = NSWindow::frameRectForContentRect_styleMask(content_rect, style, marker);
+
+    (frame_rect.size.height - content_rect.size.height).round() as u32
+}
+
+#[cfg(not(target_os = "macos"))]
+const TITLEBAR_HEIGHT_FALLBACK: u32 = 32;
+
+#[cfg(not(target_os = "macos"))]
+fn native_titlebar_height() -> u32 {
+    TITLEBAR_HEIGHT_FALLBACK
 }
 
 fn parse_window_bounds(value: &str) -> Result<WindowBounds, String> {
@@ -1705,8 +1759,8 @@ fn parse_cli_args(args: impl IntoIterator<Item = String>) -> Result<CliArgs, Str
                 })?);
             }
             "--window-bounds" => {
-                // x,y,w,h names the content rectangle. Callers tiling titled
-                // previews must leave the title-bar height free above y.
+                // x,y,w,h names the outer frame; titled windows reserve the
+                // title-bar height inside the requested height.
                 let value = args
                     .next()
                     .ok_or_else(|| "--window-bounds requires x,y,w,h".to_string())?;
@@ -1752,8 +1806,16 @@ fn main() {
     }
     let mut app = Some(app);
 
-    let geometry = window_geometry(cli.window_bounds);
-    if let Some((x, y)) = geometry.content_origin {
+    let titlebar_height = if cli.window_bounds.is_some() {
+        native_titlebar_height()
+    } else {
+        0
+    };
+    let geometry = window_geometry(cli.window_bounds, titlebar_height).unwrap_or_else(|message| {
+        eprintln!("{message}");
+        std::process::exit(2);
+    });
+    if let Some((x, y)) = geometry.window_position {
         // SAFETY: the preview sets placement before `Platform::run` starts its
         // event loop or creates any worker threads; Jetstream's platform reads
         // these supported configuration variables while creating its window.
@@ -1836,34 +1898,47 @@ mod cli_tests {
     }
 
     #[test]
-    fn window_bounds_select_the_content_rectangle() {
+    fn window_bounds_preserve_the_outer_frame_and_subtract_titlebar_from_content() {
         let cli = parse_cli_args([
             "--window-bounds".to_string(),
-            "-120,24,640,480".to_string(),
+            "-120,739,1552,701".to_string(),
         ])
-        .expect("valid content bounds");
+        .expect("valid outer frame bounds");
 
-        let geometry = window_geometry(cli.window_bounds);
+        let titlebar_height = 32;
+        let geometry = window_geometry(cli.window_bounds, titlebar_height)
+            .expect("frame leaves positive content height");
         assert_eq!(
             geometry,
             WindowGeometry {
-                content_origin: Some((-120, 24)),
-                content_width: 640,
-                content_height: 480,
+                window_position: Some((
+                    -120,
+                    739 + if cfg!(target_os = "macos") {
+                        titlebar_height as i32
+                    } else {
+                        0
+                    },
+                )),
+                content_width: 1552,
+                content_height: 669,
             }
         );
 
-        // Winit's titled outer frame extends above its content origin; the
-        // CLI rectangle stays content-sized and leaves that title bar above.
-        let titlebar_height = 32;
-        let (x, y) = geometry.content_origin.expect("explicit bounds have an origin");
+        let (x, y) = geometry
+            .window_position
+            .expect("explicit bounds have a position");
+        let frame_y = if cfg!(target_os = "macos") {
+            y - titlebar_height as i32
+        } else {
+            y
+        };
         let frame = (
             x,
-            y - titlebar_height,
+            frame_y,
             geometry.content_width,
             geometry.content_height + titlebar_height as u32,
         );
-        assert_eq!(frame, (-120, -8, 640, 512));
+        assert_eq!(frame, (-120, 739, 1552, 701));
     }
 
     #[test]
