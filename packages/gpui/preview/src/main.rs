@@ -1459,7 +1459,8 @@ struct CliArgs {
     screenshot: Option<String>,
     /// Render the selected specimen's Examples pane without preview chrome.
     specimen_capture: bool,
-    /// Initial window origin and size in logical points: x, y, width, height.
+    /// Content-area origin and size in logical points: x, y, width, height.
+    /// Titled frames extend above this rectangle by the native title-bar height.
     window_bounds: Option<[f32; 4]>,
     /// Machine-readable proof of the resolved capture axis.
     capture_receipt: Option<String>,
@@ -1512,6 +1513,40 @@ fn parse_window_bounds(value: &str) -> Result<[f32; 4], String> {
         return Err("--window-bounds width and height must be positive".to_string());
     }
     Ok([*x, *y, *width, *height])
+}
+
+/// AppKit's native frame extends upward from the content rectangle by the
+/// title bar height. Ask AppKit for the same titled, resizable window style
+/// used by the preview instead of baking a platform-specific value into the
+/// CLI geometry.
+fn native_titlebar_height() -> f32 {
+    use objc2::MainThreadMarker;
+    use objc2_app_kit::{NSWindow, NSWindowStyleMask};
+    use objc2_foundation::{NSPoint, NSRect, NSSize};
+
+    let marker = MainThreadMarker::new().expect("preview window setup runs on the AppKit thread");
+    let content_rect = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(100.0, 100.0));
+    let style = NSWindowStyleMask::Titled
+        | NSWindowStyleMask::Closable
+        | NSWindowStyleMask::Resizable
+        | NSWindowStyleMask::Miniaturizable;
+    let frame_rect = NSWindow::frameRectForContentRect_styleMask(content_rect, style, marker);
+
+    (frame_rect.size.height - content_rect.size.height) as f32
+}
+
+/// Convert the CLI content rectangle to GPUI's initial position. GPUI's
+/// AppKit backend places the frame top at this origin while keeping the size
+/// as the content size, so move only the frame origin above the requested
+/// content area. Capture mode has no title bar and bypasses this conversion.
+fn gpui_bounds_for_content_rect(
+    [x, y, width, height]: [f32; 4],
+    titlebar_height: f32,
+) -> Bounds<Pixels> {
+    Bounds::new(
+        point(px(x), px(y - titlebar_height)),
+        size(px(width), px(height)),
+    )
 }
 
 fn parse_motion_policy(value: &str) -> Result<MotionPolicy, String> {
@@ -1650,6 +1685,8 @@ fn parse_cli_args(args: &[String]) -> Result<CliArgs, String> {
                 i += 1;
             }
             "--window-bounds" => {
+                // x,y,w,h names the content rectangle. Callers tiling titled
+                // previews must leave the title-bar height free above y.
                 let Some(value) = args.get(i + 1) else {
                     eprintln!("--window-bounds requires x,y,w,h");
                     std::process::exit(2);
@@ -2534,8 +2571,15 @@ fn main() {
         } else {
             800.0
         };
-        let bounds = if let Some([x, y, width, height]) = cli.window_bounds {
-            Bounds::new(point(px(x), px(y)), size(px(width), px(height)))
+        let bounds = if let Some(content_rect) = cli.window_bounds {
+            if specimen_capture {
+                let [x, y, width, height] = content_rect;
+                // Capture windows have no title bar: preserve their established
+                // content/frame geometry exactly.
+                Bounds::new(point(px(x), px(y)), size(px(width), px(height)))
+            } else {
+                gpui_bounds_for_content_rect(content_rect, native_titlebar_height())
+            }
         } else {
             Bounds::centered(None, size(px(window_width), px(window_height)), cx)
         };
@@ -2754,7 +2798,7 @@ fn main() {
 }
 #[cfg(test)]
 mod window_bounds_tests {
-    use crate::parse_window_bounds;
+    use super::{gpui_bounds_for_content_rect, parse_window_bounds, point, px, size};
 
     #[test]
     fn window_bounds_parse_logical_position_and_size() {
@@ -2764,6 +2808,19 @@ mod window_bounds_tests {
         );
         assert!(parse_window_bounds("0,0,0,480").is_err());
         assert!(parse_window_bounds("0,0,640").is_err());
+    }
+
+    #[test]
+    fn window_bounds_place_the_content_rectangle_below_the_titlebar() {
+        let titlebar_height = 32.0;
+        let bounds = gpui_bounds_for_content_rect([-120.0, 24.0, 640.0, 480.0], titlebar_height);
+
+        // GPUI receives the frame origin and content size. Its native titled
+        // frame adds the title bar above that origin.
+        assert_eq!(bounds.origin, point(px(-120.0), px(-8.0)));
+        assert_eq!(bounds.size, size(px(640.0), px(480.0)));
+        assert_eq!(bounds.origin.y + px(titlebar_height), px(24.0));
+        assert_eq!(bounds.size.height + px(titlebar_height), px(512.0));
     }
 }
 

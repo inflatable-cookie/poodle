@@ -1553,6 +1553,9 @@ impl PreviewState {
     }
 }
 
+/// `--window-bounds` is the content-area rectangle in logical points. The
+/// titled frame extends above it by the native title-bar height, so callers
+/// tiling previews must leave that space free above the requested y position.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct WindowBounds {
     x: i32,
@@ -1568,6 +1571,28 @@ struct CliArgs {
     size: Option<ControlSize>,
     window_bounds: Option<WindowBounds>,
     motion_policy: MotionPolicy,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct WindowGeometry {
+    content_origin: Option<(i32, i32)>,
+    content_width: u32,
+    content_height: u32,
+}
+
+fn window_geometry(bounds: Option<WindowBounds>) -> WindowGeometry {
+    match bounds {
+        Some(bounds) => WindowGeometry {
+            content_origin: Some((bounds.x, bounds.y)),
+            content_width: bounds.width,
+            content_height: bounds.height,
+        },
+        None => WindowGeometry {
+            content_origin: None,
+            content_width: 1280,
+            content_height: 800,
+        },
+    }
 }
 
 fn parse_window_bounds(value: &str) -> Result<WindowBounds, String> {
@@ -1680,6 +1705,8 @@ fn parse_cli_args(args: impl IntoIterator<Item = String>) -> Result<CliArgs, Str
                 })?);
             }
             "--window-bounds" => {
+                // x,y,w,h names the content rectangle. Callers tiling titled
+                // previews must leave the title-bar height free above y.
                 let value = args
                     .next()
                     .ok_or_else(|| "--window-bounds requires x,y,w,h".to_string())?;
@@ -1725,11 +1752,8 @@ fn main() {
     }
     let mut app = Some(app);
 
-    let (window_x, window_y, window_width, window_height) =
-        cli.window_bounds.map_or((None, None, 1280, 800), |bounds| {
-            (Some(bounds.x), Some(bounds.y), bounds.width, bounds.height)
-        });
-    if let (Some(x), Some(y)) = (window_x, window_y) {
+    let geometry = window_geometry(cli.window_bounds);
+    if let Some((x, y)) = geometry.content_origin {
         // SAFETY: the preview sets placement before `Platform::run` starts its
         // event loop or creates any worker threads; Jetstream's platform reads
         // these supported configuration variables while creating its window.
@@ -1743,8 +1767,8 @@ fn main() {
     let config = PlatformConfig {
         window: WindowConfig {
             title: "Poodle — Jetstream Preview".to_string(),
-            width: window_width,
-            height: window_height,
+            width: geometry.content_width,
+            height: geometry.content_height,
             resizable: true,
             vsync: VSyncMode::Off,
         },
@@ -1774,7 +1798,8 @@ fn main() {
 #[cfg(test)]
 mod cli_tests {
     use super::{
-        MotionPolicy, WindowBounds, component_registry, parse_cli_args, parse_window_bounds,
+        MotionPolicy, WindowBounds, WindowGeometry, component_registry, parse_cli_args,
+        parse_window_bounds, window_geometry,
     };
 
     #[test]
@@ -1808,6 +1833,37 @@ mod cli_tests {
             }
         );
         assert!(parse_window_bounds("0,0,0,480").is_err());
+    }
+
+    #[test]
+    fn window_bounds_select_the_content_rectangle() {
+        let cli = parse_cli_args([
+            "--window-bounds".to_string(),
+            "-120,24,640,480".to_string(),
+        ])
+        .expect("valid content bounds");
+
+        let geometry = window_geometry(cli.window_bounds);
+        assert_eq!(
+            geometry,
+            WindowGeometry {
+                content_origin: Some((-120, 24)),
+                content_width: 640,
+                content_height: 480,
+            }
+        );
+
+        // Winit's titled outer frame extends above its content origin; the
+        // CLI rectangle stays content-sized and leaves that title bar above.
+        let titlebar_height = 32;
+        let (x, y) = geometry.content_origin.expect("explicit bounds have an origin");
+        let frame = (
+            x,
+            y - titlebar_height,
+            geometry.content_width,
+            geometry.content_height + titlebar_height as u32,
+        );
+        assert_eq!(frame, (-120, -8, 640, 512));
     }
 
     #[test]
