@@ -7,6 +7,42 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.4.13] - 2026-10-08
+
+`0.4.13` is a coordinated npm/web and native release with additive API only.
+
+### Added
+
+- **Keyboard equal-row layout.** `keyLayout="equal-rows"` gives every
+  semitone the same pitch-axis space, with `rowHeightPx` (default `16`) and
+  `scrollOffsetPx` (default `0`), so a vertical Keyboard stays aligned with a
+  scrolled piano-roll note grid. Drawing and pointer hit testing use the same
+  rows, including partly visible ones. Horizontal equal-rows gives equal
+  columns. `"piano"` stays the default. Svelte, React, `KeyboardSpec`
+  (`with_key_layout`, `with_row_height_px`, `with_scroll_offset_px`),
+  `poodle-render` and GPUI.
+- **`@inflatable-cookie/poodle-core/icons/geometry-realize`.** Test-support
+  `realize(state)` returns the SVG attributes for every icon-geometry state,
+  including reverse-midpoint, interruption and teardown. Poodle's own test
+  shells render through it; sibling test hosts can import it. It is not a
+  component.
+- **Native preview arguments.** The GPUI and Jetstream previews accept
+  `--window-bounds <x>,<y>,<w>,<h>`. The Jetstream preview accepts
+  `--component`, `--theme` and `--size`; an unknown component exits before a
+  window opens.
+
+### Fixed
+
+- **Jetstream preview compiles again** against current Poodle and Jetstream.
+  This is a preview repair only; Jetstream admission stays deferred.
+
+### Changed
+
+- **Web package dependency ranges.** Svelte and React require core
+  `>=0.4.13 <0.5`. Peer ranges stay unchanged.
+- **Cargo crates move to `0.4.13`** with internal path pins at the same exact
+  version.
+
 ## [0.4.12] - 2026-10-07
 
 `0.4.12` is the first coordinated release of both trains: the npm/web
@@ -801,6 +837,7 @@ supersedes `0.4.3`, which was never published.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.4.13]: docs/release-notes/0.4.13.md
 [0.4.12]: docs/release-notes/0.4.12.md
 [0.4.11]: docs/release-notes/0.4.11.md
 [0.4.10]: docs/release-notes/0.4.10.md
