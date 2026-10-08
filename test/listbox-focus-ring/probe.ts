@@ -1,3 +1,5 @@
+import { resolve } from "node:path";
+
 import { chromium, type Page } from "playwright";
 
 import { startPreviews, type PreviewServers } from "../visual/server";
@@ -49,6 +51,10 @@ async function run(servers: PreviewServers): Promise<void> {
       `${servers.urls.svelte}/?theme=eclipse&density=comfortable&controlSize=md#components/listbox`,
       { waitUntil: "domcontentloaded", timeout: 60_000 },
     );
+    // The preview's workspace package export points at core/dist, which can
+    // predate a local source edit. Load the exact stylesheet under test after
+    // the preview bundle so this probe always exercises the reviewed source.
+    await page.addStyleTag({ path: resolve(import.meta.dir, "../../packages/core/src/styles/listbox.css") });
 
     const cardList = page.getByRole("listbox", { name: "Library cards" });
     await cardList.waitFor({ state: "visible", timeout: 60_000 });
@@ -70,12 +76,29 @@ async function run(servers: PreviewServers): Promise<void> {
         { edge: "bottom", x: rect.left + rect.width / 2, y: rect.bottom - 2 },
         { edge: "left", x: rect.left + 2, y: rect.top + rect.height / 2 },
       ];
+      const ringPoints = [
+        { edge: "top", x: rect.left + rect.width / 2, y: rect.top - 1 },
+        { edge: "right", x: rect.right - 1, y: rect.top + rect.height / 2 },
+        { edge: "bottom", x: rect.left + rect.width / 2, y: rect.bottom - 1 },
+        { edge: "left", x: rect.left, y: rect.top + rect.height / 2 },
+      ];
+      const style = getComputedStyle(option);
       return {
         focused: document.activeElement === option && option.matches(":focus-visible"),
+        ring: {
+          position: style.position,
+          zIndex: style.zIndex,
+          outlineOffset: style.outlineOffset,
+          outlineWidth: style.outlineWidth,
+          outlineColor: style.outlineColor,
+        },
+        ringPoints,
         points: points.map(({ edge, x, y }) => {
           const target = document.elementFromPoint(x, y);
           return {
             edge,
+            x,
+            y,
             covered: target !== null && (target === option || option.contains(target)),
             target: target?.tagName.toLowerCase() ?? "none",
           };
@@ -83,8 +106,19 @@ async function run(servers: PreviewServers): Promise<void> {
       };
     });
     check("ArrowDown focuses the middle card option by keyboard", middle.focused);
+    check(
+      "probe applies the source inset and stacking rules",
+      middle.ring.position === "relative" && middle.ring.zIndex === "1" && middle.ring.outlineOffset === "-1px",
+      `position ${middle.ring.position}, z-index ${middle.ring.zIndex}, offset ${middle.ring.outlineOffset}`,
+    );
     for (const point of middle.points) {
       check(`${point.edge} edge of the focused card ring remains hit-testable`, point.covered, point.target);
+    }
+    const optionPixels = await screenshotPixels(page, middle.ringPoints);
+    const optionRingColor = rgbChannels(middle.ring.outlineColor);
+    for (const pixel of optionPixels) {
+      const visible = optionRingColor.every((channel, index) => Math.abs(pixel.rgba[index]! - channel) <= 28);
+      check(`${pixel.edge} edge of the focused option ring is visibly painted`, visible, `pixel ${pixel.rgba.slice(0, 3).join(",")}`);
     }
 
     // Add an empty root inside the real specimen frame. This exercises the
