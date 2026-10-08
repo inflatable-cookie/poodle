@@ -1198,6 +1198,15 @@
       "collections": []
     },
     {
+      "slug": "listbox",
+      "displayName": "Listbox",
+      "description": "Selectable list with host-rendered options and roving keyboard focus.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "composite",
+      "collections": []
+    },
+    {
       "slug": "list-card-counter",
       "displayName": "ListCardCounter",
       "description": "Compact icon-count item used in ListCard footer composition.",

@@ -175,6 +175,8 @@ export { Stepper, type StepperProps } from "./Stepper";
 export { Slider, type SliderProps } from "./Slider";
 export { ToggleGroup, type ToggleGroupProps } from "./ToggleGroup";
 export { Tree } from "./Tree";
+export { Listbox, type ListboxProps } from "./Listbox";
+export type { ListboxItem, ListboxOrientation, ListboxSelectionMode } from "@inflatable-cookie/poodle-core";
 export { TriStateSwitch, type TriStateSwitchProps } from "./TriStateSwitch";
 export { AgentChatInput, type AgentChatInputProps } from "./AgentChatInput";
 export { Meter, type MeterProps } from "./Meter";

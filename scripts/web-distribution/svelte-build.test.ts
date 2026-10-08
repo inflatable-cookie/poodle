@@ -155,7 +155,7 @@ void badSelectSnippet;
 
 describe("Svelte compiled distribution", () => {
   test("frozen roster and package exports match spec 070", () => {
-    expect(SHELL_ROSTER_NAMES).toHaveLength(176);
+    expect(SHELL_ROSTER_NAMES).toHaveLength(177);
     expect(rootRosterNames()).toHaveLength(171);
     expect([...MARKDOWN_COMPONENT_NAMES]).toEqual([
       "AgentMessage",

@@ -96,6 +96,7 @@ export const SHELL_ROSTER_NAMES = [
   "ListCardCounter",
   "ListContainer",
   "ListGrid",
+  "Listbox",
   "LogList",
   "MarkdownEditor",
   "MediaBrowsePanel",
@@ -200,7 +201,7 @@ export const MARKDOWN_COMPONENT_NAMES = [
  * `MarkdownRenderer` is a web-only companion to `MarkdownEditor`: it shares the
  * `./markdown` entry and the editor's private rendering path but has no native
  * counterpart, no direct `./MarkdownRenderer.svelte` entry, and no membership
- * in the 176-name native-boundary roster. It is inventoried here so the Svelte
+ * in the 177-name native-boundary roster. It is inventoried here so the Svelte
  * source/roster audit can still see it, and it is certified through the
  * web-only catalogue supplement and the installed `./markdown` smoke.
  */
@@ -210,7 +211,7 @@ export const INTERNAL_SVELTE_NAMES = ["DragDropProvider", "MenuSurface"] as cons
  * The CodeEditor engine lives behind dedicated `./editor` entries so root
  * consumers never load CodeMirror or its language chunks. `CodeEditor` is
  * deliberately absent from `SHELL_ROSTER_NAMES`: it must not join the root
- * barrel, the 176-name roster, or any successor denominator.
+ * barrel, the 177-name roster, or any successor denominator.
  */
 export const EDITOR_ENTRY_NAME = "editor";
 export const EDITOR_SVELTE_NAMES = ["CodeEditor"] as const;
@@ -219,7 +220,7 @@ export const EDITOR_SVELTE_NAMES = ["CodeEditor"] as const;
  * The rich-text engine lives behind dedicated `./rich-text` entries so root,
  * `./markdown`, and `./editor` consumers never load TipTap or ProseMirror.
  * `RichTextEditor` and `RichTextRenderer` are deliberately absent from
- * `SHELL_ROSTER_NAMES`: they must not join the root barrel, the 176-name
+ * `SHELL_ROSTER_NAMES`: they must not join the root barrel, the 177-name
  * roster, or any successor denominator.
  */
 export const RICH_TEXT_ENTRY_NAME = "rich-text";

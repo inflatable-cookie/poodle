@@ -539,6 +539,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "ListCard",
       "ListCardCounter",
       "ListGrid",
+      "Listbox",
       "Knob",
       "Keyboard",
       "Meter",

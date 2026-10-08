@@ -66,6 +66,7 @@ import ListCardSpecimen from "./ListCardSpecimen.svelte";
 import ListCardCounterSpecimen from "./ListCardCounterSpecimen.svelte";
 import ListContainerSpecimen from "./ListContainerSpecimen.svelte";
 import ListGridSpecimen from "./ListGridSpecimen.svelte";
+import ListboxSpecimen from "./ListboxSpecimen.svelte";
 import LicenceActivationSpecimen from "./LicenceActivationSpecimen.svelte";
 import LicenceSeatsSpecimen from "./LicenceSeatsSpecimen.svelte";
 import LicenceStatusSpecimen from "./LicenceStatusSpecimen.svelte";
@@ -259,6 +260,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "list-card-counter": ListCardCounterSpecimen,
   "list-container": ListContainerSpecimen,
   "list-grid": ListGridSpecimen,
+  listbox: ListboxSpecimen,
   "licence-activation": LicenceActivationSpecimen,
   "licence-seats": LicenceSeatsSpecimen,
   "licence-status": LicenceStatusSpecimen,

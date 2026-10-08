@@ -5126,6 +5126,43 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </ListGrid>`,
   },
 
+  listbox: {
+    props: [
+      { name: "items", type: "ListboxItem[]", default: "[]", description: "Stable option records with value, accessible label, and optional disabled flag." },
+      { name: "selectionMode", type: '"single" | "multiple"', default: '"single"', description: "Select one option or several." },
+      { name: "value", type: "string | null | undefined", default: "undefined", description: "Controlled selection in single mode." },
+      { name: "values", type: "string[] | undefined", default: "undefined", description: "Controlled selection in multiple mode." },
+      { name: "defaultValue", type: "string | null", default: "null", description: "Initial uncontrolled selection in single mode." },
+      { name: "defaultValues", type: "string[]", default: "[]", description: "Initial uncontrolled selection in multiple mode." },
+      { name: "orientation", type: '"vertical" | "horizontal"', default: '"vertical"', description: "Sets the one-dimensional arrow-key axis." },
+      { name: "disabled", type: "boolean", default: "false", description: "Disables the entire listbox." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible name for the listbox." },
+      { name: "ariaLabelledby", type: "string | null", default: "null", description: "ID of a visible listbox label." },
+      { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Selection request in single mode." },
+      { name: "onValuesChange", type: "((values: string[]) => void) | undefined", default: "undefined", description: "Selection request in multiple mode." },
+      { name: "onActivate", type: "((value: string) => void) | undefined", default: "undefined", description: "Called by Enter or double-click on an enabled option." },
+      { name: "children", type: "Snippet<[item, selected, focused]> | undefined", default: "undefined", description: "Host-rendered option content; interactive descendants are not allowed." },
+    ],
+    slots: [
+      { name: "children", description: "Receives each item, its selected state, and its focused state." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { Listbox, type ListboxItem } from "@inflatable-cookie/poodle-svelte";
+
+  const items: ListboxItem[] = [
+    { value: "mix-a", label: "Mix A" },
+    { value: "mix-b", label: "Mix B" },
+  ];
+</script>
+
+<Listbox {items} selectionMode="multiple" ariaLabel="Saved mixes" onValuesChange={saveSelection}>
+  {#snippet children(item, selected, focused)}
+    <div data-selected={selected} data-focused={focused}>{item.label}</div>
+  {/snippet}
+</Listbox>`,
+  },
+
   text: {
     props: [
       { name: "as", type: '"p" | "span" | "div"', default: '"p"', description: "Rendered element." },

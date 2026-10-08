@@ -212,6 +212,19 @@ export {
 } from "./menu";
 
 export {
+  listboxEnabledItems,
+  listboxInitialFocus,
+  listboxTransition,
+  type ListboxContext,
+  type ListboxEffect,
+  type ListboxEvent,
+  type ListboxItem,
+  type ListboxOrientation,
+  type ListboxResult,
+  type ListboxSelectionMode,
+} from "./listbox";
+
+export {
   modalTransition,
   type ModalState,
   type ModalContext,

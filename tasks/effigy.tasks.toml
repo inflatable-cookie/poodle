@@ -267,6 +267,9 @@
 # startup, and process/port cleanup. Does not touch live ignored output.
 "test:preview-preflight" = "bun test scripts/web-distribution/preview-distribution-preflight.test.ts test/visual/server.test.ts"
 "test:core" = "bun run --cwd packages/core test"
+# Focused shared-core behavior proof for the Listbox composite; keep worker
+# validation narrow instead of running the full core unit suite.
+"test:core-listbox" = "bun test --timeout 120000 packages/core/test/listbox.test.ts"
 "test:core-icon-geometry-realize" = [
   { run = "bun test --timeout 120000 packages/core/test/icon-geometry-realize.test.ts" },
   { run = "bun test --timeout 120000 --test-name-pattern 'geometry realization support is exported for sibling test hosts' scripts/web-distribution/core-build.test.ts" },
