@@ -163,7 +163,7 @@
 # unresolved path error. Poodle does not vendor Jetstream.
 "jetstream:build" = "bun scripts/jetstream-build.ts"
 "check:jetstream-preview" = "cargo check -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
-"jetstream:run" = "cargo run -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
+"jetstream:run" = "cargo run -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml -- {args}"
 "jetstream:test" = "cd packages/jetstream/adapter && cargo test"
 "jetstream:preview" = [{ task = "jetstream:run" }]
 
