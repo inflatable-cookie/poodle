@@ -608,13 +608,22 @@
 
 # Type-checks the Svelte preview workspace — specimens, scripts, and generated
 # catalogue artifacts that install-smoke and components never reach.
-"check:svelte-preview" = "bunx svelte-check --workspace packages/svelte/preview --tsconfig ./tsconfig.json --threshold error"
+# Pinned to the last-known-good 4.7.5 for the reason on `check:svelte-components`.
+"check:svelte-preview" = "bunx svelte-check@4.7.5 --workspace packages/svelte/preview --tsconfig ./tsconfig.json --threshold error"
 
 # Type-checks the 165 shipped components. Until this existed, `check:svelte`
 # only covered `install-smoke` -- 4 files, reported as "COMPLETED 1 FILES" --
 # so nothing in `packages/svelte/components/src` was ever type-checked, and a
 # consumer's own type-check found a Poodle error before Poodle did.
-"check:svelte-components" = "bunx svelte-check --workspace packages/svelte/components --tsconfig ./tsconfig.json --threshold error"
+#
+# svelte-check is pinned here because bare `bunx svelte-check` resolves the
+# newest release, so the gate's verdict depends on publish-day state. 4.7.7
+# (published 2026-10-16) reports "Expected 0 type arguments, but got 1" for
+# every generic `$props<T>()` in the component test harnesses -- a diagnostic
+# 4.7.5 does not emit, against the same tree and the same pinned `svelte` and
+# `typescript`. That turned the required web lane red on main's own sources.
+# Move the pin only on evidence that the release type-checks generics again.
+"check:svelte-components" = "bunx svelte-check@4.7.5 --workspace packages/svelte/components --tsconfig ./tsconfig.json --threshold error"
 
 # Core strict type gate. `packages/core/tsconfig.json` includes `src` and
 # `test`, so new modules and test fixtures are checked. Self-contained: core's
