@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
 /** Build a clean downstream GPUI consumer pinned to this commit's local tag. */
+// PENDING OXIDE ONE-USE WORKSPACE SUPPORT: stays on raw Cargo. The consumer is a fresh
+// one-use workspace; Oxide's cold one-use slot churn and its permanent-drive
+// auto-adoption (it refuses a target outside a Git work tree) change the result.
+// Dogfood finding, see working-rules.md#validation.
 
 import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";

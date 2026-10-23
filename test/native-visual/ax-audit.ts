@@ -137,7 +137,7 @@ if (screenIsLocked()) {
 
 const previewPath = path.join(repoRoot, PREVIEW);
 if (!existsSync(previewPath)) {
-  console.error(`preview binary missing: ${PREVIEW}\nbuild it first (cargo build in that crate)`);
+  console.error(`preview binary missing: ${PREVIEW}\nbuild it first (effigy jetstream:build)`);
   process.exit(1);
 }
 

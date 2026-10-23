@@ -100,3 +100,15 @@ Run validation through Effigy selectors, not raw `cargo`, `bun` or `vitest`.
 Kill only processes you started, by PID; never `pkill -f` or `killall`. Run
 `git diff --check` before opening a PR. The full rules are in
 [working rules](docs/knowledge/contracts/working-rules.md#validation).
+
+<!-- oxide:begin -->
+## Rust commands: use `oxide`
+
+- Write `oxide` wherever you would write `cargo`: `oxide check`, `oxide test`, `oxide run -- <args>`, `oxide add <crate>`.
+- Profiles: `quick` (default), `--profile debug` for a debugger, `--release`. Oxide places build output, so it refuses `--target-dir`.
+- A tool that runs Cargo itself (Tauri CLI, npm or bun scripts): `oxide exec -- <command>`.
+- A `waiting for …` line means another build holds a slot; let it wait. `oxide status` shows the pool, slots and waits.
+- Use `oxide clean`, not `cargo clean`.
+
+Managed by `oxide init`; edits between these markers are replaced.
+<!-- oxide:end -->

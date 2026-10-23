@@ -41,7 +41,26 @@
 # remains. g14-b004 adds machine-interface targets (select-only, like the
 # shell) from packages/contracts/headless/machine-interfaces.json into the
 # core and headless generated/machines/ directories.
+# Rust selectors run `scripts/rust-driver.sh`: `oxide` locally, `cargo` under
+# GITHUB_ACTIONS=true. Each main Rust selector has a `:cargo` sibling that runs
+# plain Cargo. The routes that stay raw, and the escapes, are listed in
+# working-rules.md#validation.
 "ir:build" = [
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-shell packages/codegen/fixtures/shell-model.json" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-specimens packages/codegen/fixtures/specimens-model.json" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/synthetic-model.json --out packages/codegen/generated" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/svelte/preview/src --target shell-scene" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/react/preview/src --target shell-scene" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/gpui/preview/src --target shell-rust" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/jetstream/preview/src --target shell-rust" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --machine-interfaces packages/contracts/headless/machine-interfaces.json --out packages/core/src --target machine-ts" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --machine-interfaces packages/contracts/headless/machine-interfaces.json --out packages/contracts/headless/src --target machine-rust" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/svelte/preview/src --target specimen-ts" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/react/preview/src --target specimen-ts" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/gpui/preview/src --target specimen-rust" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/jetstream/preview/src --target specimen-rust" },
+]
+"ir:build:cargo" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-shell packages/codegen/fixtures/shell-model.json" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-specimens packages/codegen/fixtures/specimens-model.json" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/synthetic-model.json --out packages/codegen/generated" },
@@ -57,6 +76,21 @@
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/jetstream/preview/src --target specimen-rust" },
 ]
 "ir:check" = [
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-shell packages/codegen/fixtures/shell-model.json --check" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-specimens packages/codegen/fixtures/specimens-model.json --check" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/synthetic-model.json --out packages/codegen/generated --check" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/svelte/preview/src --target shell-scene --check" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/react/preview/src --target shell-scene --check" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/gpui/preview/src --target shell-rust --check" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/jetstream/preview/src --target shell-rust --check" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --machine-interfaces packages/contracts/headless/machine-interfaces.json --out packages/core/src --target machine-ts --check" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --machine-interfaces packages/contracts/headless/machine-interfaces.json --out packages/contracts/headless/src --target machine-rust --check" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/svelte/preview/src --target specimen-ts --check" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/react/preview/src --target specimen-ts --check" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/gpui/preview/src --target specimen-rust --check" },
+  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/jetstream/preview/src --target specimen-rust --check" },
+]
+"ir:check:cargo" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-shell packages/codegen/fixtures/shell-model.json --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-specimens packages/codegen/fixtures/specimens-model.json --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/synthetic-model.json --out packages/codegen/generated --check" },
@@ -73,12 +107,24 @@
 ]
 
     "catalogue:build" = [
+      { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/svelte/preview/src --target catalogue-ts" },
+      { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/react/preview/src --target catalogue-ts" },
+      { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/gpui/preview/src --target catalogue-rust" },
+      { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/jetstream/preview/src --target catalogue-rust" },
+    ]
+    "catalogue:build:cargo" = [
       { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/svelte/preview/src --target catalogue-ts" },
       { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/react/preview/src --target catalogue-ts" },
       { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/gpui/preview/src --target catalogue-rust" },
       { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/jetstream/preview/src --target catalogue-rust" },
     ]
     "catalogue:check" = [
+      { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/svelte/preview/src --target catalogue-ts --check" },
+      { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/react/preview/src --target catalogue-ts --check" },
+      { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/gpui/preview/src --target catalogue-rust --check" },
+      { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/jetstream/preview/src --target catalogue-rust --check" },
+    ]
+    "catalogue:check:cargo" = [
       { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/svelte/preview/src --target catalogue-ts --check" },
       { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/react/preview/src --target catalogue-ts --check" },
       { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/gpui/preview/src --target catalogue-rust --check" },
@@ -104,14 +150,16 @@
 # tokens are accepted and dropped, and the whole target runs.
 # Per-test timeout is the harness `TEST_BOUND` in headless_driver.rs (libtest
 # thread name). A stuck wait fails by name instead of wedging the run.
-"regressions:native" = { run = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions {args}", env = { POODLE_NUCLEUS_RECEIPT_DIR = "{repo}/target/nucleus-receipts" } }
+"regressions:native" = { run = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions {args}", env = { POODLE_NUCLEUS_RECEIPT_DIR = "{repo}/target/nucleus-receipts" } }
+"regressions:native:cargo" = { run = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions {args}", env = { POODLE_NUCLEUS_RECEIPT_DIR = "{repo}/target/nucleus-receipts" } }
 # Headless native specimen probe (g15.026): mounts the production GPUI
 # `PreviewRoot` on the in-memory test platform and constructs all 174 portable
 # catalogue routes at 768px, asserting each paints a real specimen card (never
 # the fallback) and that every advertised Sizes/Densities tab opens its pane
 # through real pointer input. Construction evidence only — no visual,
 # interaction, or cross-runtime parity claim.
-"probe:gpui-specimens" = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview specimen_probe"
+"probe:gpui-specimens" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview specimen_probe"
+"probe:gpui-specimens:cargo" = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview specimen_probe"
 # g16.005 window capture smoke — HEADLESS. Builds the `poodle-window-capture`
 # target, runs its own unit tests (the activation-boundary source check, the
 # device-size policy, the frontmost-application rule, publish atomicity), and
@@ -154,19 +202,27 @@
 "react:reports" = "bun run --cwd packages/react/preview reports"
 
 # GPUI native preview (macOS)
-"gpui:build" = "cargo build -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
-"gpui:run" = "cargo run -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview -- {args}"
-"gpui:test" = "cargo test -p poodle-gpui --manifest-path packages/gpui/adapter/Cargo.toml"
+"gpui:build" = "sh scripts/rust-driver.sh build -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
+"gpui:build:cargo" = "cargo build -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
+"gpui:run" = "sh scripts/rust-driver.sh run -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview -- {args}"
+"gpui:run:cargo" = "cargo run -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview -- {args}"
+"gpui:test" = "sh scripts/rust-driver.sh test -p poodle-gpui --manifest-path packages/gpui/adapter/Cargo.toml"
+"gpui:test:cargo" = "cargo test -p poodle-gpui --manifest-path packages/gpui/adapter/Cargo.toml"
 "gpui:preview" = [{ task = "gpui:run" }]
+"gpui:preview:cargo" = [{ task = "gpui:run:cargo" }]
 
 # Jetstream native preview (game engine)
 # Preflight names a missing or stale sibling checkout instead of cargo's
 # unresolved path error. Poodle does not vendor Jetstream.
 "jetstream:build" = "bun scripts/jetstream-build.ts"
-"check:jetstream-preview" = "cargo check -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
-"jetstream:run" = "cargo run -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml -- {args}"
-"jetstream:test" = "cd packages/jetstream/adapter && cargo test"
+"check:jetstream-preview" = "sh scripts/rust-driver.sh check -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
+"check:jetstream-preview:cargo" = "cargo check -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
+"jetstream:run" = "sh scripts/rust-driver.sh run -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml -- {args}"
+"jetstream:run:cargo" = "cargo run -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml -- {args}"
+"jetstream:test" = "sh scripts/rust-driver.sh test --manifest-path packages/jetstream/adapter/Cargo.toml"
+"jetstream:test:cargo" = "cargo test --manifest-path packages/jetstream/adapter/Cargo.toml"
 "jetstream:preview" = [{ task = "jetstream:run" }]
+"jetstream:preview:cargo" = [{ task = "jetstream:run:cargo" }]
 
 # Reports
 "report:parity" = [
@@ -197,6 +253,10 @@
 # backend, passing GPUI values across the boundary both ways. A different
 # GPUI source or version in Poodle gives the crates different identities and
 # this stops compiling. Includes a negative control. Headless; no window.
+# PENDING OXIDE ONE-USE WORKSPACE SUPPORT: stays on raw Cargo. The consumer is a fresh
+# one-use workspace; Oxide's cold one-use slot churn and its permanent-drive
+# auto-adoption (it refuses a target outside a Git work tree) change the result.
+# Dogfood finding, see working-rules.md#validation.
 "drift:gpui-consumer-identity" = "bun test/consumer-dual-dependency/run.ts"
 # g18.032 / spec 071: changed-range admission and archive certification are
 # separate selectors. The npm certificate runs both and is the only web-release
@@ -211,6 +271,10 @@
   { task = "catalogue:build" },
 ]
 # Build a disposable GPUI downstream crate from a clean local bare tag of HEAD.
+# PENDING OXIDE ONE-USE WORKSPACE SUPPORT: stays on raw Cargo. The consumer is a fresh
+# one-use workspace; Oxide's cold one-use slot churn and its permanent-drive
+# auto-adoption (it refuses a target outside a Git work tree) change the result.
+# Dogfood finding, see working-rules.md#validation.
 "release:gpui-consumer" = "bun scripts/gpui-consumer-smoke.ts"
 # Certificate mode builds and packs exactly once and writes the candidate
 # identity manifest into POODLE_WEB_PACK_INSTALL_ARCHIVE_OUT.
@@ -288,7 +352,17 @@
 "check:web-pack-install-roster" = "bunx tsc --ignoreConfig --noEmit --strict --target ES2022 --module ESNext --moduleResolution Bundler --types node test/package-install/roster.ts"
 # Compatibility selector for existing downstream handoffs and historical docs.
 "test:svelte-pack-install" = [{ task = "test:web-pack-install" }]
+# cargo deny runs through scripts/rust-driver.sh: `oxide deny` locally, `cargo` under
+# GITHUB_ACTIONS=true. The `:cargo` sibling runs raw Cargo.
 "audit:security" = [
+  { run = "bun scripts/audit-repository-security.ts" },
+  { run = "bun audit" },
+  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/render/Cargo.toml check advisories sources" },
+  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/gpui/node-backend/Cargo.toml check advisories sources" },
+  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/gpui/adapter/Cargo.toml check advisories sources" },
+  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/jetstream/adapter/Cargo.toml check advisories sources" },
+]
+"audit:security:cargo" = [
   { run = "bun scripts/audit-repository-security.ts" },
   { run = "bun audit" },
   { run = "cargo deny --manifest-path packages/render/Cargo.toml check advisories sources" },
@@ -297,7 +371,16 @@
   { run = "cargo deny --manifest-path packages/jetstream/adapter/Cargo.toml check advisories sources" },
 ]
 "test:repository-security" = "bun test scripts/audit-repository-security.test.ts"
+# cargo deny runs through scripts/rust-driver.sh: `oxide deny` locally, `cargo` under
+# GITHUB_ACTIONS=true. The `:cargo` sibling runs raw Cargo.
 "audit:licenses" = [
+  { run = "bun scripts/audit-license-compliance.ts" },
+  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/render/Cargo.toml check licenses" },
+  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/gpui/node-backend/Cargo.toml check licenses" },
+  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/gpui/adapter/Cargo.toml check licenses" },
+  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/jetstream/adapter/Cargo.toml check licenses" },
+]
+"audit:licenses:cargo" = [
   { run = "bun scripts/audit-license-compliance.ts" },
   { run = "cargo deny --manifest-path packages/render/Cargo.toml check licenses" },
   { run = "cargo deny --manifest-path packages/gpui/node-backend/Cargo.toml check licenses" },
@@ -529,6 +612,10 @@
 # the module is plain TypeScript with no DOM.
 "test:visual-fixtures" = [
   { run = "bun test test/visual/fixtures/button-visual-inventory.test.ts" },
+  { run = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/gpui/preview/Cargo.toml --test visual_fixture_inventory" },
+]
+"test:visual-fixtures:cargo" = [
+  { run = "bun test test/visual/fixtures/button-visual-inventory.test.ts" },
   { run = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --test visual_fixture_inventory" },
 ]
 
@@ -581,8 +668,10 @@
 # Projects every specimen's accessibility tree headlessly — no window, no
 # display, all 132 specimens. Complements test:jetstream-ax, which proves the
 # tree reaches macOS but only for the screen the preview is showing.
-"test:jetstream-a11y" = "cargo run --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin a11y"
-"jetstream-a11y:roles" = "cargo run --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin a11y -- --roles"
+"test:jetstream-a11y" = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin a11y"
+"test:jetstream-a11y:cargo" = "cargo run --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin a11y"
+"jetstream-a11y:roles" = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin a11y -- --roles"
+"jetstream-a11y:roles:cargo" = "cargo run --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin a11y -- --roles"
 # Contract ARIA roles vs the roles Jetstream actually projects — the
 # accessibility counterpart of contract-spec-drift.
 #
@@ -741,6 +830,17 @@
 # Pure contract crates only — each is a separate crate tree, all cross-platform
 # (no gpui/game_ui deps). Native component crates are covered locally/nightly.
 "test:contracts" = [
+  { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/headless/Cargo.toml" },
+  { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/markdown/Cargo.toml" },
+  { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/components/Cargo.toml" },
+  { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/layout/Cargo.toml" },
+  { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/style/Cargo.toml" },
+  { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/events/Cargo.toml" },
+  { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/adapter/Cargo.toml" },
+  { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/tokens/Cargo.toml" },
+  { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/node/Cargo.toml" },
+]
+"test:contracts:cargo" = [
   { run = "cargo test --manifest-path packages/contracts/headless/Cargo.toml" },
   { run = "cargo test --manifest-path packages/contracts/markdown/Cargo.toml" },
   { run = "cargo test --manifest-path packages/contracts/components/Cargo.toml" },
@@ -753,8 +853,10 @@
 ]
 # Listbox's Rust machine mirror has an isolated contract suite so native task
 # validation does not need to run the unrelated contract crates above.
-"test:headless-listbox" = "cargo test --quiet --manifest-path packages/contracts/headless/Cargo.toml listbox::tests"
-"test:listbox-spec" = "cargo test --quiet --manifest-path packages/contracts/components/Cargo.toml listbox::tests"
+"test:headless-listbox" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/contracts/headless/Cargo.toml listbox::tests"
+"test:headless-listbox:cargo" = "cargo test --quiet --manifest-path packages/contracts/headless/Cargo.toml listbox::tests"
+"test:listbox-spec" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/contracts/components/Cargo.toml listbox::tests"
+"test:listbox-spec:cargo" = "cargo test --quiet --manifest-path packages/contracts/components/Cargo.toml listbox::tests"
 # Fails if the working tree is dirty. Belongs at the END of any gate that
 # runs a write-mode generator.
 #
@@ -831,7 +933,8 @@
   { task = "gate:clean" },
 ]
 # Planted GENERATOR_VERSION restamp; ir:check is the committed-tree gate on ci:rust.
-"test:codegen-stamp" = "cargo test --quiet --manifest-path packages/codegen/Cargo.toml --test emission check_detects_stale_generator_version_stamp -- --exact"
+"test:codegen-stamp" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/codegen/Cargo.toml --test emission check_detects_stale_generator_version_stamp -- --exact"
+"test:codegen-stamp:cargo" = "cargo test --quiet --manifest-path packages/codegen/Cargo.toml --test emission check_detects_stale_generator_version_stamp -- --exact"
 # poodle#072: the rustfmt gate over every Poodle Rust crate. `cargo fmt` cannot
 # be the gate: there is no root workspace, and stable rustfmt has no per-path
 # exclusion (`ignore` in rustfmt.toml is nightly-only), while rustfmt recurses
@@ -890,8 +993,14 @@
 # The pixel gate is `test:native-visual`, which does need a window and is
 # LOCAL-ONLY; the scheduled workflow (ci-native.yml) checks gpui only.
 "check:gpui" = [
-  { run = "cargo check -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml" },
+  { run = "sh scripts/rust-driver.sh check -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml" },
   { task = "test:gpui-preview" },
+  { run = "sh scripts/rust-driver.sh test -p poodle-render --manifest-path packages/render/Cargo.toml" },
+  { run = "sh scripts/rust-driver.sh test -p poodle-gpui-node-backend --manifest-path packages/gpui/node-backend/Cargo.toml" },
+]
+"check:gpui:cargo" = [
+  { run = "cargo check -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml" },
+  { task = "test:gpui-preview:cargo" },
   { run = "cargo test -p poodle-render --manifest-path packages/render/Cargo.toml" },
   { run = "cargo test -p poodle-gpui-node-backend --manifest-path packages/gpui/node-backend/Cargo.toml" },
 ]
@@ -903,15 +1012,18 @@
 # keeping every bin unit test on one selector instead of a filter list that
 # new modules would silently escape. Runtime recorded 2026-09-30 (warm
 # checkout): 8s wall, 1.6s of test time.
-"test:gpui-preview" = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview"
-"test:jetstream-preview" = "cargo test --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin poodle-jetstream-preview"
+"test:gpui-preview" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview"
+"test:gpui-preview:cargo" = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview"
+"test:jetstream-preview" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin poodle-jetstream-preview"
+"test:jetstream-preview:cargo" = "cargo test --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin poodle-jetstream-preview"
 # `check:jetstream` and `test:jetstream` are gone: they drove
 # `poodle-jetstream-components`, deleted in `ee704699` when Jetstream moved onto
 # `poodle-render` nodes. The render probes they ran live in
 # `cargo test -p poodle-render`, which `check:gpui` runs.
 # The adapter crates cover theme/token resolution, layout mapping, and their
 # direct manifest claims independently of the shared renderer.
-"test:jetstream-adapter" = "cargo test -p poodle-jetstream --manifest-path packages/jetstream/adapter/Cargo.toml"
+"test:jetstream-adapter" = "sh scripts/rust-driver.sh test -p poodle-jetstream --manifest-path packages/jetstream/adapter/Cargo.toml"
+"test:jetstream-adapter:cargo" = "cargo test -p poodle-jetstream --manifest-path packages/jetstream/adapter/Cargo.toml"
 # The native presentation cascade (architecture 010, g15.043): component specs
 # keep size/density omission, public renderers take RenderContext rather than
 # a bare ThemeProvider, and the GPUI preview never regains a passthrough or

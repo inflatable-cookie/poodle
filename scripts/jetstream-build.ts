@@ -84,8 +84,8 @@ if (import.meta.main) {
       process.exit(result.status);
     }
     const cargo = spawnSync(
-      "cargo",
-      ["build", "-p", "poodle-jetstream-preview", "--manifest-path", join(root, PREVIEW_MANIFEST)],
+      "sh",
+      [join(root, "scripts/rust-driver.sh"), "build", "-p", "poodle-jetstream-preview", "--manifest-path", join(root, PREVIEW_MANIFEST)],
       { cwd: root, stdio: "inherit" },
     );
     if (cargo.status !== 0) {

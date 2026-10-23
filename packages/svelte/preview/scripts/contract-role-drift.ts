@@ -91,7 +91,7 @@ function contractRoles(slug: string): Set<string> {
 }
 
 const censusRaw = Bun.spawnSync(
-  ["cargo", "run", "--quiet", "--bin", "a11y", "--", "--json"],
+  ["sh", path.join(repoRoot, "scripts/rust-driver.sh"), "run", "--quiet", "--bin", "a11y", "--", "--json"],
   { cwd: path.join(repoRoot, "packages/jetstream/preview"), stdout: "pipe", stderr: "pipe" },
 );
 if (!censusRaw.success) {

@@ -394,3 +394,51 @@ on `ci:rust`, and
 `ir:check` is the committed-tree gate. The parity ledger's `Updated` date is
 derived from Nucleus V1 lab-run evidence; reproduction compares the body, not
 that header line.
+
+
+### Rust selectors and Oxide
+
+Every Rust build, check, test, fetch, run and `cargo deny` in Poodle goes
+through `scripts/rust-driver.sh`. It runs `oxide` locally and `cargo` under
+`GITHUB_ACTIONS=true`, because the CI runners have no Oxide. The Effigy
+selectors call it directly, and so do the Bun and sh scripts that spawn Cargo
+themselves: the Jetstream build, the GPUI capture and AX scripts, the Jetstream
+census and snap sweep, the native-visual capture, the bootstrap fetch and the
+button-comparison capture. A missing local `oxide` fails and names the escapes.
+It never falls back to Cargo silently.
+
+Escapes to plain Cargo, for when `oxide` is broken on a developer machine:
+
+- each main Rust selector has a `:cargo` sibling that runs plain Cargo:
+  `ir:build`, `ir:check`, `catalogue:build`, `catalogue:check`,
+  `regressions:native`, `probe:gpui-specimens`, `gpui:build`, `gpui:run`,
+  `gpui:test`, `gpui:preview`, `check:jetstream-preview`, `jetstream:run`,
+  `jetstream:test`, `jetstream:preview`, `test:visual-fixtures`,
+  `test:jetstream-a11y`, `jetstream-a11y:roles`, `test:contracts`,
+  `test:headless-listbox`, `test:listbox-spec`, `test:codegen-stamp`,
+  `check:gpui`, `test:gpui-preview`, `test:jetstream-preview`,
+  `test:jetstream-adapter`, `audit:security` and `audit:licenses`;
+- script-owned selectors have no sibling. Run them with
+  `POODLE_RUST_DRIVER=cargo` set in the environment.
+
+The routes that stay raw `cargo`, each with its reason:
+
+- Pending one-use workspace support (`PENDING OXIDE ONE-USE WORKSPACE SUPPORT`
+  in each file): `drift:gpui-consumer-identity`
+  (`test/consumer-dual-dependency/run.ts`) and `release:gpui-consumer`
+  (`scripts/gpui-consumer-smoke.ts`). Each builds a private consumer in a fresh
+  temp directory. Cold one-use slot churn and Oxide's permanent-drive
+  auto-adoption (which refuses a target outside a Git work tree) change the
+  result, so they stay on Cargo until Oxide supports one-use workspaces.
+- CI runners under `GITHUB_ACTIONS=true`: the driver runs `cargo` there
+  because the runners have no Oxide. This is a genuine exception.
+- `:cargo` siblings and the `POODLE_RUST_DRIVER=cargo` escape, which stay until
+  Effigy v0.15 is formally released.
+
+There are no container or VM guest builds, no Queue warm-merge hooks, and no
+test whose subject is Cargo itself in this repository.
+
+Native tests find sibling binaries through `env!("CARGO_BIN_EXE_*")`. No
+Poodle test uses `current_exe()`. Final binaries stay in `target/debug/`, so
+scripts that read them there still work. `oxide status` shows the slot and
+pool that served a build.
