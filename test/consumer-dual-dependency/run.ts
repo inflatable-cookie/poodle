@@ -22,10 +22,10 @@ import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:f
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
-// Stays on raw Cargo: each consumer lives in a fresh temp directory outside any
-// Git work tree, and Oxide's permanent-drive auto-adoption refuses that target
-// ("Git could not confirm this checkout's work tree"). That changes the result,
-// so Oxide is not used here. Dogfood finding, see working-rules.md#validation.
+// PENDING OXIDE ONE-USE WORKSPACE SUPPORT: stays on raw Cargo. The consumer is a fresh
+// one-use workspace; Oxide's cold one-use slot churn and its permanent-drive
+// auto-adoption (it refuses a target outside a Git work tree) change the result.
+// Dogfood finding, see working-rules.md#validation.
 const HERE = new URL(".", import.meta.url).pathname;
 const REPO = resolve(HERE, "..", "..");
 const SOURCE = join(HERE, "consumer");

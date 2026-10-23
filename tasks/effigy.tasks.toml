@@ -253,8 +253,10 @@
 # backend, passing GPUI values across the boundary both ways. A different
 # GPUI source or version in Poodle gives the crates different identities and
 # this stops compiling. Includes a negative control. Headless; no window.
-# Stays on raw Cargo (dogfood finding): the consumer lives in a temp dir outside any
-# Git work tree, and Oxide refuses to adopt its target there (working-rules.md#validation).
+# PENDING OXIDE ONE-USE WORKSPACE SUPPORT: stays on raw Cargo. The consumer is a fresh
+# one-use workspace; Oxide's cold one-use slot churn and its permanent-drive
+# auto-adoption (it refuses a target outside a Git work tree) change the result.
+# Dogfood finding, see working-rules.md#validation.
 "drift:gpui-consumer-identity" = "bun test/consumer-dual-dependency/run.ts"
 # g18.032 / spec 071: changed-range admission and archive certification are
 # separate selectors. The npm certificate runs both and is the only web-release
@@ -269,8 +271,10 @@
   { task = "catalogue:build" },
 ]
 # Build a disposable GPUI downstream crate from a clean local bare tag of HEAD.
-# Stays on raw Cargo (dogfood finding): the consumer lives in a temp dir outside any
-# Git work tree, and Oxide refuses to adopt its target there (working-rules.md#validation).
+# PENDING OXIDE ONE-USE WORKSPACE SUPPORT: stays on raw Cargo. The consumer is a fresh
+# one-use workspace; Oxide's cold one-use slot churn and its permanent-drive
+# auto-adoption (it refuses a target outside a Git work tree) change the result.
+# Dogfood finding, see working-rules.md#validation.
 "release:gpui-consumer" = "bun scripts/gpui-consumer-smoke.ts"
 # Certificate mode builds and packs exactly once and writes the candidate
 # identity manifest into POODLE_WEB_PACK_INSTALL_ARCHIVE_OUT.
@@ -348,8 +352,17 @@
 "check:web-pack-install-roster" = "bunx tsc --ignoreConfig --noEmit --strict --target ES2022 --module ESNext --moduleResolution Bundler --types node test/package-install/roster.ts"
 # Compatibility selector for existing downstream handoffs and historical docs.
 "test:svelte-pack-install" = [{ task = "test:web-pack-install" }]
-# cargo-deny stays on raw Cargo: a metadata-style tool that builds nothing (working-rules.md#validation).
+# cargo deny runs through scripts/rust-driver.sh: `oxide deny` locally, `cargo` under
+# GITHUB_ACTIONS=true. The `:cargo` sibling runs raw Cargo.
 "audit:security" = [
+  { run = "bun scripts/audit-repository-security.ts" },
+  { run = "bun audit" },
+  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/render/Cargo.toml check advisories sources" },
+  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/gpui/node-backend/Cargo.toml check advisories sources" },
+  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/gpui/adapter/Cargo.toml check advisories sources" },
+  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/jetstream/adapter/Cargo.toml check advisories sources" },
+]
+"audit:security:cargo" = [
   { run = "bun scripts/audit-repository-security.ts" },
   { run = "bun audit" },
   { run = "cargo deny --manifest-path packages/render/Cargo.toml check advisories sources" },
@@ -358,8 +371,16 @@
   { run = "cargo deny --manifest-path packages/jetstream/adapter/Cargo.toml check advisories sources" },
 ]
 "test:repository-security" = "bun test scripts/audit-repository-security.test.ts"
-# cargo-deny stays on raw Cargo: a metadata-style tool that builds nothing (working-rules.md#validation).
+# cargo deny runs through scripts/rust-driver.sh: `oxide deny` locally, `cargo` under
+# GITHUB_ACTIONS=true. The `:cargo` sibling runs raw Cargo.
 "audit:licenses" = [
+  { run = "bun scripts/audit-license-compliance.ts" },
+  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/render/Cargo.toml check licenses" },
+  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/gpui/node-backend/Cargo.toml check licenses" },
+  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/gpui/adapter/Cargo.toml check licenses" },
+  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/jetstream/adapter/Cargo.toml check licenses" },
+]
+"audit:licenses:cargo" = [
   { run = "bun scripts/audit-license-compliance.ts" },
   { run = "cargo deny --manifest-path packages/render/Cargo.toml check licenses" },
   { run = "cargo deny --manifest-path packages/gpui/node-backend/Cargo.toml check licenses" },
