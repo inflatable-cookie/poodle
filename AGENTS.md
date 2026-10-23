@@ -106,7 +106,10 @@ Kill only processes you started, by PID; never `pkill -f` or `killall`. Run
 [working rules](docs/knowledge/contracts/working-rules.md#validation).
 
 <!-- oxide:begin -->
+<!-- oxide:workspaces: packages/codegen packages/contracts/adapter packages/contracts/components packages/contracts/events packages/contracts/headless packages/contracts/ir packages/contracts/layout packages/contracts/markdown packages/contracts/node packages/contracts/style packages/contracts/tokens packages/gpui/adapter packages/gpui/node-backend packages/gpui/preview packages/jetstream/adapter packages/jetstream/preview packages/render -->
 ## Rust commands: use `oxide`
+
+Covers Cargo workspaces `packages/codegen`, `packages/contracts/adapter`, `packages/contracts/components`, `packages/contracts/events`, `packages/contracts/headless`, `packages/contracts/ir`, `packages/contracts/layout`, `packages/contracts/markdown`, `packages/contracts/node`, `packages/contracts/style`, `packages/contracts/tokens`, `packages/gpui/adapter`, `packages/gpui/node-backend`, `packages/gpui/preview`, `packages/jetstream/adapter`, `packages/jetstream/preview`, `packages/render`, relative to this file's folder.
 
 - Write `oxide` wherever you would write `cargo`: `oxide check`, `oxide test`, `oxide run -- <args>`, `oxide add <crate>`.
 - Profiles: `quick` (default), `--profile debug` for a debugger, `--release`. Oxide places build output, so it refuses `--target-dir`.
