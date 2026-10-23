@@ -33,10 +33,10 @@ fi
 cd "$PREVIEW_DIR"
 
 # Build (quietly)
-cargo build --quiet 2>/dev/null
+sh "$PREVIEW_DIR/../../../scripts/rust-driver.sh" build --quiet 2>/dev/null
 
 # Launch the app with the specified component and any extra args
-cargo run --quiet -- --component "$SLUG" ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"} &
+sh "$PREVIEW_DIR/../../../scripts/rust-driver.sh" run --quiet -- --component "$SLUG" ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"} &
 APP_PID=$!
 
 # Wait for window to appear (poll up to 5 seconds)

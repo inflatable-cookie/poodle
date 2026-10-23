@@ -35,12 +35,12 @@ for (const manifest of manifests(join(ROOT, "packages")).sort()) {
     continue;
   }
   console.log(`fetch ${manifest}`);
-  const result = Bun.spawnSync(["cargo", "fetch", "--manifest-path", manifest], {
+  const result = Bun.spawnSync(["sh", join(ROOT, "scripts/rust-driver.sh"), "fetch", "--manifest-path", manifest], {
     stdout: "inherit",
     stderr: "inherit",
   });
   if (result.exitCode !== 0) {
-    console.error(`cargo fetch failed for ${manifest}`);
+    console.error(`rust fetch failed for ${manifest}`);
     process.exit(1);
   }
   fetched += 1;

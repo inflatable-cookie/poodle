@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
 /** Build a clean downstream GPUI consumer pinned to this commit's local tag. */
+// Stays on raw Cargo: the consumer lives in a fresh temp directory outside any
+// Git work tree, and Oxide's permanent-drive auto-adoption refuses that target
+// ("Git could not confirm this checkout's work tree"). Dogfood finding, see
+// working-rules.md#validation.
 
 import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";

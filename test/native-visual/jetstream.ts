@@ -49,7 +49,7 @@ const slugs =
 
 function runSweep(): void {
   rmSync(SNAP_OUT, { recursive: true, force: true });
-  const args = ["cargo", "run", "--quiet", "--bin", "snap", "--", "specimens"];
+  const args = ["sh", path.join(repoRoot, "scripts/rust-driver.sh"), "run", "--quiet", "--bin", "snap", "--", "specimens"];
   if (slugs) args.push(`--slug=${slugs}`);
   // stderr is inherited rather than piped: `snap` names each specimen as it
   // renders, and swallowing that made the render phase a silent ~80s block in

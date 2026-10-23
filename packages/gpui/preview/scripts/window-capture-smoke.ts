@@ -22,6 +22,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const PREVIEW = new URL("..", import.meta.url).pathname;
+const RUST_DRIVER = new URL("../../../../scripts/rust-driver.sh", import.meta.url).pathname;
 const MANIFEST = join(PREVIEW, "Cargo.toml");
 const BIN = join(PREVIEW, "target", "debug", "poodle-window-capture");
 const FEATURE = "window-capture";
@@ -43,8 +44,8 @@ function check(label: string, ok: boolean, detail = ""): void {
 
 console.log("## build");
 const build = spawnSync(
-  "cargo",
-  ["build", "--quiet", "--manifest-path", MANIFEST, "--bin", "poodle-window-capture", "--features", FEATURE],
+  "sh",
+  [RUST_DRIVER, "build", "--quiet", "--manifest-path", MANIFEST, "--bin", "poodle-window-capture", "--features", FEATURE],
   { encoding: "utf8" },
 );
 if (build.status !== 0) {
@@ -56,8 +57,8 @@ check("capture target builds", true);
 
 console.log("## target unit tests (activation boundary, device size, publish, foreground)");
 const unit = spawnSync(
-  "cargo",
-  ["test", "--quiet", "--manifest-path", MANIFEST, "--bin", "poodle-window-capture", "--features", FEATURE],
+  "sh",
+  [RUST_DRIVER, "test", "--quiet", "--manifest-path", MANIFEST, "--bin", "poodle-window-capture", "--features", FEATURE],
   { encoding: "utf8" },
 );
 if (unit.status !== 0) {

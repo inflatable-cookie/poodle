@@ -66,8 +66,8 @@ type BatchEntry = { fixture: string; out: string; receipt: string };
 
 export function captureGpuiBatch(fixtures: ButtonFixture[], outDir: string): GpuiCaptureRecord[] {
   const build = spawnSync(
-    "cargo",
-    ["build", "--quiet", "--manifest-path", PREVIEW_MANIFEST, "--bin", "poodle-window-capture", "--features", "window-capture"],
+    "sh",
+    ["scripts/rust-driver.sh", "build", "--quiet", "--manifest-path", PREVIEW_MANIFEST, "--bin", "poodle-window-capture", "--features", "window-capture"],
     { encoding: "utf8" },
   );
   if (build.status !== 0) {

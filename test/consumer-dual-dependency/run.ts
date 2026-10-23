@@ -22,6 +22,10 @@ import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:f
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
+// Stays on raw Cargo: each consumer lives in a fresh temp directory outside any
+// Git work tree, and Oxide's permanent-drive auto-adoption refuses that target
+// ("Git could not confirm this checkout's work tree"). That changes the result,
+// so Oxide is not used here. Dogfood finding, see working-rules.md#validation.
 const HERE = new URL(".", import.meta.url).pathname;
 const REPO = resolve(HERE, "..", "..");
 const SOURCE = join(HERE, "consumer");
