@@ -125,7 +125,11 @@ func walk(_ element: AXUIElement, depth: Int) {
 
 let application = AXUIElementCreateApplication(pid)
 guard let windows = attribute(application, kAXWindowsAttribute as String) as? [AXUIElement] else {
-    write(Result(status: "not_ready", reason: "AXWindows is not available for pid \(pid)", elements: []))
+    write(Result(
+        status: "title_pending",
+        reason: "AXWindows is not available for pid \(pid); proof window title not applied yet",
+        elements: []
+    ))
 }
 guard let proofWindow = windows.first(where: {
     string($0, kAXTitleAttribute as String) == expectedWindowTitle
@@ -133,8 +137,8 @@ guard let proofWindow = windows.first(where: {
     let titles = windows.map { string($0, kAXTitleAttribute as String) }
     let observedTitles = titles.map { String(reflecting: $0) }.joined(separator: ", ")
     write(Result(
-        status: "not_ready",
-        reason: "proof window title \(String(reflecting: expectedWindowTitle)) is not in AXWindows; observed titles: \(observedTitles)",
+        status: "title_pending",
+        reason: "proof window title not applied yet (expected \(String(reflecting: expectedWindowTitle))); observed titles: \(observedTitles)",
         elements: []
     ))
 }
@@ -148,15 +152,15 @@ guard let root = elements.first,
       root.name == expectedWindowTitle else {
     let observed = elements.first.map { describe(proofWindow, depth: $0.depth) } ?? "no root element"
     write(Result(
-        status: "not_ready",
-        reason: "expected root role=AXWindow name=\(String(reflecting: expectedWindowTitle)); observed \(observed)",
+        status: "content_pending",
+        reason: "proof window title is present but no usable AX content is exposed; expected root role=AXWindow name=\(String(reflecting: expectedWindowTitle)); observed \(observed)",
         elements: elements
     ))
 }
 guard elements.contains(where: { $0.name == "GPUI AX proof: Save" }) else {
     write(Result(
-        status: "not_ready",
-        reason: "proof window root is ready but named Poodle content is not exposed yet",
+        status: "content_pending",
+        reason: "proof window title is present but no named AX content is exposed yet",
         elements: elements
     ))
 }
