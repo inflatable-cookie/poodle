@@ -38,8 +38,8 @@ use std::time::{Duration, Instant};
 
 use anyhow::{bail, Context as _, Result};
 use gpui::{
-    px, size, App, AppContext as _, AssetSource, AsyncApp, Bounds, Entity, Point, Render, Window,
-    TitlebarOptions, WindowBounds, WindowOptions,
+    px, size, App, AppContext as _, AssetSource, AsyncApp, Bounds, Entity, Point, Render,
+    TitlebarOptions, Window, WindowBounds, WindowOptions,
 };
 use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 use serde::Serialize;
