@@ -80,6 +80,10 @@ guardrails below stay local.
 
 Targeted checks per task, full QA at milestones (Tom, 2026-09-30).
 
+- **Fresh Queue worktrees skip setup.** Queue creates task worktrees without
+  running `paseo.json` setup; it links only declared siblings such as
+  `../jetstream` (Tom, 2026-10-23). Before your first check, run
+  `effigy bootstrap:deps && effigy web:dist` yourself.
 - **Workers** run, once, the Effigy selectors for the code they changed, a
   compile or type check of what they touched, and `effigy docs:lint` if docs
   or evidence changed. Then they open the PR. No whole suites (`qa`,
