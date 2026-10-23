@@ -38,8 +38,8 @@ use std::time::{Duration, Instant};
 
 use anyhow::{bail, Context as _, Result};
 use gpui::{
-    px, size, App, AppContext as _, AssetSource, AsyncApp, Bounds, Entity, Point, Render, Window,
-    WindowBounds, WindowOptions,
+    px, size, App, AppContext as _, AssetSource, AsyncApp, Bounds, Entity, Point, Render,
+    TitlebarOptions, Window, WindowBounds, WindowOptions,
 };
 use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 use serde::Serialize;
@@ -450,6 +450,7 @@ pub fn capture_batch<V: Render, A: AssetSource>(
 pub fn accessibility_window<V: Render, A: AssetSource>(
     assets: A,
     fonts: Vec<Cow<'static, [u8]>>,
+    initial_title: &'static str,
     build: Box<dyn FnOnce(&mut Window, &mut App) -> Entity<V>>,
 ) -> ! {
     if !cfg!(target_os = "macos") {
@@ -482,7 +483,14 @@ pub fn accessibility_window<V: Render, A: AssetSource>(
             if let Err(error) = cx.open_window(
                 WindowOptions {
                     window_bounds: Some(WindowBounds::Windowed(bounds)),
-                    titlebar: None,
+                    // Give AppKit the proof title when it creates the native
+                    // window. The AX audit can then wait for its own window
+                    // instead of racing the default process title.
+                    titlebar: Some(TitlebarOptions {
+                        title: Some(initial_title.to_owned().into()),
+                        appears_transparent: true,
+                        ..Default::default()
+                    }),
                     focus: false,
                     show: true,
                     is_movable: false,

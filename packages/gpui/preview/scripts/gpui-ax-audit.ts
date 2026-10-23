@@ -32,7 +32,12 @@ type Element = {
   selected: string;
 };
 
-type ProbeResult = { status: string; reason: string; elements: Element[] };
+type ProbeResult = {
+  status: "title_pending" | "content_pending" | "ready" | "walk_error";
+  reason: string;
+  elements: Element[];
+};
+type ReadinessState = "title_pending" | "content_pending" | "ready" | "failed";
 
 const STRUCTURAL_ROLES = new Set([
   "AXApplication",
@@ -63,7 +68,69 @@ function build(command: string, args: string[], label: string): void {
   }
 }
 
-async function probeUntilReady(pid: number, probePath: string): Promise<ProbeResult> {
+function readinessState(status: ProbeResult["status"]): ReadinessState {
+  switch (status) {
+    case "title_pending":
+    case "content_pending":
+    case "ready":
+      return status;
+    case "walk_error":
+      return "failed";
+  }
+}
+
+function readinessFailure(result: ProbeResult): string {
+  switch (readinessState(result.status)) {
+    case "title_pending":
+      return `proof window title not applied yet (${result.reason})`;
+    case "content_pending":
+      return `proof window title is present but no AX content is exposed yet (${result.reason})`;
+    case "ready":
+    case "failed":
+      return result.reason;
+  }
+}
+
+function verifyReadinessClassification(): void {
+  const titleMissing = readinessFailure({
+    status: "title_pending",
+    reason: "observed the default process title",
+    elements: [],
+  });
+  const contentMissing = readinessFailure({
+    status: "content_pending",
+    reason: "the titled proof root has no named children",
+    elements: [],
+  });
+  check(
+    "AX readiness distinguishes a missing proof title from missing content",
+    titleMissing.startsWith("proof window title not applied yet") &&
+      contentMissing.startsWith("proof window title is present but no AX content") &&
+      titleMissing !== contentMissing,
+  );
+}
+
+async function waitForChildOrRetry(
+  processExited: Promise<number>,
+  last: ProbeResult | undefined,
+): Promise<void> {
+  const result = await Promise.race([
+    processExited.then((exitCode) => ({ exitCode })),
+    Bun.sleep(250).then(() => undefined),
+  ]);
+  if (result === undefined) return;
+
+  const state = last ? readinessState(last.status) : undefined;
+  const waitingFor = state === "content_pending" ? "AX content" : "the proof window title";
+  const detail = last ? `; last probe: ${last.reason}` : "";
+  throw new Error(`proof process exited with status ${result.exitCode} before ${waitingFor} was ready${detail}`);
+}
+
+async function probeUntilReady(
+  pid: number,
+  processExited: Promise<number>,
+  probePath: string,
+): Promise<ProbeResult> {
   const deadline = Date.now() + PROBE_TIMEOUT_MS;
   let last: ProbeResult | undefined;
   let lastProbeError: string | undefined;
@@ -75,7 +142,7 @@ async function probeUntilReady(pid: number, probePath: string): Promise<ProbeRes
     });
     if (result.error?.code === "ETIMEDOUT") {
       lastProbeError = `AXUIElement probe exceeded ${attemptTimeoutMs}ms`;
-      await Bun.sleep(250);
+      await waitForChildOrRetry(processExited, last);
       continue;
     }
     if (result.error) {
@@ -95,15 +162,18 @@ async function probeUntilReady(pid: number, probePath: string): Promise<ProbeRes
       throw new Error(`AXUIElement probe returned invalid JSON: ${result.stdout}`);
     }
     lastProbeError = undefined;
-    if (last.status === "walk_error") {
+    const state = readinessState(last.status);
+    if (state === "failed") {
       throw new Error(`AXUIElement tree walk failed: ${last.reason}`);
     }
-    if (last.status === "ready") return last;
-    await Bun.sleep(250);
+    if (state === "ready") return last;
+    await waitForChildOrRetry(processExited, last);
   }
-  const lastFailure = [last?.reason, lastProbeError].filter(Boolean).join("; ");
+  const lastFailure = [last ? readinessFailure(last) : undefined, lastProbeError]
+    .filter(Boolean)
+    .join("; ");
   throw new Error(
-    `proof window root and named Poodle content did not become ready in the non-activating platform tree within ${PROBE_TIMEOUT_MS}ms` +
+    `proof window AX readiness did not complete in the non-activating platform tree within ${PROBE_TIMEOUT_MS}ms` +
       (lastFailure ? ` (${lastFailure})` : ""),
   );
 }
@@ -192,7 +262,7 @@ async function runWindow(probePath: string, planted: boolean): Promise<void> {
   let probe: ProbeResult | undefined = undefined;
   let auditError: unknown;
   try {
-    probe = await probeUntilReady(child.pid, probePath);
+    probe = await probeUntilReady(child.pid, child.exited, probePath);
     printTreeEvidence(probe.elements);
     verifyPoodleContent(probe.elements);
 
@@ -228,16 +298,22 @@ async function runWindow(probePath: string, planted: boolean): Promise<void> {
   const [out, err] = await Promise.all([stdout, stderr]);
   console.log(out.trim());
   if (err.trim()) console.error(err.trim());
-  check("GPUI foreground monitor proves no activation", exit === 0 && out.includes("GPUI_AX_COMPLETE foreground=proved"));
+  const foregroundProved = exit === 0 && out.includes("GPUI_AX_COMPLETE foreground=proved");
+  const readinessFailureDetail = auditError instanceof Error ? `; AX readiness: ${auditError.message}` : "";
+  check(
+    "GPUI foreground monitor proves no activation",
+    foregroundProved,
+    foregroundProved ? "" : `exit=${exit}${readinessFailureDetail}`,
+  );
   if (probe === undefined) {
-    throw new Error(
-      "the window stayed non-frontmost, but no platform content was readable; stop here if activation would be required",
-    );
+    if (auditError instanceof Error) throw auditError;
+    throw new Error("the window stayed non-frontmost, but no platform content was readable");
   }
   if (auditError !== undefined) throw auditError;
 }
 
 async function main(): Promise<void> {
+  verifyReadinessClassification();
   console.log("## build live GPUI proof window");
   build(
     "sh",

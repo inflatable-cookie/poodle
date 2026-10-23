@@ -125,8 +125,8 @@ pub fn run(plant_unnamed: bool) -> ! {
             base: PathBuf::from(env!("CARGO_MANIFEST_DIR")),
         },
         Vec::new(),
-        Box::new(move |window, cx: &mut App| {
-            window.set_window_title(PROOF_WINDOW_TITLE);
+        PROOF_WINDOW_TITLE,
+        Box::new(move |_window, cx: &mut App| {
             cx.new(|_| A11yProofRoot {
                 theme,
                 plant_unnamed,
