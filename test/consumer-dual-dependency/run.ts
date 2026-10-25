@@ -22,10 +22,11 @@ import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:f
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
-// PENDING OXIDE ONE-USE WORKSPACE SUPPORT: stays on raw Cargo. The consumer is a fresh
-// one-use workspace; Oxide's cold one-use slot churn and its permanent-drive
-// auto-adoption (it refuses a target outside a Git work tree) change the result.
-// Dogfood finding, see working-rules.md#validation.
+// An exec route: `drift:gpui-consumer-identity` runs this proof through
+// `sh scripts/rust-driver.sh exec --manifest-path … -- bun
+// test/consumer-dual-dependency/run.ts`, so `oxide exec` leases the slot and
+// supplies the intermediates while the consumer keeps its own
+// `CARGO_TARGET_DIR` for its final outputs. See working-rules.md#validation.
 const HERE = new URL(".", import.meta.url).pathname;
 const REPO = resolve(HERE, "..", "..");
 const SOURCE = join(HERE, "consumer");
