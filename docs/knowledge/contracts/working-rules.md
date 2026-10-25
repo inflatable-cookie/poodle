@@ -398,45 +398,59 @@ that header line.
 
 ### Rust selectors and Oxide
 
-Every Rust build, check, test, fetch, run and `cargo deny` in Poodle goes
-through `scripts/rust-driver.sh`. It runs `oxide` locally and `cargo` under
-`GITHUB_ACTIONS=true`, because the CI runners have no Oxide. The Effigy
-selectors call it directly, and so do the Bun and sh scripts that spawn Cargo
-themselves: the Jetstream build, the GPUI capture and AX scripts, the Jetstream
-census and snap sweep, the native-visual capture, the bootstrap fetch and the
-button-comparison capture. A missing local `oxide` fails and names the escapes.
-It never falls back to Cargo silently.
+Every Rust build, check, test, fetch, run, `cargo deny` and Cargo-wrapping tool
+in Poodle goes through `scripts/rust-driver.sh`. It runs `oxide` locally and
+`cargo` under `GITHUB_ACTIONS=true`, because the CI runners have no Oxide. The
+Effigy selectors call it directly, and so do the Bun and sh scripts that spawn
+Cargo themselves: the Jetstream build, the GPUI capture and AX scripts, the
+Jetstream census and snap sweep, the native-visual capture, the bootstrap fetch
+and the button-comparison capture. A missing local `oxide` fails and names the
+escape. It never falls back to Cargo silently.
 
-Escapes to plain Cargo, for when `oxide` is broken on a developer machine:
+There are two routes, and both go through the same driver:
 
-- each main Rust selector has a `:cargo` sibling that runs plain Cargo:
-  `ir:build`, `ir:check`, `catalogue:build`, `catalogue:check`,
-  `regressions:native`, `probe:gpui-specimens`, `gpui:build`, `gpui:run`,
-  `gpui:test`, `gpui:preview`, `check:jetstream-preview`, `jetstream:run`,
-  `jetstream:test`, `jetstream:preview`, `test:visual-fixtures`,
-  `test:jetstream-a11y`, `jetstream-a11y:roles`, `test:contracts`,
-  `test:headless-listbox`, `test:listbox-spec`, `test:codegen-stamp`,
-  `check:gpui`, `test:gpui-preview`, `test:jetstream-preview`,
-  `test:jetstream-adapter`, `audit:security` and `audit:licenses`;
-- script-owned selectors have no sibling. Run them with
-  `POODLE_RUST_DRIVER=cargo` set in the environment.
+- an ordinary route passes a Cargo subcommand, `sh scripts/rust-driver.sh
+  <subcommand> …`, which is `oxide <subcommand> …` locally;
+- an **`exec` route** is a tool that runs Cargo itself or picks its own target
+  directory: `sh scripts/rust-driver.sh exec --manifest-path <crate>/Cargo.toml
+  -- <tool> …`, which is `oxide exec -- <tool> …` locally. Oxide leases the
+  slot and supplies the intermediates, and the tool keeps its own
+  `CARGO_TARGET_DIR` for final outputs, so its result is unchanged. The lease
+  names a crate manifest because Poodle deliberately has no root `Cargo.toml`.
+  `drift:gpui-consumer-identity` (`test/consumer-dual-dependency/run.ts`) and
+  `release:gpui-consumer` (`scripts/gpui-consumer-smoke.ts`) are these two
+  routes: each builds a private consumer in a fresh temp directory.
 
-The routes that stay raw `cargo`, each with its reason:
+Escapes to plain Cargo. There is exactly one (Tom, 2026-10-25: every Rust
+project moves fully to Oxide and per-selector `:cargo` escapes are removed):
 
-- Pending one-use workspace support (`PENDING OXIDE ONE-USE WORKSPACE SUPPORT`
-  in each file): `drift:gpui-consumer-identity`
-  (`test/consumer-dual-dependency/run.ts`) and `release:gpui-consumer`
-  (`scripts/gpui-consumer-smoke.ts`). Each builds a private consumer in a fresh
-  temp directory. Cold one-use slot churn and Oxide's permanent-drive
-  auto-adoption (which refuses a target outside a Git work tree) change the
-  result, so they stay on Cargo until Oxide supports one-use workspaces.
-- CI runners under `GITHUB_ACTIONS=true`: the driver runs `cargo` there
-  because the runners have no Oxide. This is a genuine exception.
-- `:cargo` siblings and the `POODLE_RUST_DRIVER=cargo` escape, which stay until
-  Effigy v0.15 is formally released.
+- `EFFIGY_OXIDE_ESCAPE=cargo`, the same escape Effigy's own selectors use. It
+  covers a whole selector (`EFFIGY_OXIDE_ESCAPE=cargo effigy <selector>`) and
+  the driver on its own (`EFFIGY_OXIDE_ESCAPE=cargo sh
+  scripts/rust-driver.sh …`). On an `exec` route it runs the tool itself, so
+  the tool's own Cargo is plain. Any other value is rejected.
+- There are no `:cargo` sibling selectors and no `POODLE_RUST_DRIVER` variable.
+  The escape is for a broken `oxide`, not a fallback: report Oxide's exact
+  failure instead of switching (Oxide planner advisory, 2026-10-25).
 
-There are no container or VM guest builds, no Queue warm-merge hooks, and no
-test whose subject is Cargo itself in this repository.
+Genuine exceptions that stay on plain Cargo:
+
+- CI runners under `GITHUB_ACTIONS=true`: the driver runs `cargo` there because
+  the runners have no Oxide. `.github/workflows` are unchanged and never pass
+  the escape.
+- Product copy, not a route: specimen and demo text that prints a shell
+  command (`cargo check`, `cargo build`) is display data.
+
+Poodle has no container or VM guest build, no Queue warm-merge hook, and no
+test whose subject is Cargo itself.
+
+The driver also passes the real Oxide pool through: when `OXIDE_POOL` is unset
+and `$HOME` is not the account's real home, it resolves the pool from `oxide
+status` under that home and exports it before `exec oxide`, covering both
+routes. Oxide's default pool lives under `$HOME`, so without this a run with a
+temporary HOME would create a cold pool on the internal SSD (3.3-3.8 GB per
+run, measured 2026-10-24). No Poodle harness sets a temporary HOME today; the
+block keeps that from becoming a silent cost if one appears.
 
 Native tests find sibling binaries through `env!("CARGO_BIN_EXE_*")`. No
 Poodle test uses `current_exe()`. Final binaries stay in `target/debug/`, so
