@@ -70,10 +70,7 @@
     background: var(--poodle-recipe-menu-surface-separator-fill, color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent));
   }
 
-  /* Submenu flyout (cascading menus). The root surface is portalled; a nested
-     flyout is not — it is positioned against its own row inside that already
-     portalled parent, so it stays in flow and keeps absolute positioning at
-     the anchor's right edge, flipping to the left on viewport overflow. */
+  /* Fixed descendants retain dismiss ownership while escaping menu scrolling. */
   .poodle-menu-surface__item-anchor {
     position: relative;
     width: 100%;
@@ -91,15 +88,16 @@
   }
 
   .poodle-menu-surface.poodle-menu-surface--submenu {
-    position: absolute;
-    top: calc(-1 * var(--poodle-menu-overlay-padding));
-    left: 100%;
+    position: fixed;
+    box-sizing: border-box;
+    min-width: min(14rem, calc(100vw - 16px));
+    overflow: auto;
     z-index: calc(var(--poodle-overlay-z-menu) + 1);
   }
 
-  .poodle-menu-surface.poodle-menu-surface--submenu.poodle-menu-surface--flipped {
-    left: auto;
-    right: 100%;
+  .poodle-menu-surface--submenu[data-anchor-hidden="true"] {
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .poodle-menu-surface[data-size="xs"] .poodle-menu-surface__item {

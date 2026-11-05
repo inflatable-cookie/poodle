@@ -153,9 +153,13 @@ policy do not enter the contract.
 - **Modal layers** — `Dialog`, `Drawer`, `AlertDialog`, `CommandPalette`,
   `ToastHost`. These are viewport-anchored, not trigger-anchored; they portal
   (or are already fixed to the viewport) but have no anchor to track.
-- **Nested submenu flyouts.** A submenu is positioned against its own row inside
-  an already-portalled parent surface, so it inherits correct stacking and stays
-  in flow. Passing no `anchor` leaves it exactly where it is.
+- **Nested submenu flyouts.** A submenu remains a DOM descendant of its
+  already-portalled parent, preserving the owning menu's dismiss containment.
+  It uses fixed viewport coordinates beside its row, tracks row movement,
+  flips horizontally, clamps vertically and scrolls within its available height.
+  Fixed positioning escapes the parent menu's scroll clipping; it does not add
+  an in-flow box or a separate dismiss layer. A clipped row or hidden parent
+  hides the flyout. Geometry observation reports each surface independently.
 - **In-flow disclosure panels** — `NavigationMenu`'s viewport, `Accordion`,
   `Collapsible`. These take space in the layout and are not overlays.
 

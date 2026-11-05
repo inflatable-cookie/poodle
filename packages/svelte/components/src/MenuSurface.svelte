@@ -13,6 +13,7 @@
   import MenuSurface from "./MenuSurface.svelte";
   import { anchored } from "./anchored";
   import { surfaceGeometry } from "./surface-geometry";
+  import { submenuPosition } from "./submenu-position";
 
   import type { ControlDensity, ControlSize, MenuItem, OverlayPlacement } from "./types";
 
@@ -29,8 +30,6 @@
     overlayElement?: HTMLDivElement | null;
     /** True for a submenu flyout nested inside a parent surface. */
     nested?: boolean;
-    /** Nested flyout that ran out of room on the right and opens leftward. */
-    flipped?: boolean;
     onAction?: ((value: string) => void) | undefined;
     onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler | undefined;
     /** Nested surfaces: request the parent to close this flyout (ArrowLeft). */
@@ -47,7 +46,6 @@
     placement = null,
     overlayElement = $bindable<HTMLDivElement | null>(null),
     nested = false,
-    flipped = false,
     onAction = undefined,
     onSurfaceGeometryChange = undefined,
     onRequestClose = undefined,
@@ -61,8 +59,6 @@
   let highlightIndex = $state(0);
   let openSubmenuValue = $state<string | null>(null);
   let submenuSurface = $state<{ focusFirstItem: () => void } | null>(null);
-  let submenuElement = $state<HTMLDivElement | null>(null);
-  let submenuFlippedValue = $state<string | null>(null);
 
   const actionableItems = $derived(menuNavigableItems(items));
   const firstTabStopIndex = $derived(
@@ -81,23 +77,10 @@
     }
   });
 
-  // Flip an open flyout to the parent's left edge when it would overflow
-  // the right viewport edge.
-  $effect(() => {
-    if (!openSubmenuValue || !submenuElement) {
-      submenuFlippedValue = null;
-      return;
-    }
-
-    const rect = submenuElement.getBoundingClientRect();
-    if (rect.right > window.innerWidth - 8) {
-      submenuFlippedValue = openSubmenuValue;
-    }
-  });
-
   function focusIndex(index: number): void {
     highlightIndex = index;
-    itemElements[index]?.focus();
+    itemElements[index]?.focus({ preventScroll: true });
+    itemElements[index]?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
   }
 
   export function focusFirstItem(): void {
@@ -189,13 +172,13 @@
     onPlacement: (next) => (resolvedPlacement = next),
     onSurfaceGeometryChange: nested ? undefined : onSurfaceGeometryChange,
   }}
+  use:submenuPosition={nested}
   use:surfaceGeometry={{
     onSurfaceGeometryChange: nested ? onSurfaceGeometryChange : undefined,
     placement: displayPlacement,
   }}
   class="poodle-menu-surface"
   class:poodle-menu-surface--submenu={nested}
-  class:poodle-menu-surface--flipped={flipped}
   data-size={size}
   data-density={density}
   data-placement={displayPlacement ?? undefined}
@@ -284,13 +267,11 @@
         {#if hasSubmenu && openSubmenuValue === item.value}
           <MenuSurface
             bind:this={submenuSurface}
-            bind:overlayElement={submenuElement}
             items={item.children ?? []}
             ariaLabel={item.label}
             size={size}
             density={density}
             nested={true}
-            flipped={submenuFlippedValue === item.value}
             {onSurfaceGeometryChange}
             onAction={onAction}
             onRequestClose={() => closeSubmenu(true)}

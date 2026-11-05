@@ -111,3 +111,34 @@ describe("Menu (svelte) item identity", () => {
     expect(document.activeElement).toBe(menuItems[1]);
   });
 });
+
+describe("Menu cascading keyboard ownership", () => {
+  it("skips disabled children, returns to the parent and commits only leaves", async () => {
+    const actions: string[] = [];
+    const { container } = render(Menu, { props: { items: [{ value: "parent", label: "Parent", children: [
+      { value: "disabled", label: "Disabled", disabled: true },
+      { value: "first", label: "First" },
+      { value: "last", label: "Last", kind: "radio", checked: true },
+    ] }], onAction: (value: string) => actions.push(value) } });
+    await fireEvent.click(container.querySelector('.poodle-menu__trigger')!);
+    const parent = document.querySelector('[data-value="parent"]') as HTMLElement;
+    await fireEvent.keyDown(parent, { key: "ArrowRight" });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const first = document.querySelector('[data-value="first"]') as HTMLElement;
+    const last = document.querySelector('[data-value="last"]') as HTMLElement;
+    expect(document.activeElement).toBe(first);
+    await fireEvent.keyDown(first, { key: "End" });
+    expect(document.activeElement).toBe(last);
+    await fireEvent.keyDown(last, { key: "ArrowLeft" });
+    expect(document.activeElement).toBe(parent);
+    expect(document.querySelector('[data-value="last"]')).toBeNull();
+    expect(actions).toEqual([]);
+    await fireEvent.keyDown(parent, { key: "ArrowRight" });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await fireEvent.mouseDown(document.querySelector('[data-value="last"]')!);
+    expect(document.querySelector('[data-value="last"]')).not.toBeNull();
+    await fireEvent.click(document.querySelector('[data-value="last"]')!);
+    expect(actions).toEqual(["last"]);
+    expect(document.querySelector('[role="menu"]')).toBeNull();
+  });
+});

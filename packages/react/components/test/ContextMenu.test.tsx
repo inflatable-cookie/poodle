@@ -57,7 +57,7 @@ describe("ContextMenu (react) item accessible names", () => {
     );
 
     const surface = document.querySelector(".poodle-menu-surface") as HTMLElement;
-    const rows = [...surface.querySelectorAll(":scope > button.poodle-menu-surface__item")];
+    const rows = [...surface.querySelectorAll(":scope > .poodle-menu-surface__item-anchor > button.poodle-menu-surface__item")];
     expect(rows.map((row) => row.getAttribute("aria-label"))).toEqual([
       "Rename",
       "Delete",
