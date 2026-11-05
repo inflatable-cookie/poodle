@@ -111,7 +111,7 @@ try {
     check(`${fw} geometry reports actual moved bounds`, !!moved && geometry.some(e => e.type === "upsert" && e.surface?.visible && Math.abs(e.surface.rect.left - moved.x) < 1 && Math.abs(e.surface.rect.top - moved.y) < 1));
     await page.locator(`[data-framework="${fw}"] .scroller`).evaluate(n => n.scrollTop = n.scrollHeight);
     await settle(page);
-    check(`${fw} clipped row hides flyout`, await menu.evaluate(n => getComputedStyle(n).visibility === "hidden" || getComputedStyle(n).display === "none"));
+    check(`${fw} clipped row hides flyout`, await page.getByRole("menu", { name: "Go to frame", exact: true, includeHidden: true }).evaluate(n => getComputedStyle(n).visibility === "hidden" || getComputedStyle(n).display === "none"));
     check(`${fw} geometry reports hidden surface`, await page.evaluate(() => (window as any).geometry.some((e: any) => e.type === "upsert" && e.surface.visible === false)));
     await page.mouse.click(600, 20);
     await settle(page);
