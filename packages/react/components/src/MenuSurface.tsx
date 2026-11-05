@@ -92,10 +92,13 @@ export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(funct
       const row = anchor!.getBoundingClientRect();
       const viewport = { width: window.innerWidth, height: window.innerHeight };
       const parentSurface = anchor!.closest<HTMLElement>('[role="menu"]');
-      node!.dataset.anchorHidden = String(parentSurface?.dataset.anchorHidden === "true" ||
+      const hidden = String(parentSurface?.dataset.anchorHidden === "true" ||
         isAnchorClipped(row, resolveClipRect(anchor!, viewport)));
-      node!.style.maxHeight = `${Math.max(0, viewport.height - 16)}px`;
-      node!.style.maxWidth = `${Math.max(0, viewport.width - 16)}px`;
+      if (node!.dataset.anchorHidden !== hidden) node!.dataset.anchorHidden = hidden;
+      const maxHeight = `${Math.max(0, viewport.height - 16)}px`;
+      const maxWidth = `${Math.max(0, viewport.width - 16)}px`;
+      if (node!.style.maxHeight !== maxHeight) node!.style.maxHeight = maxHeight;
+      if (node!.style.maxWidth !== maxWidth) node!.style.maxWidth = maxWidth;
       const rect = node!.getBoundingClientRect();
       const padding = Number.parseFloat(getComputedStyle(node!).paddingTop) || 0;
       const flipped = row.right + rect.width > viewport.width - 8;
