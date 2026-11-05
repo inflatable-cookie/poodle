@@ -36,14 +36,24 @@ export interface MenuSurfaceProps {
   anchor?: AnchorTarget | null;
   offset?: number;
   placement?: OverlayPlacement | null;
-  /** Internal cascading surface; retains DOM ancestry for root dismissal. */
-  nested?: boolean;
-  onRequestClose?: () => void;
   onAction?: (value: string) => void;
   onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler;
 }
 
-export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(function MenuSurfaceImpl(
+interface CascadingMenuSurfaceProps extends MenuSurfaceProps {
+  /** Private recursive state; never exposed through the exported wrapper. */
+  nested?: boolean;
+  onRequestClose?: () => void;
+}
+
+export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(function MenuSurface(
+  props,
+  ref,
+) {
+  return <CascadingMenuSurface {...props} ref={ref} />;
+});
+
+const CascadingMenuSurface = forwardRef<MenuSurfaceHandle, CascadingMenuSurfaceProps>(function CascadingMenuSurfaceImpl(
   {
     items = [],
     ariaLabel = null,
@@ -275,7 +285,7 @@ export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(funct
               ) : null}
             </button>
             {menuItemHasSubmenu(item) && openSubmenuValue === item.value ? (
-              <MenuSurface
+              <CascadingMenuSurface
                 ref={attachSubmenu}
                 items={item.children}
                 ariaLabel={item.label}

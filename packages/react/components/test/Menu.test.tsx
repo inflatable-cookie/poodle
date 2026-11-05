@@ -1,5 +1,8 @@
 import { fireEvent, render } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, expectTypeOf, it, vi } from "vitest";
+import type { ComponentProps } from "react";
+import type { MenuSurface as PublicMenuSurface, MenuSurfaceProps as PublicMenuSurfaceProps } from "../src";
+import type { MenuSurface, MenuSurfaceProps } from "../src/MenuSurface";
 
 import { Menu } from "../src/Menu";
 import type { MenuItem } from "../src/types";
@@ -157,4 +160,11 @@ describe("Menu (react) cascading children", () => {
     await fireEvent.keyDown(row("first"), { key: "Escape" });
     expect(document.querySelector('[role="menu"]')).toBeNull();
   });
+});
+
+
+it("keeps cascading controls out of both exported MenuSurface entry points", () => {
+  type ExportedKeys = keyof MenuSurfaceProps | keyof PublicMenuSurfaceProps |
+    keyof ComponentProps<typeof MenuSurface> | keyof ComponentProps<typeof PublicMenuSurface>;
+  expectTypeOf<Extract<"nested" | "onRequestClose", ExportedKeys>>().toEqualTypeOf<never>();
 });
