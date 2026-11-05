@@ -43,7 +43,7 @@ export interface MenuSurfaceProps {
   onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler;
 }
 
-export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(function MenuSurface(
+export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(function MenuSurfaceImpl(
   {
     items = [],
     ariaLabel = null,
