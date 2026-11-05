@@ -27,7 +27,8 @@ async function capture(page: Page, menu: Locator, name: string) {
   const bounds = await menu.boundingBox();
   const viewport = page.viewportSize()!;
   const extra = await menu.evaluate((node) => ({ scrollTop: node.scrollTop, scrollHeight: node.scrollHeight, clientHeight: node.clientHeight, placement: node.getAttribute("data-placement"), hidden: node.getAttribute("data-anchor-hidden") }));
-  const receipt = { head, name, viewport, bounds, ...extra };
+  const rect = bounds ? { left: bounds.x, top: bounds.y, right: bounds.x + bounds.width, bottom: bounds.y + bounds.height } : null;
+  const receipt = { head, name, viewport, bounds, rect, ...extra };
   receipts.push(receipt);
   await page.screenshot({ path: join(output, `${name}.png`) });
   console.log(`capture ${JSON.stringify(receipt)}`);
@@ -107,7 +108,11 @@ try {
     const moved = await menu.boundingBox();
     check(`${fw} parent scroll tracks row`, !!before && !!after && before.y !== after.y && fits(moved, page));
     const geometry = await page.evaluate(() => (window as typeof window & { geometry: Array<{ type: string; surface?: { rect: { top: number; left: number }; visible: boolean } }> }).geometry);
-    check(`${fw} geometry reports moved surface`, geometry.filter(e => e.type === "upsert" && e.surface?.visible).length >= 3);
+    check(`${fw} geometry reports actual moved bounds`, !!moved && geometry.some(e => e.type === "upsert" && e.surface?.visible && Math.abs(e.surface.rect.left - moved.x) < 1 && Math.abs(e.surface.rect.top - moved.y) < 1));
+    await page.locator(`[data-framework="${fw}"] .scroller`).evaluate(n => n.scrollTop = n.scrollHeight);
+    await settle(page);
+    check(`${fw} clipped row hides flyout`, await menu.evaluate(n => getComputedStyle(n).visibility === "hidden" || getComputedStyle(n).display === "none"));
+    check(`${fw} geometry reports hidden surface`, await page.evaluate(() => (window as any).geometry.some((e: any) => e.type === "upsert" && e.surface.visible === false)));
     await page.mouse.click(600, 20);
     await settle(page);
     check(`${fw} outside dismisses all surfaces`, await page.getByRole("menu").count() === 0);
