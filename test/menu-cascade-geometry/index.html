@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Menu cascading geometry</title>
+<style>
+body { margin:0; font-family:system-ui,sans-serif; background:#181a20; color:#eee; }
+section { position:fixed; bottom:24px; left:24px; width:240px; }
+body.right section { left:auto; right:24px; }
+.scroller { height:120px; overflow:auto; }
+.spacer { height:80px; } .tail { height:160px; }
+</style></head><body>
+<div id="svelte-mount"></div><div id="react-mount"></div>
+<script type="module" src="./main.ts"></script>
+<script>const q=new URLSearchParams(location.search);document.body.classList.toggle('right',q.has('right'));document.querySelector(q.get('framework')==='react'?'#svelte-mount':'#react-mount').style.display='none';</script>
+</body></html>
