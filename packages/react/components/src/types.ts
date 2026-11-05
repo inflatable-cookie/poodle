@@ -256,6 +256,7 @@ export interface MenuItem {
   shortcutLabel?: string;
   tone?: "default" | "danger";
   kind?: "action" | "checkbox" | "radio" | "separator";
+  children?: MenuItem[];
 }
 
 export type DrawerEdge = "left" | "right" | "top" | "bottom";
