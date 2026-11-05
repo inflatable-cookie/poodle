@@ -71,12 +71,13 @@ export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(funct
   const geometryHandler = useRef(onSurfaceGeometryChange);
   geometryHandler.current = onSurfaceGeometryChange;
 
-  useLayoutEffect(() => {
-    if (pendingSubmenuFocus.current) {
+  function attachSubmenu(handle: MenuSurfaceHandle | null): void {
+    submenuRef.current = handle;
+    if (handle && pendingSubmenuFocus.current) {
       pendingSubmenuFocus.current = false;
-      submenuRef.current?.focusFirstItem();
+      handle.focusFirstItem();
     }
-  });
+  }
 
   useLayoutEffect(() => {
     const node = overlayRef.current;
@@ -171,6 +172,7 @@ export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(funct
     if (item.disabled || !menuItemHasSubmenu(item)) return;
     pendingSubmenuFocus.current = focusFirst;
     if (openSubmenuValue === item.value && focusFirst) {
+      pendingSubmenuFocus.current = false;
       submenuRef.current?.focusFirstItem();
     }
     setOpenSubmenuValue(item.value);
@@ -274,7 +276,7 @@ export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(funct
             </button>
             {menuItemHasSubmenu(item) && openSubmenuValue === item.value ? (
               <MenuSurface
-                ref={submenuRef}
+                ref={attachSubmenu}
                 items={item.children}
                 ariaLabel={item.label}
                 size={size}
