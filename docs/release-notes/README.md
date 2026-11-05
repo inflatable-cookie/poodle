@@ -20,6 +20,8 @@ exists yet.
 
 ## Versions
 
+- [0.4.15](0.4.15.md) — 2026-11-05 — viewport-safe cascading menus, native
+  preview bounds/motion fixes, and build/capture tooling.
 - [0.4.14](0.4.14.md) — 2026-10-08 — Listbox composite across Svelte, React,
   shared Rust and GPUI.
 - [0.4.13](0.4.13.md) — 2026-10-08 — Keyboard equal-row layout, icon-geometry
