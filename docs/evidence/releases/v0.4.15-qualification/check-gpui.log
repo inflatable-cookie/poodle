@@ -1,0 +1,2687 @@
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ EFFIGY  [checkout] │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── v0.14.1+local.737a6d0 ╯
+
+oxide: auto-adopted [checkout]/packages/gpui/preview/target -> [oxide-outputs]/poodle-66c3bd2b for permanent-drive outputs; no existing outputs moved
+oxide: seeding skipped: no eligible donor; bit-set: ambiguous name
+    Blocking waiting for file lock on package cache
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling libc v0.2.189
+   Compiling typeid v1.0.3
+    Checking bitflags v2.13.1
+    Checking cfg-if v1.0.4
+   Compiling erased-serde v0.4.10
+   Compiling libm v0.2.16
+    Checking memchr v2.8.3
+   Compiling autocfg v1.5.1
+    Checking smallvec v1.15.2
+    Checking objc2-encode v4.1.0
+   Compiling objc2 v0.6.4
+    Checking simd-adler32 v0.3.10
+    Checking core-foundation-sys v0.8.7
+    Checking stable_deref_trait v1.2.1
+   Compiling getrandom v0.4.3
+    Checking pin-project-lite v0.2.17
+    Checking adler2 v2.0.1
+   Compiling zmij v1.0.23
+   Compiling anyhow v1.0.104
+    Checking miniz_oxide v0.8.9
+   Compiling crossbeam-utils v0.8.22
+   Compiling crc32fast v1.5.0
+   Compiling serde v1.0.229
+   Compiling version_check v0.9.5
+    Checking arrayvec v0.7.8
+    Checking bytemuck v1.25.2
+    Checking futures-core v0.3.34
+   Compiling num-traits v0.2.19
+   Compiling rustix v1.1.4
+   Compiling zerocopy v0.8.56
+   Compiling hashbrown v0.17.1
+   Compiling equivalent v1.0.2
+    Checking futures-io v0.3.34
+   Compiling semver v1.0.28
+    Checking once_cell v1.21.4
+    Checking itoa v1.0.18
+    Checking litemap v0.8.3
+    Checking writeable v0.6.4
+    Checking scopeguard v1.2.0
+    Checking futures-sink v0.3.34
+   Compiling crossbeam-epoch v0.9.20
+   Compiling getrandom v0.3.4
+    Checking lock_api v0.4.14
+   Compiling rustc_version v0.4.1
+    Checking flate2 v1.1.9
+   Compiling crossbeam-deque v0.8.7
+    Checking foreign-types-shared v0.3.1
+   Compiling serde_json v1.0.151
+   Compiling unicode-segmentation v1.13.3
+   Compiling paste v1.0.15
+   Compiling icu_normalizer_data v2.3.0
+   Compiling syn v2.0.119
+   Compiling syn v3.0.3
+    Checking utf8_iter v1.0.4
+   Compiling glob v0.3.4
+    Checking fastrand v2.5.0
+   Compiling icu_properties_data v2.3.0
+    Checking core-foundation v0.10.0
+    Checking futures-channel v0.3.34
+   Compiling slotmap v1.1.1
+    Checking futures-task v0.3.34
+    Checking slab v0.4.12
+   Compiling rustc-hash v2.1.3
+   Compiling prettyplease v0.2.37
+   Compiling clang-sys v1.9.1
+   Compiling parking_lot_core v0.9.12
+   Compiling rayon-core v1.13.0
+    Checking rand_core v0.9.5
+    Checking malloc_buf v0.0.6
+    Checking tracing-core v0.1.36
+    Checking iana-time-zone v0.1.65
+    Checking fdeflate v0.3.7
+    Checking float-cmp v0.9.0
+    Checking lazy_static v1.5.0
+    Checking core-graphics-types v0.2.0
+   Compiling minimal-lexical v0.2.1
+    Checking parking v2.2.1
+    Checking block v0.1.6
+   Compiling regex-syntax v0.8.11
+   Compiling winnow v1.0.4
+    Checking strict-num v0.1.1
+    Checking objc v0.2.7
+    Checking errno v0.3.14
+   Compiling pathfinder_simd v0.5.6
+   Compiling nom v7.1.3
+   Compiling libloading v0.8.9
+    Checking polycool v0.4.0
+   Compiling pulp v0.22.3
+   Compiling shlex v2.0.1
+    Checking libbz2-rs-sys v0.2.5
+    Checking core_maths v0.1.1
+    Checking ttf-parser v0.25.1
+    Checking percent-encoding v2.3.2
+    Checking zune-core v0.5.3
+    Checking tinyvec_macros v0.1.1
+    Checking arrayref v0.3.9
+    Checking either v1.17.0
+    Checking weezl v0.1.12
+   Compiling object v0.37.3
+   Compiling toml_parser v1.1.3+spec-1.1.0
+    Checking sha1_smol v1.0.1
+   Compiling find-msvc-tools v0.1.11
+    Checking byteorder v1.5.0
+    Checking objc2-core-foundation v0.3.2
+    Checking block2 v0.6.2
+   Compiling ref-cast v1.0.27
+    Checking quick-error v2.0.1
+   Compiling bindgen v0.72.1
+   Compiling toml_writer v1.1.2+spec-1.1.0
+   Compiling cc v1.4.3
+   Compiling itertools v0.13.0
+    Checking zune-jpeg v0.5.15
+    Checking tiny-skia-path v0.11.4
+    Checking form_urlencoded v1.2.2
+    Checking tinyvec v1.12.0
+    Checking kurbo v0.13.1
+    Checking bzip2 v0.6.1
+    Checking euclid v0.22.14
+    Checking num-complex v0.4.6
+    Checking parking_lot v0.12.5
+    Checking sharded-slab v0.1.7
+   Compiling convert_case v0.10.0
+    Checking memmap2 v0.9.11
+    Checking thread_local v1.1.10
+   Compiling heapless v0.9.3
+    Checking unicode-bidi-mirroring v0.4.0
+    Checking unicode-script v0.5.8
+   Compiling ztracing-gpui-unofficial v1.22.0
+    Checking serde_fmt v1.1.0
+    Checking indexmap v2.14.0
+   Compiling regex-automata v0.4.18
+    Checking lyon_geom v1.0.19
+    Checking uuid v1.24.1
+    Checking poodle-tokens v0.4.15 ([checkout]/packages/contracts/tokens)
+    Checking byteorder-lite v0.1.0
+    Checking compression-core v0.4.32
+    Checking value-bag-serde1 v1.13.2
+    Checking value-bag v1.13.2
+   Compiling winnow v0.7.15
+   Compiling heck v0.5.0
+   Compiling unicode-xid v0.2.6
+   Compiling toml_write v0.1.2
+    Checking siphasher v1.0.3
+    Checking objc2-foundation v0.3.2
+   Compiling serde_spanned v1.1.1
+   Compiling toml_datetime v1.1.1+spec-1.1.0
+    Checking objc2-core-video v0.3.2
+    Checking color_quant v1.1.0
+    Checking unicode-properties v0.1.3
+    Checking leak v0.1.2
+    Checking gimli v0.32.3
+   Compiling thiserror v1.0.69
+   Compiling shlex v1.3.0
+    Checking lyon_path v1.0.19
+    Checking log v0.4.33
+    Checking option-ext v0.2.0
+   Compiling cexpr v0.6.0
+   Compiling toml v1.1.4+spec-1.1.0
+    Checking pulp-wasm-simd-flag v0.1.1
+    Checking bytes v1.12.1
+    Checking reborrow v0.5.5
+    Checking bitflags v1.3.2
+    Checking unicode-ccc v0.4.0
+   Compiling objc-sys v0.3.5
+    Checking gpui-util-gpui-unofficial v1.22.0
+    Checking tracing-log v0.2.0
+    Checking collections-gpui-unofficial v1.22.0
+    Checking nu-ansi-term v0.50.3
+    Checking simplecss v0.2.2
+    Checking png v0.17.16
+    Checking tracing-subscriber v0.3.23
+    Checking http v1.5.0
+    Checking dirs-sys v0.4.1
+    Checking rustybuzz v0.20.1
+    Checking fontdb v0.23.0
+    Checking leaky-cow v0.1.1
+    Checking gif v0.14.2
+   Compiling embed-resource v3.0.11
+    Checking svgtypes v0.16.1
+    Checking tempfile v3.27.0
+    Checking image-webp v0.2.4
+    Checking compression-codecs v0.4.38
+   Compiling regex v1.13.1
+   Compiling serde_derive_internals v0.30.0
+    Checking hash32 v0.3.1
+    Checking rayon v1.12.0
+    Checking event-listener v5.4.2
+   Compiling convert_case v0.11.0
+    Checking cgl v0.3.2
+    Checking wait-timeout v0.2.1
+    Checking spin v0.9.9
+    Checking roxmltree v0.21.1
+    Checking aho-corasick v1.1.5
+    Checking zune-inflate v0.2.54
+    Checking lebe v0.5.3
+   Compiling synstructure v0.13.2
+    Checking float_next_after v1.0.0
+    Checking imagesize v0.14.0
+    Checking ryu v1.0.23
+   Compiling cbindgen v0.28.0
+   Compiling zed-font-kit v0.14.1-zed
+    Checking data-url v0.3.2
+    Checking same-file v1.0.6
+    Checking unicode-bidi v0.3.18
+   Compiling ztracing-macro-gpui-unofficial v1.22.0
+    Checking pico-args v0.5.0
+    Checking fnv v1.0.7
+    Checking base64 v0.22.1
+   Compiling serde_derive v1.0.229
+   Compiling zerovec-derive v0.11.5
+   Compiling displaydoc v0.2.7
+   Compiling foreign-types-macros v0.2.4
+   Compiling futures-macro v0.3.34
+   Compiling ref-cast-impl v1.0.27
+    Checking addr2line v0.25.1
+   Compiling schemars_derive v1.2.2
+    Checking fax v0.2.7
+    Checking foreign-types v0.5.0
+    Checking pxfm v0.1.30
+    Checking core-graphics v0.24.0
+   Compiling thiserror v2.0.20
+    Checking xmlwriter v0.1.0
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling zerocopy-derive v0.8.56
+   Compiling pin-project-internal v1.1.13
+    Checking futures-util v0.3.34
+   Compiling tracing-attributes v0.1.31
+   Compiling enumn v0.1.14
+   Compiling derive_more-impl v2.1.1
+    Checking accesskit v0.24.1
+   Compiling thiserror-impl v1.0.69
+    Checking quick-error v1.2.3
+    Checking dyn-clone v1.0.20
+    Checking bit-vec v0.8.0
+    Checking unicode-vo v0.1.0
+    Checking rustc-demangle v0.1.28
+    Checking zerofrom v0.1.8
+    Checking pin-project v1.1.13
+    Checking yoke v0.8.3
+    Checking bit_field v0.10.3
+    Checking usvg v0.46.0
+    Checking bit-set v0.8.0
+    Checking rusty-fork v0.3.1
+    Checking zerovec v0.11.8
+    Checking zerotrie v0.2.5
+    Checking core-text v21.0.0
+    Checking tracing v0.1.44
+   Compiling derive-refineable-gpui-unofficial v1.22.0
+   Compiling strum_macros v0.28.0
+   Compiling proptest-macro v0.5.0
+   Compiling profiling-procmacros v1.0.18
+    Checking metal v0.33.0
+   Compiling thiserror-impl v2.0.20
+    Checking walkdir v2.5.0
+    Checking tinystr v0.8.4
+    Checking potential_utf v0.1.6
+    Checking lyon_tessellation v1.0.20
+    Checking flume v0.12.0
+    Checking icu_collections v2.3.0
+    Checking icu_locale_core v2.3.0
+    Checking event-listener-strategy v0.5.4
+    Checking io-surface v0.16.1
+    Checking pathfinder_geometry v0.5.1
+    Checking http-body v1.1.0
+    Checking async-compression v0.4.43
+    Checking tiny-skia v0.11.4
+    Checking dirs v5.0.1
+    Checking lyon_algorithms v1.0.20
+    Checking poodle-layout v0.4.15 ([checkout]/packages/contracts/layout)
+    Checking png v0.18.1
+    Checking core-graphics2 v0.5.2
+    Checking futures-lite v2.6.1
+    Checking rand_xorshift v0.4.0
+    Checking icu_provider v2.3.0
+    Checking backtrace v0.3.76
+    Checking crossbeam-queue v0.3.13
+    Checking concurrent-queue v2.5.0
+    Checking icu_normalizer v2.3.0
+    Checking chrono v0.4.45
+    Checking icu_properties v2.3.0
+   Compiling toml_datetime v0.6.11
+   Compiling serde_spanned v0.6.9
+   Compiling perf-gpui-unofficial v1.22.0
+    Checking derive_more v2.1.1
+   Compiling toml_edit v0.22.27
+    Checking serde_urlencoded v0.7.1
+    Checking schemars v1.2.2
+    Checking qoi v0.4.1
+    Checking moxcms v0.8.1
+    Checking rgb v0.8.53
+    Checking futures-executor v0.3.34
+    Checking fixedbitset v0.5.7
+    Checking link-section v0.19.3
+    Checking futures v0.3.34
+    Checking svg_fmt v0.4.5
+    Checking web-time v1.1.0
+    Checking float-ord v0.3.2
+    Checking async-task v4.7.1
+    Checking smol_str v0.3.6
+    Checking pollster v0.2.5
+    Checking atomic v0.5.3
+   Compiling linktime-proc-macro v0.2.3
+    Checking static_assertions v1.1.0
+    Checking unarray v0.1.4
+   Compiling heck v0.4.1
+    Checking futures-concurrency v7.7.1
+    Checking postage v0.5.0
+    Checking etagere v0.2.15
+   Compiling util-macros-gpui-unofficial v1.22.0
+    Checking async-channel v2.5.0
+    Checking strum v0.28.0
+    Checking resvg v0.46.0
+    Checking lyon v1.0.19
+    Checking poodle-style v0.4.15 ([checkout]/packages/contracts/style)
+    Checking objc2 v0.5.3
+    Checking refineable-gpui-unofficial v1.22.0
+    Checking profiling v1.0.18
+   Compiling gpui-macros-gpui-unofficial v1.22.0
+    Checking taffy v0.13.0
+    Checking itertools v0.14.0
+    Checking num_cpus v1.17.0
+    Checking spin v0.10.1
+    Checking poodle-headless v0.4.15 ([checkout]/packages/contracts/headless)
+    Checking ctor v1.0.13
+    Checking raw-window-handle v0.6.2
+    Checking gpui-shared-string-gpui-unofficial v1.22.0
+    Checking waker-fn v1.2.0
+    Checking foldhash v0.2.0
+    Checking seahash v4.1.0
+    Checking pollster v0.4.0
+    Checking inventory v0.3.24
+    Checking hashbrown v0.16.1
+    Checking objc2-core-graphics v0.3.2
+    Checking cocoa-foundation v0.2.0
+   Compiling pulldown-cmark v0.13.4
+    Checking objc2-core-media v0.3.2
+    Checking idna_adapter v1.2.2
+    Checking zlog-gpui-unofficial v1.22.0
+    Checking idna v1.1.0
+    Checking objc2-core-text v0.3.2
+    Checking url v2.5.8
+    Checking dispatch2 v0.3.1
+    Checking accesskit_consumer v0.38.0
+    Checking sum-tree-gpui-unofficial v1.22.0
+    Checking objc2-foundation v0.2.2
+    Checking poodle-events v0.4.15 ([checkout]/packages/contracts/events)
+    Checking unicase v2.9.0
+    Checking cocoa v0.26.0
+    Checking poodle-adapter v0.4.15 ([checkout]/packages/contracts/adapter)
+    Checking mach2 v0.5.0
+    Checking http-client-gpui-unofficial v1.22.0
+   Compiling toml v0.8.23
+    Checking ppv-lite86 v0.2.21
+    Checking half v2.7.1
+    Checking rand_chacha v0.9.0
+    Checking exr v1.74.2
+    Checking tiff v0.11.3
+    Checking rand v0.9.5
+    Checking core-video v0.5.2
+   Compiling gpui-unofficial v1.22.0
+    Checking poodle-markdown v0.4.15 ([checkout]/packages/contracts/markdown)
+    Checking proptest v1.11.0
+    Checking scheduler-gpui-unofficial v1.22.0
+    Checking poodle-node v0.4.15 ([checkout]/packages/contracts/node)
+    Checking poodle-specs v0.4.15 ([checkout]/packages/contracts/components)
+    Checking objc2-app-kit v0.2.2
+    Checking image v0.25.10
+    Checking accesskit_macos v0.26.3
+   Compiling gpui-apple-gpui-unofficial v1.22.0
+    Checking poodle-render v0.4.15 ([checkout]/packages/render)
+    Checking poodle-gpui v0.4.15 ([checkout]/packages/gpui/adapter)
+    Checking objc2-core-image v0.3.2
+    Checking objc2-core-location v0.3.2
+    Checking objc2-cloud-kit v0.3.2
+    Checking objc2-core-data v0.3.2
+    Checking objc2-quartz-core v0.3.2
+    Checking objc2-screen-capture-kit v0.3.2
+    Checking objc2-user-notifications v0.3.2
+warning: unused import: `poodle_adapter::ThemeProvider`
+ --> [checkout]/packages/render/src/audio.rs:6:5
+  |
+6 | use poodle_adapter::ThemeProvider as _;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+    Checking objc2-app-kit v0.3.2
+warning: variable does not need to be mutable
+  --> [checkout]/packages/render/src/debug_dialog.rs:62:9
+   |
+62 |     let mut root = root.child(trigger);
+   |         ----^^^^
+   |         |
+   |         help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: `poodle-render` (lib) generated 2 warnings (run `cargo fix --lib -p poodle-render` to apply 1 suggestion)
+    Checking poodle-gpui-node-backend v0.4.15 ([checkout]/packages/gpui/node-backend)
+warning: variable does not need to be mutable
+   --> [checkout]/packages/gpui/node-backend/src/interaction.rs:944:25
+    |
+944 |                     let mut session = session.borrow_mut();
+    |                         ----^^^^^^^
+    |                         |
+    |                         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: `poodle-gpui-node-backend` (lib) generated 1 warning (run `cargo fix --lib -p poodle-gpui-node-backend` to apply 1 suggestion)
+    Checking gpui-macos-gpui-unofficial v1.22.0
+    Checking gpui-platform-gpui-unofficial v1.22.0
+    Checking poodle-gpui-preview v0.4.15 ([checkout]/packages/gpui/preview)
+warning: unused import: `RenderContext`
+  --> src/specimens/audio_controls.rs:19:40
+   |
+19 |     FaderLive, KnobHandlers, KnobLive, RenderContext, XYPadHandlers, XYPadLive,
+   |                                        ^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `RenderContext`
+  --> src/specimens/select.rs:27:62
+   |
+27 |     select, select_search_focus_id, select_trigger_focus_id, RenderContext, SelectHandlers,
+   |                                                              ^^^^^^^^^^^^^
+
+warning: unused import: `RenderContext`
+  --> src/specimens/history_center_specimen.rs:21:24
+   |
+21 |     HistoryCenterView, RenderContext,
+   |                        ^^^^^^^^^^^^^
+
+warning: function `all_components` is never used
+  --> src/component_registry.rs:40:8
+   |
+40 | pub fn all_components() -> Vec<&'static CanonicalComponent> {
+   |        ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: associated function `from_spec` is never used
+   --> src/node_compat.rs:172:19
+    |
+171 | impl Skeleton {
+    | ------------- associated function in this implementation
+172 |     pub(crate) fn from_spec(spec: SkeletonSpec, theme: &GpuiThemeProvider) -> AnyElement {
+    |                   ^^^^^^^^^
+
+warning: method `with_instance_id` is never used
+   --> src/node_compat.rs:224:19
+    |
+215 | impl StatusIndicator {
+    | -------------------- method in this implementation
+...
+224 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+    |                   ^^^^^^^^^^^^^^^^
+
+warning: methods `with_actions`, `size`, and `with_density` are never used
+   --> src/node_compat.rs:501:19
+    |
+482 | impl Callout {
+    | ------------ methods in this implementation
+...
+501 |     pub(crate) fn with_actions(
+    |                   ^^^^^^^^^^^^
+...
+509 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+    |                   ^^^^
+...
+514 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
+    |                   ^^^^^^^^^^^^
+
+warning: struct `MessageCenter` is never constructed
+   --> src/node_compat.rs:968:19
+    |
+968 | pub(crate) struct MessageCenter {
+    |                   ^^^^^^^^^^^^^
+
+warning: methods `on_dismiss` and `with_instance_id` are never used
+    --> src/node_compat.rs:1262:19
+     |
+1248 | impl AgentQuestion {
+     | ------------------ methods in this implementation
+...
+1262 |     pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^
+...
+1267 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: method `on_file_select` is never used
+    --> src/node_compat.rs:1582:19
+     |
+1554 | impl AgentTranscript {
+     | -------------------- method in this implementation
+...
+1582 |     pub(crate) fn on_file_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^
+
+warning: methods `with_instance_id`, `on_dismiss`, and `on_action` are never used
+    --> src/node_compat.rs:1735:19
+     |
+1702 | impl ToastStack {
+     | --------------- methods in this implementation
+...
+1735 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+1740 |     pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^
+...
+1745 |     pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+
+warning: methods `with_instance_id`, `on_dismiss`, and `on_action` are never used
+    --> src/node_compat.rs:1797:19
+     |
+1768 | impl ToastHost {
+     | -------------- methods in this implementation
+...
+1797 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+1802 |     pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^
+...
+1807 |     pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> src/node_compat.rs:1832:19
+     |
+1831 | impl MessageCenter {
+     | ------------------ associated items in this implementation
+1832 |     pub(crate) fn from_spec(spec: MessageCenterSpec, theme: &GpuiThemeProvider) -> Self {
+     |                   ^^^^^^^^^
+...
+1840 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+1845 |     pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^
+...
+1850 |     pub(crate) fn on_item_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^
+...
+1855 |     pub(crate) fn on_read_change(mut self, handler: Arc<dyn Fn(&str, bool) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^
+...
+1860 |     pub(crate) fn on_remove(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+1865 |     pub(crate) fn on_mark_all_read(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: method `on_open_change` is never used
+    --> src/node_compat.rs:1957:19
+     |
+1942 | impl DebugDialog {
+     | ---------------- method in this implementation
+...
+1957 |     pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^
+
+warning: methods `on_action`, `on_clear`, and `on_select_all` are never used
+    --> src/node_compat.rs:2027:19
+     |
+2018 | impl BulkActionBar {
+     | ------------------ methods in this implementation
+...
+2027 |     pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+2032 |     pub(crate) fn on_clear(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^
+...
+2037 |     pub(crate) fn on_select_all(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^
+
+warning: multiple methods are never used
+    --> src/node_compat.rs:2082:19
+     |
+2061 | impl AgentChatInput {
+     | ------------------- methods in this implementation
+...
+2082 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+2087 |     pub(crate) fn with_selection(mut self, start: usize, end: usize) -> Self {
+     |                   ^^^^^^^^^^^^^^
+...
+2092 |     pub(crate) fn with_is_focused(mut self, focused: bool) -> Self {
+     |                   ^^^^^^^^^^^^^^^
+...
+2097 |     pub(crate) fn on_value_change(
+     |                   ^^^^^^^^^^^^^^^
+...
+2105 |     pub(crate) fn on_selection_change(
+     |                   ^^^^^^^^^^^^^^^^^^^
+...
+2113 |     pub(crate) fn on_focus_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^^
+...
+2118 |     pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+2123 |     pub(crate) fn on_stop(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^
+
+warning: method `on_select` is never used
+    --> src/node_compat.rs:2626:19
+     |
+2613 | impl RelationPicker {
+     | ------------------- method in this implementation
+...
+2626 |     pub(crate) fn on_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+
+warning: method `on_request_close` is never used
+    --> src/node_compat.rs:2752:19
+     |
+2739 | impl Dialog {
+     | ----------- method in this implementation
+...
+2752 |     pub(crate) fn on_request_close(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: methods `on_submit` and `on_cancel` are never used
+    --> src/node_compat.rs:3015:19
+     |
+2945 | impl FormDialog {
+     | --------------- methods in this implementation
+...
+3015 |     pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+3020 |     pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+
+warning: methods `on_change` and `on_open_change` are never used
+    --> src/node_compat.rs:3138:19
+     |
+3113 | impl ModelPicker {
+     | ---------------- methods in this implementation
+...
+3138 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+3143 |     pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^
+
+warning: methods `with_instance_id` and `on_dismiss` are never used
+    --> src/node_compat.rs:3209:19
+     |
+3196 | impl ThemeSelect {
+     | ---------------- methods in this implementation
+...
+3209 |     pub(crate) fn with_instance_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+3214 |     pub(crate) fn on_dismiss(
+     |                   ^^^^^^^^^^
+
+warning: methods `with_instance_id`, `on_change`, `on_search_change`, `on_open_change`, and `on_dismiss` are never used
+    --> src/node_compat.rs:3673:19
+     |
+3653 | impl RefSelect {
+     | -------------- methods in this implementation
+...
+3673 |     pub(crate) fn with_instance_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+3678 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+3683 |     pub(crate) fn on_search_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+3690 |     pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^
+...
+3695 |     pub(crate) fn on_dismiss(
+     |                   ^^^^^^^^^^
+
+warning: method `on_click` is never used
+    --> src/node_compat.rs:3795:19
+     |
+3785 | impl NavCard {
+     | ------------ method in this implementation
+...
+3795 |     pub(crate) fn on_click(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+     |                   ^^^^^^^^
+
+warning: methods `on_remove` and `on_dismiss` are never used
+    --> src/node_compat.rs:4311:19
+     |
+4300 | impl Pill {
+     | --------- methods in this implementation
+...
+4311 |     pub(crate) fn on_remove(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+     |                   ^^^^^^^^^
+...
+4316 |     pub(crate) fn on_dismiss(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+     |                   ^^^^^^^^^^
+
+warning: method `with_copied` is never used
+    --> src/node_compat.rs:4548:19
+     |
+4503 | impl Code {
+     | --------- method in this implementation
+...
+4548 |     pub(crate) fn with_copied(mut self, copied: bool) -> Self {
+     |                   ^^^^^^^^^^^
+
+warning: method `on_page_change` is never used
+    --> src/node_compat.rs:4701:19
+     |
+4681 | impl ListContainer {
+     | ------------------ method in this implementation
+...
+4701 |     pub(crate) fn on_page_change(mut self, handler: Arc<dyn Fn(usize) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^
+
+warning: methods `on_submit`, `on_cancel`, and `on_clear` are never used
+    --> src/node_compat.rs:4961:19
+     |
+4913 | impl TextInput {
+     | -------------- methods in this implementation
+...
+4961 |     pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+4966 |     pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+4971 |     pub(crate) fn on_clear(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^
+
+warning: method `on_transition` is never used
+    --> src/node_compat.rs:5049:19
+     |
+5029 | impl Select {
+     | ----------- method in this implementation
+...
+5049 |     pub(crate) fn on_transition(
+     |                   ^^^^^^^^^^^^^
+
+warning: methods `with_id`, `on_remove`, and `on_browse` are never used
+    --> src/node_compat.rs:5295:19
+     |
+5284 | impl FileUpload {
+     | --------------- methods in this implementation
+...
+5295 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+5300 |     pub(crate) fn on_remove(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+5308 |     pub(crate) fn on_browse(
+     |                   ^^^^^^^^^
+
+warning: methods `with_size` and `with_density` are never used
+    --> src/node_compat.rs:5367:19
+     |
+5359 | impl LicenceStatus {
+     | ------------------ methods in this implementation
+...
+5367 |     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^^^^^^
+...
+5372 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
+     |                   ^^^^^^^^^^^^
+
+warning: method `on_activate` is never used
+    --> src/node_compat.rs:6065:19
+     |
+6038 | impl SelectionSummary {
+     | --------------------- method in this implementation
+...
+6065 |     pub(crate) fn on_activate(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^
+
+warning: method `with_focused_value` is never used
+    --> src/node_compat.rs:6200:19
+     |
+6145 | impl Tabs {
+     | --------- method in this implementation
+...
+6200 |     pub(crate) fn with_focused_value(mut self, value: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^^^
+
+warning: methods `on_change` and `on_query` are never used
+    --> src/node_compat.rs:6853:19
+     |
+6822 | impl TimeZoneSelect {
+     | ------------------- methods in this implementation
+...
+6853 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+6858 |     pub(crate) fn on_query(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^
+
+warning: methods `size` and `with_density` are never used
+    --> src/node_compat.rs:7090:19
+     |
+7058 | impl Accordion {
+     | -------------- methods in this implementation
+...
+7090 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+7095 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
+     |                   ^^^^^^^^^^^^
+
+warning: methods `on_confirm` and `on_cancel` are never used
+    --> src/node_compat.rs:7327:19
+     |
+7291 | impl AlertDialog {
+     | ---------------- methods in this implementation
+...
+7327 |     pub(crate) fn on_confirm(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^
+...
+7332 |     pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+
+warning: methods `with_id`, `working`, `working_label`, and `on_trigger` are never used
+    --> src/node_compat.rs:7397:19
+     |
+7381 | impl ConfirmAction {
+     | ------------------ methods in this implementation
+...
+7397 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+7412 |     pub(crate) fn working(mut self, working: bool) -> Self {
+     |                   ^^^^^^^
+...
+7417 |     pub(crate) fn working_label(mut self, label: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^
+...
+7422 |     pub(crate) fn on_trigger(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^
+
+warning: method `on_active_change` is never used
+    --> src/node_compat.rs:7704:19
+     |
+7676 | impl CommandPalette {
+     | ------------------- method in this implementation
+...
+7704 |     pub(crate) fn on_active_change(
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: method `with_instance_id` is never used
+    --> src/node_compat.rs:8232:19
+     |
+8221 | impl DetailItem {
+     | --------------- method in this implementation
+...
+8232 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: methods `cross_window_drag_source`, `on_panel_drop`, `on_reorder`, and `accept_panel` are never used
+    --> src/node_compat.rs:9249:19
+     |
+9213 | impl DockRegion {
+     | --------------- methods in this implementation
+...
+9249 |     pub(crate) fn cross_window_drag_source(
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^
+...
+9257 |     pub(crate) fn on_panel_drop(
+     |                   ^^^^^^^^^^^^^
+...
+9265 |     pub(crate) fn on_reorder(mut self, handler: Arc<dyn Fn(&[String]) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^
+...
+9270 |     pub(crate) fn accept_panel(
+     |                   ^^^^^^^^^^^^
+
+warning: methods `on_clear_filters` and `on_navigate` are never used
+    --> src/node_compat.rs:9391:19
+     |
+9377 | impl LogList {
+     | ------------ methods in this implementation
+...
+9391 |     pub(crate) fn on_clear_filters(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+9396 |     pub(crate) fn on_navigate(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^
+
+warning: `poodle-gpui-preview` (bin "poodle-preview") generated 40 warnings (run `cargo fix --bin "poodle-preview" -p poodle-gpui-preview` to apply 3 suggestions)
+    Finished `dev` profile [optimized + debuginfo] target(s) in 1m 14s
+warning: the following packages contain code that will be rejected by a future version of Rust: block v0.1.6
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+oxide: quick profile, build strategy, slot 111 cold, 92.2s, new slot, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-66c3bd2b through profile member links (debug), temp: inherited [scratch]
+oxide: flushed the removable volume before releasing slot 111 in 92.8 ms
+oxide: seeding skipped: recipient not fresh
+warning: unused import: `poodle_adapter::ThemeProvider`
+ --> [checkout]/packages/render/src/audio.rs:6:5
+  |
+6 | use poodle_adapter::ThemeProvider as _;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+  --> [checkout]/packages/render/src/debug_dialog.rs:62:9
+   |
+62 |     let mut root = root.child(trigger);
+   |         ----^^^^
+   |         |
+   |         help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> [checkout]/packages/gpui/node-backend/src/interaction.rs:944:25
+    |
+944 |                     let mut session = session.borrow_mut();
+    |                         ----^^^^^^^
+    |                         |
+    |                         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `RenderContext`
+  --> src/specimens/audio_controls.rs:19:40
+   |
+19 |     FaderLive, KnobHandlers, KnobLive, RenderContext, XYPadHandlers, XYPadLive,
+   |                                        ^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `RenderContext`
+  --> src/specimens/select.rs:27:62
+   |
+27 |     select, select_search_focus_id, select_trigger_focus_id, RenderContext, SelectHandlers,
+   |                                                              ^^^^^^^^^^^^^
+
+warning: unused import: `RenderContext`
+  --> src/specimens/history_center_specimen.rs:21:24
+   |
+21 |     HistoryCenterView, RenderContext,
+   |                        ^^^^^^^^^^^^^
+
+warning: variable does not need to be mutable
+    --> src/main.rs:2958:20
+     |
+2958 |         let (root, mut cx) = cx.add_window_view(|_window, cx| PreviewRoot::new(cx));
+     |                    ----^^
+     |                    |
+     |                    help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `all_components` is never used
+  --> src/component_registry.rs:40:8
+   |
+40 | pub fn all_components() -> Vec<&'static CanonicalComponent> {
+   |        ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: associated function `from_spec` is never used
+   --> src/node_compat.rs:172:19
+    |
+171 | impl Skeleton {
+    | ------------- associated function in this implementation
+172 |     pub(crate) fn from_spec(spec: SkeletonSpec, theme: &GpuiThemeProvider) -> AnyElement {
+    |                   ^^^^^^^^^
+
+warning: method `with_instance_id` is never used
+   --> src/node_compat.rs:224:19
+    |
+215 | impl StatusIndicator {
+    | -------------------- method in this implementation
+...
+224 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+    |                   ^^^^^^^^^^^^^^^^
+
+warning: methods `with_actions`, `size`, and `with_density` are never used
+   --> src/node_compat.rs:501:19
+    |
+482 | impl Callout {
+    | ------------ methods in this implementation
+...
+501 |     pub(crate) fn with_actions(
+    |                   ^^^^^^^^^^^^
+...
+509 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+    |                   ^^^^
+...
+514 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
+    |                   ^^^^^^^^^^^^
+
+warning: struct `MessageCenter` is never constructed
+   --> src/node_compat.rs:968:19
+    |
+968 | pub(crate) struct MessageCenter {
+    |                   ^^^^^^^^^^^^^
+
+warning: methods `on_dismiss` and `with_instance_id` are never used
+    --> src/node_compat.rs:1262:19
+     |
+1248 | impl AgentQuestion {
+     | ------------------ methods in this implementation
+...
+1262 |     pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^
+...
+1267 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: method `on_file_select` is never used
+    --> src/node_compat.rs:1582:19
+     |
+1554 | impl AgentTranscript {
+     | -------------------- method in this implementation
+...
+1582 |     pub(crate) fn on_file_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^
+
+warning: methods `with_instance_id`, `on_dismiss`, and `on_action` are never used
+    --> src/node_compat.rs:1735:19
+     |
+1702 | impl ToastStack {
+     | --------------- methods in this implementation
+...
+1735 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+1740 |     pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^
+...
+1745 |     pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+
+warning: methods `with_instance_id`, `on_dismiss`, and `on_action` are never used
+    --> src/node_compat.rs:1797:19
+     |
+1768 | impl ToastHost {
+     | -------------- methods in this implementation
+...
+1797 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+1802 |     pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^
+...
+1807 |     pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> src/node_compat.rs:1832:19
+     |
+1831 | impl MessageCenter {
+     | ------------------ associated items in this implementation
+1832 |     pub(crate) fn from_spec(spec: MessageCenterSpec, theme: &GpuiThemeProvider) -> Self {
+     |                   ^^^^^^^^^
+...
+1840 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+1845 |     pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^
+...
+1850 |     pub(crate) fn on_item_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^
+...
+1855 |     pub(crate) fn on_read_change(mut self, handler: Arc<dyn Fn(&str, bool) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^
+...
+1860 |     pub(crate) fn on_remove(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+1865 |     pub(crate) fn on_mark_all_read(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: method `on_open_change` is never used
+    --> src/node_compat.rs:1957:19
+     |
+1942 | impl DebugDialog {
+     | ---------------- method in this implementation
+...
+1957 |     pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^
+
+warning: methods `on_action`, `on_clear`, and `on_select_all` are never used
+    --> src/node_compat.rs:2027:19
+     |
+2018 | impl BulkActionBar {
+     | ------------------ methods in this implementation
+...
+2027 |     pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+2032 |     pub(crate) fn on_clear(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^
+...
+2037 |     pub(crate) fn on_select_all(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^
+
+warning: multiple methods are never used
+    --> src/node_compat.rs:2082:19
+     |
+2061 | impl AgentChatInput {
+     | ------------------- methods in this implementation
+...
+2082 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+2087 |     pub(crate) fn with_selection(mut self, start: usize, end: usize) -> Self {
+     |                   ^^^^^^^^^^^^^^
+...
+2092 |     pub(crate) fn with_is_focused(mut self, focused: bool) -> Self {
+     |                   ^^^^^^^^^^^^^^^
+...
+2097 |     pub(crate) fn on_value_change(
+     |                   ^^^^^^^^^^^^^^^
+...
+2105 |     pub(crate) fn on_selection_change(
+     |                   ^^^^^^^^^^^^^^^^^^^
+...
+2113 |     pub(crate) fn on_focus_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^^
+...
+2118 |     pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+2123 |     pub(crate) fn on_stop(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^
+
+warning: method `on_select` is never used
+    --> src/node_compat.rs:2626:19
+     |
+2613 | impl RelationPicker {
+     | ------------------- method in this implementation
+...
+2626 |     pub(crate) fn on_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+
+warning: method `on_request_close` is never used
+    --> src/node_compat.rs:2752:19
+     |
+2739 | impl Dialog {
+     | ----------- method in this implementation
+...
+2752 |     pub(crate) fn on_request_close(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: methods `on_submit` and `on_cancel` are never used
+    --> src/node_compat.rs:3015:19
+     |
+2945 | impl FormDialog {
+     | --------------- methods in this implementation
+...
+3015 |     pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+3020 |     pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+
+warning: methods `on_change` and `on_open_change` are never used
+    --> src/node_compat.rs:3138:19
+     |
+3113 | impl ModelPicker {
+     | ---------------- methods in this implementation
+...
+3138 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+3143 |     pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^
+
+warning: methods `with_instance_id` and `on_dismiss` are never used
+    --> src/node_compat.rs:3209:19
+     |
+3196 | impl ThemeSelect {
+     | ---------------- methods in this implementation
+...
+3209 |     pub(crate) fn with_instance_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+3214 |     pub(crate) fn on_dismiss(
+     |                   ^^^^^^^^^^
+
+warning: methods `with_instance_id`, `on_change`, `on_search_change`, `on_open_change`, and `on_dismiss` are never used
+    --> src/node_compat.rs:3673:19
+     |
+3653 | impl RefSelect {
+     | -------------- methods in this implementation
+...
+3673 |     pub(crate) fn with_instance_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+3678 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+3683 |     pub(crate) fn on_search_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+3690 |     pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^
+...
+3695 |     pub(crate) fn on_dismiss(
+     |                   ^^^^^^^^^^
+
+warning: method `on_click` is never used
+    --> src/node_compat.rs:3795:19
+     |
+3785 | impl NavCard {
+     | ------------ method in this implementation
+...
+3795 |     pub(crate) fn on_click(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+     |                   ^^^^^^^^
+
+warning: methods `on_remove` and `on_dismiss` are never used
+    --> src/node_compat.rs:4311:19
+     |
+4300 | impl Pill {
+     | --------- methods in this implementation
+...
+4311 |     pub(crate) fn on_remove(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+     |                   ^^^^^^^^^
+...
+4316 |     pub(crate) fn on_dismiss(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+     |                   ^^^^^^^^^^
+
+warning: method `with_copied` is never used
+    --> src/node_compat.rs:4548:19
+     |
+4503 | impl Code {
+     | --------- method in this implementation
+...
+4548 |     pub(crate) fn with_copied(mut self, copied: bool) -> Self {
+     |                   ^^^^^^^^^^^
+
+warning: method `on_page_change` is never used
+    --> src/node_compat.rs:4701:19
+     |
+4681 | impl ListContainer {
+     | ------------------ method in this implementation
+...
+4701 |     pub(crate) fn on_page_change(mut self, handler: Arc<dyn Fn(usize) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^
+
+warning: methods `on_submit`, `on_cancel`, and `on_clear` are never used
+    --> src/node_compat.rs:4961:19
+     |
+4913 | impl TextInput {
+     | -------------- methods in this implementation
+...
+4961 |     pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+4966 |     pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+4971 |     pub(crate) fn on_clear(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^
+
+warning: method `on_transition` is never used
+    --> src/node_compat.rs:5049:19
+     |
+5029 | impl Select {
+     | ----------- method in this implementation
+...
+5049 |     pub(crate) fn on_transition(
+     |                   ^^^^^^^^^^^^^
+
+warning: methods `with_id`, `on_remove`, and `on_browse` are never used
+    --> src/node_compat.rs:5295:19
+     |
+5284 | impl FileUpload {
+     | --------------- methods in this implementation
+...
+5295 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+5300 |     pub(crate) fn on_remove(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+5308 |     pub(crate) fn on_browse(
+     |                   ^^^^^^^^^
+
+warning: methods `with_size` and `with_density` are never used
+    --> src/node_compat.rs:5367:19
+     |
+5359 | impl LicenceStatus {
+     | ------------------ methods in this implementation
+...
+5367 |     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^^^^^^
+...
+5372 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
+     |                   ^^^^^^^^^^^^
+
+warning: method `on_activate` is never used
+    --> src/node_compat.rs:6065:19
+     |
+6038 | impl SelectionSummary {
+     | --------------------- method in this implementation
+...
+6065 |     pub(crate) fn on_activate(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^
+
+warning: method `with_focused_value` is never used
+    --> src/node_compat.rs:6200:19
+     |
+6145 | impl Tabs {
+     | --------- method in this implementation
+...
+6200 |     pub(crate) fn with_focused_value(mut self, value: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^^^
+
+warning: methods `on_change` and `on_query` are never used
+    --> src/node_compat.rs:6853:19
+     |
+6822 | impl TimeZoneSelect {
+     | ------------------- methods in this implementation
+...
+6853 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+...
+6858 |     pub(crate) fn on_query(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^
+
+warning: methods `size` and `with_density` are never used
+    --> src/node_compat.rs:7090:19
+     |
+7058 | impl Accordion {
+     | -------------- methods in this implementation
+...
+7090 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+7095 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
+     |                   ^^^^^^^^^^^^
+
+warning: methods `on_confirm` and `on_cancel` are never used
+    --> src/node_compat.rs:7327:19
+     |
+7291 | impl AlertDialog {
+     | ---------------- methods in this implementation
+...
+7327 |     pub(crate) fn on_confirm(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^
+...
+7332 |     pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^
+
+warning: methods `with_id`, `working`, `working_label`, and `on_trigger` are never used
+    --> src/node_compat.rs:7397:19
+     |
+7381 | impl ConfirmAction {
+     | ------------------ methods in this implementation
+...
+7397 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+7412 |     pub(crate) fn working(mut self, working: bool) -> Self {
+     |                   ^^^^^^^
+...
+7417 |     pub(crate) fn working_label(mut self, label: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^
+...
+7422 |     pub(crate) fn on_trigger(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^
+
+warning: method `on_active_change` is never used
+    --> src/node_compat.rs:7704:19
+     |
+7676 | impl CommandPalette {
+     | ------------------- method in this implementation
+...
+7704 |     pub(crate) fn on_active_change(
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: method `with_instance_id` is never used
+    --> src/node_compat.rs:8232:19
+     |
+8221 | impl DetailItem {
+     | --------------- method in this implementation
+...
+8232 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: methods `cross_window_drag_source`, `on_panel_drop`, `on_reorder`, and `accept_panel` are never used
+    --> src/node_compat.rs:9249:19
+     |
+9213 | impl DockRegion {
+     | --------------- methods in this implementation
+...
+9249 |     pub(crate) fn cross_window_drag_source(
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^
+...
+9257 |     pub(crate) fn on_panel_drop(
+     |                   ^^^^^^^^^^^^^
+...
+9265 |     pub(crate) fn on_reorder(mut self, handler: Arc<dyn Fn(&[String]) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^
+...
+9270 |     pub(crate) fn accept_panel(
+     |                   ^^^^^^^^^^^^
+
+warning: methods `on_clear_filters` and `on_navigate` are never used
+    --> src/node_compat.rs:9391:19
+     |
+9377 | impl LogList {
+     | ------------ methods in this implementation
+...
+9391 |     pub(crate) fn on_clear_filters(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+9396 |     pub(crate) fn on_navigate(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+     |                   ^^^^^^^^^^^
+
+
+running 40 tests
+........................................
+test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.26s
+
+oxide: quick profile, build+execute strategy, slot 111 warm, 142.5s, slot 111 was 688 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-66c3bd2b through profile member links (debug), temp: inherited [scratch]
+oxide: flushed the removable volume before releasing slot 111 in 114.0 ms
+oxide: auto-adopted [checkout]/packages/render/target -> [oxide-outputs]/poodle-f6c3770d for permanent-drive outputs; no existing outputs moved
+oxide: seeded 2 units (0.7 MiB) from slot 114; skipped 0 donor candidate units: unknown (4)
+     Locking 10 packages to latest compatible versions
+    Updating poodle-adapter v0.4.14 ([checkout]/packages/contracts/adapter) -> v0.4.15
+    Updating poodle-events v0.4.14 ([checkout]/packages/contracts/events) -> v0.4.15
+    Updating poodle-headless v0.4.14 ([checkout]/packages/contracts/headless) -> v0.4.15
+    Updating poodle-jetstream v0.4.14 ([checkout]/packages/jetstream/adapter) -> v0.4.15
+    Updating poodle-layout v0.4.14 ([checkout]/packages/contracts/layout) -> v0.4.15
+    Updating poodle-markdown v0.4.14 ([checkout]/packages/contracts/markdown) -> v0.4.15
+    Updating poodle-node v0.4.14 ([checkout]/packages/contracts/node) -> v0.4.15
+    Updating poodle-specs v0.4.14 ([checkout]/packages/contracts/components) -> v0.4.15
+    Updating poodle-style v0.4.14 ([checkout]/packages/contracts/style) -> v0.4.15
+    Updating poodle-tokens v0.4.14 ([checkout]/packages/contracts/tokens) -> v0.4.15
+   Compiling poodle-tokens v0.4.15 ([checkout]/packages/contracts/tokens)
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling version_check v0.9.5
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling memchr v2.8.3
+   Compiling poodle-headless v0.4.15 ([checkout]/packages/contracts/headless)
+   Compiling pulldown-cmark v0.13.6
+   Compiling serde_json v1.0.154
+   Compiling libc v0.2.191
+   Compiling poodle-events v0.4.15 ([checkout]/packages/contracts/events)
+   Compiling serde v1.0.229
+   Compiling grid v1.0.1
+   Compiling arrayvec v0.7.8
+   Compiling itoa v1.0.18
+   Compiling glam v0.29.3
+   Compiling poodle-layout v0.4.15 ([checkout]/packages/contracts/layout)
+   Compiling poodle-style v0.4.15 ([checkout]/packages/contracts/style)
+   Compiling poodle-adapter v0.4.15 ([checkout]/packages/contracts/adapter)
+   Compiling slotmap v1.1.1
+   Compiling syn v3.0.9
+   Compiling taffy v0.9.2
+   Compiling poodle-markdown v0.4.15 ([checkout]/packages/contracts/markdown)
+   Compiling serde_derive v1.0.229
+   Compiling poodle-specs v0.4.15 ([checkout]/packages/contracts/components)
+   Compiling poodle-node v0.4.15 ([checkout]/packages/contracts/node)
+   Compiling poodle-jetstream v0.4.15 ([checkout]/packages/jetstream/adapter)
+   Compiling poodle-render v0.4.15 ([checkout]/packages/render)
+warning: unused import: `poodle_adapter::ThemeProvider`
+ --> src/audio.rs:6:5
+  |
+6 | use poodle_adapter::ThemeProvider as _;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+  --> src/debug_dialog.rs:62:9
+   |
+62 |     let mut root = root.child(trigger);
+   |         ----^^^^
+   |         |
+   |         help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `resolved_icon_geometry` is never used
+  --> src/icon_geometry.rs:31:8
+   |
+31 | pub fn resolved_icon_geometry(
+   |        ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `write_resolved_frame` is never used
+  --> src/icon_geometry.rs:54:8
+   |
+54 | pub fn write_resolved_frame(runtime: &IconGeometryRuntime, node: &mut Node) {
+   |        ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `resolved_frame_point_caps` is never used
+  --> src/icon_geometry.rs:61:8
+   |
+61 | pub fn resolved_frame_point_caps(node: &Node) -> Vec<usize> {
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `compact_frame_point_caps` is never used
+  --> src/icon_geometry.rs:72:8
+   |
+72 | pub fn compact_frame_point_caps(runtime: &IconGeometryRuntime) -> Vec<usize> {
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `compact_frame_point_ptrs` is never used
+  --> src/icon_geometry.rs:76:8
+   |
+76 | pub fn compact_frame_point_ptrs(runtime: &IconGeometryRuntime) -> Vec<*const (i32, i32)> {
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `write_compact_into` is never used
+  --> src/icon_geometry.rs:80:4
+   |
+80 | fn write_compact_into(runtime: &IconGeometryRuntime, dest: &mut ResolvedIconGeometryFrame) {
+   |    ^^^^^^^^^^^^^^^^^^
+
+warning: `poodle-render` (lib) generated 8 warnings (run `cargo fix --lib -p poodle-render` to apply 1 suggestion)
+warning: unused variable: `value`
+   --> src/sidebar_nav.rs:753:54
+    |
+753 |                 on_context_menu: Some(Arc::new(move |value, origin| {
+    |                                                      ^^^^^ help: if this is intentional, prefix it with an underscore: `_value`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `poodle-render` (lib test) generated 3 warnings (2 duplicates) (run `cargo fix --lib -p poodle-render --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 22.65s
+     Running unittests src/lib.rs ([oxide-pool]/slots/poodle-17cf731a/quick-116/build/debug/deps/poodle_render-843fd6081cf59752)
+
+running 690 tests
+test accordion::tests::instance_scope_keeps_trigger_and_panel_identity_independent ... ok
+test app_header::tests::app_header_accessible_label_resolution ... ok
+test app_header::tests::app_header_custom_identity_slot_replaces_default_title_group ... ok
+test accordion::tests::multiple_mode_exposes_group_role_and_complete_set_results ... ok
+test accordion::tests::keyed_content_reaches_the_expanded_item ... ok
+test agent_transcript::tests::jump_control_uses_the_transcript_recipe_and_real_activation ... ok
+test accordion::tests::single_mode_omits_root_group_and_reports_resulting_selection ... ok
+test accordion::tests::disabled_items_do_not_activate_or_focus ... ok
+test agent_plan_record::tests::toggle_identity_does_not_include_expanded_state ... ok
+test agent_chat_input::tests::attention_regions_follow_status_and_stay_inside_the_field ... ok
+test agent_subagent::tests::an_instance_scope_isolates_backend_state_ids ... ok
+test action_discovery_panel::tests::an_instance_scope_isolates_backend_state_ids ... ok
+test agent_plan::tests::plan_title_is_a_levelled_heading ... ok
+test agent_plan_record::tests::an_instance_scope_isolates_backend_state_ids ... ok
+test agent_plan::tests::an_instance_scope_isolates_backend_state_ids ... ok
+test agent_chat_input::tests::contract_tokens_and_data_metadata_are_exact ... ok
+test agent_question::tests::option_group_is_labelled_by_the_prompt_node ... ok
+test accordion::tests::empty_instance_scope_is_rejected - should panic ... ok
+test app_header::tests::app_header_size_ladder_and_typography ... ok
+test app_header::tests::app_header_density_ladder_and_spacing ... ok
+test app_header::tests::app_header_exact_tokens_and_root_styling ... ok
+test app_header::tests::app_header_slot_builders_receive_scoped_context ... ok
+test app_header::tests::centered_layout_without_actions_or_utility_still_emits_the_trailing_column ... ok
+test app_header::tests::default_layout_keeps_actions_and_utility_as_flat_region_children ... ok
+test app_header::tests::centered_layout_groups_actions_and_utility_into_a_trailing_column ... ok
+test app_header::tests::size_resolution_and_label_are_unchanged_by_the_centre_region ... ok
+test audio::tests::presentation_axes_change_geometry_without_changing_visual_state ... ok
+test audio_specimens::tests::the_requested_density_reaches_the_control ... ok
+test audio::tests::envelope_points_keep_independent_slider_semantics ... ok
+test audio::tests::controls_expose_native_roles_and_value_text ... ok
+test audio_specimens::tests::the_requested_size_reaches_the_control ... ok
+test breadcrumbs::tests::a_text_only_crumb_stays_a_bare_text_node ... ok
+test breadcrumbs::tests::a_malformed_icon_only_item_renders_its_label ... ok
+test audio::tests::stereo_meter_has_two_visual_channels ... ok
+test audio::tests::phase_three_renderers_expose_visual_state_semantics ... ok
+test audio_handlers::tests::instance_ids_scope_roots_and_entry ... ok
+test audio_handlers::tests::host_replacement_applies_during_a_gesture ... ok
+test audio_handlers::tests::empty_instance_id_is_rejected - should panic ... ok
+test breadcrumbs::tests::a_linkless_crumb_calls_on_navigate_with_its_value ... ok
+test block_editor::tests::two_blocks_do_not_share_select_runtime_ids ... ok
+test breadcrumbs::tests::an_icon_crumb_keeps_glyph_and_label_in_one_target ... ok
+test breadcrumbs::tests::an_icon_only_crumb_drops_the_text_but_keeps_the_name ... ok
+test breadcrumbs::tests::item_icons_take_the_resolved_breadcrumbs_size_without_a_role_shift ... ok
+test breadcrumbs::tests::the_icon_label_gap_is_the_tighter_inline_step ... ok
+test breadcrumbs::tests::href_current_and_ellipsis_crumbs_do_not_invoke_on_navigate ... ok
+test breadcrumbs::tests::text_icon_and_icon_only_callback_crumbs_are_one_button_target ... ok
+test breadcrumbs::tests::the_truncation_ellipsis_stays_a_plain_crumb ... ok
+test button::tests::clicking_reports_through_the_handler ... ok
+test button::tests::chevron_pulls_in_with_a_negative_left_margin ... ok
+test button::tests::controls_target_reaches_the_accessibility_channel ... ok
+test bulk_action_bar::tests::region_carries_the_bulk_actions_name_and_select_all_total_suffix ... ok
+test button::tests::gap_ladders_on_density ... ok
+test button::tests::icon_only_button_is_square_with_no_min_width_or_padding ... ok
+test button::tests::hover_active_recipes_follow_variant_and_tone ... ok
+test button::tests::icons_and_spinner_ride_in_the_icon_md_wrapper_box ... ok
+test button::tests::icons_use_the_sm_icon_token_not_the_font_ladder ... ok
+test button::tests::pressed_non_primary_toggle_takes_the_accent_treatment ... ok
+test button::tests::leading_inset_fixtures_emit_the_css_padding ... ok
+test button::tests::loading_disables_activation_and_shows_the_sm_spinner ... ok
+test button::tests::metrics_follow_the_web_css_ladder ... ok
+test button::tests::primary_border_is_the_darkened_fill ... ok
+test button::tests::secondary_status_tone_idle_has_tinted_fill_and_plain_border ... ok
+test button::tests::secondary_default_idle_fill_is_elevation_stacked ... ok
+test button::tests::toggle_disclosure_and_focus_state_reach_the_accessibility_channel ... ok
+test bx::tests::resolves_dimensions_padding_overflow_and_children ... ok
+test calendar::tests::range_selection_starts_completes_swaps_and_restarts ... ok
+test button::tests::semantic_token_roles_are_stamped_with_resolved_values ... ok
+test callout::tests::an_instance_scope_isolates_backend_state_ids ... ok
+test callout::tests::dismiss_control_is_a_named_focusable_button ... ok
+test callout::tests::solid_surface_stamps_primary_foreground_on_content_and_pending_spinner ... ok
+test card::tests::default_card_matches_the_old_tiers_border_and_ring ... ok
+test card::tests::selected_card_keeps_a_one_pixel_border_and_two_accent_rings ... ok
+test card_toggle_group::tests::a_disabled_group_dims_each_option_once_and_wires_nothing ... ok
+test audio_specimens::tests::examples_pane_carries_no_axis_matrix ... ok
+test card_toggle_group::tests::a_disabled_option_dims_and_shows_the_not_allowed_cursor ... ok
+test card_toggle_group::tests::deactivation_reports_null_when_the_spec_allows_it ... ok
+test card_toggle_group::tests::enabled_options_keep_the_old_tiers_pointer_without_a_handler ... ok
+test card_toggle_group::tests::count_pill_follows_the_size_ladder ... ok
+test card_toggle_group::tests::grid_gap_follows_the_density_ladder ... ok
+test card_toggle_group::tests::option_cells_carry_the_button_role_and_pressed_state ... ok
+test card_toggle_group::tests::selected_card_carries_the_accent_border_and_option_label ... ok
+test card_toggle_group::tests::responsive_cells_seed_at_a_column_share_and_wrap_at_the_minimum ... ok
+test card_toggle_group::tests::toggling_an_option_reports_the_resulting_value_through_the_handlers ... ok
+test card_toggle_group::tests::the_legacy_entry_point_keeps_the_pressed_value_payload ... ok
+test changed_files::tests::an_instance_scope_isolates_backend_state_ids ... ok
+test checkbox::tests::mixed_resolves_to_checked_and_projects_mixed_until_then ... ok
+test checkbox::tests::disabled_is_out_of_focus_and_activation ... ok
+test card_toggle_group::tests::title_and_description_fonts_follow_the_size_ladder ... ok
+test code::tests::block_source_uses_contract_relative_line_height ... ok
+test code::tests::block_wrap_preserves_newlines_and_controls_long_tokens ... ok
+test checkbox::tests::readonly_stays_focusable_without_an_activate_handler ... ok
+test code_input::tests::clicking_a_filled_slot_selects_its_character ... ok
+test code_input::tests::a_disabled_code_input_takes_no_keys ... ok
+test code_input::tests::a_digit_appends_and_the_last_one_completes ... ok
+test code_input::tests::keys_that_change_nothing_report_nothing ... ok
+test code_input::tests::completion_indicator_renders_for_the_checked_value_only ... ok
+test code::tests::inline_wrap_preserves_normal_breaks_and_anywhere_breaks_tokens ... ok
+test collapse_toggle::tests::activation_reports_the_next_collapsed_value_without_owning_state ... ok
+test collapse_toggle::tests::collapsed_default_projects_expand_label_and_expanded_false ... ok
+test code_input::tests::pasting_a_code_fills_it_and_completes ... ok
+test code_input::tests::group_margins_follow_explicit_partitions_only ... ok
+test code_input::tests::the_slot_row_takes_the_keys_and_no_slot_does ... ok
+test collapse_toggle::tests::disabled_suppresses_activation_focus_and_the_ring ... ok
+test code_input::tests::typing_into_a_full_code_overwrites_the_last_slot ... ok
+test collapse_toggle::tests::expanded_default_projects_collapse_label_and_expanded_true ... ok
+test collapse_toggle::tests::enabled_control_is_a_button_tab_stop_with_the_contracted_ring ... ok
+test collapse_toggle::tests::explicit_label_overrides_both_collapsed_states ... ok
+test code_input::tests::separators_follow_valid_group_boundaries ... ok
+test collapsible::tests::activation_reports_the_next_open_value ... ok
+test collapsible::tests::aria_label_names_the_trigger_when_title_is_absent ... ok
+test collapsible::tests::disabled_suppresses_activation_and_focus ... ok
+test collapse_toggle::tests::every_direction_paints_the_authored_chevron_and_its_opposite ... ok
+test collapsible::tests::instance_scope_isolates_backend_state_ids ... ok
+test collapsible::tests::default_open_projects_to_paint_and_expanded_state ... ok
+test collapsible::tests::controlled_open_wins_over_default_open_seed ... ok
+test collapsible::tests::legacy_instances_emit_no_colliding_identity_or_false_relationships ... ok
+test collapsible::tests::scoped_instances_wire_controls_and_labelled_by ... ok
+test collapsible::tests::trigger_identity_does_not_include_open_state ... ok
+test confirm_action::tests::open_custom_slots_and_actions_stay_live ... ok
+test command_palette::tests::query_select_and_close_handlers_reach_their_nodes ... ok
+test confirm_action::tests::open_keeps_the_default_trigger_mounted_and_live ... ok
+test context::tests::context_exposes_the_borrowed_token_only_theme ... ok
+test context::tests::button_and_text_input_inherit_the_provider_scope ... ok
+test context::tests::explicit_default_density_wins_inside_a_comfortable_scope ... ok
+test context::tests::explicit_md_wins_inside_a_non_default_scope ... ok
+test context::tests::explicit_md_and_default_reset_wins_inside_a_non_default_scope ... ok
+test context::tests::motion_defaults_to_full_and_nests_by_restriction ... ok
+test context::tests::a_scoped_host_slot_builds_inside_the_composites_scope ... ok
+test context::tests::motion_provider_builds_the_child_unchanged_without_node_metadata ... ok
+test context::tests::nested_provider_replaces_the_outer_scope_for_its_closure_only ... ok
+test context::tests::outer_scope_replaces_both_defaults ... ok
+test context::tests::presentation_scope_preserves_motion ... ok
+test context::tests::nested_scope_replaces_the_outer_defaults ... ok
+test context::tests::provider_builds_child_inside_its_scope_and_returns_it_unchanged ... ok
+test context::tests::role_mapping_applies_only_to_inherited_size ... ok
+test context::tests::root_defaults_are_md_and_default ... ok
+test context::tests::sibling_scopes_restore_the_parent_by_borrowing ... ok
+test context::tests::the_provider_adds_no_wrapper_node_layout_or_accessibility_entry ... ok
+test context_menu::tests::dismiss_handler_registers_the_surface_layer ... ok
+test detail_section_group::tests::max_columns_seeds_each_grid_cell_with_the_old_percentage_width ... ok
+test color::tests::solid_tone_surface_promotes_tint_borders_with_readable_primary_foreground ... ok
+test audio_specimens::tests::each_axis_step_returns_one_representative ... ok
+test date_time_zone_picker::tests::empty_instance_scope_is_rejected - should panic ... ok
+test context_menu::tests::refusal_forwarded_into_composed_menu_surface ... ok
+test dialog::tests::bare_dialog_mode_mounts_children_directly_into_panel ... ok
+test dialog::tests::dismiss_on_backdrop_disabled_omits_root_activation ... ok
+test dialog::tests::dismissal_wiring_for_backdrop_and_escape ... ok
+test detail_shell::tests::loading_shell_keeps_the_header_rule_and_grid_spinner_row ... ok
+test dialog::tests::width_presets_apply_to_panel_sizing ... ok
+test dialog::tests::renders_dialog_backdrop_and_surface ... ok
+test dock_region::tests::a_hovered_tab_runs_accept_panel_on_hover_and_commit ... ok
+test dock_region::tests::a_dock_panel_is_a_subject_its_own_zone_refuses ... ok
+test dock_region::tests::a_static_stack_item_lands_before_or_after_the_hovered_half ... ok
+test dock_region::tests::a_static_stack_follows_the_dock_edge_axis ... ok
+test dock_region::tests::an_instance_scope_isolates_backend_state_ids ... ok
+test drag_drop::tests::a_file_export_source_is_a_copy_and_carries_only_its_bridge ... ok
+test dock_region::tests::outer_node_is_a_named_region_and_the_strip_owns_the_tablist ... ok
+test drag_drop::tests::a_nested_target_carries_the_same_scope_and_self_drop_rules ... ok
+test dock_region::tests::show_tabs_false_emits_no_tab_nodes_but_keeps_toggle_and_body ... ok
+test drag_drop::tests::a_nested_target_keeps_its_edge_bands_and_a_leaf_never_answers_inside ... ok
+test dock_region::tests::collapsed_icon_strips_nest_a_named_tablist_under_the_region ... ok
+test drag_drop::tests::a_reorder_destination_accounts_for_the_removed_row_and_stays_in_range ... ok
+test drag_drop::tests::a_reorder_row_rejects_itself_with_a_reason_rather_than_going_quiet ... ok
+test drag_drop::tests::an_arrival_band_answers_from_the_travelling_direction ... ok
+test drag_drop::tests::an_inbound_file_target_accepts_only_the_external_family ... ok
+test drag_drop::tests::applying_a_reorder_returns_the_whole_next_order_or_none ... ok
+test drag_drop::tests::edges_round_trip_and_an_unknown_position_has_none ... ok
+test drag_drop::tests::keyboard_traversal_maps_direction_onto_placement ... ok
+test drag_drop::tests::one_reorder_surface_is_ineligible_for_another_surfaces_subject ... ok
+test drag_drop::tests::an_inert_row_registers_neither_source_nor_target ... ok
+test drag_drop::tests::source_and_target_ids_are_scoped_per_instance ... ok
+test duration_input::tests::arrow_up_on_minutes_carries_into_hours ... ok
+test duration_input::tests::hiding_seconds_leaves_the_stored_value_in_the_callback ... ok
+test duration_input::tests::a_disabled_duration_input_takes_no_keys ... ok
+test duration_input::tests::display_text_comes_from_the_segment_fields ... ok
+test editable_label::tests::commit_reports_trimmed_value_and_committed_previous ... ok
+test duration_input::tests::every_segment_is_its_own_focus_stop ... ok
+test duration_input::tests::a_large_hours_total_is_reported_as_u64 ... ok
+test duration_input::tests::derived_invalid_follows_inclusive_bounds ... ok
+test duration_input::tests::keys_that_are_not_ours_pass_through ... ok
+test duration_input::tests::digits_shift_into_the_focused_segment ... ok
+test editable_label::tests::inserted_text_appends_and_max_length_is_enforced ... ok
+test editable_label::tests::live_draft_paints_without_moving_committed_value ... ok
+test eyebrow::tests::emits_the_old_gpui_typography_channels ... ok
+test empty_state::tests::compact_and_default_sizes_use_distinct_title_and_icon_geometry ... ok
+test editable_label::tests::native_end_editing_maps_space_shift_and_backspace ... ok
+test file_upload::tests::browse_intent_wires_the_dropzone_when_supplied ... ok
+test file_upload::tests::no_browse_handler_and_disabled_keep_the_zone_inert ... ok
+test floating_overlay::tests::wrapper_is_pinned_to_the_anchor_for_end_placement ... ok
+test floating_overlay::tests::gap_is_the_authored_offset ... ok
+test grid::tests::fractional_tracks_keep_their_declared_weight ... ok
+test file_upload::tests::remove_handlers_survive_beside_browse ... ok
+test history_center::tests::a_surface_without_a_rejection_paints_no_notice ... ok
+test history_center::tests::a_single_fork_disables_the_select_but_not_its_actions ... ok
+test history_center::tests::busy_makes_both_triggers_inert ... ok
+test history_center::tests::an_open_rename_replaces_the_select ... ok
+test filter_builder::tests::outside_interact_refusal_marks_the_open_surface ... ok
+test history_center::tests::every_focusable_control_is_reachable_through_a_declared_focus_treatment ... ok
+test history_center::tests::delete_confirmation_emits_only_confirm_and_cancel_intents ... ok
+test history_center::tests::a_closed_centre_has_a_trigger_and_no_surface ... ok
+test history_center::tests::no_rows_renders_the_empty_state_and_no_list ... ok
+test history_center::tests::a_disclosed_run_nests_one_level_without_moving_the_spine ... ok
+test history_center::tests::the_disclosure_names_its_forks_and_its_direction ... ok
+test history_center::tests::the_list_is_bounded_and_scrolls ... ok
+test history_center::tests::rows_carry_stable_identity_and_an_announced_level ... ok
+test icon::tests::custom_icon_names_pass_through ... ok
+test icon::tests::emits_the_explicit_gpui_svg_tint ... ok
+test history_center::tests::the_rename_input_reports_keys_as_content_with_shift_and_space_intact ... ok
+test icon_button::tests::activation_fires_the_handler ... ok
+test history_center::tests::the_tab_stop_follows_the_machines_roving_focus ... ok
+test icon_button::tests::an_unset_icon_renders_no_glyph ... ok
+test history_center::tests::delete_is_opt_in_and_the_menu_item_only_requests_confirmation ... ok
+test history_center::tests::token_roles_project_onto_the_root ... ok
+test icon_button::tests::danger_variant_uses_the_raw_status_tokens ... ok
+test icon_button::tests::command_only_activation_never_emits_pressed_change ... ok
+test icon_button::tests::disabled_is_dimmed_not_allowed_and_inert ... ok
+test icon_button::tests::focus_and_disclosure_semantics_reach_the_node ... ok
+test icon_button::tests::ghost_default_is_fully_transparent_with_primary_text ... ok
+test icon_button::tests::default_pressed_seeds_toggled_state_and_first_activation_reports_false ... ok
+test icon_button::tests::explicit_tooltip_wins_and_empty_text_is_omitted ... ok
+test history_center::tests::every_rejection_code_renders_its_own_copy_in_the_live_region ... ok
+test icon_button::tests::pressed_primary_keeps_its_variant_styling ... ok
+test icon_button::tests::hover_and_active_mix_the_fill_toward_elevated ... ok
+test icon_button::tests::ghost_toned_paints_the_tone_on_the_glyph_only ... ok
+test icon_button::tests::loading_swaps_the_glyph_for_the_fixed_size_ring_spinner ... ok
+test icon_button::tests::primary_darkens_its_own_fill_for_the_border ... ok
+test icon_button::tests::no_shadow_in_any_state ... ok
+test icon_button::tests::glyph_size_resolves_through_the_icon_token_ladder ... ok
+test icon_button::tests::pressed_non_primary_gets_the_solid_accent_treatment ... ok
+test icon_button::tests::secondary_default_uses_the_token_values ... ok
+test icon_button::tests::secondary_toned_mixes_status_into_surface_and_border ... ok
+test icon_button::tests::primary_toned_fill_is_the_status_color_with_a_darkened_border ... ok
+test icon_button::tests::square_follows_the_axis_faithful_recipe ... ok
+test icon_button::tests::toggle_activation_reports_the_inverse_before_the_command ... ok
+test icon_geometry::tests::named_icon_path_stays_a_named_icon_node ... ok
+test icon_geometry::tests::interior_samples_reuse_compact_and_node_capacity ... ok
+test icon_button::tests::unavailable_targets_emit_nothing ... ok
+test icon_geometry::tests::resolved_frame_carries_no_pair_identity ... ok
+test icon_provider::tests::passthrough_returns_the_child_unchanged ... ok
+test icon::tests::default_specimen_icons_have_paint_assets ... ok
+test licence_activation::tests::key_mode_renders_no_account_or_offline_route ... ok
+test icon_geometry::tests::construction_is_sealed_from_the_crate_root ... ok
+test licence_activation::tests::account_mode_opens_on_account_and_switches_offline ... ok
+test licence_activation::tests::machine_label_enter_and_escape_restore_display_focus_blur_does_not ... ok
+test licence_activation::tests::machine_label_change_commit_and_cancel_are_distinct ... ok
+test licence_activation::tests::submit_is_blocked_while_pending_or_disabled ... ok
+test licence_seats::tests::empty_seats_render_nothing ... ok
+test licence_activation::tests::offline_view_browses_through_the_generic_seam ... ok
+test licence_activation::tests::segmented_key_entry_composes_grouped_code_input ... ok
+test licence_seats::tests::labelled_and_unnamed_rows_render_honestly ... ok
+test licence_activation::tests::machine_naming_is_opt_in_and_blank_emits_null ... ok
+test licence_seats::tests::pending_affects_only_the_matching_row ... ok
+test licence_seats::tests::this_machine_cannot_be_released_others_can ... ok
+test licence_activation::tests::submit_fires_in_account_and_offline_routes ... ok
+test licence_seats::tests::rename_enter_and_escape_restore_display_focus_blur_does_not ... ok
+test licence_seats::tests::rename_emits_trimmed_label_and_null_for_blank ... ok
+test list_card::tests::activation_only_reaches_available_interactive_cards ... ok
+test licence_status::tests::coverage_rows_cover_null_and_value_combinations ... ok
+test list_card::tests::eyebrow_renders_above_the_title_and_is_absent_when_unset ... ok
+test licence_seats::tests::release_emits_the_exact_machine_id_after_confirm ... ok
+test list_card_counter::tests::icon_and_count_share_the_secondary_tone ... ok
+test list_card::tests::outside_interact_refusal_marks_the_card_root ... ok
+test listbox::tests::emits_listbox_option_semantics_focus_and_token_ring ... ok
+test list_container::tests::ready_pager_preserves_full_width_summary_and_end_aligned_controls ... ok
+test listbox::tests::empty_and_disabled_roots_use_the_contract_tab_stop ... ok
+test listbox::tests::host_row_renderer_receives_selection_and_focus ... ok
+test list_container::tests::accessible_name_prefers_aria_label_and_empty_variant_reaches_empty_state ... ok
+test log_list::tests::an_empty_stream_renders_the_empty_surface ... ok
+test log_list::tests::accessible_name_uses_aria_label_and_falls_back_to_log_output ... ok
+test log_list::tests::audit_entries_switch_the_list_into_audit_mode ... ok
+test log_list::tests::audit_actor_and_resource_hrefs_compose_focusable_links ... ok
+test log_list::tests::level_filter_drops_non_matching_rows ... ok
+test log_list::tests::clear_filters_composes_a_focusable_ghost_button ... ok
+test log_list::tests::max_entries_caps_the_rendered_rows ... ok
+test log_list::tests::stream_mode_uses_the_log_role ... ok
+test markdown_editor::tests::apply_toolbar_tool_matches_svelte_syntax ... ok
+test log_list::tests::stream_rows_render_timestamp_level_and_message ... ok
+test markdown_editor::tests::split_body_shrinks_and_preview_owns_scroll ... ok
+test log_list::tests::text_filter_matches_the_message_case_insensitively ... ok
+test menu::tests::checked_items_render_production_icon_metadata ... ok
+test markdown_editor::tests::preview_mode_disables_tool_buttons ... ok
+test menu::tests::disabled_items_are_not_focusable_and_lack_activation ... ok
+test markdown_editor::tests::preview_pane_declares_vertical_scroll_overflow ... ok
+test menu::tests::outside_interact_refusal_marks_the_menu_surface ... ok
+test markdown_editor::tests::edit_pane_is_a_labelled_text_input ... ok
+test menu::tests::single_entry_tab_posture_assigns_zero_to_first_enabled_and_minus_one_to_all_others ... ok
+test markdown_editor::tests::toolbar_bold_wraps_the_current_value_through_on_change ... ok
+test menu::tests::roving_key_navigation_skips_disabled_and_separators ... ok
+test menubar::tests::refusal_forwarded_into_open_overlay_surface ... ok
+test message_center::tests::closed_center_only_renders_trigger_and_unread_indicator ... ok
+test menubar::tests::trigger_keys_and_dismiss_layer_follow_the_handlers ... ok
+test message_center::tests::open_center_renders_dialog_list_and_item_controls ... ok
+test message_center::tests::selectable_row_uses_contract_hover_radius_and_inset_focus_ring ... ok
+test message_center::tests::mixed_feed_renders_progress_and_respects_item_policies ... ok
+test message_center::tests::progress_updates_render_in_place_without_local_authority ... ok
+test message_center::tests::caller_scoped_runtime_ids_do_not_alias ... ok
+test model_catalogue_editor::tests::a_disabled_row_locks_only_itself ... ok
+test model_catalogue_editor::tests::a_shown_only_catalogue_renders_no_hidden_section ... ok
+test model_catalogue_editor::tests::an_admitted_pointer_drag_moves_through_the_same_order_payload ... ok
+test model_catalogue_editor::tests::a_scoped_editor_requests_scoped_focus_destinations ... ok
+test model_catalogue_editor::tests::arrow_keys_report_the_list_boundary_without_emitting_an_order ... ok
+test model_catalogue_editor::tests::drag_can_be_turned_off_while_keyboard_and_buttons_remain ... ok
+test model_catalogue_editor::tests::hiding_the_last_shown_model_discloses_and_focuses_the_hidden_section ... ok
+test model_catalogue_editor::tests::duplicate_labels_stay_distinct_rows_keyed_by_id ... ok
+test model_catalogue_editor::tests::explicit_moves_emit_the_complete_shown_order_and_follow_focus ... ok
+test model_catalogue_editor::tests::hiding_the_last_shown_model_names_a_destination_that_can_take_focus ... ok
+test model_catalogue_editor::tests::hidden_restore_controls_keep_their_scoped_identity ... ok
+test model_catalogue_editor::tests::every_posture_renders_its_own_copy_and_no_rows ... ok
+test model_catalogue_editor::tests::hiding_emits_only_visibility_and_moves_focus_to_the_next_shown_model ... ok
+test model_catalogue_editor::tests::restoring_emits_visibility_and_never_chooses_a_position ... ok
+test licence_status::tests::authority_reads_reach_the_tree_as_data_state_only ... ok
+test model_catalogue_editor::tests::rows_carry_position_badges_and_host_content_keyed_by_id ... ok
+test model_catalogue_editor::tests::an_instance_scope_isolates_backend_state_ids ... ok
+test model_catalogue_editor::tests::the_host_may_override_a_posture_heading_and_message ... ok
+test model_catalogue_editor::tests::move_actions_are_disabled_at_the_boundaries ... ok
+test model_catalogue_editor::tests::locked_surfaces_stay_readable_and_take_no_edits ... ok
+test model_connection_card::tests::a_disabled_card_is_inert_but_readable ... ok
+test model_connection_card::tests::a_scoped_card_restores_focus_to_its_own_disclosure ... ok
+test model_catalogue_editor::tests::the_live_region_says_what_the_host_last_stored ... ok
+test licence_status::tests::every_state_renders_with_the_web_copy ... ok
+test model_connection_card::tests::an_off_card_dims_its_copy_but_never_its_switch ... ok
+test model_catalogue_editor::tests::the_hidden_section_controls_and_labelled_by_agree_after_stamping ... ok
+test model_connection_card::tests::closing_restores_focus_to_the_disclosure_control ... ok
+test model_connection_card::tests::an_instance_scope_isolates_backend_state_ids ... ok
+test model_connection_card::tests::repeated_records_get_instance_scoped_details_ids ... ok
+test model_connection_card::tests::open_and_enabled_stay_independent ... ok
+test model_connection_card::tests::the_details_region_is_labelled_and_named_by_the_disclosure ... ok
+test model_connection_card::tests::the_enable_switch_can_be_disabled_on_its_own ... ok
+test model_connection_card::tests::ready_shows_the_access_summary_and_other_postures_show_readiness ... ok
+test model_catalogue_editor::tests::the_hidden_section_id_sits_on_a_focusable_disclosure ... ok
+test model_connection_card::tests::the_provider_mark_precedes_the_name_without_indenting_the_summary ... ok
+test model_connection_card::tests::the_closed_accessory_is_mounted_only_while_closed ... ok
+test model_connection_picker::tests::a_disabled_picker_keeps_its_selection_and_takes_no_input ... ok
+test model_connection_picker::tests::disabled_and_unavailable_options_cannot_be_selected ... ok
+test model_connection_picker::tests::a_scoped_picker_roves_to_scoped_destinations ... ok
+test model_catalogue_editor::tests::the_info_action_exists_only_when_the_host_wants_it ... ok
+test model_connection_picker::tests::filtering_preserves_source_order_and_group_order ... ok
+test model_connection_picker::tests::an_instance_scope_isolates_backend_state_ids ... ok
+test model_connection_picker::tests::query_changes_reach_the_host_and_announce_the_result_count ... ok
+test model_connection_picker::tests::options_carry_radio_semantics_and_the_supplied_reason ... ok
+test model_connection_picker::tests::every_posture_renders_its_own_copy_and_no_choices ... ok
+test model_catalogue_editor::tests::the_handle_grabs_drops_and_moves_by_keyboard ... ok
+test model_connection_picker::tests::host_leading_content_is_keyed_by_option_id ... ok
+test model_connection_setup::tests::back_returns_to_choose_and_restores_focus_to_the_selected_option ... ok
+test model_connection_picker::tests::roving_keys_move_through_enabled_options_and_wrap ... ok
+test model_connection_setup::tests::a_scoped_setup_requests_scoped_focus_destinations ... ok
+test model_connection_setup::tests::a_direct_route_submits_from_choose_without_emitting_a_stage ... ok
+test model_connection_setup::tests::cancel_requests_closure_and_the_root_is_a_region_not_a_dialog ... ok
+test model_connection_setup::tests::pending_locks_every_workflow_action_and_announces_itself ... ok
+test model_connection_picker::tests::selection_replaces_the_leading_mark_without_a_second_indicator ... ok
+test model_connection_setup::tests::configure_renders_host_content_and_submits_only_when_the_host_allows_it ... ok
+test motion::tests::frozen_schedules_no_clock ... ok
+test model_picker::tests::outside_interact_refusal_marks_the_open_surface ... ok
+test model_connection_setup::tests::choose_shows_continue_for_a_route_that_requires_configuration ... ok
+test motion::tests::height_has_no_native_channel_and_is_a_static_endpoint ... ok
+test motion::tests::loop_animation_for_policy_waits_for_first_frame ... ok
+test model_connection_setup::tests::safe_feedback_renders_without_resetting_the_stage ... ok
+test motion::tests::reduced_drops_loops_and_keeps_toast_opacity ... ok
+test motion::tests::scale_keeps_the_named_opacity_stand_in ... ok
+test navigation_menu::tests::active_edge_outline_reserves_transparent_border_and_marks_open_trigger ... ok
+test model_connection_setup::tests::the_choose_stage_forwards_picker_selection_and_query_requests ... ok
+test model_connection_setup::tests::an_instance_scope_isolates_backend_state_ids ... ok
+test navigation_menu::tests::none_fill_keeps_idle_background_and_underline_still_marks_open_trigger ... ok
+test navigation_menu::tests::active_underline_edges_only_the_open_trigger ... ok
+test navigation_menu::tests::default_trigger_is_borderless_with_tint_fill ... ok
+test navigation_menu::tests::outside_interact_refusal_marks_the_open_viewport ... ok
+test navigation_menu::tests::solid_open_trigger_keeps_accent_on_hover ... ok
+test model_connection_setup::tests::the_configure_heading_can_actually_take_focus ... ok
+test number_input::tests::editable_spin_button_declares_edit_channels ... ok
+test number_input::tests::empty_committed_omits_valuenow_and_shows_placeholder ... ok
+test navigation_menu::tests::solid_fill_uses_accent_with_inverse_foreground ... ok
+test number_input::tests::read_only_keeps_focus_but_drops_mutation_channels ... ok
+test order_by::tests::empty_instance_scope_is_rejected - should panic ... ok
+test number_input::tests::bounds_project_to_valuemin_max ... ok
+test pagination::tests::empty_instance_scope_is_rejected - should panic ... ok
+test number_input::tests::steppers_wire_machine_not_increment_callbacks ... ok
+test number_input::tests::unresolved_draft_and_pending_validation_project_a11y_flags ... ok
+test order_by::tests::outside_interact_refusal_marks_the_open_surface ... ok
+test order_by::tests::two_order_bys_do_not_share_select_runtime_ids ... ok
+test pagination::tests::numbered_page_and_adjacent_requests_report_destinations ... ok
+test pagination::tests::current_page_ellipsis_and_boundary_controls_emit_nothing ... ok
+test pagination::tests::loading_keeps_open_limit_options_from_reporting_size_changes ... ok
+test model_connection_setup::tests::continue_stays_disabled_until_a_selectable_route_is_chosen ... ok
+test pagination::tests::public_pagination_path_rejects_empty_instance_scope - should panic ... ok
+test pagination::tests::public_pagination_path_rejects_blank_instance_scope - should panic ... ok
+test pagination::tests::public_pagination_path_does_not_share_select_runtime_ids ... ok
+test pagination::tests::loading_disables_wired_page_size_select_and_page_buttons ... ok
+test pagination::tests::enabled_limit_select_reports_open_and_parsed_page_size ... ok
+test picker_trigger::tests::value_open_and_disabled_states_follow_the_contract ... ok
+test pill::tests::default_appearance_is_tint_and_matches_explicit_tint ... ok
+test pagination::tests::simple_and_full_variants_report_adjacent_and_first_last_destinations ... ok
+test pill::tests::removable_pill_exposes_and_runs_its_remove_action ... ok
+test picker_trigger::tests::shared_trigger_preserves_metrics_and_indicator ... ok
+test pill::tests::solid_dot_and_remove_affordance_use_primary_foreground ... ok
+test pill::tests::solid_appearance_uses_shared_opaque_recipe_and_custom_accent_base ... ok
+test popover::tests::authored_width_bounds_override_the_contract_defaults ... ok
+test pill::tests::dismissible_pill_uses_its_stable_instance_identity_and_label ... ok
+test pill::tests::subtle_appearance_halves_the_tint_fill_opacity ... ok
+test popover::tests::closed_disabled_and_trigger_width_variants_gate_the_surface ... ok
+test pagination::tests::two_paginations_do_not_share_select_runtime_ids ... ok
+test popover::tests::initial_focus_strategies_gate_surface_focusability ... ok
+test popover::tests::open_composition_owns_trigger_surface_and_roles ... ok
+test popover::tests::placement_roles_kebab_case_like_web_data_attributes ... ok
+test popover::tests::surface_carries_the_contract_token_profile ... ok
+test presentation::tests::button_icon_inset_ladder_matches_css ... ok
+test presentation::tests::chrome_role_shifts_down_one_stop_and_clamps ... ok
+test presentation::tests::control_heights_match_svelte ... ok
+test presentation::tests::density_space_values_match_svelte ... ok
+test presentation::tests::control_role_is_identity ... ok
+test presentation::tests::editable_list_scales_match_contract ... ok
+test presentation::tests::font_sizes_match_svelte_css ... ok
+test presentation::tests::height_offsets_match_svelte_css ... ok
+test presentation::tests::min_widths_match_svelte_css ... ok
+test presentation::tests::prominent_role_shifts_up_one_stop_and_clamps ... ok
+test presentation::tests::rem_to_px_uses_16px_base ... ok
+test presentation::tests::supporting_visual_shifts_down_one_stop_and_clamps ... ok
+test radio::tests::accessible_name_comes_from_the_visible_label_or_aria_label ... ok
+test radio::tests::unchecked_activate_fires_true_and_does_not_uncheck ... ok
+test radio::tests::disabled_and_readonly_do_not_report_a_change ... ok
+test radio_group::tests::choosing_an_option_reports_its_value_and_same_value_stays_inert ... ok
+test radio_group::tests::disabled_group_has_no_tab_stop ... ok
+test radio_group::tests::home_and_end_jump_across_enabled_options_and_stay_inert_at_extremes ... ok
+test radio_group::tests::enabled_options_declare_the_contracted_focus_ring ... ok
+test radio_group::tests::horizontal_arrows_wrap_and_vertical_arrows_are_inert ... ok
+test radio_group::tests::vertical_arrows_move_and_horizontal_arrows_are_inert ... ok
+test radio_group::tests::instance_scope_keeps_roving_focus_inside_the_originating_control ... ok
+test radio_group::tests::native_scope_is_not_the_web_form_name ... ok
+test radio_group::tests::radiogroup_role_rides_the_root_without_aria_orientation ... ok
+test radio_group::tests::selected_option_is_the_roving_tab_stop ... ok
+test range_slider::tests::an_embedded_vertical_spec_still_scrubs_the_horizontal_geometry ... ok
+test radio_group::tests::unknown_or_disabled_selection_falls_back_to_the_first_enabled_option ... ok
+test range_slider::tests::a_drag_keeps_the_thumb_the_press_chose ... ok
+test range_slider::tests::block_hits_are_forty_four ... ok
+test range_slider::tests::block_fit_follows_context_span_and_measure ... ok
+test range_slider::tests::track_thickness_scales_with_size ... ok
+test range_slider::tests::embedded_thumbs_announce_their_orientation ... ok
+test range_slider::tests::block_pointer_tie_chooses_lower_and_does_not_swap ... ok
+test range_slider::tests::the_grab_overlay_carries_the_scrub_and_the_thumbs_do_not ... ok
+test range_slider::tests::pressing_the_track_moves_the_nearest_thumb_to_the_press ... ok
+test rating::tests::default_step_is_fractional_slider ... ok
+test range_slider::tests::each_thumb_exposes_the_slider_role ... ok
+test range_slider::tests::the_click_that_ends_a_drag_changes_nothing ... ok
+test range_slider::tests::vertical_range_block_keeps_upright_text_and_a_vertical_scrub ... ok
+test range_slider::tests::unnamed_controls_still_name_their_thumbs ... ok
+test rating::tests::fractional_scrub_and_keys_use_pure_math ... ok
+test rating::tests::empty_state_stays_none_and_display_fraction_is_not_quantized ... ok
+test rating::tests::whole_step_arrows_move_focus_without_selecting ... ok
+test rating::tests::scoped_ids_match_runtime_identity ... ok
+test rating::tests::clear_on_reselect_and_disabled_inertia ... ok
+test rating::tests::whole_step_boundary_arrows_are_inert ... ok
+test rating::tests::instance_scopes_do_not_collide ... ok
+test relation_picker::tests::empty_instance_scope_is_rejected - should panic ... ok
+test rating::tests::whole_step_selects_exact_radio_only ... ok
+test ref_select::tests::outside_interact_refusal_marks_the_open_surface ... ok
+test remediation_banner::tests::action_and_dismiss_controls_reach_host_handlers ... ok
+test resize_handle::tests::a_disabled_handle_is_still_identified ... ok
+test remediation_banner::tests::solid_pending_banner_uses_primary_spinner_and_local_secondary_recipe ... ok
+test remediation_banner::tests::banner_role_follows_the_announce_mode ... ok
+test resize_handle::tests::a_keystroke_is_a_whole_gesture ... ok
+test resize_handle::tests::an_unnamed_handle_still_announces_itself ... ok
+test remediation_banner::tests::an_instance_scope_isolates_backend_state_ids ... ok
+test resize_handle::tests::drag_still_reports_the_per_frame_axis_delta ... ok
+test resize_handle::tests::focus_recolors_the_visible_hairline ... ok
+test relation_picker::tests::two_relation_pickers_do_not_share_select_runtime_ids ... ok
+test resize_handle::tests::vertical_answers_up_and_down_only ... ok
+test resize_handle::tests::one_instance_keeps_its_identity_across_rebuilds ... ok
+test resize_handle::tests::horizontal_answers_left_and_right_only ... ok
+test resize_handle::tests::the_separator_declares_its_axis_name_and_range ... ok
+test resize_handle::tests::identical_handles_keep_distinct_backend_identities ... ok
+test resize_handle::tests::only_an_enabled_handle_takes_focus ... ok
+test segmented_control::tests::custom_option_icon_names_are_preserved ... ok
+test segmented_control::tests::arrow_keys_move_selection_through_enabled_options_and_skip_disabled ... ok
+test segmented_control::tests::choosing_a_segment_reports_its_value_through_the_node_handler ... ok
+test segmented_control::tests::enabled_segments_carry_a_focus_patch_so_gpui_tracks_handles ... ok
+test segmented_control::tests::disabled_control_dims_the_track_and_shows_not_allowed ... ok
+test segmented_control::tests::disabled_option_is_out_of_traversal_and_dimmed ... ok
+test segmented_control::tests::hovering_the_selected_segment_keeps_its_accent_fill ... ok
+test segmented_control::tests::enabled_segments_show_pointer_cursor_and_hover_fill_without_a_handler ... ok
+test segmented_control::tests::equal_width_grows_segments_content_fit_leaves_them_alone ... ok
+test segmented_control::tests::icon_only_content_fit_is_square_with_no_inline_padding ... ok
+test segmented_control::tests::explicit_aria_label_and_title_win_over_the_required_label ... ok
+test segmented_control::tests::icon_only_activation_still_reports_the_option_value ... ok
+test segmented_control::tests::icon_only_without_an_icon_keeps_the_visible_label ... ok
+test segmented_control::tests::explicit_scope_is_stable_when_a_preceding_control_disappears ... ok
+test segmented_control::tests::instance_scope_keeps_roving_focus_inside_the_originating_control ... ok
+test segmented_control::tests::icon_only_hides_visible_label_and_falls_back_for_name_and_tooltip ... ok
+test segmented_control::tests::labelled_icon_renders_before_text_with_supporting_visual_size_and_gap ... ok
+test segmented_control::tests::segment_padding_is_density_driven ... ok
+test segmented_control::tests::radiogroup_role_and_aria_label_ride_the_root ... ok
+test segmented_control::tests::selected_option_is_the_roving_tab_stop ... ok
+test segmented_control::tests::selected_segment_gets_accent_fill_and_top_highlight ... ok
+test select::tests::a_disabled_select_has_no_activation ... ok
+test segmented_control::tests::two_filter_builders_do_not_share_boolean_focus_ids ... ok
+test select::tests::a_long_open_panel_declares_scroll_overflow ... ok
+test segmented_control::tests::track_metrics_follow_the_old_tiers_fixed_tables ... ok
+test segmented_control::tests::two_color_pickers_do_not_share_mode_focus_ids ... ok
+test select::tests::choosing_an_option_reports_its_value_through_the_node_handler ... ok
+test select::tests::closed_trigger_shows_placeholder_and_chevron_only ... ok
+test select::tests::control_blur_commits_freeform_only_when_allowed ... ok
+test select::tests::disabled_search_and_options_are_inert ... ok
+test select::tests::empty_instance_scope_is_rejected - should panic ... ok
+test select::tests::freeform_alone_does_not_show_search ... ok
+test segmented_control::tests::two_model_pickers_do_not_share_axis_focus_ids ... ok
+test select::tests::blank_instance_scope_is_rejected - should panic ... ok
+test select::tests::open_composition_owns_exact_structure_tokens_and_option_metadata ... ok
+test select::tests::highlighted_option_is_projected ... ok
+test select::tests::open_non_searchable_keeps_focus_on_the_trigger ... ok
+test select::tests::open_renders_options_in_an_absolute_overlay_listbox ... ok
+test select::tests::instance_scopes_do_not_collide ... ok
+test select::tests::search_edit_reports_query_not_value ... ok
+test select::tests::outside_interact_refusal_marks_the_open_panel ... ok
+test select::tests::search_filters_and_empty_query_shows_message ... ok
+test select::tests::search_edit_keeps_host_authored_selection_and_inserts_in_the_middle ... ok
+test select::tests::search_shift_arrow_keeps_a_backward_selection_after_rebuild ... ok
+test select::tests::search_enter_commits_highlighted_and_escape_closes ... ok
+test select::tests::trigger_arrows_open_without_a_double_move ... ok
+test select::tests::trigger_and_panel_share_one_dismiss_layer ... ok
+test select::tests::searchable_open_search_row_is_a_real_editor ... ok
+test settings_shell::tests::closed_shell_renders_nothing ... ok
+test separator::tests::exposes_separator_semantics_only_when_requested ... ok
+test select::tests::search_home_and_end_highlight_first_and_last_options ... ok
+test select::tests::trigger_metrics_follow_the_axis_faithful_recipe ... ok
+test settings_shell::tests::empty_groups_with_a_query_is_no_matches ... ok
+test settings_shell::tests::empty_scope_is_no_settings_pages ... ok
+test settings_shell::tests::navigate_fires_the_page_id ... ok
+test sidebar_nav::tests::context_menu_gestures_reach_only_items_carrying_rows ... ok
+test sidebar_nav::tests::unset_end_label_keeps_direct_text_and_no_description ... ok
+test settings_shell::tests::page_stays_rendered_while_a_query_is_live ... ok
+test skeleton::tests::initial_construction_schedules_no_pulse ... ok
+test sidebar_nav::tests::adversarial_values_keep_item_and_end_label_ids_distinct ... ok
+test sidebar_nav::tests::keyboard_menu_gesture_maps_the_context_menu_key_and_shift_f10 ... ok
+test skeleton::tests::list_and_table_presets_keep_reference_padding ... ok
+test sidebar_nav::tests::end_label_renders_muted_metadata_and_the_description_link ... ok
+test skeleton::tests::static_skeleton_has_no_animation ... ok
+test settings_shell::tests::refused_close_keeps_the_dialog_and_shows_the_reason ... ok
+test slider::tests::a_second_scrub_release_is_inert ... ok
+test slider::tests::a_vertical_slider_declares_its_axis_and_uses_height_pct ... ok
+test slider::tests::aria_label_never_becomes_visible_block_text ... ok
+test slider::tests::arrows_home_and_end_emit_change_then_commit ... ok
+test slider::tests::block_rtl_remaps_scrub_without_changing_keys ... ok
+test slider::tests::block_without_layout_inputs_panics - should panic ... ok
+test slider::tests::block_hit_is_forty_four_and_forced_colors_keep_roles ... ok
+test slider::tests::block_fit_follows_context_span_and_measure ... ok
+test slider::tests::block_text_layers_split_at_the_fill_boundary ... ok
+test slider::tests::pointer_release_commits_through_the_scrub ... ok
+test slider::tests::commit_only_hosts_still_install_the_scrub ... ok
+test slider::tests::no_change_handler_means_no_scrub ... ok
+test slider::tests::embedded_focus_is_a_root_outline ... ok
+test slider::tests::collision_suppresses_the_label_and_keeps_the_exact_value ... ok
+test slider::tests::disabled_slider_is_inert ... ok
+test slider::tests::track_thickness_scales_with_size ... ok
+test spinner::tests::initial_construction_schedules_no_ring_clock ... ok
+test spinner::tests::frozen_and_reduced_schedule_no_ring_clock ... ok
+test slider::tests::vertical_block_keeps_upright_text_and_a_vertical_scrub ... ok
+test slider::tests::the_focusable_node_carries_slider_intent ... ok
+test slider::tests::the_track_carries_the_scrub_and_the_thumb_does_not ... ok
+test split_button::tests::divider_reads_the_separator_token_at_full_strength ... ok
+test slider::tests::visible_label_never_becomes_block_accessible_name ... ok
+test spinner::tests::ring_uses_the_reference_svg_asset_and_rotation ... ok
+test split_button::tests::handlers_route_to_their_halves_and_items ... ok
+test split_button::tests::open_menu_matches_the_old_tiers_anatomy ... ok
+test split_button::tests::loading_shows_the_old_tiers_spinner_glyph ... ok
+test split_button::tests::outside_interact_refusal_marks_the_open_menu ... ok
+test split_button::tests::unavailable_control_dims_and_drops_activation ... ok
+test split_button::tests::chevron_size_follows_the_per_size_table ... ok
+test split_button::tests::state_patches_match_the_old_tier ... ok
+test split_view::tests::always_visibility_leaves_the_cluster_opaque_and_unpatched ... ok
+test split_button::tests::half_metrics_follow_the_axis_faithful_recipe ... ok
+test split_view::tests::a_collapsed_pane_keeps_its_expand_toggle_visible_under_hover_visibility ... ok
+test split_button::tests::variant_colors_match_the_old_gpui_tier ... ok
+test split_view::tests::divider_and_toggle_expose_the_split_accessibility_contract ... ok
+test split_view::tests::disabled_split_dims_root_and_passes_disabled_to_handle_and_toggles ... ok
+test split_view::tests::fixed_pane_sizes_and_collapses ... ok
+test split_view::tests::handlers_are_forwarded_to_handle_and_toggles ... ok
+test split_view::tests::horizontal_and_vertical_root_and_pane_layout_postures ... ok
+test stepper::tests::an_enabled_trigger_emits_its_own_value_and_a_disabled_one_emits_nothing ... ok
+test split_view::tests::pane_min_sizes_apply_on_matching_axis ... ok
+test status_indicator::tests::composes_icon_and_text_with_exact_status_tokens ... ok
+test stepper::tests::rerun_is_a_separate_control_that_never_selects_its_step ... ok
+test split_view::tests::hover_visibility_rests_the_cluster_at_zero_and_reveals_on_hover ... ok
+test stepper::tests::the_contracted_controls_declare_the_focus_ring_and_stable_identities ... ok
+test split_view::tests::toggle_chevron_directions_by_orientation ... ok
+test stepper::tests::an_unwired_rerun_still_swallows_its_activation ... ok
+test switch::tests::activation_emits_the_next_checked_value ... ok
+test surface::tests::surface_border_width_queries_resolve_border_width_not_resolve_space ... ok
+test switch::tests::custom_colors_take_precedence_over_tones ... ok
+test stepper::tests::collapse_is_vertical_only_and_independent_of_the_other_two ... ok
+test stepper::tests::rerun_appears_only_for_a_completed_step_that_asked_for_it ... ok
+test surface::tests::surface_maps_semantics_and_contains_children ... ok
+test switch::tests::disabled_is_out_of_focus_and_activation ... ok
+test surface::tests::surface_resolves_exact_contract_tones_borders_elevation_radius_and_padding ... ok
+test switch::tests::dual_labels_and_fallback_aria_names ... ok
+test switch::tests::readonly_stays_focusable_without_an_activate_handler ... ok
+test tabs::tests::alt_arrow_reorders_before_ordinary_focus_movement ... ok
+test tabs::tests::block_none_fill_keeps_underline_edge ... ok
+test tabs::tests::a_vertical_tab_band_rule_reads_the_vertical_fraction ... ok
+test tabs::tests::an_explicit_subject_kind_shares_the_family_without_sharing_ids ... ok
+test tabs::tests::block_renderer_keeps_separators_under_outline ... ok
+test tabs::tests::block_renderer_underline_edges_only_the_selected_tab ... ok
+test tabs::tests::card_renderer_does_not_draw_outline_by_default ... ok
+test tabs::tests::block_renderer_vertical_underline_uses_the_inline_end_edge ... ok
+test tabs::tests::card_renderer_active_edge_outline_borders_only_the_selected_tab ... ok
+test tabs::tests::card_renderer_inactive_and_none_fill_keep_the_surface_on_the_item ... ok
+test tabs::tests::card_renderer_renders_icon_count_and_close_wired_to_on_close ... ok
+test tabs::tests::delete_closes_only_closable_enabled_tabs ... ok
+test tabs::tests::card_renderer_solid_fill_uses_accent_with_inverse_foreground ... ok
+test tabs::tests::empty_tab_label_is_not_a_tooltip ... ok
+test tabs::tests::fill_layout_grows_the_root_and_auto_does_not ... ok
+test tabs::tests::fill_layout_grows_the_panel_and_leaves_the_strip_fixed ... ok
+test tabs::tests::instance_scope_isolates_ids_relationships_and_focus_requests ... ok
+test tabs::tests::none_fill_keeps_card_surface_and_leaves_pill_block_unfilled ... ok
+test tabs::tests::pinned_tabs_stay_fixed_in_their_partitions ... ok
+test tabs::tests::pill_and_block_project_the_same_tooltip_text ... ok
+test tabs::tests::pointer_drop_emits_the_complete_next_order ... ok
+test tabs::tests::reorderable_tabs_register_a_scoped_source_and_target ... ok
+test tabs::tests::show_tooltips_true_projects_each_tab_label ... ok
+test tabs::tests::the_tab_band_rule_reads_the_horizontal_fraction ... ok
+test tabs::tests::show_tooltips_false_does_not_project_hover_text ... ok
+test tabs::tests::vertical_projects_hidden_labels_without_show_tooltips ... ok
+test text::tests::text_resolves_sizes_weights_leading_clamp_and_compact_spacing ... ok
+test text::tests::text_resolves_all_contract_tones ... ok
+test text_input::tests::a11y_projects_described_by_invalid_and_busy_states ... ok
+test text::tests::text_wrap_distinguishes_normal_and_anywhere ... ok
+test text_input::tests::a_disabled_field_carries_no_caret ... ok
+test text_input::tests::a_rejected_full_field_edit_reports_nothing_at_all ... ok
+test text_input::tests::affixes_keep_separator_inside_the_inline_row ... ok
+test text_input::tests::each_search_field_owns_its_clear_control_identity ... ok
+test text_input::tests::pointer_selection_is_reported_from_the_value_node_only ... ok
+test text_input::tests::editable_callback_lives_on_the_input_but_read_only_suppresses_it ... ok
+test text_input::tests::the_value_is_one_text_node_carrying_the_caret_and_its_colors ... ok
+test text_input::tests::root_is_a_full_width_input_with_inline_count_and_validation ... ok
+test text_input::tests::read_only_keeps_focus_reporting_without_mutation_channels ... ok
+test theme_select::tests::outside_interact_refusal_marks_the_open_panel ... ok
+test time_input::tests::a_partial_digit_survives_on_the_reusable_change_path ... ok
+test time_input::tests::a_complete_digit_pair_emits_the_canonical_value ... ok
+test time_input::tests::disabled_segments_are_not_focus_stops ... ok
+test time_input::tests::arrows_step_the_whole_time ... ok
+test time_input::tests::an_invalid_draft_uses_the_danger_border ... ok
+test time_input::tests::seconds_appear_when_step_is_below_a_minute ... ok
+test toast_stack::tests::dismiss_transfer_prefers_next_then_previous_then_outside_entry ... ok
+test toast_stack::tests::action_removal_target_prefers_row_dismiss_then_surviving_order ... ok
+test time_zone_select::tests::empty_instance_scope_is_rejected - should panic ... ok
+test time_input::tests::the_root_is_a_labelled_group_of_spinbuttons ... ok
+test toast_host::tests::host_forwards_placement_presentation_label_and_scope_to_stack ... ok
+test toast_stack::tests::preloaded_items_do_not_enter ... ok
+test time_zone_select::tests::two_time_zone_selects_do_not_share_runtime_ids ... ok
+test toast_stack::tests::contract_components_callbacks_and_scope_stay_distinct ... ok
+test toast_stack::tests::danger_projects_as_alert_while_other_tones_stay_list_items ... ok
+test toast_stack::tests::frozen_presence_settles_new_rows_and_drops_remnants_immediately ... ok
+test toast_stack::tests::reconcile_reports_removed_actions_once_with_row_survival ... ok
+test toast_stack::tests::presence_law_settles_initial_enters_new_and_remnants_removed ... ok
+test toast_stack::tests::unavailable_action_is_reachable_but_inert ... ok
+test toast_stack::tests::presence_ledger_keeps_phase_on_same_id_replacement_and_reports_completion ... ok
+test toast_stack::tests::stale_run_completions_cannot_mutate_a_reused_id ... ok
+test toggle_group::tests::allow_deactivation_emits_single_none ... ok
+test toggle_group::tests::instance_scope_keeps_roving_focus_inside_the_originating_control ... ok
+test toggle_group::tests::left_right_wrap_skips_disabled_and_emits_the_result ... ok
+test toast_stack::tests::exact_tone_composition_focus_axes_and_spacing_match_contract ... ok
+test toast_stack::tests::presence_treatment_follows_the_effective_motion_policy ... ok
+test toggle_group::tests::unknown_or_disabled_selection_falls_back_to_the_first_enabled_option ... ok
+test toast_stack::tests::renderer_paints_the_presence_phase_and_marks_the_exit_remnant_inert ... ok
+test toggle_group::tests::multiple_mode_keeps_every_enabled_item_tabbable_and_ignores_arrows ... ok
+test toggle_group::tests::disabled_items_paint_the_disabled_recipe_and_do_not_activate ... ok
+test toggle_group::tests::selected_option_is_the_single_mode_tab_stop ... ok
+test toggle_group::tests::unselected_and_selected_items_use_the_old_tiers_recipes ... ok
+test toggle_group::tests::selection_mode_sets_roles_and_activation_reports_the_result ... ok
+test toggle_group::tests::gap_and_font_follow_the_density_and_size_ladders ... ok
+test tri_state_switch::tests::arrow_wrap_reports_changed_value_and_requests_focus ... ok
+test toggle_group::tests::item_metrics_follow_the_control_size_height_ladder ... ok
+test tri_state_switch::tests::disabled_group_suppresses_focus_and_handlers ... ok
+test tool_call::tests::an_instance_scope_isolates_backend_state_ids ... ok
+test tri_state_switch::tests::selected_segment_is_the_roving_tab_stop ... ok
+test tri_state_switch::tests::same_value_activation_is_inert ... ok
+test tool_call_group::tests::an_instance_scope_isolates_backend_state_ids ... ok
+test update_center::tests::downloading_replaces_the_glyph_with_distinct_progress_rings ... ok
+test update_center::tests::attention_draws_the_indicator_and_open_hosts_update_status ... ok
+test update_center::tests::quiet_renders_a_trigger_without_an_attention_dot ... ok
+test tri_state_switch::tests::two_instances_keep_independent_runtime_identity ... ok
+test update_status::tests::ahead_of_channel_is_not_up_to_date ... ok
+test update_status::tests::deferral_notice_is_status_not_an_alert ... ok
+test update_center::tests::hidden_presence_collapses_the_tree ... ok
+test update_status::tests::null_fraction_is_indeterminate_and_zero_is_a_zero_bar ... ok
+test update_center::tests::non_default_size_role_keeps_anchor_and_trigger_aligned ... ok
+test update_status::tests::confirm_install_opens_the_dialog_instead_of_emitting ... ok
+test update_status::tests::managed_elsewhere_is_information ... ok
+test update_status::tests::offer_renders_version_notes_and_both_actions ... ok
+test update_status::tests::confirmation_inherits_authored_presentation ... ok
+test update_status::tests::pending_disables_actions ... ok
+test update_status::tests::signature_rejection_offers_no_retry ... ok
+test update_status::tests::up_to_date_has_no_actions ... ok
+
+test result: ok. 690 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+   Doc-tests poodle_render
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+oxide: quick profile, build+execute strategy, slot 116 cold, 26.7s, new slot, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-f6c3770d through profile member links (debug), temp: inherited [scratch]
+oxide: flushed the removable volume before releasing slot 116 in 55.6 ms
+oxide: seeding skipped: no eligible donor; bitflags: ambiguous name
+    Blocking waiting for file lock on package cache
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling cfg-if v1.0.4
+   Compiling libc v0.2.189
+   Compiling typeid v1.0.3
+   Compiling erased-serde v0.4.10
+   Compiling memchr v2.8.3
+   Compiling libm v0.2.16
+   Compiling smallvec v1.15.2
+   Compiling autocfg v1.5.1
+   Compiling simd-adler32 v0.3.10
+   Compiling bitflags v2.13.1
+   Compiling stable_deref_trait v1.2.1
+   Compiling pin-project-lite v0.2.17
+   Compiling core-foundation-sys v0.8.7
+   Compiling adler2 v2.0.1
+   Compiling crossbeam-utils v0.8.22
+   Compiling hashbrown v0.17.1
+   Compiling equivalent v1.0.2
+   Compiling miniz_oxide v0.8.9
+   Compiling crc32fast v1.5.0
+   Compiling arrayvec v0.7.8
+   Compiling version_check v0.9.5
+   Compiling futures-core v0.3.34
+   Compiling anyhow v1.0.104
+   Compiling bytemuck v1.25.2
+   Compiling serde v1.0.229
+   Compiling zerocopy v0.8.56
+   Compiling itoa v1.0.18
+   Compiling rustc-hash v2.1.3
+   Compiling semver v1.0.28
+   Compiling zmij v1.0.23
+   Compiling num-traits v0.2.19
+   Compiling once_cell v1.21.4
+   Compiling futures-io v0.3.34
+   Compiling scopeguard v1.2.0
+   Compiling crossbeam-epoch v0.9.20
+   Compiling litemap v0.8.3
+   Compiling writeable v0.6.4
+   Compiling rustc_version v0.4.1
+   Compiling futures-sink v0.3.34
+   Compiling getrandom v0.3.4
+   Compiling lock_api v0.4.14
+   Compiling icu_normalizer_data v2.3.0
+   Compiling unicode-segmentation v1.13.3
+   Compiling getrandom v0.4.3
+   Compiling icu_properties_data v2.3.0
+   Compiling paste v1.0.15
+   Compiling utf8_iter v1.0.4
+   Compiling glob v0.3.4
+   Compiling crossbeam-deque v0.8.7
+   Compiling fastrand v2.5.0
+   Compiling futures-channel v0.3.34
+   Compiling slotmap v1.1.1
+   Compiling foreign-types-shared v0.3.1
+   Compiling futures-task v0.3.34
+   Compiling parking_lot_core v0.9.12
+   Compiling flate2 v1.1.9
+   Compiling rayon-core v1.13.0
+   Compiling slab v0.4.12
+   Compiling prettyplease v0.2.37
+   Compiling clang-sys v1.9.1
+   Compiling syn v2.0.119
+   Compiling syn v3.0.3
+   Compiling tracing-core v0.1.36
+   Compiling iana-time-zone v0.1.65
+   Compiling fdeflate v0.3.7
+   Compiling parking v2.2.1
+   Compiling lazy_static v1.5.0
+   Compiling minimal-lexical v0.2.1
+   Compiling rustix v1.1.4
+   Compiling float-cmp v0.9.0
+   Compiling serde_json v1.0.151
+   Compiling regex-syntax v0.8.11
+   Compiling core-foundation v0.10.0
+   Compiling winnow v1.0.4
+   Compiling strict-num v0.1.1
+   Compiling errno v0.3.14
+   Compiling rand_core v0.9.5
+   Compiling pathfinder_simd v0.5.6
+   Compiling nom v7.1.3
+   Compiling pulp v0.22.3
+   Compiling polycool v0.4.0
+   Compiling libloading v0.8.9
+   Compiling either v1.18.0
+   Compiling find-msvc-tools v0.1.11
+   Compiling bindgen v0.72.1
+   Compiling weezl v0.1.12
+   Compiling core-graphics-types v0.2.0
+   Compiling arrayref v0.3.9
+   Compiling toml_parser v1.1.3+spec-1.1.0
+   Compiling object v0.37.3
+   Compiling ref-cast v1.0.27
+   Compiling zune-core v0.5.3
+   Compiling toml_writer v1.1.2+spec-1.1.0
+   Compiling shlex v2.0.1
+   Compiling percent-encoding v2.3.2
+   Compiling quick-error v2.0.1
+   Compiling libbz2-rs-sys v0.2.5
+   Compiling core_maths v0.1.1
+   Compiling tinyvec_macros v0.1.1
+   Compiling ttf-parser v0.25.1
+   Compiling byteorder v1.5.0
+   Compiling zune-jpeg v0.5.15
+   Compiling tinyvec v1.12.0
+   Compiling itertools v0.13.0
+   Compiling form_urlencoded v1.2.2
+   Compiling cc v1.4.4
+   Compiling tiny-skia-path v0.11.4
+   Compiling kurbo v0.13.1
+   Compiling parking_lot v0.12.5
+   Compiling memmap2 v0.9.11
+   Compiling bzip2 v0.6.1
+   Compiling malloc_buf v0.0.6
+   Compiling convert_case v0.10.0
+   Compiling sharded-slab v0.1.7
+   Compiling thread_local v1.1.10
+   Compiling euclid v0.22.14
+   Compiling num-complex v0.4.6
+   Compiling heapless v0.9.3
+   Compiling gimli v0.32.3
+   Compiling unicode-ccc v0.4.0
+   Compiling unicode-properties v0.1.4
+   Compiling unicode-xid v0.2.6
+   Compiling thiserror v1.0.69
+   Compiling option-ext v0.2.0
+   Compiling regex-automata v0.4.18
+   Compiling color_quant v1.1.0
+   Compiling heck v0.5.0
+   Compiling block v0.1.6
+   Compiling unicode-script v0.5.8
+   Compiling reborrow v0.5.5
+   Compiling leak v0.1.2
+   Compiling unicode-bidi-mirroring v0.4.0
+   Compiling ztracing-gpui-unofficial v1.22.0
+   Compiling shlex v1.3.0
+   Compiling compression-core v0.4.32
+   Compiling pulp-wasm-simd-flag v0.1.1
+   Compiling bitflags v1.3.2
+   Compiling bytes v1.12.1
+   Compiling byteorder-lite v0.1.0
+   Compiling nu-ansi-term v0.50.3
+   Compiling siphasher v1.0.3
+   Compiling lyon_geom v1.0.19
+   Compiling compression-codecs v0.4.38
+   Compiling png v0.17.16
+   Compiling svgtypes v0.16.1
+   Compiling image-webp v0.2.4
+   Compiling cexpr v0.6.0
+   Compiling tempfile v3.27.0
+   Compiling leaky-cow v0.1.1
+   Compiling serde_fmt v1.1.0
+   Compiling indexmap v2.14.0
+   Compiling toml_datetime v1.1.1+spec-1.1.0
+   Compiling serde_spanned v1.1.1
+   Compiling lyon_path v1.0.19
+   Compiling toml v1.1.4+spec-1.1.0
+   Compiling http v1.5.0
+   Compiling gif v0.14.2
+   Compiling dirs-sys v0.4.1
+   Compiling objc v0.2.7
+   Compiling value-bag-serde1 v1.13.2
+   Compiling value-bag v1.13.2
+   Compiling hash32 v0.3.1
+   Compiling rayon v1.12.0
+   Compiling cgl v0.3.2
+   Compiling wait-timeout v0.2.1
+   Compiling convert_case v0.11.0
+   Compiling event-listener v5.4.2
+   Compiling log v0.4.33
+   Compiling spin v0.9.9
+   Compiling aho-corasick v1.1.5
+   Compiling gpui-util-gpui-unofficial v1.22.0
+   Compiling collections-gpui-unofficial v1.22.0
+   Compiling regex v1.13.1
+   Compiling tracing-log v0.2.0
+   Compiling embed-resource v3.0.11
+   Compiling tracing-subscriber v0.3.23
+   Compiling simplecss v0.2.2
+   Compiling serde_derive_internals v0.30.0
+   Compiling fontdb v0.23.0
+   Compiling rustybuzz v0.20.1
+   Compiling roxmltree v0.21.1
+   Compiling zune-inflate v0.2.54
+   Compiling addr2line v0.25.1
+   Compiling float_next_after v1.0.0
+   Compiling same-file v1.0.6
+   Compiling zed-font-kit v0.14.1-zed
+   Compiling poodle-tokens v0.4.15 ([checkout]/packages/contracts/tokens)
+   Compiling unicode-vo v0.1.0
+   Compiling sha1_smol v1.0.1
+   Compiling lebe v0.5.3
+   Compiling fnv v1.0.7
+   Compiling pico-args v0.5.0
+   Compiling ryu v1.0.23
+   Compiling data-url v0.3.2
+   Compiling bit_field v0.10.3
+   Compiling base64 v0.22.1
+   Compiling imagesize v0.14.0
+   Compiling dyn-clone v1.0.20
+   Compiling xmlwriter v0.1.0
+   Compiling bit-vec v0.8.0
+   Compiling synstructure v0.13.2
+   Compiling quick-error v1.2.3
+   Compiling fax v0.2.7
+   Compiling rustc-demangle v0.1.28
+   Compiling unicode-bidi v0.3.18
+   Compiling pxfm v0.1.30
+   Compiling thiserror v2.0.20
+   Compiling ztracing-macro-gpui-unofficial v1.22.0
+   Compiling serde_derive v1.0.229
+   Compiling zerovec-derive v0.11.6
+   Compiling displaydoc v0.2.7
+   Compiling futures-macro v0.3.34
+   Compiling foreign-types-macros v0.2.4
+   Compiling ref-cast-impl v1.0.27
+   Compiling schemars_derive v1.2.2
+   Compiling thiserror-impl v2.0.20
+   Compiling bit-set v0.8.0
+   Compiling rusty-fork v0.3.1
+   Compiling uuid v1.25.0
+   Compiling foreign-types v0.5.0
+   Compiling core-graphics v0.24.0
+   Compiling metal v0.33.0
+   Compiling futures-util v0.3.34
+   Compiling poodle-layout v0.4.15 ([checkout]/packages/contracts/layout)
+   Compiling walkdir v2.5.0
+   Compiling lyon_tessellation v1.0.20
+   Compiling tiny-skia v0.11.4
+   Compiling pathfinder_geometry v0.5.1
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling zerocopy-derive v0.8.56
+   Compiling tracing-attributes v0.1.31
+   Compiling pin-project-internal v1.1.13
+   Compiling thiserror-impl v1.0.69
+   Compiling derive_more-impl v2.1.1
+   Compiling usvg v0.46.0
+   Compiling profiling-procmacros v1.0.18
+   Compiling zerofrom v0.1.8
+   Compiling yoke v0.8.3
+   Compiling strum_macros v0.28.0
+   Compiling zerovec v0.11.8
+   Compiling zerotrie v0.2.5
+   Compiling tracing v0.1.44
+   Compiling pin-project v1.1.13
+   Compiling proptest-macro v0.5.0
+   Compiling derive-refineable-gpui-unofficial v1.22.0
+   Compiling enumn v0.1.14
+   Compiling core-text v21.0.0
+   Compiling flume v0.12.0
+   Compiling http-body v1.1.0
+   Compiling event-listener-strategy v0.5.4
+   Compiling tinystr v0.8.4
+   Compiling potential_utf v0.1.6
+   Compiling io-surface v0.16.1
+   Compiling icu_collections v2.3.0
+   Compiling lyon_algorithms v1.0.20
+   Compiling icu_locale_core v2.3.0
+   Compiling dirs v5.0.1
+   Compiling backtrace v0.3.76
+   Compiling moxcms v0.8.1
+   Compiling async-compression v0.4.43
+   Compiling core-graphics2 v0.5.2
+   Compiling png v0.18.1
+   Compiling rand_xorshift v0.4.0
+   Compiling futures-lite v2.6.1
+   Compiling crossbeam-queue v0.3.13
+   Compiling concurrent-queue v2.5.0
+   Compiling qoi v0.4.1
+   Compiling rgb v0.8.53
+   Compiling pollster v0.2.5
+   Compiling chrono v0.4.45
+   Compiling perf-gpui-unofficial v1.22.0
+   Compiling schemars v1.2.2
+   Compiling serde_urlencoded v0.7.1
+   Compiling link-section v0.19.3
+   Compiling atomic v0.5.3
+   Compiling icu_provider v2.3.1
+   Compiling static_assertions v1.1.0
+   Compiling unarray v0.1.4
+   Compiling async-task v4.7.1
+   Compiling fixedbitset v0.5.7
+   Compiling smol_str v0.3.6
+   Compiling objc2-core-foundation v0.3.2
+   Compiling linktime-proc-macro v0.2.3
+   Compiling futures-executor v0.3.34
+   Compiling icu_properties v2.3.0
+   Compiling icu_normalizer v2.3.0
+   Compiling float-ord v0.3.2
+   Compiling web-time v1.1.0
+   Compiling svg_fmt v0.4.5
+   Compiling futures v0.3.34
+   Compiling postage v0.5.0
+   Compiling etagere v0.2.15
+   Compiling objc2-core-video v0.3.2
+   Compiling resvg v0.46.0
+   Compiling futures-concurrency v7.7.1
+   Compiling util-macros-gpui-unofficial v1.22.0
+   Compiling async-channel v2.5.0
+   Compiling ctor v1.0.13
+   Compiling strum v0.28.0
+   Compiling lyon v1.0.19
+   Compiling accesskit v0.24.1
+   Compiling refineable-gpui-unofficial v1.22.0
+   Compiling profiling v1.0.18
+   Compiling gpui-shared-string-gpui-unofficial v1.22.0
+   Compiling gpui-macros-gpui-unofficial v1.22.0
+   Compiling poodle-style v0.4.15 ([checkout]/packages/contracts/style)
+   Compiling taffy v0.13.0
+   Compiling itertools v0.14.0
+   Compiling num_cpus v1.17.0
+   Compiling spin v0.10.1
+   Compiling derive_more v2.1.1
+   Compiling pollster v0.4.0
+   Compiling seahash v4.1.0
+   Compiling waker-fn v1.2.0
+   Compiling inventory v0.3.24
+   Compiling raw-window-handle v0.6.2
+   Compiling poodle-headless v0.4.15 ([checkout]/packages/contracts/headless)
+   Compiling zlog-gpui-unofficial v1.22.0
+   Compiling core-video v0.5.2
+   Compiling sum-tree-gpui-unofficial v1.22.0
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling url v2.5.8
+   Compiling http-client-gpui-unofficial v1.22.0
+   Compiling gpui-unofficial v1.22.0
+   Compiling ppv-lite86 v0.2.21
+   Compiling half v2.7.1
+   Compiling rand_chacha v0.9.0
+   Compiling tiff v0.11.3
+   Compiling exr v1.74.2
+   Compiling rand v0.9.5
+   Compiling poodle-node v0.4.15 ([checkout]/packages/contracts/node)
+   Compiling scheduler-gpui-unofficial v1.22.0
+   Compiling proptest v1.11.0
+   Compiling image v0.25.10
+   Compiling poodle-gpui-node-backend v0.4.15 ([checkout]/packages/gpui/node-backend)
+warning: variable does not need to be mutable
+   --> src/interaction.rs:944:25
+    |
+944 |                     let mut session = session.borrow_mut();
+    |                         ----^^^^^^^
+    |                         |
+    |                         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: `poodle-gpui-node-backend` (lib) generated 1 warning (run `cargo fix --lib -p poodle-gpui-node-backend` to apply 1 suggestion)
+warning: `poodle-gpui-node-backend` (lib test) generated 1 warning (1 duplicate)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 16s
+warning: the following packages contain code that will be rejected by a future version of Rust: block v0.1.6
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+     Running unittests src/lib.rs ([oxide-pool]/slots/poodle-121899d7/quick-119/build/debug/deps/poodle_gpui_node_backend-cf60c116bb7e6ac3)
+
+running 59 tests
+test a11y::tests::common_roles_map_to_accesskit_and_presentation_stays_omitted ... ok
+test drag::tests::a_target_without_an_eligibility_resolver_accepts ... ok
+test file_capability::tests::cancellation_stays_quiet ... ok
+test file_capability::tests::read_failures_are_reported ... ok
+test ime::tests::an_offset_inside_a_surrogate_pair_does_not_split_it ... ok
+test ime::tests::offsets_past_the_end_clamp ... ok
+test file_capability::tests::size_rule_applies_the_web_default ... ok
+test file_capability::tests::os_selection_cancellation_is_not_pending ... ok
+test drag::tests::eligibility_gates_on_kind_before_the_consumer_resolver_runs ... ok
+test input_text::tests::char_offsets_past_the_end_clamp_to_the_length ... ok
+test drag::tests::a_target_the_pointer_has_left_is_not_the_refusing_one ... ok
+test file_capability::tests::injected_source_resolves_through_the_same_seam ... ok
+test ime::tests::utf16_offsets_round_trip_through_astral_characters ... ok
+test file_capability::tests::accept_rule_rejects_after_selection ... ok
+test input_text::tests::a_caret_after_an_emoji_lands_on_a_boundary ... ok
+test interaction::scrub_axis_tests::escape_maps_to_the_shared_node_key ... ok
+test input_text::tests::char_and_byte_offsets_round_trip_through_multibyte_text ... ok
+test input_text::tests::drag_anchors_are_scoped_to_the_field_that_started_the_drag ... ok
+test interaction::scrub_axis_tests::wheel_up_is_positive_dy ... ok
+test drag::tests::the_refused_target_is_arbitrated_deepest_first ... ok
+test scroll::tests::keys_for_an_axis_the_viewport_does_not_own_do_nothing ... ok
+test scroll::tests::arrows_step_a_line_and_clamp_at_both_ends ... ok
+test scroll::tests::page_and_edge_keys_follow_the_owned_axis ... ok
+test interaction::scrub_axis_tests::horizontal_scrub_is_left_to_right ... ok
+test interaction::scrub_axis_tests::vertical_scrub_is_bottom_to_top ... ok
+test interaction::scrub_axis_tests::continuous_local_is_right_and_up ... ok
+test drag::tests::default_announcements_name_the_source_placement_and_reason ... ok
+test tests::a_declared_focus_ring_is_tracked_and_takes_the_stateful_path ... ok
+test tests::a_downward_offset_inset_layer_is_a_top_edge_band ... ok
+test interaction::scrub_axis_tests::a_lost_host_cancels_once ... ok
+test drag::tests::the_published_capabilities_match_stock_gpui ... ok
+test file_capability::tests::os_selection_failures_are_reported ... ok
+test tests::a_rightward_offset_inset_layer_is_a_leading_edge_band ... ok
+test interaction::scrub_axis_tests::one_continuous_gesture_then_exactly_one_terminal ... ok
+test tests::a_spread_only_inset_layer_is_an_even_inner_ring ... ok
+test drag::tests::the_announcement_log_keeps_a_bounded_tail ... ok
+test drag::tests::two_controllers_never_share_an_identity_or_a_session ... ok
+test tests::focusable_nodes_with_a_focus_patch_are_tracked ... ok
+test tests::color_is_a_raw_srgb_passthrough ... ok
+test file_capability::tests::os_selection_reads_a_real_file_through_the_seam ... ok
+test tests::inset_band_widths_follow_the_shadow_rect_in_every_direction ... ok
+test tests::gpui_animation_maps_loop_modes_and_easing ... ok
+test tests::sample_property_interpolates_linearly_between_keyframes ... ok
+test tests::sample_property_clamps_outside_keyframe_range_and_skips_absent_properties ... ok
+test tests::the_painted_text_key_uses_the_element_id_the_backend_paints_under ... ok
+test tests::tooltip_forces_element_state ... ok
+test tests::tooltip_contract_delay_is_300ms ... ok
+test tests::tooltip_state_reset_increments_generation_and_clears_fields ... ok
+test tests::the_painted_text_key_follows_the_node_that_draws_the_value ... ok
+test tracked_scroll::tests::pin_state_uses_remaining_distance_and_clamps_negative_thresholds ... ok
+test tests::an_all_inset_shadow_stack_declares_no_drop_shadow ... ok
+test tests::the_fallback_descriptor_shadow_projects_its_single_drop_layer ... ok
+test tests::blur_clears_transient_text_state_and_keeps_undo_history ... ok
+test tests::the_shadow_refinement_carries_drop_layers_only ... ok
+test tests::a_focus_ring_leaves_the_shadow_stack_untouched ... ok
+test tests::generated_identity_counters_are_isolated_per_thread ... ok
+test tests::a_to_gpui_prewalk_runs_once_per_tree_and_keeps_nested_drop_depth ... ok
+test tests::a_dialog_root_overlay_stays_inside_its_host_slot ... ok
+test tests::a_dialog_backdrop_covers_the_window_with_a_sibling_trigger_mounted ... ok
+
+test result: ok. 59 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+   Doc-tests poodle_gpui_node_backend
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+oxide: quick profile, build+execute strategy, slot 119 cold, 89.1s, new slot, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-9b0940b6 through profile member links (debug), temp: inherited [scratch]
+oxide: flushed the removable volume before releasing slot 119 in 435.5 ms

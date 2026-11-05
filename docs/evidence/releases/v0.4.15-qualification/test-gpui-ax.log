@@ -1,0 +1,69 @@
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ EFFIGY  [checkout] │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── v0.14.1+local.737a6d0 ╯
+
+  PASS  AX readiness distinguishes a missing proof title from missing content
+## build live GPUI proof window
+## named Poodle preview
+  AX tree evidence (14 elements):
+    depth=0 role="AXWindow" subrole="AXStandardWindow" title="Poodle GPUI AX proof" description="" name="Poodle GPUI AX proof" attributes=["AXFocused","AXFullScreen","AXTitle","AXChildrenInNavigationOrder","AXFrame","AXPosition","AXGrowArea","AXMinimizeButton","AXDocument","AXSections","AXCloseButton","AXMain","AXActivationPoint","AXFullScreenButton","AXProxy","AXDefaultButton","AXMinimized","AXChildren","AXRole","AXParent","AXTitleUIElement","AXCancelButton","AXModal","AXSubrole","AXZoomButton","AXRoleDescription","AXSize","AXToolbarButton"]
+    depth=1 role="AXGroup" subrole="AXUnknown" title="" description="" name="" attributes=["AXFocused","AXChildrenInNavigationOrder","AXTitle","AXSelectedChildren","AXFrame","AXLinkedUIElements","AXRequired","AXMinValue","AXPlaceholderValue","AXEnabled","AXMaxValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXIdentifier","AXRoleDescription","AXWindow","AXSize","AXPosition"]
+    depth=2 role="AXCheckBox" subrole="AXToggle" title="GPUI AX proof: Save" description="" name="GPUI AX proof: Save" attributes=["AXFocused","AXFrame","AXChildrenInNavigationOrder","AXSelectedChildren","AXTitle","AXMaxValue","AXLinkedUIElements","AXRequired","AXMinValue","AXEnabled","AXPlaceholderValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXRoleDescription","AXIdentifier","AXWindow","AXSize","AXPosition"]
+    depth=2 role="AXButton" subrole="AXUnknown" title="GPUI AX proof: Details" description="" name="GPUI AX proof: Details" attributes=["AXFocused","AXFrame","AXChildrenInNavigationOrder","AXSelectedChildren","AXTitle","AXMaxValue","AXLinkedUIElements","AXRequired","AXMinValue","AXEnabled","AXPlaceholderValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXRoleDescription","AXIdentifier","AXWindow","AXSize","AXPosition"]
+    depth=2 role="AXCheckBox" subrole="AXUnknown" title="GPUI AX proof: Mixed state" description="" name="GPUI AX proof: Mixed state" attributes=["AXFocused","AXFrame","AXChildrenInNavigationOrder","AXSelectedChildren","AXTitle","AXMaxValue","AXLinkedUIElements","AXRequired","AXMinValue","AXEnabled","AXPlaceholderValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXRoleDescription","AXIdentifier","AXWindow","AXSize","AXPosition"]
+    depth=2 role="AXSlider" subrole="AXUnknown" title="GPUI AX proof: Output level" description="" name="GPUI AX proof: Output level" attributes=["AXFocused","AXFrame","AXChildrenInNavigationOrder","AXSelectedChildren","AXTitle","AXMaxValue","AXLinkedUIElements","AXRequired","AXMinValue","AXEnabled","AXPlaceholderValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXRoleDescription","AXIdentifier","AXWindow","AXSize","AXPosition"]
+    depth=2 role="AXTabGroup" subrole="AXUnknown" title="GPUI AX proof: Tabs" description="" name="GPUI AX proof: Tabs" attributes=["AXFocused","AXTabs","AXFrame","AXChildrenInNavigationOrder","AXSelectedChildren","AXTitle","AXMaxValue","AXLinkedUIElements","AXRequired","AXMinValue","AXEnabled","AXPlaceholderValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXRoleDescription","AXIdentifier","AXWindow","AXSize","AXPosition"]
+    depth=3 role="AXRadioButton" subrole="AXTabButton" title="GPUI AX proof: Selected tab" description="" name="GPUI AX proof: Selected tab" attributes=["AXFocused","AXFrame","AXChildrenInNavigationOrder","AXSelectedChildren","AXTitle","AXMaxValue","AXLinkedUIElements","AXRequired","AXMinValue","AXEnabled","AXPlaceholderValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXRoleDescription","AXIdentifier","AXWindow","AXSize","AXPosition"]
+    depth=2 role="AXButton" subrole="AXUnknown" title="GPUI AX proof: Disabled button" description="" name="GPUI AX proof: Disabled button" attributes=["AXFocused","AXFrame","AXChildrenInNavigationOrder","AXSelectedChildren","AXTitle","AXMaxValue","AXLinkedUIElements","AXRequired","AXMinValue","AXEnabled","AXPlaceholderValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXRoleDescription","AXIdentifier","AXWindow","AXSize","AXPosition"]
+    depth=1 role="AXButton" subrole="AXCloseButton" title="" description="" name="" attributes=["AXEnabled","AXFrame","AXParent","AXSize","AXFocused","AXRole","AXTopLevelUIElement","AXHelp","AXPosition","AXTitle","AXWindow","AXRoleDescription","AXSubrole","AXEdited"]
+    depth=1 role="AXButton" subrole="AXZoomButton" title="" description="" name="" attributes=["AXEnabled","AXFrame","AXParent","AXSize","AXFocused","AXChildren","AXRole","AXTopLevelUIElement","AXHelp","AXPosition","AXTitle","AXWindow","AXRoleDescription","AXSubrole"]
+    depth=2 role="AXGroup" subrole="" title="" description="" name="" attributes=["AXRole","AXHelp","AXChildrenInNavigationOrder","AXChildren","AXWindow","AXPosition","AXRoleDescription","AXSize","AXFocused","AXFrame","AXParent","AXTopLevelUIElement"]
+    depth=3 role="AXGroup" subrole="" title="" description="" name="" attributes=["AXRole","AXHelp","AXChildrenInNavigationOrder","AXChildren","AXWindow","AXPosition","AXRoleDescription","AXSize","AXFocused","AXFrame","AXParent","AXTopLevelUIElement"]
+    depth=1 role="AXButton" subrole="AXMinimizeButton" title="" description="" name="" attributes=["AXEnabled","AXFrame","AXParent","AXSize","AXFocused","AXRole","AXTopLevelUIElement","AXHelp","AXPosition","AXTitle","AXWindow","AXRoleDescription","AXSubrole"]
+  PASS  live pressed Button name and macOS toggle role
+  PASS  Button toggled state reaches AXValue
+  PASS  live disclosure Button role and name
+  PASS  live Poodle Checkbox role and name
+  PASS  Checkbox state reaches AXValue
+  PASS  live Poodle Slider role and name
+  PASS  slider minimum and maximum reach the platform tree
+  PASS  slider orientation reaches the platform tree: AXHorizontalOrientation
+  PASS  slider numeric value or value text reaches AXValue: 42.5 percent
+  PASS  selected Tab state reaches AXValue
+  PASS  disabled state reaches the platform tree
+  PASS  every meaningful element in the clean tree has a name
+GPUI_AX_WINDOW pid=18489 hold_ms=12000
+GPUI_AX_COMPLETE foreground=proved samples=243 failed_reads=0
+  PASS  GPUI foreground monitor proves no activation
+## planted unnamed control
+  AX tree evidence (14 elements):
+    depth=0 role="AXWindow" subrole="AXStandardWindow" title="Poodle GPUI AX proof" description="" name="Poodle GPUI AX proof" attributes=["AXFocused","AXFullScreen","AXTitle","AXChildrenInNavigationOrder","AXFrame","AXPosition","AXGrowArea","AXMinimizeButton","AXDocument","AXSections","AXCloseButton","AXMain","AXActivationPoint","AXFullScreenButton","AXProxy","AXDefaultButton","AXMinimized","AXChildren","AXRole","AXParent","AXTitleUIElement","AXCancelButton","AXModal","AXSubrole","AXZoomButton","AXRoleDescription","AXSize","AXToolbarButton"]
+    depth=1 role="AXGroup" subrole="AXUnknown" title="" description="" name="" attributes=["AXFocused","AXChildrenInNavigationOrder","AXTitle","AXSelectedChildren","AXFrame","AXLinkedUIElements","AXRequired","AXMinValue","AXPlaceholderValue","AXEnabled","AXMaxValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXIdentifier","AXRoleDescription","AXWindow","AXSize","AXPosition"]
+    depth=2 role="AXCheckBox" subrole="AXToggle" title="GPUI AX proof: Save" description="" name="GPUI AX proof: Save" attributes=["AXFocused","AXFrame","AXChildrenInNavigationOrder","AXSelectedChildren","AXTitle","AXMaxValue","AXLinkedUIElements","AXRequired","AXMinValue","AXEnabled","AXPlaceholderValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXRoleDescription","AXIdentifier","AXWindow","AXSize","AXPosition"]
+    depth=2 role="AXButton" subrole="AXUnknown" title="GPUI AX proof: Details" description="" name="GPUI AX proof: Details" attributes=["AXFocused","AXFrame","AXChildrenInNavigationOrder","AXSelectedChildren","AXTitle","AXMaxValue","AXLinkedUIElements","AXRequired","AXMinValue","AXEnabled","AXPlaceholderValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXRoleDescription","AXIdentifier","AXWindow","AXSize","AXPosition"]
+    depth=2 role="AXCheckBox" subrole="AXUnknown" title="GPUI AX proof: Mixed state" description="" name="GPUI AX proof: Mixed state" attributes=["AXFocused","AXFrame","AXChildrenInNavigationOrder","AXSelectedChildren","AXTitle","AXMaxValue","AXLinkedUIElements","AXRequired","AXMinValue","AXEnabled","AXPlaceholderValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXRoleDescription","AXIdentifier","AXWindow","AXSize","AXPosition"]
+    depth=2 role="AXSlider" subrole="AXUnknown" title="GPUI AX proof: Output level" description="" name="GPUI AX proof: Output level" attributes=["AXFocused","AXFrame","AXChildrenInNavigationOrder","AXSelectedChildren","AXTitle","AXMaxValue","AXLinkedUIElements","AXRequired","AXMinValue","AXEnabled","AXPlaceholderValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXRoleDescription","AXIdentifier","AXWindow","AXSize","AXPosition"]
+    depth=2 role="AXTabGroup" subrole="AXUnknown" title="GPUI AX proof: Tabs" description="" name="GPUI AX proof: Tabs" attributes=["AXFocused","AXTabs","AXFrame","AXChildrenInNavigationOrder","AXSelectedChildren","AXTitle","AXMaxValue","AXLinkedUIElements","AXRequired","AXMinValue","AXEnabled","AXPlaceholderValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXRoleDescription","AXIdentifier","AXWindow","AXSize","AXPosition"]
+    depth=3 role="AXRadioButton" subrole="AXTabButton" title="GPUI AX proof: Selected tab" description="" name="GPUI AX proof: Selected tab" attributes=["AXFocused","AXFrame","AXChildrenInNavigationOrder","AXSelectedChildren","AXTitle","AXMaxValue","AXLinkedUIElements","AXRequired","AXMinValue","AXEnabled","AXPlaceholderValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXRoleDescription","AXIdentifier","AXWindow","AXSize","AXPosition"]
+    depth=2 role="AXButton" subrole="AXUnknown" title="GPUI AX proof: Disabled button" description="" name="GPUI AX proof: Disabled button" attributes=["AXFocused","AXFrame","AXChildrenInNavigationOrder","AXSelectedChildren","AXTitle","AXMaxValue","AXLinkedUIElements","AXRequired","AXMinValue","AXEnabled","AXPlaceholderValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXRoleDescription","AXIdentifier","AXWindow","AXSize","AXPosition"]
+    depth=2 role="AXButton" subrole="AXUnknown" title="" description="" name="" attributes=["AXFocused","AXFrame","AXChildrenInNavigationOrder","AXSelectedChildren","AXTitle","AXMaxValue","AXLinkedUIElements","AXRequired","AXMinValue","AXEnabled","AXPlaceholderValue","AXHelp","AXChildren","AXRole","AXParent","AXTopLevelUIElement","AXSubrole","AXOrientation","AXValue","AXRoleDescription","AXIdentifier","AXWindow","AXSize","AXPosition"]
+    depth=1 role="AXButton" subrole="AXCloseButton" title="" description="" name="" attributes=["AXEnabled","AXFrame","AXParent","AXSize","AXFocused","AXRole","AXTopLevelUIElement","AXHelp","AXPosition","AXTitle","AXWindow","AXRoleDescription","AXSubrole","AXEdited"]
+    depth=1 role="AXButton" subrole="AXZoomButton" title="" description="" name="" attributes=["AXEnabled","AXFrame","AXParent","AXSize","AXFocused","AXChildren","AXRole","AXTopLevelUIElement","AXHelp","AXPosition","AXTitle","AXWindow","AXRoleDescription","AXSubrole"]
+    depth=2 role="AXGroup" subrole="" title="" description="" name="" attributes=["AXRole","AXHelp","AXChildrenInNavigationOrder","AXChildren","AXWindow","AXPosition","AXRoleDescription","AXSize","AXFocused","AXFrame","AXParent","AXTopLevelUIElement"]
+    depth=1 role="AXButton" subrole="AXMinimizeButton" title="" description="" name="" attributes=["AXEnabled","AXFrame","AXParent","AXSize","AXFocused","AXRole","AXTopLevelUIElement","AXHelp","AXPosition","AXTitle","AXWindow","AXRoleDescription","AXSubrole"]
+  PASS  live pressed Button name and macOS toggle role
+  PASS  Button toggled state reaches AXValue
+  PASS  live disclosure Button role and name
+  PASS  live Poodle Checkbox role and name
+  PASS  Checkbox state reaches AXValue
+  PASS  live Poodle Slider role and name
+  PASS  slider minimum and maximum reach the platform tree
+  PASS  slider orientation reaches the platform tree: AXHorizontalOrientation
+  PASS  slider numeric value or value text reaches AXValue: 42.5 percent
+  PASS  selected Tab state reaches AXValue
+  PASS  disabled state reaches the platform tree
+  PASS  the name audit rejects a planted unnamed control: AXButton@2
+GPUI_AX_WINDOW pid=22620 hold_ms=12000
+GPUI_AX_COMPLETE foreground=proved samples=243 failed_reads=0
+  PASS  GPUI foreground monitor proves no activation

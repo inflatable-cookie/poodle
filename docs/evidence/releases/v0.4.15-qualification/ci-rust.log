@@ -1,0 +1,1045 @@
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ EFFIGY  [checkout] │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── v0.14.1+local.737a6d0 ╯
+
+oxide: auto-adopted [checkout]/packages/contracts/headless/target -> [oxide-outputs]/poodle-7bdc88b7 for permanent-drive outputs; no existing outputs moved
+oxide: seeding skipped: no eligible donor; poodle-headless: non-leaf
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.154
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling poodle-headless v0.4.15 ([checkout]/packages/contracts/headless)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.54s
+     Running unittests src/lib.rs ([oxide-pool]/slots/poodle-43a04aae/quick-102/build/debug/deps/poodle_headless-bd84ba96c8d7b171)
+
+running 240 tests
+test audio::tests::fader_snaps_to_the_first_nearest_detent_and_maps_both_axes ... ok
+test audio::tests::phase_three_matrix_supports_per_cell_unipolar_parameters ... ok
+test audio::tests::keyboard_hit_test_matches_svelte_geometry ... ok
+test audio::tests::envelope_curve_golden_values_match_web ... ok
+test audio::tests::disabled_scalar_controls_stay_inert_but_still_close_a_gesture ... ok
+test audio::tests::equal_row_geometry_and_hit_testing_share_a_partial_scroll_offset ... ok
+test audio::tests::knob_pairs_gestures_and_reuses_entry_parsing ... ok
+test audio::tests::meter_ballistics_match_constants ... ok
+test audio::tests::phase_three_keyboard_pairs_notes_and_matches_velocity ... ok
+test audio::tests::format_golden_values_match_web ... ok
+test audio::tests::envelope_mutations_clamp_sort_and_preserve_flat_segments ... ok
+test audio::tests::law_golden_values_match_web ... ok
+test audio::tests::knob_modes_anchor_movement_and_rebase_without_jumps ... ok
+test audio::tests::phase_three_matrix_is_row_major_and_bipolar ... ok
+test audio::tests::computer_keys_map_from_computer_base_note ... ok
+test audio::tests::phase_three_keyboard_retargets_captured_pointer_notes ... ok
+test audio::tests::computer_keys_use_the_configured_key_map ... ok
+test audio::tests::phase_three_matrix_rejects_duplicate_axis_ids - should panic ... ok
+test audio::tests::range_octave_and_disable_changes_close_held_notes ... ok
+test audio::tests::phase_three_waveform_reduces_extrema_and_caps_columns ... ok
+test audio::tests::switch_and_xy_machines_commit_atomic_values ... ok
+test audio::tests::xy_pad_presses_at_position_then_anchors_fine_travel ... ok
+test cross_window_drag::tests::a_late_listener_runs_immediately_with_the_recorded_reason ... ok
+test cross_window_drag::tests::a_receipt_is_valid_only_at_this_protocol_version_and_within_token_bounds ... ok
+test cross_window_drag::tests::aborting_is_idempotent_and_keeps_the_first_reason ... ok
+test cross_window_drag::tests::receipts_compare_by_version_and_token_together ... ok
+test drag_drop::tests::arbitration_does_not_depend_on_candidate_order ... ok
+test drag_drop::tests::an_inert_event_returns_the_caller_context_unchanged ... ok
+test drag_drop::tests::equal_depth_and_priority_fall_back_to_registration_order ... ok
+test duration::tests::direct_entry_clamps_per_segment ... ok
+test drag_drop::tests::every_event_reports_its_own_session ... ok
+test drag_drop::tests::priority_applies_only_within_one_depth ... ok
+test duration::tests::hours_clamp_at_both_ends ... ok
+test duration::tests::a_large_hours_value_does_not_overflow_the_total ... ok
+test duration::tests::seconds_borrow_back_down_through_minutes_and_hours ... ok
+test duration::tests::carries_at_the_hour_bound_are_swallowed ... ok
+test duration::tests::seconds_carry_into_minutes_and_minutes_into_hours ... ok
+test duration::tests::total_seconds_and_padding_match_the_web_helpers ... ok
+test edit::tests::portable_trim_drops_nel_and_bom_that_str_trim_does_not_both_drop ... ok
+test duration::tests::typing_digits_shifts_them_into_the_segment ... ok
+test duration::tests::typing_past_a_segment_bound_clamps ... ok
+test external_file_drag::tests::a_prepared_export_cannot_exceed_its_own_advertised_capabilities ... ok
+test external_file_drag::tests::a_batch_from_another_protocol_version_is_refused_first ... ok
+test external_file_drag::tests::a_display_name_that_is_a_location_is_not_presentable ... ok
+test external_file_drag::tests::inbound_validation_gates_count_type_identity_and_transport ... ok
+test external_file_drag::tests::a_single_file_transport_refuses_a_multi_file_batch ... ok
+test file_upload::tests::default_max_size_is_ten_megabytes ... ok
+test file_upload::tests::error_copy_vectors_match_the_web_exactly ... ok
+test file_upload::tests::extension_token_keeps_the_reference_quirk_for_dotless_names ... ok
+test file_upload::tests::extension_tokens_match_case_insensitively ... ok
+test external_file_drag::tests::an_export_without_a_bounded_receipt_id_is_refused ... ok
+test external_file_drag::tests::custom_data_needs_both_sides_to_name_the_same_type ... ok
+test external_file_drag::tests::an_unknown_hover_size_passes_and_the_real_drop_size_does_not ... ok
+test file_upload::tests::base64_matches_rfc4648_vectors ... ok
+test file_upload::tests::base64_never_carries_a_data_url_prefix ... ok
+test file_upload::tests::mime_rules_need_a_mime_read_and_never_guess ... ok
+test external_file_drag::tests::an_undisclosed_hover_name_defers_extension_rules_and_keeps_type_rules ... ok
+test file_upload::tests::wildcard_and_absent_accept_admit_everything ... ok
+test file_upload::tests::size_rule_precedes_accept_and_uses_the_web_copy ... ok
+test history_center::tests::a_run_row_navigates_on_its_own_branch ... ok
+test history_center::tests::a_single_fork_is_chosen_and_still_shows_a_disabled_picker ... ok
+test history_center::tests::a_spine_row_reports_no_branch ... ok
+test history_center::tests::a_terminal_entry_has_no_forks ... ok
+test history_center::tests::a_stale_level_re_requests_once_and_never_duplicates_a_row ... ok
+test history_center::tests::a_truncated_successor_is_recognised_by_preference ... ok
+test history_center::tests::an_overlapping_page_seam_renders_each_entry_once ... ok
+test history_center::tests::closing_a_level_drops_its_subtree ... ok
+test history_center::tests::closing_the_popover_caches_nothing ... ok
+test history_center::tests::checkout_commits_the_shown_fork_and_clears_the_level ... ok
+test history_center::tests::delete_invalidates_a_nested_fork_in_place_and_keeps_siblings ... ok
+test history_center::tests::delete_invalidates_the_offered_fork_and_reloads_its_anchor ... ok
+test history_center::tests::delete_is_inert_for_an_unoffered_fork_and_while_closed ... ok
+test history_center::tests::depth_nests_without_a_cap ... ok
+test history_center::tests::every_rejection_code_owns_its_own_exact_copy ... ok
+test history_center::tests::focus_wraps_and_a_picker_row_navigates_nowhere ... ok
+test history_center::tests::focus_survives_a_disclosure_toggle ... ok
+test history_center::tests::pages_join_into_one_oldest_first_timeline ... ok
+test history_center::tests::disclosure_requests_continuations_and_holds_a_place ... ok
+test history_center::tests::the_child_already_on_the_list_is_filtered_by_id ... ok
+test history_center::tests::show_rejection_displays_replaces_and_repeats_inertly ... ok
+test history_center::tests::without_pages_every_row_event_is_inert ... ok
+test history_center::tests::several_forks_select_the_current_one_and_preview_it ... ok
+test licence::tests::civil_from_days_round_trips_modern_dates_not_1970 ... ok
+test licence::tests::data_url_prefix_is_stripped_exactly_once ... ok
+test licence::tests::informational_attention_lifts_only_calm_states_to_info ... ok
+test licence::tests::machine_label_trims_and_drops_empty ... ok
+test licence::tests::seat_rows_are_honest_about_unnamed_machines ... ok
+test licence::tests::submit_resolution_emits_exact_credentials ... ok
+test licence::tests::status_view_covers_every_state_with_the_web_copy ... ok
+test licence::tests::time_date_parts_use_the_fixed_component_format ... ok
+test licence::tests::timestamp_conversion_is_authority_seconds_to_ms ... ok
+test listbox::tests::click_modifiers_toggle_or_replace_selection_with_enabled_ranges ... ok
+test listbox::tests::globally_disabled_machine_is_inert ... ok
+test licence::tests::token_cancellation_is_quiet_and_failure_stays_generic ... ok
+test listbox::tests::initial_focus_prefers_selected_enabled_then_first_enabled ... ok
+test listbox::tests::multiple_move_preserves_selection_and_shift_replaces_with_enabled_range ... ok
+test listbox::tests::select_space_select_all_and_activate_follow_mode_and_disabled_guards ... ok
+test listbox::tests::single_move_skips_disabled_selects_and_stops_at_ends ... ok
+test listbox::tests::typeahead_cycles_repeats_resets_and_skips_disabled_items ... ok
+test model_connection::tests::announcements_name_the_model_and_outcome ... ok
+test model_connection::tests::back_returns_to_choose_without_clearing_selection ... ok
+test model_connection::tests::catalogue_state_copy_keeps_every_posture_distinct ... ok
+test model_connection::tests::filter_case_folds_keywords_without_reshuffling_groups ... ok
+test model_connection::tests::continue_requires_a_selectable_exact_id ... ok
+test model_connection::tests::filter_retains_source_order_across_every_searchable_field ... ok
+test model_connection::tests::direct_routes_submit_from_choose_without_entering_configure ... ok
+test model_connection::tests::filter_with_an_empty_query_returns_the_full_source_order ... ok
+test model_connection::tests::order_requests_emit_the_complete_shown_id_order ... ok
+test model_connection::tests::focus_after_hide_follows_next_previous_or_hidden_section ... ok
+test model_connection::tests::reorder_key_intent_moves_the_active_row_and_reports_boundaries ... ok
+test model_connection::tests::grouping_preserves_first_seen_group_order ... ok
+test model_connection::tests::only_available_non_disabled_options_are_selectable ... ok
+test model_connection::tests::result_announcement_names_match_counts ... ok
+test model_connection::tests::pending_guards_workflow_events ... ok
+test model_connection::tests::picker_uses_the_compact_availability_labels ... ok
+test model_connection::tests::reorder_key_intent_toggles_grab_and_cancels ... ok
+test model_connection::tests::reselecting_the_current_value_emits_nothing ... ok
+test model_connection::tests::shell_state_maps_postures_and_derived_empty_or_no_results ... ok
+test model_connection::tests::select_emits_exact_opaque_ids_only_for_selectable_options ... ok
+test model_connection::tests::visibility_requests_only_carry_id_and_visible ... ok
+test model_connection::tests::shown_and_hidden_partitions_ignore_hidden_order_meaning ... ok
+test motion_policy::tests::abort_keeps_the_endpoint_and_unmount_drops_the_remnant ... ok
+test motion_policy::tests::controlled_close_starts_at_closed_direction_and_reverses_proportionally ... ok
+test motion_policy::tests::height_is_the_only_layout_exception_and_gpui_names_gaps ... ok
+test motion_policy::tests::keys_are_semantic_and_stable ... ok
+test motion_policy::tests::loading_loop_waits_for_the_first_committed_frame ... ok
+test model_connection::tests::state_copy_names_every_non_ready_posture ... ok
+test motion_policy::tests::missing_preference_resolves_to_full ... ok
+test model_connection::tests::the_card_status_label_prefers_access_summary_only_when_ready ... ok
+test model_connection::tests::tones_map_availability_and_readiness_without_collapsing_dimensions ... ok
+test model_connection::tests::the_selected_summary_repeats_supplied_labels_only ... ok
+test model_connection::tests::submit_requires_configure_can_submit_and_an_exact_id ... ok
+test motion_policy::tests::authored_initial_state_paints_the_endpoint ... ok
+test motion_policy::tests::child_full_cannot_reenable_reduced ... ok
+test motion_policy::tests::multi_target_retarget_does_not_queue ... ok
+test motion_policy::tests::nesting_is_restriction_only ... ok
+test motion_policy::tests::reduced_keeps_only_allowed_opacity_and_drops_layout ... ok
+test motion_policy::tests::repeated_target_is_inert_and_latest_state_wins ... ok
+test number_input::tests::blur_discards_unresolved_draft ... ok
+test motion_policy::tests::tightening_full_to_reduced_to_frozen_is_honest ... ok
+test number_input::tests::classifies_empty_incomplete_complete_and_malformed ... ok
+test number_input::tests::format_shortest_decimal_expands_without_exponent ... ok
+test number_input::tests::clear_empty_emits_draft_and_null_value ... ok
+test number_input::tests::omitted_step_is_one_and_invalid_config_is_inert ... ok
+test number_input::tests::oversized_finite_draft_is_complete ... ok
+test popover::tests::disabled_blocks_every_open_direction_and_keeps_state ... ok
+test popover::tests::every_close_axis_restores_trigger_focus ... ok
+test popover::tests::focus_effect_carries_the_declared_strategy ... ok
+test popover::tests::open_events_are_inert_while_closed_but_toggle_closes_an_open_surface ... ok
+test popover::tests::outside_interact_obeys_dismiss_on_outside_interact ... ok
+test number_input::tests::step_from_empty_baseline_uses_min_or_zero ... ok
+test rating::tests::clear_on_reselect_and_keyboard_stepping ... ok
+test popover::tests::toggle_and_open_from_closed_emit_open_and_focus_effects ... ok
+test rating::tests::normalize_clamps_then_snaps_null_passes_through ... ok
+test rating::tests::fraction_trimming_and_fill_ratio ... ok
+test rating::tests::pointer_value_snaps_up_within_the_item_capped_at_item_count ... ok
+test rating::tests::step_resolution_caps_at_1_and_rejects_invalid ... ok
+test rating::tests::value_text_keeps_empty_distinct_from_zero_display_path ... ok
+test select::tests::clear_restores_the_authored_default ... ok
+test select::tests::disabled_context_is_inert_in_every_direction ... ok
+test select::tests::disabled_option_commit_is_inert ... ok
+test select::tests::effects_are_ordered_open_then_query_then_value ... ok
+test select::tests::highlight_navigation_skips_disabled_and_lands_on_enabled_bounds ... ok
+test select::tests::options_changed_revalidates_a_stale_highlight ... ok
+test select::tests::query_opens_and_highlights_the_first_enabled_match ... ok
+test slider::control_tests::a_second_pointer_end_is_inert ... ok
+test slider::control_tests::bipolar_fill_grows_from_center ... ok
+test slider::control_tests::bipolar_range_only_squares_a_join_when_both_segments_meet ... ok
+test slider::control_tests::bipolar_range_splits_negative_and_positive_fill ... ok
+test slider::control_tests::block_fit_is_value_independent ... ok
+test slider::control_tests::collision_suppresses_label_and_keeps_exact_value ... ok
+test slider::control_tests::disabled_pointer_is_inert ... ok
+test slider::control_tests::equality_fits_and_required_minus_one_falls_back ... ok
+test slider::control_tests::negative_half_ties_round_toward_positive_infinity ... ok
+test slider::control_tests::press_move_and_end_emit_live_change_then_one_commit ... ok
+test slider::control_tests::range_gesture_keeps_the_chosen_thumb ... ok
+test slider::control_tests::set_value_rebuilds_without_emitting ... ok
+test switch::tests::set_checked_updates_context_without_emitting_effects ... ok
+test slider::control_tests::the_default_display_serializer_emits_fixed_width_step_aware_decimals ... ok
+test slider::control_tests::uneven_steps_keep_slider_and_range_bounds_reachable ... ok
+test switch::tests::toggle_when_disabled_is_inert ... ok
+test switch::tests::toggle_when_interactive_emits_effect_and_updates_context ... ok
+test switch::tests::toggle_when_read_only_reverts_native_checked_without_emitting_change ... ok
+test tabs::tests::pinned_partitions_validate ... ok
+test tabs::tests::pinned_reorders_are_refused_without_effects ... ok
+test text_input::tests::a_cursor_past_a_shortened_value_is_clamped ... ok
+test text_input::tests::a_moved_caret_breaks_the_run ... ok
+test text_input::tests::a_full_field_swallows_a_printable_key_and_changes_nothing ... ok
+test text_input::tests::a_paste_overwrites_from_the_selection_and_clamps ... ok
+test text_input::tests::a_plain_arrow_collapses_a_selection_to_its_edge ... ok
+test text_input::tests::an_over_long_insertion_is_truncated_to_what_fits ... ok
+test text_input::tests::consecutive_typing_coalesces_into_one_step ... ok
+test text_input::tests::group_ends_follow_explicit_partitions ... ok
+test text_input::tests::invalid_or_single_group_patterns_produce_no_breaks ... ok
+test text_input::tests::arrows_home_and_end_move_without_changing_the_value ... ok
+test text_input::tests::an_over_long_value_can_still_be_deleted_from ... ok
+test text_input::tests::backspace_at_the_start_and_delete_at_the_end_are_inert_but_consumed ... ok
+test text_input::tests::arrows_move_the_caret_without_touching_the_value ... ok
+test text_input::tests::backspace_deletes_before_the_caret ... ok
+test text_input::tests::backspace_removes_before_the_caret_and_is_inert_at_the_start ... ok
+test text_input::tests::backspace_over_a_selection_deletes_the_whole_range ... ok
+test text_input::tests::characters_insert_at_the_caret_not_at_the_end ... ok
+test text_input::tests::delete_removes_the_character_at_the_caret ... ok
+test text_input::tests::digits_fill_left_to_right_then_overwrite_the_last_slot ... ok
+test text_input::tests::deletions_and_pastes_each_begin_a_new_step ... ok
+test text_input::tests::insert_replaces_the_selection_and_leaves_the_caret_after_the_text ... ok
+test text_input::tests::insert_at_a_collapsed_caret_adds_without_removing ... ok
+test text_input::tests::escape_clears_a_filled_code_and_passes_through_an_empty_one ... ok
+test text_input::tests::letters_are_swallowed_by_a_numbers_only_code ... ok
+test text_input::tests::multi_character_keys_are_not_ours ... ok
+test text_input::tests::keys_we_do_not_own_are_left_alone ... ok
+test text_input::tests::multibyte_text_edits_by_character_not_byte ... ok
+test text_input::tests::paste_sanitizes_and_clamps_like_typing ... ok
+test text_input::tests::replacing_a_selection_begins_a_new_step ... ok
+test text_input::tests::sanitized_away_input_reports_nothing ... ok
+test text_input::tests::select_all_then_type_replaces_everything ... ok
+test text_input::tests::selected_text_reads_the_range_by_character ... ok
+test text_input::tests::shift_arrow_extends_a_selection_and_typing_replaces_it ... ok
+test text_input::tests::slot_clicks_select_a_filled_character_and_collapse_past_the_end ... ok
+test text_input::tests::typing_at_the_end_appends_and_stops_at_the_length ... ok
+test text_input::tests::typing_into_a_selected_slot_replaces_it ... ok
+test text_input::tests::typing_over_a_selected_slot_replaces_it_in_place ... ok
+test text_input::tests::typing_over_a_selection_spends_the_characters_it_replaces ... ok
+test text_input::tests::word_ranges_cover_words_runs_of_punctuation_and_the_trailing_caret ... ok
+test time_input::tests::complete_digits_commit_and_partial_digits_stay_local ... ok
+test time_input::tests::overnight_step_crosses_midnight_and_stops_at_the_gap ... ok
+test time_input::tests::parse_rejects_unpadded_and_impossible_values ... ok
+test token::tests::backspace_guard_needs_an_empty_draft_and_a_token ... ok
+test update::tests::a_deferral_is_not_a_failure ... ok
+test token::tests::merge_preserves_first_occurrence_order ... ok
+test update::tests::ahead_of_channel_is_not_up_to_date ... ok
+test token::tests::split_matches_the_js_separator_run_semantics ... ok
+test update::tests::download_label_never_says_zero_for_a_null_fraction ... ok
+test update::tests::managed_elsewhere_is_not_an_error ... ok
+test update::tests::null_fraction_is_indeterminate_and_zero_is_zero ... ok
+test update::tests::offer_carries_version_notes_and_both_actions ... ok
+test update::tests::withheld_by_rollout_is_information ... ok
+test update::tests::progress_supersedes_availability ... ok
+test update::tests::signature_rejection_offers_no_retry ... ok
+test update::tests::up_to_date_is_calm_and_actionless ... ok
+
+test result: ok. 240 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/agent_plan_conformance.rs ([oxide-pool]/slots/poodle-43a04aae/quick-102/build/debug/deps/agent_plan_conformance-d133c7079a39155e)
+
+running 3 tests
+test status_labels_match_the_shared_vectors ... ok
+test record_summaries_match_the_shared_vectors ... ok
+test decisions_match_the_shared_vectors ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/agent_question_conformance.rs ([oxide-pool]/slots/poodle-43a04aae/quick-102/build/debug/deps/agent_question_conformance-b33081ef95267747)
+
+running 4 tests
+test selection_toggling_matches_the_shared_vectors ... ok
+test answer_resolution_matches_the_shared_vectors ... ok
+test batch_progress_matches_the_shared_vectors ... ok
+test answered_summaries_match_the_shared_vectors ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/agent_subagent_conformance.rs ([oxide-pool]/slots/poodle-43a04aae/quick-102/build/debug/deps/agent_subagent_conformance-26f6a359ab1468c1)
+
+running 3 tests
+test spinner_mapping_matches_the_shared_vectors ... ok
+test status_labels_match_the_shared_vectors ... ok
+test terminal_mapping_matches_the_shared_vectors ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/agent_transcript_conformance.rs ([oxide-pool]/slots/poodle-43a04aae/quick-102/build/debug/deps/agent_transcript_conformance-01e84c8fd2caad71)
+
+running 4 tests
+test windowing_matches_the_shared_vectors ... ok
+test bottom_anchoring_matches_the_shared_vectors ... ok
+test grouping_matches_the_shared_vectors ... ok
+test changed_file_tree_matches_the_shared_vectors ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/conformance.rs ([oxide-pool]/slots/poodle-43a04aae/quick-102/build/debug/deps/conformance-8abcb3cf71d5991b)
+
+running 16 tests
+test switch_conformance ... ok
+test select_conformance ... ok
+test slider_conformance ... ok
+test edit_conformance ... ok
+test single_select_conformance ... ok
+test range_slider_conformance ... ok
+test disclosure_conformance ... ok
+test slider_snap_conformance ... ok
+test checkbox_conformance ... ok
+test hover_conformance ... ok
+test tabs_conformance ... ok
+test modal_conformance ... ok
+test toggle_group_conformance ... ok
+test audio_controls_conformance ... ok
+test menu_conformance ... ok
+test drag_drop_conformance ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/contrast.rs ([oxide-pool]/slots/poodle-43a04aae/quick-102/build/debug/deps/contrast-ab41e46d5889d6a1)
+
+running 6 tests
+test translucent_borders_scale_alpha_with_floor ... ok
+test light_theme_values ... ok
+test identity_at_full_contrast ... ok
+test dark_anchor_lightness_matches_browser ... ok
+test dark_backgrounds_at_default_contrast ... ok
+test token_classification ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/domain_conformance.rs ([oxide-pool]/slots/poodle-43a04aae/quick-102/build/debug/deps/domain_conformance-5527def2f630e394)
+
+running 8 tests
+test color_conformance ... ok
+test pagination_conformance ... ok
+test duration_conformance ... ok
+test nav_conformance ... ok
+test tree_conformance ... ok
+test time_input_conformance ... ok
+test date_conformance ... ok
+test number_input_conformance ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+   Doc-tests poodle_headless
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+oxide: quick profile, build+execute strategy, slot 102 cold, 19.4s, new slot, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-7bdc88b7 through profile member links (debug), temp: inherited [scratch]
+oxide: flushed the removable volume before releasing slot 102 in 176.9 ms
+oxide: auto-adopted [checkout]/packages/contracts/markdown/target -> [oxide-outputs]/poodle-d600630a for permanent-drive outputs; no existing outputs moved
+oxide: seeding skipped: no eligible donor; poodle-markdown: non-leaf
+   Compiling pulldown-cmark v0.13.6
+   Compiling serde_core v1.0.229
+   Compiling memchr v2.8.3
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.154
+   Compiling bitflags v2.13.2
+   Compiling unicase v2.10.0
+   Compiling itoa v1.0.18
+   Compiling poodle-markdown v0.4.15 ([checkout]/packages/contracts/markdown)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.88s
+     Running unittests src/lib.rs ([oxide-pool]/slots/poodle-7a632735/quick-103/build/debug/deps/poodle_markdown-427bf6d0a7415fef)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/block_conformance.rs ([oxide-pool]/slots/poodle-7a632735/quick-103/build/debug/deps/block_conformance-6ec0ea11df69d948)
+
+running 3 tests
+test plain_text_includes_code ... ok
+test unknown_html_degrades_to_text_rather_than_vanishing ... ok
+test blocks_match_the_shared_vectors ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests poodle_markdown
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+oxide: quick profile, build+execute strategy, slot 103 cold, 11.8s, new slot, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-d600630a through profile member links (debug), temp: inherited [scratch]
+oxide: flushed the removable volume before releasing slot 103 in 178.0 ms
+oxide: auto-adopted [checkout]/packages/contracts/components/target -> [oxide-outputs]/poodle-544fea3d for permanent-drive outputs; no existing outputs moved
+oxide: seeding skipped: no eligible donor; poodle-specs: non-leaf
+     Locking 2 packages to latest compatible versions
+    Updating poodle-headless v0.4.14 ([checkout]/packages/contracts/headless) -> v0.4.15
+    Updating poodle-tokens v0.4.14 ([checkout]/packages/contracts/tokens) -> v0.4.15
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde v1.0.229
+   Compiling serde_json v1.0.154
+   Compiling poodle-tokens v0.4.15 ([checkout]/packages/contracts/tokens)
+   Compiling itoa v1.0.18
+   Compiling poodle-headless v0.4.15 ([checkout]/packages/contracts/headless)
+   Compiling memchr v2.8.3
+   Compiling syn v3.0.9
+   Compiling poodle-specs v0.4.15 ([checkout]/packages/contracts/components)
+   Compiling serde_derive v1.0.229
+warning: unused import: `TabPin`
+   --> src/lib.rs:512:24
+    |
+512 |         TabDefinition, TabPin, TabStripItem, TabStripSpec, TabsSpec, TextInputSpec, TimeInputSpec,
+    |                        ^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `poodle-specs` (lib test) generated 1 warning (run `cargo fix --lib -p poodle-specs --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.73s
+     Running unittests src/lib.rs ([oxide-pool]/slots/poodle-bdebb5dd/quick-104/build/debug/deps/poodle_specs-aba156ce228ea86f)
+
+running 335 tests
+test agent_plan::tests::density_moves_spacing_but_not_the_type_scale ... ok
+test agent_message::tests::density_moves_spacing_but_never_the_type_scale ... ok
+test agent_plan::tests::a_pending_plan_can_be_decided_and_a_settled_one_cannot ... ok
+test agent_plan::tests::the_badge_wording_comes_from_the_headless_core ... ok
+test agent_message::tests::an_empty_message_does_not_render ... ok
+test agent_chat_input::tests::action_flips_with_status ... ok
+test agent_chat_input::tests::submit_intent_covers_every_gesture_row ... ok
+test agent_chat_input::tests::status_selects_the_editor_placeholder ... ok
+test agent_chat_input::tests::attachments_switch_to_tiles_when_they_carry_a_thumbnail ... ok
+test agent_message::tests::a_streaming_message_renders_even_before_any_tokens_arrive ... ok
+test agent_chat_input::tests::keyboard_submit_is_dropped_while_busy ... ok
+test agent_chat_input::tests::submit_gating_matches_the_contract_table ... ok
+test accordion::tests::selection_mode_is_the_sole_mode_field ... ok
+test accordion::tests::controlled_value_wins_over_default_value ... ok
+test accordion::tests::single_mode_represents_open_and_collapsed_results ... ok
+test agent_chat_input::tests::context_ring_only_renders_with_a_limit ... ok
+test accordion::tests::multiple_mode_represents_open_and_empty_sets ... ok
+test agent_chat_input::tests::visible_rows_clamps_between_floor_and_ceiling ... ok
+test agent_plan_record::tests::a_dismissed_badge_drops_to_meta_strength ... ok
+test agent_plan_record::tests::the_badge_falls_back_to_the_status_label ... ok
+test agent_plan_record::tests::the_summary_respects_the_budget ... ok
+test agent_plan_record::tests::the_summary_yields_to_the_full_plan ... ok
+test agent_question::tests::a_lone_question_shows_no_progress ... ok
+test agent_question::tests::an_override_wins_over_a_selection ... ok
+test agent_question::tests::density_moves_spacing_but_not_the_type_scale ... ok
+test agent_question::tests::shortcuts_run_out_after_nine ... ok
+test agent_question::tests::single_select_resolves_on_one_click_and_multi_never_does ... ok
+test agent_question_record::tests::a_declined_question_reads_as_declined ... ok
+test agent_question_record::tests::an_override_shows_no_option_list ... ok
+test agent_question_record::tests::every_option_survives_a_selected_answer ... ok
+test agent_question_record::tests::the_chosen_option_says_so_in_words ... ok
+test agent_subagent::tests::density_moves_spacing_but_not_the_type_scale ... ok
+test agent_subagent::tests::terminal_statuses_show_the_summary_side_and_running_spins ... ok
+test agent_subagent::tests::the_badge_wording_comes_from_the_headless_core ... ok
+test agent_subagent::tests::the_disclosure_only_exists_when_there_is_detail ... ok
+test agent_transcript::tests::adjacent_tool_calls_group_and_a_message_splits_them ... ok
+test agent_transcript::tests::density_moves_spacing_but_not_the_type_scale ... ok
+test agent_transcript::tests::the_activity_footer_is_not_a_block ... ok
+test agent_transcript::tests::the_natives_default_to_unwindowed ... ok
+test app_header::tests::app_header_density_ladder ... ok
+test app_header::tests::app_header_effective_size_resolution ... ok
+test app_header::tests::app_header_semantic_tokens ... ok
+test app_header::tests::app_header_size_and_typography_ladders ... ok
+test app_header::tests::app_header_spec_defaults_and_builder_methods ... ok
+test breadcrumbs::tests::a_malformed_icon_only_item_still_shows_its_label ... ok
+test breadcrumbs::tests::the_synthetic_ellipsis_never_inherits_icon_presentation ... ok
+test breadcrumbs::tests::with_icon_keeps_the_label_visible ... ok
+test breadcrumbs::tests::with_icon_only_sets_icon_and_flag_together ... ok
+test changed_files::tests::a_chain_with_no_forks_collapses_to_one_row ... ok
+test changed_files::tests::an_empty_card_does_not_render ... ok
+test changed_files::tests::chips_are_capped_without_panicking_on_short_lists ... ok
+test changed_files::tests::totals_sum_across_files ... ok
+test code_input::tests::completion_result_belongs_to_its_value ... ok
+test code_input::tests::grouping_is_explicit_and_never_inferred ... ok
+test code_input::tests::no_completion_means_no_indicator ... ok
+test collapse_toggle::tests::default_and_explicit_labels_follow_collapsed_state ... ok
+test collapse_toggle::tests::every_direction_maps_to_its_opposite_when_collapsed ... ok
+test debug_dialog::tests::default_max_height_extracts_rem_term ... ok
+test debug_dialog::tests::plain_rem_max_height_parses ... ok
+test debug_dialog::tests::vh_only_max_height_yields_none ... ok
+test dialog::tests::default_spec_and_builder_methods ... ok
+test dialog::tests::semantic_token_resolvers_match_contract ... ok
+test dialog::tests::width_presets_match_contract_dimensions ... ok
+test duration_input::segment_tests::a_large_hours_value_does_not_overflow_the_total ... ok
+test duration_input::segment_tests::an_empty_duration_totals_zero_and_is_valid ... ok
+test duration_input::segment_tests::inclusive_bounds_are_valid_and_outside_is_invalid ... ok
+test duration_input::segment_tests::seconds_are_shown_by_default ... ok
+test duration_input::segment_tests::segments_are_the_only_value_and_reduce_to_a_total ... ok
+test editable_label::tests::editable_label_defaults_keep_display_and_session_state_separate ... ok
+test editable_label::tests::editable_label_live_text_name_and_selection_follow_the_portable_contract ... ok
+test editable_list::item_tests::a_label_is_optional ... ok
+test editable_list::item_tests::item_count_tracks_the_items ... ok
+test editable_list::item_tests::items_carry_their_labels ... ok
+test filter_builder::tests::available_fields_respects_allow_multiple ... ok
+test filter_builder::tests::clause_completeness_checks_operand_kind_match ... ok
+test filter_builder::tests::clause_label_reads_naturally ... ok
+test filter_builder::tests::default_operators_cover_all_kinds ... ok
+test filter_builder::tests::opener_label_reflects_live_combinator ... ok
+test filter_builder::tests::operand_validity_rejects_incomplete ... ok
+test filter_builder::tests::draft_state_and_edit_scoped_combinator ... ok
+test filter_builder::tests::summary_and_combinator_visibility ... ok
+test grid::tests::aria_label_round_trips ... ok
+test grid::tests::gap_resolves_contract_space_scale ... ok
+test grid::tests::padding_resolves_contract_space_scale_both_axes ... ok
+test grid::tests::parses_auto_fit_minmax ... ok
+test grid::tests::parses_equal_fr_tracks ... ok
+test grid::tests::parses_fixed_rem_track ... ok
+test grid::tests::parses_mixed_ratio_tracks ... ok
+test grid::tests::parses_repeat_count ... ok
+test grid::tests::row_gap_equals_column_gap ... ok
+test grid::tests::unrecognised_columns_fall_back_to_single_fr ... ok
+test history_center::tests::a_failed_source_prefers_the_hosts_message ... ok
+test history_center::tests::chrome_steps_the_inherited_scale_down ... ok
+test history_center::tests::every_refusal_meaning_stays_distinct ... ok
+test history_center::tests::rejection_copy_is_component_owned ... ok
+test history_center::tests::the_surface_falls_back_to_its_heading_for_a_name ... ok
+test history_center::tests::triggers_are_inert_without_availability_or_while_busy ... ok
+test icon::size_role_tests::control_size_maps_one_to_one_without_endpoint_collapse ... ok
+test icon::size_role_tests::roles_clamp_at_both_ends ... ok
+test icon::size_role_tests::size_role_shifts_within_the_five_icon_stops ... ok
+test licence_activation::tests::activate_label_overrides_the_mode_copy ... ok
+test licence_activation::tests::effective_route_follows_mode_and_view ... ok
+test licence_activation::tests::machine_label_commits_trimmed_or_null ... ok
+test licence_activation::tests::pending_or_disabled_freezes_interaction ... ok
+test list_card::context_menu_tests::a_card_has_no_context_menu_until_it_is_given_entries ... ok
+test list_card::context_menu_tests::the_trigger_can_move_to_the_leading_slot ... ok
+test list_card::leading_size_tests::the_box_follows_the_size_ladder ... ok
+test list_card::leading_size_tests::the_offset_walks_and_clamps ... ok
+test list_card::leading_size_tests::the_resolved_size_is_the_ladder_base ... ok
+test listbox::tests::default_focus_skips_disabled_items_and_global_disable_removes_it ... ok
+test listbox::tests::builders_preserve_controlled_and_default_selection_modes ... ok
+test log_list::tests::actor_name_falls_back_through_name_email_then_id ... ok
+test log_list::tests::audit_labels_replace_underscores ... ok
+test log_list::tests::defaults_match_contract ... ok
+test log_list::tests::filter_value_falls_back_to_empty ... ok
+test log_list::tests::has_active_filters_ignores_blank_values ... ok
+test log_list::tests::has_audit_toolbar_tracks_filters ... ok
+test log_list::tests::is_loading_requires_no_entries ... ok
+test log_list::tests::log_filter_builders ... ok
+test log_list::tests::show_pagination_only_when_total_exceeds_page_size ... ok
+test log_list::tests::total_pages_ceils_and_clamps_to_one ... ok
+test log_list::tests::stream_entries_apply_level_and_text_filters ... ok
+test log_list::tests::variant_resolves_to_audit_when_any_entry_is_audit ... ok
+test markdown_editor::tests::char_count_counts_unicode_scalars ... ok
+test markdown_editor::tests::defaults_match_contract ... ok
+test markdown_editor::tests::density_spacing_tracks_table ... ok
+test markdown_editor::tests::min_height_parses_rem_and_px ... ok
+test markdown_editor::tests::mode_visibility_flags ... ok
+test markdown_editor::tests::tool_size_tracks_size_table ... ok
+test markdown_editor::tests::tools_disabled_in_preview_or_when_disabled ... ok
+test media_thumbnail::tests::auto_aspect_ratio_resolves_and_flags ... ok
+test menu::tests::default_spec_and_builder_methods ... ok
+test menu::tests::menu_entry_builders_and_properties ... ok
+test message_center::tests::derives_open_and_unread_presentation_from_host_state ... ok
+test message_center::tests::items_default_to_full_interaction_policy ... ok
+test message_center::tests::live_row_opts_out_of_interactions_and_unread ... ok
+test message_center::tests::progress_preserves_max_and_indeterminate_meaning ... ok
+test meter::tests::level_normal_without_thresholds ... ok
+test meter::tests::level_prefers_high_over_low ... ok
+test meter::tests::low_keeps_the_base_tone ... ok
+test meter::tests::ring_ladder_steps_monotonically ... ok
+test meter::tests::value_text_overrides_computed_percentage ... ok
+test model_picker::tests::a_model_without_axis_refs_inherits_every_axis ... ok
+test model_picker::tests::an_image_takes_precedence_over_an_icon ... ok
+test model_picker::tests::control_kind_switches_to_a_list_past_the_option_threshold ... ok
+test model_picker::tests::bindings_override_only_what_they_set ... ok
+test model_picker::tests::defaults_fall_back_to_first_enabled_option ... ok
+test model_picker::tests::group_headings_emit_once_per_run ... ok
+test model_picker::tests::per_model_axis_refs_drop_axes_the_model_does_not_expose ... ok
+test model_picker::tests::placeholder_and_unknown_model_labels ... ok
+test model_picker::tests::subdued_emphasis_dims_the_resting_trigger_label ... ok
+test model_picker::tests::summary_joins_applicable_axes_in_declaration_order ... ok
+test model_picker::tests::unknown_axis_references_are_dropped ... ok
+test model_picker::tests::toggle_without_labels_contributes_nothing ... ok
+test model_picker::tests::unrepresentable_values_fall_back_to_the_default ... ok
+test navigation_menu::tests::builders_set_edge_and_fill ... ok
+test navigation_menu::tests::defaults_have_no_edge_and_tint_fill ... ok
+test number_input::tests::draft_overrides_display_without_inventing_committed ... ok
+test number_input::tests::empty_committed_formats_blank ... ok
+test number_input::tests::omitted_bounds_do_not_use_infinity_sentinels ... ok
+test number_input::tests::precision_uses_headless_fixed_scale ... ok
+test number_input::tests::steppers_disable_at_authored_bounds ... ok
+test number_input::tests::steppers_match_transition_baselines_for_empty_and_invalid_drafts ... ok
+test pagination::chrome_tests::chrome_is_off_by_default ... ok
+test pagination::chrome_tests::chrome_turns_the_treatment_on ... ok
+test pagination::chrome_tests::standalone_overrides_chrome_as_its_inverse ... ok
+test pagination::tests::ellipsis_truncates_middle_of_range ... ok
+test pagination::tests::few_pages_have_no_ellipsis ... ok
+test pagination::tests::full_summary_is_page_of_total ... ok
+test pagination::tests::info_hidden_when_total_zero ... ok
+test pagination::tests::showing_to_clamps_to_total_on_last_page ... ok
+test pagination::tests::simple_summary_is_item_range ... ok
+test pagination_summary::label_tests::an_empty_set_starts_at_zero ... ok
+test pagination_summary::label_tests::matches_the_svelte_strings ... ok
+test picker_shell::tests::popover_max_width_is_32rem ... ok
+test picker_shell::tests::variant_predicates_are_exclusive ... ok
+test popover::tests::builders_cover_the_public_prop_surface ... ok
+test popover::tests::current_open_prefers_the_controlled_value ... ok
+test popover::tests::defaults_match_the_contract ... ok
+test popover::tests::effective_width_bounds_fall_back_to_contract_rems ... ok
+test popover::tests::portable_width_bound_accepts_rem ... ok
+test popover::tests::surface_token_recipes_match_the_contract ... ok
+test radio::tests::controlled_checked_wins_over_the_uncontrolled_seed ... ok
+test radio::tests::disabled_or_readonly_is_not_interactive ... ok
+test ref_select::tests::a_host_supplied_query_disables_local_filtering ... ok
+test ref_select::tests::current_marker_is_independent_of_selection ... ok
+test popover::tests::portable_width_bound_rejects_css_extensions - should panic ... ok
+test ref_select::tests::filtering_spans_label_value_and_description ... ok
+test ref_select::tests::kind_drives_the_glyph_unless_overridden ... ok
+test ref_select::tests::group_headings_emit_once_per_run ... ok
+test ref_select::tests::loading_suppresses_the_empty_message ... ok
+test ref_select::tests::placeholder_and_unknown_ref_labels ... ok
+test relation_picker::tests::defaults_match_contract ... ok
+test relation_picker::tests::filter_include_all_false_and_custom_all_label ... ok
+test relation_picker::tests::filter_resolved_options_prepends_all_by_default ... ok
+test relation_picker::tests::filter_value_falls_back_to_all_sentinel ... ok
+test relation_picker::tests::footer_and_summary_toggles ... ok
+test segmented_control::tests::default_spec_and_builder_methods ... ok
+test segmented_control::tests::option_builders_icon_only_and_fallbacks ... ok
+test select::tests::applying_context_rebuilds_host_owned_fields ... ok
+test select::tests::authored_default_is_the_clear_value ... ok
+test select::tests::builders_cover_the_public_prop_surface ... ok
+test select::tests::current_open_and_value_prefer_controlled_fields ... ok
+test select::tests::defaults_match_the_contract ... ok
+test select::tests::overlay_fill_token_is_elevated ... ok
+test settings_shell::tests::empty_groups_with_a_live_query_is_filtering_not_an_empty_scope ... ok
+test settings_shell::tests::open_is_host_owned_and_the_dialog_name_falls_back_to_title ... ok
+test sidebar_nav::tests::active_detection_matches_value ... ok
+test sidebar_nav::tests::chrome_role_resolves_one_stop_smaller ... ok
+test sidebar_nav::tests::context_menu_semantics_follow_the_contract ... ok
+test sidebar_nav::tests::density_spacing_tracks_table ... ok
+test sidebar_nav::tests::end_label_geometry_scales_with_size_and_density ... ok
+test sidebar_nav::tests::item_height_tracks_size_table ... ok
+test sidebar_nav::tests::visible_groups_drops_empty ... ok
+test spinner::size_role_tests::size_role_shifts_the_resolved_size ... ok
+test split_view::tests::current_ratio_resolves_and_clamps ... ok
+test split_view::tests::default_spec_and_builder_methods ... ok
+test split_view::tests::divider_instance_id_derives_from_instance_scope ... ok
+test split_view::tests::keyboard_resize_supported_requires_uncollapsed_panes ... ok
+test split_view::tests::toggles_hidden_until_hover_policy ... ok
+test stepper::tests::a_failed_step_reports_danger_wherever_it_sits ... ok
+test stepper::tests::a_horizontal_stepper_never_collapses ... ok
+test stepper::tests::current_falls_back_to_the_first_step ... ok
+test stepper::tests::density_moves_only_horizontal_spacing ... ok
+test stepper::tests::rail_colour_carries_status ... ok
+test stepper::tests::rail_length_carries_position ... ok
+test stepper::tests::the_summary_counts_completed_steps_and_names_the_current_one ... ok
+test switch::tests::builders_cover_the_public_prop_surface ... ok
+test switch::tests::current_checked_resolves_default_when_controlled_is_absent ... ok
+test switch::tests::defaults_match_the_contract ... ok
+test switch::tests::dual_label_mode_derives_from_either_side ... ok
+test switch::tests::switch_tone_color_tokens_map_to_semantics ... ok
+test tabs::tests::active_decorations_builders_set_both ... ok
+test tabs::tests::active_decorations_default_off_and_tint ... ok
+test tabs::tests::current_value_resolution_order ... ok
+test tabs::tests::drag_builders_clear_with_none ... ok
+test tabs::tests::drag_builders_set_drag_and_drop_target ... ok
+test tabs::tests::drag_state_defaults_none ... ok
+test tabs::tests::layout_defaults_auto_and_builder_sets_fill ... ok
+test tabs::tests::shows_tooltips_defaults_false_and_builder_sets_it ... ok
+test tabs::tests::spec_defaults_and_builder_accessors ... ok
+test tabs::tests::tab_definition_builders ... ok
+test tabs::tests::token_helpers_and_visual_properties ... ok
+test tests::badge_and_status_indicator_resolve_tokens ... ok
+test tests::accordion_and_collapsible_surface_disclosure_state ... ok
+test tests::box_defaults_stay_neutral ... ok
+test tests::calendar_and_picker_surface_date_values ... ok
+test tests::checkbox_mixed_state_overrides_checked_state ... ok
+test tests::data_table_reports_visible_scope_selection_and_sortability ... ok
+test tests::detail_and_empty_state_surface_state_posture ... ok
+test tests::dialog_and_drawer_keep_native_dismissal_posture_explicit ... ok
+test tests::elevated_surface_uses_elevated_background_and_surface_shadow ... ok
+test tests::embed_preview_spec_uses_public_parse_surface ... ok
+test tests::field_relationships_prefer_invalid_message_over_pending ... ok
+test tests::file_upload_item_progress_drives_status ... ok
+test tests::file_upload_spec_files_drive_list ... ok
+test tests::filter_toolbar_and_pagination_summary_report_result_state ... ok
+test tests::form_actions_danger_items_model ... ok
+test tests::form_actions_default_to_end_alignment_with_wrap_behavior ... ok
+test tests::form_shell_counts_invalid_and_pending_fields_and_blocks_submit ... ok
+test tests::format_file_size_thresholds ... ok
+test tests::grid_defaults_match_single_track_baseline ... ok
+test tests::icon_button_requires_icon_and_accessible_name ... ok
+test tests::inline_remediation_tracks_field_references_and_actionability ... ok
+test tests::media_picker_spec_tab_and_items ... ok
+test tests::menu_and_context_menu_report_actionable_entries ... ok
+test tests::parsed_embed_detection_matches_supported_patterns ... ok
+test tests::picker_and_relation_picker_preserve_selection_and_variant ... ok
+test tests::popover_and_tooltip_hold_overlay_state_and_placement ... ok
+test tests::primary_button_uses_accent_and_suppresses_activation_while_loading ... ok
+test tests::progress_reports_none_when_indeterminate ... ok
+test tests::radio_group_selects_default_option ... ok
+test tests::range_calendar_and_picker_surface_range_values ... ok
+test tests::remediation_banner_reports_actions_and_urgency ... ok
+test tests::remediation_banner_tone_icon_map_covers_all_tones ... ok
+test tests::scroll_shell_exposes_focus_tokens ... ok
+test tests::segmented_control_option_carries_the_contract_icon_surface ... ok
+test tests::segmented_control_uses_selected_fill ... ok
+test tests::select_prefers_selected_label_over_placeholder ... ok
+test tests::selection_summary_and_media_specs_preserve_fallback_posture ... ok
+test tests::separator_uses_default_border_width ... ok
+test tests::slider_normalizes_progress_within_bounds ... ok
+test tests::stack_defaults_use_md_gap ... ok
+test tests::state_tile_resolves_dimension_and_trend_tokens ... ok
+test tests::switch_uses_accent_track_when_checked ... ok
+test tests::tabs_navigation_menu_menubar_and_tab_strip_surface_selection ... ok
+test tests::text_input_combines_description_and_invalid_message ... ok
+test tests::text_input_multiline_reports_pending_busy_state ... ok
+test tests::text_input_search_type_preserves_current_value ... ok
+test tests::time_and_date_time_specs_preserve_public_values ... ok
+test tests::validation_summary_filters_to_active_entries_and_exposes_alert_role ... ok
+test theme_select::tests::current_option_and_label ... ok
+test theme_select::tests::unknown_value_falls_back_to_theme_label ... ok
+test theme_select::tests::is_selected_matches_value ... ok
+test time_ago::tests::defaults_match_contract ... ok
+test time_ago::tests::future_from_now_uses_suffix_without_changing_past ... ok
+test time_ago::tests::future_short_uses_in_prefix ... ok
+test time_ago::tests::long_form_pluralizes_and_yesterday ... ok
+test time_ago::tests::no_week_tier ... ok
+test time_ago::tests::short_thresholds_match_svelte ... ok
+test time_ago::tests::tense_prefixes_keep_deadline_copy_grammatical ... ok
+test toggle_group::tests::multiple_select_adds_and_removes_independently ... ok
+test toggle_group::tests::single_select_replaces_value ... ok
+test toggle_group::tests::single_select_with_deactivation_clears_active ... ok
+test toggle_group::tests::single_select_without_deactivation_reselects_same ... ok
+test tool_call::tests::a_row_without_output_is_not_interactive ... ok
+test tool_call::tests::density_never_changes_row_height ... ok
+test tool_call::tests::empty_output_does_not_count_as_output ... ok
+test tool_call::tests::the_icon_follows_the_label_unless_overridden ... ok
+test tool_call::tests::the_name_carries_status_but_omits_success ... ok
+test tool_call_group::tests::a_buried_failure_still_reaches_the_collapsed_name ... ok
+test tool_call_group::tests::a_single_call_run_renders_no_toggle ... ok
+test tool_call_group::tests::an_empty_run_does_not_panic ... ok
+test tool_call_group::tests::collapsed_shows_the_newest_call_not_the_oldest ... ok
+test tree::flat_tests::a_single_branch_anywhere_un_flattens_the_tree ... ok
+test tool_call_group::tests::expanded_ends_on_the_call_that_was_visible_while_collapsed ... ok
+test tree::flat_tests::flatness_alone_does_not_collapse_the_gutter ... ok
+test tree::tests::branch_rule_uses_children_or_override ... ok
+test tree::tests::check_state_cascades_from_descendants ... ok
+test tree::tests::checkbox_lazy_defaults ... ok
+test tree::tests::compute_selection_replace_toggle_range ... ok
+test tree::tests::current_expanded_prefers_controlled_over_default ... ok
+test tree::tests::defaults_match_contract ... ok
+test tree::tests::editing_state ... ok
+test tree::tests::focused_value_defaults_none_and_sets ... ok
+test tree::tests::node_counts_respect_expansion ... ok
+test tree::tests::reorder_state_and_siblings ... ok
+test tree::tests::reorder_moves_nodes ... ok
+test tree::tests::selection_membership ... ok
+test tree::tests::visible_rows_and_nav_helpers ... ok
+test tri_state_switch::tests::defaults_to_default_value ... ok
+test tri_state_switch::tests::with_value_sets_semantic_state ... ok
+test types::semantic_size_tests::matches_the_svelte_size_role_table ... ok
+test types::semantic_size_tests::roles_clamp_at_both_ends ... ok
+test update_center::tests::hidden_presence_is_the_default_and_open_seeds_from_default_open ... ok
+
+test result: ok. 335 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/icon_geometry.rs ([oxide-pool]/slots/poodle-bdebb5dd/quick-104/build/debug/deps/icon_geometry-ee7f713a520ad856)
+
+running 5 tests
+test icon_geometry::tests::generated_registry_has_complete_lineage_and_candidate_gate ... ok
+test icon_geometry::tests::hot_path_samples_reuse_buffer_capacity ... ok
+test icon_geometry::tests::runtime_paints_exact_endpoints_and_rebases_reversals ... ok
+test icon_geometry::tests::second_owner_retargets_and_separate_runtimes_stay_independent ... ok
+test icon_geometry::tests::shared_vectors_cover_both_normalization_and_pair_planning ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+   Doc-tests poodle_specs
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+oxide: quick profile, build+execute strategy, slot 104 cold, 15.6s, new slot, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-544fea3d through profile member links (debug), temp: inherited [scratch]
+oxide: flushed the removable volume before releasing slot 104 in 55.5 ms
+oxide: auto-adopted [checkout]/packages/contracts/layout/target -> [oxide-outputs]/poodle-9d63aa02 for permanent-drive outputs; no existing outputs moved
+oxide: seeding skipped: no eligible locked packages; poodle-layout: non-leaf
+     Locking 1 package to latest compatible version
+    Updating poodle-tokens v0.4.14 ([checkout]/packages/contracts/tokens) -> v0.4.15
+   Compiling poodle-tokens v0.4.15 ([checkout]/packages/contracts/tokens)
+   Compiling poodle-layout v0.4.15 ([checkout]/packages/contracts/layout)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.35s
+     Running unittests src/lib.rs ([oxide-pool]/slots/poodle-91a1c389/quick-105/build/debug/deps/poodle_layout-ac75800abec49a77)
+
+running 4 tests
+test tests::edges_constructors_work ... ok
+test tests::constrained_sizing_holds_bounds ... ok
+test tests::default_layout_is_column_fit_visible ... ok
+test tests::builder_composes_intent ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests poodle_layout
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+oxide: quick profile, build+execute strategy, slot 105 cold, 1.9s, new slot, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-9d63aa02 through profile member links (debug), temp: inherited [scratch]
+oxide: flushed the removable volume before releasing slot 105 in 86.3 ms
+oxide: auto-adopted [checkout]/packages/contracts/style/target -> [oxide-outputs]/poodle-1aa904fa for permanent-drive outputs; no existing outputs moved
+oxide: seeding skipped: no eligible locked packages; poodle-layout: non-leaf
+     Locking 2 packages to latest compatible versions
+    Updating poodle-layout v0.4.14 ([checkout]/packages/contracts/layout) -> v0.4.15
+    Updating poodle-tokens v0.4.14 ([checkout]/packages/contracts/tokens) -> v0.4.15
+   Compiling poodle-tokens v0.4.15 ([checkout]/packages/contracts/tokens)
+   Compiling poodle-layout v0.4.15 ([checkout]/packages/contracts/layout)
+   Compiling poodle-style v0.4.15 ([checkout]/packages/contracts/style)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.00s
+     Running unittests src/lib.rs ([oxide-pool]/slots/poodle-35d85f9c/quick-106/build/debug/deps/poodle_style-6ea45bcb300cb377)
+
+running 4 tests
+test tests::builder_composes_full_style ... ok
+test tests::hidden_style_reports_not_visible ... ok
+test tests::default_style_is_visible_and_opaque ... ok
+test tests::typography_defaults_to_body_sans ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests poodle_style
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+oxide: quick profile, build+execute strategy, slot 106 cold, 3.1s, new slot, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-1aa904fa through profile member links (debug), temp: inherited [scratch]
+oxide: flushed the removable volume before releasing slot 106 in 115.5 ms
+oxide: auto-adopted [checkout]/packages/contracts/events/target -> [oxide-outputs]/poodle-5cbe6b40 for permanent-drive outputs; no existing outputs moved
+oxide: seeding skipped: no eligible locked packages
+   Compiling poodle-events v0.4.15 ([checkout]/packages/contracts/events)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.91s
+     Running unittests src/lib.rs ([oxide-pool]/slots/poodle-8add1f25/quick-107/build/debug/deps/poodle_events-c651738a4e1f9729)
+
+running 5 tests
+test tests::semantic_events_carry_expected_payloads ... ok
+test tests::event_value_variants_are_distinct ... ok
+test tests::modifiers_default_to_false ... ok
+test tests::component_profiles_cover_all_interaction_patterns ... ok
+test tests::drag_phases_are_ordered ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests poodle_events
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+oxide: quick profile, build+execute strategy, slot 107 cold, 3.8s, new slot, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-5cbe6b40 through profile member links (debug), temp: inherited [scratch]
+oxide: flushed the removable volume before releasing slot 107 in 132.0 ms
+oxide: auto-adopted [checkout]/packages/contracts/adapter/target -> [oxide-outputs]/poodle-e7789964 for permanent-drive outputs; no existing outputs moved
+oxide: seeding skipped: no eligible locked packages; poodle-adapter: non-leaf
+     Locking 4 packages to latest compatible versions
+    Updating poodle-events v0.4.14 ([checkout]/packages/contracts/events) -> v0.4.15
+    Updating poodle-layout v0.4.14 ([checkout]/packages/contracts/layout) -> v0.4.15
+    Updating poodle-style v0.4.14 ([checkout]/packages/contracts/style) -> v0.4.15
+    Updating poodle-tokens v0.4.14 ([checkout]/packages/contracts/tokens) -> v0.4.15
+   Compiling poodle-tokens v0.4.15 ([checkout]/packages/contracts/tokens)
+   Compiling poodle-events v0.4.15 ([checkout]/packages/contracts/events)
+   Compiling poodle-layout v0.4.15 ([checkout]/packages/contracts/layout)
+   Compiling poodle-style v0.4.15 ([checkout]/packages/contracts/style)
+   Compiling poodle-adapter v0.4.15 ([checkout]/packages/contracts/adapter)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.50s
+     Running unittests src/lib.rs ([oxide-pool]/slots/poodle-0f2a9a74/quick-108/build/debug/deps/poodle_adapter-6872576b6eeb6b71)
+
+running 3 tests
+test tests::theme_provider_resolves_values ... ok
+test tests::adapter_manifest_reports_support ... ok
+test tests::event_sink_collects_events ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests poodle_adapter
+
+running 1 test
+test src/lib.rs - RenderComponent (line 102) ... ignored
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+oxide: quick profile, build+execute strategy, slot 108 cold, 2.1s, new slot, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-e7789964 through profile member links (debug), temp: inherited [scratch]
+oxide: flushed the removable volume before releasing slot 108 in 50.1 ms
+oxide: auto-adopted [checkout]/packages/contracts/tokens/target -> [oxide-outputs]/poodle-fac00091 for permanent-drive outputs; no existing outputs moved
+oxide: seeding skipped: no eligible locked packages
+   Compiling poodle-tokens v0.4.15 ([checkout]/packages/contracts/tokens)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.39s
+     Running unittests src/lib.rs ([oxide-pool]/slots/poodle-869e1cc8/quick-109/build/debug/deps/poodle_tokens-1b61efe8daed92b2)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests poodle_tokens
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+oxide: quick profile, build+execute strategy, slot 109 cold, 1.1s, new slot, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-fac00091 through profile member links (debug), temp: inherited [scratch]
+oxide: flushed the removable volume before releasing slot 109 in 60.7 ms
+oxide: auto-adopted [checkout]/packages/contracts/node/target -> [oxide-outputs]/poodle-9bd4c820 for permanent-drive outputs; no existing outputs moved
+oxide: seeding skipped: no eligible locked packages; poodle-layout: non-leaf
+     Locking 4 packages to latest compatible versions
+    Updating poodle-headless v0.4.14 ([checkout]/packages/contracts/headless) -> v0.4.15
+    Updating poodle-layout v0.4.14 ([checkout]/packages/contracts/layout) -> v0.4.15
+    Updating poodle-style v0.4.14 ([checkout]/packages/contracts/style) -> v0.4.15
+    Updating poodle-tokens v0.4.14 ([checkout]/packages/contracts/tokens) -> v0.4.15
+   Compiling poodle-tokens v0.4.15 ([checkout]/packages/contracts/tokens)
+   Compiling poodle-headless v0.4.15 ([checkout]/packages/contracts/headless)
+   Compiling poodle-layout v0.4.15 ([checkout]/packages/contracts/layout)
+   Compiling poodle-style v0.4.15 ([checkout]/packages/contracts/style)
+   Compiling poodle-node v0.4.15 ([checkout]/packages/contracts/node)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.18s
+     Running unittests src/lib.rs ([oxide-pool]/slots/poodle-047c90fc/quick-110/build/debug/deps/poodle_node-2a2fee7fdd13c2bf)
+
+running 15 tests
+test tests::a_node_declares_no_numeric_range_by_default ... ok
+test tests::a_node_declares_no_focus_ring_by_default ... ok
+test tests::a_node_declares_no_percentage_height_by_default ... ok
+test tests::a_continuous_value_event_carries_only_local_geometry ... ok
+test drag::tests::a_target_gates_on_kind_and_disabled_posture ... ok
+test drag::tests::a_new_source_is_move_only_and_opts_out_of_keyboard_pickup ... ok
+test tests::a_node_is_not_hidden_from_assistive_technology_by_default ... ok
+test tests::an_inert_scrub_axis_stays_horizontal ... ok
+test tests::continuous_value_intents_are_opt_in ... ok
+test tests::delete_is_a_named_command_key ... ok
+test tests::drag_registrations_are_opt_in ... ok
+test tests::find_locates_the_activatable_node ... ok
+test tests::focus_requests_dedupe_and_drain ... ok
+test tests::focus_transit_and_landing_roundtrip ... ok
+test tests::texts_walk_the_tree_in_order ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests poodle_node
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+oxide: quick profile, build+execute strategy, slot 110 cold, 5.8s, new slot, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-9bd4c820 through profile member links (debug), temp: inherited [scratch]
+oxide: flushed the removable volume before releasing slot 110 in 184.4 ms
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 1.1s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), freshness gate refreshed 71 file(s), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Authored shell model is current.
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 0.9s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Authored display-specimens model is current.
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 1.8s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Verified 1 files (target: conformance, IR schema 1).
+Verified 3 files (target: docs, IR schema 1).
+Verified 4 files (target: json, IR schema 1).
+Verified 1 files (target: registry, IR schema 1).
+Verified 1 files (target: schema, IR schema 1).
+Verified 5 files (target: typescript, IR schema 1).
+All generated artifacts are current.
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 5.4s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Verified 1 files (target: shell-scene, IR schema 1).
+All generated artifacts are current.
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 1.2s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Verified 1 files (target: shell-scene, IR schema 1).
+All generated artifacts are current.
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 0.7s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Verified 1 files (target: shell-rust, IR schema 1).
+All generated artifacts are current.
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 1.3s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Verified 1 files (target: shell-rust, IR schema 1).
+All generated artifacts are current.
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 1.8s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Verified 4 files (target: machine-ts, machine interface schema 1).
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 0.6s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Verified 4 files (target: machine-rust, machine interface schema 1).
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 1.1s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Verified 6 files (target: specimen-ts, IR schema 1).
+All generated artifacts are current.
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 2.0s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Verified 6 files (target: specimen-ts, IR schema 1).
+All generated artifacts are current.
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 1.3s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Verified 1 files (target: specimen-rust, IR schema 1).
+All generated artifacts are current.
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 5.9s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Verified 1 files (target: specimen-rust, IR schema 1).
+All generated artifacts are current.
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 1.6s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Verified 1 files (target: catalogue-ts, catalogue schema 1).
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 3.0s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Verified 1 files (target: catalogue-ts, catalogue schema 1).
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 5.0s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Verified 1 files (target: catalogue-rust, catalogue schema 1).
+oxide: seeding skipped: recipient not fresh
+oxide: quick profile, build+execute strategy, slot 101 warm, 3.9s, slot 101 was 95 MiB when leased, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-4c5cb428 through profile member links (debug), temp: inherited [scratch]
+Verified 1 files (target: catalogue-rust, catalogue schema 1).
+check-rustfmt: packages/codegen clean (35 file(s))
+check-rustfmt: packages/contracts/adapter clean (1 file(s))
+check-rustfmt: packages/contracts/components clean (181 file(s))
+check-rustfmt: packages/contracts/events clean (1 file(s))
+check-rustfmt: packages/contracts/headless clean (47 file(s))
+check-rustfmt: packages/contracts/ir clean (19 file(s))
+check-rustfmt: packages/contracts/layout clean (1 file(s))
+check-rustfmt: packages/contracts/markdown clean (2 file(s))
+check-rustfmt: packages/contracts/node clean (2 file(s))
+check-rustfmt: packages/contracts/style clean (1 file(s))
+check-rustfmt: packages/contracts/tokens clean (1 file(s))
+check-rustfmt: packages/gpui/adapter clean (14 file(s))
+check-rustfmt: packages/gpui/node-backend clean (16 file(s))
+check-rustfmt: packages/gpui/preview clean (203 file(s))
+check-rustfmt: packages/jetstream/adapter clean (11 file(s))
+check-rustfmt: packages/jetstream/preview clean (159 file(s))
+check-rustfmt: packages/render clean (181 file(s))
+check-rustfmt: 17 crate(s), 875 file(s), all rustfmt-clean
+  ok   generated: packages/contracts/tokens/src/generated/primitives.rs
+  ok   generated: packages/contracts/headless/src/generated/machines/modal.rs
+  ok   generated: packages/gpui/preview/src/generated/preview-shell.rs
+  ok   generated: packages/jetstream/preview/src/generated/specimens/specimens.rs
+  ok   generated: packages/contracts/components/src/icon_geometry.generated.rs
+  ok   authored:  packages/render/src/action_discovery_panel.rs
+  ok   authored:  packages/contracts/tokens/src/lib.rs
+  ok   authored:  packages/x/src/generated_tokens.rs
+  ok   authored:  packages/x/src/generated_tests/mod.rs
+  ok   check flags the authored file, never the generated child
+  ok   write formats the authored file, leaves the generated child byte-identical
+  ok   diff output classified as a formatting finding
+  ok   non-diff output kept out of the unformatted verdict
+  ok   non-diff output kept out of the unformatted verdict
+  ok   missing component: clear environment error, never misreported as unformatted
+  ok   diff-bearing exit 1: reported as not rustfmt-clean
+  ok   non-diff exit status: hard environment error
+check-rustfmt self-test: exclusion boundary and recursion guard hold

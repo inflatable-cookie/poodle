@@ -1,0 +1,43 @@
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ EFFIGY  [checkout] │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── v0.14.1+local.737a6d0 ╯
+
+bun test v1.4.2 (744846f84)
+
+scripts/gpui-functionality-census.test.ts:
+(pass) g18.001 census oracles > keeps the axis set closed [0.08ms]
+(pass) g18.001 census oracles > denominator oracle: rejects a dropped component row [0.69ms]
+(pass) g18.001 census oracles > denominator oracle: rejects a duplicated component row [0.28ms]
+(pass) g18.001 census oracles > denominator oracle: rejects a dropped portable Listbox row [0.15ms]
+(pass) g18.001 census oracles > stale-test oracle: a renamed expected test admits nothing [0.09ms]
+(pass) g18.001 census oracles > test-body oracle: appended test docs stay outside the previous body [9.06ms]
+(pass) g18.001 census oracles > claim-overreach oracle: a pointer-only body never admits keyboard_focus [0.74ms]
+(pass) g18.001 census oracles > backend-bypass oracle: a direct handler call without the mounted backend admits nothing [0.03ms]
+(pass) g18.001 census oracles > backend-bypass oracle: a renderer unit test without HeadlessDriver admits nothing [0.01ms]
+(pass) g18.001 census oracles > production-mount oracle: imported node-compat components mount through the renderer [90.98ms]
+(pass) g18.001 census oracles > manifest oracle: callbacks and static summaries follow their contract surfaces [54.36ms]
+(pass) g18.001 census oracles > manifest oracle: static metadata leaves only its interaction axes not applicable [15.96ms]
+(pass) g18.001 census oracles > manifest oracle: feedback states keep only their delegated-events axis not applicable [13.75ms]
+(pass) g18.001 census oracles > manifest oracle: workstation and agent composites keep only their contract-declared N/A axes [14.16ms]
+(pass) g18.001 census oracles > widened-A2 oracle: platform language can never justify not-applicable [0.21ms]
+(pass) g18.001 census oracles > widened-A2 oracle: the platform detector matches every known phrasing [0.03ms]
+(pass) g18.001 census oracles > manifest oracle: required plus not-applicable must partition the closed axes [0.03ms]
+(pass) g18.001 census oracles > overclaim oracle: construction language can never read as functional completion [0.06ms]
+(pass) g18.001 census oracles > overclaim oracle: holds stay off every axis except accessibility [0.04ms]
+(pass) g18.001 census oracles > A2 oracle: clearance needs both live tree assertions and a portable component [0.15ms]
+(pass) g18.001 census oracles > receipt-text oracle: pointer-only prose never admits keyboard_focus [0.06ms]
+(pass) g18.001 census oracles > signal table covers every closed axis [0.01ms]
+(pass) g18.001 census oracles > record-state oracle: evidence identity is pinned, current tree descends from it [1658.64ms]
+(pass) g18.001 census oracles > evidence-text oracle: receipts store matched body text, not patterns [0.44ms]
+(pass) g18.001 census oracles > announce-hardening oracle: prose alone without the read idiom admits no accessibility [0.05ms]
+(pass) g18.001 census oracles > formatting-tolerance oracle: a chain rustfmt splits across lines claims what the one-line form claims [0.10ms]
+(pass) g18.031 census release provenance > live-manifest law: preview Cargo.toml is the receipt version authority [5.96ms]
+(pass) g18.031 census release provenance > planted-manifest law: a preview bump flows into emitted receipt content [0.33ms]
+(pass) g18.031 census release provenance > fail-closed law: missing, duplicate, and malformed versions are rejected [0.10ms]
+(pass) g18.031 census release provenance > stale-receipt law: a receipt version that disagrees with the live manifest is rejected [0.05ms]
+
+ 30 pass
+ 0 fail
+ 340 expect() calls
+Ran 30 tests across 1 file. [1.92s]
