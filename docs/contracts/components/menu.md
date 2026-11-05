@@ -34,7 +34,7 @@ Updated: 2026-07-10
 | Separator | no | groups item clusters | border, spacing |
 | Submenu anchor | conditional | `position: relative` wrapper around each non-separator item hosting its flyout | relative positioning |
 | Submenu indicator | conditional | `›` glyph in the meta column of a submenu parent | secondary text |
-| Submenu flyout | conditional | nested menu surface, absolutely positioned at the parent item's right edge | same surface tokens as Overlay |
+| Submenu flyout | conditional | nested menu surface, viewport-positioned beside its parent row | same surface tokens as Overlay |
 
 ## 3. Props And Inputs
 
@@ -179,6 +179,10 @@ behavior (the Svelte implementation is the parity authority).
 - The flyout is a nested menu surface anchored at the parent item's right
   edge (`top` aligned to the parent row minus the overlay padding). When it
   would overflow the right viewport edge it flips to the parent's left edge.
+  It shifts vertically inside an 8px viewport inset and constrains its height
+  with scrolling when its items exceed the viewport. Focused items scroll into
+  view. It follows parent layout, scrolling and viewport resize, and hides when
+  its owning row is clipped.
 - Nesting is recursive: flyout items may themselves carry `children`.
 
 ### Focus And Announcement
@@ -199,7 +203,7 @@ behavior (the Svelte implementation is the parity authority).
 
 - Overlay min-width: 14rem
 - Overlay width may fit content beyond min-width
-- Long menus should compose with `ScrollShell`
+- Cascading flyouts constrain their height to the viewport and scroll internally
 
 ### Composition
 
