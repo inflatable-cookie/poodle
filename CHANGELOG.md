@@ -7,6 +7,26 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.4.15] - 2026-11-05
+
+Coordinated patch release; no new component API.
+
+### Fixed
+
+- Cascading Menu and ContextMenu flyouts stay inside the viewport in Svelte
+  and React, follow their owning row during scrolling, and preserve keyboard
+  focus and dismissal across recursive submenus.
+- Native preview outer/content bounds agree with the requested window size.
+- Native preview motion policy reaches specimen and compatibility builders;
+  AX qualification waits for the proof window title at creation.
+
+### Changed
+
+- Add specimen-only preview capture modes and shared specimen framing.
+- Route Rust validation through Oxide, align Effigy task/argument routing,
+  pin the Svelte type-check tool, and use Nucleus worktree provisioning.
+- Move root, core, Svelte, private React and all private Rust crates to 0.4.15.
+
 ## [0.4.14] - 2026-10-08
 
 `0.4.14` adds the `Listbox` composite across Svelte, React, shared Rust and
@@ -890,3 +910,5 @@ supersedes `0.4.3`, which was never published.
 [0.2.1]: docs/release-notes/0.2.1.md
 [0.2.0]: docs/release-notes/0.2.0.md
 [0.1.0]: docs/release-notes/0.1.0.md
+
+[0.4.15]: docs/release-notes/0.4.15.md

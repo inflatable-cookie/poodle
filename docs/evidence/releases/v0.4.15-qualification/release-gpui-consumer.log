@@ -1,0 +1,10 @@
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ EFFIGY  [checkout] │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── v0.14.1+local.737a6d0 ╯
+
+oxide: auto-adopted [checkout]/packages/gpui/node-backend/target -> [oxide-outputs]/poodle-9b0940b6 for permanent-drive outputs; no existing outputs moved
+oxide: seeding skipped: unsupported command
+Built a clean GPUI consumer against 4c51f25f19c42aa057f8230017b786d4d52a5d61 via local tag v0.4.15; gpui-unofficial =1.22.0 identity compiled.
+oxide: quick profile, build+execute strategy, slot 112 cold, 115.4s, new slot, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-9b0940b6 through profile member links (debug, release), temp: inherited [scratch]
+oxide: flushed the removable volume before releasing slot 112 in 58.4 ms
