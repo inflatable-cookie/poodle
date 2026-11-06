@@ -18,7 +18,7 @@ or a consumer-shaped adapter layer.
 
 The plan (lanes, their documents and their order), leads, papercuts, brief
 drafts, tasks and status live in Queue, never in this repository. Read what's
-next with `plan.get` (see the `northstar` skill).
+next with `plan.get` (see the Nucleus skill).
 
 ## Commands
 
