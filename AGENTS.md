@@ -96,7 +96,6 @@ Targeted checks per task, full QA at milestones (Tom, 2026-09-30).
 - Briefs name the targeted checks as acceptance. Required PR CI still runs on
   GitHub; workers don't wait or poll for it.
 
-
 Run validation through Effigy selectors, not raw `cargo`, `bun` or `vitest`.
 Kill only processes you started, by PID; never `pkill -f` or `killall`. Run
 `git diff --check` before opening a PR. The full rules are in
