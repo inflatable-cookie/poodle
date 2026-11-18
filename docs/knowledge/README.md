@@ -14,7 +14,6 @@ Every topic has exactly one owning file. Link to it; don't restate it.
 | Internal writing style | [contracts/writing-style.md](contracts/writing-style.md) |
 | How we release | [contracts/release.md](contracts/release.md) |
 | GPUI capture research behind the held visual lane | [research/](research/gpui-offscreen-capture-feasibility.md) |
-| Retired concepts | [retired.toml](retired.toml) |
 | Open questions | [questions.md](questions.md) |
 
 Product documentation for users or consumers lives outside `docs/knowledge/`:
