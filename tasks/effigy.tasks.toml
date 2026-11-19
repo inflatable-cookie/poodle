@@ -986,6 +986,10 @@
 "lock:workspaces-refresh" = "bun scripts/workspace-lock.ts --refresh"
 "docs:dev" = [{ task = "svelte:preview" }]
 "docs:build" = [{ task = "svelte:build" }]
+# Regenerate the installable Svelte implementer skill's searchable reference
+# from contracts, public package exports and the preview manifest. docs:lint
+# fails when the committed reference drifts.
+"skill:reference" = "bun packages/svelte/preview/scripts/build-skill-reference.ts"
 # Guide snippets must compile against the live poodle-svelte surface
 # (g16.108): every fenced ```svelte block in docs/guides/*.md is checked in
 # a throwaway project. Needs network/cache for its first bun install.

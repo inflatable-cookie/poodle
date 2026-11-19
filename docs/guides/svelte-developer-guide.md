@@ -88,7 +88,7 @@ Poodle themes are activated via `data-*` attributes on a parent element. Use the
 
   onMount(() => {
     applyThemeAttributes(shell, {
-      theme: "eclipse",       // "eclipse" | "iceberg" | "graphite"
+      theme: "eclipse",       // see "Themes" below for the full generated set
       density: "default",     // "compact" | "default" | "comfortable"
       controlSize: "sm",      // "xs" | "sm" | "md" | "lg" | "xl"
     });

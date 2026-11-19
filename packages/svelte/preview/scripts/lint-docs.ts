@@ -14,6 +14,7 @@ import { contractCallbackDrift } from "./contract-callback-drift";
 import { contractDriftErrors, contractPropDrift } from "./contract-prop-drift";
 import { contractSpecDrift } from "./contract-spec-drift";
 import { focusRingDriftErrors } from "./focus-ring-drift";
+import { skillReferenceDriftErrors } from "./skill-reference";
 import { PORTABLE_ROUTE_COUNT, ROSTER_WEB_ONLY_NAMES } from "../../../../scripts/component-denominator";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -2295,6 +2296,12 @@ for (const f of specDriftResult.findings) {
 // own border-radius, so a ring element with no radius anywhere renders square.
 // The baseline holds rings that are square by intent, each with a reason.
 for (const f of focusRingDriftErrors()) {
+  errors.push(f);
+}
+
+// The installable Svelte implementer skill must not drift from the contracts,
+// exports and preview manifest it routes consumers through.
+for (const f of skillReferenceDriftErrors()) {
   errors.push(f);
 }
 
