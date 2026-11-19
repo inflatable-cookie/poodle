@@ -10,8 +10,8 @@ Depends on: [Product Guardrails](../architecture/product-guardrails.md)
 - Architecture defines stable ownership and runtime boundaries.
 - Specs define repository-wide normative rules.
 - Component contracts define public component semantics.
-- The Queue plan (lanes, lane documents and their order) states what matters
-  next, and Queue holds leads, tasks, briefs, status and outcomes; Effigy tasks
+- The Nucleus plan (lanes, lane documents and their order) states what matters
+  next, and Nucleus holds leads, tasks, briefs, status and outcomes; Effigy tasks
   are command selectors. Neither is knowledge authority.
 - Generated evidence under `docs/evidence/` records what was observed.
 
@@ -257,10 +257,9 @@ spec 071.
 
 ## Papercuts
 
-Small, recurring friction worth fixing later is filed in Queue, not in this
-repository (operator ruling 2026-09-26). From the Queue plugin root
-(`~/Dev/projects/paseo-northstar-queue`), run
-`node bin/queue-cli.mjs papercut.add payload.json` with
+Small, recurring friction worth fixing later is filed in Nucleus, not in this
+repository (operator ruling 2026-09-26). Run `nucleus papercut.add -` with the
+JSON payload on stdin:
 `repository: {origin: "inflatable-cookie/poodle", path}`, `title`, `happened`
 and `impact`, plus optional `area` and `fix`. Record it and continue the task.
 The planner promotes a papercut into the plan or a brief, or closes it as
@@ -330,15 +329,15 @@ Use Effigy as the command surface. Match proof cost to the delivery stage:
    required CI lanes for broad web/Rust coverage. Do not repeat an equivalent
    broad local board merely to restate green CI unless the task changes that
    board or its reproducibility. The worker reports `ready_for_review` as soon
-   as the clean PR head and local task proof exist, then stops. Queue
+   as the clean PR head and local task proof exist, then stops. Nucleus
    coordination observes CI asynchronously; workers never run sleep/poll loops
-   for GitHub checks. Queue runs no per-task validation command (Tom,
+   for GitHub checks. Nucleus runs no per-task validation command (Tom,
    2026-09-30: per-task full QA wedged the machine and filled the disk).
    Tasks merge on targeted checks, exact-head review and required PR CI.
 3. **Milestone proof:** the planner runs `effigy ci:fresh` on `main` at
-   release points and after a major chunk of work, through Queue
+   release points and after a major chunk of work, through Nucleus
    (`project.qa.run` with `{"repository": "inflatable-cookie/poodle",
-   "baseBranch": "main"}`, then `project.qa.get`; the repository's Queue `qa`
+   "baseBranch": "main"}`, then `project.qa.get`; the repository's Nucleus `qa`
    setting is `effigy ci:fresh`, one-hour timeout). It runs
    `bun install --frozen-lockfile` then `ci` (`ci:web` and `ci:rust`) with
    the Bun pinned in `package.json` `packageManager`, fetched through `bunx`
@@ -441,7 +440,7 @@ Genuine exceptions that stay on plain Cargo:
 - Product copy, not a route: specimen and demo text that prints a shell
   command (`cargo check`, `cargo build`) is display data.
 
-Poodle has no container or VM guest build, no Queue warm-merge hook, and no
+Poodle has no container or VM guest build, no Nucleus warm-merge hook, and no
 test whose subject is Cargo itself.
 
 The driver also passes the real Oxide pool through: when `OXIDE_POOL` is unset

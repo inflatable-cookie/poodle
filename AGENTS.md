@@ -16,7 +16,7 @@ or a consumer-shaped adapter layer.
 - Generated evidence (receipts, ledgers, census): `docs/evidence/`
 
 The plan (lanes, their documents and their order), leads, papercuts, brief
-drafts, tasks and status live in Queue, never in this repository. Read what's
+drafts, tasks and status live in Nucleus, never in this repository. Read what's
 next with `plan.get` (see the Nucleus skill).
 
 ## Commands
@@ -67,7 +67,7 @@ guardrails below stay local.
   operator-selected `AGENTS_WORKTREE_CONTAINER_DIR` from ignored
   `.agents.local.env`; never guess a temporary or repository-adjacent path. See
   [agent local paths](docs/knowledge/contracts/agent-local-paths.md).
-- File small solvable friction as a Queue papercut and carry on; do not turn
+- File small solvable friction as a Nucleus papercut and carry on; do not turn
   it into unplanned work. See
   [working rules](docs/knowledge/contracts/working-rules.md#papercuts).
 - When a change alters what is true, update the owning knowledge file in the
@@ -79,7 +79,7 @@ guardrails below stay local.
 
 Targeted checks per task, full QA at milestones (Tom, 2026-09-30).
 
-- **Fresh Queue worktrees skip setup.** Queue creates task worktrees without
+- **Fresh Nucleus worktrees skip setup.** Nucleus creates task worktrees without
   running `paseo.json` setup; it links only declared siblings such as
   `../jetstream` (Tom, 2026-10-23). Before your first check, run
   `effigy bootstrap:deps && effigy web:dist` yourself.
@@ -90,7 +90,7 @@ Targeted checks per task, full QA at milestones (Tom, 2026-09-30).
 - **Reviewers** read the diff, run the same targeted checks and exercise the
   behaviour. No suites.
 - **The planner** runs milestone QA (`effigy ci:fresh`) on `main` through
-  Queue's `project.qa.run` at release points and after a major chunk of work,
+  Nucleus's `project.qa.run` at release points and after a major chunk of work,
   and briefs fixes for what it finds.
 - Briefs name the targeted checks as acceptance. Required PR CI still runs on
   GitHub; workers don't wait or poll for it.
