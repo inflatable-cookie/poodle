@@ -30,6 +30,9 @@ capabilities have mounted proof. Closing that gap is the product direction; see
   media workflows, and admin shells
 - [Component contracts](contracts/components/README.md) — the source of truth
   for public inputs, states, events, accessibility, layout, and token usage
+- [Poodle implementer skill](../skills/poodle/SKILL.md) — an installable agent
+  skill that routes a Svelte view requirement to a recipe, a contract at the
+  consumer's pinned release tag, and an available specimen
 
 Contracts describe observable behavior. Framework and engine implementation
 details may differ when the contract permits it.

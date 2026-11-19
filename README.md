@@ -32,6 +32,12 @@ The web packages are:
 - `@inflatable-cookie/poodle-svelte` for Svelte components
 - `@inflatable-cookie/poodle-react` for React components
 
+Svelte agent workflows can install the
+[Poodle implementer skill](skills/poodle/SKILL.md) with
+`npx skills add inflatable-cookie/poodle --skill poodle -g -y`. It routes a view
+requirement to a recipe, the contract at the app's pinned release tag, and an
+available specimen.
+
 ## How Poodle Works
 
 Every component starts with a renderer-neutral contract. The contract defines
