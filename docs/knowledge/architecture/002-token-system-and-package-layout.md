@@ -91,7 +91,7 @@ applying direct overrides.
 | --- | --- | --- |
 | `fill` | `outlined`, `filled`, `ghost` | Controls at rest, including hover and press fills where used |
 | `surface` | `border`, `elevation`, `tonal` | Containers |
-| `selection` | `accent-outline`, `accent-tint`, `neutral` | Selected items in Select, Tabs, ToggleGroup, and the list and data components (ListCard, Tree, LogList, DataTable, Calendar, RelationPicker, ActionDiscoveryPanel, ModelPicker, HistoryCenter) |
+| `selection` | `accent-outline`, `accent-tint`, `neutral` | Selected items in Select, Tabs, ToggleGroup, the list and data components (ListCard, Tree, LogList, DataTable, Calendar, RelationPicker, ActionDiscoveryPanel, ModelPicker, HistoryCenter), and choice controls (SegmentedControl, Card, CardRadioGroup, CardToggleGroup, ThemeSelect, AgentQuestion, Rating) |
 
 The default uses `outlined`, `border` and `accent-outline` to reproduce
 the prior paint. `accent-tint` keeps tint and suppresses selection borders.
@@ -103,7 +103,13 @@ existing small indicator. Each component retains its selection anatomy.
 It is `transparent` under `accent-tint` and `neutral`. Components route their
 selected border through the recipe hook, then `itemBorder`, then the current
 literal. A sibling component that needs a selected border can use the same
-role.
+role (used by Card, ThemeSelect selected tiles, and AgentQuestion selected
+options alongside ListCard, Tree, LogList, RelationPicker, and
+ActionDiscoveryPanel).
+
+Rating's filled glyphs and AgentQuestion's progress dots bind
+`style.selection.indicator`, so they keep `{color.accent.base}` under plain
+`selection: neutral` (with no style override) and become neutral under `quiet`.
 
 `quiet` is an experimental style (`status: "experimental"` in style metadata)
 that combines `filled`, `tonal`, and `neutral` with a neutral selection

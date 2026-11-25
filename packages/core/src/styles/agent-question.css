@@ -63,7 +63,7 @@
 
 .poodle-agent-question__progress-dot[data-state="answered"],
 .poodle-agent-question__progress-dot[data-state="current"] {
-  background: var(--poodle-color-accent-base);
+  background: var(--poodle-style-selection-indicator, var(--poodle-color-accent-base));
 }
 
 .poodle-agent-question__progress-dot[data-state="current"] {
@@ -115,8 +115,8 @@
 }
 
 .poodle-agent-question__option[data-selected="true"] {
-  border-color: var(--poodle-color-accent-base);
-  background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, var(--poodle-color-background-elevated));
+  border-color: var(--poodle-style-selection-itemBorder, var(--poodle-color-accent-base));
+  background: var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, var(--poodle-color-background-elevated)));
 }
 
 .poodle-agent-question__option-body {

@@ -1,7 +1,7 @@
 # Rating
 
 Status: detailed contract
-Updated: 2026-08-27
+Updated: 2026-11-25
 
 ## 1. Purpose
 
@@ -242,7 +242,7 @@ and DOM geometry reads stay adapter-side.
 | `position` | `absolute` |
 | `inset` | `0 auto 0 0` |
 | `overflow` | `hidden` |
-| `color` | `var(--poodle-color-accent-base)` |
+| `color` | `var(--poodle-recipe-rating-glyph-fill-text, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)))` |
 
 ### Size adjustments
 
