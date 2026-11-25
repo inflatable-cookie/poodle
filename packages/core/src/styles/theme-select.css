@@ -152,8 +152,8 @@
   }
 
   .poodle-theme-select__tile[data-selected="true"] {
-    border-color: var(--poodle-color-accent-base);
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
+    border-color: var(--poodle-style-selection-indicator, var(--poodle-color-accent-base));
+    background: var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent));
   }
 
   .poodle-theme-select__tile-label {

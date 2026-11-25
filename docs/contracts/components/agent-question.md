@@ -1,7 +1,7 @@
 # AgentQuestion
 
 Status: detailed contract
-Updated: 2026-07-30
+Updated: 2026-11-25
 
 ## 1. Purpose
 
@@ -268,11 +268,11 @@ composer owns the editor, the toolbar and the submit control; see
 | option label | `--poodle-color-text-primary` |
 | option description | `--poodle-color-text-secondary` |
 | option fill | `--poodle-color-background-elevated` |
-| option fill, selected | `--poodle-color-accent-base` at 10% |
-| option border, selected | `--poodle-color-accent-base` |
+| option fill, selected | `var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, var(--poodle-color-background-elevated)))` |
+| option border, selected | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |
 | option radius | `--poodle-radius-control` |
 | shortcut colour | `--poodle-color-text-tertiary` |
-| progress dot, answered | `--poodle-color-accent-base` |
+| progress dot, answered / current | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |
 | progress dot, pending | `--poodle-color-border-subtle` |
 | focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, offset outline |
 

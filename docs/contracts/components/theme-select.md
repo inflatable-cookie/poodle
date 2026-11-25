@@ -1,7 +1,7 @@
 # ThemeSelect
 
 Status: detailed contract
-Updated: 2026-07-15
+Updated: 2026-11-25
 
 ## 1. Purpose
 
@@ -153,7 +153,9 @@ dismissable-layer stack; selection is plain state.
 
 Chrome (trigger, surface, tile selection) resolves from semantic tokens; swatch
 colors are the theme's literal values (the whole point of a preview). See the
-Anatomy token-target column.
+Anatomy token-target column. Selected tiles (`.poodle-theme-select__tile[data-selected="true"]`)
+read `border-color: var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))`
+and `background: var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent))`.
 
 ### Data Attributes
 
