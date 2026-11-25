@@ -58,6 +58,10 @@ prefer the narrower current authority and repair the stale document.
 - A renderer-neutral specimen plan may share ordered tabs, sections, captions,
   and fixture references across runtimes. Runtime adapters still render real
   components and may own bounded presentation needed by their renderer.
+- For Button, Select and DataTable, both native preview hosts mount the same
+  node trees and typed session from `poodle-specimens`. Keep their content and
+  interaction in the shared definition and leave preview chrome in the hosts.
+  See [Shared native specimens](../architecture/016-shared-native-specimens.md).
 - Axis tabs use the component's exact ordered public value domain. A prop named
   `size` does not imply the five-step `ControlSize` domain, and a prop named
   `density` does not justify a tab when its values have no observable effect.
@@ -143,8 +147,8 @@ Operator decision 2026-11-25: Jetstream components use the shared
 `poodle-render` node trees and the sibling repository's `jetstream-poodle`
 converter. The Poodle Jetstream crate supplies theme and accessibility role
 mappings. `poodle-render` tests use a backend-neutral token fixture, and
-`check:backend-neutral` checks the renderer and contract dependency trees,
-including test dependencies.
+`check:backend-neutral` checks the renderer, shared specimens and contract
+dependency trees, including test dependencies.
 
 Distinguish two things that sound alike:
 

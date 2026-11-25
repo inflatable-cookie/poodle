@@ -45,3 +45,5 @@ them.
   receipts, and installed-tarball certification ownership
 - [Theme resolution](015-theme-resolution.md) — settings, colour roles, fit
   targets, presets and cross-runtime conformance
+- [Shared native specimens](016-shared-native-specimens.md) — shared page
+  bodies, typed sessions and host effects

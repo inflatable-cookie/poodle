@@ -45,6 +45,7 @@ gpui_platform = { package = "gpui-platform-gpui-unofficial", version = "=1.22.0"
 poodle-gpui = { path = "../adapter" }
 poodle-gpui-node-backend = { path = "../node-backend" }
 poodle-render = { path = "../../render", features = ["icon-geometry-internal"] }
+poodle-specimens = { path = "../../specimens" }
 poodle-node = { path = "../../contracts/node" }
 poodle-adapter = { path = "../../contracts/adapter" }
 poodle-specs = { path = "../../contracts/components" }

@@ -1,0 +1,443 @@
+[Examples]
+Box id=specimen-data-table-examples
+  Box
+    Text "WITH SORTING, COLUMN VISIBILITY, AND EXPORT"
+    Box role=Table label="Data table" id=specimen-data-table-live
+      Box role=Row
+        Box role=ColumnHeader label="Name" clickable padding=12,0
+          Text "Name"
+          Icon arrow-up
+        Box role=ColumnHeader label="Email" clickable padding=12,0
+          Text "Email"
+        Box role=ColumnHeader label="Role" clickable padding=12,0
+          Text "Role"
+        Box role=ColumnHeader label="Status" padding=12,0
+          Text "Status"
+        Box
+          Text "Actions"
+      Box role=Row clickable
+        Text "Alice Chen" role=RowHeader
+        Text "alice@example.com" role=Cell
+        Text "Engineer" role=Cell
+        Text "Active" role=Cell
+        Box role=Cell
+          Text "Open"
+      Box role=Row clickable
+        Text "Bob Martinez" role=RowHeader
+        Text "bob@example.com" role=Cell
+        Text "Designer" role=Cell
+        Text "Active" role=Cell
+        Box role=Cell
+          Text "Open"
+      Box role=Row clickable
+        Text "Carol Patel" role=RowHeader
+        Text "carol@example.com" role=Cell
+        Text "PM" role=Cell
+        Text "On leave" role=Cell
+        Box role=Cell
+          Text "Open"
+      Box role=Row clickable
+        Text "Dan Okoro" role=RowHeader
+        Text "dan@example.com" role=Cell
+        Text "Engineer" role=Cell
+        Text "Active" role=Cell
+        Box role=Cell
+          Text "Open"
+      Box role=Row clickable
+        Text "Eve Nakamura" role=RowHeader
+        Text "eve@example.com" role=Cell
+        Text "Designer" role=Cell
+        Text "Active" role=Cell
+        Box role=Cell
+          Text "Open"
+  Text "0 of 5 selected"
+  Box
+    Text "WITH FILTERS AND PAGINATION"
+    Box role=Table label="Directory table"
+      Box role=Row
+        Box role=ColumnHeader label="Name" padding=12,0
+          Text "Name"
+        Box role=ColumnHeader label="Email" padding=12,0
+          Text "Email"
+        Box role=ColumnHeader label="Role" padding=12,0
+          Text "Role"
+        Box role=ColumnHeader label="Status" padding=12,0
+          Text "Status"
+      Box role=Row
+        Text "name: Alice" role=Cell
+        Text "role: Engineer" role=Cell
+      Box role=Row
+        Text "Alice Chen" role=RowHeader
+        Text "alice@example.com" role=Cell
+        Text "Engineer" role=Cell
+        Text "Active" role=Cell
+      Box role=Row
+        Text "Bob Martinez" role=RowHeader
+        Text "bob@example.com" role=Cell
+        Text "Designer" role=Cell
+        Text "Active" role=Cell
+      Box role=Row
+        Text "Carol Patel" role=RowHeader
+        Text "carol@example.com" role=Cell
+        Text "PM" role=Cell
+        Text "On leave" role=Cell
+      Box
+        Text "1–10 of 42"
+        Box
+          Text "Prev"
+          Text "Page 1 of 5"
+          Text "Next"
+  Box
+    Text "COLUMN VISIBILITY + EXPORT + ROW SELECTION"
+    Box role=Table label="Team members"
+      Box
+        Box
+          Icon download
+          Text "Export"
+        Box
+          Icon columns-3
+          Text "Columns"
+      Box role=Row
+        Box role=ColumnHeader padding=0,0
+          Box role=CheckBox label="Select all rows" toggled=Mixed
+            Box height=10
+              Icon minus
+        Box role=ColumnHeader label="Name" padding=12,0
+          Text "Name"
+        Box role=ColumnHeader label="Role" padding=12,0
+          Text "Role"
+        Box role=ColumnHeader label="Status" padding=12,0
+          Text "Status"
+      Box role=Row selected
+        Box role=Cell clickable
+          Box role=CheckBox label="Select row" toggled=True
+            Box height=10
+              Icon check
+        Text "Alice Chen" role=RowHeader
+        Text "Engineer" role=Cell
+        Text "Active" role=Cell
+      Box role=Row
+        Box role=Cell clickable
+          Box role=CheckBox label="Select row" toggled=False
+            Box height=10
+        Text "Bob Martinez" role=RowHeader
+        Text "Designer" role=Cell
+        Text "Active" role=Cell
+      Box role=Row selected
+        Box role=Cell clickable
+          Box role=CheckBox label="Select row" toggled=True
+            Box height=10
+              Icon check
+        Text "Carol Patel" role=RowHeader
+        Text "PM" role=Cell
+        Text "On leave" role=Cell
+  Box
+    Text "CUSTOM CELLS AND EXPANDED ROWS"
+    Box role=Table label="Active incidents"
+      Box role=Row
+        Box role=ColumnHeader label="Status" padding=12,0
+          Text "Status"
+        Box role=ColumnHeader label="Endpoint" padding=12,0
+          Text "Endpoint"
+        Box role=ColumnHeader label="Owner" padding=12,0
+          Text "Owner"
+      Box role=Row
+        Box role=RowHeader
+          Text "Open" tone=danger
+        Text "POST /api/orders" role=Cell
+        Text "Alice" role=Cell
+      Box role=Row
+        Text "Active incident — last updated 2026-03-27 11:18 UTC." role=Cell
+      Box role=Row
+        Box role=RowHeader
+          Text "Resolved" tone=success
+        Text "GET /api/catalog" role=Cell
+        Text "Bob" role=Cell
+  Box
+    Text "EMPTY STATE"
+    Box role=Table label="Data table"
+      Box role=Row
+        Box role=ColumnHeader label="Name" padding=12,0
+          Text "Name"
+        Box role=ColumnHeader label="Email" padding=12,0
+          Text "Email"
+        Box role=ColumnHeader label="Role" padding=12,0
+          Text "Role"
+        Box role=ColumnHeader label="Status" padding=12,0
+          Text "Status"
+        Box
+          Text "Actions"
+      Box role=Row
+        Text "No team members match the current filters." role=Cell
+[Sizes / xs]
+Box role=Table label="Data table"
+  Box role=Row
+    Box role=ColumnHeader label="Name" padding=12,0
+      Text "Name"
+    Box role=ColumnHeader label="Email" padding=12,0
+      Text "Email"
+    Box role=ColumnHeader label="Role" padding=12,0
+      Text "Role"
+    Box role=ColumnHeader label="Status" padding=12,0
+      Text "Status"
+    Box
+      Text "Actions"
+  Box role=Row
+    Text "Alice Chen" role=RowHeader
+    Text "alice@example.com" role=Cell
+    Text "Engineer" role=Cell
+    Text "Active" role=Cell
+    Box role=Cell
+      Text "Open"
+  Box role=Row
+    Text "Bob Martinez" role=RowHeader
+    Text "bob@example.com" role=Cell
+    Text "Designer" role=Cell
+    Text "Active" role=Cell
+    Box role=Cell
+      Text "Open"
+  Box role=Row
+    Text "Carol Patel" role=RowHeader
+    Text "carol@example.com" role=Cell
+    Text "PM" role=Cell
+    Text "On leave" role=Cell
+    Box role=Cell
+      Text "Open"
+[Sizes / sm]
+Box role=Table label="Data table"
+  Box role=Row
+    Box role=ColumnHeader label="Name" padding=12,0
+      Text "Name"
+    Box role=ColumnHeader label="Email" padding=12,0
+      Text "Email"
+    Box role=ColumnHeader label="Role" padding=12,0
+      Text "Role"
+    Box role=ColumnHeader label="Status" padding=12,0
+      Text "Status"
+    Box
+      Text "Actions"
+  Box role=Row
+    Text "Alice Chen" role=RowHeader
+    Text "alice@example.com" role=Cell
+    Text "Engineer" role=Cell
+    Text "Active" role=Cell
+    Box role=Cell
+      Text "Open"
+  Box role=Row
+    Text "Bob Martinez" role=RowHeader
+    Text "bob@example.com" role=Cell
+    Text "Designer" role=Cell
+    Text "Active" role=Cell
+    Box role=Cell
+      Text "Open"
+  Box role=Row
+    Text "Carol Patel" role=RowHeader
+    Text "carol@example.com" role=Cell
+    Text "PM" role=Cell
+    Text "On leave" role=Cell
+    Box role=Cell
+      Text "Open"
+[Sizes / md]
+Box role=Table label="Data table"
+  Box role=Row
+    Box role=ColumnHeader label="Name" padding=12,0
+      Text "Name"
+    Box role=ColumnHeader label="Email" padding=12,0
+      Text "Email"
+    Box role=ColumnHeader label="Role" padding=12,0
+      Text "Role"
+    Box role=ColumnHeader label="Status" padding=12,0
+      Text "Status"
+    Box
+      Text "Actions"
+  Box role=Row
+    Text "Alice Chen" role=RowHeader
+    Text "alice@example.com" role=Cell
+    Text "Engineer" role=Cell
+    Text "Active" role=Cell
+    Box role=Cell
+      Text "Open"
+  Box role=Row
+    Text "Bob Martinez" role=RowHeader
+    Text "bob@example.com" role=Cell
+    Text "Designer" role=Cell
+    Text "Active" role=Cell
+    Box role=Cell
+      Text "Open"
+  Box role=Row
+    Text "Carol Patel" role=RowHeader
+    Text "carol@example.com" role=Cell
+    Text "PM" role=Cell
+    Text "On leave" role=Cell
+    Box role=Cell
+      Text "Open"
+[Sizes / lg]
+Box role=Table label="Data table"
+  Box role=Row
+    Box role=ColumnHeader label="Name" padding=12,0
+      Text "Name"
+    Box role=ColumnHeader label="Email" padding=12,0
+      Text "Email"
+    Box role=ColumnHeader label="Role" padding=12,0
+      Text "Role"
+    Box role=ColumnHeader label="Status" padding=12,0
+      Text "Status"
+    Box
+      Text "Actions"
+  Box role=Row
+    Text "Alice Chen" role=RowHeader
+    Text "alice@example.com" role=Cell
+    Text "Engineer" role=Cell
+    Text "Active" role=Cell
+    Box role=Cell
+      Text "Open"
+  Box role=Row
+    Text "Bob Martinez" role=RowHeader
+    Text "bob@example.com" role=Cell
+    Text "Designer" role=Cell
+    Text "Active" role=Cell
+    Box role=Cell
+      Text "Open"
+  Box role=Row
+    Text "Carol Patel" role=RowHeader
+    Text "carol@example.com" role=Cell
+    Text "PM" role=Cell
+    Text "On leave" role=Cell
+    Box role=Cell
+      Text "Open"
+[Sizes / xl]
+Box role=Table label="Data table"
+  Box role=Row
+    Box role=ColumnHeader label="Name" padding=12,0
+      Text "Name"
+    Box role=ColumnHeader label="Email" padding=12,0
+      Text "Email"
+    Box role=ColumnHeader label="Role" padding=12,0
+      Text "Role"
+    Box role=ColumnHeader label="Status" padding=12,0
+      Text "Status"
+    Box
+      Text "Actions"
+  Box role=Row
+    Text "Alice Chen" role=RowHeader
+    Text "alice@example.com" role=Cell
+    Text "Engineer" role=Cell
+    Text "Active" role=Cell
+    Box role=Cell
+      Text "Open"
+  Box role=Row
+    Text "Bob Martinez" role=RowHeader
+    Text "bob@example.com" role=Cell
+    Text "Designer" role=Cell
+    Text "Active" role=Cell
+    Box role=Cell
+      Text "Open"
+  Box role=Row
+    Text "Carol Patel" role=RowHeader
+    Text "carol@example.com" role=Cell
+    Text "PM" role=Cell
+    Text "On leave" role=Cell
+    Box role=Cell
+      Text "Open"
+[Densities / compact]
+Box role=Table label="Data table"
+  Box role=Row
+    Box role=ColumnHeader label="Name" padding=8,0
+      Text "Name"
+    Box role=ColumnHeader label="Email" padding=8,0
+      Text "Email"
+    Box role=ColumnHeader label="Role" padding=8,0
+      Text "Role"
+    Box role=ColumnHeader label="Status" padding=8,0
+      Text "Status"
+    Box
+      Text "Actions"
+  Box role=Row
+    Text "Alice Chen" role=RowHeader
+    Text "alice@example.com" role=Cell
+    Text "Engineer" role=Cell
+    Text "Active" role=Cell
+    Box role=Cell
+      Text "Open"
+  Box role=Row
+    Text "Bob Martinez" role=RowHeader
+    Text "bob@example.com" role=Cell
+    Text "Designer" role=Cell
+    Text "Active" role=Cell
+    Box role=Cell
+      Text "Open"
+  Box role=Row
+    Text "Carol Patel" role=RowHeader
+    Text "carol@example.com" role=Cell
+    Text "PM" role=Cell
+    Text "On leave" role=Cell
+    Box role=Cell
+      Text "Open"
+[Densities / default]
+Box role=Table label="Data table"
+  Box role=Row
+    Box role=ColumnHeader label="Name" padding=12,0
+      Text "Name"
+    Box role=ColumnHeader label="Email" padding=12,0
+      Text "Email"
+    Box role=ColumnHeader label="Role" padding=12,0
+      Text "Role"
+    Box role=ColumnHeader label="Status" padding=12,0
+      Text "Status"
+    Box
+      Text "Actions"
+  Box role=Row
+    Text "Alice Chen" role=RowHeader
+    Text "alice@example.com" role=Cell
+    Text "Engineer" role=Cell
+    Text "Active" role=Cell
+    Box role=Cell
+      Text "Open"
+  Box role=Row
+    Text "Bob Martinez" role=RowHeader
+    Text "bob@example.com" role=Cell
+    Text "Designer" role=Cell
+    Text "Active" role=Cell
+    Box role=Cell
+      Text "Open"
+  Box role=Row
+    Text "Carol Patel" role=RowHeader
+    Text "carol@example.com" role=Cell
+    Text "PM" role=Cell
+    Text "On leave" role=Cell
+    Box role=Cell
+      Text "Open"
+[Densities / comfortable]
+Box role=Table label="Data table"
+  Box role=Row
+    Box role=ColumnHeader label="Name" padding=16,0
+      Text "Name"
+    Box role=ColumnHeader label="Email" padding=16,0
+      Text "Email"
+    Box role=ColumnHeader label="Role" padding=16,0
+      Text "Role"
+    Box role=ColumnHeader label="Status" padding=16,0
+      Text "Status"
+    Box
+      Text "Actions"
+  Box role=Row
+    Text "Alice Chen" role=RowHeader
+    Text "alice@example.com" role=Cell
+    Text "Engineer" role=Cell
+    Text "Active" role=Cell
+    Box role=Cell
+      Text "Open"
+  Box role=Row
+    Text "Bob Martinez" role=RowHeader
+    Text "bob@example.com" role=Cell
+    Text "Designer" role=Cell
+    Text "Active" role=Cell
+    Box role=Cell
+      Text "Open"
+  Box role=Row
+    Text "Carol Patel" role=RowHeader
+    Text "carol@example.com" role=Cell
+    Text "PM" role=Cell
+    Text "On leave" role=Cell
+    Box role=Cell
+      Text "Open"

@@ -1,0 +1,277 @@
+[Examples]
+Box id=specimen-select-examples
+  Box
+    Text "NATIVE SELECT"
+    Box
+      Box role=Button id=select:select-native:trigger expanded=false clickable height=32 padding=12,0
+        Text "Choose a fruit"
+        Icon chevron-down
+  Box
+    Text "CUSTOM DROPDOWN"
+    Box
+      Box role=Button id=select:select-custom:trigger expanded=false clickable height=32 padding=12,0
+        Text "Choose a country"
+        Icon chevron-down
+  Box
+    Text "SEARCH AND FREEFORM ENTRY"
+    Box
+      Box
+        Box role=ComboBox id=select:select-searchable:trigger expanded=false clickable height=32
+          Text "Search frameworks..."
+          Icon chevron-down
+      Box
+        Box role=ComboBox id=select:select-freeform:trigger expanded=false clickable height=32
+          Text "Type or select..."
+          Icon chevron-down
+        Text "value: — · query: — · open: false"
+  Box
+    Text "RICH AND GROUPED OPTIONS"
+    Box
+      Box role=Button id=select:select-rich:trigger expanded=false clickable height=32 padding=12,0
+        Text "Choose a country"
+        Icon chevron-down
+      Box role=Button id=select:select-native-grouped:trigger expanded=false clickable height=32 padding=12,0
+        Text "Choose a food"
+        Icon chevron-down
+  Box
+    Text "CLEARABLE SELECTION"
+    Box
+      Box role=Button id=select:select-clearable:trigger expanded=false clickable height=32 padding=12,0
+        Text "All fruits"
+        Icon chevron-down
+  Box
+    Text "DISABLED"
+    Box
+      Box role=Button id=select:select-static:trigger expanded=false disabled height=32 padding=12,0
+        Text "Banana"
+        Icon chevron-down
+[Sizes / xs]
+Box role=Button label="xs select" id=select:select-size-xs:trigger expanded=false height=24 padding=10,0
+  Text "Select..."
+  Icon chevron-down
+[Sizes / sm]
+Box role=Button label="sm select" id=select:select-size-sm:trigger expanded=false height=26 padding=10,0
+  Text "Select..."
+  Icon chevron-down
+[Sizes / md]
+Box role=Button label="md select" id=select:select-size-md:trigger expanded=false height=32 padding=12,0
+  Text "Select..."
+  Icon chevron-down
+[Sizes / lg]
+Box role=Button label="lg select" id=select:select-size-lg:trigger expanded=false height=38 padding=14,0
+  Text "Select..."
+  Icon chevron-down
+[Sizes / xl]
+Box role=Button label="xl select" id=select:select-size-xl:trigger expanded=false height=40 padding=15,0
+  Text "Select..."
+  Icon chevron-down
+[Densities / compact]
+Box role=Button label="compact select" id=select:select-density-compact:trigger expanded=false height=32 padding=10,0
+  Text "Select..."
+  Icon chevron-down
+[Densities / default]
+Box role=Button label="default select" id=select:select-density-default:trigger expanded=false height=32 padding=12,0
+  Text "Select..."
+  Icon chevron-down
+[Densities / comfortable]
+Box role=Button label="comfortable select" id=select:select-density-comfortable:trigger expanded=false height=32 padding=14,0
+  Text "Select..."
+  Icon chevron-down
+[Examples / select-rich open]
+Box id=specimen-select-examples
+  Box
+    Text "NATIVE SELECT"
+    Box
+      Box role=Button id=select:select-native:trigger expanded=false clickable height=32 padding=12,0
+        Text "Choose a fruit"
+        Icon chevron-down
+  Box
+    Text "CUSTOM DROPDOWN"
+    Box
+      Box role=Button id=select:select-custom:trigger expanded=false clickable height=32 padding=12,0
+        Text "Choose a country"
+        Icon chevron-down
+  Box
+    Text "SEARCH AND FREEFORM ENTRY"
+    Box
+      Box
+        Box role=ComboBox id=select:select-searchable:trigger expanded=false clickable height=32
+          Text "Search frameworks..."
+          Icon chevron-down
+      Box
+        Box role=ComboBox id=select:select-freeform:trigger expanded=false clickable height=32
+          Text "Type or select..."
+          Icon chevron-down
+        Text "value: — · query: — · open: false"
+  Box
+    Text "RICH AND GROUPED OPTIONS"
+    Box
+      Box
+        Box role=Button id=select:select-rich:trigger expanded=true clickable height=32 padding=12,0
+          Text "Choose a country"
+          Icon chevron-down
+        Box role=ListBox id=select:select-rich:listbox
+          Box role=ListBoxOption label="United States" id=select:select-rich:option:us clickable
+            Box
+              Text "United States"
+              Text "North America"
+          Box role=ListBoxOption label="United Kingdom" id=select:select-rich:option:uk clickable
+            Box
+              Text "United Kingdom"
+              Text "Europe"
+          Box role=ListBoxOption label="Japan" id=select:select-rich:option:jp clickable
+            Box
+              Text "Japan"
+              Text "Asia"
+          Box role=ListBoxOption label="Australia" id=select:select-rich:option:au clickable
+            Box
+              Text "Australia"
+              Text "Oceania"
+          Box role=ListBoxOption label="Brazil" id=select:select-rich:option:br clickable
+            Box
+              Text "Brazil"
+              Text "South America"
+      Box role=Button id=select:select-native-grouped:trigger expanded=false clickable height=32 padding=12,0
+        Text "Choose a food"
+        Icon chevron-down
+  Box
+    Text "CLEARABLE SELECTION"
+    Box
+      Box role=Button id=select:select-clearable:trigger expanded=false clickable height=32 padding=12,0
+        Text "All fruits"
+        Icon chevron-down
+  Box
+    Text "DISABLED"
+    Box
+      Box role=Button id=select:select-static:trigger expanded=false disabled height=32 padding=12,0
+        Text "Banana"
+        Icon chevron-down
+[Examples / select-native-grouped open]
+Box id=specimen-select-examples
+  Box
+    Text "NATIVE SELECT"
+    Box
+      Box role=Button id=select:select-native:trigger expanded=false clickable height=32 padding=12,0
+        Text "Choose a fruit"
+        Icon chevron-down
+  Box
+    Text "CUSTOM DROPDOWN"
+    Box
+      Box role=Button id=select:select-custom:trigger expanded=false clickable height=32 padding=12,0
+        Text "Choose a country"
+        Icon chevron-down
+  Box
+    Text "SEARCH AND FREEFORM ENTRY"
+    Box
+      Box
+        Box role=ComboBox id=select:select-searchable:trigger expanded=false clickable height=32
+          Text "Search frameworks..."
+          Icon chevron-down
+      Box
+        Box role=ComboBox id=select:select-freeform:trigger expanded=false clickable height=32
+          Text "Type or select..."
+          Icon chevron-down
+        Text "value: — · query: — · open: false"
+  Box
+    Text "RICH AND GROUPED OPTIONS"
+    Box
+      Box role=Button id=select:select-rich:trigger expanded=false clickable height=32 padding=12,0
+        Text "Choose a country"
+        Icon chevron-down
+      Box
+        Box role=Button id=select:select-native-grouped:trigger expanded=true clickable height=32 padding=12,0
+          Text "Choose a food"
+          Icon chevron-down
+        Box role=ListBox id=select:select-native-grouped:listbox
+          Box role=Group label="Fruits" id=select:select-native-grouped:group-Fruits
+            Text "Fruits"
+          Box role=ListBoxOption label="Apple" id=select:select-native-grouped:option:apple clickable height=32
+            Text "Apple"
+          Box role=ListBoxOption label="Banana" id=select:select-native-grouped:option:banana clickable height=32
+            Text "Banana"
+          Box role=ListBoxOption label="Cherry" id=select:select-native-grouped:option:cherry clickable height=32
+            Text "Cherry"
+          Box role=Group label="Vegetables" id=select:select-native-grouped:group-Vegetables
+            Text "Vegetables"
+          Box role=ListBoxOption label="Carrot" id=select:select-native-grouped:option:carrot clickable height=32
+            Text "Carrot"
+          Box role=ListBoxOption label="Broccoli" id=select:select-native-grouped:option:broccoli clickable height=32
+            Text "Broccoli"
+          Box role=ListBoxOption label="Spinach" id=select:select-native-grouped:option:spinach disabled height=32
+            Text "Spinach"
+  Box
+    Text "CLEARABLE SELECTION"
+    Box
+      Box role=Button id=select:select-clearable:trigger expanded=false clickable height=32 padding=12,0
+        Text "All fruits"
+        Icon chevron-down
+  Box
+    Text "DISABLED"
+    Box
+      Box role=Button id=select:select-static:trigger expanded=false disabled height=32 padding=12,0
+        Text "Banana"
+        Icon chevron-down
+[Examples / select-freeform open]
+Box id=specimen-select-examples
+  Box
+    Text "NATIVE SELECT"
+    Box
+      Box role=Button id=select:select-native:trigger expanded=false clickable height=32 padding=12,0
+        Text "Choose a fruit"
+        Icon chevron-down
+  Box
+    Text "CUSTOM DROPDOWN"
+    Box
+      Box role=Button id=select:select-custom:trigger expanded=false clickable height=32 padding=12,0
+        Text "Choose a country"
+        Icon chevron-down
+  Box
+    Text "SEARCH AND FREEFORM ENTRY"
+    Box
+      Box
+        Box role=ComboBox id=select:select-searchable:trigger expanded=false clickable height=32
+          Text "Search frameworks..."
+          Icon chevron-down
+      Box
+        Box
+          Box role=ComboBox id=select:select-freeform:trigger expanded=true clickable height=32
+            Text "Type or select..."
+            Icon chevron-down
+          Box role=ListBox id=select:select-freeform:listbox
+            Box id=select:select-freeform:search editable height=32
+              Icon search
+              Text "Search…" id=select:select-freeform:search-value
+            Box role=ListBoxOption label="Svelte" id=select:select-freeform:option:svelte clickable height=32
+              Text "Svelte"
+            Box role=ListBoxOption label="React" id=select:select-freeform:option:react clickable height=32
+              Text "React"
+            Box role=ListBoxOption label="Vue" id=select:select-freeform:option:vue clickable height=32
+              Text "Vue"
+            Box role=ListBoxOption label="Angular" id=select:select-freeform:option:angular clickable height=32
+              Text "Angular"
+            Box role=ListBoxOption label="SolidJS" id=select:select-freeform:option:solid clickable height=32
+              Text "SolidJS"
+            Box role=ListBoxOption label="Astro" id=select:select-freeform:option:astro clickable height=32
+              Text "Astro"
+        Text "value: — · query:  · open: true"
+  Box
+    Text "RICH AND GROUPED OPTIONS"
+    Box
+      Box role=Button id=select:select-rich:trigger expanded=false clickable height=32 padding=12,0
+        Text "Choose a country"
+        Icon chevron-down
+      Box role=Button id=select:select-native-grouped:trigger expanded=false clickable height=32 padding=12,0
+        Text "Choose a food"
+        Icon chevron-down
+  Box
+    Text "CLEARABLE SELECTION"
+    Box
+      Box role=Button id=select:select-clearable:trigger expanded=false clickable height=32 padding=12,0
+        Text "All fruits"
+        Icon chevron-down
+  Box
+    Text "DISABLED"
+    Box
+      Box role=Button id=select:select-static:trigger expanded=false disabled height=32 padding=12,0
+        Text "Banana"
+        Icon chevron-down

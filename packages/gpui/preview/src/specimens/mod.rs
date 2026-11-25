@@ -22,10 +22,10 @@ mod avatar;
 mod icon;
 mod icon_provider;
 mod motion_policy_provider;
+mod shared;
 mod ui_presentation_provider;
 
 // ── Action ────────────────────────────────────────────────
-mod button;
 mod code_input;
 mod editable_label;
 mod field;
@@ -48,7 +48,6 @@ mod radio;
 mod radio_group;
 mod range_slider;
 mod segmented_control;
-mod select;
 mod slider;
 // `pub(crate)` for its test-only probe markers (g15.042); the render entry
 // point is still reached through `render_single_specimen` like every other.
@@ -116,7 +115,6 @@ mod card_specimen;
 mod card_toggle_group_specimen;
 mod changed_files;
 mod confirm_action_specimen;
-mod data_table;
 mod debug_dialog_specimen;
 mod detail_item_specimen;
 mod detail_section_group_specimen;
@@ -391,7 +389,12 @@ pub fn render_single_specimen(
             state.specimen_capture,
             "Button",
             theme,
-            button::render(state, cx),
+            shared::render(
+                poodle_specimens::Specimen::Button,
+                state,
+                cx,
+                motion_context,
+            ),
         ),
         "icon-button" => specimen_card(
             state.specimen_capture,
@@ -525,7 +528,12 @@ pub fn render_single_specimen(
             state.specimen_capture,
             "Select",
             theme,
-            select::render(state, cx),
+            shared::render(
+                poodle_specimens::Specimen::Select,
+                state,
+                cx,
+                motion_context,
+            ),
         ),
         "listbox" => specimen_card(
             state.specimen_capture,
@@ -902,7 +910,12 @@ pub fn render_single_specimen(
             state.specimen_capture,
             "DataTable",
             theme,
-            data_table::render(state, cx),
+            shared::render(
+                poodle_specimens::Specimen::DataTable,
+                state,
+                cx,
+                motion_context,
+            ),
         ),
         "list-card" => specimen_card(
             state.specimen_capture,

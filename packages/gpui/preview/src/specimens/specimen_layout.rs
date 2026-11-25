@@ -50,9 +50,12 @@ type NamedDensityRenderer<'a> = Box<dyn Fn(&str, &GpuiThemeProvider) -> AnyEleme
 /// page can neither inherit a pane it does not support nor advertise a tab it
 /// cannot fill.
 pub struct SpecimenAxes<'a> {
-    sizes: Option<SizeRenderer<'a>>,
+    sizes: Option<(&'static [(ControlSize, &'static str)], SizeRenderer<'a>)>,
     named_sizes: Option<(Vec<&'static str>, NamedSizeRenderer<'a>)>,
-    densities: Option<DensityRenderer<'a>>,
+    densities: Option<(
+        &'static [(ControlDensity, &'static str)],
+        DensityRenderer<'a>,
+    )>,
     named_densities: Option<(Vec<&'static str>, NamedDensityRenderer<'a>)>,
 }
 
@@ -73,10 +76,18 @@ impl<'a> SpecimenAxes<'a> {
 
     /// Admit the `Sizes` pane, one representative per control step.
     pub fn with_sizes(
-        mut self,
+        self,
         row: impl Fn(ControlSize, &GpuiThemeProvider) -> AnyElement + 'a,
     ) -> Self {
-        self.sizes = Some(Box::new(row));
+        self.with_size_values(ALL_SIZES, row)
+    }
+
+    pub(crate) fn with_size_values(
+        mut self,
+        values: &'static [(ControlSize, &'static str)],
+        row: impl Fn(ControlSize, &GpuiThemeProvider) -> AnyElement + 'a,
+    ) -> Self {
+        self.sizes = Some((values, Box::new(row)));
         self
     }
 
@@ -93,10 +104,18 @@ impl<'a> SpecimenAxes<'a> {
 
     /// Admit the `Densities` pane, one representative per density step.
     pub fn with_densities(
-        mut self,
+        self,
         row: impl Fn(ControlDensity, &GpuiThemeProvider) -> AnyElement + 'a,
     ) -> Self {
-        self.densities = Some(Box::new(row));
+        self.with_density_values(ALL_DENSITIES, row)
+    }
+
+    pub(crate) fn with_density_values(
+        mut self,
+        values: &'static [(ControlDensity, &'static str)],
+        row: impl Fn(ControlDensity, &GpuiThemeProvider) -> AnyElement + 'a,
+    ) -> Self {
+        self.densities = Some((values, Box::new(row)));
         self
     }
 
@@ -131,6 +150,16 @@ pub fn specimen_layout(
     cx: &mut Context<PreviewRoot>,
     name: &str,
     examples: AnyElement,
+    axes: SpecimenAxes<'_>,
+) -> Div {
+    specimen_layout_lazy(state, cx, name, || examples, axes)
+}
+
+pub(crate) fn specimen_layout_lazy(
+    state: &AppState,
+    cx: &mut Context<PreviewRoot>,
+    name: &str,
+    examples: impl FnOnce() -> AnyElement,
     axes: SpecimenAxes<'_>,
 ) -> Div {
     let theme = &state.theme;
@@ -206,8 +235,8 @@ pub fn specimen_layout(
                     col = col.child(variant_row(value, row(value, theme), text_secondary));
                 }
             } else {
-                let row = axes.sizes.as_ref().expect("sizes tab is admitted");
-                for (size, label) in ALL_SIZES {
+                let (values, row) = axes.sizes.as_ref().expect("sizes tab is admitted");
+                for (size, label) in *values {
                     col = col.child(variant_row(label, row(*size, theme), text_secondary));
                 }
             }
@@ -220,14 +249,14 @@ pub fn specimen_layout(
                     col = col.child(variant_row(value, row(value, theme), text_secondary));
                 }
             } else {
-                let row = axes.densities.as_ref().expect("densities tab is admitted");
-                for (density, label) in ALL_DENSITIES {
+                let (values, row) = axes.densities.as_ref().expect("densities tab is admitted");
+                for (density, label) in *values {
                     col = col.child(variant_row(label, row(*density, theme), text_secondary));
                 }
             }
             col
         }
-        _ => div().flex().flex_col().gap(px(16.0)).child(examples),
+        _ => div().flex().flex_col().gap(px(16.0)).child(examples()),
     };
 
     let mut layout = div().flex().flex_col().gap(if state.specimen_capture {

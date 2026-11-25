@@ -666,3 +666,108 @@ fn a_slow_shard_that_constructed_every_route_still_passes() {
 fn a_shard_that_missed_a_route_fails() {
     record_shard_budget(1, 43, 44, 3, 2, Duration::from_secs(1));
 }
+
+fn click_shared_node(cx: &mut VisualTestContext, id: &str) {
+    let bounds =
+        poodle_gpui_node_backend::bounds_for(id).unwrap_or_else(|| panic!("{id} did not paint"));
+    cx.simulate_click(bounds.center(), Modifiers::none());
+    settle(cx);
+}
+
+fn shared_painted_text(id: &str) -> Vec<String> {
+    poodle_gpui_node_backend::painted_node_for(id)
+        .unwrap_or_else(|| panic!("{id} did not paint"))
+        .texts
+}
+
+#[test]
+fn shared_button_mount_repaints_the_click_readout() {
+    let _exclusive = NODE_TREE_RENDER.write().unwrap_or_else(|e| e.into_inner());
+    let app = TestAppContext::single();
+    poodle_gpui_node_backend::begin_probe_capture();
+    let (_root, mut cx) = open_capture_route_window(&app, "button");
+    settle(&mut cx);
+
+    click_shared_node(&mut cx, "specimen-button-save-changes");
+    click_shared_node(&mut cx, "specimen-button-primary");
+    let text = shared_painted_text("specimen-button-examples");
+    assert!(text.iter().any(|line| line == "Clicks: 2"));
+    assert!(text.iter().any(|line| line == "Last clicked: Primary"));
+
+    close_route_window(&mut cx);
+    let _ = poodle_gpui_node_backend::take_probe_capture();
+}
+
+#[test]
+fn shared_select_mount_applies_focus_effects_and_commits_an_option() {
+    let _exclusive = NODE_TREE_RENDER.write().unwrap_or_else(|e| e.into_inner());
+    let app = TestAppContext::single();
+    poodle_gpui_node_backend::begin_probe_capture();
+    let (_root, mut cx) = open_stateful_route_window(&app, "select", 1600.0);
+    settle(&mut cx);
+
+    let scope = "select-searchable";
+    let trigger = poodle_render::select_trigger_focus_id(scope);
+    let search = poodle_render::select_search_focus_id(scope);
+    click_shared_node(&mut cx, &trigger);
+    assert_eq!(
+        poodle_gpui_node_backend::focus_state_for(&search),
+        Some(true)
+    );
+
+    cx.simulate_input("s");
+    settle(&mut cx);
+    assert!(shared_painted_text(&search).iter().any(|text| text == "s"));
+
+    cx.simulate_keystrokes("down");
+    settle(&mut cx);
+    cx.simulate_keystrokes("enter");
+    settle(&mut cx);
+    assert_eq!(
+        poodle_gpui_node_backend::focus_state_for(&trigger),
+        Some(true)
+    );
+    assert!(shared_painted_text("specimen-select-examples")
+        .iter()
+        .any(|text| text == "Selected: solid"));
+
+    close_route_window(&mut cx);
+    let _ = poodle_gpui_node_backend::take_probe_capture();
+}
+
+#[test]
+fn shared_data_table_mount_sorts_and_selects_through_pointer_input() {
+    let _exclusive = NODE_TREE_RENDER.write().unwrap_or_else(|e| e.into_inner());
+    let app = TestAppContext::single();
+    poodle_gpui_node_backend::begin_probe_capture();
+    let (_root, mut cx) = open_stateful_route_window(&app, "data-table", 1800.0);
+    settle(&mut cx);
+
+    let table_id = "specimen-data-table-live";
+    let table = poodle_gpui_node_backend::bounds_for(table_id).expect("live table paints");
+    // The live table begins with four data headings and a trailing action
+    // column. The left inset is inside Name, the first heading.
+    cx.simulate_click(
+        point(table.origin.x + px(30.0), table.origin.y + px(12.0)),
+        Modifiers::none(),
+    );
+    settle(&mut cx);
+    let text = shared_painted_text(table_id);
+    let index = |name| text.iter().position(|label| label == name).unwrap();
+    assert!(index("Eve Nakamura") < index("Alice Chen"));
+
+    let table = poodle_gpui_node_backend::bounds_for(table_id).expect("sorted table paints");
+    // The first row's Open action is at the trailing edge and now belongs
+    // to Eve (row 5).
+    cx.simulate_click(
+        point(table.right() - px(20.0), table.origin.y + px(42.0)),
+        Modifiers::none(),
+    );
+    settle(&mut cx);
+    let text = shared_painted_text("specimen-data-table-examples");
+    assert!(text.iter().any(|text| text == "Clicked row 5"));
+    assert!(text.iter().any(|text| text == "1 of 5 selected"));
+
+    close_route_window(&mut cx);
+    let _ = poodle_gpui_node_backend::take_probe_capture();
+}
