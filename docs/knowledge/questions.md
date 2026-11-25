@@ -5,11 +5,8 @@ briefs. An answered question keeps only its pointer to where the answer lives.
 
 ## Q-004 — What is the route for the Rust renderers?
 
-Status: open, raised 2026-11-25. Jetstream is barely usable, GPUI needs a lot
-of work, and parity across the four renderers has been hard to hold. The
-operator wants a separate conversation on this. One constraint is already
-known: a rendering style that is token data, not CSS selectors, reaches the
-Rust renderers through the same build that emits theme artefacts.
+Status: answered 2026-11-25 — the node tree is the seam; GPUI stays, the
+Jetstream backend moves to its runtime. See [vision](vision.md#direction).
 
 ## Q-003 — How far can a rendering style reach?
 
