@@ -705,9 +705,7 @@ pub fn filter_builder(
 mod tests {
     use super::*;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     #[test]
     fn outside_interact_refusal_marks_the_open_surface() {

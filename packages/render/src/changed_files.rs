@@ -363,9 +363,7 @@ mod tests {
     use super::*;
     use poodle_headless::agent_transcript::ChangedFile;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn spec() -> ChangedFilesSpec {
         ChangedFilesSpec::new(

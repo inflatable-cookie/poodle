@@ -499,6 +499,26 @@ describe("installed-package scope routing", () => {
     );
   });
 
+  test("ordinary Cargo cleanup admits removal of the renderer's backend dev dependency", async () => {
+    const root = await initPlant();
+    const manifestPath = "packages/render/Cargo.toml";
+    const manifest = [
+      "[package]",
+      'name = "poodle-render"',
+      'version = "0.4.15"',
+      "publish = false",
+      "",
+    ].join("\n");
+    await writeFiles(root, {
+      [manifestPath]: `${manifest}\n[dev-dependencies]\npoodle-jetstream = { version = "0.4.15", path = "../jetstream/adapter" }\n`,
+    });
+    const base = await commitAll(root, "renderer with backend test dependency");
+    await writeFiles(root, { [manifestPath]: manifest });
+    const head = await commitAll(root, "renderer with neutral tests");
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.changedPaths).toEqual([manifestPath]);
+  });
+
   test("ordinary exact pinned dependency and export additions are not a version surface", async () => {
     const root = await initPlant();
     await writeFiles(root, { [ORDINARY_JS_MANIFEST]: `${ordinaryJsManifestBase}\n` });

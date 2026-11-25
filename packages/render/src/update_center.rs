@@ -198,9 +198,7 @@ mod tests {
         OfferReason, UpdateAvailabilityProjection, UpdateControllerStatus,
     };
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn texts(node: &Node) -> Vec<String> {
         node.texts()

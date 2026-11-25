@@ -160,9 +160,7 @@ pub fn time_zone_select(
 mod tests {
     use super::*;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     #[test]
     fn two_time_zone_selects_do_not_share_runtime_ids() {

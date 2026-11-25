@@ -449,9 +449,7 @@ mod tests {
     use super::*;
     use poodle_headless::licence::{LicenceActivationMode, LicenceKeyProblem};
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     /// Key mode requires only the key path: no account or offline route
     /// renders, and the route switch is absent.

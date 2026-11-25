@@ -57,5 +57,8 @@ at the crate root; use that path.
 Add shared native composition, token-resolved appearance, and interaction intent here.
 Keep engine input, text, lifecycle, and drawing behavior in the backend.
 
+Run `effigy test:render` from the repository root to exercise node composition
+using the renderer's token-backed test theme.
+
 See the [native architecture](../../docs/knowledge/architecture/001-poodle-system-shape.md)
 and [component contracts](../../docs/contracts/components/README.md).

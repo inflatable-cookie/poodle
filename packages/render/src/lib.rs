@@ -11,6 +11,8 @@
 //! history lives in git; parity evidence lives with each backend.
 
 mod layout_utils;
+#[cfg(test)]
+mod test_support;
 
 pub mod accordion;
 pub mod action_discovery_panel;

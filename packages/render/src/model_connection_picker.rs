@@ -584,9 +584,7 @@ mod tests {
     use poodle_headless::model_connection::model_connection_picker_fixtures;
     use std::sync::Mutex;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn spec() -> ModelConnectionPickerSpec {
         ModelConnectionPickerSpec::new().with_options(model_connection_picker_fixtures())

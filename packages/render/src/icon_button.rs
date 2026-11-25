@@ -272,16 +272,12 @@ fn non_empty_text(text: &str) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::test_theme as theme;
     use poodle_node::ColorValue;
     use poodle_node::NodeKind;
     use poodle_specs::ControlSize;
 
-    /// The real token resolver over the ECLIPSE theme. Pure — no backend.
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
-
-    fn resolve_color(theme: &poodle_jetstream::JetstreamThemeProvider, token: &str) -> ColorValue {
+    fn resolve_color(theme: &crate::test_support::TestThemeProvider, token: &str) -> ColorValue {
         poodle_adapter::ThemeProvider::resolve_color(theme, token)
     }
 

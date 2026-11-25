@@ -235,9 +235,7 @@ mod tests {
     use super::*;
     use poodle_headless::agent_subagent::{AgentSubagentItem, AgentSubagentStatus};
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn spec() -> AgentSubagentSpec {
         AgentSubagentSpec::new(AgentSubagentItem {

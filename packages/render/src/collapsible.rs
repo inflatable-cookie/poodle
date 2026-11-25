@@ -261,9 +261,7 @@ mod tests {
     use super::*;
     use poodle_node::NodeKind;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn trigger<'a>(root: &'a Node) -> &'a Node {
         root.find(&|node| node.a11y.role == Some(NodeRole::Button))

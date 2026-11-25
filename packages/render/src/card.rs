@@ -238,9 +238,7 @@ mod tests {
     use super::*;
     use poodle_adapter::ThemeProvider;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     #[test]
     fn default_card_matches_the_old_tiers_border_and_ring() {

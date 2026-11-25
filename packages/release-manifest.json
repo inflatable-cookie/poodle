@@ -168,7 +168,7 @@
     {
       "name": "poodle-jetstream",
       "path": "packages/jetstream/adapter",
-      "kind": "renderer-adapter",
+      "kind": "theme-provider",
       "language": "rust",
       "publicIntent": true,
       "channel": "preview"

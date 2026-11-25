@@ -116,8 +116,7 @@ mod tests {
 
     #[test]
     fn named_icon_path_stays_a_named_icon_node() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let node = icon(&IconSpec::new("plus"), &ctx);
         assert!(matches!(
@@ -129,8 +128,7 @@ mod tests {
 
     #[test]
     fn resolved_frame_carries_no_pair_identity() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let mut runtime = create_icon_geometry_runtime(MotionPolicy::Full);
         activate_icon_geometry(
@@ -182,8 +180,7 @@ mod tests {
 
     #[test]
     fn interior_samples_reuse_compact_and_node_capacity() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let mut runtime = create_icon_geometry_runtime(MotionPolicy::Full);
         let start = activate_icon_geometry(

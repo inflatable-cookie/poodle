@@ -75,8 +75,8 @@ repository version and a stale value is misleading.
 - Rust contracts: `poodle-adapter`, `poodle-events`, `poodle-headless`,
   `poodle-ir`, `poodle-layout`, `poodle-markdown`, `poodle-node`,
   `poodle-specs`, `poodle-style`, and `poodle-tokens`
-- Rust renderers: `poodle-render`, `poodle-gpui`,
-  `poodle-gpui-node-backend`, and `poodle-jetstream`
+- Rust rendering and backend support: `poodle-render`, `poodle-gpui`,
+  `poodle-gpui-node-backend`, and the Jetstream theme provider `poodle-jetstream`
 
 The web public release set is core and Svelte only. See
 [compiled web package distribution](../architecture/014-compiled-web-package-distribution.md)

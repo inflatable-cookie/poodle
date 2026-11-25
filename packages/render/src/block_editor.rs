@@ -649,9 +649,7 @@ mod tests {
     use poodle_specs::BlockTypeDefinition;
     use std::collections::BTreeSet;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn runtime_ids(node: &Node) -> Vec<String> {
         let mut ids = Vec::new();

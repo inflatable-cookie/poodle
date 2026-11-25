@@ -336,9 +336,7 @@ pub fn code_input_with_handlers(
 mod tests {
     use super::*;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn typed(spec: &CodeInputSpec, key: &str) -> (Vec<String>, Vec<String>) {
         let changes = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));

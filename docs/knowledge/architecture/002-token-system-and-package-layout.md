@@ -210,9 +210,10 @@ poodle-tokens + poodle-specs
 GPUI backend    Jetstream backend
 ```
 
-`poodle-gpui` and `poodle-jetstream` provide runtime-specific theme providers
-and style mapping. They resolve the same semantic token roles and must not
-introduce backend-only theme values.
+`poodle-gpui` and `poodle-jetstream` provide runtime theme providers that
+resolve the same semantic token roles. `poodle-render` tests resolve these roles
+from `poodle-tokens` through a local fixture. The Jetstream node converter
+owns runtime layout and style mapping in the sibling repository.
 
 ## Package Ownership
 
@@ -224,7 +225,7 @@ packages/react/components/  React component package
 packages/contracts/tokens/  generated Rust token consumer crate
 packages/render/            shared Rust component renderer
 packages/gpui/              GPUI adapter and node backend
-packages/jetstream/         Jetstream adapter
+packages/jetstream/         Jetstream theme, role map, and preview
 ```
 
 Downstream consumers may translate Poodle tokens into host-owned names, in

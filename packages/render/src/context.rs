@@ -263,9 +263,7 @@ mod tests {
 
     use super::*;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     /// Every law runs against a caller-owned theme so lifetimes stay local.
     fn with_root<R>(f: impl FnOnce(&RenderContext<'_>) -> R) -> R {

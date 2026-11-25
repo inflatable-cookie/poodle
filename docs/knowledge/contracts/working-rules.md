@@ -139,6 +139,13 @@ One exception (Tom, 2026-10-07): the Jetstream preview must compile and open
 a component by name, because the poodle-lab side-by-side specimen view hosts
 it. That repair is not admission; parity reporting stays deferred.
 
+Operator decision 2026-11-25: Jetstream components use the shared
+`poodle-render` node trees and the sibling repository's `jetstream-poodle`
+converter. The Poodle Jetstream crate supplies theme and accessibility role
+mappings. `poodle-render` tests use a backend-neutral token fixture, and
+`check:backend-neutral` checks the renderer and contract dependency trees,
+including test dependencies.
+
 Distinguish two things that sound alike:
 
 - **Active-cohort component parity is required.** Every component has a

@@ -10,6 +10,7 @@ import {
 } from "./release-versioning";
 import { bumpLockstepVersion } from "./release-version";
 import { packagesSectionUnchanged, workspaceLockDrift } from "./workspace-lock";
+import releaseManifest from "../packages/release-manifest.json";
 
 const roots: string[] = [];
 const SOURCE_VERSION = "0.4.11";
@@ -39,7 +40,6 @@ function crateName(path: string): string {
     tokens: "poodle-tokens",
     "node-backend": "poodle-gpui-node-backend",
     preview: path.includes("gpui") ? "poodle-gpui-preview" : "poodle-jetstream-preview",
-    jetstream: "poodle-jetstream",
     render: "poodle-render",
   };
   return names[directory]!;
@@ -182,6 +182,14 @@ function fixture(): string {
 }
 
 describe("lockstep release version bump", () => {
+  test("includes every Rust release package, including the Jetstream theme provider", () => {
+    const manifests = releaseManifest.packages
+      .filter((entry) => entry.language === "rust")
+      .map((entry) => `${entry.path}/Cargo.toml`)
+      .sort();
+    expect([...LOCKSTEP_CARGO_MANIFEST_PATHS].sort()).toEqual(manifests);
+  });
+
   test("release:bump restamps codegen outputs and census updates accept evidence arguments", () => {
     const tasks = readFileSync(new URL("../tasks/effigy.tasks.toml", import.meta.url), "utf8");
     const bump = /"release:bump"\s*=\s*\[([\s\S]*?)\n\]/.exec(tasks)?.[1] ?? "";

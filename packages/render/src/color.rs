@@ -3,9 +3,8 @@
 //! Everything here operates in **sRGB**, the vocabulary's colour space. The
 //! CSS `color-mix` behaviour both old tiers implemented was "lerp in sRGB":
 //! they resolved tokens to linear first, so they had to encode, lerp, decode.
-//! Node colours stay in sRGB until a backend converts at its own edge, so the
-//! same recipe is a plain componentwise lerp — bit-equivalent, asserted by
-//! the Jetstream adapter's draw-command parity suite.
+//! Node colours stay in sRGB until a backend converts them. Interpolation
+//! therefore works directly on the stored channels.
 
 use poodle_node::ColorValue;
 
@@ -118,8 +117,8 @@ pub const WHITE: ColorValue = ColorValue(1.0, 1.0, 1.0, 1.0);
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::TestThemeProvider;
     use poodle_adapter::ThemeProvider;
-    use poodle_jetstream::JetstreamThemeProvider;
     use poodle_tokens::themes;
 
     fn relative_luminance(color: ColorValue) -> f32 {
@@ -182,7 +181,7 @@ mod tests {
         let mut floor_name = "";
 
         for definition in themes {
-            let provider = JetstreamThemeProvider::from_theme(definition);
+            let provider = TestThemeProvider::from_theme(definition);
             let ctx = RenderContext::new(&provider);
             let neutral = solid_tone_surface(
                 &ctx,

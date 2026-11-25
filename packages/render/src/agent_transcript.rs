@@ -398,8 +398,7 @@ mod tests {
 
     #[test]
     fn jump_control_uses_the_transcript_recipe_and_real_activation() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let spec = AgentTranscriptSpec::default();
         let activations = Arc::new(AtomicUsize::new(0));

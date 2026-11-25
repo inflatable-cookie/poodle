@@ -1271,9 +1271,7 @@ mod tests {
     use poodle_node::NodeKind;
     use poodle_specs::{Orientation, RangeSliderSpec};
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn spec() -> RangeSliderSpec {
         RangeSliderSpec::new(20.0, 80.0).with_bounds(0.0, 100.0)

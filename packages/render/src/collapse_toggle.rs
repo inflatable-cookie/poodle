@@ -95,9 +95,7 @@ mod tests {
     use poodle_node::NodeKind;
     use poodle_specs::CollapseDirection;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn icon_name(node: &Node) -> &str {
         node.find(&|child| matches!(&child.kind, NodeKind::Icon { .. }))

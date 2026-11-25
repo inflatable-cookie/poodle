@@ -196,9 +196,7 @@ mod tests {
     use poodle_node::NodeKind;
     use poodle_specs::{BreadcrumbItem, ControlSize};
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn crumbs(items: Vec<BreadcrumbItem>) -> Node {
         let theme = theme();

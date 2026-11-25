@@ -330,12 +330,7 @@ pub fn bulk_action_bar(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_jetstream::JetstreamThemeProvider;
-    use poodle_tokens::themes::ECLIPSE;
-
-    fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     #[test]
     fn region_carries_the_bulk_actions_name_and_select_all_total_suffix() {

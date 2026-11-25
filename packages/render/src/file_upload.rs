@@ -526,9 +526,7 @@ fn build_hint_text(spec: &FileUploadSpec) -> Option<String> {
 mod tests {
     use super::*;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn activate_targets(node: &Node) -> Vec<&Node> {
         fn walk<'a>(n: &'a Node, out: &mut Vec<&'a Node>) {

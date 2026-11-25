@@ -1259,9 +1259,7 @@ mod tests {
     };
     use poodle_specs::HistoryCenterRejection;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn entry(id: &str, label: &str, continuation_count: usize) -> HistoryEntry {
         HistoryEntry::new(id, label).with_continuation_count(continuation_count)

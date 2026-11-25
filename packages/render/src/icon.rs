@@ -36,8 +36,7 @@ mod tests {
 
     #[test]
     fn emits_the_explicit_gpui_svg_tint() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let node = icon(&IconSpec::new("plus"), &ctx);
         assert_eq!(
@@ -65,8 +64,7 @@ mod tests {
 
     #[test]
     fn custom_icon_names_pass_through() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let node = icon(&IconSpec::new("company-logo"), &ctx);
         assert!(matches!(

@@ -54,9 +54,7 @@ mod tests {
     use poodle_node::{LayoutOverflow, LayoutSizing};
     use poodle_specs::{Overflow, PaddingScale};
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     #[test]
     fn resolves_dimensions_padding_overflow_and_children() {

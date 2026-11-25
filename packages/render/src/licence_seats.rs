@@ -314,9 +314,7 @@ mod tests {
     use poodle_headless::licence::LicenceSeat;
     use poodle_specs::LicenceSeatsSpec;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn seat(machine_id: &str, label: Option<&str>, this_machine: bool) -> LicenceSeat {
         LicenceSeat {

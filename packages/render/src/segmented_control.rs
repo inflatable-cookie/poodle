@@ -359,13 +359,9 @@ fn roving_key_handler(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::test_theme as theme;
     use poodle_node::NodeModifiers;
     use poodle_specs::{ControlDensity, ControlSize, SegmentedControlOption};
-
-    /// The real token resolver over the ECLIPSE theme. Pure — no backend.
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
 
     fn view_options() -> Vec<SegmentedControlOption> {
         vec![
