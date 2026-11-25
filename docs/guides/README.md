@@ -35,6 +35,10 @@ work. They use Svelte examples, but their ownership rules apply across runtimes.
 13. [Admin feature delivery](013-admin-feature-delivery-recipes.md)
 14. [Admin application shells](014-admin-app-shell-recipes.md)
 
+## Build from behaviour
+
+- [Async tag combobox](015-async-tag-combobox.md)
+
 ## Ownership Rule
 
 Poodle owns reusable primitives, composites, and general workstation shells.

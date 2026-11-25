@@ -341,6 +341,7 @@ export const CORE_TOKEN_JS_ENTRIES = [
 export const CORE_FILES = [
   "dist",
   "README.md",
+  "llms.txt",
   "LICENSE",
   "THIRD_PARTY_NOTICES.md",
 ] as const;

@@ -48,6 +48,8 @@ contract references the rule rather than restating it:
 
 ## Current Contracts
 
+- [Supported core behaviour](core-behaviour.md) — exports for building
+  custom web controls
 - `template/component-contract-template.md`
 - `components/README.md`
 - `components/accordion.md`

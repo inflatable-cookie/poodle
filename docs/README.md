@@ -16,6 +16,8 @@ names the one file that owns each topic.
   integration for Rust contracts, node rendering, and conversion
 - [Application pattern recipes](guides/README.md) — forms, lists, dialogs,
   media workflows, and admin shells
+- [Build from core behaviour](contracts/core-behaviour.md) — supported
+  primitives for custom web controls
 - [Component contracts](contracts/components/README.md) — the source of truth
   for public inputs, states, events, accessibility, layout, and token usage
 - [Poodle implementer skill](../skills/poodle/SKILL.md) — an installable agent

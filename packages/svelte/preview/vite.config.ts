@@ -6,6 +6,12 @@ export default defineConfig({
   plugins: [svelte()],
   build: {
     chunkSizeWarningLimit: 2200,
+    rolldownOptions: {
+      input: [
+        fileURLToPath(new URL("./index.html", import.meta.url)),
+        fileURLToPath(new URL("./async-tag-combobox.html", import.meta.url)),
+      ],
+    },
   },
   resolve: {
     alias: {

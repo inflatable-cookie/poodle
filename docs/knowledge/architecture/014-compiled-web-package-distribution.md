@@ -29,17 +29,8 @@ fallback preserves the retired root markdown imports.
 
 ## Package boundary
 
-All three web packages use exact file and side-effect policies:
-
-```json
-// core
-"files": ["dist", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md"],
-"sideEffects": ["**/*.css"]
-
-// Svelte and private React
-"files": ["dist", "README.md", "LICENSE"],
-"sideEffects": ["**/*.css"]
-```
+All three web packages follow the exact file allowlists and side-effect policy
+in the [compiled web distribution contract](../specs/070-compiled-web-distribution-contract.md#files-side-effects-declarations).
 
 Core uses one JavaScript lane with declarations. Every core JS export uses
 `types`, then `import`, then `default`, with `import` and `default` targeting

@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 
 import { auditPackageDependencies } from "./audit";
 import {
+  CORE_FILES,
   CORE_FORBIDDEN_MODULES,
   CORE_PACKAGE_DIR,
   CORE_PACKAGE_NAME,
@@ -70,7 +71,7 @@ export function assertCoreManifest(repoRoot: string): void {
   if (manifest.bin?.["poodle-icons"] !== "./dist/icons/build.mjs") {
     throw new Error("bin.poodle-icons must target ./dist/icons/build.mjs");
   }
-  if (JSON.stringify(manifest.files) !== JSON.stringify(["dist", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md"])) {
+  if (JSON.stringify(manifest.files) !== JSON.stringify(CORE_FILES)) {
     throw new Error("core files must be dist plus package docs and licences");
   }
   if (JSON.stringify(manifest.sideEffects) !== JSON.stringify(["**/*.css"])) {

@@ -1,0 +1,14 @@
+# Poodle Core
+
+> Poodle offers a behaviour layer, a style framework, and opinionated components.
+
+Use the version in the package.json beside this file. Replace VERSION in
+each URL with that exact version (the release tag is vVERSION).
+
+- Supported behaviour exports: https://github.com/inflatable-cookie/poodle/blob/vVERSION/docs/contracts/core-behaviour.md
+- Svelte async tag combobox recipe: https://github.com/inflatable-cookie/poodle/blob/vVERSION/docs/guides/015-async-tag-combobox.md
+- Appearance recipe hooks: https://github.com/inflatable-cookie/poodle/blob/vVERSION/docs/knowledge/architecture/007-appearance-recipe-contract.md
+
+If the tag or a document is absent, these instructions are newer than the
+installed release or the build has no release tag. Check the build's source
+revision and use only exports verified against that installation.
