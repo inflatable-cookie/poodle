@@ -269,10 +269,13 @@ app if it needs a face beyond the system stack.
 PageHeader, SidebarNav, Dialog, DataTable, Button, and TextInput also read
 the family tokens at their own rendering location, so the same override
 works on a containing subtree. For a portaled dialog, put it on the
-portal host or an ancestor. Quiet typography uses the system sans and
-mono stacks when there is no app-wide or subtree family input. The
-existing per-role family tokens still serve the component typography
-treatment.
+portal host or an ancestor.
+
+The default typography treatment uses the existing per-role tokens such as
+`--poodle-typography-label-family`. In these six components, Quiet reads the
+shared sans or mono override first and then its system stack, ahead of the
+existing per-role token. A component's font-family recipe takes precedence
+where one is available.
 
 ### Themes
 

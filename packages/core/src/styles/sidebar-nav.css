@@ -177,7 +177,7 @@
 
   .poodle-sidebar-nav__item--active {
     color: var(--poodle-recipe-sidebar-nav-item--active-text, var(--poodle-style-selection-text, var(--poodle-color-text-primary)));
-    font-weight: var(--poodle-recipe-sidebar-nav-item-font-weight, 600);
+    font-weight: var(--poodle-recipe-sidebar-nav-item--active-font-weight, 600);
     background: var(--poodle-recipe-sidebar-nav-item--active-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)));
     /* The inset ring also draws the left edge that border-left-color marks: a
        doubled edge, kept for the redesign to remove. It reads the item fill, so

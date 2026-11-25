@@ -1,7 +1,7 @@
 {
   "summary": {
     "components": 150,
-    "recipeHooks": 1281,
+    "recipeHooks": 1282,
     "hookCandidates": 9,
     "metricVariables": 452
   },
@@ -2147,6 +2147,7 @@
         "--poodle-recipe-sidebar-nav-hover-item-fill",
         "--poodle-recipe-sidebar-nav-hover-item-text",
         "--poodle-recipe-sidebar-nav-item--active-fill",
+        "--poodle-recipe-sidebar-nav-item--active-font-weight",
         "--poodle-recipe-sidebar-nav-item--active-shadow",
         "--poodle-recipe-sidebar-nav-item--active-text",
         "--poodle-recipe-sidebar-nav-item-fill",

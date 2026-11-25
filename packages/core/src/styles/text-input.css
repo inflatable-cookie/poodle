@@ -242,15 +242,22 @@
     color: var(--poodle-color-status-danger);
   }
 
+  /* Let either shorthand override the caption longhands without requiring
+     consumers to define the legacy token. */
+  @layer poodle-text-input-count {
+    .poodle-text-input__char-count {
+      font-family: var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, inherit));
+      font-size: var(--poodle-style-typography-caption-size, inherit);
+      line-height: var(--poodle-style-typography-caption-lineHeight, inherit);
+      font-weight: var(--poodle-style-typography-caption-weight, inherit);
+    }
+  }
+
   .poodle-text-input__char-count {
     position: absolute;
     inset-inline-end: 0.5rem;
     inset-block-end: 0.375rem;
-    font: var(--poodle-recipe-text-input-char-count-font,
-      var(--poodle-typography-code-xs,
-        var(--poodle-style-typography-caption-weight)
-        var(--poodle-style-typography-caption-size)/var(--poodle-style-typography-caption-lineHeight)
-        var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-body-family)))));
+    font: var(--poodle-recipe-text-input-char-count-font, var(--poodle-typography-code-xs, revert-layer));
     color: var(--poodle-color-text-muted);
     pointer-events: none;
     font-variant-numeric: var(--poodle-style-typography-numeric, inherit);
