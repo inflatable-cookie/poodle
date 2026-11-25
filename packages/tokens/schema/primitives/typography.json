@@ -25,6 +25,16 @@
           "$value": "600"
         }
       },
+      "letterSpacing": {
+        "subtle": {
+          "$type": "dimension",
+          "$value": "0.01em"
+        },
+        "wide": {
+          "$type": "dimension",
+          "$value": "0.04em"
+        }
+      },
       "size": {
         "xs": {
           "$type": "dimension",

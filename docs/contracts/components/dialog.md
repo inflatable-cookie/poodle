@@ -1,7 +1,7 @@
 # Dialog
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-11-25
 
 ## 1. Purpose
 
@@ -301,7 +301,7 @@ Two rules bound that deferral, and both are required behaviour:
 | `max-height` | `min(80vh, 42rem)` |
 | `overflow` | `auto` |
 | `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent)` |
+| `border` | `var(--poodle-border-width-default) solid color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent)` |
 | `border-radius` | `var(--poodle-radius-surface)` |
 | `background` | `var(--poodle-recipe-dialog-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))` |
 | `--poodle-surface` | `var(--poodle-recipe-dialog-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))` |

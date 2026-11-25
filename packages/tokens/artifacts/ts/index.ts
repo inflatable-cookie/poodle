@@ -108,6 +108,11 @@ export const tokens = {
         "lg": "0 1.5rem 3.75rem rgba(11, 15, 20, 0.32)"
       }
     },
+    "focus": {
+      "outline": {
+        "offset": "0.125rem"
+      }
+    },
     "icon": {
       "size": {
         "xs": "0.625rem",
@@ -165,6 +170,10 @@ export const tokens = {
           "regular": "400",
           "medium": "500",
           "semibold": "600"
+        },
+        "letterSpacing": {
+          "subtle": "0.01em",
+          "wide": "0.04em"
         },
         "size": {
           "xs": "0.6875rem",
@@ -242,6 +251,11 @@ export const tokens = {
       "surface": "0 0.25rem 0.75rem rgba(17, 22, 29, 0.08)",
       "overlay": "0 0.75rem 2rem rgba(17, 22, 29, 0.16)",
       "dialog": "0 1.5rem 3.75rem rgba(11, 15, 20, 0.32)"
+    },
+    "focus": {
+      "outline": {
+        "offset": "0.125rem"
+      }
     },
     "icon": {
       "size": {
@@ -364,7 +378,8 @@ export const tokens = {
         "family": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
         "size": "0.8125rem",
         "lineHeight": "1rem",
-        "weight": "500"
+        "weight": "500",
+        "letterSpacing": "0.01em"
       },
       "counter": {
         "size": "0.75rem"
@@ -374,6 +389,9 @@ export const tokens = {
         "size": "0.6875rem",
         "lineHeight": "1rem",
         "weight": "500"
+      },
+      "overline": {
+        "letterSpacing": "0.04em"
       },
       "heading": {
         "family": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
@@ -459,6 +477,7 @@ export const tokenPaths = [
   "primitives.elevation.shadow.sm",
   "primitives.elevation.shadow.md",
   "primitives.elevation.shadow.lg",
+  "primitives.focus.outline.offset",
   "primitives.icon.size.xs",
   "primitives.icon.size.sm",
   "primitives.icon.size.md",
@@ -487,6 +506,8 @@ export const tokenPaths = [
   "primitives.typography.font.weight.regular",
   "primitives.typography.font.weight.medium",
   "primitives.typography.font.weight.semibold",
+  "primitives.typography.font.letterSpacing.subtle",
+  "primitives.typography.font.letterSpacing.wide",
   "primitives.typography.font.size.xs",
   "primitives.typography.font.size.sm",
   "primitives.typography.font.size.md",
@@ -532,6 +553,7 @@ export const tokenPaths = [
   "elevation.surface",
   "elevation.overlay",
   "elevation.dialog",
+  "focus.outline.offset",
   "icon.size.default",
   "icon.stroke.default",
   "motion.duration.interaction",
@@ -588,11 +610,13 @@ export const tokenPaths = [
   "typography.label.size",
   "typography.label.lineHeight",
   "typography.label.weight",
+  "typography.label.letterSpacing",
   "typography.counter.size",
   "typography.caption.family",
   "typography.caption.size",
   "typography.caption.lineHeight",
   "typography.caption.weight",
+  "typography.overline.letterSpacing",
   "typography.heading.family",
   "typography.heading.size",
   "typography.heading.lineHeight",
@@ -642,6 +666,7 @@ export const cssVars = {
   "elevation.surface": "--poodle-elevation-surface",
   "elevation.overlay": "--poodle-elevation-overlay",
   "elevation.dialog": "--poodle-elevation-dialog",
+  "focus.outline.offset": "--poodle-focus-outline-offset",
   "icon.size.default": "--poodle-icon-size-default",
   "icon.stroke.default": "--poodle-icon-stroke-default",
   "motion.duration.interaction": "--poodle-motion-duration-interaction",
@@ -698,11 +723,13 @@ export const cssVars = {
   "typography.label.size": "--poodle-typography-label-size",
   "typography.label.lineHeight": "--poodle-typography-label-lineHeight",
   "typography.label.weight": "--poodle-typography-label-weight",
+  "typography.label.letterSpacing": "--poodle-typography-label-letterSpacing",
   "typography.counter.size": "--poodle-typography-counter-size",
   "typography.caption.family": "--poodle-typography-caption-family",
   "typography.caption.size": "--poodle-typography-caption-size",
   "typography.caption.lineHeight": "--poodle-typography-caption-lineHeight",
   "typography.caption.weight": "--poodle-typography-caption-weight",
+  "typography.overline.letterSpacing": "--poodle-typography-overline-letterSpacing",
   "typography.heading.family": "--poodle-typography-heading-family",
   "typography.heading.size": "--poodle-typography-heading-size",
   "typography.heading.lineHeight": "--poodle-typography-heading-lineHeight",

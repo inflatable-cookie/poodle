@@ -1,7 +1,7 @@
 # Card
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-11-25
 
 ## 1. Purpose
 
@@ -151,7 +151,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | `align-content` | `start` |
 | `gap` | `var(--poodle-card-gap)` |
 | `padding` | `var(--poodle-card-padding-block) var(--poodle-card-padding-inline)` |
-| `border` | `0.0625rem solid var(--poodle-card-border)` |
+| `border` | `var(--poodle-border-width-default) solid var(--poodle-card-border)` |
 | `border-radius` | `var(--poodle-card-radius)` |
 | `background` | `var(--poodle-card-fill)` |
 | `--poodle-surface` | `var(--poodle-card-fill)` |
@@ -239,7 +239,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | Property | Value |
 |----------|-------|
 | `padding-top` | `var(--poodle-card-footer-padding-top)` |
-| `border-top` | `0.0625rem solid var(--poodle-card-divider)` |
+| `border-top` | `var(--poodle-border-width-default) solid var(--poodle-card-divider)` |
 
 ## 9. Svelte Notes
 

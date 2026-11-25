@@ -1,0 +1,10 @@
+{
+  "focus": {
+    "outline": {
+      "offset": {
+        "$type": "dimension",
+        "$value": "0.125rem"
+      }
+    }
+  }
+}

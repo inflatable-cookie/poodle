@@ -1,7 +1,7 @@
 # Text Input
 
 Status: detailed contract
-Updated: 2026-10-06
+Updated: 2026-11-25
 
 ## 1. Purpose
 
@@ -415,7 +415,7 @@ cannot drift between targets.
 | `gap` | `var(--poodle-space-inline-sm)` |
 | `min-height` | `var(--poodle-size-control-height)` |
 | `padding` | `0 var(--poodle-space-control-x)` |
-| `border` | `0.0625rem solid var(--poodle-text-input-border)` |
+| `border` | `var(--poodle-border-width-default) solid var(--poodle-text-input-border)` |
 | `border-radius` | `var(--poodle-text-input-radius)` |
 | `background` | `var(--poodle-text-input-fill)` |
 | `color` | `var(--poodle-color-text-primary)` |
@@ -539,13 +539,13 @@ Affixes use a single flat `padding-inline: 0.625rem` (no separate margin); horiz
 
 | Property | Value |
 |----------|-------|
-| `border-right` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border-right` | `var(--poodle-border-width-default) solid var(--poodle-color-border-default)` |
 
 ### Suffix `.text-input__affix--suffix`
 
 | Property | Value |
 |----------|-------|
-| `border-left` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border-left` | `var(--poodle-border-width-default) solid var(--poodle-color-border-default)` |
 
 ### Character Count `.text-input__char-count`
 
@@ -649,7 +649,7 @@ The input control reserves inline padding for leading/trailing adornments so tex
 - [ ] validation emphasis uses the same semantic color roles (danger, success, accent)
 - [ ] built-in validation indicator semantics match (spinner, success icon, danger icon)
 - [ ] focus treatment matches (border, background, box-shadow transitions)
-- [ ] affix separator border uses the same color (`border-default` solid, `0.0625rem`)
+- [ ] affix separator border uses the same color (`border-default` solid, `border-width-default`)
 - [ ] character count typography matches (`typography-code-xs` shorthand, color `text-muted`)
 - [ ] character count over-limit color matches (status-danger)
 - [ ] disabled opacity matches (state-opacity-disabled)

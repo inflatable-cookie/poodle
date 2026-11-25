@@ -34,6 +34,10 @@
       "weight": {
         "$type": "fontWeight",
         "$value": "{primitives.typography.font.weight.medium}"
+      },
+      "letterSpacing": {
+        "$type": "dimension",
+        "$value": "{primitives.typography.font.letterSpacing.subtle}"
       }
     },
     "counter": {
@@ -58,6 +62,12 @@
       "weight": {
         "$type": "fontWeight",
         "$value": "{primitives.typography.font.weight.medium}"
+      }
+    },
+    "overline": {
+      "letterSpacing": {
+        "$type": "dimension",
+        "$value": "{primitives.typography.font.letterSpacing.wide}"
       }
     },
     "heading": {
