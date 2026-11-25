@@ -163,9 +163,10 @@
     color: var(--poodle-recipe-sidebar-nav-item--active-text, var(--poodle-style-selection-text, var(--poodle-color-text-primary)));
     font-weight: 600;
     background: var(--poodle-recipe-sidebar-nav-item--active-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)));
-    /* The inset ring also draws the left edge that border-left-color marks. Both
-       stay under the default style; the doubled edge is noise for the redesign. */
-    box-shadow: var(--poodle-recipe-sidebar-nav-item--active-shadow, inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent));
+    /* The inset ring also draws the left edge that border-left-color marks: a
+       doubled edge, kept for the redesign to remove. It reads the item fill, so
+       it goes neutral with the fill under a neutral selection style. */
+    box-shadow: var(--poodle-recipe-sidebar-nav-item--active-shadow, inset 0 0 0 0.0625rem var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent)));
   }
 
   .poodle-sidebar-nav__item--active {

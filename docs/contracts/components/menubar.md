@@ -247,7 +247,25 @@ trigger focus.
 | `font-weight` | `var(--poodle-typography-label-weight)` |
 | `line-height` | `1` |
 
-### Trigger — Open / Hover / Focus
+### Trigger — Open
+
+The open trigger is the active item. Its fill reads the selection item fill,
+with the hand-mixed 14% as the fallback that keeps `accent-outline` unchanged.
+
+| Property | Value |
+|----------|-------|
+| `background` | `var(--poodle-recipe-menubar-open-hover-focus-trigger-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)))` |
+| `outline` | `none` |
+
+### Trigger — Open, hovered
+
+An open trigger that is hovered keeps the selection fill. This rule outranks the generic hover rule.
+
+| Property | Value |
+|----------|-------|
+| `background` | `var(--poodle-recipe-menubar-open-hover-focus-trigger-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)))` |
+
+### Trigger — Hover / Focus
 
 | Property | Value |
 |----------|-------|

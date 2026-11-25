@@ -35,6 +35,13 @@
     background: var(--poodle-recipe-navigation-menu-open-trigger-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)));
   }
 
+  /* A hovered open trigger keeps the selection fill, not the generic hover tint.
+     Excludes activeFill="none" (its own rule holds the idle fill) and
+     activeFill="solid" (its own rule holds the solid fill). */
+  .poodle-navigation-menu:not([data-active-fill="none"]):not([data-active-fill="solid"]) .poodle-navigation-menu__trigger[data-open="true"]:hover:not(:disabled) {
+    background: var(--poodle-recipe-navigation-menu-hover-focus-trigger-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
+  }
+
   .poodle-navigation-menu__trigger:hover:not(:disabled),
   .poodle-navigation-menu__trigger:focus-visible {
     background: var(--poodle-recipe-navigation-menu-hover-focus-trigger-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
