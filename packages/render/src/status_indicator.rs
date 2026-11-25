@@ -114,8 +114,7 @@ mod tests {
 
     #[test]
     fn composes_icon_and_text_with_exact_status_tokens() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let spec = StatusIndicatorSpec::new()
             .with_status(StatusTone::Success)

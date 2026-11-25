@@ -957,9 +957,7 @@ mod tests {
     use super::*;
     use poodle_node::NodeKind;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn find_scrub(node: &Node) -> Option<&Node> {
         node.find(&|n| n.interaction.on_scrub.is_some())

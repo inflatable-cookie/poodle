@@ -13,8 +13,3 @@
 # the design system (interactive; covers poodle.design-system,
 # poodle.gpui-target).
 "demo:gpui" = [{ task = "gpui:preview" }]
-
-# Jetstream Game Engine Preview: launches the Jetstream game engine preview
-# application for the design system (interactive; covers poodle.design-system,
-# poodle.jetstream-target).
-"demo:jetstream" = [{ task = "jetstream:preview" }]

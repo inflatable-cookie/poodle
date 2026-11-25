@@ -37,11 +37,7 @@ exclude = [
   "**/contracts/components/src/model_picker.rs", "**/contracts/components/src/filter_builder.rs",
   "**/contracts/components/src/agent_chat_input.rs", "**/contracts/components/src/log_list.rs",
   "**/contracts/headless/src/text_input.rs", "**/contracts/headless/tests/conformance.rs",
-  # Legacy direct-adapter catalogues. Each file is a flat set of small,
-  # backend-owned RenderComponent mappings or one token theme implementation;
-  # the manifest drift gate checks their claimed surface independently.
-  "**/jetstream/adapter/src/render_composites.rs",
-  "**/jetstream/adapter/src/render_feedback.rs",
+  # Jetstream theme and token resolution.
   "**/jetstream/adapter/src/theme.rs",
   # Type-system aggregation files: interdependent type definitions with no
   # runtime logic; splitting forces arbitrary cross-file type imports for no

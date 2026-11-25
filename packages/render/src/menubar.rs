@@ -364,9 +364,7 @@ pub fn menubar(spec: &MenubarSpec, ctx: &RenderContext<'_>, handlers: MenubarHan
 mod tests {
     use super::*;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn open_spec() -> MenubarSpec {
         MenubarSpec::new(vec![poodle_specs::MenubarEntry::new(

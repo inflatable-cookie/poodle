@@ -234,8 +234,7 @@ mod tests {
 
     #[test]
     fn ready_pager_preserves_full_width_summary_and_end_aligned_controls() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let spec = ListContainerSpec::new("Items")
             .with_total_pages(3)
@@ -275,8 +274,7 @@ mod tests {
 
     #[test]
     fn accessible_name_prefers_aria_label_and_empty_variant_reaches_empty_state() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let labelled = list_container(
             &ListContainerSpec::new("Projects").with_aria_label("Project catalogue"),

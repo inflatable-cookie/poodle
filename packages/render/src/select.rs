@@ -2,11 +2,8 @@
 //!
 //! Contract: `docs/contracts/components/select.md`
 //! Reference: `packages/svelte/components/src/Select.svelte`
-//! Ported from: `packages/jetstream/components/src/select.rs`, whose structure
-//! this transcribes exactly — same anatomy, same token paths, same state
-//! recipes — so a backend interpreting these nodes reproduces that tier's
-//! output verbatim. That is the parity gate, and it is asserted by diffing
-//! draw commands in the Jetstream adapter's suite, not by inspection here.
+//! The shared node tree carries the anatomy, token paths, and state recipes
+//! used by GPUI and Jetstream.
 //!
 //! Closed state: trigger with chevron. Open state: relative wrapper holding
 //! the trigger plus an absolutely-positioned overlay panel of options.
@@ -1033,12 +1030,8 @@ fn parse_css_length_to_px(value: &str) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::test_theme as theme;
     use poodle_specs::ChoiceOption;
-
-    /// The real token resolver over the ECLIPSE theme. Pure — no backend.
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
 
     fn fruit_options() -> Vec<ChoiceOption> {
         vec![

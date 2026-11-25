@@ -156,9 +156,7 @@ mod tests {
     use super::*;
     use std::sync::Mutex;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     #[test]
     fn open_keeps_the_default_trigger_mounted_and_live() {

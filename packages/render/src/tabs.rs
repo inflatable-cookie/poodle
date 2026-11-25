@@ -1050,14 +1050,10 @@ fn render_block(spec: &TabsSpec, ctx: &RenderContext<'_>, handlers: &TabsHandler
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::test_theme as theme;
     use poodle_adapter::ThemeProvider;
     use poodle_specs::{ActiveEdge, ActiveFill, Orientation, TabDefinition, TabVariant};
     use std::sync::Mutex;
-
-    /// The real token resolver over the ECLIPSE theme. Pure — no backend.
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
 
     /// The tab element for `value` — `apply_drag_state` tags it `tabs:{value}`.
     fn tab_of<'a>(root: &'a Node, value: &str) -> &'a Node {

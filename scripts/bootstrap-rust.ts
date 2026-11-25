@@ -1,12 +1,12 @@
 /**
  * Fetch dependencies for every Rust crate in the repo.
  *
- * There is deliberately no root Cargo workspace: the jetstream crates
- * path-depend on the sibling `jetstream` repo (`../jetstream/crates/*`),
+ * There is deliberately no root Cargo workspace: the Jetstream preview
+ * path-depends on the sibling `jetstream` repo (`../jetstream/crates/*`),
  * and a workspace would make every cargo invocation — including
  * contracts-only and web checkouts — fail whenever that repo is absent.
  * Each crate stands alone, so this fetches each manifest in turn instead,
- * and skips the jetstream tree with a note when the engine is not checked
+ * and skips the preview with a note when the engine is not checked
  * out rather than failing the bootstrap.
  */
 import { existsSync, readdirSync, statSync } from "node:fs";
@@ -14,6 +14,7 @@ import { join, resolve } from "node:path";
 
 const ROOT = resolve(new URL("..", import.meta.url).pathname);
 const ENGINE = resolve(ROOT, "../jetstream");
+const JETSTREAM_PREVIEW = join(ROOT, "packages/jetstream/preview/Cargo.toml");
 
 function manifests(dir: string): string[] {
   return readdirSync(dir).flatMap((entry) => {
@@ -29,7 +30,7 @@ let fetched = 0;
 let skipped = 0;
 
 for (const manifest of manifests(join(ROOT, "packages")).sort()) {
-  if (manifest.includes("/jetstream/") && !engineAvailable) {
+  if (manifest === JETSTREAM_PREVIEW && !engineAvailable) {
     console.log(`skip  ${manifest} (sibling jetstream repo not checked out)`);
     skipped += 1;
     continue;

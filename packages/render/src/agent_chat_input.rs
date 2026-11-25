@@ -426,9 +426,7 @@ mod tests {
     use poodle_node::{NodeKind, NodeRole};
     use poodle_specs::{AgentChatAttachment, ControlDensity, ControlSize};
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn has_text(node: &Node, expected: &str) -> bool {
         node.find(&|child| matches!(&child.kind, NodeKind::Text { content } if content == expected))

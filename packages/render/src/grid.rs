@@ -97,8 +97,7 @@ mod tests {
 
     #[test]
     fn fractional_tracks_keep_their_declared_weight() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let node = grid(
             &GridSpec::new().with_columns("1fr 2fr"),

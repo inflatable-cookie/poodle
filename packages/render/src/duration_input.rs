@@ -382,9 +382,7 @@ mod tests {
 
     use super::*;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     type Reports = std::sync::Arc<std::sync::Mutex<Vec<(u32, u32, u32, u64)>>>;
 

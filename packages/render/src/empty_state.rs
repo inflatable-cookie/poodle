@@ -288,8 +288,7 @@ mod tests {
 
     #[test]
     fn compact_and_default_sizes_use_distinct_title_and_icon_geometry() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let default = empty_state(
             &EmptyStateSpec::new("No projects yet"),

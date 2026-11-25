@@ -46,8 +46,7 @@ mod tests {
 
     #[test]
     fn emits_the_old_gpui_typography_channels() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let spec = EyebrowSpec::new().with_content("Section");
         let node = eyebrow(&spec, &ctx);

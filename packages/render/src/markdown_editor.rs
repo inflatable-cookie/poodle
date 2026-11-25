@@ -429,9 +429,7 @@ mod tests {
     use super::*;
     use crate::context::RenderContext;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn preview_pane(node: &Node) -> &Node {
         let body = node.children.get(1).expect("toolbar then body");

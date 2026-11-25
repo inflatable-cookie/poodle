@@ -189,9 +189,7 @@ pub fn tool_call(spec: &ToolCallSpec, ctx: &RenderContext<'_>, handlers: ToolCal
 mod tests {
     use super::*;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn spec() -> ToolCallSpec {
         ToolCallSpec::new("with-output", "Ran command").with_output("ok")

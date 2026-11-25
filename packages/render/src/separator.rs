@@ -56,8 +56,7 @@ mod tests {
 
     #[test]
     fn exposes_separator_semantics_only_when_requested() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
 
         assert_eq!(separator(&SeparatorSpec::new(), &ctx).a11y.role, None);

@@ -192,9 +192,7 @@ mod tests {
     use poodle_specs::CheckboxSpec;
     use std::sync::{Arc, Mutex};
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     #[test]
     fn mixed_resolves_to_checked_and_projects_mixed_until_then() {

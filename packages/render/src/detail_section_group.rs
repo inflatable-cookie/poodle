@@ -88,8 +88,7 @@ mod tests {
 
     #[test]
     fn max_columns_seeds_each_grid_cell_with_the_old_percentage_width() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let spec = DetailSectionGroupSpec::new().with_max_columns(2);
         let node = detail_section_group(

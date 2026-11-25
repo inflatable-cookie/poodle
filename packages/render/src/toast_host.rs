@@ -121,8 +121,7 @@ mod tests {
 
     #[test]
     fn host_forwards_placement_presentation_label_and_scope_to_stack() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let host = ToastHostSpec::new()
             .with_placement(ToastHostPlacement::TopStart)

@@ -902,9 +902,7 @@ mod tests {
     use poodle_headless::model_connection::model_catalogue_fixtures;
     use std::sync::Mutex;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn spec() -> ModelCatalogueEditorSpec {
         ModelCatalogueEditorSpec::new().with_items(model_catalogue_fixtures())

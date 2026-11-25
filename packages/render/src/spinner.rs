@@ -226,8 +226,7 @@ mod tests {
 
     #[test]
     fn ring_uses_the_reference_svg_asset_and_rotation() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let base = RenderContext::new(&theme);
         let ctx = base.with_first_frame_committed(true);
         let node = spinner(&SpinnerSpec::new(), &ctx);
@@ -245,8 +244,7 @@ mod tests {
 
     #[test]
     fn frozen_and_reduced_schedule_no_ring_clock() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let base = RenderContext::new(&theme);
         let ctx = base.with_first_frame_committed(true);
         let frozen = ctx.with_motion_policy(poodle_headless::motion_policy::MotionPolicy::Frozen);
@@ -263,8 +261,7 @@ mod tests {
 
     #[test]
     fn initial_construction_schedules_no_ring_clock() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         assert!(spinner(&SpinnerSpec::new(), &ctx).style.animation.is_none());
     }

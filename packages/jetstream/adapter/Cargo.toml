@@ -4,7 +4,7 @@ version = "0.4.15"
 edition = "2021"
 license = "MIT"
 rust-version = "1.95"
-description = "Jetstream rendering adapter for Poodle — maps shared contract specs and resolved styles to Jetstream UiTree nodes."
+description = "Poodle theme and accessibility mappings for the Jetstream node backend."
 repository = "https://github.com/inflatable-cookie/poodle"
 homepage = "https://github.com/inflatable-cookie/poodle"
 readme = "README.md"
@@ -14,15 +14,9 @@ publish = false
 [dependencies]
 poodle-adapter = { version = "0.4.15", path = "../../contracts/adapter" }
 poodle-headless = { version = "0.4.15", path = "../../contracts/headless" }
-poodle-events = { version = "0.4.15", path = "../../contracts/events" }
-poodle-layout = { version = "0.4.15", path = "../../contracts/layout" }
-poodle-specs = { version = "0.4.15", path = "../../contracts/components" }
-poodle-style = { version = "0.4.15", path = "../../contracts/style" }
 poodle-tokens = { version = "0.4.15", path = "../../contracts/tokens" }
 poodle-node = { version = "0.4.15", path = "../../contracts/node" }
-# These types cross the Jetstream adapter boundary and must match the sibling
-# Jetstream workspace. Upgrade them in both repositories as one migration.
-taffy = "0.9"
+# Linear colors cross the preview's Jetstream boundary as Vec4.
 glam = "0.29"
 
 [package.metadata.poodle]
