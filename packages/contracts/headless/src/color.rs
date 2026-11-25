@@ -252,7 +252,7 @@ pub fn hsl_to_hsv(h: f64, s: f64, l: f64) -> Hsv {
 // that math numerically so the Rust runtimes can render the same ramp.
 // Constants are Björn Ottosson's OKLab matrices (the ones browsers use).
 
-fn srgb_to_linear(c: f64) -> f64 {
+pub(crate) fn srgb_to_linear(c: f64) -> f64 {
     if c <= 0.04045 {
         c / 12.92
     } else {
@@ -260,7 +260,7 @@ fn srgb_to_linear(c: f64) -> f64 {
     }
 }
 
-fn linear_to_srgb(c: f64) -> f64 {
+pub(crate) fn linear_to_srgb(c: f64) -> f64 {
     if c <= 0.0031308 {
         12.92 * c
     } else {
@@ -281,16 +281,21 @@ pub fn srgb_to_oklab(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
     )
 }
 
-/// OKLab (L, a, b) → sRGB (0–1 channels, clamped).
-pub fn oklab_to_srgb(lab_l: f64, lab_a: f64, lab_b: f64) -> (f64, f64, f64) {
+pub(crate) fn oklab_to_linear_srgb(lab_l: f64, lab_a: f64, lab_b: f64) -> [f64; 3] {
     let l = (lab_l + 0.3963377774 * lab_a + 0.2158037573 * lab_b).powi(3);
     let m = (lab_l - 0.1055613458 * lab_a - 0.0638541728 * lab_b).powi(3);
     let s = (lab_l - 0.0894841775 * lab_a - 1.2914855480 * lab_b).powi(3);
     let r = 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
     let g = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
     let b = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s;
-    let clamp = |c: f64| linear_to_srgb(c.clamp(0.0, 1.0)).clamp(0.0, 1.0);
-    (clamp(r), clamp(g), clamp(b))
+    [r, g, b]
+}
+
+/// OKLab (L, a, b) → sRGB (0–1 channels, clamped).
+pub fn oklab_to_srgb(lab_l: f64, lab_a: f64, lab_b: f64) -> (f64, f64, f64) {
+    let [r, g, b] = oklab_to_linear_srgb(lab_l, lab_a, lab_b)
+        .map(|c| linear_to_srgb(c.clamp(0.0, 1.0)).clamp(0.0, 1.0));
+    (r, g, b)
 }
 
 /// OKLab lightness of an sRGB color (0–1 channels).
