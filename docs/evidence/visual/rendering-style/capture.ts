@@ -18,7 +18,7 @@ const matrices = {
     ["default", darkThemes, cohort],
     ["default", iceberg, icebergSpecimens],
   ],
-  treatments: [
+  variants: [
     ["filled", ["eclipse"], cohort.slice(0, 3)],
     ["ghost", ["eclipse"], cohort.slice(0, 3)],
     ["elevation", ["eclipse"], cohort.slice(3)],
@@ -84,8 +84,8 @@ function countPixelChanges(before: PNG, after: PNG): number {
 }
 
 const [phase, output] = process.argv.slice(2);
-if ((phase !== "baseline" && phase !== "compare" && phase !== "treatments") || !output) {
-  throw new Error("Usage: bun capture.ts baseline|compare|treatments OUTPUT_DIRECTORY");
+if ((phase !== "baseline" && phase !== "compare" && phase !== "variants") || !output) {
+  throw new Error("Usage: bun capture.ts baseline|compare|variants OUTPUT_DIRECTORY");
 }
 
 const previews = await startPreviews();
