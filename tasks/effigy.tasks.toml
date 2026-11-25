@@ -291,7 +291,7 @@
 # validation narrow instead of running the full core unit suite.
 "test:core-listbox" = "bun test --timeout 120000 packages/core/test/listbox.test.ts"
 "theme-resolver:vectors" = "bun packages/core/test/generate-theme-vectors.ts"
-"test:core-theme-resolver" = "bun test packages/core/test/theme-resolver.test.ts"
+"test:core-theme-resolver" = "bun test packages/core/test/theme-resolver.test.ts packages/core/test/theme-css.test.ts"
 "test:core-icon-geometry-realize" = [
   { run = "bun test --timeout 120000 packages/core/test/icon-geometry-realize.test.ts" },
   { run = "bun test --timeout 120000 --test-name-pattern 'geometry realization support is exported for sibling test hosts' scripts/web-distribution/core-build.test.ts" },

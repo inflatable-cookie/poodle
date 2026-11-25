@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { previewThemeCssProperties, resolveTheme } from "@inflatable-cookie/poodle-core";
   import {
     applyThemeAttributes,
     cssVars,
@@ -20,12 +21,14 @@
   import { onMount, setContext, tick } from "svelte";
 
   import DisplayControls from "./components/DisplayControls.svelte";
+  import LiveThemePanel from "./components/LiveThemePanel.svelte";
   import ComponentsSection from "./sections/ComponentsSection.svelte";
   import TokensSection from "./sections/TokensSection.svelte";
   import { parseRoute, type Route, type SectionId } from "./router";
   import { findComponent } from "./component-registry";
   import { specimenMap } from "./specimens/registry";
   import { SPECIMEN_CAPTURE_CONTEXT } from "./specimen-capture-context";
+  import { readLiveTheme, startLiveTheme, writeLiveTheme, type LiveThemeSettings } from "./live-theme";
   import { previewShell } from "./generated/preview-shell";
   import specimenCaptureFrame from "../../../preview-capture/specimen-frame.json";
 
@@ -51,6 +54,7 @@
 
   let appShell: HTMLElement | null = $state(null);
   let theme: ThemeName = $state("eclipse");
+  let liveTheme: LiveThemeSettings | null = $state(null);
   let style: StyleName = $state("default");
   let density: DensityName = $state("compact");
   let controlSize: ControlSizeName = $state("sm");
@@ -61,12 +65,19 @@
   );
   let captureMode = $state(startsInSpecimenCapture);
   let liveTokenValues: Partial<Record<SemanticTokenPath, string>> = $state({});
-  let appliedPreviewModeKey = "";
   let hasMounted = $state(false);
 
   let activeSection = $derived(route.section);
   let captureEntry = $derived(captureMode && route.component ? findComponent(route.component) : undefined);
   let captureSpecimen = $derived(captureEntry ? specimenMap[captureEntry.slug] ?? null : null);
+  const liveColors = $derived(liveTheme ? previewThemeCssProperties(resolveTheme(liveTheme).roles) : null);
+  const liveSwatch = $derived(liveColors ? {
+    canvas: liveColors["--poodle-color-background-canvas"],
+    surface: liveColors["--poodle-color-background-surface"],
+    accent: liveColors["--poodle-color-accent-base"],
+    text: liveColors["--poodle-color-text-primary"],
+    border: liveColors["--poodle-color-border-default"],
+  } : undefined);
   // ── Theme application ───────────────────────────────────────────────
 
   function readSemanticTokenValues(element: HTMLElement): Partial<Record<SemanticTokenPath, string>> {
@@ -77,22 +88,34 @@
     }, {});
   }
 
-  function refreshPreviewSurface(): void {
-    if (!appShell) return;
-    if (typeof document !== "undefined") {
-      applyThemeAttributes(document.documentElement, { theme, style, density, controlSize });
-    }
-    applyThemeAttributes(appShell, { theme, style, density, controlSize });
-    liveTokenValues = readSemanticTokenValues(appShell);
-    appliedPreviewModeKey = previewModeKey;
-  }
-
-  let previewModeKey = $derived(`${theme}:${style}:${density}:${controlSize}`);
   $effect(() => {
-    if (appShell && previewModeKey && previewModeKey !== appliedPreviewModeKey) {
-      refreshPreviewSurface();
+    if (!appShell || !hasMounted) return;
+    const root = document.documentElement;
+    const axes = { theme: liveTheme ? undefined : theme, style, density, controlSize };
+    applyThemeAttributes(root, axes);
+    applyThemeAttributes(appShell, axes);
+
+    const colors = liveColors;
+    if (liveTheme && colors) {
+      // Resolve aliases on html and keep the shell as the nearest theme root for portals.
+      if (root.dataset.theme !== "live") root.dataset.theme = "live";
+      if (appShell.dataset.theme !== "live") appShell.dataset.theme = "live";
+      root.style.colorScheme = liveTheme.scheme;
+      for (const [property, value] of Object.entries(colors)) root.style.setProperty(property, value);
     }
+    liveTokenValues = readSemanticTokenValues(appShell);
+
+    if (colors) return () => {
+      root.style.removeProperty("color-scheme");
+      for (const property of Object.keys(colors)) root.style.removeProperty(property);
+    };
   });
+
+  async function openLiveTheme(): Promise<void> {
+    liveTheme ??= startLiveTheme(theme);
+    await tick();
+    appShell?.querySelector<HTMLElement>("#live-theme-settings")?.focus();
+  }
 
   // ── Routing ─────────────────────────────────────────────────────────
 
@@ -104,6 +127,7 @@
 
     route = parseRoute(hash);
     captureMode = params.get("capture") === "specimen";
+    liveTheme = readLiveTheme(params);
 
     const paramTheme = params.get("theme");
     const paramStyle = params.get("style");
@@ -135,6 +159,7 @@
         controlSize,
       });
       if (captureMode) searchParams.set("capture", "specimen");
+      if (liveTheme) writeLiveTheme(searchParams, liveTheme);
       const hash = window.location.hash || "#components";
       const nextUrl = `${window.location.pathname}?${searchParams.toString()}${hash}`;
       const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
@@ -147,7 +172,6 @@
   onMount(() => {
     syncCurrentLocation();
     hasMounted = true;
-    refreshPreviewSurface();
 
     const originalHtmlOverflow = document.documentElement.style.overflow;
     const originalBodyOverflow = document.body.style.overflow;
@@ -194,7 +218,7 @@
         style:--specimen-capture-width={`${specimenCaptureFrame.logicalWidth}px`}
         style:--specimen-capture-height={`${specimenCaptureFrame.logicalHeight}px`}
         style:--specimen-capture-padding={`${specimenCaptureFrame.padding}px`}
-        style:--poodle-contrast={contrast === 0.5 ? undefined : contrast}
+        style:--poodle-contrast={liveTheme || contrast === 0.5 ? undefined : contrast}
         bind:this={appShell}
       >
         <IconProvider icons={iconNodes as unknown as IconSet}>
@@ -203,7 +227,7 @@
       </main>
     {/if}
   {:else}
-    <div class="poodle-app-shell" style:--poodle-contrast={contrast === 0.5 ? undefined : contrast} bind:this={appShell}>
+    <div class="poodle-app-shell" style:--poodle-contrast={liveTheme || contrast === 0.5 ? undefined : contrast} bind:this={appShell}>
       <header class="poodle-app-top-bar">
         <div class="poodle-app-top-bar__title">
           <strong>Poodle</strong>
@@ -217,7 +241,7 @@
           onValueChange={(value) => navigateToSection(value as SectionId)}
         />
         <div class="poodle-app-top-bar__pills">
-          <Pill>{theme}</Pill>
+          <Pill>{liveTheme ? "live" : theme}</Pill>
           <Pill>{density}</Pill>
           <Pill>{controlSize}</Pill>
         </div>
@@ -229,7 +253,12 @@
         {density}
         {controlSize}
         search={componentSearch}
-        onThemeChange={(value) => (theme = value as ThemeName)}
+        onThemeChange={(value) => {
+          theme = value as ThemeName;
+          liveTheme = null;
+        }}
+        {liveSwatch}
+        onLiveTheme={openLiveTheme}
         onStyleChange={(value) => { if (isStyleName(value)) style = value; }}
         onDensityChange={(value) => (density = value as DensityName)}
         onControlSizeChange={(value) => (controlSize = value as ControlSizeName)}
@@ -242,6 +271,10 @@
           }
         }}
       />
+
+      {#if liveTheme}
+        <LiveThemePanel settings={liveTheme} onChange={(settings) => (liveTheme = settings)} />
+      {/if}
 
       <main class="poodle-app-main">
         {#key `${theme}:${activeSection}`}

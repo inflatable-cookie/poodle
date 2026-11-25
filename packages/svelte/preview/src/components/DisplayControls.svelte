@@ -15,6 +15,7 @@
     styles,
     themeOptions,
     type StyleName,
+    type ThemeSwatch,
   } from "@inflatable-cookie/poodle-core/tokens";
   import { previewShell } from "../generated/preview-shell";
 
@@ -25,6 +26,8 @@
     controlSize,
     search = "",
     onThemeChange = () => {},
+    liveSwatch,
+    onLiveTheme,
     onStyleChange = () => {},
     onDensityChange = () => {},
     onControlSizeChange = () => {},
@@ -38,6 +41,8 @@
     controlSize: ControlSizeName;
     search?: string;
     onThemeChange?: (value: string) => void;
+    liveSwatch?: ThemeSwatch;
+    onLiveTheme?: () => void;
     onStyleChange?: (value: string) => void;
     onDensityChange?: (value: string) => void;
     onControlSizeChange?: (value: string) => void;
@@ -87,6 +92,14 @@
         (themeControl.values as readonly string[]).includes(option.value),
       )
     : [];
+  const liveThemeChoice = "live";
+  const currentTheme = $derived(themeList.find((option) => option.value === theme));
+  const themeChoices = $derived(onLiveTheme && currentTheme ? [...themeList, {
+    value: liveThemeChoice,
+    label: "Live theme",
+    description: "Edit the live theme settings",
+    swatch: liveSwatch ?? currentTheme.swatch,
+  }] : themeList);
   const densityOptions: ToggleGroupOption[] = densityControl
     ? densityControl.values
         .filter((name): name is DensityName => name in densityModes)
@@ -105,10 +118,10 @@
       <div class="poodle-display-controls__group">
         <Eyebrow>{themeControl.label}</Eyebrow>
         <ThemeSelect
-          themes={themeList}
-          value={theme}
+          themes={themeChoices}
+          value={liveSwatch ? liveThemeChoice : theme}
           ariaLabel={themeControl.label}
-          onChange={(value) => onThemeChange(value)}
+          onChange={(value) => value === liveThemeChoice ? onLiveTheme?.() : onThemeChange(value)}
         />
       </div>
     {/if}
@@ -142,7 +155,7 @@
       </div>
     {/if}
 
-    {#if contrastControl}
+    {#if contrastControl && !liveSwatch}
       <div class="poodle-display-controls__group">
         <Eyebrow>{contrastControl.label}</Eyebrow>
         <Slider
