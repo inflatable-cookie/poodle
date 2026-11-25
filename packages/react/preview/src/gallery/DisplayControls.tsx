@@ -8,7 +8,14 @@ import {
   UiPresentationProvider,
   type ToggleGroupOption,
 } from "@inflatable-cookie/poodle-react";
-import { themeOptions, densityModes, controlSizes, styles, type StyleName } from "@inflatable-cookie/poodle-core/tokens";
+import {
+  themeOptions,
+  densityModes,
+  controlSizes,
+  styles,
+  type StyleName,
+  type ThemeSwatch,
+} from "@inflatable-cookie/poodle-core/tokens";
 import { previewShell } from "../generated/preview-shell";
 
 export interface DisplayControlsProps {
@@ -21,6 +28,9 @@ export interface DisplayControlsProps {
   controlSize: ControlSizeName;
   search?: string;
   contrast?: number;
+  // Set while the live theme is applied; its swatch then shows the live colours.
+  liveSwatch?: ThemeSwatch;
+  onLiveTheme?: () => void;
   onThemeChange?: (value: string) => void;
   onStyleChange?: (value: string) => void;
   onDensityChange?: (value: string) => void;
@@ -54,6 +64,7 @@ const styleOptions = Object.keys(styles).map((name) => ({ value: name, label: na
 const themeList = themeControl
   ? themeCatalogue.filter((option) => (themeControl.values as readonly string[]).includes(option.value))
   : [];
+const liveThemeChoice = "live";
 const densityOptions: ToggleGroupOption[] = densityControl
   ? densityControl.values
       .filter((name): name is DensityName => name in densityModes)
@@ -72,6 +83,8 @@ export function DisplayControls({
   controlSize,
   search = "",
   contrast = 1,
+  liveSwatch,
+  onLiveTheme,
   onThemeChange = () => {},
   onStyleChange = () => {},
   onDensityChange = () => {},
@@ -79,6 +92,20 @@ export function DisplayControls({
   onSearchChange = () => {},
   onContrastChange = () => {},
 }: DisplayControlsProps) {
+  const currentTheme = themeList.find((option) => option.value === theme);
+  const themeChoices =
+    onLiveTheme && currentTheme
+      ? [
+          ...themeList,
+          {
+            value: liveThemeChoice,
+            label: "Live theme",
+            description: "Edit the live theme settings",
+            swatch: liveSwatch ?? currentTheme.swatch,
+          },
+        ]
+      : themeList;
+
   return (
     <UiPresentationProvider density={density} sizeScale={controlSize}>
       <div className="poodle-display-controls">
@@ -86,10 +113,10 @@ export function DisplayControls({
           <div className="poodle-display-controls__group">
             <Eyebrow>{themeControl.label}</Eyebrow>
             <ThemeSelect
-              value={theme}
-              themes={themeList}
+              value={liveSwatch ? liveThemeChoice : theme}
+              themes={themeChoices}
               ariaLabel={themeControl.label}
-              onChange={onThemeChange}
+              onChange={(value) => (value === liveThemeChoice ? onLiveTheme?.() : onThemeChange(value))}
             />
           </div>
         )}
@@ -123,7 +150,7 @@ export function DisplayControls({
           </div>
         )}
 
-        {contrastControl && (
+        {contrastControl && !liveSwatch && (
           <div className="poodle-display-controls__group">
             <Eyebrow>{contrastControl.label}</Eyebrow>
             <Slider
