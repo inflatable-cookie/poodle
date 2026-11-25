@@ -107,10 +107,10 @@ future admission with no placeholder or parity credit.
 The g14 attempt to bind the cohort through one generated portable interface,
 case corpus, normalized observation, and completion gate was rejected on cost
 and correctness evidence. Component contracts, shared substrate tests,
-runtime interaction tests, and explicit parity audits remain the active
-evidence until a replacement architecture is decided. See the rejected
-[009 Cross-Runtime Component Conformance](009-cross-runtime-component-conformance.md)
-record and `g14.008` verdict.
+runtime interaction tests, and explicit parity audits remain the component
+evidence. [Node backend conformance](009-cross-runtime-component-conformance.md)
+covers native interpretation of the node vocabulary and records the
+`g14.008` verdict.
 
 ## Web Architecture
 
