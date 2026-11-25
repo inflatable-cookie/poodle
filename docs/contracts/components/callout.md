@@ -179,8 +179,8 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 | Property | Value |
 |----------|-------|
-| `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
-| `--poodle-callout-border` | `color-mix(in srgb, var(--poodle-color-border-subtle) 88%, transparent)` |
+| `--poodle-callout-fill` | `var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent))` |
+| `--poodle-callout-border` | `var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 88%, transparent))` |
 | `display` | `grid` |
 | `grid-template-columns` | `minmax(0, 1fr) auto auto` |
 | `align-items` | `center` |
@@ -197,35 +197,35 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | Property | Value |
 |----------|-------|
 | `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 10%, var(--poodle-color-background-panel))` |
-| `--poodle-callout-border` | `color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 34%, var(--poodle-color-border-default))` |
+| `--poodle-callout-border` | `var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 34%, var(--poodle-color-border-default)))` |
 
 ### Root — tone: success
 
 | Property | Value |
 |----------|-------|
 | `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-status-success) 10%, var(--poodle-color-background-panel))` |
-| `--poodle-callout-border` | `color-mix(in srgb, var(--poodle-color-status-success) 34%, var(--poodle-color-border-default))` |
+| `--poodle-callout-border` | `var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-success) 34%, var(--poodle-color-border-default)))` |
 
 ### Root — tone: warning
 
 | Property | Value |
 |----------|-------|
 | `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-status-warning) 10%, var(--poodle-color-background-panel))` |
-| `--poodle-callout-border` | `color-mix(in srgb, var(--poodle-color-status-warning) 34%, var(--poodle-color-border-default))` |
+| `--poodle-callout-border` | `var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-warning) 34%, var(--poodle-color-border-default)))` |
 
 ### Root — tone: danger
 
 | Property | Value |
 |----------|-------|
 | `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-status-danger) 10%, var(--poodle-color-background-panel))` |
-| `--poodle-callout-border` | `color-mix(in srgb, var(--poodle-color-status-danger) 34%, var(--poodle-color-border-default))` |
+| `--poodle-callout-border` | `var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-danger) 34%, var(--poodle-color-border-default)))` |
 
 ### Root — tone: pending
 
 | Property | Value |
 |----------|-------|
 | `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-panel))` |
-| `--poodle-callout-border` | `color-mix(in srgb, var(--poodle-color-accent-base) 26%, var(--poodle-color-border-default))` |
+| `--poodle-callout-border` | `var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-accent-base) 26%, var(--poodle-color-border-default)))` |
 
 ### Root — `fill="solid"`
 
@@ -234,7 +234,7 @@ Tint recipes remain unchanged. For every non-neutral tone, solid resolves:
 | Property | Value |
 |----------|-------|
 | `--poodle-callout-fill` | the tint-border recipe: 34% tone base with `color.border.default`; pending uses 24% |
-| `--poodle-callout-border` | the same resolved colour as `--poodle-callout-fill` |
+| `--poodle-callout-border` | `var(--poodle-style-surface-border, var(--poodle-callout-fill))` — under a style that hides borders the fill is the one boundary |
 | foreground | `var(--poodle-color-text-primary)` |
 
 For `tone="neutral"`, solid mixes `color.text.secondary` and

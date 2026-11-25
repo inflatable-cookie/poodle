@@ -8,20 +8,20 @@
     box-sizing: border-box;
     min-width: 0;
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
-    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-picker-shell-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent));
+    background: var(--poodle-recipe-picker-shell-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)));
   }
 
   .poodle-picker-shell[data-variant="popover"] {
     width: 100%;
     max-width: min(32rem, calc(100vw - 2rem));
-    box-shadow: var(--poodle-recipe-picker-shell-popover-shadow, var(--poodle-elevation-overlay));
+    box-shadow: var(--poodle-recipe-picker-shell-popover-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay)));
   }
 
   .poodle-picker-shell[data-variant="modal"] {
-    box-shadow: var(--poodle-recipe-picker-shell-modal-shadow, var(--poodle-elevation-dialog));
-    background: var(--poodle-recipe-picker-shell-modal-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent));
+    box-shadow: var(--poodle-recipe-picker-shell-modal-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-dialog)));
+    background: var(--poodle-recipe-picker-shell-modal-fill, var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent))));
   }
 
   .poodle-picker-shell__header {
@@ -83,8 +83,11 @@
     gap: var(--poodle-space-stack-sm);
     justify-items: start;
     padding: calc(var(--poodle-space-panel-y) * 1.5) var(--poodle-space-panel-x);
-    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
     border-radius: var(--poodle-radius-surface);
+    /* The state block is a nested tone, one step below the shell. No surface
+       role supplies that step, so the fill stays literal while the border
+       follows the switch; under `quiet` the tone is what separates it. */
     background: var(--poodle-recipe-picker-shell-state-fill, color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent));
   }
 

@@ -193,10 +193,10 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | gap | `var(--poodle-space-stack-sm)` |
 | padding | `var(--poodle-space-panel-x)` |
 | padding-right | `calc(var(--poodle-space-panel-x) + 1.5rem)` |
-| border | `0.0625rem solid color-mix(in srgb, var(--poodle-toast-tone) 34%, var(--poodle-color-border-default))` |
+| border | `0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-toast-tone) 34%, var(--poodle-color-border-default)))` |
 | border-radius | `calc(var(--poodle-radius-surface) - 0.125rem)` |
-| background | `linear-gradient(90deg, color-mix(in srgb, var(--poodle-toast-tone) 12%, transparent), color-mix(in srgb, var(--poodle-color-background-elevated) 98%, transparent) 18%), color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent)` |
-| box-shadow | `var(--poodle-elevation-overlay)` |
+| background | `var(--poodle-recipe-toast-stack-fill, var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, linear-gradient(90deg, color-mix(in srgb, var(--poodle-toast-tone) 12%, transparent), color-mix(in srgb, var(--poodle-color-background-elevated) 98%, transparent) 18%), color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent))))` |
+| box-shadow | `var(--poodle-recipe-toast-stack-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay)))` |
 | position | `relative` |
 | overflow | `hidden` |
 

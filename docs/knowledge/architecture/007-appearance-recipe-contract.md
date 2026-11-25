@@ -66,6 +66,25 @@ keeps its own mix, so the default style stays pixel-identical while
 accent-coloured under every selection style; it is a doubled edge, listed for
 the redesign.
 
+The surface switch resolves a container's boundary through
+`--poodle-style-surface-border`, `-fill`, `-floatingFill` and `-shadow`:
+recipe hook, then style role, then the component's own mix. Card and Dialog
+took the chain earlier; this cohort is Popover, Tooltip, Drawer, HoverCard,
+CommandPalette, ToastStack, PickerShell, Surface, Callout and EmptyState.
+Floating containers read `-floatingFill`, then `-fill`, because they sit
+above the page: Popover, Tooltip, Drawer, HoverCard, CommandPalette, the
+toast body, PickerShell's popover and modal variants and Surface's elevated
+tone. Inline ones read `-fill` alone: Surface, Callout, EmptyState and the
+inline PickerShell. Under `tonal` each one drops border and shadow and
+separates by fill alone, so a toast keeps only its status bar and an empty
+state only its tone. Status and instance tones keep their colour in every
+style: Callout's tones and solid fills, EmptyState's search and first-run
+variants and Surface's canvas tone read the role for their border only, so
+the switch moves the boundary and not the meaning. A few values stay literal
+and are listed for the redesign: PickerShell's state block (a nested tone
+below the shell, which no role supplies) and the tinted icon circles in
+Callout and EmptyState, which are markup noise.
+
 ## Public Surface vs Internal Variables
 
 Two classes, machine-classified by
