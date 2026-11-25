@@ -166,9 +166,9 @@ When `stateTitle` is null, the component uses these defaults:
 |----------|-------|
 | position | `relative` |
 | overflow | `hidden` |
-| border | `0.0625rem solid var(--poodle-color-border-subtle)` |
+| border | `0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle))` |
 | border-radius | `calc(var(--poodle-radius-surface) - 0.125rem)` |
-| background | `radial-gradient(circle at top left, color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent), transparent 38%), color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
+| background | `var(--poodle-recipe-media-thumbnail-frame-fill, var(--poodle-style-surface-fill, radial-gradient(circle at top left, color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent), transparent 38%), color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)))` |
 
 ### Frame Media Children
 
@@ -219,7 +219,7 @@ When `stateTitle` is null, the component uses these defaults:
 | justify-items | `start` |
 | padding | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
 | text-align | `left` |
-| background | `linear-gradient(180deg, transparent, color-mix(in srgb, var(--poodle-color-background-panel) 46%, transparent)), color-mix(in srgb, var(--poodle-color-background-surface) 78%, transparent)` |
+| background | `var(--poodle-recipe-media-thumbnail-state-fill, var(--poodle-style-surface-fill, linear-gradient(180deg, transparent, color-mix(in srgb, var(--poodle-color-background-panel) 46%, transparent)), color-mix(in srgb, var(--poodle-color-background-surface) 78%, transparent)))` |
 | width | `100%` |
 | height | `100%` |
 
@@ -282,7 +282,7 @@ presentation.
 | padding | `0 0.625rem` |
 | border-radius | `var(--poodle-radius-control)` |
 | backdrop-filter | `blur(1rem)` |
-| background | `color-mix(in srgb, var(--poodle-color-background-surface) 74%, transparent)` |
+| background | `var(--poodle-recipe-media-thumbnail-badge-fill, var(--poodle-style-surface-floatingFill, color-mix(in srgb, var(--poodle-color-background-surface) 74%, transparent)))` |
 | color | `var(--poodle-color-text-primary)` |
 | font-size | `0.6875rem` |
 | font-weight | `600` |
@@ -303,7 +303,7 @@ presentation.
 | height | `2rem` |
 | border-radius | `var(--poodle-radius-control)` |
 | backdrop-filter | `blur(1rem)` |
-| background | `color-mix(in srgb, var(--poodle-color-background-elevated) 78%, transparent)` |
+| background | `var(--poodle-recipe-media-thumbnail-play-fill, var(--poodle-style-surface-floatingFill, color-mix(in srgb, var(--poodle-color-background-elevated) 78%, transparent)))` |
 | color | `var(--poodle-color-text-primary)` |
 | font-size | `0.9375rem` |
 

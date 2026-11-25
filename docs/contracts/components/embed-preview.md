@@ -199,7 +199,7 @@ None. EmbedPreview is a pure display component.
 |----------|-------|
 | position | `relative` |
 | width | `100%` |
-| background | `var(--poodle-color-background-panel, #1a1a1a)` |
+| background | `var(--poodle-recipe-embed-preview-container-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-panel, #1a1a1a)))` |
 
 Aspect ratio is applied via inline `style` attribute when
 `effectiveAspectRatio !== "auto"`.
@@ -251,7 +251,7 @@ Aspect ratio is applied via inline `style` attribute when
 | gap | `0.5rem` |
 | min-height | `8rem` |
 | padding | `1.5rem` |
-| background | `var(--poodle-color-background-panel, #1a1a1a)` |
+| background | `var(--poodle-recipe-embed-preview-empty-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-panel, #1a1a1a)))` |
 | border-radius | `var(--poodle-radius-surface, 0.5rem)` |
 
 ### Error/Empty Icons `.poodle-embed-preview__error svg`, `.poodle-embed-preview__empty svg`
@@ -287,7 +287,7 @@ Aspect ratio is applied via inline `style` attribute when
 | Property | Value |
 |----------|-------|
 | padding | `0.75rem 1rem` |
-| background | `var(--poodle-color-background-panel, #1a1a1a)` |
+| background | `var(--poodle-recipe-embed-preview-fallback-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-panel, #1a1a1a)))` |
 | border-radius | `var(--poodle-radius-surface, 0.5rem)` |
 
 ### Fallback Link `.poodle-embed-preview__fallback :global(.poodle-text-link)`

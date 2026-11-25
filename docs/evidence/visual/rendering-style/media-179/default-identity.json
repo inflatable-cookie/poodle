@@ -1,0 +1,7 @@
+{
+  "base": "412ed2523",
+  "compared": 16,
+  "identical": 14,
+  "differing": ["clay-embed-preview.png", "eclipse-embed-preview.png"],
+  "note": "embed-preview differs only inside the remote Vimeo iframe (y 687-1225 of 992x2192). Two after-runs of the same code also differ from each other in that box, so the mismatch is live iframe content, not CSS. Every other default-style pixel is byte-identical."
+}

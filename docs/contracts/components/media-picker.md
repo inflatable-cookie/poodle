@@ -197,9 +197,9 @@ Composed from `Dialog`, `Tabs`, `TextInput`, and `FileUpload` primitives. Wraps 
 | align-items | `center` |
 | gap | `0.25rem` |
 | padding | `0.375rem` (default) |
-| border | `0.0625rem solid transparent` |
+| border | `0.0625rem solid var(--poodle-style-control-border, transparent)` |
 | border-radius | `var(--poodle-radius-control, 0.375rem)` |
-| background | `transparent` |
+| background | `var(--poodle-recipe-media-picker-item-fill, var(--poodle-style-control-fill, transparent))` |
 | cursor | `pointer` |
 | transition | `border-color 0.1s, background 0.1s` |
 
@@ -208,9 +208,9 @@ Composed from `Dialog`, `Tabs`, `TextInput`, and `FileUpload` primitives. Wraps 
 | State | Property | Value |
 |-------|----------|-------|
 | `:hover` | border-color | `var(--poodle-color-border-focus, #888)` |
-| `:hover` | background | `var(--poodle-color-background-panel, #1a1a1a)` |
+| `:hover` | background | `var(--poodle-recipe-media-picker-hover-focus-item-fill, var(--poodle-style-control-fillHover, var(--poodle-color-background-panel, #1a1a1a)))` |
 | `:focus-visible` | border-color | `var(--poodle-color-border-focus, #888)` |
-| `:focus-visible` | background | `var(--poodle-color-background-panel, #1a1a1a)` |
+| `:focus-visible` | background | `var(--poodle-recipe-media-picker-hover-focus-item-fill, var(--poodle-style-control-fillHover, var(--poodle-color-background-panel, #1a1a1a)))` |
 | `:focus-visible` | outline | `none` |
 
 ### Thumbnail `.media-picker__thumb`
@@ -229,7 +229,7 @@ Composed from `Dialog`, `Tabs`, `TextInput`, and `FileUpload` primitives. Wraps 
 | display | `flex` |
 | align-items | `center` |
 | justify-content | `center` |
-| background | `var(--poodle-color-background-panel, #1a1a1a)` |
+| background | `var(--poodle-recipe-media-picker-thumb--placeholder-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-panel, #1a1a1a)))` |
 
 #### Placeholder SVG
 
