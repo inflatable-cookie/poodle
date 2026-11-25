@@ -686,6 +686,7 @@ export * from "./color";
 
 export * from "./theme-resolver";
 export { themePresets, type ThemePreset } from "./theme-presets";
+export { previewThemeCssProperties } from "./theme-css";
 
 export * from "./embed-input";
 
