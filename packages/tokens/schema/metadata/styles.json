@@ -1,0 +1,8 @@
+{
+  "styles": {
+    "default": {
+      "selector": "[data-style=\"default\"]",
+      "description": "Poodle\u2019s standard control and surface treatments."
+    }
+  }
+}

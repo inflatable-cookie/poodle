@@ -1,7 +1,7 @@
 # 007 Appearance Recipe Contract
 
 Status: active
-Updated: 2026-09-02
+Updated: 2026-11-25
 Depends on: `006-headless-core-and-machine-model.md`
 Supersedes: `005-treatment-system-and-recipe-variables.md` (legacy override layer retired 2026-07-13; Recipes are the single override surface)
 Promoted from: `docs/knowledge/specs/026-appearance-recipes-and-downstream-override-strategy.md` (g11.005)
@@ -10,7 +10,7 @@ Promoted from: `docs/knowledge/specs/026-appearance-recipes-and-downstream-overr
 
 A recipe is the set of **component-scoped CSS custom properties** a component
 resolves its appearance from. Recipes are the third override depth in the
-sanctioned ladder (tokens → per-component recipe variables), and the
+sanctioned ladder (tokens → style → recipe), and the
 mechanism apps use to restyle individual components
 without forking them or redefining shared meaning.
 
@@ -31,10 +31,10 @@ spec field / token override on the GPUI/Jetstream side).
   variables are internal resolution variables — components define them, so
   ancestor overrides cannot reach them. This distinction was verified live
   in g11.005.)
-- Components resolve each internal appearance variable with the chain:
-  **recipe hook → semantic token.** With no
-  override active, rendering is identical to the token default — recipes
-  are strictly additive.
+- Components read the recipe hook first, then the style-adjusted semantic
+  token and its base fallback. A style applies across a subtree independently
+  of its colour theme. The `fill` and `surface` treatments expand to
+  token values during the build. Shared CSS consumes the resulting tokens.
 - Variant-specific rules get variant-scoped hooks (e.g.
   `-button-primary-*`); semantic tone rules (danger/success) keep token
   semantics unless a variant hook is added on demand.
@@ -49,17 +49,23 @@ Two classes, machine-classified by
 
 - **Recipe hooks** (`--poodle-recipe-*`, public): the supported override
   surface. Stable: renaming or removing one is a breaking change handled
-  via the g11.001 wave process. The current inventory records 1,175 hooks
-  across 147 scanned components. Three pre-existing internal tone variables
+  via the g11.001 wave process. Three pre-existing internal tone variables
   remain classified as candidates; new audio controls add no candidates. Two
   mechanical shapes: components with local appearance variables wrap the
   variable definition; components without them hook inline at the property.
   Slot names come from the component's anatomy class parts; qualifiers from
   data-attributes and pseudo-state in the defining selector.
+
 - **Metric variables** (internal): sizing, padding, gaps, font sizes. These
   belong to the size/density system and are NOT part of the recipe
   contract. Overriding them is unsupported (density must never change
   component height — see the size/density contract).
+
+The 2026-11-25 rendering-style ruling removed
+`--poodle-recipe-card-theme-iceberg-elevated-shadow` and
+`--poodle-recipe-metric-tile-theme-iceberg-fill`. Apps can set
+`--poodle-recipe-card-elevated-shadow` or `--poodle-recipe-metric-tile-fill`
+on their own subtree.
 
 Regenerate the inventory after styling changes:
 `bun packages/svelte/preview/scripts/build-recipe-inventory.ts`.

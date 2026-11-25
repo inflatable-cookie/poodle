@@ -1,1 +1,1 @@
-export { controlSizes, densityModes, themes } from "./generated/ts/themes";
+export { controlSizes, densityModes, styles, themes } from "./generated/ts/themes";

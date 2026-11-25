@@ -189,6 +189,12 @@
   --poodle-space-button-iconInset: 0.125rem;
   --poodle-state-opacity-disabled: 0.48;
   --poodle-state-opacity-muted: 0.72;
+  --poodle-style-control-fill: initial;
+  --poodle-style-control-border: initial;
+  --poodle-style-control-shadow: initial;
+  --poodle-style-surface-fill: initial;
+  --poodle-style-surface-border: initial;
+  --poodle-style-surface-shadow: initial;
   --poodle-tabs-gap: var(--poodle-space-stack-md);
   --poodle-tabs-list-padding: 0;
   --poodle-tabs-list-background: color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent);

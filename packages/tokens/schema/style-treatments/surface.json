@@ -1,0 +1,56 @@
+{
+  "border": {
+    "style": {
+      "surface": {
+        "fill": {
+          "$type": "color",
+          "$value": "initial"
+        },
+        "border": {
+          "$type": "color",
+          "$value": "initial"
+        },
+        "shadow": {
+          "$type": "shadow",
+          "$value": "initial"
+        }
+      }
+    }
+  },
+  "elevation": {
+    "style": {
+      "surface": {
+        "fill": {
+          "$type": "color",
+          "$value": "initial"
+        },
+        "border": {
+          "$type": "color",
+          "$value": "transparent"
+        },
+        "shadow": {
+          "$type": "shadow",
+          "$value": "{elevation.dialog}"
+        }
+      }
+    }
+  },
+  "tonal": {
+    "style": {
+      "surface": {
+        "fill": {
+          "$type": "color",
+          "$value": "{color.background.panel}"
+        },
+        "border": {
+          "$type": "color",
+          "$value": "transparent"
+        },
+        "shadow": {
+          "$type": "shadow",
+          "$value": "none"
+        }
+      }
+    }
+  }
+}

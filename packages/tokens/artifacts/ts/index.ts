@@ -359,6 +359,18 @@ export const tokens = {
         "muted": 0.72
       }
     },
+    "style": {
+      "control": {
+        "fill": "initial",
+        "border": "initial",
+        "shadow": "initial"
+      },
+      "surface": {
+        "fill": "initial",
+        "border": "initial",
+        "shadow": "initial"
+      }
+    },
     "tabs": {
       "gap": "var(--poodle-space-stack-md)",
       "list": {
@@ -598,6 +610,12 @@ export const tokenPaths = [
   "space.button.iconInset",
   "state.opacity.disabled",
   "state.opacity.muted",
+  "style.control.fill",
+  "style.control.border",
+  "style.control.shadow",
+  "style.surface.fill",
+  "style.surface.border",
+  "style.surface.shadow",
   "tabs.gap",
   "tabs.list.padding",
   "tabs.list.background",
@@ -711,6 +729,12 @@ export const cssVars = {
   "space.button.iconInset": "--poodle-space-button-iconInset",
   "state.opacity.disabled": "--poodle-state-opacity-disabled",
   "state.opacity.muted": "--poodle-state-opacity-muted",
+  "style.control.fill": "--poodle-style-control-fill",
+  "style.control.border": "--poodle-style-control-border",
+  "style.control.shadow": "--poodle-style-control-shadow",
+  "style.surface.fill": "--poodle-style-surface-fill",
+  "style.surface.border": "--poodle-style-surface-border",
+  "style.surface.shadow": "--poodle-style-surface-shadow",
   "tabs.gap": "--poodle-tabs-gap",
   "tabs.list.padding": "--poodle-tabs-list-padding",
   "tabs.list.background": "--poodle-tabs-list-background",

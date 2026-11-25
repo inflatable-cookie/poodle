@@ -26,10 +26,10 @@
     align-items: center;
     min-height: var(--poodle-select-control-height);
     padding: 0 var(--poodle-select-inline-padding);
-    border: var(--poodle-border-width-default) solid var(--poodle-color-border-default);
+    border: var(--poodle-border-width-default) solid var(--poodle-style-control-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-select-fill, var(--poodle-color-background-surface));
-    box-shadow: var(--poodle-recipe-select-shadow, none);
+    background: var(--poodle-recipe-select-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
+    box-shadow: var(--poodle-recipe-select-shadow, var(--poodle-style-control-shadow, none));
     transition:
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),

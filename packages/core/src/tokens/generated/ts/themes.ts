@@ -388,3 +388,22 @@ export const controlSizes = {
     }
   }
 } as const;
+
+export const styles = {
+  "default": {
+    "selector": "[data-style=\"default\"]",
+    "description": "Poodle’s standard control and surface treatments.",
+    "treatment": {
+      "fill": "outlined",
+      "surface": "border"
+    },
+    "overrides": {
+      "style.control.fill": "initial",
+      "style.control.border": "initial",
+      "style.control.shadow": "initial",
+      "style.surface.fill": "initial",
+      "style.surface.border": "initial",
+      "style.surface.shadow": "initial"
+    }
+  }
+} as const;

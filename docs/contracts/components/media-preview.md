@@ -218,6 +218,9 @@ Card header and body always render regardless of media state.
 | `lg` | `0.71875rem` | `1.1875rem` | `0.875rem` | `0.4375rem 0.6875rem` |
 | `xl` | `0.75rem` | `1.25rem` | `0.9375rem` | `0.5rem 0.75rem` |
 
+Metadata tags use the `--poodle-recipe-media-preview-meta-shadow` hook,
+with no shadow by default.
+
 ### Density Variants
 
 | Density | Header Gap | Section Gap |
@@ -225,12 +228,6 @@ Card header and body always render regardless of media state.
 | `compact` | `0.625rem` | `0.375rem` |
 | `default` | `var(--poodle-space-stack-md)` | `var(--poodle-space-stack-sm)` |
 | `comfortable` | `1rem` | `0.625rem` |
-
-### Iceberg Theme Overrides
-
-| Selector | Property | Value |
-|----------|----------|-------|
-| `:global([data-theme="iceberg"]) .media-preview__meta li` | box-shadow | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent)` |
 
 ## 10. Composition
 

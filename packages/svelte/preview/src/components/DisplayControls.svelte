@@ -1,6 +1,7 @@
 <script lang="ts">
   import {
     Eyebrow,
+    Select,
     Slider,
     TextInput,
     ThemeSelect,
@@ -11,16 +12,20 @@
   import {
     densityModes,
     controlSizes,
+    styles,
     themeOptions,
+    type StyleName,
   } from "@inflatable-cookie/poodle-core/tokens";
   import { previewShell } from "../generated/preview-shell";
 
   let {
     theme,
+    style,
     density,
     controlSize,
     search = "",
     onThemeChange = () => {},
+    onStyleChange = () => {},
     onDensityChange = () => {},
     onControlSizeChange = () => {},
     onSearchChange = () => {},
@@ -28,10 +33,12 @@
     onContrastChange = () => {},
   }: {
     theme: string;
+    style: StyleName;
     density: DensityName;
     controlSize: ControlSizeName;
     search?: string;
     onThemeChange?: (value: string) => void;
+    onStyleChange?: (value: string) => void;
     onDensityChange?: (value: string) => void;
     onControlSizeChange?: (value: string) => void;
     onSearchChange?: (value: string) => void;
@@ -74,6 +81,7 @@
   );
 
   const themeCatalogue = themeOptions();
+  const styleOptions = Object.keys(styles).map((name) => ({ value: name, label: name }));
   const themeList = themeControl
     ? themeCatalogue.filter((option) =>
         (themeControl.values as readonly string[]).includes(option.value),
@@ -104,6 +112,11 @@
         />
       </div>
     {/if}
+
+    <div class="poodle-display-controls__group">
+      <Eyebrow>Style</Eyebrow>
+      <Select native value={style} options={styleOptions} ariaLabel="Style" onValueChange={onStyleChange} />
+    </div>
 
     {#if densityControl}
       <div class="poodle-display-controls__group">

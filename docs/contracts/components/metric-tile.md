@@ -12,7 +12,7 @@ Updated: 2026-07-10
   inline sparkline chart — rendered in a contained surface treatment
 - In scope: label-value pairs with contained surface, code-style labels,
   trend direction with colored icon and label, inline sparkline SVG,
-  accessible name computation, iceberg theme override
+  accessible name computation
 - Out of scope: interactive editing, multi-value display, full charts or
   gauges, click behavior
 
@@ -242,7 +242,6 @@ The `buildSparkline()` function generates an SVG `<path>` from data points:
 
 | Selector | Property | Value |
 |----------|----------|-------|
-| `:global([data-theme="iceberg"]) .state-tile` | background | `var(--poodle-recipe-metric-tile-fill)` |
 
 ### Composed Primitives
 
@@ -259,8 +258,6 @@ The `buildSparkline()` function generates an SVG `<path>` from data points:
   SVG path from data points
 - Trend icons use the `Icon` primitive (no explicit `size` prop — inherits
   from font-size of parent `trend-arrow` span)
-- Iceberg theme override uses `:global([data-theme="iceberg"])` selector with
-  `--poodle-recipe-metric-tile-fill` token
 - `sparklinePath` is a reactive derived value computed when `sparklineData`
   has 2+ entries
 
@@ -270,7 +267,6 @@ The `buildSparkline()` function generates an SVG `<path>` from data points:
 - Render as vertical stack of styled text within contained surface
 - Sparkline rendering may use platform-specific drawing primitives
 - Trend colors must map to the same status tokens
-- Light theme surface fill override must be honored
 
 ## 11. Parity Checklist
 
@@ -288,7 +284,6 @@ The `buildSparkline()` function generates an SVG `<path>` from data points:
 - [ ] typography hierarchy matches (code label, bold value)
 - [ ] trend colors map to correct status tokens
 - [ ] sparkline dimensions and stroke match (4rem x 1.5rem, stroke-width 1.5)
-- [ ] iceberg theme override matches
 
 ### Tier 3: Implementation Freedom
 

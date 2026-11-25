@@ -1,10 +1,11 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { resolvePortalTarget } from "@inflatable-cookie/poodle-core";
 
 /**
  * Theme-aware portal (mirrors the Svelte `portal` action): mounts overlay
  * content into the explicit `[data-poodle-theme-root]` when present,
- * otherwise the nearest `[data-theme]` ancestor, never directly under
+ * otherwise the nearest theme or style ancestor, never directly under
  * <html>; falls back to <body>. A zero-size marker span anchors the lookup
  * at the component's position in the tree.
  */
@@ -15,14 +16,7 @@ export function ThemePortal({ children }: { children: ReactNode }) {
   useLayoutEffect(() => {
     const marker = markerRef.current;
     if (!marker) return;
-    const explicitThemeRoot = marker.parentElement?.closest("[data-poodle-theme-root]") as HTMLElement | null;
-    const nearestThemeAncestor = marker.parentElement?.closest("[data-theme]") as HTMLElement | null;
-    const next =
-      explicitThemeRoot ??
-      (nearestThemeAncestor && nearestThemeAncestor !== document.documentElement
-        ? nearestThemeAncestor
-        : document.body);
-    setTarget(next);
+    setTarget(resolvePortalTarget(marker));
   }, []);
 
   return (

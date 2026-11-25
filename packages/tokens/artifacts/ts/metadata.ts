@@ -18,7 +18,8 @@ export const manifest = {
     "density",
     "icon",
     "overlay",
-    "state"
+    "state",
+    "style"
   ],
   "requiredThemes": [
     "iceberg",
@@ -45,7 +46,9 @@ export const manifest = {
       "packages/tokens/artifacts/css/poodle-theme-graphite.css",
       "packages/tokens/artifacts/css/poodle-density-compact.css",
       "packages/tokens/artifacts/css/poodle-density-default.css",
-      "packages/tokens/artifacts/css/poodle-density-comfortable.css"
+      "packages/tokens/artifacts/css/poodle-density-comfortable.css",
+      "packages/tokens/artifacts/css/poodle-style-default.css",
+      "packages/tokens/artifacts/css/poodle-styles.css"
     ],
     "ts": [
       "packages/tokens/artifacts/ts/index.ts",
@@ -56,9 +59,13 @@ export const manifest = {
       "packages/contracts/tokens/src/generated/mod.rs",
       "packages/contracts/tokens/src/generated/themes.rs",
       "packages/contracts/tokens/src/generated/density.rs",
-      "packages/contracts/tokens/src/generated/metadata.rs"
+      "packages/contracts/tokens/src/generated/metadata.rs",
+      "packages/contracts/tokens/src/generated/styles.rs"
     ]
-  }
+  },
+  "requiredStyles": [
+    "default"
+  ]
 } as const;
 
 export const aliases = [

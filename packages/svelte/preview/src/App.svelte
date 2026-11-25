@@ -2,9 +2,11 @@
   import {
     applyThemeAttributes,
     cssVars,
+    styles,
     themes,
     densityModes,
     controlSizes,
+    type StyleName,
   } from "@inflatable-cookie/poodle-core/tokens";
   import {
     Pill,
@@ -49,6 +51,7 @@
 
   let appShell: HTMLElement | null = $state(null);
   let theme: ThemeName = $state("eclipse");
+  let style: StyleName = $state("default");
   let density: DensityName = $state("compact");
   let controlSize: ControlSizeName = $state("sm");
   let contrast = $state(0.5);
@@ -77,14 +80,14 @@
   function refreshPreviewSurface(): void {
     if (!appShell) return;
     if (typeof document !== "undefined") {
-      applyThemeAttributes(document.documentElement, { theme, density, controlSize });
+      applyThemeAttributes(document.documentElement, { theme, style, density, controlSize });
     }
-    applyThemeAttributes(appShell, { theme, density, controlSize });
+    applyThemeAttributes(appShell, { theme, style, density, controlSize });
     liveTokenValues = readSemanticTokenValues(appShell);
     appliedPreviewModeKey = previewModeKey;
   }
 
-  let previewModeKey = $derived(`${theme}:${density}:${controlSize}`);
+  let previewModeKey = $derived(`${theme}:${style}:${density}:${controlSize}`);
   $effect(() => {
     if (appShell && previewModeKey && previewModeKey !== appliedPreviewModeKey) {
       refreshPreviewSurface();
@@ -103,12 +106,18 @@
     captureMode = params.get("capture") === "specimen";
 
     const paramTheme = params.get("theme");
+    const paramStyle = params.get("style");
     const paramDensity = params.get("density");
     const paramControlSize = params.get("controlSize");
 
     if (paramTheme && paramTheme in themes) theme = paramTheme as ThemeName;
+    style = isStyleName(paramStyle) ? paramStyle : "default";
     if (paramDensity && paramDensity in densityModes) density = paramDensity as DensityName;
     if (paramControlSize && paramControlSize in controlSizes) controlSize = paramControlSize as ControlSizeName;
+  }
+
+  function isStyleName(value: string | null): value is StyleName {
+    return value !== null && Object.hasOwn(styles, value);
   }
 
   function navigateToSection(section: SectionId): void {
@@ -121,6 +130,7 @@
     if (hasMounted && typeof window !== "undefined") {
       const searchParams = new URLSearchParams({
         theme,
+        style,
         density,
         controlSize,
       });
@@ -215,10 +225,12 @@
 
       <DisplayControls
         {theme}
+        {style}
         {density}
         {controlSize}
         search={componentSearch}
         onThemeChange={(value) => (theme = value as ThemeName)}
+        onStyleChange={(value) => { if (isStyleName(value)) style = value; }}
         onDensityChange={(value) => (density = value as DensityName)}
         onControlSizeChange={(value) => (controlSize = value as ControlSizeName)}
         {contrast}

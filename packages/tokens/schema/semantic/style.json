@@ -1,0 +1,32 @@
+{
+  "style": {
+    "control": {
+      "fill": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "border": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "shadow": {
+        "$type": "shadow",
+        "$value": "initial"
+      }
+    },
+    "surface": {
+      "fill": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "border": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "shadow": {
+        "$type": "shadow",
+        "$value": "initial"
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 # 002 Token System and Package Layout
 
 Status: active
-Updated: 2026-09-30
+Updated: 2026-11-25
 Depends on: [001 Poodle System Shape](001-poodle-system-shape.md)
 
 ## Purpose
@@ -19,10 +19,12 @@ schema/
   primitives/          raw color, dimension, typography, radius, motion, etc.
   semantic/            purpose-based component roles
   modes/
-    themes/            named theme values
+    themes/            named colour roles
+    style/             named rendering styles
     density/           compact, default, and comfortable spacing
     control-size/      xs, sm, md, lg, and xl control dimensions
-  metadata/            aliases, deprecations, and theme metadata
+  style-treatments/    token overrides for each rendering treatment value
+  metadata/            aliases, deprecations, and mode metadata
   manifest.json        schema and output metadata
 ```
 
@@ -58,24 +60,41 @@ effigy tokens:build
 
 ## Modes
 
-Poodle treats theme, density, and control size as independent inherited axes.
+Poodle treats colour theme, rendering style, density, and control size as
+independent inherited axes.
 
 | Axis | Values |
 | --- | --- |
 | Theme | `iceberg`, `eclipse`, `graphite`, `midnight`, `nord`, `rose`, `forest`, `solarized`, `hornet`, `cobalt`, `clay`, `meadow` |
+| Rendering style | `default` |
 | Density | `compact`, `default`, `comfortable` |
 | Control size | `xs`, `sm`, `md`, `lg`, `xl` |
 
 On the web, set data attributes on any ancestor:
 
 ```html
-<section data-theme="graphite" data-density="compact" data-control-size="md">
+<section data-theme="graphite" data-style="default" data-density="compact" data-control-size="md">
   <!-- Descendants inherit the selected modes. -->
 </section>
 ```
 
-Applications can scope different modes to different subtrees. Native theme
-providers expose the same axes through typed builders.
+Applications can scope modes to different subtrees. A theme supplies colour
+roles. A style supplies shape, border, elevation, type, and motion values and
+refers to colour through semantic roles. The token build rejects overlapping
+theme and style writes and theme selectors in shared component CSS.
+
+A style mode declares a `treatment` group alongside any direct semantic token
+overrides. The build expands the choices from `schema/style-treatments/` before
+applying direct overrides. The shipped switches are `fill` (`outlined`,
+`filled`, `ghost`) for controls at rest, and `surface` (`border`, `elevation`,
+`tonal`) for containers. The default choices preserve the component's
+underlying paint through fallback slots. Nested style modes start from the
+base values for style-owned tokens, and nested themes resolve style aliases
+against their own colour roles.
+
+Native theme providers support theme, density, and control size. Generated
+Rust style definitions carry treatment enums and token references for future
+native support.
 
 The inherited `--poodle-contrast` custom property adjusts neutral background
 and border separation without redefining a theme. The default is `0.5`; `1`
@@ -88,8 +107,9 @@ calculation.
 
 The core package publishes the framework-free web surface:
 
-- `/tokens` — generated token values, paths, themes, and metadata
-- `/tokens/styles.css` — base tokens and theme selectors
+- `/tokens` — generated token values, paths, themes, styles, and metadata
+- `/tokens/styles.css` — base tokens
+- `/tokens/css/poodle-styles.css` — all rendering style modes
 - `/tokens/runtime` — `applyThemeAttributes()` and mode types
 - `/styles/*` — shared component styles
 - `/icons` — icon types and Poodle's scoped default Lucide set
@@ -101,12 +121,14 @@ Applications import base tokens plus the mode styles they can select:
 ```ts
 import "@inflatable-cookie/poodle-core/tokens/styles.css";
 import "@inflatable-cookie/poodle-core/tokens/themes.css";
+import "@inflatable-cookie/poodle-core/tokens/css/poodle-styles.css";
 import "@inflatable-cookie/poodle-core/tokens/density-default.css";
 import "@inflatable-cookie/poodle-core/tokens/control-size-md.css";
 ```
 
-Individual theme, density, and control-size stylesheets remain available as
-explicit subpath exports for consumers that need a narrower CSS payload.
+Individual theme, style, density, and control-size stylesheets are available
+for consumers that need a narrower CSS payload. For example,
+`/tokens/style-default.css` loads just the default style.
 
 ### Framework packages
 
@@ -140,8 +162,8 @@ an unused catalogue to every consumer.
 
 ## Rust Packages
 
-The token build feeds `poodle-tokens`, which exposes typed theme, density,
-control-size, and semantic token data. Native code consumes these values at
+The token build feeds `poodle-tokens`, which exposes typed theme, rendering style,
+density, control-size, and semantic token data. Native code consumes tokens at
 compile time.
 
 The relevant native package flow is:

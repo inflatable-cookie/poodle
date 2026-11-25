@@ -1,7 +1,7 @@
 {
   "summary": {
     "components": 150,
-    "recipeHooks": 1161,
+    "recipeHooks": 1159,
     "hookCandidates": 9,
     "metricVariables": 428
   },
@@ -439,8 +439,7 @@
         "--poodle-recipe-card-selected-hover-border",
         "--poodle-recipe-card-selected-hover-shadow",
         "--poodle-recipe-card-selected-shadow",
-        "--poodle-recipe-card-shadow",
-        "--poodle-recipe-card-theme-iceberg-elevated-shadow"
+        "--poodle-recipe-card-shadow"
       ],
       "candidates": [],
       "metric": [
@@ -1510,7 +1509,6 @@
         "--poodle-recipe-metric-tile-flat-trend-text",
         "--poodle-recipe-metric-tile-label-text",
         "--poodle-recipe-metric-tile-sparkline-text",
-        "--poodle-recipe-metric-tile-theme-iceberg-fill",
         "--poodle-recipe-metric-tile-trend-text",
         "--poodle-recipe-metric-tile-up-trend-text"
       ],

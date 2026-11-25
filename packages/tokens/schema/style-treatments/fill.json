@@ -1,0 +1,56 @@
+{
+  "outlined": {
+    "style": {
+      "control": {
+        "fill": {
+          "$type": "color",
+          "$value": "initial"
+        },
+        "border": {
+          "$type": "color",
+          "$value": "initial"
+        },
+        "shadow": {
+          "$type": "shadow",
+          "$value": "initial"
+        }
+      }
+    }
+  },
+  "filled": {
+    "style": {
+      "control": {
+        "fill": {
+          "$type": "color",
+          "$value": "{color.background.elevated}"
+        },
+        "border": {
+          "$type": "color",
+          "$value": "transparent"
+        },
+        "shadow": {
+          "$type": "shadow",
+          "$value": "none"
+        }
+      }
+    }
+  },
+  "ghost": {
+    "style": {
+      "control": {
+        "fill": {
+          "$type": "color",
+          "$value": "transparent"
+        },
+        "border": {
+          "$type": "color",
+          "$value": "transparent"
+        },
+        "shadow": {
+          "$type": "shadow",
+          "$value": "none"
+        }
+      }
+    }
+  }
+}

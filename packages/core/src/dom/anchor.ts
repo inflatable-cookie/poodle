@@ -328,13 +328,6 @@ export function observeAnchorMovement(
 }
 
 /**
- * Portal target for an overlay opened from `origin`: the explicit theme root
- * when the host declares one, otherwise the nearest themed ancestor, never
- * `<html>`, falling back to `<body>`. Mounting inside the theme scope keeps
- * token inheritance intact — an overlay under a bare `<body>` would resolve
- * against whatever theme the document root happens to carry.
- */
-/**
  * The z-index an anchored surface needs to clear whatever it was opened from.
  *
  * Portalling to the theme root fixes clipping but creates a layering problem:
@@ -370,14 +363,17 @@ export function resolveLayerZIndex(origin: Element | null, ownZIndex: number): n
   return highest >= ownZIndex ? highest + 1 : ownZIndex;
 }
 
+/** Keep overlays inside the nearest appearance scope unless a host sets an explicit portal root. */
 export function resolvePortalTarget(origin: Element | null): HTMLElement {
   const parent = origin?.parentElement ?? null;
   const explicit = parent?.closest("[data-poodle-theme-root]") as HTMLElement | null;
-  const themed = parent?.closest("[data-theme]") as HTMLElement | null;
+  const appearanceRoot = parent?.closest<HTMLElement>("[data-theme], [data-style]");
 
   if (explicit) {
     return explicit;
   }
 
-  return themed && themed !== document.documentElement ? themed : document.body;
+  return appearanceRoot && appearanceRoot !== document.documentElement
+    ? appearanceRoot
+    : document.body;
 }
