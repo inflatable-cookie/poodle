@@ -1,7 +1,7 @@
 # 001 Poodle Vision
 
 Status: active
-Updated: 2026-09-04
+Updated: 2026-11-25
 
 ## Purpose
 
@@ -91,6 +91,35 @@ Renderer-specific input, lifecycle, and drawing remain in the backend.
   fixes in `packages/gpui`, `packages/render` and `packages/contracts` need no
   evidence repin. GPUI parity stays the goal; the rebuilt Nucleus can anchor
   new evidence once it adopts Poodle.
+- **The fleet and its agents come first; public adoption is the long-term
+  aim.** Operator ruling 2026-11-25. Choices serve the operator's
+  applications and the agents that build them now, and should not close off
+  public use later.
+- **Poodle offers three entry points.** Operator ruling 2026-11-25: a
+  behaviour layer, a style framework, and opinionated components built on
+  both. A consumer or an agent can enter at any layer, so when the library
+  lacks a component the agent drops down one layer and stays in the system.
+  The redesigned Poodle look is built as the first style, not as the only
+  one.
+- **Poodle keeps its own behaviour core.** Operator ruling 2026-11-25. The
+  core is framework-free and has a matched Rust crate with shared test
+  vectors; DOM-bound libraries such as Vercel's UI SDK cannot give the Rust
+  renderers that. Poodle borrows ideas from them and does not rebase onto
+  them.
+- **Rendering style and colour theme are independent axes.** Operator ruling
+  2026-11-25: the style language is portable alongside theming, so a consumer
+  application can switch rendering style and colour theme separately, for
+  example from a settings picker. A style is a set of token modes plus a
+  small, fixed set of treatment switches, such as control fill and surface
+  separation. Token modes alone change radius, weight, elevation and motion
+  but leave every component built the same way, so a second style would not
+  be a second look. Each renderer implements each switch value once, and the
+  switches live in the token sources, not in a preview application.
+- **The design sweep lands on web first.** Operator ruling 2026-11-25.
+  Soundcheck is the test consumer for a second style; Loophole is the
+  long-term case. The route for GPUI and Jetstream is a separate, open
+  conversation; see
+  [Q-004](questions.md#q-004--what-is-the-route-for-the-rust-renderers).
 - **Svelte is the parity authority.** When runtimes disagree, the others are
   brought up to Svelte; see
   [working rules](contracts/working-rules.md#runtime-parity-authority).
