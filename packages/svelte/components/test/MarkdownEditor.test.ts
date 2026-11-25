@@ -53,7 +53,7 @@ describe("MarkdownEditor (svelte)", () => {
       props: {
         mode: "preview",
         value: "# Hello",
-        renderHtml: (markdown) => `<h1>${markdown.replace("# ", "")}</h1>`,
+        renderHtml: (markdown: string) => `<h1>${markdown.replace("# ", "")}</h1>`,
       },
     });
     const preview = container.querySelector(".poodle-md-editor__preview") as HTMLElement;

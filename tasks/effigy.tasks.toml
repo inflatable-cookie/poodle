@@ -642,6 +642,14 @@
 # 4.7.5 does not emit, against the same tree and the same pinned `svelte` and
 # `typescript`. That turned the required web lane red on main's own sources.
 # Move the pin only on evidence that the release type-checks generics again.
+#
+# The pin covers the checker only. bunx resolves its Svelte and TypeScript
+# peers fresh on every run, outside any lockfile. Svelte 5.59 (2026-11) added
+# a renderer type parameter to `mount`, which dropped contextual types for
+# callback props passed through Testing Library's `render`; tests annotate
+# those callbacks. A second private manifest to freeze the peers is rejected
+# by the release scope gate (`test/package-install/scope.ts`), so freezing
+# them needs an operator decision on that gate.
 "check:svelte-components" = "bunx svelte-check@4.7.5 --workspace packages/svelte/components --tsconfig ./tsconfig.json --threshold error"
 
 # Core strict type gate. `packages/core/tsconfig.json` includes `src` and

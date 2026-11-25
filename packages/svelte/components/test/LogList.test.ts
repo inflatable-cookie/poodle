@@ -2,7 +2,7 @@ import { fireEvent, render } from "@testing-library/svelte";
 import { describe, expect, it, vi } from "vitest";
 
 import LogList from "../src/LogList.svelte";
-import type { AuditLogEntry, LogFilter, StreamLogEntry } from "../src/types";
+import type { AuditLogEntry, LogActor, LogFilter, StreamLogEntry } from "../src/types";
 
 const streamEntries: StreamLogEntry[] = [
   { id: "1", timestamp: 1720000000000, level: "info", message: "Server started" },
@@ -82,7 +82,7 @@ describe("LogList (svelte)", () => {
 
   it("links actors when getActorHref is provided", () => {
     const { container } = render(LogList, {
-      props: { entries: auditEntries, getActorHref: (actor) => `/users/${actor.id}` },
+      props: { entries: auditEntries, getActorHref: (actor: LogActor) => `/users/${actor.id}` },
     });
     const actorLink = container.querySelector(".poodle-log-list__audit-link") as HTMLAnchorElement;
     expect(actorLink.getAttribute("href")).toBe("/users/u-1");
@@ -92,7 +92,7 @@ describe("LogList (svelte)", () => {
     const { container } = render(LogList, {
       props: {
         entries: auditEntries,
-        getResourceHref: (resourceType, resourceId) => `/${resourceType}/${resourceId}`,
+        getResourceHref: (resourceType: string, resourceId: string) => `/${resourceType}/${resourceId}`,
       },
     });
     const resourceLink = container.querySelector(
