@@ -110,11 +110,17 @@ Renderer-specific input, lifecycle, and drawing remain in the backend.
   2026-11-25: the style language is portable alongside theming, so a consumer
   application can switch rendering style and colour theme separately, for
   example from a settings picker. A style is a set of token modes plus a
-  small, fixed set of treatment switches, such as control fill and surface
-  separation. Token modes alone change radius, weight, elevation and motion
+  small, fixed set of treatment switches: control fill, surface separation
+  and the selected state. Token modes alone change radius, weight, elevation and motion
   but leave every component built the same way, so a second style would not
   be a second look. Each renderer implements each switch value once, and the
   switches live in the token sources, not in a preview application.
+- **The redesign removes noise.** Operator ruling 2026-11-25. The current
+  look has too many lines, surfaces and labels, most of all on clickable
+  items that carry a dimmed accent fill with an accent border. The redesign
+  uses subtle fills, few borders and subtle ones where a border is needed,
+  minimal labelling, and far less accent colour. The aim is sleek and
+  simple.
 - **The design sweep lands on web first.** Operator ruling 2026-11-25.
   Soundcheck is the test consumer for a second style; Loophole is the
   long-term case. The route for GPUI and Jetstream is a separate, open
