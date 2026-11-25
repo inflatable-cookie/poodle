@@ -79,10 +79,10 @@ guardrails below stay local.
 
 Targeted checks per task, full QA at milestones (Tom, 2026-09-30).
 
-- **Fresh Nucleus worktrees skip setup.** Nucleus creates task worktrees without
-  running `paseo.json` setup; it links only declared siblings such as
-  `../jetstream` (Tom, 2026-10-23). Before your first check, run
-  `effigy bootstrap:deps && effigy web:dist` yourself.
+- **Set up fresh worktrees explicitly.** Nucleus allocates the Git worktree.
+  Run `effigy bootstrap:deps && effigy web:dist` before your first check.
+  For Jetstream preview work, first follow the
+  [local Jetstream setup](docs/guides/jetstream-developer-guide.md#set-up-jetstream).
 - **Workers** run, once, the Effigy selectors for the code they changed, a
   compile or type check of what they touched, and `effigy docs:lint` if docs
   or evidence changed. Then they open the PR. No whole suites (`qa`,
