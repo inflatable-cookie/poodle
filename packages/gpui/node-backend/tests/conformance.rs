@@ -146,6 +146,8 @@ impl Backend for Gpui {
         }
         reset_focus_registry();
         *self.platform.output.borrow_mut() = Output::default();
+        let mut root_ids = Vec::new();
+        collect_ids(root, &mut root_ids);
         let root = Arc::new(Mutex::new(root.clone()));
         let window = self
             .app
@@ -183,17 +185,8 @@ impl Backend for Gpui {
         let debug: Value = serde_json::from_str(&debug.expect("GPUI built its accessibility tree"))
             .expect("decode GPUI's debug metadata");
         self.tab_stops = debug["frame"]["tab_stop_count"].clone();
-        self.ids = debug["nodes"]
-            .as_object()
-            .expect("GPUI debug nodes")
-            .values()
-            .filter_map(|node| {
-                Some((
-                    NodeId(node["accesskit_id"].as_str()?.parse().ok()?),
-                    node["element_id"].as_str()?.to_owned(),
-                ))
-            })
-            .collect();
+        let ids = attribute_nodes(&root_ids, &self.tree(), self.scale);
+        self.ids = ids;
         assert!(
             !self.tree().nodes.is_empty(),
             "the platform received accessible output"
@@ -270,6 +263,44 @@ impl Backend for Gpui {
         };
         Reading::Observed(value)
     }
+}
+
+fn collect_ids(node: &Node, ids: &mut Vec<String>) {
+    if let Some(id) = &node.id {
+        ids.push(id.clone());
+    }
+    for child in &node.children {
+        collect_ids(child, ids);
+    }
+}
+
+// The small fixtures place each accessible target in its own rectangle.
+// Match the emitted AccessKit node to the independently measured layout,
+// which also works when GPUI is compiled without debug provenance.
+fn attribute_nodes(ids: &[String], tree: &TreeUpdate, scale: f32) -> BTreeMap<NodeId, String> {
+    let mut attributed = BTreeMap::new();
+    for id in ids {
+        let Some(bounds) = bounds_for(id) else {
+            continue;
+        };
+        let rect = accesskit::Rect {
+            x0: f64::from(f32::from(bounds.left()) * scale),
+            y0: f64::from(f32::from(bounds.top()) * scale),
+            x1: f64::from(f32::from(bounds.right()) * scale),
+            y1: f64::from(f32::from(bounds.bottom()) * scale),
+        };
+        let mut matches = tree.nodes.iter().filter(|(_, node)| {
+            node.role() != accesskit::Role::Window && node.bounds() == Some(rect)
+        });
+        if let Some((node, _)) = matches.next() {
+            assert!(matches.next().is_none(), "ambiguous AccessKit target {id}");
+            assert!(
+                attributed.insert(*node, id.clone()).is_none(),
+                "overlapping targets for AccessKit node {node:?}"
+            );
+        }
+    }
+    attributed
 }
 
 fn enum_value(value: Option<impl std::fmt::Debug>) -> Value {

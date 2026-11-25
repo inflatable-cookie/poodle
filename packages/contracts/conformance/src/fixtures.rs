@@ -153,6 +153,8 @@ fn kind_cases() -> Vec<Case> {
         },
     );
     contour.style.descriptor.text_color = bar.style.descriptor.text_color;
+    let mut icon = Node::icon(NAMED_ICON, 24.0);
+    icon.style.descriptor.text_color = bar.style.descriptor.text_color;
 
     let input = kind(
         sized(Node::input("filled value", "unused prompt"), 80.0, 20.0),
@@ -181,7 +183,7 @@ fn kind_cases() -> Vec<Case> {
         intrinsic_text(Node::button("button label"), Node::button("x"), vec![]),
         input,
         kind(
-            Node::icon(NAMED_ICON, 24.0),
+            icon,
             Proof::Paint,
             vec![],
             vec![

@@ -57,7 +57,8 @@ that activates AccessKit and captures its tree updates and GPUI's presented
 scene. Geometry samples check submitted quads and tessellated paths in
 logical coordinates. They carry scene-level proof without claiming pixel,
 compositor, or operating-system assistive-technology coverage. The runner
-uses GPUI's debug element IDs to attribute AccessKit nodes to fixture targets.
+uses distinct fixture rectangles to match AccessKit nodes to the backend's
+measured element bounds.
 
 ## Cost and stop rule
 
