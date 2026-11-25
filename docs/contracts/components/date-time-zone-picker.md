@@ -203,9 +203,10 @@ this machinery.
 | `gap` | `0.75rem` |
 | `min-height` | `var(--poodle-size-control-height)` |
 | `padding` | `0 var(--poodle-space-control-x)` |
-| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border` | `0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default))` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `var(--poodle-color-background-surface)` |
+| `background` | `var(--poodle-recipe-date-time-zone-picker-trigger-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)))` |
+| `box-shadow` | `var(--poodle-style-control-shadow, none)` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font-family` | `var(--poodle-typography-body-family)` |
@@ -217,7 +218,7 @@ this machinery.
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 86%, var(--poodle-color-background-elevated))` |
+| `background` | `var(--poodle-recipe-date-time-zone-picker-hover-trigger-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 86%, var(--poodle-color-background-elevated))))` |
 
 ### Trigger — focus-visible
 
@@ -237,7 +238,7 @@ this machinery.
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-color-text-secondary)` |
+| `color` | `var(--poodle-recipe-date-time-zone-picker-value-text, var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary)))` |
 
 ### Indicator `.date-time-zone-picker__indicator`
 
