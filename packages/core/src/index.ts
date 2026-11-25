@@ -682,6 +682,9 @@ export * from "./date";
 
 export * from "./color";
 
+export * from "./theme-resolver";
+export { themePresets, type ThemePreset } from "./theme-presets";
+
 export * from "./embed-input";
 
 export * from "./file-upload";

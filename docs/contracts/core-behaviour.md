@@ -2,9 +2,10 @@
 
 Import the behaviours below from `@inflatable-cookie/poodle-core`. The named
 transition types and the types in the listed function signatures are part of
-this subset. Other root exports are internal to Poodle components, except the
-existing [drag-and-drop integration](#drag-and-drop). The package subpaths for
-tokens, styles and icons have their own contracts.
+this subset. The [drag-and-drop integration](#drag-and-drop) and
+[preview theme resolution](#preview-theme-resolution) are also listed here.
+Other root exports are internal to Poodle components. The package subpaths
+for tokens, styles and icons have their own contracts.
 
 ## Portable functions
 
@@ -25,6 +26,20 @@ and performs any effects.
 | `hoverTransition` | `HoverState` is `closed`, `opening`, `open` or `closing`. `HoverContext` requires `openDelayMs` and `closeDelayMs`. `HoverEvent` is `ENTER`, `LEAVE`, `TIMER_FIRE`, `DISMISS` or `SET_OPEN(open)`. No defaults. | Returns timer intents (`clearTimer`, `startTimer(ms)`) and `emitOpenChange`. Run timer effects in order and dispatch `TIMER_FIRE` when the current timer fires. A nonpositive close delay closes immediately. `SET_OPEN` clears pending timing without announcing a change. Cancel the caller's timer on teardown. |
 | `popoverTransition` | `PopoverState` is `closed` or `open`. `PopoverContext` requires `disabled`, `dismissOnOutsideInteract` and `initialFocus` (`first-focusable`, `content` or `none`). `PopoverEvent` is `TOGGLE`, `OPEN`, `CLOSE`, `ESCAPE` or `OUTSIDE_INTERACT`. No defaults. | Disabled controls stay put. An open emits `emitOpenChange(true)` then `focusOnOpen` with the supplied strategy. A close emits `emitOpenChange(false)` then `restoreTriggerFocus`. Outside interaction closes only when enabled by the context. The caller performs focus and dismissal wiring. |
 | `resolveOverlayPosition` | Anchor rect, overlay rect, preferred `OverlayPlacement`, viewport width and height, and a gap in pixels (default `6`). | Returns `top`, `left` and the actual `placement` in viewport coordinates after collision resolution. Caller measures and applies the result. |
+
+## Preview theme resolution
+
+`resolveTheme(settings?)` returns 44 RGBA roles (integer channels from 0
+to 255) and a report of clamped inputs, adjustments, warnings and notes.
+It needs no DOM. Settings default to dark, mono base at 0.25 blend, mono
+accent at 0 blend, contrast 1 and even tint on. Colours accept three- or
+six-digit sRGB hex or normalized RGB triples.
+
+`themePresets` is preview data. Each tuple contains the id, name, scheme,
+base, base blend, accent, accent blend, contrast and an optional
+`[base, baseBlend]` override for even tint. See the
+[theme resolution architecture](../knowledge/architecture/015-theme-resolution.md)
+for fit targets and the Rust mirror.
 
 ## Browser helpers
 

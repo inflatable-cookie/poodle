@@ -289,6 +289,8 @@
 # Focused shared-core behavior proof for the Listbox composite; keep worker
 # validation narrow instead of running the full core unit suite.
 "test:core-listbox" = "bun test --timeout 120000 packages/core/test/listbox.test.ts"
+"theme-resolver:vectors" = "bun packages/core/test/generate-theme-vectors.ts"
+"test:core-theme-resolver" = "bun test packages/core/test/theme-resolver.test.ts"
 "test:core-icon-geometry-realize" = [
   { run = "bun test --timeout 120000 packages/core/test/icon-geometry-realize.test.ts" },
   { run = "bun test --timeout 120000 --test-name-pattern 'geometry realization support is exported for sibling test hosts' scripts/web-distribution/core-build.test.ts" },
@@ -783,6 +785,8 @@
 # Listbox's Rust machine mirror has an isolated contract suite so native task
 # validation does not need to run the unrelated contract crates above.
 "test:headless-listbox" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/contracts/headless/Cargo.toml listbox::tests"
+"test:headless-theme-resolver" = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/headless/Cargo.toml --test theme_resolver_conformance"
+"check:headless-theme-resolver" = "sh scripts/rust-driver.sh check --manifest-path packages/contracts/headless/Cargo.toml"
 "test:listbox-spec" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/contracts/components/Cargo.toml listbox::tests"
 # Fails if the working tree is dirty. Belongs at the END of any gate that
 # runs a write-mode generator.

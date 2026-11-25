@@ -43,3 +43,5 @@ them.
 - [Compiled web package distribution](014-compiled-web-package-distribution.md)
   — source-free `dist` boundary, dual Svelte client/server lanes, deterministic
   receipts, and installed-tarball certification ownership
+- [Theme resolution](015-theme-resolution.md) — settings, colour roles, fit
+  targets, presets and cross-runtime conformance
