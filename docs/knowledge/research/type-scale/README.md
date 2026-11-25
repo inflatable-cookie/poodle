@@ -14,6 +14,8 @@ packages.
 - `audit.cjs` and `migration.py`: the scripts that produced them. They
   read a clean archive of the repository; the README of the audit run is
   in the planner's lane `design-sweep`.
+- In the `*.tsv` files an empty last field is written as `-`, so the
+  files carry no trailing whitespace.
 - `index.html`: a self-contained prototype. Open it in a browser. It
   shows the same console with today's type and with the proposal, and a
   control for each choice below.
@@ -42,13 +44,17 @@ packages.
   17px for `xs` to `xl`, with line heights 16 to 24px.
 - Mono only for code, identifiers, paths and key caps. Aligned numbers
   use tabular figures, not a mono face.
+- Fonts are a consumer's choice. Poodle picks a default stack and lets
+  each consumer set its own. Font families are tokens (sans and mono, and
+  a heading family if a style needs one) with system stacks as the
+  default; a consumer overrides them on any subtree, and a rendering style
+  may set them. Poodle ships no font files in core. On native runtimes
+  the application registers its font bytes and names the families
+  through the same tokens.
 
 ## Open
 
-- Fonts. The prototype could only compare system faces (San Francisco and
-  Menlo on macOS); Inter was not installed. The study's recommendation
-  stands until judged: system font stacks in core, with an opt-in
-  self-hosted Inter entry.
+- Whether Poodle also offers an opt-in self-hosted Inter entry as a
+  convenience. The prototype could not show Inter; judge it by eye first.
 - Which components that promise size-dependent content type today
   (PageHeader, Table, editor prose) keep it.
-- `*.tsv`: an empty last field is written as `-` so the files carry no trailing whitespace.
