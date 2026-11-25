@@ -139,7 +139,7 @@ Updated: 2026-09-29
 | hover | pointer enters (when interactive) | elevated background, stronger border |
 | focus | keyboard focus (when interactive) | accent focus ring |
 | disabled | `disabled=true` | reduced opacity, not-allowed cursor |
-| selected | `selected=true` | accent border and focus-style outline |
+| selected | `selected=true` | selection border (`--poodle-style-selection-itemBorder`: the accent under the default style, transparent under `accent-tint` and `neutral`) and focus-style outline |
 | active | `active=true` | accent bar down the leading edge, primary-weight title; no border or fill change |
 | highlighted | `highlighted=true` | accent-tinted border, accent-to-transparent fill gradient, and inset accent ring; orthogonal to selection |
 | compact | `layout="compact"` | denser spacing, smaller leading area, single-line emphasis |

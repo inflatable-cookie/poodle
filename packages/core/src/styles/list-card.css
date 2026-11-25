@@ -89,8 +89,8 @@
   .poodle-list-card[data-selected="true"] {
     border-color: var(--poodle-recipe-list-card-selected-border, var(--poodle-style-selection-itemBorder, var(--poodle-color-accent-base)));
     background: var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-list-card-fill) 84%, var(--poodle-color-accent-base) 16%));
-    box-shadow: var(--poodle-recipe-list-card-selected-shadow, 0 0 0 0.0625rem var(--poodle-style-selection-itemFill, var(--poodle-color-accent-base)),
-      inset 0 0 0 0.0625rem var(--poodle-style-selection-itemFill, color-mix(
+    box-shadow: var(--poodle-recipe-list-card-selected-shadow, 0 0 0 0.0625rem var(--poodle-style-selection-itemBorder, var(--poodle-color-accent-base)),
+      inset 0 0 0 0.0625rem var(--poodle-style-selection-itemBorder, color-mix(
         in srgb,
         var(--poodle-color-accent-base) 12%,
         transparent
@@ -123,8 +123,8 @@
     box-shadow:
       inset var(--poodle-recipe-list-card-active-bar-width, 0.1875rem) 0 0 0
         var(--poodle-recipe-list-card-active-bar, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))),
-      0 0 0 0.0625rem var(--poodle-style-selection-itemFill, var(--poodle-color-accent-base)),
-      inset 0 0 0 0.0625rem var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
+      0 0 0 0.0625rem var(--poodle-style-selection-itemBorder, var(--poodle-color-accent-base)),
+      inset 0 0 0 0.0625rem var(--poodle-style-selection-itemBorder, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
   }
 
   .poodle-list-card[data-active="true"][data-highlighted="true"] {

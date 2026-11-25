@@ -179,8 +179,8 @@ response to keyboard events.
 | Property | Value |
 |----------|-------|
 | `border-color` | `transparent` |
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-elevated))` |
-| `box-shadow` | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)` |
+| `background` | `var(--poodle-recipe-action-discovery-panel-list-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-elevated))))` |
+| `box-shadow` | `var(--poodle-recipe-action-discovery-panel-list-shadow, inset 0 0 0 0.0625rem var(--poodle-style-selection-itemBorder, color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)))` |
 
 #### `.action-discovery-panel__trailing`
 

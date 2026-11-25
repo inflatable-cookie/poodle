@@ -228,7 +228,7 @@
     font-weight: 600;
     background: var(--poodle-recipe-tree-selected-row-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)));
     box-shadow: var(--poodle-recipe-tree-selected-row-shadow, inset 0 0 0 0.0625rem
-      var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent)));
+      var(--poodle-style-selection-itemBorder, color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent)));
   }
 
   .poodle-tree__item:focus-visible > .poodle-tree__row {

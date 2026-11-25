@@ -308,7 +308,7 @@
     display: inline-flex;
     flex-shrink: 0;
     margin-top: 0.125rem;
-    color: var(--poodle-color-accent-base);
+    color: var(--poodle-style-selection-indicator, var(--poodle-color-accent-base));
   }
 
   /* ── Capability axes ─────────────────────────────────────────────────────
