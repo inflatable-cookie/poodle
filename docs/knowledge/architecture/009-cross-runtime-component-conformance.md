@@ -36,7 +36,7 @@ type identity. Iterate `cases()`, implement `Backend::mount` and
 Normalize values from engine output to the fixture's probe vocabulary.
 Report unavailable observer channels as `unsupported`.
 
-A `poodle-node-conformance.v1` receipt carries the vocabulary and case
+A [`poodle-node-conformance.v1` receipt](../../evidence/conformance/receipt-v1.schema.json) carries the vocabulary and case
 manifest SHA-256 digests, the Poodle and backend source commits, the runner
 lockfile SHA-256, and the platform. Each case carries its ID, proof level,
 status, and observations in check order. A mismatch records the target,
@@ -44,8 +44,8 @@ probe, expected value, and actual value. `Receipt::from_json` rejects stale
 stamps, unknown or missing IDs, duplicate rows, and mismatched proof levels.
 Read a historical receipt with the kit at its stamped commit.
 
-For GPUI, run the headless test at the clean source commit and write the
-receipt in a subsequent commit.
+The GPUI runner targets macOS and Linux. Run the headless test at the clean
+source commit and write the receipt in a subsequent commit.
 
 ```sh
 POODLE_GPUI_CONFORMANCE_RECEIPT=/absolute/path/to/gpui.json \
