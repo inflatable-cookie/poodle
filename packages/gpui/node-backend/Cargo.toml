@@ -45,7 +45,10 @@ tinyvec = { version = "1", features = ["std"] }
 # Headless GPUI tests (TestAppContext / VisualTestContext). Ordinary builds
 # and the published interpretation path never pull test-support in.
 [dev-dependencies]
-gpui = { package = "gpui-unofficial", version = "=1.22.0", features = ["test-support"] }
+gpui = { package = "gpui-unofficial", version = "=1.22.0", features = ["test-support", "bench-support"] }
+poodle-conformance = { path = "../../contracts/conformance" }
+raw-window-handle = "0.6"
+serde_json = "1"
 
 [package.metadata.poodle]
 public-intent = true

@@ -12,6 +12,7 @@ rewrite them.
 - [`nucleus/`](nucleus/README.md) — frozen Nucleus cohort, receipt schemas,
   M1/A1/V1 receipts, the imported V1 lab bundle and the generated parity ledger
   (`scripts/nucleus-parity-receipts.ts`, `scripts/parity-evidence-ledger.ts`).
+- [`conformance/`](conformance/gpui-pilot.json) — GPUI node vocabulary pilot receipt.
 - [`visual/`](visual/g15-047-button-comparison/summary.json) — retained g15.047
   Button comparison run cited by the parity ledger and parity reports. Frozen.
 - [`releases/`](releases/README.md) — release evidence still consumed by local

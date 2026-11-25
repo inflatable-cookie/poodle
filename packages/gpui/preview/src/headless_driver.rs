@@ -161,6 +161,20 @@ pub struct HeadlessRoot {
     pub drag_host: poodle_gpui_node_backend::DragDropWindowHost,
 }
 
+impl HeadlessRoot {
+    /// Build the common headless mount for a node tree on a test window.
+    pub fn node(node: Arc<Mutex<Node>>, [box_width, box_height]: [f32; 2], cx: &App) -> Self {
+        Self {
+            content: HeadlessContent::Node(node),
+            focus: cx.focus_handle(),
+            box_width,
+            box_height,
+            drag: poodle_gpui_node_backend::DragDropController::new(),
+            drag_host: poodle_gpui_node_backend::DragDropWindowHost::new(),
+        }
+    }
+}
+
 impl Focusable for HeadlessRoot {
     fn focus_handle(&self, _cx: &App) -> FocusHandle {
         self.focus.clone()
@@ -282,14 +296,7 @@ impl<'a> HeadlessDriver<'a> {
         box_height: f32,
     ) -> Self {
         let (root, cx) = cx.add_window_view(|window, cx| {
-            let root = HeadlessRoot {
-                content: HeadlessContent::Node(Arc::clone(&node)),
-                focus: cx.focus_handle(),
-                box_width,
-                box_height,
-                drag: poodle_gpui_node_backend::DragDropController::new(),
-                drag_host: poodle_gpui_node_backend::DragDropWindowHost::new(),
-            };
+            let root = HeadlessRoot::node(Arc::clone(&node), [box_width, box_height], cx);
             window.refresh();
             root
         });

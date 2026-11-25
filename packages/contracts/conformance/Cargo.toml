@@ -1,0 +1,20 @@
+[package]
+name = "poodle-conformance"
+version = "0.4.15"
+edition = "2021"
+rust-version = "1.95"
+license = "MIT"
+description = "Headless conformance fixtures and receipts for Poodle node backends."
+repository = "https://github.com/inflatable-cookie/poodle"
+publish = false
+
+[dependencies]
+poodle-node = { path = "../node" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+
+[package.metadata.poodle]
+public-intent = false
+channel = "internal"
+stability = "internal-tooling"

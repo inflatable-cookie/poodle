@@ -26,8 +26,8 @@ them.
 
 - [Underlay bridge and adapter ownership](004-underlay-bridge-and-adapter-ownership.md)
   — superseded; current consumer ownership lives in the system shape
-- [Cross-runtime component conformance](009-cross-runtime-component-conformance.md)
-  — rejected g14 pilot record; not standing architecture
+- [Node backend conformance](009-cross-runtime-component-conformance.md)
+  — typed fixtures, headless observations and versioned backend receipts
 - [Native presentation construction context](010-native-presentation-construction-context.md)
   — accepted shared-Rust context, inheritance, composition, and explicit-
   override rules
