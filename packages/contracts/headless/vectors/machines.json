@@ -1,5 +1,227 @@
 {
   "description": "Shared conformance vectors for the Poodle headless machines. Executed by both the TypeScript core (packages/core/test/conformance.test.ts) and the Rust mirror (packages/contracts/headless/tests/conformance.rs). Effects are order-significant.",
+  "activeOption": [
+    {
+      "name": "next wraps past disabled options",
+      "context": {"items": [{"value": "a", "disabled": true}, {"value": "b"}, {"value": "c", "disabled": true}, {"value": "d"}, {"value": "e", "disabled": true}], "activeValue": "d"},
+      "event": {"type": "MOVE", "movement": "next"},
+      "expect": {"context": {"activeValue": "b"}, "effects": []}
+    },
+    {
+      "name": "previous wraps past disabled options",
+      "context": {"items": [{"value": "a", "disabled": true}, {"value": "b"}, {"value": "c", "disabled": true}, {"value": "d"}, {"value": "e", "disabled": true}], "activeValue": "b"},
+      "event": {"type": "MOVE", "movement": "previous"},
+      "expect": {"context": {"activeValue": "d"}, "effects": []}
+    },
+    {
+      "name": "next skips disabled options without wrapping",
+      "context": {"items": [{"value": "a"}, {"value": "b", "disabled": true}, {"value": "c"}], "activeValue": "a", "wrap": false},
+      "event": {"type": "MOVE", "movement": "next"},
+      "expect": {"context": {"activeValue": "c"}, "effects": []}
+    },
+    {
+      "name": "previous clamps when wrapping is off",
+      "context": {"items": [{"value": "a", "disabled": true}, {"value": "b"}, {"value": "c"}], "activeValue": "b", "wrap": false},
+      "event": {"type": "MOVE", "movement": "previous"},
+      "expect": {"context": {"activeValue": "b"}, "effects": []}
+    },
+    {
+      "name": "a disabled active option starts next at the first enabled item",
+      "context": {"items": [{"value": "a", "disabled": true}, {"value": "b"}, {"value": "c", "disabled": true}, {"value": "d"}], "activeValue": "c"},
+      "event": {"type": "MOVE", "movement": "next"},
+      "expect": {"context": {"activeValue": "b"}, "effects": []}
+    },
+    {
+      "name": "previous without an active option starts at the last enabled item",
+      "context": {"items": [{"value": "a", "disabled": true}, {"value": "b"}, {"value": "c", "disabled": true}], "activeValue": null},
+      "event": {"type": "MOVE", "movement": "previous"},
+      "expect": {"context": {"activeValue": "b"}, "effects": []}
+    },
+    {
+      "name": "first ignores the current option and disabled prefix",
+      "context": {"items": [{"value": "a", "disabled": true}, {"value": "b"}, {"value": "c"}], "activeValue": "c"},
+      "event": {"type": "MOVE", "movement": "first"},
+      "expect": {"context": {"activeValue": "b"}, "effects": []}
+    },
+    {
+      "name": "last skips disabled options at the end",
+      "context": {"items": [{"value": "a"}, {"value": "b"}, {"value": "c", "disabled": true}], "activeValue": "a"},
+      "event": {"type": "MOVE", "movement": "last"},
+      "expect": {"context": {"activeValue": "b"}, "effects": []}
+    },
+    {
+      "name": "all disabled options yield no active value",
+      "context": {"items": [{"value": "a", "disabled": true}, {"value": "b", "disabled": true}], "activeValue": "b"},
+      "event": {"type": "MOVE", "movement": "last"},
+      "expect": {"context": {"activeValue": null}, "effects": []}
+    },
+    {
+      "name": "replacement keeps an enabled identity after reordering",
+      "context": {"items": [{"value": "a"}, {"value": "b"}, {"value": "c"}], "activeValue": "b"},
+      "event": {"type": "REPLACE", "items": [{"value": "b"}, {"value": "c"}, {"value": "d"}]},
+      "expect": {"context": {"activeValue": "b"}, "effects": []}
+    },
+    {
+      "name": "replacement picks the option at the removed item's old index",
+      "context": {"items": [{"value": "a"}, {"value": "b"}, {"value": "c"}], "activeValue": "b"},
+      "event": {"type": "REPLACE", "items": [{"value": "a"}, {"value": "c"}, {"value": "d"}]},
+      "expect": {"context": {"activeValue": "c"}, "effects": []}
+    },
+    {
+      "name": "replacement breaks distance ties toward the later option",
+      "context": {"items": [{"value": "a"}, {"value": "b"}, {"value": "c"}], "activeValue": "b"},
+      "event": {"type": "REPLACE", "items": [{"value": "a"}, {"value": "b", "disabled": true}, {"value": "c"}]},
+      "expect": {"context": {"activeValue": "c"}, "effects": []}
+    },
+    {
+      "name": "replacement falls back to the nearer previous index",
+      "context": {"items": [{"value": "a"}, {"value": "b"}, {"value": "c"}, {"value": "d"}, {"value": "e"}], "activeValue": "e"},
+      "event": {"type": "REPLACE", "items": [{"value": "a"}, {"value": "b"}, {"value": "c", "disabled": true}]},
+      "expect": {"context": {"activeValue": "b"}, "effects": []}
+    },
+    {
+      "name": "replacement falls back to first enabled if the previous identity is unknown",
+      "context": {"items": [{"value": "a"}, {"value": "b"}], "activeValue": "unknown"},
+      "event": {"type": "REPLACE", "items": [{"value": "a", "disabled": true}, {"value": "c"}, {"value": "d"}]},
+      "expect": {"context": {"activeValue": "c"}, "effects": []}
+    },
+    {
+      "name": "replacement keeps an intentionally inactive list inactive",
+      "context": {"items": [], "activeValue": null},
+      "event": {"type": "REPLACE", "items": [{"value": "a"}]},
+      "expect": {"context": {"activeValue": null}, "effects": []}
+    },
+    {
+      "name": "replacement clears active value when results empty",
+      "context": {"items": [{"value": "a"}], "activeValue": "a"},
+      "event": {"type": "REPLACE", "items": []},
+      "expect": {"context": {"activeValue": null}, "effects": []}
+    }
+  ],
+  "selection": [
+    {
+      "name": "selecting a result from a new query retains older selected records",
+      "context": {"selected": [{"value": "old", "label": "Old tag"}], "mode": "multiple"},
+      "event": {"type": "SELECT", "item": {"value": "new", "label": "New tag"}},
+      "expect": {"context": {"selected": [{"value": "old", "label": "Old tag"}, {"value": "new", "label": "New tag"}]}, "effects": []}
+    },
+    {
+      "name": "selecting the same identity retains its saved record",
+      "context": {"selected": [{"value": "tag", "label": "Saved label"}], "mode": "multiple"},
+      "event": {"type": "SELECT", "item": {"value": "tag", "label": "New label"}},
+      "expect": {"context": {"selected": [{"value": "tag", "label": "Saved label"}]}, "effects": []}
+    },
+    {
+      "name": "single selection replaces an existing choice even at capacity",
+      "context": {"selected": [{"value": "old"}], "max": 1},
+      "event": {"type": "SELECT", "item": {"value": "new"}},
+      "expect": {"context": {"selected": [{"value": "new"}]}, "effects": []}
+    },
+    {
+      "name": "disabled candidate cannot be selected",
+      "context": {"selected": [{"value": "old"}]},
+      "event": {"type": "SELECT", "item": {"value": "disabled"}, "disabled": true},
+      "expect": {"context": {"selected": [{"value": "old"}]}, "effects": []}
+    },
+    {
+      "name": "toggle adds an enabled choice",
+      "context": {"selected": [{"value": "a"}], "mode": "multiple"},
+      "event": {"type": "TOGGLE", "item": {"value": "b"}},
+      "expect": {"context": {"selected": [{"value": "a"}, {"value": "b"}]}, "effects": []}
+    },
+    {
+      "name": "toggle removes a selected identity at capacity",
+      "context": {"selected": [{"value": "a"}, {"value": "b", "label": "Saved label"}], "mode": "multiple", "max": 2},
+      "event": {"type": "TOGGLE", "item": {"value": "b", "label": "New label"}},
+      "expect": {"context": {"selected": [{"value": "a"}]}, "effects": []}
+    },
+    {
+      "name": "toggle in single mode can deselect",
+      "context": {"selected": [{"value": "a"}]},
+      "event": {"type": "TOGGLE", "item": {"value": "a"}},
+      "expect": {"context": {"selected": []}, "effects": []}
+    },
+    {
+      "name": "toggling a disabled selected identity is inert",
+      "context": {"selected": [{"value": "a"}]},
+      "event": {"type": "TOGGLE", "item": {"value": "a"}, "disabled": true},
+      "expect": {"context": {"selected": [{"value": "a"}]}, "effects": []}
+    },
+    {
+      "name": "remove can address a choice absent from current results",
+      "context": {"selected": [{"value": "hidden", "label": "Saved label"}, {"value": "visible"}], "mode": "multiple"},
+      "event": {"type": "REMOVE", "item": {"value": "hidden"}},
+      "expect": {"context": {"selected": [{"value": "visible"}]}, "effects": []}
+    },
+    {
+      "name": "clear removes every choice",
+      "context": {"selected": [{"value": "a"}, {"value": "b"}], "mode": "multiple"},
+      "event": {"type": "CLEAR"},
+      "expect": {"context": {"selected": []}, "effects": []}
+    },
+    {
+      "name": "maximum prevents a new multiple choice",
+      "context": {"selected": [{"value": "a"}, {"value": "b"}], "mode": "multiple", "max": 2},
+      "event": {"type": "SELECT", "item": {"value": "c"}},
+      "expect": {"context": {"selected": [{"value": "a"}, {"value": "b"}]}, "effects": []}
+    },
+    {
+      "name": "zero maximum disables additions",
+      "context": {"selected": [], "max": 0},
+      "event": {"type": "SELECT", "item": {"value": "a"}},
+      "expect": {"context": {"selected": []}, "effects": []}
+    },
+    {
+      "name": "replace deduplicates in first-occurrence order before applying capacity",
+      "context": {"selected": [], "mode": "multiple", "max": 2},
+      "event": {"type": "REPLACE", "items": [{"value": "a", "label": "Original"}, {"value": "a", "label": "Later"}, {"value": "b"}, {"value": "c"}]},
+      "expect": {"context": {"selected": [{"value": "a", "label": "Original"}, {"value": "b"}]}, "effects": []}
+    }
+  ],
+  "listbox": [
+    {
+      "name": "single move skips disabled options and focuses before changing selection",
+      "context": {"items": [{"value": "a", "label": "A"}, {"value": "b", "disabled": true, "label": "B"}, {"value": "c", "label": "C"}, {"value": "d", "label": "D"}, {"value": "e", "disabled": true, "label": "E"}], "selectionMode": "single", "orientation": "vertical", "disabled": false, "selectedValues": ["a"], "focusedValue": "a", "anchorValue": null, "typeahead": "", "typeaheadAt": 0},
+      "event": {"type": "MOVE", "direction": 1},
+      "expect": {"context": {"focusedValue": "c", "anchorValue": "c", "selectedValues": ["c"]}, "effects": [{"type": "focus", "value": "c"}, {"type": "selectionChanged", "values": ["c"]}]}
+    },
+    {
+      "name": "move at the enabled boundary is inert",
+      "context": {"items": [{"value": "a", "label": "A"}, {"value": "b", "disabled": true, "label": "B"}, {"value": "c", "label": "C"}, {"value": "d", "label": "D"}, {"value": "e", "disabled": true, "label": "E"}], "selectionMode": "multiple", "orientation": "vertical", "disabled": false, "selectedValues": ["d"], "focusedValue": "d", "anchorValue": "d", "typeahead": "", "typeaheadAt": 0},
+      "event": {"type": "MOVE", "direction": 1},
+      "expect": {"context": {"focusedValue": "d", "anchorValue": "d", "selectedValues": ["d"]}, "effects": []}
+    },
+    {
+      "name": "last boundary skips disabled trailing options",
+      "context": {"items": [{"value": "a", "label": "A"}, {"value": "b", "disabled": true, "label": "B"}, {"value": "c", "label": "C"}, {"value": "d", "label": "D"}, {"value": "e", "disabled": true, "label": "E"}], "selectionMode": "multiple", "orientation": "vertical", "disabled": false, "selectedValues": ["a"], "focusedValue": "a", "anchorValue": null, "typeahead": "", "typeaheadAt": 0},
+      "event": {"type": "BOUNDARY", "boundary": "last"},
+      "expect": {"context": {"focusedValue": "d", "anchorValue": "d", "selectedValues": ["a"]}, "effects": [{"type": "focus", "value": "d"}]}
+    },
+    {
+      "name": "shift move extends the range through enabled rows in order",
+      "context": {"items": [{"value": "a", "label": "A"}, {"value": "b", "disabled": true, "label": "B"}, {"value": "c", "label": "C"}, {"value": "d", "label": "D"}, {"value": "e", "disabled": true, "label": "E"}], "selectionMode": "multiple", "orientation": "vertical", "disabled": false, "selectedValues": ["a"], "focusedValue": "a", "anchorValue": null, "typeahead": "", "typeaheadAt": 0},
+      "event": {"type": "MOVE", "direction": 1, "extendSelection": true},
+      "expect": {"context": {"focusedValue": "c", "anchorValue": "a", "selectedValues": ["a", "c"]}, "effects": [{"type": "focus", "value": "c"}, {"type": "selectionChanged", "values": ["a", "c"]}]}
+    },
+    {
+      "name": "space toggles the active value and normalizes against enabled rows",
+      "context": {"items": [{"value": "a", "label": "A"}, {"value": "b", "disabled": true, "label": "B"}, {"value": "c", "label": "C"}, {"value": "d", "label": "D"}, {"value": "e", "disabled": true, "label": "E"}], "selectionMode": "multiple", "orientation": "vertical", "disabled": false, "selectedValues": ["a", "a", "b", "hidden", "c"], "focusedValue": "a", "anchorValue": null, "typeahead": "", "typeaheadAt": 0},
+      "event": {"type": "SPACE"},
+      "expect": {"context": {"focusedValue": "a", "anchorValue": "a", "selectedValues": ["c"]}, "effects": [{"type": "selectionChanged", "values": ["c"]}]}
+    },
+    {
+      "name": "additive selection keeps visible values in order and filters absent values",
+      "context": {"items": [{"value": "a", "label": "A"}, {"value": "b", "disabled": true, "label": "B"}, {"value": "c", "label": "C"}, {"value": "d", "label": "D"}, {"value": "e", "disabled": true, "label": "E"}], "selectionMode": "multiple", "orientation": "vertical", "disabled": false, "selectedValues": ["d", "hidden"], "focusedValue": "a", "anchorValue": null, "typeahead": "", "typeaheadAt": 0},
+      "event": {"type": "SELECT", "value": "c", "additive": true},
+      "expect": {"context": {"focusedValue": "c", "anchorValue": "c", "selectedValues": ["d", "c"]}, "effects": [{"type": "focus", "value": "c"}, {"type": "selectionChanged", "values": ["d", "c"]}]}
+    },
+    {
+      "name": "disabled selection is inert",
+      "context": {"items": [{"value": "a", "label": "A"}, {"value": "b", "disabled": true, "label": "B"}, {"value": "c", "label": "C"}, {"value": "d", "label": "D"}, {"value": "e", "disabled": true, "label": "E"}], "selectionMode": "multiple", "orientation": "vertical", "disabled": false, "selectedValues": ["a"], "focusedValue": "a", "anchorValue": null, "typeahead": "", "typeaheadAt": 0},
+      "event": {"type": "SELECT", "value": "b", "additive": true},
+      "expect": {"context": {"focusedValue": "a", "anchorValue": null, "selectedValues": ["a"]}, "effects": []}
+    }
+  ],
   "checkbox": [
     {
       "name": "toggle emits checked change",

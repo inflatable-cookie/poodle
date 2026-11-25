@@ -3,6 +3,9 @@
 //! Focus, range selection, typeahead, and selection transitions are pure.
 //! Renderers own rows, native focus, and execution of the returned effects.
 
+use crate::active_option::{move_active_option, ActiveOption, ActiveOptionMove};
+use crate::selection::{selection_transition, SelectionEvent, SelectionMode, SelectionOptions};
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ListboxItem {
     pub value: String,
@@ -146,26 +149,56 @@ pub fn listbox_initial_focus(
     items
         .iter()
         .find(|item| !item.disabled && selected_values.contains(&item.value))
-        .or_else(|| items.iter().find(|item| !item.disabled))
-        .map(|item| item.value.clone())
+        .map(|item| item.value.as_str())
+        .or_else(|| move_active_option(active_options(items), None, ActiveOptionMove::First, false))
+        .map(str::to_owned)
+}
+
+fn active_options(items: &[ListboxItem]) -> impl Iterator<Item = ActiveOption<'_>> {
+    items.iter().map(|item| ActiveOption {
+        value: &item.value,
+        disabled: item.disabled,
+    })
 }
 
 fn normalize_values(values: &[String], context: &ListboxContext) -> Vec<String> {
-    let mut unique = Vec::new();
-    for value in values {
-        if context
-            .items
-            .iter()
-            .any(|item| item.value == *value && !item.disabled)
-            && !unique.contains(value)
-        {
-            unique.push(value.clone());
-        }
-    }
-    if context.selection_mode == ListboxSelectionMode::Single {
-        unique.truncate(1);
-    }
-    unique
+    let items: Vec<_> = values
+        .iter()
+        .filter(|value| {
+            context
+                .items
+                .iter()
+                .any(|item| item.value == value.as_str() && !item.disabled)
+        })
+        .collect();
+    let mode = match context.selection_mode {
+        ListboxSelectionMode::Single => SelectionMode::Single,
+        ListboxSelectionMode::Multiple => SelectionMode::Multiple,
+    };
+    selection_transition(
+        &[],
+        SelectionEvent::Replace { items: &items },
+        SelectionOptions { mode, max: None },
+        |value| value.as_str(),
+    )
+    .into_iter()
+    .cloned()
+    .collect()
+}
+
+fn toggled_values(context: &ListboxContext, value: &str) -> Vec<String> {
+    selection_transition(
+        &context.selected_values,
+        SelectionEvent::Toggle {
+            item: &value.to_owned(),
+            disabled: false,
+        },
+        SelectionOptions {
+            mode: SelectionMode::Multiple,
+            max: None,
+        },
+        String::as_str,
+    )
 }
 
 fn focus_result(
@@ -237,40 +270,35 @@ fn enabled_range(context: &ListboxContext, start_value: &str, end_value: &str) -
 }
 
 fn move_focus(context: &ListboxContext, direction: i8, extend_selection: bool) -> ListboxResult {
-    let enabled = listbox_enabled_items(context);
-    if enabled.is_empty() {
-        return ListboxResult {
-            context: context.clone(),
-            effects: Vec::new(),
-        };
-    }
-
-    let current = enabled_index(context, context.focused_value.as_deref());
-    let next_index = match current {
-        None if direction > 0 => 0,
-        None => enabled.len() - 1,
-        Some(index) if direction > 0 => (index + 1).min(enabled.len() - 1),
-        Some(index) => index.saturating_sub(1),
+    let movement = if direction > 0 {
+        ActiveOptionMove::Next
+    } else {
+        ActiveOptionMove::Previous
     };
-    let next = enabled[next_index];
-    if context.focused_value.as_deref() == Some(next.value.as_str()) {
+    let next = move_active_option(
+        active_options(&context.items),
+        context.focused_value.as_deref(),
+        movement,
+        false,
+    );
+    let Some(next) = next.filter(|value| Some(*value) != context.focused_value.as_deref()) else {
         return ListboxResult {
             context: context.clone(),
             effects: Vec::new(),
         };
-    }
+    };
 
     let focused = ListboxContext {
-        focused_value: Some(next.value.clone()),
+        focused_value: Some(next.to_owned()),
         ..context.clone()
     };
     let focus_effect = ListboxEffect::Focus {
-        value: next.value.clone(),
+        value: next.to_owned(),
     };
     match context.selection_mode {
         ListboxSelectionMode::Single => {
-            let mut selected = with_selection(&focused, &[next.value.clone()]);
-            selected.context.anchor_value = Some(next.value.clone());
+            let mut selected = with_selection(&focused, &[next.to_owned()]);
+            selected.context.anchor_value = Some(next.to_owned());
             selected.effects.insert(0, focus_effect);
             selected
         }
@@ -279,39 +307,36 @@ fn move_focus(context: &ListboxContext, direction: i8, extend_selection: bool) -
                 .anchor_value
                 .as_deref()
                 .or(context.focused_value.as_deref())
-                .unwrap_or(next.value.as_str());
-            let range = enabled_range(context, anchor, &next.value);
+                .unwrap_or(next);
+            let range = enabled_range(context, anchor, next);
             let mut selected = with_selection(context, &range);
-            selected.context.focused_value = Some(next.value.clone());
+            selected.context.focused_value = Some(next.to_owned());
             selected.context.anchor_value = Some(anchor.to_string());
             selected.effects.insert(0, focus_effect);
             selected
         }
         ListboxSelectionMode::Multiple => ListboxResult {
-            context: ListboxContext {
-                focused_value: Some(next.value.clone()),
-                ..context.clone()
-            },
+            context: focused,
             effects: vec![focus_effect],
         },
     }
 }
 
 fn focus_boundary(context: &ListboxContext, boundary: ListboxBoundary) -> ListboxResult {
-    let enabled = listbox_enabled_items(context);
-    let item = match boundary {
-        ListboxBoundary::First => enabled.first().copied(),
-        ListboxBoundary::Last => enabled.last().copied(),
+    let movement = match boundary {
+        ListboxBoundary::First => ActiveOptionMove::First,
+        ListboxBoundary::Last => ActiveOptionMove::Last,
     };
-    let Some(item) = item else {
+    let Some(value) = move_active_option(active_options(&context.items), None, movement, false)
+    else {
         return ListboxResult {
             context: context.clone(),
             effects: Vec::new(),
         };
     };
-    let mut result = focus_result(context, &item.value, Some(item.value.clone()));
+    let mut result = focus_result(context, value, Some(value.to_owned()));
     if context.selection_mode == ListboxSelectionMode::Single {
-        let mut selected = with_selection(&result.context, &[item.value.clone()]);
+        let mut selected = with_selection(&result.context, &[value.to_owned()]);
         selected.effects.splice(0..0, result.effects);
         result = selected;
     }
@@ -466,18 +491,7 @@ pub fn listbox_transition(context: &ListboxContext, event: ListboxEvent) -> List
             if context.selection_mode == ListboxSelectionMode::Single {
                 with_selection(context, &[value.to_string()])
             } else {
-                let values = if context.selected_values.iter().any(|item| item == value) {
-                    context
-                        .selected_values
-                        .iter()
-                        .filter(|item| item.as_str() != value)
-                        .cloned()
-                        .collect()
-                } else {
-                    let mut values = context.selected_values.clone();
-                    values.push(value.to_string());
-                    values
-                };
+                let values = toggled_values(context, value);
                 let mut result = with_selection(context, &values);
                 result.context.anchor_value = Some(value.to_string());
                 result
@@ -526,18 +540,7 @@ pub fn listbox_transition(context: &ListboxContext, event: ListboxEvent) -> List
                 return result;
             }
             let values = if additive {
-                if context.selected_values.iter().any(|item| item == &value) {
-                    context
-                        .selected_values
-                        .iter()
-                        .filter(|item| item.as_str() != value)
-                        .cloned()
-                        .collect()
-                } else {
-                    let mut values = context.selected_values.clone();
-                    values.push(value.clone());
-                    values
-                }
+                toggled_values(context, &value)
             } else {
                 vec![value.clone()]
             };

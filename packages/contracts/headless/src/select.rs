@@ -3,6 +3,9 @@
 //! Pure open/query/highlight/value transitions. Adapters own async loading,
 //! placement, portals, and DOM/native focus.
 
+use crate::active_option::{move_active_option, ActiveOption, ActiveOptionMove};
+use crate::selection::{selection_transition, SelectionEvent, SelectionOptions};
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SelectOptionState {
     pub value: String,
@@ -86,7 +89,22 @@ pub fn select_committed_query(context: &SelectContext) -> String {
 }
 
 pub fn select_query_highlight_value(context: &SelectContext) -> Option<String> {
-    select_enabled_visible_values(context).into_iter().next()
+    move_active_option(
+        visible_active_options(context),
+        None,
+        ActiveOptionMove::First,
+        false,
+    )
+    .map(str::to_owned)
+}
+
+fn visible_active_options(context: &SelectContext) -> impl Iterator<Item = ActiveOption<'_>> {
+    select_visible_options(context)
+        .into_iter()
+        .map(|option| ActiveOption {
+            value: &option.value,
+            disabled: option.disabled,
+        })
 }
 
 pub fn select_open_highlight_value(context: &SelectContext) -> Option<String> {
@@ -171,30 +189,18 @@ fn move_highlight(context: SelectContext, direction: i8) -> (SelectContext, Vec<
         return open_list(context);
     }
 
-    let enabled = select_enabled_visible_values(&context);
-
-    if enabled.is_empty() {
-        if context.highlighted_value.is_none() {
-            return inert(context);
-        }
-
-        let mut next = context;
-        next.highlighted_value = None;
-        return (next, Vec::new());
-    }
-
-    let current_index = context
-        .highlighted_value
-        .as_ref()
-        .and_then(|value| enabled.iter().position(|item| item == value));
-    let last = enabled.len() - 1;
-    let next_index = match current_index {
-        None if direction > 0 => 0,
-        None => last,
-        Some(index) if direction > 0 => index.saturating_add(1).min(last),
-        Some(index) => index.saturating_sub(1),
+    let movement = if direction > 0 {
+        ActiveOptionMove::Next
+    } else {
+        ActiveOptionMove::Previous
     };
-    let highlighted_value = enabled.get(next_index).cloned();
+    let highlighted_value = move_active_option(
+        visible_active_options(&context),
+        context.highlighted_value.as_deref(),
+        movement,
+        false,
+    )
+    .map(str::to_owned);
 
     if highlighted_value == context.highlighted_value {
         return inert(context);
@@ -210,12 +216,14 @@ fn jump_highlight(context: SelectContext, first: bool) -> (SelectContext, Vec<Se
         return inert(context);
     }
 
-    let enabled = select_enabled_visible_values(&context);
-    let highlighted_value = if first {
-        enabled.first().cloned()
+    let movement = if first {
+        ActiveOptionMove::First
     } else {
-        enabled.last().cloned()
+        ActiveOptionMove::Last
     };
+    let highlighted_value =
+        move_active_option(visible_active_options(&context), None, movement, false)
+            .map(str::to_owned);
 
     if highlighted_value == context.highlighted_value {
         return inert(context);
@@ -231,9 +239,18 @@ fn commit_option(context: SelectContext, value: &str) -> (SelectContext, Vec<Sel
         return inert(context);
     };
 
-    if option.disabled {
+    let chosen = selection_transition(
+        &[],
+        SelectionEvent::Select {
+            item: &option,
+            disabled: option.disabled,
+        },
+        SelectionOptions::default(),
+        |item| &item.value,
+    );
+    let Some(option) = chosen.first() else {
         return inert(context);
-    }
+    };
 
     let mut next = context.clone();
     next.value = option.value.clone();

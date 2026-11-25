@@ -27,6 +27,44 @@ and performs any effects.
 | `popoverTransition` | `PopoverState` is `closed` or `open`. `PopoverContext` requires `disabled`, `dismissOnOutsideInteract` and `initialFocus` (`first-focusable`, `content` or `none`). `PopoverEvent` is `TOGGLE`, `OPEN`, `CLOSE`, `ESCAPE` or `OUTSIDE_INTERACT`. No defaults. | Disabled controls stay put. An open emits `emitOpenChange(true)` then `focusOnOpen` with the supplied strategy. A close emits `emitOpenChange(false)` then `restoreTriggerFocus`. Outside interaction closes only when enabled by the context. The caller performs focus and dismissal wiring. |
 | `resolveOverlayPosition` | Anchor rect, overlay rect, preferred `OverlayPlacement`, viewport width and height, and a gap in pixels (default `6`). | Returns `top`, `left` and the actual `placement` in viewport coordinates after collision resolution. Caller measures and applies the result. |
 
+## Preview option and selection policies
+
+`moveActiveOption(items, activeValue, move, wrap = true)` takes ordered
+`ActiveOption` items with stable, unique string values and an optional
+`disabled` flag that defaults to false. `ActiveOptionMove` is `next`,
+`previous`, `first` or `last`. From a null, missing or disabled value,
+next starts at the first enabled option and previous starts at the last.
+First and last go straight to the corresponding enabled end. Pass
+`wrap = false` to stop at the ends.
+
+`reconcileActiveOption(previousItems, items, activeValue)` takes both lists
+when results change. It keeps the current value if it is still enabled.
+Otherwise it picks the enabled option nearest the old index in the new list,
+preferring the later index on ties. An unknown old value falls back to the
+first enabled option. A null value stays null. Both functions return null
+when no option is enabled. The caller supplies the order, decides when to
+reset or reconcile, and wires keyboard intents, focus and ARIA.
+
+`selectionTransition(selected, event, options?)` takes an ordered array
+of string IDs or records. `SelectionOptions` defaults to `mode: "single"`
+and an unlimited `max` in multiple mode. Supply `key: (item) => string` to
+identify records by a stable key. Without a key, strings compare by value and
+records by reference. Use a nonnegative whole number for `max`. Zero
+prevents additions.
+
+`SelectionEvent` supports `SELECT` and `TOGGLE` with an item and an optional
+`disabled` flag (defaults to false), `REMOVE` with an item, `CLEAR`, and
+`REPLACE` with an array of items. Selecting appends in multiple mode or
+replaces the current choice in single mode. Selecting an existing key keeps
+the saved item. Toggling an existing key removes it. Disabled candidates
+ignore select and toggle. Remove matches by key, including for items absent
+from the current results. Replace keeps the first item per key in input order
+up to the mode and count limit. Start with an empty array or seed with
+replace. Select, toggle, remove and clear return the same array when the
+selection is unchanged. The caller stores the result, supplies candidate
+eligibility, and projects which options to show. Both policies are pure and
+emit no effects.
+
 ## Preview theme resolution
 
 `resolveTheme(settings?)` returns 44 RGBA roles (integer channels from 0
@@ -70,4 +108,5 @@ covers the inputs, defaults and lifecycle for the web and native transports.
 ## Example
 
 Build an [async tag combobox](../guides/015-async-tag-combobox.md) using
-navigation, token removal, dismissal and the public Svelte anchor action.
+active-option navigation, persistent selection, token removal, dismissal and
+the public Svelte anchor action.
