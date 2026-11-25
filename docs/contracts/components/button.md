@@ -212,8 +212,8 @@ The secondary variant uses **elevation stacking** via `color-mix` toward `text-p
 | Var | Secondary (default) | Primary | Ghost |
 |-----|---------------------|---------|-------|
 | `--poodle-button-fill` | `var(--poodle-recipe-button-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 88%, var(--poodle-color-text-primary))))` | `accent-base` | `transparent` |
-| `--poodle-button-fill-hover` | `var(--poodle-recipe-button-fill-hover, color-mix(in srgb, var(--poodle-surface, ...) 80%, var(--poodle-color-text-primary)))` | `color-mix(in srgb, white 12%, accent-base)` | inherits generic hover formula |
-| `--poodle-button-fill-active` | `color-mix(in srgb, var(--poodle-surface, ...) 84%, var(--poodle-color-text-primary))` | `color-mix(in srgb, accent-base 88%, black)` | inherits generic active formula |
+| `--poodle-button-fill-hover` | `var(--poodle-recipe-button-fill-hover, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-surface, ...) 80%, var(--poodle-color-text-primary))))` | `color-mix(in srgb, white 12%, accent-base)` | inherits generic hover formula |
+| `--poodle-button-fill-active` | `var(--poodle-recipe-button-fill-active, var(--poodle-style-control-fillActive, color-mix(in srgb, var(--poodle-surface, ...) 84%, var(--poodle-color-text-primary))))` | `color-mix(in srgb, accent-base 88%, black)` | inherits generic active formula |
 | `--poodle-button-border` | `var(--poodle-recipe-button-border, var(--poodle-style-control-border, var(--poodle-color-border-default)))` | `color-mix(in srgb, accent-base 84%, black)` | `transparent` |
 | `--poodle-button-border-hover` | `var(--poodle-recipe-button-border-hover, color-mix(in srgb, var(--poodle-button-border) 78%, var(--poodle-color-text-primary)))` | inherits generic hover formula | `transparent` |
 | `--poodle-button-text` | `text-primary` | `text-inverse` | `text-primary` |

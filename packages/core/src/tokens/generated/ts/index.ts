@@ -133,7 +133,8 @@ export const tokens = {
       },
       "easing": {
         "standard": "cubic-bezier(0.2, 0, 0, 1)",
-        "emphasized": "cubic-bezier(0.16, 1, 0.3, 1)"
+        "emphasized": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "ease": "cubic-bezier(0.25, 0.1, 0.25, 1)"
       }
     },
     "overlay": {
@@ -157,7 +158,8 @@ export const tokens = {
     "state": {
       "opacity": {
         "disabled": 0.48,
-        "muted": 0.72
+        "muted": 0.72,
+        "dragSource": 0.4
       }
     },
     "typography": {
@@ -194,7 +196,8 @@ export const tokens = {
     "border": {
       "width": {
         "default": "0.0625rem",
-        "focus": "0.125rem"
+        "focus": "0.125rem",
+        "strong": "0.125rem"
       }
     },
     "color": {
@@ -245,6 +248,21 @@ export const tokens = {
         "operator": "#aebccf",
         "punctuation": "#98adbe",
         "invalid": "#ff8f86"
+      },
+      "fill": {
+        "rest": "rgba(19, 26, 34, 0.045)",
+        "hover": "rgba(19, 26, 34, 0.07)",
+        "active": "rgba(19, 26, 34, 0.10)"
+      },
+      "select": {
+        "accent": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
+        "accentSubtle": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)",
+        "accentStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)",
+        "accentSurface": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
+        "accentSurfaceHover": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))",
+        "accentBorder": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))",
+        "accentBorderStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))",
+        "neutral": "rgba(19, 26, 34, 0.10)"
       }
     },
     "elevation": {
@@ -272,7 +290,8 @@ export const tokens = {
       },
       "easing": {
         "standard": "cubic-bezier(0.2, 0, 0, 1)",
-        "emphasized": "cubic-bezier(0.16, 1, 0.3, 1)"
+        "emphasized": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "ease": "cubic-bezier(0.25, 0.1, 0.25, 1)"
       }
     },
     "overlay": {
@@ -356,19 +375,42 @@ export const tokens = {
     "state": {
       "opacity": {
         "disabled": 0.48,
-        "muted": 0.72
+        "muted": 0.72,
+        "dragSource": 0.4
       }
     },
     "style": {
       "control": {
         "fill": "initial",
         "border": "initial",
-        "shadow": "initial"
+        "shadow": "initial",
+        "fillHover": "initial",
+        "fillActive": "initial",
+        "secondaryText": "initial",
+        "secondaryOpacity": "initial"
       },
       "surface": {
         "fill": "initial",
         "border": "initial",
-        "shadow": "initial"
+        "shadow": "initial",
+        "floatingFill": "initial"
+      },
+      "selection": {
+        "itemFill": "initial",
+        "fill": "initial",
+        "fillStrong": "initial",
+        "fillStrongBackdrop": "initial",
+        "fillSurface": "initial",
+        "fillSurfaceHover": "initial",
+        "fillSolid": "initial",
+        "highlightFill": "initial",
+        "border": "initial",
+        "borderStrong": "initial",
+        "text": "initial",
+        "textSolid": "initial",
+        "indicator": "initial",
+        "detailText": "initial",
+        "fillStrongUnderlay": "initial"
       }
     },
     "tabs": {
@@ -391,7 +433,8 @@ export const tokens = {
         "size": "0.8125rem",
         "lineHeight": "1rem",
         "weight": "500",
-        "letterSpacing": "0.01em"
+        "letterSpacing": "0.01em",
+        "lineHeightTight": 1
       },
       "counter": {
         "size": "0.75rem"
@@ -400,7 +443,8 @@ export const tokens = {
         "family": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
         "size": "0.6875rem",
         "lineHeight": "1rem",
-        "weight": "500"
+        "weight": "500",
+        "lineHeightRatio": 1.35
       },
       "overline": {
         "letterSpacing": "0.04em"
@@ -501,6 +545,7 @@ export const tokenPaths = [
   "primitives.motion.duration.slow",
   "primitives.motion.easing.standard",
   "primitives.motion.easing.emphasized",
+  "primitives.motion.easing.ease",
   "primitives.overlay.z.base",
   "primitives.overlay.z.menu",
   "primitives.overlay.z.dialog",
@@ -513,6 +558,7 @@ export const tokenPaths = [
   "primitives.radius.pill",
   "primitives.state.opacity.disabled",
   "primitives.state.opacity.muted",
+  "primitives.state.opacity.dragSource",
   "primitives.typography.font.family.sans",
   "primitives.typography.font.family.mono",
   "primitives.typography.font.weight.regular",
@@ -530,6 +576,7 @@ export const tokenPaths = [
   "primitives.typography.font.lineHeight.lg",
   "border.width.default",
   "border.width.focus",
+  "border.width.strong",
   "color.background.canvas",
   "color.background.surface",
   "color.background.panel",
@@ -562,6 +609,17 @@ export const tokenPaths = [
   "color.syntax.operator",
   "color.syntax.punctuation",
   "color.syntax.invalid",
+  "color.fill.rest",
+  "color.fill.hover",
+  "color.fill.active",
+  "color.select.accent",
+  "color.select.accentSubtle",
+  "color.select.accentStrong",
+  "color.select.accentSurface",
+  "color.select.accentSurfaceHover",
+  "color.select.accentBorder",
+  "color.select.accentBorderStrong",
+  "color.select.neutral",
   "elevation.surface",
   "elevation.overlay",
   "elevation.dialog",
@@ -572,6 +630,7 @@ export const tokenPaths = [
   "motion.duration.overlay",
   "motion.easing.standard",
   "motion.easing.emphasized",
+  "motion.easing.ease",
   "overlay.z.menu",
   "overlay.z.dialog",
   "overlay.z.toast",
@@ -610,12 +669,33 @@ export const tokenPaths = [
   "space.button.iconInset",
   "state.opacity.disabled",
   "state.opacity.muted",
+  "state.opacity.dragSource",
   "style.control.fill",
   "style.control.border",
   "style.control.shadow",
+  "style.control.fillHover",
+  "style.control.fillActive",
+  "style.control.secondaryText",
+  "style.control.secondaryOpacity",
   "style.surface.fill",
   "style.surface.border",
   "style.surface.shadow",
+  "style.surface.floatingFill",
+  "style.selection.itemFill",
+  "style.selection.fill",
+  "style.selection.fillStrong",
+  "style.selection.fillStrongBackdrop",
+  "style.selection.fillSurface",
+  "style.selection.fillSurfaceHover",
+  "style.selection.fillSolid",
+  "style.selection.highlightFill",
+  "style.selection.border",
+  "style.selection.borderStrong",
+  "style.selection.text",
+  "style.selection.textSolid",
+  "style.selection.indicator",
+  "style.selection.detailText",
+  "style.selection.fillStrongUnderlay",
   "tabs.gap",
   "tabs.list.padding",
   "tabs.list.background",
@@ -629,11 +709,13 @@ export const tokenPaths = [
   "typography.label.lineHeight",
   "typography.label.weight",
   "typography.label.letterSpacing",
+  "typography.label.lineHeightTight",
   "typography.counter.size",
   "typography.caption.family",
   "typography.caption.size",
   "typography.caption.lineHeight",
   "typography.caption.weight",
+  "typography.caption.lineHeightRatio",
   "typography.overline.letterSpacing",
   "typography.heading.family",
   "typography.heading.size",
@@ -649,6 +731,7 @@ export const tokenPaths = [
 export const cssVars = {
   "border.width.default": "--poodle-border-width-default",
   "border.width.focus": "--poodle-border-width-focus",
+  "border.width.strong": "--poodle-border-width-strong",
   "color.background.canvas": "--poodle-color-background-canvas",
   "color.background.surface": "--poodle-color-background-surface",
   "color.background.panel": "--poodle-color-background-panel",
@@ -681,6 +764,17 @@ export const cssVars = {
   "color.syntax.operator": "--poodle-color-syntax-operator",
   "color.syntax.punctuation": "--poodle-color-syntax-punctuation",
   "color.syntax.invalid": "--poodle-color-syntax-invalid",
+  "color.fill.rest": "--poodle-color-fill-rest",
+  "color.fill.hover": "--poodle-color-fill-hover",
+  "color.fill.active": "--poodle-color-fill-active",
+  "color.select.accent": "--poodle-color-select-accent",
+  "color.select.accentSubtle": "--poodle-color-select-accentSubtle",
+  "color.select.accentStrong": "--poodle-color-select-accentStrong",
+  "color.select.accentSurface": "--poodle-color-select-accentSurface",
+  "color.select.accentSurfaceHover": "--poodle-color-select-accentSurfaceHover",
+  "color.select.accentBorder": "--poodle-color-select-accentBorder",
+  "color.select.accentBorderStrong": "--poodle-color-select-accentBorderStrong",
+  "color.select.neutral": "--poodle-color-select-neutral",
   "elevation.surface": "--poodle-elevation-surface",
   "elevation.overlay": "--poodle-elevation-overlay",
   "elevation.dialog": "--poodle-elevation-dialog",
@@ -691,6 +785,7 @@ export const cssVars = {
   "motion.duration.overlay": "--poodle-motion-duration-overlay",
   "motion.easing.standard": "--poodle-motion-easing-standard",
   "motion.easing.emphasized": "--poodle-motion-easing-emphasized",
+  "motion.easing.ease": "--poodle-motion-easing-ease",
   "overlay.z.menu": "--poodle-overlay-z-menu",
   "overlay.z.dialog": "--poodle-overlay-z-dialog",
   "overlay.z.toast": "--poodle-overlay-z-toast",
@@ -729,12 +824,33 @@ export const cssVars = {
   "space.button.iconInset": "--poodle-space-button-iconInset",
   "state.opacity.disabled": "--poodle-state-opacity-disabled",
   "state.opacity.muted": "--poodle-state-opacity-muted",
+  "state.opacity.dragSource": "--poodle-state-opacity-dragSource",
   "style.control.fill": "--poodle-style-control-fill",
   "style.control.border": "--poodle-style-control-border",
   "style.control.shadow": "--poodle-style-control-shadow",
+  "style.control.fillHover": "--poodle-style-control-fillHover",
+  "style.control.fillActive": "--poodle-style-control-fillActive",
+  "style.control.secondaryText": "--poodle-style-control-secondaryText",
+  "style.control.secondaryOpacity": "--poodle-style-control-secondaryOpacity",
   "style.surface.fill": "--poodle-style-surface-fill",
   "style.surface.border": "--poodle-style-surface-border",
   "style.surface.shadow": "--poodle-style-surface-shadow",
+  "style.surface.floatingFill": "--poodle-style-surface-floatingFill",
+  "style.selection.itemFill": "--poodle-style-selection-itemFill",
+  "style.selection.fill": "--poodle-style-selection-fill",
+  "style.selection.fillStrong": "--poodle-style-selection-fillStrong",
+  "style.selection.fillStrongBackdrop": "--poodle-style-selection-fillStrongBackdrop",
+  "style.selection.fillSurface": "--poodle-style-selection-fillSurface",
+  "style.selection.fillSurfaceHover": "--poodle-style-selection-fillSurfaceHover",
+  "style.selection.fillSolid": "--poodle-style-selection-fillSolid",
+  "style.selection.highlightFill": "--poodle-style-selection-highlightFill",
+  "style.selection.border": "--poodle-style-selection-border",
+  "style.selection.borderStrong": "--poodle-style-selection-borderStrong",
+  "style.selection.text": "--poodle-style-selection-text",
+  "style.selection.textSolid": "--poodle-style-selection-textSolid",
+  "style.selection.indicator": "--poodle-style-selection-indicator",
+  "style.selection.detailText": "--poodle-style-selection-detailText",
+  "style.selection.fillStrongUnderlay": "--poodle-style-selection-fillStrongUnderlay",
   "tabs.gap": "--poodle-tabs-gap",
   "tabs.list.padding": "--poodle-tabs-list-padding",
   "tabs.list.background": "--poodle-tabs-list-background",
@@ -748,11 +864,13 @@ export const cssVars = {
   "typography.label.lineHeight": "--poodle-typography-label-lineHeight",
   "typography.label.weight": "--poodle-typography-label-weight",
   "typography.label.letterSpacing": "--poodle-typography-label-letterSpacing",
+  "typography.label.lineHeightTight": "--poodle-typography-label-lineHeightTight",
   "typography.counter.size": "--poodle-typography-counter-size",
   "typography.caption.family": "--poodle-typography-caption-family",
   "typography.caption.size": "--poodle-typography-caption-size",
   "typography.caption.lineHeight": "--poodle-typography-caption-lineHeight",
   "typography.caption.weight": "--poodle-typography-caption-weight",
+  "typography.caption.lineHeightRatio": "--poodle-typography-caption-lineHeightRatio",
   "typography.overline.letterSpacing": "--poodle-typography-overline-letterSpacing",
   "typography.heading.family": "--poodle-typography-heading-family",
   "typography.heading.size": "--poodle-typography-heading-size",

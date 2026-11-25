@@ -1,0 +1,192 @@
+{
+  "accent-outline": {
+    "style": {
+      "selection": {
+        "itemFill": {
+          "$type": "color",
+          "$value": "initial"
+        },
+        "fill": {
+          "$type": "color",
+          "$value": "{color.select.accent}"
+        },
+        "fillStrong": {
+          "$type": "color",
+          "$value": "{color.select.accentStrong}"
+        },
+        "fillStrongBackdrop": {
+          "$type": "color",
+          "$value": "initial"
+        },
+        "fillSurface": {
+          "$type": "color",
+          "$value": "{color.select.accentSurface}"
+        },
+        "fillSurfaceHover": {
+          "$type": "color",
+          "$value": "{color.select.accentSurfaceHover}"
+        },
+        "fillSolid": {
+          "$type": "color",
+          "$value": "initial"
+        },
+        "highlightFill": {
+          "$type": "color",
+          "$value": "{color.select.accentSubtle}"
+        },
+        "border": {
+          "$type": "color",
+          "$value": "{color.select.accentBorder}"
+        },
+        "borderStrong": {
+          "$type": "color",
+          "$value": "{color.select.accentBorderStrong}"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{color.text.primary}"
+        },
+        "textSolid": {
+          "$type": "color",
+          "$value": "initial"
+        },
+        "indicator": {
+          "$type": "color",
+          "$value": "{color.accent.base}"
+        },
+        "detailText": {
+          "$type": "color",
+          "$value": "initial"
+        }
+      }
+    }
+  },
+  "accent-tint": {
+    "style": {
+      "selection": {
+        "itemFill": {
+          "$type": "color",
+          "$value": "{color.select.accentSubtle}"
+        },
+        "fill": {
+          "$type": "color",
+          "$value": "{color.select.accent}"
+        },
+        "fillStrong": {
+          "$type": "color",
+          "$value": "{color.select.accentStrong}"
+        },
+        "fillStrongBackdrop": {
+          "$type": "color",
+          "$value": "{color.background.canvas}"
+        },
+        "fillSurface": {
+          "$type": "color",
+          "$value": "{color.select.accentSurface}"
+        },
+        "fillSurfaceHover": {
+          "$type": "color",
+          "$value": "{color.select.accentSurfaceHover}"
+        },
+        "fillSolid": {
+          "$type": "color",
+          "$value": "{color.select.accentSurface}"
+        },
+        "highlightFill": {
+          "$type": "color",
+          "$value": "{color.select.accentSubtle}"
+        },
+        "border": {
+          "$type": "color",
+          "$value": "transparent"
+        },
+        "borderStrong": {
+          "$type": "color",
+          "$value": "transparent"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{color.text.primary}"
+        },
+        "textSolid": {
+          "$type": "color",
+          "$value": "{color.text.primary}"
+        },
+        "indicator": {
+          "$type": "color",
+          "$value": "{color.accent.base}"
+        },
+        "detailText": {
+          "$type": "color",
+          "$value": "{color.text.primary}"
+        }
+      }
+    }
+  },
+  "neutral": {
+    "style": {
+      "selection": {
+        "itemFill": {
+          "$type": "color",
+          "$value": "{color.select.neutral}"
+        },
+        "fill": {
+          "$type": "color",
+          "$value": "{color.select.neutral}"
+        },
+        "fillStrong": {
+          "$type": "color",
+          "$value": "{color.select.neutral}"
+        },
+        "fillStrongBackdrop": {
+          "$type": "color",
+          "$value": "initial"
+        },
+        "fillSurface": {
+          "$type": "color",
+          "$value": "{color.select.neutral}"
+        },
+        "fillSurfaceHover": {
+          "$type": "color",
+          "$value": "{color.select.neutral}"
+        },
+        "fillSolid": {
+          "$type": "color",
+          "$value": "{color.select.neutral}"
+        },
+        "highlightFill": {
+          "$type": "color",
+          "$value": "{color.select.neutral}"
+        },
+        "border": {
+          "$type": "color",
+          "$value": "transparent"
+        },
+        "borderStrong": {
+          "$type": "color",
+          "$value": "transparent"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{color.text.primary}"
+        },
+        "textSolid": {
+          "$type": "color",
+          "$value": "{color.text.primary}"
+        },
+        "indicator": {
+          "$type": "color",
+          "$value": "{color.accent.base}"
+        },
+        "detailText": {
+          "$type": "color",
+          "$value": "{color.text.primary}"
+        },
+        "fillStrongUnderlay": {
+          "$type": "color",
+          "$value": "transparent"
+        }
+      }
+    }
+  }
+}

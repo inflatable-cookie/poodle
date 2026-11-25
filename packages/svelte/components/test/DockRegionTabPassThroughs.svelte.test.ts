@@ -159,27 +159,22 @@ describe("DockRegion tab pass-throughs (svelte)", () => {
 
 // The underline hook is a CSS declaration; happy-dom cannot resolve the
 // var()-of-var fallback chain at computed-value time, so the contract is
-// asserted on the stylesheet declaration itself: one hook, both orientations,
-// the current value as fallback.
+// asserted on the stylesheet declaration itself: one hook for both
+// orientations, with the style token and default accent as fallbacks.
 describe("DockRegion underline recipe hook (tabs.css)", () => {
   const tabsCss = readFileSync(
     new URL("../../../core/src/styles/tabs.css", `file://${import.meta.dirname}/`),
     "utf8",
   );
-  const hook = "var(--poodle-recipe-tabs-active-underline-border, var(--poodle-color-accent-base))";
+  const hook =
+    "var(--poodle-recipe-tabs-active-underline-border, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)))";
 
-  it("wraps the measured indicator colour in the hook", () => {
+  it("resolves the measured indicator through the recipe, style and default accent", () => {
     expect(tabsCss).toContain(`background: ${hook}`);
   });
 
   it("uses the same hook for both orientations", () => {
     expect(tabsCss).toContain('.poodle-tabs[data-orientation="horizontal"] .poodle-tabs__indicator');
     expect(tabsCss).toContain('.poodle-tabs[data-orientation="vertical"] .poodle-tabs__indicator');
-  });
-
-  it("leaves the current accent colour as the fallback", () => {
-    // The fallback is exactly the pre-hook value, so an unset hook renders
-    // byte-identically to today.
-    expect(hook).toContain("var(--poodle-color-accent-base)");
   });
 });

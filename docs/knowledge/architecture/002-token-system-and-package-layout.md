@@ -85,12 +85,38 @@ theme and style writes and theme selectors in shared component CSS.
 
 A style mode declares a `treatment` group alongside any direct semantic token
 overrides. The build expands the choices from `schema/style-treatments/` before
-applying direct overrides. The shipped switches are `fill` (`outlined`,
-`filled`, `ghost`) for controls at rest, and `surface` (`border`, `elevation`,
-`tonal`) for containers. The default choices preserve the component's
-underlying paint through fallback slots. Nested style modes start from the
-base values for style-owned tokens, and nested themes resolve style aliases
-against their own colour roles.
+applying direct overrides.
+
+| Switch | Choices | Applies to |
+| --- | --- | --- |
+| `fill` | `outlined`, `filled`, `ghost` | Controls at rest, including hover and press fills where used |
+| `surface` | `border`, `elevation`, `tonal` | Containers |
+| `selection` | `accent-outline`, `accent-tint`, `neutral` | Selected items in Select, Tabs and ToggleGroup |
+
+The default uses `outlined`, `border` and `accent-outline` to reproduce
+the prior paint. `accent-tint` keeps tint and suppresses selection borders.
+`neutral` uses a neutral fill, stronger text and an accent only for an
+existing small indicator. Each component retains its selection anatomy.
+
+Themes define `color.fill.{rest,hover,active}` for filled controls and
+`color.select.{accent,neutral}` for selected items. Neutral fills use the
+theme's primary-text ink at a fixed alpha over the current layer. Light
+themes use 0.045, 0.07, 0.10 and 0.10 for those four neutral fills. Dark
+themes use 0.055, 0.085, 0.12 and 0.13. The additional accent fill and
+border roles preserve the previous component weights and backdrops. The
+selection switch reuses the primary text and accent indicator roles.
+Default solid Tabs keep their existing accent and inverse text tokens.
+
+Tonal goes from canvas to `color.background.panel` for Card and from
+panel to `color.background.elevated` for floating Dialog. Both use the
+existing colour steps. Run `effigy tokens:contrast` to check the new fills
+with their paired text on the content layers. The report shows the existing
+steps below 0.04 OKLCH lightness so themes can address small steps in a
+later palette revision.
+
+Nested style modes start from the base values for style-owned tokens, and
+nested themes resolve style aliases against their own colour roles. Style
+data references the roles. The themes own the colour values.
 
 Native theme providers support theme, density, and control size. Generated
 Rust style definitions carry treatment enums and token references for future

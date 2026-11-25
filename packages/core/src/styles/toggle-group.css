@@ -48,7 +48,7 @@
   .poodle-toggle-group__item {
     min-height: var(--poodle-toggle-group-height);
     padding: 0 var(--poodle-toggle-group-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
+    border: var(--poodle-border-width-default) solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-recipe-toggle-group-item-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)));
     box-shadow: var(--poodle-recipe-toggle-group-item-shadow, none);
@@ -56,27 +56,28 @@
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);
-    font-weight: 600;
-    line-height: 1;
+    font-weight: var(--poodle-typography-heading-weight);
+    line-height: var(--poodle-typography-label-lineHeightTight);
     transition:
-      border-color 180ms ease,
-      background 180ms ease,
-      box-shadow 180ms ease,
-      color 180ms ease;
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-ease),
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-ease),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-ease),
+      color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-ease);
   }
 
   .poodle-toggle-group__item.poodle-selected {
     background: var(--poodle-recipe-toggle-group-selected-item-fill, linear-gradient(
-        color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent),
-        color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)
+        var(--poodle-style-selection-fillStrong, var(--poodle-color-select-accentStrong)),
+        var(--poodle-style-selection-fillStrong, var(--poodle-color-select-accentStrong))
       ),
-      color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)));
-    border-color: var(--poodle-recipe-toggle-group-item-border, color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default)));
+      var(--poodle-style-selection-fillStrongUnderlay, color-mix(in srgb, var(--poodle-surface, var(--poodle-style-selection-fillStrongBackdrop)) 93%, var(--poodle-color-text-primary))));
+    border-color: var(--poodle-recipe-toggle-group-item-border, var(--poodle-style-selection-borderStrong, var(--poodle-color-select-accentBorderStrong)));
+    color: var(--poodle-recipe-toggle-group-item-text, var(--poodle-style-selection-text, var(--poodle-color-text-primary)));
   }
 
   .poodle-toggle-group__item:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-    outline-offset: 0.125rem;
+    outline-offset: var(--poodle-focus-outline-offset);
   }
 
   .poodle-toggle-group__item:disabled {

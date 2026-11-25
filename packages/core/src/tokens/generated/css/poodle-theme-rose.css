@@ -18,4 +18,15 @@
   --poodle-color-accent-focusRing: #ff7ba3;
   --poodle-color-icon-primary: #f0eaeb;
   --poodle-color-icon-muted: #a89fa1;
+  --poodle-color-fill-rest: rgba(240, 234, 235, 0.055);
+  --poodle-color-fill-hover: rgba(240, 234, 235, 0.085);
+  --poodle-color-fill-active: rgba(240, 234, 235, 0.12);
+  --poodle-color-select-accent: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-select-accentSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-select-accentStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-select-accentSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentBorder: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-select-accentBorderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-select-neutral: rgba(240, 234, 235, 0.13);
 }

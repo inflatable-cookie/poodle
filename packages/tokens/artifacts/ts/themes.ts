@@ -30,7 +30,18 @@ export const themes = {
       "color.syntax.property": "#ad2678",
       "color.syntax.operator": "#54616f",
       "color.syntax.punctuation": "#5e6e7e",
-      "color.syntax.invalid": "#c22f38"
+      "color.syntax.invalid": "#c22f38",
+      "color.fill.rest": "rgba(42, 38, 34, 0.045)",
+      "color.fill.hover": "rgba(42, 38, 34, 0.07)",
+      "color.fill.active": "rgba(42, 38, 34, 0.10)",
+      "color.select.accent": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
+      "color.select.accentSubtle": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)",
+      "color.select.accentStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)",
+      "color.select.accentSurface": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
+      "color.select.accentSurfaceHover": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))",
+      "color.select.accentBorder": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))",
+      "color.select.accentBorderStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))",
+      "color.select.neutral": "rgba(42, 38, 34, 0.10)"
     }
   },
   "cobalt": {
@@ -56,7 +67,18 @@ export const themes = {
       "color.status.danger": "#ef7c72",
       "color.status.info": "#5b9dff",
       "color.icon.primary": "#ededed",
-      "color.icon.muted": "#a3a3a3"
+      "color.icon.muted": "#a3a3a3",
+      "color.fill.rest": "rgba(237, 237, 237, 0.055)",
+      "color.fill.hover": "rgba(237, 237, 237, 0.085)",
+      "color.fill.active": "rgba(237, 237, 237, 0.12)",
+      "color.select.accent": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
+      "color.select.accentSubtle": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)",
+      "color.select.accentStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)",
+      "color.select.accentSurface": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
+      "color.select.accentSurfaceHover": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))",
+      "color.select.accentBorder": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))",
+      "color.select.accentBorderStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))",
+      "color.select.neutral": "rgba(237, 237, 237, 0.13)"
     }
   },
   "eclipse": {
@@ -78,7 +100,18 @@ export const themes = {
       "color.accent.hover": "#ffca73",
       "color.accent.focusRing": "#ffca73",
       "color.icon.primary": "#eef2f6",
-      "color.icon.muted": "#99a4b0"
+      "color.icon.muted": "#99a4b0",
+      "color.fill.rest": "rgba(238, 242, 246, 0.055)",
+      "color.fill.hover": "rgba(238, 242, 246, 0.085)",
+      "color.fill.active": "rgba(238, 242, 246, 0.12)",
+      "color.select.accent": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
+      "color.select.accentSubtle": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)",
+      "color.select.accentStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)",
+      "color.select.accentSurface": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
+      "color.select.accentSurfaceHover": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))",
+      "color.select.accentBorder": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))",
+      "color.select.accentBorderStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))",
+      "color.select.neutral": "rgba(238, 242, 246, 0.13)"
     }
   },
   "forest": {
@@ -100,7 +133,18 @@ export const themes = {
       "color.accent.hover": "#6fe0a3",
       "color.accent.focusRing": "#6fe0a3",
       "color.icon.primary": "#e9f0ea",
-      "color.icon.muted": "#99a49d"
+      "color.icon.muted": "#99a49d",
+      "color.fill.rest": "rgba(233, 240, 234, 0.055)",
+      "color.fill.hover": "rgba(233, 240, 234, 0.085)",
+      "color.fill.active": "rgba(233, 240, 234, 0.12)",
+      "color.select.accent": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
+      "color.select.accentSubtle": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)",
+      "color.select.accentStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)",
+      "color.select.accentSurface": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
+      "color.select.accentSurfaceHover": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))",
+      "color.select.accentBorder": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))",
+      "color.select.accentBorderStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))",
+      "color.select.neutral": "rgba(233, 240, 234, 0.13)"
     }
   },
   "graphite": {
@@ -126,7 +170,18 @@ export const themes = {
       "color.status.danger": "#ef7c72",
       "color.status.info": "#6ea9d4",
       "color.icon.primary": "#efefef",
-      "color.icon.muted": "#a6a6a6"
+      "color.icon.muted": "#a6a6a6",
+      "color.fill.rest": "rgba(239, 239, 239, 0.055)",
+      "color.fill.hover": "rgba(239, 239, 239, 0.085)",
+      "color.fill.active": "rgba(239, 239, 239, 0.12)",
+      "color.select.accent": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
+      "color.select.accentSubtle": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)",
+      "color.select.accentStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)",
+      "color.select.accentSurface": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
+      "color.select.accentSurfaceHover": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))",
+      "color.select.accentBorder": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))",
+      "color.select.accentBorderStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))",
+      "color.select.neutral": "rgba(239, 239, 239, 0.13)"
     }
   },
   "hornet": {
@@ -148,7 +203,18 @@ export const themes = {
       "color.accent.hover": "#ffe14d",
       "color.accent.focusRing": "#ffe14d",
       "color.icon.primary": "#ffffff",
-      "color.icon.muted": "#d4d4d4"
+      "color.icon.muted": "#d4d4d4",
+      "color.fill.rest": "rgba(255, 255, 255, 0.055)",
+      "color.fill.hover": "rgba(255, 255, 255, 0.085)",
+      "color.fill.active": "rgba(255, 255, 255, 0.12)",
+      "color.select.accent": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
+      "color.select.accentSubtle": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)",
+      "color.select.accentStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)",
+      "color.select.accentSurface": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
+      "color.select.accentSurfaceHover": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))",
+      "color.select.accentBorder": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))",
+      "color.select.accentBorderStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))",
+      "color.select.neutral": "rgba(255, 255, 255, 0.13)"
     }
   },
   "iceberg": {
@@ -177,7 +243,18 @@ export const themes = {
       "color.syntax.invalid": "#c22f38",
       "color.accent.base": "#1668d6",
       "color.accent.hover": "#2d86f3",
-      "color.accent.focusRing": "#1668d6"
+      "color.accent.focusRing": "#1668d6",
+      "color.fill.rest": "rgba(19, 26, 34, 0.045)",
+      "color.fill.hover": "rgba(19, 26, 34, 0.07)",
+      "color.fill.active": "rgba(19, 26, 34, 0.10)",
+      "color.select.accent": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
+      "color.select.accentSubtle": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)",
+      "color.select.accentStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)",
+      "color.select.accentSurface": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
+      "color.select.accentSurfaceHover": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))",
+      "color.select.accentBorder": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))",
+      "color.select.accentBorderStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))",
+      "color.select.neutral": "rgba(19, 26, 34, 0.10)"
     }
   },
   "meadow": {
@@ -209,7 +286,18 @@ export const themes = {
       "color.syntax.property": "#ad2678",
       "color.syntax.operator": "#54616f",
       "color.syntax.punctuation": "#5e6e7e",
-      "color.syntax.invalid": "#c22f38"
+      "color.syntax.invalid": "#c22f38",
+      "color.fill.rest": "rgba(27, 36, 30, 0.045)",
+      "color.fill.hover": "rgba(27, 36, 30, 0.07)",
+      "color.fill.active": "rgba(27, 36, 30, 0.10)",
+      "color.select.accent": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
+      "color.select.accentSubtle": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)",
+      "color.select.accentStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)",
+      "color.select.accentSurface": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
+      "color.select.accentSurfaceHover": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))",
+      "color.select.accentBorder": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))",
+      "color.select.accentBorderStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))",
+      "color.select.neutral": "rgba(27, 36, 30, 0.10)"
     }
   },
   "midnight": {
@@ -231,7 +319,18 @@ export const themes = {
       "color.accent.hover": "#8aa4ff",
       "color.accent.focusRing": "#8aa4ff",
       "color.icon.primary": "#e8ebf2",
-      "color.icon.muted": "#969ca8"
+      "color.icon.muted": "#969ca8",
+      "color.fill.rest": "rgba(232, 235, 242, 0.055)",
+      "color.fill.hover": "rgba(232, 235, 242, 0.085)",
+      "color.fill.active": "rgba(232, 235, 242, 0.12)",
+      "color.select.accent": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
+      "color.select.accentSubtle": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)",
+      "color.select.accentStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)",
+      "color.select.accentSurface": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
+      "color.select.accentSurfaceHover": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))",
+      "color.select.accentBorder": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))",
+      "color.select.accentBorderStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))",
+      "color.select.neutral": "rgba(232, 235, 242, 0.13)"
     }
   },
   "nord": {
@@ -253,7 +352,18 @@ export const themes = {
       "color.accent.hover": "#9fd0de",
       "color.accent.focusRing": "#9fd0de",
       "color.icon.primary": "#e9edf4",
-      "color.icon.muted": "#99a2b2"
+      "color.icon.muted": "#99a2b2",
+      "color.fill.rest": "rgba(233, 237, 244, 0.055)",
+      "color.fill.hover": "rgba(233, 237, 244, 0.085)",
+      "color.fill.active": "rgba(233, 237, 244, 0.12)",
+      "color.select.accent": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
+      "color.select.accentSubtle": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)",
+      "color.select.accentStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)",
+      "color.select.accentSurface": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
+      "color.select.accentSurfaceHover": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))",
+      "color.select.accentBorder": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))",
+      "color.select.accentBorderStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))",
+      "color.select.neutral": "rgba(233, 237, 244, 0.13)"
     }
   },
   "rose": {
@@ -275,7 +385,18 @@ export const themes = {
       "color.accent.hover": "#ff7ba3",
       "color.accent.focusRing": "#ff7ba3",
       "color.icon.primary": "#f0eaeb",
-      "color.icon.muted": "#a89fa1"
+      "color.icon.muted": "#a89fa1",
+      "color.fill.rest": "rgba(240, 234, 235, 0.055)",
+      "color.fill.hover": "rgba(240, 234, 235, 0.085)",
+      "color.fill.active": "rgba(240, 234, 235, 0.12)",
+      "color.select.accent": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
+      "color.select.accentSubtle": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)",
+      "color.select.accentStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)",
+      "color.select.accentSurface": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
+      "color.select.accentSurfaceHover": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))",
+      "color.select.accentBorder": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))",
+      "color.select.accentBorderStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))",
+      "color.select.neutral": "rgba(240, 234, 235, 0.13)"
     }
   },
   "solarized": {
@@ -297,7 +418,18 @@ export const themes = {
       "color.accent.hover": "#cb9a10",
       "color.accent.focusRing": "#cb9a10",
       "color.icon.primary": "#eee8d5",
-      "color.icon.muted": "#93a1a1"
+      "color.icon.muted": "#93a1a1",
+      "color.fill.rest": "rgba(238, 232, 213, 0.055)",
+      "color.fill.hover": "rgba(238, 232, 213, 0.085)",
+      "color.fill.active": "rgba(238, 232, 213, 0.12)",
+      "color.select.accent": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
+      "color.select.accentSubtle": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)",
+      "color.select.accentStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)",
+      "color.select.accentSurface": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
+      "color.select.accentSurfaceHover": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))",
+      "color.select.accentBorder": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))",
+      "color.select.accentBorderStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))",
+      "color.select.neutral": "rgba(238, 232, 213, 0.13)"
     }
   }
 } as const;
@@ -395,6 +527,7 @@ export const styles = {
     "description": "Poodle’s standard control and surface treatments.",
     "treatment": {
       "fill": "outlined",
+      "selection": "accent-outline",
       "surface": "border"
     },
     "overrides": {
@@ -403,7 +536,21 @@ export const styles = {
       "style.control.shadow": "initial",
       "style.surface.fill": "initial",
       "style.surface.border": "initial",
-      "style.surface.shadow": "initial"
+      "style.surface.shadow": "initial",
+      "style.selection.itemFill": "initial",
+      "style.selection.fill": "{color.select.accent}",
+      "style.selection.fillStrong": "{color.select.accentStrong}",
+      "style.selection.fillStrongBackdrop": "initial",
+      "style.selection.fillSurface": "{color.select.accentSurface}",
+      "style.selection.fillSurfaceHover": "{color.select.accentSurfaceHover}",
+      "style.selection.fillSolid": "initial",
+      "style.selection.highlightFill": "{color.select.accentSubtle}",
+      "style.selection.border": "{color.select.accentBorder}",
+      "style.selection.borderStrong": "{color.select.accentBorderStrong}",
+      "style.selection.text": "{color.text.primary}",
+      "style.selection.textSolid": "initial",
+      "style.selection.indicator": "{color.accent.base}",
+      "style.selection.detailText": "initial"
     }
   }
 } as const;

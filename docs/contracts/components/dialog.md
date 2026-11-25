@@ -303,8 +303,8 @@ Two rules bound that deferral, and both are required behaviour:
 | `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
 | `border` | `var(--poodle-border-width-default) solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent))` |
 | `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `var(--poodle-recipe-dialog-surface-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))))` |
-| `--poodle-surface` | `var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))` |
+| `background` | `var(--poodle-recipe-dialog-surface-fill, var(--poodle-surface))` |
+| `--poodle-surface` | `var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))))` |
 | `box-shadow` | `var(--poodle-recipe-dialog-surface-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-dialog)))` |
 
 ### Surface bare modifier `.dialog__surface--bare`

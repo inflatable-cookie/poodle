@@ -49,6 +49,10 @@
         "shadow": {
           "$type": "shadow",
           "$value": "none"
+        },
+        "floatingFill": {
+          "$type": "color",
+          "$value": "{color.background.elevated}"
         }
       }
     }

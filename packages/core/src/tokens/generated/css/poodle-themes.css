@@ -28,6 +28,17 @@
   --poodle-color-syntax-operator: #54616f;
   --poodle-color-syntax-punctuation: #5e6e7e;
   --poodle-color-syntax-invalid: #c22f38;
+  --poodle-color-fill-rest: rgba(42, 38, 34, 0.045);
+  --poodle-color-fill-hover: rgba(42, 38, 34, 0.07);
+  --poodle-color-fill-active: rgba(42, 38, 34, 0.10);
+  --poodle-color-select-accent: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-select-accentSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-select-accentStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-select-accentSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentBorder: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-select-accentBorderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-select-neutral: rgba(42, 38, 34, 0.10);
 }
 
 [data-theme="cobalt"] {
@@ -53,6 +64,17 @@
   --poodle-color-status-info: #5b9dff;
   --poodle-color-icon-primary: #ededed;
   --poodle-color-icon-muted: #a3a3a3;
+  --poodle-color-fill-rest: rgba(237, 237, 237, 0.055);
+  --poodle-color-fill-hover: rgba(237, 237, 237, 0.085);
+  --poodle-color-fill-active: rgba(237, 237, 237, 0.12);
+  --poodle-color-select-accent: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-select-accentSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-select-accentStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-select-accentSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentBorder: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-select-accentBorderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-select-neutral: rgba(237, 237, 237, 0.13);
 }
 
 [data-theme="eclipse"] {
@@ -74,6 +96,17 @@
   --poodle-color-accent-focusRing: #ffca73;
   --poodle-color-icon-primary: #eef2f6;
   --poodle-color-icon-muted: #99a4b0;
+  --poodle-color-fill-rest: rgba(238, 242, 246, 0.055);
+  --poodle-color-fill-hover: rgba(238, 242, 246, 0.085);
+  --poodle-color-fill-active: rgba(238, 242, 246, 0.12);
+  --poodle-color-select-accent: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-select-accentSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-select-accentStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-select-accentSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentBorder: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-select-accentBorderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-select-neutral: rgba(238, 242, 246, 0.13);
 }
 
 [data-theme="forest"] {
@@ -95,6 +128,17 @@
   --poodle-color-accent-focusRing: #6fe0a3;
   --poodle-color-icon-primary: #e9f0ea;
   --poodle-color-icon-muted: #99a49d;
+  --poodle-color-fill-rest: rgba(233, 240, 234, 0.055);
+  --poodle-color-fill-hover: rgba(233, 240, 234, 0.085);
+  --poodle-color-fill-active: rgba(233, 240, 234, 0.12);
+  --poodle-color-select-accent: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-select-accentSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-select-accentStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-select-accentSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentBorder: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-select-accentBorderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-select-neutral: rgba(233, 240, 234, 0.13);
 }
 
 [data-theme="graphite"] {
@@ -120,6 +164,17 @@
   --poodle-color-status-info: #6ea9d4;
   --poodle-color-icon-primary: #efefef;
   --poodle-color-icon-muted: #a6a6a6;
+  --poodle-color-fill-rest: rgba(239, 239, 239, 0.055);
+  --poodle-color-fill-hover: rgba(239, 239, 239, 0.085);
+  --poodle-color-fill-active: rgba(239, 239, 239, 0.12);
+  --poodle-color-select-accent: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-select-accentSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-select-accentStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-select-accentSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentBorder: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-select-accentBorderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-select-neutral: rgba(239, 239, 239, 0.13);
 }
 
 [data-theme="hornet"] {
@@ -141,6 +196,17 @@
   --poodle-color-accent-focusRing: #ffe14d;
   --poodle-color-icon-primary: #ffffff;
   --poodle-color-icon-muted: #d4d4d4;
+  --poodle-color-fill-rest: rgba(255, 255, 255, 0.055);
+  --poodle-color-fill-hover: rgba(255, 255, 255, 0.085);
+  --poodle-color-fill-active: rgba(255, 255, 255, 0.12);
+  --poodle-color-select-accent: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-select-accentSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-select-accentStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-select-accentSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentBorder: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-select-accentBorderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-select-neutral: rgba(255, 255, 255, 0.13);
 }
 
 [data-theme="iceberg"] {
@@ -169,6 +235,17 @@
   --poodle-color-accent-base: #1668d6;
   --poodle-color-accent-hover: #2d86f3;
   --poodle-color-accent-focusRing: #1668d6;
+  --poodle-color-fill-rest: rgba(19, 26, 34, 0.045);
+  --poodle-color-fill-hover: rgba(19, 26, 34, 0.07);
+  --poodle-color-fill-active: rgba(19, 26, 34, 0.10);
+  --poodle-color-select-accent: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-select-accentSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-select-accentStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-select-accentSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentBorder: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-select-accentBorderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-select-neutral: rgba(19, 26, 34, 0.10);
 }
 
 [data-theme="meadow"] {
@@ -200,6 +277,17 @@
   --poodle-color-syntax-operator: #54616f;
   --poodle-color-syntax-punctuation: #5e6e7e;
   --poodle-color-syntax-invalid: #c22f38;
+  --poodle-color-fill-rest: rgba(27, 36, 30, 0.045);
+  --poodle-color-fill-hover: rgba(27, 36, 30, 0.07);
+  --poodle-color-fill-active: rgba(27, 36, 30, 0.10);
+  --poodle-color-select-accent: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-select-accentSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-select-accentStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-select-accentSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentBorder: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-select-accentBorderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-select-neutral: rgba(27, 36, 30, 0.10);
 }
 
 [data-theme="midnight"] {
@@ -221,6 +309,17 @@
   --poodle-color-accent-focusRing: #8aa4ff;
   --poodle-color-icon-primary: #e8ebf2;
   --poodle-color-icon-muted: #969ca8;
+  --poodle-color-fill-rest: rgba(232, 235, 242, 0.055);
+  --poodle-color-fill-hover: rgba(232, 235, 242, 0.085);
+  --poodle-color-fill-active: rgba(232, 235, 242, 0.12);
+  --poodle-color-select-accent: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-select-accentSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-select-accentStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-select-accentSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentBorder: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-select-accentBorderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-select-neutral: rgba(232, 235, 242, 0.13);
 }
 
 [data-theme="nord"] {
@@ -242,6 +341,17 @@
   --poodle-color-accent-focusRing: #9fd0de;
   --poodle-color-icon-primary: #e9edf4;
   --poodle-color-icon-muted: #99a2b2;
+  --poodle-color-fill-rest: rgba(233, 237, 244, 0.055);
+  --poodle-color-fill-hover: rgba(233, 237, 244, 0.085);
+  --poodle-color-fill-active: rgba(233, 237, 244, 0.12);
+  --poodle-color-select-accent: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-select-accentSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-select-accentStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-select-accentSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentBorder: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-select-accentBorderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-select-neutral: rgba(233, 237, 244, 0.13);
 }
 
 [data-theme="rose"] {
@@ -263,6 +373,17 @@
   --poodle-color-accent-focusRing: #ff7ba3;
   --poodle-color-icon-primary: #f0eaeb;
   --poodle-color-icon-muted: #a89fa1;
+  --poodle-color-fill-rest: rgba(240, 234, 235, 0.055);
+  --poodle-color-fill-hover: rgba(240, 234, 235, 0.085);
+  --poodle-color-fill-active: rgba(240, 234, 235, 0.12);
+  --poodle-color-select-accent: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-select-accentSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-select-accentStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-select-accentSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentBorder: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-select-accentBorderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-select-neutral: rgba(240, 234, 235, 0.13);
 }
 
 [data-theme="solarized"] {
@@ -284,4 +405,15 @@
   --poodle-color-accent-focusRing: #cb9a10;
   --poodle-color-icon-primary: #eee8d5;
   --poodle-color-icon-muted: #93a1a1;
+  --poodle-color-fill-rest: rgba(238, 232, 213, 0.055);
+  --poodle-color-fill-hover: rgba(238, 232, 213, 0.085);
+  --poodle-color-fill-active: rgba(238, 232, 213, 0.12);
+  --poodle-color-select-accent: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-select-accentSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-select-accentStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-select-accentSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-select-accentBorder: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-select-accentBorderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-select-neutral: rgba(238, 232, 213, 0.13);
 }

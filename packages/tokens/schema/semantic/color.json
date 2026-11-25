@@ -159,6 +159,60 @@
         "$value": "{primitives.color.syntax.dark.invalid}",
         "$description": "Syntax invalid or malformed text; always paired with a non-colour cue. Dark base by default; light theme modes reference the light primitives."
       }
+    },
+    "fill": {
+      "rest": {
+        "$type": "color",
+        "$value": "rgba(19, 26, 34, 0.045)",
+        "$description": "Neutral ink wash for a filled control at rest."
+      },
+      "hover": {
+        "$type": "color",
+        "$value": "rgba(19, 26, 34, 0.07)",
+        "$description": "Neutral ink wash for a hovered filled control."
+      },
+      "active": {
+        "$type": "color",
+        "$value": "rgba(19, 26, 34, 0.10)",
+        "$description": "Neutral ink wash for a pressed filled control."
+      }
+    },
+    "select": {
+      "accent": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
+        "$description": "Translucent accent selection fill."
+      },
+      "accentSubtle": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)"
+      },
+      "accentStrong": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)"
+      },
+      "accentSurface": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
+        "$description": "Accent selection composited with the control surface."
+      },
+      "accentSurfaceHover": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))"
+      },
+      "accentBorder": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))"
+      },
+      "accentBorderStrong": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))"
+      },
+      "neutral": {
+        "$type": "color",
+        "$value": "rgba(19, 26, 34, 0.10)",
+        "$description": "Neutral ink wash for a selected item."
+      }
     }
   }
 }

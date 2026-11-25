@@ -6,4 +6,32 @@
   --poodle-style-surface-fill: initial;
   --poodle-style-surface-border: initial;
   --poodle-style-surface-shadow: initial;
+  --poodle-style-selection-itemFill: initial;
+  --poodle-style-selection-fill: var(--poodle-color-select-accent);
+  --poodle-style-selection-fillStrong: var(--poodle-color-select-accentStrong);
+  --poodle-style-selection-fillStrongBackdrop: initial;
+  --poodle-style-selection-fillSurface: var(--poodle-color-select-accentSurface);
+  --poodle-style-selection-fillSurfaceHover: var(--poodle-color-select-accentSurfaceHover);
+  --poodle-style-selection-fillSolid: initial;
+  --poodle-style-selection-highlightFill: var(--poodle-color-select-accentSubtle);
+  --poodle-style-selection-border: var(--poodle-color-select-accentBorder);
+  --poodle-style-selection-borderStrong: var(--poodle-color-select-accentBorderStrong);
+  --poodle-style-selection-text: var(--poodle-color-text-primary);
+  --poodle-style-selection-textSolid: initial;
+  --poodle-style-selection-indicator: var(--poodle-color-accent-base);
+  --poodle-style-selection-detailText: initial;
+}
+
+@scope ([data-style="default"]) to ([data-style]) {
+  [data-theme] {
+    --poodle-style-selection-fill: var(--poodle-color-select-accent);
+    --poodle-style-selection-fillStrong: var(--poodle-color-select-accentStrong);
+    --poodle-style-selection-fillSurface: var(--poodle-color-select-accentSurface);
+    --poodle-style-selection-fillSurfaceHover: var(--poodle-color-select-accentSurfaceHover);
+    --poodle-style-selection-highlightFill: var(--poodle-color-select-accentSubtle);
+    --poodle-style-selection-border: var(--poodle-color-select-accentBorder);
+    --poodle-style-selection-borderStrong: var(--poodle-color-select-accentBorderStrong);
+    --poodle-style-selection-text: var(--poodle-color-text-primary);
+    --poodle-style-selection-indicator: var(--poodle-color-accent-base);
+  }
 }

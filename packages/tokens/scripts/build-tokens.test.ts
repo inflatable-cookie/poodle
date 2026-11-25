@@ -121,7 +121,7 @@ function withStyleFixture(run: (fixture: {
 
 test("the style builder rejects a theme token written by a style mode or treatment", () => {
   withStyleFixture(({ writeJson, build }) => {
-    const treatment = { fill: "outlined", surface: "border" };
+    const treatment = { fill: "outlined", surface: "border", selection: "accent-outline" };
     const color = { background: { canvas: { $value: "{color.background.surface}" } } };
     writeJson("modes/style/default.json", { treatment, color });
     const direct = build();
@@ -144,21 +144,27 @@ test("a treatment added in schema expands into CSS and a typed Rust mode", () =>
       flat: { radius: { control: { $value: "0rem" } } },
     });
     writeJson("modes/style/default.json", {
-      treatment: { fill: "filled", surface: "border", shape: "flat" },
+      treatment: { fill: "filled", surface: "tonal", selection: "neutral", shape: "flat" },
     });
     const result = build();
     expect(result.status).toBe(0);
     const css = read("tokens/artifacts/css/poodle-style-default.css");
     expect(css).toContain("--poodle-radius-control: 0rem;");
-    expect(css).toContain("--poodle-style-control-fill: var(--poodle-color-background-elevated);");
-    expect(css).toContain(`@scope ([data-style="default"]) to ([data-style]) {
-  [data-theme] {
-    --poodle-style-control-fill: var(--poodle-color-background-elevated);
-  }
-}`);
+    expect(css).toContain("--poodle-style-control-fill: var(--poodle-color-fill-rest);");
+    expect(css).toContain("--poodle-style-control-fillHover: var(--poodle-color-fill-hover);");
+    expect(css).toContain("--poodle-style-control-fillActive: var(--poodle-color-fill-active);");
+    expect(css).toContain("--poodle-style-surface-fill: var(--poodle-color-background-panel);");
+    expect(css).toContain("--poodle-style-surface-floatingFill: var(--poodle-color-background-elevated);");
+    const nestedTheme = css.split('@scope ([data-style="default"]) to ([data-style])').at(1);
+    expect(nestedTheme).toContain("--poodle-style-selection-fill: var(--poodle-color-select-neutral);");
+    expect(css).toContain("--poodle-style-selection-fillStrongUnderlay: transparent;");
+    expect(css).toContain("--poodle-style-selection-border: transparent;");
+    expect(nestedTheme).toContain("--poodle-style-selection-text: var(--poodle-color-text-primary);");
+    expect(nestedTheme).toContain("--poodle-style-selection-indicator: var(--poodle-color-accent-base);");
     const rust = read("contracts/tokens/src/generated/styles.rs");
     expect(rust).toContain("shape: ShapeTreatment::Flat");
-    expect(rust).toContain('("style.control.fill", "{color.background.elevated}")');
+    expect(rust).toContain("selection: SelectionTreatment::Neutral");
+    expect(rust).toContain('("style.selection.fill", "{color.select.neutral}")');
   });
 });
 

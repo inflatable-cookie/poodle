@@ -10,6 +10,14 @@ pub enum FillTreatment {
     Ghost,
 }
 
+/// Available values for the `selection` treatment.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SelectionTreatment {
+    AccentOutline,
+    AccentTint,
+    Neutral,
+}
+
 /// Available values for the `surface` treatment.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SurfaceTreatment {
@@ -24,6 +32,7 @@ pub struct StyleDefinition {
     pub name: &'static str,
     pub selector: &'static str,
     pub fill: FillTreatment,
+    pub selection: SelectionTreatment,
     pub surface: SurfaceTreatment,
     /// Semantic paths and portable values. Braced paths refer to active tokens.
     pub overrides: &'static [(&'static str, &'static str)],
@@ -33,6 +42,7 @@ pub const DEFAULT: StyleDefinition = StyleDefinition {
     name: "default",
     selector: "[data-style=\"default\"]",
     fill: FillTreatment::Outlined,
+    selection: SelectionTreatment::AccentOutline,
     surface: SurfaceTreatment::Border,
     overrides: &[
     ("style.control.fill", "initial"),
@@ -41,5 +51,19 @@ pub const DEFAULT: StyleDefinition = StyleDefinition {
     ("style.surface.fill", "initial"),
     ("style.surface.border", "initial"),
     ("style.surface.shadow", "initial"),
+    ("style.selection.itemFill", "initial"),
+    ("style.selection.fill", "{color.select.accent}"),
+    ("style.selection.fillStrong", "{color.select.accentStrong}"),
+    ("style.selection.fillStrongBackdrop", "initial"),
+    ("style.selection.fillSurface", "{color.select.accentSurface}"),
+    ("style.selection.fillSurfaceHover", "{color.select.accentSurfaceHover}"),
+    ("style.selection.fillSolid", "initial"),
+    ("style.selection.highlightFill", "{color.select.accentSubtle}"),
+    ("style.selection.border", "{color.select.accentBorder}"),
+    ("style.selection.borderStrong", "{color.select.accentBorderStrong}"),
+    ("style.selection.text", "{color.text.primary}"),
+    ("style.selection.textSolid", "initial"),
+    ("style.selection.indicator", "{color.accent.base}"),
+    ("style.selection.detailText", "initial"),
     ],
 };

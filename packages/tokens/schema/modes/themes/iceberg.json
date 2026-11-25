@@ -103,6 +103,54 @@
         "$type": "color",
         "$value": "#1668d6"
       }
+    },
+    "fill": {
+      "rest": {
+        "$type": "color",
+        "$value": "rgba(19, 26, 34, 0.045)"
+      },
+      "hover": {
+        "$type": "color",
+        "$value": "rgba(19, 26, 34, 0.07)"
+      },
+      "active": {
+        "$type": "color",
+        "$value": "rgba(19, 26, 34, 0.10)"
+      }
+    },
+    "select": {
+      "accent": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)"
+      },
+      "accentSubtle": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)"
+      },
+      "accentStrong": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)"
+      },
+      "accentSurface": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))"
+      },
+      "accentSurfaceHover": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))"
+      },
+      "accentBorder": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))"
+      },
+      "accentBorderStrong": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))"
+      },
+      "neutral": {
+        "$type": "color",
+        "$value": "rgba(19, 26, 34, 0.10)"
+      }
     }
   }
 }
