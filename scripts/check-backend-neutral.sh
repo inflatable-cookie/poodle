@@ -1,9 +1,9 @@
 #!/bin/sh
-# The contract crates and shared renderer must stay usable without a backend,
+# The contracts, shared renderer and specimens must stay usable without a backend,
 # including in tests and on platform-specific dependency paths.
 set -eu
 
-for manifest in packages/contracts/*/Cargo.toml packages/render/Cargo.toml; do
+for manifest in packages/contracts/*/Cargo.toml packages/render/Cargo.toml packages/specimens/Cargo.toml; do
   tree=$(sh scripts/rust-driver.sh tree --manifest-path "$manifest" \
     --all-features --target all --edges normal,build,dev --prefix none)
   if matches=$(printf '%s\n' "$tree" |

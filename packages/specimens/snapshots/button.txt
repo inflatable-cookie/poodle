@@ -1,0 +1,78 @@
+[Examples]
+Box id=specimen-button-examples
+  Box
+    Text "A NORMAL ACTION ROW — THE PRIMARY ACTION, THEN THE WAY OUT"
+    Box
+      Button "Save changes" role=Button label="Save changes" density=default fit=default size=md tone=default variant=primary id=specimen-button-save-changes clickable height=36 padding=12,0
+      Button "Cancel" role=Button label="Cancel" density=default fit=default size=md tone=default variant=ghost id=specimen-button-cancel clickable height=36 padding=12,0
+  Box
+    Text "VARIANTS — HOW MUCH WEIGHT THE ACTION CARRIES"
+    Box
+      Button "Primary" role=Button label="Primary" density=default fit=default size=md tone=default variant=primary id=specimen-button-primary clickable height=36 padding=12,0
+      Button "Secondary" role=Button label="Secondary" density=default fit=default size=md tone=default variant=secondary id=specimen-button-secondary clickable height=36 padding=12,0
+      Button "Ghost" role=Button label="Ghost" density=default fit=default size=md tone=default variant=ghost id=specimen-button-ghost clickable height=36 padding=12,0
+  Box
+    Text "TONES — WHAT KIND OF ACTION IT IS"
+    Box
+      Button "Default" role=Button label="Default" density=default fit=default size=md tone=default variant=secondary height=36 padding=12,0
+      Button "Delete" role=Button label="Delete" density=default fit=default size=md tone=danger variant=secondary height=36 padding=12,0
+      Button "Approve" role=Button label="Approve" density=default fit=default size=md tone=success variant=secondary height=36 padding=12,0
+      Button "Override" role=Button label="Override" density=default fit=default size=md tone=warning variant=secondary height=36 padding=12,0
+  Box
+    Text "ICONS, DISCLOSURE, AND ICON-ONLY"
+    Box
+      Button "" role=Button label="Create" density=default fit=default size=md tone=default variant=secondary height=36 padding=10,0
+        Box height=8
+          Icon plus
+        Text "Create"
+      Button "" role=Button label="Open" density=default fit=default size=md tone=default variant=secondary height=36 padding=12,0
+        Text "Open"
+        Box height=8
+          Icon external-link
+      Button "" role=Button label="Filter" density=default fit=default size=md tone=default variant=secondary height=36 padding=10,0
+        Box height=8
+          Icon filter
+        Text "Filter"
+        Icon chevron-down
+      Button "" role=Button label="Settings" density=default fit=default size=md tone=default variant=secondary height=36 padding=0,0
+        Box height=8
+          Icon settings
+    Button "" role=Button label="Sections" density=default fit=default size=md tone=default variant=secondary id=specimen-button-sections expanded=false clickable height=36 padding=12,0
+      Text "Sections"
+      Icon chevron-down
+    Text "ButtonSpec.aria_expanded = Some(false)"
+  Box
+    Text "STATES — UNAVAILABLE, WORKING, AND HELD DOWN"
+    Box
+      Button "Disabled" role=Button label="Disabled" density=default fit=default size=md tone=default variant=primary disabled height=36 padding=12,0
+      Button "" role=Button label="Loading" density=default fit=default size=md tone=default variant=primary disabled height=36 padding=10,0
+        Box height=8
+          Icon spinner
+        Text "Loading"
+      Button "" role=Button label="Bookmark" density=default fit=default size=md tone=default variant=secondary id=specimen-button-bookmark toggled=False clickable height=36 padding=10,0
+        Box height=8
+          Icon star
+        Text "Bookmark"
+  Box
+    Text "INSIDE A FORM — EACH BUTTON CAN SUBMIT SOMEWHERE ELSE"
+    Box
+      Button "Save" role=Button label="Save" density=default fit=default size=md tone=default variant=secondary id=specimen-button-save clickable height=36 padding=12,0
+      Button "Publish" role=Button label="Publish" density=default fit=default size=md tone=default variant=primary id=specimen-button-publish clickable height=36 padding=12,0
+  Box
+    Text "Clicks: 0"
+[Sizes / xs]
+Button "Enabled" role=Button label="Enabled" density=default fit=default size=xs tone=default variant=primary height=24 padding=12,0
+[Sizes / sm]
+Button "Enabled" role=Button label="Enabled" density=default fit=default size=sm tone=default variant=primary height=28 padding=12,0
+[Sizes / md]
+Button "Enabled" role=Button label="Enabled" density=default fit=default size=md tone=default variant=primary height=36 padding=12,0
+[Sizes / lg]
+Button "Enabled" role=Button label="Enabled" density=default fit=default size=lg tone=default variant=primary height=44 padding=12,0
+[Sizes / xl]
+Button "Enabled" role=Button label="Enabled" density=default fit=default size=xl tone=default variant=primary height=52 padding=12,0
+[Densities / compact]
+Button "Toggle" role=Button label="Toggle" density=compact fit=default size=md tone=default variant=primary height=36 padding=10,0
+[Densities / default]
+Button "Toggle" role=Button label="Toggle" density=default fit=default size=md tone=default variant=primary height=36 padding=12,0
+[Densities / comfortable]
+Button "Toggle" role=Button label="Toggle" density=comfortable fit=default size=md tone=default variant=primary height=36 padding=14,0

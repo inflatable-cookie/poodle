@@ -305,14 +305,6 @@ pub fn js_context_menu(spec: &ContextMenuSpec, theme: &JetstreamThemeProvider) -
     ))
 }
 
-pub fn js_data_table(spec: &DataTableSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::data_table(
-        spec,
-        &pr::RenderContext::new(theme),
-        pr::DataTableHandlers::default(),
-    ))
-}
-
 pub fn js_data_table_loading(
     spec: &DataTableSpec,
     theme: &JetstreamThemeProvider,

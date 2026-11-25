@@ -784,6 +784,7 @@
   { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/node/Cargo.toml" },
 ]
 "check:backend-neutral" = "sh scripts/check-backend-neutral.sh"
+"test:specimens" = "sh scripts/rust-driver.sh test --manifest-path packages/specimens/Cargo.toml {args}"
 "check:render" = "sh scripts/rust-driver.sh check --manifest-path packages/render/Cargo.toml"
 "test:render" = "sh scripts/rust-driver.sh test --manifest-path packages/render/Cargo.toml"
 # Listbox's Rust machine mirror has an isolated contract suite so native task
@@ -904,6 +905,7 @@
 # restamp that is not regenerated used to pass every board Queue runs.
 "ci:rust" = [
   { task = "test:contracts" },
+  { task = "test:specimens" },
   { task = "check:backend-neutral" },
   { task = "ir:check" },
   { task = "catalogue:check" },

@@ -15,6 +15,7 @@ path = "src/main.rs"
 [dependencies]
 # Poodle adapter + contracts + components
 poodle-jetstream = { path = "../adapter" }
+poodle-specimens = { path = "../../specimens" }
 poodle-node = { path = "../../contracts/node" }
 poodle-render = { path = "../../render" }
 jetstream-poodle = { path = "../../../../jetstream/crates/jetstream-poodle" }

@@ -206,6 +206,14 @@
       "channel": "preview"
     },
     {
+      "name": "poodle-specimens",
+      "path": "packages/specimens",
+      "kind": "tooling",
+      "language": "rust",
+      "publicIntent": false,
+      "channel": "internal"
+    },
+    {
       "name": "poodle-gpui-node-backend",
       "path": "packages/gpui/node-backend",
       "kind": "renderer-backend",
