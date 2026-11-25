@@ -91,7 +91,7 @@ applying direct overrides.
 | --- | --- | --- |
 | `fill` | `outlined`, `filled`, `ghost` | Controls at rest, including hover and press fills where used |
 | `surface` | `border`, `elevation`, `tonal` | Containers |
-| `selection` | `accent-outline`, `accent-tint`, `neutral` | Selected items in Select, Tabs, ToggleGroup, and the list and data components (ListCard, Tree, LogList, DataTable, Calendar, RelationPicker, ActionDiscoveryPanel, ModelPicker, HistoryCenter) |
+| `selection` | `accent-outline`, `accent-tint`, `neutral` | Selected items in Select, Tabs, ToggleGroup, the list and data components (ListCard, Tree, LogList, DataTable, Calendar, RelationPicker, ActionDiscoveryPanel, ModelPicker, HistoryCenter), and choice controls (SegmentedControl, Card, CardRadioGroup, CardToggleGroup, ThemeSelect, AgentQuestion, Rating) |
 | `typography` | `component`, `scale` | Type size, leading, weight, tracking, case, and associated family and neutral text roles |
 
 The default uses `outlined`, `border` and `accent-outline` to reproduce
@@ -104,7 +104,13 @@ existing small indicator. Each component retains its selection anatomy.
 It is `transparent` under `accent-tint` and `neutral`. Components route their
 selected border through the recipe hook, then `itemBorder`, then the current
 literal. A sibling component that needs a selected border can use the same
-role.
+role (used by Card, ThemeSelect selected tiles, and AgentQuestion selected
+options alongside ListCard, Tree, LogList, RelationPicker, and
+ActionDiscoveryPanel).
+
+Rating's filled glyphs and AgentQuestion's progress dots bind
+`style.selection.indicator`, so they keep `{color.accent.base}` under plain
+`selection: neutral` (with no style override) and become neutral under `quiet`.
 
 `quiet` is an experimental style (`status: "experimental"` in style metadata)
 that combines `filled`, `tonal`, and `neutral` with a neutral selection
@@ -136,9 +142,21 @@ border roles preserve the previous component weights and backdrops. The
 selection switch reuses the primary text and accent indicator roles.
 Default solid Tabs keep their existing accent and inverse text tokens.
 
-Tonal goes from canvas to `color.background.panel` for Card and from
-panel to `color.background.elevated` for floating Dialog. Both use the
-existing colour steps. Run `effigy tokens:contrast` to check the new fills
+Tonal goes from canvas to `color.background.panel` for a container and from
+panel to `color.background.elevated` for one that floats. Both use the
+existing colour steps. Containers read the switch as
+`--poodle-style-surface-fill` (the inline step) and
+`--poodle-style-surface-floatingFill` (the elevated step), with
+`--poodle-style-surface-border` and `--poodle-style-surface-shadow` for the
+other two edges; each component reads its recipe hook first, then the role.
+Card, Dialog, Popover, Tooltip, Drawer, HoverCard, CommandPalette,
+ToastStack, PickerShell's popover and modal variants, Surface, Callout and
+EmptyState all resolve through that chain, so a style reaches them without
+per-component CSS. Popover, Tooltip, Drawer, HoverCard, CommandPalette, the
+toast body, Surface's elevated tone and PickerShell's floating variants fall
+back from `-floatingFill` to `-fill`; Surface, Callout, EmptyState and the
+inline PickerShell read `-fill`. Run `effigy tokens:contrast` to check the
+new fills
 with their paired text on the content layers. The report shows the existing
 steps below 0.04 OKLCH lightness so themes can address small steps in a
 later palette revision.

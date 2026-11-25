@@ -772,7 +772,9 @@
 # rendered but that no host can reach.
 # Pure contract crates only — each is a separate crate tree, all cross-platform
 # (no gpui/game_ui deps). Native component crates are covered locally/nightly.
+"test:conformance-kit" = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/conformance/Cargo.toml {args}"
 "test:contracts" = [
+  { task = "test:conformance-kit" },
   { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/headless/Cargo.toml" },
   { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/ir/Cargo.toml" },
   { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/markdown/Cargo.toml" },
@@ -931,11 +933,13 @@
 # surface cannot land with the board green.
 # The pixel gate is `test:native-visual`, which does need a window and is
 # LOCAL-ONLY; the scheduled workflow (ci-native.yml) checks gpui only.
+"test:gpui-node-backend" = "sh scripts/rust-driver.sh test --manifest-path packages/gpui/node-backend/Cargo.toml {args}"
+"check:gpui-node-backend" = "sh scripts/rust-driver.sh check --tests --manifest-path packages/gpui/node-backend/Cargo.toml"
 "check:gpui" = [
   { run = "sh scripts/rust-driver.sh check -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml" },
   { task = "test:gpui-preview" },
   { task = "test:render" },
-  { run = "sh scripts/rust-driver.sh test -p poodle-gpui-node-backend --manifest-path packages/gpui/node-backend/Cargo.toml" },
+  { task = "test:gpui-node-backend" },
 ]
 # The poodle-preview bin's unit tests, headless: the contract usage-docs
 # loader (shared generated docs plus its contract-markdown fallback), the

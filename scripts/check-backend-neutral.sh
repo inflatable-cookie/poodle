@@ -3,6 +3,7 @@
 # including in tests and on platform-specific dependency paths.
 set -eu
 
+# The contracts glob includes poodle-conformance and its own test graph.
 for manifest in packages/contracts/*/Cargo.toml packages/render/Cargo.toml packages/specimens/Cargo.toml; do
   tree=$(sh scripts/rust-driver.sh tree --manifest-path "$manifest" \
     --all-features --target all --edges normal,build,dev --prefix none)

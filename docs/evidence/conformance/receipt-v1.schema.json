@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:poodle:node-conformance:v1",
+  "title": "Poodle node backend conformance receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "vocabulary_sha256", "case_manifest_sha256", "identity", "results"],
+  "properties": {
+    "schema": { "const": "poodle-node-conformance.v1" },
+    "vocabulary_sha256": { "$ref": "#/$defs/digest" },
+    "case_manifest_sha256": { "$ref": "#/$defs/digest" },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["poodle_commit", "backend_commit", "lock_sha256", "platform"],
+      "properties": {
+        "poodle_commit": { "$ref": "#/$defs/commit" },
+        "backend_commit": { "$ref": "#/$defs/commit" },
+        "lock_sha256": { "$ref": "#/$defs/digest" },
+        "platform": { "type": "string", "pattern": "\\S" }
+      }
+    },
+    "results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "proof", "status", "observation"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "proof": { "enum": ["layout", "accessibility", "paint", "dispatch"] },
+          "status": { "enum": ["pass", "fail", "unsupported", "not_run"] },
+          "observation": {}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

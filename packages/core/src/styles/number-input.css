@@ -12,10 +12,11 @@
     display: inline-flex;
     align-items: center;
     padding: 0 0.75rem;
-    border: 0.0625rem solid var(--poodle-color-border-default);
+    border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-control);
-    color: var(--poodle-recipe-number-input-suffix-text, var(--poodle-color-text-muted));
-    background: var(--poodle-recipe-number-input-suffix-fill, var(--poodle-color-background-surface));
+    color: var(--poodle-recipe-number-input-suffix-text, var(--poodle-style-control-secondaryText, var(--poodle-color-text-muted)));
+    background: var(--poodle-recipe-number-input-suffix-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
+    box-shadow: var(--poodle-style-control-shadow, none);
     white-space: nowrap;
   }
 
@@ -26,9 +27,10 @@
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: stretch;
     height: var(--poodle-number-input-control-height);
-    border: 0.0625rem solid var(--poodle-color-border-default);
+    border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-number-input-field-fill, var(--poodle-color-background-surface));
+    background: var(--poodle-recipe-number-input-field-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
+    box-shadow: var(--poodle-style-control-shadow, none);
     overflow: hidden;
   }
 
@@ -76,7 +78,7 @@
     min-height: 0;
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: var(--poodle-recipe-number-input-steppers-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 88%, transparent));
+    background: var(--poodle-recipe-number-input-steppers-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 88%, transparent)));
     color: var(--poodle-recipe-number-input-steppers-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-size: 0;

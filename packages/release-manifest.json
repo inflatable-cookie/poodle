@@ -206,6 +206,14 @@
       "channel": "preview"
     },
     {
+      "name": "poodle-conformance",
+      "path": "packages/contracts/conformance",
+      "kind": "tooling",
+      "language": "rust",
+      "publicIntent": false,
+      "channel": "internal"
+    },
+    {
       "name": "poodle-specimens",
       "path": "packages/specimens",
       "kind": "tooling",

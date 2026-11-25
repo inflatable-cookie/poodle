@@ -52,11 +52,18 @@ Type recipes affect text metrics. Control height continues to come from the
 size contract.
 
 The selection switch resolves selected fills and borders through
-`color.select.*` and reuses existing text and indicator roles. Existing
-recipe hooks for Select options, Tabs edges and fills, and ToggleGroup
-items still take precedence in all three selection styles. A recipe can
-supply a visible Tabs outline even when
-`accent-tint` supplies a transparent fallback border. See
+`color.select.*` and reuses existing text and indicator roles across Select,
+Tabs, ToggleGroup, SegmentedControl, Card (including CardRadioGroup and
+CardToggleGroup), ThemeSelect, AgentQuestion, and Rating. Existing recipe
+hooks for Select options, Tabs edges and fills, ToggleGroup items,
+SegmentedControl labels, Card selected edges, and Rating filled glyphs still
+take precedence in all three selection styles (ThemeSelect and AgentQuestion
+expose no selected-state recipe hooks). Selected edges on Card, ThemeSelect, and
+AgentQuestion read `--poodle-style-selection-itemBorder` (and selected fills
+read `--poodle-style-selection-itemFill`), keeping `accent-outline` identical
+while suppressing borders under `accent-tint` and `neutral`. A recipe can
+supply a visible Tabs outline even when `accent-tint` supplies a transparent
+fallback border. See
 [002 Token System and Package Layout](002-token-system-and-package-layout.md#modes).
 
 The selected state of sidebar nav, navigation menu, pagination, stepper,
@@ -67,6 +74,25 @@ keeps its own mix, so the default style stays pixel-identical while
 `accent-tint` and `neutral` reach it. The sidebar's inset ring stays
 accent-coloured under every selection style; it is a doubled edge, listed for
 the redesign.
+
+The surface switch resolves a container's boundary through
+`--poodle-style-surface-border`, `-fill`, `-floatingFill` and `-shadow`:
+recipe hook, then style role, then the component's own mix. Card and Dialog
+took the chain earlier; this cohort is Popover, Tooltip, Drawer, HoverCard,
+CommandPalette, ToastStack, PickerShell, Surface, Callout and EmptyState.
+Floating containers read `-floatingFill`, then `-fill`, because they sit
+above the page: Popover, Tooltip, Drawer, HoverCard, CommandPalette, the
+toast body, PickerShell's popover and modal variants and Surface's elevated
+tone. Inline ones read `-fill` alone: Surface, Callout, EmptyState and the
+inline PickerShell. Under `tonal` each one drops border and shadow and
+separates by fill alone, so a toast keeps only its status bar and an empty
+state only its tone. Status and instance tones keep their colour in every
+style: Callout's tones and solid fills, EmptyState's search and first-run
+variants and Surface's canvas tone read the role for their border only, so
+the switch moves the boundary and not the meaning. A few values stay literal
+and are listed for the redesign: PickerShell's state block (a nested tone
+below the shell, which no role supplies) and the tinted icon circles in
+Callout and EmptyState, which are markup noise.
 
 ## Public Surface vs Internal Variables
 

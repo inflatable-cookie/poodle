@@ -1,206 +1,74 @@
-# 009 Cross-Runtime Component Conformance
+# 009 Node backend conformance
 
-Status: rejected as standing architecture — `g14.008`; machinery removed by `g14.021`
-Updated: 2026-08-16
+Status: pure pilot
+Updated: 2026-11-25
 Owner: Poodle core
-Depends on: `001-poodle-system-shape.md`,
-`../contracts/working-rules.md`
 
-## Pilot Verdict
+The [conformance kit](../../../packages/contracts/conformance/) exercises the
+boundary between `poodle-node` and a native backend. Fixtures construct the
+real Rust nodes with logical viewports and expected observations. Backends
+mount them through their production converters and read the resulting layout,
+accessibility tree, and paint output.
 
-`g14.008` rejected this conformance-plane design. The pilot measured 22,746
-LOC against 472 LOC replaced, omitted HistoryCenter from its comparator, and
-exposed 1,205 cross-runtime differences when that omission was corrected.
-Manual component registries, incomplete interface consumption, and
-backend-named shared probes also violated this decision's boundaries.
+The inventory uses exhaustive Rust enum matches and struct patterns. Changes
+to a covered declaration require a fixture or a classification. The pilot
+covers all node kinds, roles, and accessibility fields, plus representative
+layout. The progress ring and resolved icon cases check positive and negative
+samples of emitted geometry. The accessibility focus cases check the
+published focus target and sequential tab-stop count. Callbacks, tooltip
+transitions, and drag registrations are inventoried for a later dispatch
+pass. The activation fixture carries an action and recording closure and
+reports `not_run` in the pure pilot.
 
-Poodle still requires semantic parity and dependable component construction.
-This document records the rejected approach; it is not authority for new
-components or rollout. `g14.021` removed the pilot machinery, keeping the
-component fixes, the defects it caught (now owned by focused tests), and the
-headless GPUI test platform — see
-the g14 `conformance-estate` record (Git history) and
-the retired logs (Git history).
-Nothing described below exists in the tree any more. A replacement
-architecture needs a fresh decision.
+The kit owns backend vocabulary evidence. Component roster coverage stays
+with the [census](../../evidence/gpui/gpui-functionality-census.md). Component
+construction, machine behavior, and web parity continue to use the existing
+contract tests, A1/A2 receipts, and machine vectors. The pilot receipts live
+beside the parity ledger and do not feed it yet.
 
-## Decision
+## Running and recording
 
-Poodle keeps two implementation substrates and adds one conformance plane.
+An external backend adds `poodle-conformance` as a development dependency
+from Poodle Git at the full commit it consumes. Pin its own `poodle-node`
+dependency to that same commit so the fixture trees have the same Rust
+type identity. Iterate `cases()`, implement `Backend::mount` and
+`Backend::read`, and use `Case::run` and `Receipt::new` to write the run.
+Normalize values from engine output to the fixture's probe vocabulary.
+Report unavailable observer channels as `unsupported`.
 
-```text
-component contract + portable interface
-                  |
-       shared typed cases
-      /                   \
-Svelte + React       poodle-render
-      |                    |
- web observers          GPUI
-      \                    /
-        normalized observations
-                  |
-             parity gate
+A [`poodle-node-conformance.v1` receipt](../../evidence/conformance/receipt-v1.schema.json) carries the vocabulary and case
+manifest SHA-256 digests, the Poodle and backend source commits, the runner
+lockfile SHA-256, and the platform. Each case carries its ID, proof level,
+status, and observations in check order. A mismatch records the target,
+probe, expected value, and actual value. `Receipt::from_json` rejects stale
+stamps, unknown or missing IDs, duplicate rows, and mismatched proof levels.
+Read a historical receipt with the kit at its stamped commit.
+
+The GPUI runner targets macOS and Linux. Run the headless test at the clean
+source commit and write the receipt in a subsequent commit.
+
+```sh
+POODLE_GPUI_CONFORMANCE_RECEIPT=/absolute/path/to/gpui.json \
+  effigy test:gpui-node-backend -- --locked
 ```
 
-- Svelte and React share `poodle-core` behaviour and CSS.
-- GPUI consumes shared `poodle-render` composition and `poodle-node` now.
-- Jetstream remains a deferred consumer of the same Rust substrate and case
-  corpus; its later backend-admission gate must add execution, not a second
-  component implementation.
-- The conformance plane shares declarations, inputs, actions, assertions, and
-  exhaustive diagnostic cases. It does not share executable component
-  behaviour or own the catalogue's teaching structure.
-- Svelte remains the reference when current implementations disagree. The
-  component contract remains the authority for what should ship.
+The runner uses the existing headless mount with a test-window delegate
+that activates AccessKit and captures its tree updates and GPUI's presented
+scene. Geometry samples check submitted quads and tessellated paths in
+logical coordinates. They carry scene-level proof without claiming pixel,
+compositor, or operating-system assistive-technology coverage. The runner
+uses distinct fixture rectangles to match AccessKit nodes to the backend's
+measured element bounds.
 
-## No Silent Portable Difference
+## Cost and stop rule
 
-Every portable difference must do one of two things:
+Keep the corpus rooted in the compiler-visible node vocabulary. A runner
+that needs a component-specific branch stops the pilot. Count authored,
+generated, runner and wiring lines, and name any replaced probes in each
+pilot PR. This pilot reuses the headless mount and replaces no existing probes.
 
-1. fail a standing conformance gate; or
-2. be classified as runtime-owned mechanism with an equivalent observable
-   result.
-
-A declared missing capability is visible debt, not an equivalent result. It
-cannot satisfy the component completion gate.
-
-## Conformance Layers
-
-### Portable interface
-
-One constrained declaration records portable props and defaults, controlled
-state pairs, semantic events and payloads, named composition regions, public
-methods, states, and capability requirements.
-
-The declaration may emit idiomatic TypeScript and Rust types. It does not
-model DOM attributes, framework lifecycle, backend objects, arbitrary
-callbacks, or behaviour. Generated declarations must replace hand-written
-portable declarations; additive mirrors fail the cost gate.
-
-### Shared cases
-
-A case carries:
-
-- fixture data and portable inputs
-- stable case identity, diagnostic labels, axes, and capture identity
-- semantic actions addressed to stable component parts
-- expected state, event order, focus, accessibility, structure, token roles,
-  and geometry
-- explicit runtime-owned capability requirements and tolerances
-
-The same authored case drives tests in every active runtime. A dedicated
-conformance view may project the complete corpus for manual diagnosis. Cases
-remain backend-neutral so the deferred Jetstream runner can consume them
-unchanged.
-
-### Catalogue specimens
-
-Catalogue specimens are a documentation layer beside conformance, not a view
-that must enumerate every case. Their `Examples` tab is a curated route through
-the component: primary use, meaningful variants, important states, and useful
-composition. Size and density matrices stay in their named tabs. Exhaustive
-cases may appear in a separate `Conformance` tab.
-
-One renderer-neutral specimen plan may own tab order, section order, captions,
-and references to shared fixture data. It must remain smaller and simpler than
-the runtime specimens it coordinates. It cannot become a universal scene tree
-or encode component behaviour. Svelte, React, GPUI, and later Jetstream render
-real runtime components through thin adapters; bounded runtime-only examples
-remain explicit.
-
-### Normalized observations
-
-Each runtime projects real output into a versioned semantic observation:
-
-- component and part identity
-- role, accessible name, state, and focusability
-- text and icon identity
-- semantic token roles and resolved visual channels
-- parent/child and layout relationships
-- geometry, clipping/layer order, and supported interactions
-- emitted semantic events in order
-
-Web observers read DOM, computed style, and accessibility state. Native
-observers read `poodle-node` plus backend-observed output. Raw DOM trees and
-engine nodes need not match. Shared capture IDs add image evidence where
-properties cannot expose rasterization, clipping, or layer composition.
-
-Semantic identity, event order, state, token role, resolved non-raster visual
-values, and part relationships are exact. Geometry uses explicit bounded
-tolerances. Font rasterization and engine drawing may use named visual or
-regional image tolerances; blanket runtime tolerances are forbidden.
-
-### Certified primitive substrate
-
-Component parity depends on a small renderer vocabulary. Poodle certifies:
-
-- layout, sizing, clipping, and scroll
-- surface, border, radius, shadow, text, and icon
-- control state and semantic token projection
-- focus, keyboard, pointer, dismissal, and overlay placement (the shared
-  vocabulary names Escape as its own `NodeKey`; `Interaction::on_cancel`
-  stays for cancelling an input edit, operator ruling 2026-09-29)
-- accessibility projection
-- text editing and IME boundaries
-
-The active pilot certifies the node vocabulary and GPUI interpretation without
-leaking GPUI objects into `poodle-node`. Jetstream admission must later prove
-equivalent interpretation of those primitives and intents. A
-component-specific workaround cannot stand in for a missing primitive in
-either backend.
-
-## Component Construction Profiles
-
-Every component uses one build recipe and declares one profile:
-
-| Profile | Adds |
-| --- | --- |
-| `display` | structure, tokens, layout, accessibility |
-| `control` | controlled state, semantic events, focus, keyboard/pointer |
-| `collection` | item identity, selection, navigation, repeated anatomy |
-| `overlay` | portals/layers, placement, dismissal, focus transfer |
-| `input` | editing, validation, selection, clipboard/IME capability |
-| `composite` | nested components, host commands, multi-step scenarios |
-
-Profiles accumulate requirements; they do not select different component
-architectures. `Button` uses the same pipeline as `HistoryCenter`.
-HistoryCenter adds composite fixtures and host-command adapters rather than a
-bespoke parity method.
-
-## Completion
-
-A component is active-cohort complete only when:
-
-1. its contract and portable interface agree;
-2. both web implementations and shared Rust composition consume the declared
-   interface;
-3. required shared cases execute in Svelte, React, and GPUI;
-4. normalized observations pass;
-5. each active runtime has a useful curated specimen and the complete case
-   corpus remains available to its executable harness;
-6. required primitive capabilities are certified; and
-7. no placeholder, inert handler, missing registration, or declared absence
-   remains for required behaviour.
-
-New components enter through this pipeline. A preview registration or passing
-unit test alone is not delivery.
-
-Jetstream has a separate admission state. It is neither required for current
-active-cohort completion nor allowed to appear as passing until its backend
-executes the shared cases, observations, and interactions. Its curated
-specimen joins through the separate catalogue workflow.
-
-## Boundaries
-
-- No cross-language behaviour compiler or expression evaluator.
-- No universal render tree for web and native.
-- No application state, routing, persistence, or DAW-specific models in
-  cases.
-- Runtime harnesses may translate actions and observe output; they may not
-  contain a second fixture definition.
-- Every generated or authored conformance surface must state what existing
-  declaration or executable fixture content it replaces. Curated catalogue
-  specimens are not deletion credit merely because a case corpus exists.
-
-The executable format and pilot stop conditions live in
-`../specs/066-executable-component-conformance.md`.
+The prior cross-runtime component pilot was rejected in `g14.008` and its
+machinery removed in `g14.021`. It added 22,746 lines against 472 replaced,
+and the comparator exposed 1,205 differences after HistoryCenter was added
+to its scope. The [historical cost rules](../specs/066-executable-component-conformance.md#cost-and-replacement-rules)
+record the reasons for that decision.

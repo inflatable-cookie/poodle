@@ -33,12 +33,14 @@ from TypeScript. Both runtimes compare every role and the report against
 those vectors. See the [theming model study](../research/theming-model/README.md)
 for derivations and design trade-offs.
 
-## Live Svelte preview
+## Live previews (Svelte and React)
 
 Choose **Live theme** from the preview's theme picker to edit the settings
 or apply a resolver preset. The URL stores the settings, including even tint.
 The style picker works independently. Choosing a built-in theme clears the
-live settings and restores the generated CSS.
+live settings and restores the generated CSS. The React preview mirrors the
+Svelte one: the same core export, the same URL names and parsing (shared from
+`packages/svelte/preview/src/live-theme.ts`), so one URL drives either preview.
 
 [`previewThemeCssProperties`](../../../packages/core/src/theme-css.ts) maps
 resolved roles to the current semantic CSS colour properties. The preview

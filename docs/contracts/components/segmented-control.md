@@ -3,7 +3,7 @@
 > **Surface elevation**: SegmentedControl is a surface consumer (72% moderate contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-08-20
+Updated: 2026-11-25
 
 ## 1. Purpose
 
@@ -219,13 +219,13 @@ Native radio inputs provide keyboard and focus behavior.
 | `width` | `calc(var(--poodle-segmented-control-height) - 0.25rem)` |
 | `padding-inline` | `0` |
 
-### Label — selected state (`:checked + .segmented-control__label`)
+### Label — selected state (`[data-selected="true"] .poodle-segmented-control__label`)
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-color-accent-base)` |
-| `color` | `var(--poodle-color-text-inverse)` |
-| `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, white 12%, transparent)` |
+| `background` | `var(--poodle-recipe-segmented-control-selected-label-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)))` |
+| `color` (label and icon) | `var(--poodle-recipe-segmented-control-selected-label-text, var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse)))` |
+| `box-shadow` | `var(--poodle-recipe-segmented-control-selected-label-shadow, inset 0 0.0625rem 0 color-mix(in srgb, white 12%, transparent))` |
 
 ### Label — focus visible (`:focus-visible + .segmented-control__label`)
 

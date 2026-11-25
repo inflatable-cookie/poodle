@@ -114,13 +114,13 @@
   }
 
   .poodle-segmented-control__segment[data-selected="true"] .poodle-segmented-control__label {
-    background: var(--poodle-recipe-segmented-control-selected-label-fill, var(--poodle-color-accent-base));
-    color: var(--poodle-recipe-segmented-control-selected-label-text, var(--poodle-color-text-inverse));
+    background: var(--poodle-recipe-segmented-control-selected-label-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)));
+    color: var(--poodle-recipe-segmented-control-selected-label-text, var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse)));
     box-shadow: var(--poodle-recipe-segmented-control-selected-label-shadow, inset 0 0.0625rem 0 color-mix(in srgb, white 12%, transparent));
   }
 
   .poodle-segmented-control__segment[data-selected="true"] .poodle-segmented-control__label .poodle-icon {
-    color: var(--poodle-recipe-segmented-control-selected-label-text, var(--poodle-color-text-inverse));
+    color: var(--poodle-recipe-segmented-control-selected-label-text, var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse)));
   }
 
   .poodle-segmented-control__control:focus-visible + .poodle-segmented-control__label {

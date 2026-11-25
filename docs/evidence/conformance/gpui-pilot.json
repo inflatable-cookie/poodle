@@ -1,0 +1,1120 @@
+{
+  "schema": "poodle-node-conformance.v1",
+  "vocabulary_sha256": "02b67b5eda66774909a9ecead8972dbd2b3b1d43810b594265f0d4f8aa89ed63",
+  "case_manifest_sha256": "943cec31f6f1041e860450477ea41aa858f71d2410259304722c0f99e239a781",
+  "identity": {
+    "poodle_commit": "24d583e04f19ac3c13a199a0299a9f6f7e594efb",
+    "backend_commit": "24d583e04f19ac3c13a199a0299a9f6f7e594efb",
+    "lock_sha256": "281a368c5db22835d494bd0795987fbd265422c92eb9f74c1b256156704c49ee",
+    "platform": "macos-aarch64"
+  },
+  "results": [
+    {
+      "id": "kind.Container",
+      "proof": "layout",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          24.0
+        ],
+        [
+          0.0,
+          0.0,
+          8.0,
+          6.0
+        ]
+      ]
+    },
+    {
+      "id": "kind.Text",
+      "proof": "layout",
+      "status": "pass",
+      "observation": [
+        true
+      ]
+    },
+    {
+      "id": "kind.Button",
+      "proof": "layout",
+      "status": "pass",
+      "observation": [
+        true
+      ]
+    },
+    {
+      "id": "kind.Input",
+      "proof": "layout",
+      "status": "pass",
+      "observation": [
+        "filled value",
+        "shown prompt"
+      ]
+    },
+    {
+      "id": "kind.Icon",
+      "proof": "paint",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          24.0
+        ],
+        true
+      ]
+    },
+    {
+      "id": "kind.Image",
+      "proof": "paint",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          32.0,
+          24.0
+        ],
+        true
+      ]
+    },
+    {
+      "id": "kind.Progress",
+      "proof": "paint",
+      "status": "pass",
+      "observation": [
+        true,
+        false
+      ]
+    },
+    {
+      "id": "kind.ProgressRing",
+      "proof": "paint",
+      "status": "pass",
+      "observation": [
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false
+      ]
+    },
+    {
+      "id": "kind.ResolvedIconGeometry",
+      "proof": "paint",
+      "status": "pass",
+      "observation": [
+        true,
+        true,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "id": "role.Alert",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Alert"
+      ]
+    },
+    {
+      "id": "role.AlertDialog",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "AlertDialog"
+      ]
+    },
+    {
+      "id": "role.Banner",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Banner"
+      ]
+    },
+    {
+      "id": "role.Button",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Button"
+      ]
+    },
+    {
+      "id": "role.Cell",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Cell"
+      ]
+    },
+    {
+      "id": "role.CheckBox",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "CheckBox"
+      ]
+    },
+    {
+      "id": "role.ColumnHeader",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "ColumnHeader"
+      ]
+    },
+    {
+      "id": "role.ComboBox",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "ComboBox"
+      ]
+    },
+    {
+      "id": "role.ContentInfo",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "ContentInfo"
+      ]
+    },
+    {
+      "id": "role.Dialog",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Dialog"
+      ]
+    },
+    {
+      "id": "role.Figure",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Figure"
+      ]
+    },
+    {
+      "id": "role.Grid",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Grid"
+      ]
+    },
+    {
+      "id": "role.Group",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Group"
+      ]
+    },
+    {
+      "id": "role.Heading",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Heading"
+      ]
+    },
+    {
+      "id": "role.SearchBox",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "SearchBox"
+      ]
+    },
+    {
+      "id": "role.Label",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Label"
+      ]
+    },
+    {
+      "id": "role.Link",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Link"
+      ]
+    },
+    {
+      "id": "role.List",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "List"
+      ]
+    },
+    {
+      "id": "role.ListItem",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "ListItem"
+      ]
+    },
+    {
+      "id": "role.ListBox",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "ListBox"
+      ]
+    },
+    {
+      "id": "role.ListBoxOption",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "ListBoxOption"
+      ]
+    },
+    {
+      "id": "role.Log",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Log"
+      ]
+    },
+    {
+      "id": "role.Image",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Image"
+      ]
+    },
+    {
+      "id": "role.Menu",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Menu"
+      ]
+    },
+    {
+      "id": "role.MenuBar",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "MenuBar"
+      ]
+    },
+    {
+      "id": "role.MenuItem",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "MenuItem"
+      ]
+    },
+    {
+      "id": "role.MenuItemCheckBox",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "MenuItemCheckBox"
+      ]
+    },
+    {
+      "id": "role.MenuItemRadio",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "MenuItemRadio"
+      ]
+    },
+    {
+      "id": "role.Meter",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Meter"
+      ]
+    },
+    {
+      "id": "role.Navigation",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Navigation"
+      ]
+    },
+    {
+      "id": "role.Presentation",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        null
+      ]
+    },
+    {
+      "id": "role.Splitter",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Splitter"
+      ]
+    },
+    {
+      "id": "role.Slider",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Slider"
+      ]
+    },
+    {
+      "id": "role.ProgressIndicator",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "ProgressIndicator"
+      ]
+    },
+    {
+      "id": "role.RadioGroup",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "RadioGroup"
+      ]
+    },
+    {
+      "id": "role.RadioButton",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "RadioButton"
+      ]
+    },
+    {
+      "id": "role.Region",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Region"
+      ]
+    },
+    {
+      "id": "role.Row",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Row"
+      ]
+    },
+    {
+      "id": "role.SpinButton",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "SpinButton"
+      ]
+    },
+    {
+      "id": "role.Status",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Status"
+      ]
+    },
+    {
+      "id": "role.Switch",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Switch"
+      ]
+    },
+    {
+      "id": "role.Table",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Table"
+      ]
+    },
+    {
+      "id": "role.RowHeader",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "RowHeader"
+      ]
+    },
+    {
+      "id": "role.Tab",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Tab"
+      ]
+    },
+    {
+      "id": "role.TabList",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "TabList"
+      ]
+    },
+    {
+      "id": "role.TabPanel",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "TabPanel"
+      ]
+    },
+    {
+      "id": "role.TextInput",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "TextInput"
+      ]
+    },
+    {
+      "id": "role.Toolbar",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Toolbar"
+      ]
+    },
+    {
+      "id": "role.Tooltip",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Tooltip"
+      ]
+    },
+    {
+      "id": "role.Tree",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "Tree"
+      ]
+    },
+    {
+      "id": "role.TreeItem",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        [
+          0.0,
+          0.0,
+          24.0,
+          16.0
+        ],
+        "TreeItem"
+      ]
+    },
+    {
+      "id": "a11y.role",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        "Heading"
+      ]
+    },
+    {
+      "id": "a11y.label",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        "Run report"
+      ]
+    },
+    {
+      "id": "a11y.expanded",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        true
+      ]
+    },
+    {
+      "id": "a11y.selected",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        true
+      ]
+    },
+    {
+      "id": "a11y.multiselectable",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        true
+      ]
+    },
+    {
+      "id": "a11y.hidden",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        true
+      ]
+    },
+    {
+      "id": "a11y.initial_focus",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        true
+      ]
+    },
+    {
+      "id": "a11y.tab_index",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        true,
+        0
+      ]
+    },
+    {
+      "id": "a11y.controls",
+      "proof": "accessibility",
+      "status": "fail",
+      "observation": [
+        {
+          "target": "target",
+          "probe": {
+            "channel": "a11y",
+            "query": "controls"
+          },
+          "expected": [
+            "related"
+          ],
+          "actual": []
+        }
+      ]
+    },
+    {
+      "id": "a11y.has_popup",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        "Menu"
+      ]
+    },
+    {
+      "id": "a11y.labelled_by",
+      "proof": "accessibility",
+      "status": "fail",
+      "observation": [
+        {
+          "target": "target",
+          "probe": {
+            "channel": "a11y",
+            "query": "labelled_by"
+          },
+          "expected": [
+            "related"
+          ],
+          "actual": []
+        }
+      ]
+    },
+    {
+      "id": "a11y.orientation",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        "Vertical"
+      ]
+    },
+    {
+      "id": "a11y.toggled",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        "Mixed"
+      ]
+    },
+    {
+      "id": "a11y.level",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        3
+      ]
+    },
+    {
+      "id": "a11y.value",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        0.25
+      ]
+    },
+    {
+      "id": "a11y.value_min",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        -2.5
+      ]
+    },
+    {
+      "id": "a11y.value_max",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        2.5
+      ]
+    },
+    {
+      "id": "a11y.value_text",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        "quarter"
+      ]
+    },
+    {
+      "id": "a11y.invalid",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        true
+      ]
+    },
+    {
+      "id": "a11y.busy",
+      "proof": "accessibility",
+      "status": "pass",
+      "observation": [
+        true
+      ]
+    },
+    {
+      "id": "a11y.described_by",
+      "proof": "accessibility",
+      "status": "fail",
+      "observation": [
+        {
+          "target": "target",
+          "probe": {
+            "channel": "a11y",
+            "query": "described_by"
+          },
+          "expected": [
+            "related"
+          ],
+          "actual": []
+        }
+      ]
+    },
+    {
+      "id": "layout.row",
+      "proof": "layout",
+      "status": "pass",
+      "observation": [
+        [
+          4.0,
+          4.0,
+          20.0,
+          12.0
+        ],
+        [
+          30.0,
+          4.0,
+          10.0,
+          8.0
+        ]
+      ]
+    },
+    {
+      "id": "layout.column",
+      "proof": "layout",
+      "status": "pass",
+      "observation": [
+        [
+          4.0,
+          4.0,
+          20.0,
+          12.0
+        ],
+        [
+          4.0,
+          22.0,
+          10.0,
+          8.0
+        ]
+      ]
+    },
+    {
+      "id": "layout.height_grow",
+      "proof": "layout",
+      "status": "fail",
+      "observation": [
+        {
+          "target": "target",
+          "probe": {
+            "channel": "bounds"
+          },
+          "expected": [
+            0.0,
+            12.0,
+            10.0,
+            60.0
+          ],
+          "actual": [
+            0.0,
+            12.0,
+            10.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "layout.absolute",
+      "proof": "layout",
+      "status": "pass",
+      "observation": [
+        [
+          30.0,
+          18.0,
+          16.0,
+          12.0
+        ]
+      ]
+    },
+    {
+      "id": "dispatch.activate",
+      "proof": "dispatch",
+      "status": "not_run",
+      "observation": "dispatch is outside the pure pilot"
+    }
+  ]
+}

@@ -62,4 +62,4 @@ output, focus, or specimen structure while its machine trace stays green.
 The g14 shared-case/normalized-observation attempt was rejected. Keep machine
 tests as focused evidence for the behaviour they own; do not promote them into
 proof of full component parity. The failed system is recorded in
-[009 Cross-Runtime Component Conformance](009-cross-runtime-component-conformance.md).
+[Node backend conformance](009-cross-runtime-component-conformance.md).

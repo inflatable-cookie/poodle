@@ -1,10 +1,13 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Pill, Tabs, IconProvider, UiPresentationProvider, type IconSet, type TabItem } from "@inflatable-cookie/poodle-react";
+import { previewThemeCssProperties, resolveTheme } from "@inflatable-cookie/poodle-core";
 import { applyThemeAttributes, cssVars, styles, themes, densityModes, controlSizes, type StyleName } from "@inflatable-cookie/poodle-core/tokens";
 import iconNodes from "lucide-static/icon-nodes.json";
+import { readLiveTheme, startLiveTheme, writeLiveTheme, type LiveThemeSettings } from "@poodle/svelte-preview/live-theme";
 
 import { DisplayControls } from "./DisplayControls";
 import { ComponentsSection } from "./ComponentsSection";
+import { LiveThemePanel } from "./LiveThemePanel";
 import { TokensSection } from "./TokensSection";
 import { previewShell } from "../generated/preview-shell";
 
@@ -50,6 +53,26 @@ export function App() {
   const [route, setRoute] = useState<Route>({ section: "components" });
   const [mounted, setMounted] = useState(false);
   const [liveTokenValues, setLiveTokenValues] = useState<Partial<Record<string, string>>>({});
+  // Null while a built-in theme is selected; the settings drive the colours otherwise.
+  const [liveTheme, setLiveTheme] = useState<LiveThemeSettings | null>(null);
+  const [panelFocusRequest, setPanelFocusRequest] = useState(0);
+  const liveColors = useMemo(
+    () => (liveTheme ? previewThemeCssProperties(resolveTheme(liveTheme).roles) : null),
+    [liveTheme],
+  );
+  const liveSwatch = useMemo(
+    () =>
+      liveColors
+        ? {
+            canvas: liveColors["--poodle-color-background-canvas"],
+            surface: liveColors["--poodle-color-background-surface"],
+            accent: liveColors["--poodle-color-accent-base"],
+            text: liveColors["--poodle-color-text-primary"],
+            border: liveColors["--poodle-color-border-default"],
+          }
+        : undefined,
+    [liveColors],
+  );
 
   // ── Routing + initial query state ────────────────────────────────────
   useEffect(() => {
@@ -60,6 +83,7 @@ export function App() {
       const paramStyle = params.get("style");
       const paramDensity = params.get("density");
       const paramControlSize = params.get("controlSize");
+      setLiveTheme(readLiveTheme(params));
       if (paramTheme && paramTheme in themes) setTheme(paramTheme as ThemeName);
       setStyle(isStyleName(paramStyle) ? paramStyle : "default");
       if (paramDensity && paramDensity in densityModes) setDensity(paramDensity as DensityName);
@@ -77,12 +101,22 @@ export function App() {
 
   // ── Theme application + live token readout ───────────────────────────
   useEffect(() => {
-    if (typeof document !== "undefined") {
-      applyThemeAttributes(document.documentElement, { theme, style, density, controlSize });
-    }
+    const root = document.documentElement;
     const shell = shellRef.current;
+    const axes = { theme: liveColors ? undefined : theme, style, density, controlSize };
+    applyThemeAttributes(root, axes);
+    if (shell) applyThemeAttributes(shell, axes);
+
+    // The live colours sit on the root so portals inherit them; the shell is
+    // marked as the nearest theme root for the same reason.
+    if (liveTheme && liveColors) {
+      root.dataset.theme = "live";
+      if (shell) shell.dataset.theme = "live";
+      root.style.colorScheme = liveTheme.scheme;
+      for (const [property, value] of Object.entries(liveColors)) root.style.setProperty(property, value);
+    }
+
     if (shell) {
-      applyThemeAttributes(shell, { theme, style, density, controlSize });
       const computedStyles = getComputedStyle(shell);
       const next: Partial<Record<string, string>> = {};
       for (const path of semanticPaths) {
@@ -90,26 +124,39 @@ export function App() {
       }
       setLiveTokenValues(next);
     }
-  }, [theme, style, density, controlSize, contrast]);
+
+    if (!liveColors) return;
+    return () => {
+      root.style.removeProperty("color-scheme");
+      for (const property of Object.keys(liveColors)) root.style.removeProperty(property);
+    };
+  }, [theme, style, density, controlSize, contrast, liveTheme, liveColors]);
 
   // ── Persist preview mode to the URL ──────────────────────────────────
   useEffect(() => {
     if (!mounted) return;
     const searchParams = new URLSearchParams({ theme, style, density, controlSize });
+    if (liveTheme) writeLiveTheme(searchParams, liveTheme);
     const hash = window.location.hash || "#components";
     const nextUrl = `${window.location.pathname}?${searchParams.toString()}${hash}`;
     const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     if (nextUrl !== currentUrl) {
       window.history.replaceState(null, "", nextUrl);
     }
-  }, [mounted, theme, style, density, controlSize, route]);
+  }, [mounted, theme, style, density, controlSize, liveTheme, route]);
 
   function navigateToSection(section: SectionId): void {
     window.location.hash = section;
   }
 
+  // Picking "Live theme" starts from the current built-in theme; an open live theme is kept.
+  function openLiveTheme(): void {
+    setLiveTheme((current) => current ?? startLiveTheme(theme));
+    setPanelFocusRequest((request) => request + 1);
+  }
+
   const shellStyle: CSSProperties | undefined =
-    contrast === 0.5 ? undefined : ({ "--poodle-contrast": contrast } as CSSProperties);
+    liveTheme || contrast === 0.5 ? undefined : ({ "--poodle-contrast": contrast } as CSSProperties);
 
   return (
     <UiPresentationProvider density={density} sizeScale={controlSize}>
@@ -127,7 +174,7 @@ export function App() {
             onValueChange={(value) => navigateToSection(value as SectionId)}
           />
           <div className="poodle-app-top-bar__pills">
-            <Pill>{theme}</Pill>
+            <Pill>{liveTheme ? "live" : theme}</Pill>
             <Pill>{density}</Pill>
             <Pill>{controlSize}</Pill>
           </div>
@@ -140,7 +187,12 @@ export function App() {
           controlSize={controlSize}
           search={search}
           contrast={contrast}
-          onThemeChange={(value) => setTheme(value as ThemeName)}
+          liveSwatch={liveSwatch}
+          onLiveTheme={openLiveTheme}
+          onThemeChange={(value) => {
+            setTheme(value as ThemeName);
+            setLiveTheme(null);
+          }}
           onStyleChange={(value) => {
             if (isStyleName(value)) setStyle(value);
           }}
@@ -152,6 +204,10 @@ export function App() {
             if (route.section !== "components") navigateToSection("components");
           }}
         />
+
+        {liveTheme && (
+          <LiveThemePanel settings={liveTheme} onChange={setLiveTheme} focusRequest={panelFocusRequest} />
+        )}
 
         <main className="poodle-app-main">
           <IconProvider icons={iconNodes as unknown as IconSet}>
