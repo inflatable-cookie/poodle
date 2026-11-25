@@ -441,13 +441,9 @@ pub fn navigation_menu(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::test_theme as theme;
     use poodle_node::NodeKind;
     use poodle_specs::NavigationMenuEntry;
-
-    /// The real token resolver over the ECLIPSE theme. Pure — no backend.
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
 
     fn items() -> Vec<NavigationMenuEntry> {
         vec![

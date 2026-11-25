@@ -67,9 +67,7 @@ mod tests {
     use super::*;
     use poodle_specs::{TextLeading, TextSize, TextSpacing, TextTone, TextWeight, TextWrap};
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     #[test]
     fn text_resolves_all_contract_tones() {

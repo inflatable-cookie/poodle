@@ -1,0 +1,22 @@
+[package]
+name = "poodle-specimens"
+version = "0.4.15"
+edition = "2021"
+license = "MIT"
+rust-version = "1.95"
+description = "Backend-neutral native preview specimens and their interactive sessions."
+publish = false
+
+[dependencies]
+poodle-headless = { path = "../contracts/headless" }
+poodle-node = { path = "../contracts/node" }
+poodle-render = { path = "../render" }
+poodle-specs = { path = "../contracts/components" }
+
+[dev-dependencies]
+poodle-adapter = { path = "../contracts/adapter" }
+
+[package.metadata.poodle]
+public-intent = false
+channel = "internal"
+stability = "internal-tooling"

@@ -545,9 +545,7 @@ mod tests {
 
     use super::*;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn find<'a>(node: &'a Node, id: &str) -> Option<&'a Node> {
         if node.id.as_deref() == Some(id) {

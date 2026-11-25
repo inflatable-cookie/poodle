@@ -408,8 +408,8 @@ default. Container chrome is opt-in via the `chrome` prop (the deprecated
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)` |
-| `border-color` | `color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))` |
+| `background` | `var(--poodle-style-selection-fill, var(--poodle-color-select-accent))` — the 18% accent mix under `accent-outline` |
+| `border-color` | `var(--poodle-style-selection-borderStrong, var(--poodle-color-select-accentBorderStrong))` — the 42% accent mix on `border-default` under `accent-outline`; transparent under `neutral` |
 
 ### Button — hover / focus-visible (not disabled)
 

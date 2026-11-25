@@ -582,9 +582,7 @@ mod tests {
         walk(node, &pred)
     }
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     /// Every text run in the tree, in order.
     fn texts(node: &Node) -> Vec<String> {

@@ -340,9 +340,7 @@ mod tests {
     use super::*;
     use poodle_specs::{ListboxItem, ListboxOrientation, ListboxSelectionMode};
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn options() -> Vec<ListboxItem> {
         vec![

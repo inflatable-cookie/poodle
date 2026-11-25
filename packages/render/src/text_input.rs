@@ -715,9 +715,7 @@ mod tests {
     use poodle_adapter::ThemeProvider;
     use poodle_node::NodeKind;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     #[test]
     fn root_is_a_full_width_input_with_inline_count_and_validation() {

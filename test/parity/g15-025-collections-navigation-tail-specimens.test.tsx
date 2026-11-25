@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import {
   cleanup as cleanupReact,
   fireEvent as fireEventReact,
@@ -18,6 +16,7 @@ import { IconProvider, type IconSet } from "../../packages/react/components/src"
 import { specimenMap as reactMap } from "../../packages/react/preview/src/gallery/specimen-map";
 import { specimenMap as svelteMap } from "../../packages/svelte/preview/src/specimens/registry";
 import PilotSpecimenHarness from "../../packages/svelte/preview/test/PilotSpecimenHarness.svelte";
+import { readNativeSpecimenSource } from "./native-specimen-source";
 
 /**
  * `g15.025` curates the collections, navigation, and long-tail family to the
@@ -136,14 +135,12 @@ const PAGES: Page[] = [
   },
 ];
 
-const GPUI_SPECIMENS = join(import.meta.dirname, "../../packages/gpui/preview/src/specimens");
-
 function collect(source: string, pattern: RegExp): string[] {
   return [...source.matchAll(pattern)].map((match) => match[1]!);
 }
 
 function gpuiCaptions(page: Page): string[] {
-  const source = readFileSync(join(GPUI_SPECIMENS, `${page.gpui}.rs`), "utf8");
+  const source = readNativeSpecimenSource(page);
   const examplesMatch = source.match(/\n\s*specimen_layout\(/);
   const examples = examplesMatch ? source.slice(0, examplesMatch.index) : source;
 
@@ -327,7 +324,10 @@ describe("g15.025 collections, navigation, and long-tail specimens", () => {
   });
 
   it("keeps GPUI FilterBuilder field-kind and overflow teaching in source", () => {
-    const source = readFileSync(join(GPUI_SPECIMENS, "filter_builder_specimen.rs"), "utf8");
+    const source = readNativeSpecimenSource({
+      slug: "filter-builder",
+      gpui: "filter_builder_specimen",
+    });
     expect(source).toMatch(/FilterFieldKind::Enum/);
     expect(source).toMatch(/FilterFieldKind::Range/);
     expect(source).toMatch(/with_allow_multiple\(true\)/);
@@ -336,7 +336,7 @@ describe("g15.025 collections, navigation, and long-tail specimens", () => {
   });
 
   it("keeps GPUI Dialog form controls and Tree large-data teaching in source", () => {
-    const dialog = readFileSync(join(GPUI_SPECIMENS, "dialog.rs"), "utf8");
+    const dialog = readNativeSpecimenSource({ slug: "dialog" });
     expect(dialog).toMatch(/TextInput::from_spec/);
     expect(dialog).toMatch(/Select::from_spec/);
     expect(dialog).toMatch(/Checkbox::from_spec/);
@@ -345,7 +345,7 @@ describe("g15.025 collections, navigation, and long-tail specimens", () => {
       /with_placeholder\("Choose a model"\)\s*\.with_open\(true\)/,
     );
 
-    const tree = readFileSync(join(GPUI_SPECIMENS, "tree.rs"), "utf8");
+    const tree = readNativeSpecimenSource({ slug: "tree" });
     expect(tree).toMatch(/fn large_nodes/);
     expect(tree).toMatch(/with_aria_label\("Large tree"\)/);
     expect(tree).toMatch(/with_loading_values/);

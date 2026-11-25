@@ -15,11 +15,12 @@ search, or enter text that matches no tags to see the empty state.
    unique IDs, display labels and an optional `disabled` boolean. Parse service
    responses before handing them to the recipe and pass the signal to your
    request. Each search may return an entirely different set of tags.
-2. Store chosen tags separately and filter them out of suggestions by ID.
-   Arrow keys navigate suggestions and skip disabled rows. Enter or a click
-   adds the active or clicked tag, clears the query and keeps focus on the
-   input. Backspace on an empty query removes the last tag. Each tag also has a
-   named remove button.
+2. Use `selectionTransition` in multiple mode with the tag ID as the key.
+   Store its result across searches and filter chosen tags out of suggestions.
+   Use `moveActiveOption` to navigate suggestions with the arrow keys and
+   skip disabled rows. Enter or a click adds a tag, clears the query and
+   keeps focus on the input. Backspace on an empty query removes the last
+   tag. Each tag also has a named remove button.
 3. Use the [editable combobox pattern](https://www.w3.org/WAI/ARIA/apg/patterns/combobox/).
    Keep DOM focus on the input and expose the provisional option via
    `aria-activedescendant`. Keep `aria-controls` pointed at the mounted
@@ -35,19 +36,25 @@ search, or enter text that matches no tags to see the empty state.
    with token defaults. Set overrides on the theme root when they must also
    reach the portalled listbox.
 
+## Behaviour supplied by core
+
+- `moveActiveOption` tracks the active value through wrapping and disabled
+  options, including lists with no enabled option. The recipe projects tag
+  IDs into option values, clears the active value on a new query or close,
+  and passes the active index to the DOM. Call `reconcileActiveOption` if
+  your control refreshes a list while keeping navigation active.
+- `selectionTransition` keeps chosen tag records across searches, rejects
+  duplicate or disabled additions, and removes by tag ID. The recipe stores
+  the selected records and uses them to hide already-chosen suggestions.
+  `tokenBackspaceRemoves` checks whether Backspace can remove a tag.
+
 ## Behaviour still written in the recipe
 
 | Piece | What the recipe supplies | Source |
 | --- | --- | --- |
-| Active option | Keep an active ID, project it into the current unchosen results, seed first or last on open, and clear it on query changes and close. Core supplies enabled-index traversal; the recipe guards its all-disabled return. | [Active state and navigation](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L29-L62), [search and close](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L64-L89) |
-| Persistent tag selection | Store tag records outside the result set, hide chosen IDs, guard duplicate or disabled additions, and remove by ID while preserving order. Core supplies only the empty-input Backspace predicate here. | [Suggestion projection](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L38-L42), [add and remove](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L102-L115), [Backspace](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L141-L145) |
-| Search lifecycle | Project loading, ready and error; abort superseded or closed requests and ignore either outcome after abort. Remember arrow direction during loading, retry the same query and abort on unmount. The host supplies fetching and matching. | [Search and close](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L64-L89), [pending navigation and retry](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L125-L140), [unmount](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L168) |
-| Keyboard and text input | Map arrows, Enter and Backspace to intents; preserve ordinary cursor keys and browser editing shortcuts. Suppress commands, requests and dismissal while composing text, then search the committed text. | [Keyboard mapping](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L117-L150), [input and IME events](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L197-L210) |
-| Focus and scroll | Keep DOM focus on the input during navigation and pointer selection. Return focus after tag removal or retry. Reveal the active row after the DOM updates. | [Tag mutations](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L102-L115), [active row scroll](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L162-L166), [retry](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L221-L230), [option pointer events](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L251-L252) |
-| Overlay lifecycle | Bind open state and the two DOM roots to the core dismissal layer, pass its unregister function to Svelte, and close on focus leaving the input except when moving to retry. The Svelte action owns positioning, portalling and observation. | [Dismissal registration](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L152-L160), [blur and retry](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L214-L230), [anchoring](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L235-L243) |
-| Accessible parts | Allocate instance, listbox and option IDs; bind expanded, controls and active descendant to mounted suggestions; label the list and tag buttons, and project disabled and provisional selection on rows. | [IDs](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L22-L23), [option IDs](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L46), [label, tags and input](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L171-L194), [listbox and options](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L235-L255) |
-| Announcements | Convert search outcomes and tag commits into messages and keep the live nodes mounted while their content changes. The application supplies copy. | [Search messages](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L48-L54), [tag messages](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L97-L115), [live regions](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L219-L232) |
-
-The active-option and persistent-selection rules are portable policy candidates.
-Key events, focus, ARIA and overlay lifecycle belong in bindings. Search
-transport and tag vocabulary belong to the application.
+| Search lifecycle | Track loading, ready and error. Abort superseded or closed requests and ignore either outcome after abort. Remember arrow direction during loading, retry the same query and abort on unmount. The host supplies fetching and matching. | [Search and close](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L60-L85), [pending navigation and retry](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L122-L137), [unmount](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L165) |
+| Keyboard and text input | Map arrows, Enter and Backspace to intents. Preserve ordinary cursor keys and browser editing shortcuts. Suppress commands, requests and dismissal while composing text, then search the committed text. | [Keyboard mapping](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L114-L147), [input and IME events](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L194-L206) |
+| Focus and scroll | Keep DOM focus on the input during navigation and pointer selection. Return focus after tag removal or retry. Reveal the active row after the DOM updates. | [Tag mutations](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L98-L112), [active row scroll](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L159-L163), [retry](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L217-L227), [option pointer events](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L248-L249) |
+| Overlay lifecycle | Bind open state and the two DOM roots to the core dismissal layer, pass its unregister function to Svelte, and close on focus leaving the input except when moving to retry. The Svelte action owns positioning, portalling and observation. | [Dismissal registration](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L149-L157), [blur and retry](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L211-L227), [anchoring](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L232-L240) |
+| Accessible parts | Allocate instance, listbox and option IDs. Bind expanded, controls and active descendant to mounted suggestions, label the list and tag buttons, and project disabled and provisional selection on rows. | [IDs](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L25-L26), [option IDs](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L50), [label, tags and input](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L168-L191), [listbox and options](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L232-L252) |
+| Announcements | Convert search outcomes and tag commits into messages and keep the live nodes mounted while their content changes. The application supplies copy. | [Search messages](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L52-L58), [tag messages](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L93-L112), [live regions](../../packages/svelte/preview/src/recipes/async-tag-combobox/TagCombobox.svelte#L216-L229) |

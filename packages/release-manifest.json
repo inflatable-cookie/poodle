@@ -168,7 +168,7 @@
     {
       "name": "poodle-jetstream",
       "path": "packages/jetstream/adapter",
-      "kind": "renderer-adapter",
+      "kind": "theme-provider",
       "language": "rust",
       "publicIntent": true,
       "channel": "preview"
@@ -204,6 +204,14 @@
       "language": "rust",
       "publicIntent": true,
       "channel": "preview"
+    },
+    {
+      "name": "poodle-specimens",
+      "path": "packages/specimens",
+      "kind": "tooling",
+      "language": "rust",
+      "publicIntent": false,
+      "channel": "internal"
     },
     {
       "name": "poodle-gpui-node-backend",

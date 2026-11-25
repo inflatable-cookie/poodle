@@ -53,6 +53,10 @@
         "$type": "color",
         "$value": "initial"
       },
+      "itemBorder": {
+        "$type": "color",
+        "$value": "initial"
+      },
       "fill": {
         "$type": "color",
         "$value": "initial"

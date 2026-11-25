@@ -97,13 +97,13 @@ same DTCG source as the web CSS.
 | `poodle-tokens` | Generated themes and semantic values |
 | `poodle-render` | Shared native composition, appearance, and interaction intent |
 | `poodle-node` | Renderer-neutral output vocabulary |
-| `poodle-jetstream` | Jetstream theme and shared style mapping |
+| `poodle-jetstream` | Jetstream theme and accessibility role mapping |
 | `jetstream-poodle` | Node-to-`JsEl` conversion at the engine boundary |
 | Jetstream runtime | Widget tree, layout, drawing, input dispatch, and lifecycle |
 | Application | Data, routing, persistence, domain state, and orchestration |
 
-There is no Poodle-owned `poodle-jetstream-components` crate. Component recipes
-belong in `poodle-render`; the Jetstream backend only interprets their output.
+Component recipes belong in `poodle-render`. The Jetstream backend interprets
+their completed node trees.
 
 ## Slots and Composition
 
@@ -140,6 +140,10 @@ bun install --frozen-lockfile
 effigy jetstream:build
 ```
 
+Use `effigy check:jetstream-preview` to compile-check the preview without
+launching it. `effigy jetstream:test` covers the theme and role mappings and
+runs without the sibling checkout.
+
 To launch it, run:
 
 ```sh
@@ -155,7 +159,7 @@ of parity.
 1. Update the contract under `docs/contracts/components/`.
 2. Update or add the spec in `poodle-specs`.
 3. Put reusable interaction logic in `poodle-headless` when appropriate.
-4. Implement `Spec + Theme -> Node` in `poodle-render`.
+4. Implement `Spec + RenderContext -> Node` in `poodle-render`.
 5. Extend `poodle-node` only for a genuinely reusable rendering capability.
 6. Extend `jetstream-poodle` only for Jetstream-specific interpretation.
 7. Add preview coverage and update parity evidence.

@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import {
   cleanup as cleanupReact,
   fireEvent as fireEventReact,
@@ -18,6 +16,7 @@ import { IconProvider, type IconSet } from "../../packages/react/components/src"
 import { specimenMap as reactMap } from "../../packages/react/preview/src/gallery/specimen-map";
 import { specimenMap as svelteMap } from "../../packages/svelte/preview/src/specimens/registry";
 import PilotSpecimenHarness from "../../packages/svelte/preview/test/PilotSpecimenHarness.svelte";
+import { readNativeSpecimenSource } from "./native-specimen-source";
 
 /**
  * `g15.024` curates the agent and tools family back to the outline's section
@@ -105,14 +104,12 @@ const PAGES: Page[] = [
 // test:components. Timeout 20s is 4× that 5s default / ~56× the warm 357ms.
 const AGENT_TRANSCRIPT_CAPTION_TIMEOUT_MS = 20_000;
 
-const GPUI_SPECIMENS = join(import.meta.dirname, "../../packages/gpui/preview/src/specimens");
-
 function collect(source: string, pattern: RegExp): string[] {
   return [...source.matchAll(pattern)].map((match) => match[1]!);
 }
 
 function gpuiCaptions(page: Page): string[] {
-  const source = readFileSync(join(GPUI_SPECIMENS, `${page.gpui}.rs`), "utf8");
+  const source = readNativeSpecimenSource(page);
   const examplesMatch = source.match(/\n\s*specimen_layout\(/);
   const examples = examplesMatch ? source.slice(0, examplesMatch.index) : source;
 

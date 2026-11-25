@@ -349,8 +349,7 @@ mod tests {
 
     #[test]
     fn block_source_uses_contract_relative_line_height() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let node = code(&CodeSpec::new().with_content("let value = 1;"), &ctx);
         let scroll = node
@@ -363,8 +362,7 @@ mod tests {
 
     #[test]
     fn inline_wrap_preserves_normal_breaks_and_anywhere_breaks_tokens() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         // Svelte wraps every inline fragment with the adjacent copy button
         // by default; the fragment carries the wrap directives.
@@ -421,8 +419,7 @@ mod tests {
 
     #[test]
     fn block_wrap_preserves_newlines_and_controls_long_tokens() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let normal = code(&CodeSpec::new().with_content("first\n"), &ctx);
         let normal_scroll = normal.children.last().expect("block code scroll");

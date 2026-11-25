@@ -332,11 +332,13 @@ item's colour and weight changes apply to the label only.
 |----------|-------|
 | `color` | `var(--poodle-color-text-primary)` |
 | `font-weight` | `600` |
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)` |
-| `box-shadow` | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent)` |
-| `border-left-color` | `var(--poodle-color-accent-base)` |
+| `background` | `var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent))` |
+| `box-shadow` | `inset 0 0 0 0.0625rem var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent))` |
+| `border-left-color` | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |
 
-The active indicator is implemented as a left border on the item element itself. When inactive, the left border is transparent. When active, it takes the accent color. This replaces the previous `::before` pseudo-element approach.
+The active indicator is implemented as a left border on the item element itself. When inactive, the left border is transparent. When active, it takes the selection indicator colour, which is the accent under `accent-outline`. This replaces the previous `::before` pseudo-element approach.
+
+The inset ring also draws the left edge that `border-left-color` marks. That doubled edge is kept for the redesign to remove. The ring reads the item fill, so it goes neutral with the fill under a neutral selection style.
 
 ### `.poodle-sidebar-nav__item:focus-visible`
 

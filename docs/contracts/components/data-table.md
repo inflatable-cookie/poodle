@@ -392,7 +392,7 @@ the table:
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 8%, transparent)` |
+| `background` | `var(--poodle-recipe-data-table-selected-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 8%, transparent)))` |
 
 #### `tbody tr:hover`
 

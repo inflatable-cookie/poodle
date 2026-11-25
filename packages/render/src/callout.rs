@@ -412,9 +412,7 @@ mod tests {
     use poodle_node::NodeKind;
     use poodle_specs::ToneFill;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     #[test]
     fn dismiss_control_is_a_named_focusable_button() {

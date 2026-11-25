@@ -9,6 +9,18 @@ each URL with that exact version (the release tag is vVERSION).
 - Svelte async tag combobox recipe: https://github.com/inflatable-cookie/poodle/blob/vVERSION/docs/guides/015-async-tag-combobox.md
 - Appearance recipe hooks: https://github.com/inflatable-cookie/poodle/blob/vVERSION/docs/knowledge/architecture/007-appearance-recipe-contract.md
 
+## Preview policies from @inflatable-cookie/poodle-core
+
+- moveActiveOption(items, activeValue, move, wrap = true) and
+  reconcileActiveOption(previousItems, items, activeValue) take ordered
+  items with stable string values and optional disabled flags (default false).
+  Supply the active value or null and handle keyboard events, focus and ARIA.
+- selectionTransition(selected, event, options?) handles select, toggle,
+  remove, clear and replace without reading visible items. Mode defaults to
+  single. Multiple mode defaults to no maximum. Supply a stable key for
+  records, candidate eligibility and the current selection. Store the
+  returned selection and decide which options to show.
+
 If the tag or a document is absent, these instructions are newer than the
 installed release or the build has no release tag. Check the build's source
 revision and use only exports verified against that installation.

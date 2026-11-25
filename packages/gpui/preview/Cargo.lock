@@ -4154,6 +4154,7 @@ dependencies = [
  "poodle-headless",
  "poodle-node",
  "poodle-render",
+ "poodle-specimens",
  "poodle-specs",
  "poodle-style",
  "poodle-tokens",
@@ -4206,6 +4207,16 @@ dependencies = [
  "poodle-tokens",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "poodle-specimens"
+version = "0.4.15"
+dependencies = [
+ "poodle-headless",
+ "poodle-node",
+ "poodle-render",
+ "poodle-specs",
 ]
 
 [[package]]

@@ -3,7 +3,7 @@
 //!
 //! Run with: `cargo run -p poodle-jetstream-preview`
 
-use poodle_jetstream_preview::{app_state, component_registry, shell, theme_bridge};
+use poodle_jetstream_preview::{app_state, component_registry, shell, specimens, theme_bridge};
 use theme_bridge::build_draw_theme;
 
 use glam::Mat4;
@@ -259,11 +259,11 @@ impl PreviewState {
             logical_w,
             logical_h
         );
-        state.rebuild_shell();
+        state.rebuild_shell(Vec::new());
         state
     }
 
-    fn rebuild_shell(&mut self) {
+    fn rebuild_shell(&mut self, specimen_effects: Vec<poodle_specimens::Effect>) {
         // Update the theme provider to match the selected preset.
         let theme_def = match self.app.theme_preset {
             ThemePreset::Default => &poodle_tokens::themes::ICEBERG,
@@ -291,6 +291,7 @@ impl PreviewState {
         // Framework handles everything: clear → materialize → layout.
         // Scroll offsets are preserved automatically via JsEl ids.
         self.game_ui.render_immediate(&ui);
+        specimens::apply_effects(&mut self.game_ui, specimen_effects);
 
         self.app.dirty = false;
         self.app.reset_sidebar_scroll = false;
@@ -684,9 +685,13 @@ impl PreviewState {
             }
         }
 
+        // Pointer and accessibility callbacks enqueue shared specimen events.
+        let (changed, effects) = self.app.shared_specimens.drain();
+        self.app.dirty |= changed;
+
         // Rebuild if state changed
         if self.app.dirty {
-            self.rebuild_shell();
+            self.rebuild_shell(effects);
             // Suppress scroll events for a few frames so that trackpad
             // momentum doesn't immediately re-scroll the fresh list.
             self.scroll_suppress_frames = 3;

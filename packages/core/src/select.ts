@@ -7,6 +7,9 @@
  * adapter-owned.
  */
 
+import { moveActiveOption } from "./active-option";
+import { selectionTransition } from "./selection";
+
 export interface SelectOptionLike {
   value: string;
   label: string;
@@ -164,7 +167,7 @@ export function selectCommittedQuery(context: SelectContext): string {
 
 /** Query and option-list highlight: first enabled visible option, else null. */
 export function selectQueryHighlightValue(context: SelectContext): string | null {
-  return selectEnabledVisibleValues(context)[0] ?? null;
+  return moveActiveOption(selectVisibleOptions(context), null, "first");
 }
 
 /** Opening highlight: selected enabled visible option, else first enabled visible, else null. */
@@ -261,26 +264,9 @@ function moveHighlight(context: SelectContext, direction: 1 | -1): SelectResult 
     return openList(context);
   }
 
-  const enabled = selectEnabledVisibleValues(context);
-
-  if (enabled.length === 0) {
-    if (context.highlightedValue === null) {
-      return inert(context);
-    }
-
-    return { context: { ...context, highlightedValue: null }, effects: [] };
-  }
-
-  const currentIndex = context.highlightedValue === null ? -1 : enabled.indexOf(context.highlightedValue);
-  let nextIndex: number;
-
-  if (currentIndex < 0) {
-    nextIndex = direction === 1 ? 0 : enabled.length - 1;
-  } else {
-    nextIndex = Math.max(0, Math.min(enabled.length - 1, currentIndex + direction));
-  }
-
-  const highlightedValue = enabled[nextIndex] ?? null;
+  const highlightedValue = moveActiveOption(
+    selectVisibleOptions(context), context.highlightedValue, direction === 1 ? "next" : "previous", false,
+  );
 
   if (highlightedValue === context.highlightedValue) {
     return inert(context);
@@ -294,8 +280,7 @@ function jumpHighlight(context: SelectContext, position: "first" | "last"): Sele
     return inert(context);
   }
 
-  const enabled = selectEnabledVisibleValues(context);
-  const highlightedValue = position === "first" ? (enabled[0] ?? null) : (enabled[enabled.length - 1] ?? null);
+  const highlightedValue = moveActiveOption(selectVisibleOptions(context), null, position);
 
   if (highlightedValue === context.highlightedValue) {
     return inert(context);
@@ -305,11 +290,10 @@ function jumpHighlight(context: SelectContext, position: "first" | "last"): Sele
 }
 
 function commitOption(context: SelectContext, value: string): SelectResult {
-  const option = findOption(context, value);
-
-  if (!option || option.disabled) {
-    return inert(context);
-  }
+  const candidate = findOption(context, value);
+  if (!candidate) return inert(context);
+  const [option] = selectionTransition([], { type: "SELECT", item: candidate, disabled: candidate.disabled });
+  if (!option) return inert(context);
 
   const next: SelectContext = {
     ...context,

@@ -524,9 +524,7 @@ mod tests {
 
     use super::*;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     /// The Soundcheck arrangement, with one completed step carrying a rerun
     /// and one step disabled.

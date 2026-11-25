@@ -273,6 +273,15 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
+      "name": "poodle-specimens",
+      "channel": "internal",
+      "publicIntent": false,
+      "changeControl": "tooling-owned",
+      "requiresReleaseNotes": false,
+      "requiresDeprecationRecord": false,
+      "removalGate": "owner-directed-with-doc-update"
+    },
+    {
       "name": "poodle-gpui-node-backend",
       "channel": "preview",
       "publicIntent": true,

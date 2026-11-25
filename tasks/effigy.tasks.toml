@@ -172,6 +172,7 @@
 "jetstream:build" = "bun scripts/jetstream-build.ts"
 "check:jetstream-preview" = "sh scripts/rust-driver.sh check -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
 "jetstream:run" = "sh scripts/rust-driver.sh run -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml -- {args}"
+# Theme and accessibility role tests. No sibling checkout is needed.
 "jetstream:test" = "sh scripts/rust-driver.sh test --manifest-path packages/jetstream/adapter/Cargo.toml"
 "jetstream:preview" = [{ task = "jetstream:run" }]
 
@@ -290,7 +291,7 @@
 # validation narrow instead of running the full core unit suite.
 "test:core-listbox" = "bun test --timeout 120000 packages/core/test/listbox.test.ts"
 "theme-resolver:vectors" = "bun packages/core/test/generate-theme-vectors.ts"
-"test:core-theme-resolver" = "bun test packages/core/test/theme-resolver.test.ts"
+"test:core-theme-resolver" = "bun test packages/core/test/theme-resolver.test.ts packages/core/test/theme-css.test.ts"
 "test:core-icon-geometry-realize" = [
   { run = "bun test --timeout 120000 packages/core/test/icon-geometry-realize.test.ts" },
   { run = "bun test --timeout 120000 --test-name-pattern 'geometry realization support is exported for sibling test hosts' scripts/web-distribution/core-build.test.ts" },
@@ -733,8 +734,7 @@
 # AlertDialog rendering Confirm and Cancel that no host can wire looks finished
 # and is not. Carries a ratchet — the known-gap list can only shrink.
 "drift:events" = "bun packages/gpui/preview/scripts/inert-component-drift.ts"
-# Direct adapter manifests are independent runtime evidence, but must match the
-# RenderComponent implementations they claim exactly.
+# The GPUI direct manifest must match its legacy RenderComponent implementations.
 "drift:adapter-manifests" = "bun packages/gpui/preview/scripts/adapter-manifest-drift.ts"
 # The family-level Treatment layer is retired. Historical records and the
 # architecture tombstone are preserved; active code, contracts, guides,
@@ -773,6 +773,7 @@
 # (no gpui/game_ui deps). Native component crates are covered locally/nightly.
 "test:contracts" = [
   { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/headless/Cargo.toml" },
+  { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/ir/Cargo.toml" },
   { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/markdown/Cargo.toml" },
   { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/components/Cargo.toml" },
   { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/layout/Cargo.toml" },
@@ -782,9 +783,14 @@
   { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/tokens/Cargo.toml" },
   { run = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/node/Cargo.toml" },
 ]
+"check:backend-neutral" = "sh scripts/check-backend-neutral.sh"
+"test:specimens" = "sh scripts/rust-driver.sh test --manifest-path packages/specimens/Cargo.toml {args}"
+"check:render" = "sh scripts/rust-driver.sh check --manifest-path packages/render/Cargo.toml"
+"test:render" = "sh scripts/rust-driver.sh test --manifest-path packages/render/Cargo.toml"
 # Listbox's Rust machine mirror has an isolated contract suite so native task
 # validation does not need to run the unrelated contract crates above.
 "test:headless-listbox" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/contracts/headless/Cargo.toml listbox::tests"
+"test:headless-conformance" = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/headless/Cargo.toml --test conformance"
 "test:headless-theme-resolver" = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/headless/Cargo.toml --test theme_resolver_conformance"
 "check:headless-theme-resolver" = "sh scripts/rust-driver.sh check --manifest-path packages/contracts/headless/Cargo.toml"
 "test:listbox-spec" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/contracts/components/Cargo.toml listbox::tests"
@@ -899,6 +905,8 @@
 # restamp that is not regenerated used to pass every board Queue runs.
 "ci:rust" = [
   { task = "test:contracts" },
+  { task = "test:specimens" },
+  { task = "check:backend-neutral" },
   { task = "ir:check" },
   { task = "catalogue:check" },
   { task = "check:rustfmt" },
@@ -925,7 +933,7 @@
 "check:gpui" = [
   { run = "sh scripts/rust-driver.sh check -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml" },
   { task = "test:gpui-preview" },
-  { run = "sh scripts/rust-driver.sh test -p poodle-render --manifest-path packages/render/Cargo.toml" },
+  { task = "test:render" },
   { run = "sh scripts/rust-driver.sh test -p poodle-gpui-node-backend --manifest-path packages/gpui/node-backend/Cargo.toml" },
 ]
 # The poodle-preview bin's unit tests, headless: the contract usage-docs
@@ -938,13 +946,6 @@
 # checkout): 8s wall, 1.6s of test time.
 "test:gpui-preview" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview"
 "test:jetstream-preview" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin poodle-jetstream-preview"
-# `check:jetstream` and `test:jetstream` are gone: they drove
-# `poodle-jetstream-components`, deleted in `ee704699` when Jetstream moved onto
-# `poodle-render` nodes. The render probes they ran live in
-# `cargo test -p poodle-render`, which `check:gpui` runs.
-# The adapter crates cover theme/token resolution, layout mapping, and their
-# direct manifest claims independently of the shared renderer.
-"test:jetstream-adapter" = "sh scripts/rust-driver.sh test -p poodle-jetstream --manifest-path packages/jetstream/adapter/Cargo.toml"
 # The native presentation cascade (architecture 010, g15.043): component specs
 # keep size/density omission, public renderers take RenderContext rather than
 # a bare ThemeProvider, and the GPUI preview never regains a passthrough or
@@ -961,7 +962,7 @@
   { task = "drift:presentation-cascade" },
   { task = "check:gpui" },
   { task = "gpui:test" },
-  { task = "test:jetstream-adapter" },
+  { task = "jetstream:test" },
   # Focused native regressions on GPUI's in-memory test platform (g14.023,
   # retained by g14.021): no window, no focus, no OS activation.
   { task = "regressions:native" },

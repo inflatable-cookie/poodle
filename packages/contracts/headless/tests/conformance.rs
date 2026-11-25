@@ -7,17 +7,27 @@
 
 use serde_json::{json, Value};
 
+use poodle_headless::active_option::{
+    move_active_option, reconcile_active_option, ActiveOption, ActiveOptionMove,
+};
 use poodle_headless::audio::*;
 use poodle_headless::checkbox::*;
 use poodle_headless::disclosure::*;
 use poodle_headless::drag_drop::*;
 use poodle_headless::edit::*;
 use poodle_headless::hover::*;
+use poodle_headless::listbox::{
+    listbox_transition, ListboxBoundary, ListboxContext, ListboxEffect, ListboxEvent, ListboxItem,
+    ListboxSelectionMode,
+};
 use poodle_headless::menu::*;
 use poodle_headless::modal::*;
 use poodle_headless::select::{
     select_transition, SelectContext as SelectMachineContext, SelectEffect as SelectMachineEffect,
     SelectEvent as SelectMachineEvent, SelectOptionState,
+};
+use poodle_headless::selection::{
+    selection_transition, SelectionEvent, SelectionMode as PortableSelectionMode, SelectionOptions,
 };
 use poodle_headless::single_select::*;
 use poodle_headless::slider::*;
@@ -125,6 +135,170 @@ fn assert_case(
                 "{machine}/{name}: context.{key}"
             );
         }
+    }
+}
+
+fn active_options(value: &Value) -> Vec<ActiveOption<'_>> {
+    value
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|item| ActiveOption {
+            value: s(item, "value"),
+            disabled: b(item, "disabled"),
+        })
+        .collect()
+}
+
+#[test]
+fn active_option_conformance() {
+    for case in vectors()["activeOption"].as_array().unwrap() {
+        let context = &case["context"];
+        let event = &case["event"];
+        let items = active_options(&context["items"]);
+        let active = context["activeValue"].as_str();
+        let value = match s(event, "type") {
+            "MOVE" => {
+                let movement = match s(event, "movement") {
+                    "first" => ActiveOptionMove::First,
+                    "last" => ActiveOptionMove::Last,
+                    "next" => ActiveOptionMove::Next,
+                    "previous" => ActiveOptionMove::Previous,
+                    other => panic!("unknown active-option movement: {other}"),
+                };
+                let wrap = context["wrap"].as_bool().unwrap_or(true);
+                move_active_option(items, active, movement, wrap)
+            }
+            "REPLACE" => reconcile_active_option(&items, &active_options(&event["items"]), active),
+            other => panic!("unknown active-option event: {other}"),
+        };
+        assert_case(
+            "activeOption",
+            case,
+            vec![],
+            None,
+            Some(json!({ "activeValue": value })),
+        );
+    }
+}
+
+#[test]
+fn selection_conformance() {
+    for case in vectors()["selection"].as_array().unwrap() {
+        let context = &case["context"];
+        let event = &case["event"];
+        let selected = context["selected"].as_array().unwrap();
+        let item = &event["item"];
+        let disabled = b(event, "disabled");
+        let action = match s(event, "type") {
+            "SELECT" => SelectionEvent::Select { item, disabled },
+            "TOGGLE" => SelectionEvent::Toggle { item, disabled },
+            "REMOVE" => SelectionEvent::Remove { item },
+            "CLEAR" => SelectionEvent::Clear,
+            "REPLACE" => SelectionEvent::Replace {
+                items: event["items"].as_array().unwrap(),
+            },
+            other => panic!("unknown selection event: {other}"),
+        };
+        let options = SelectionOptions {
+            mode: if s(context, "mode") == "multiple" {
+                PortableSelectionMode::Multiple
+            } else {
+                PortableSelectionMode::Single
+            },
+            max: opt_usize(context, "max"),
+        };
+        let next = selection_transition(selected, action, options, |item| s(item, "value"));
+        assert_case(
+            "selection",
+            case,
+            vec![],
+            None,
+            Some(json!({ "selected": next })),
+        );
+    }
+}
+
+#[test]
+fn listbox_conformance() {
+    for case in vectors()["listbox"].as_array().unwrap() {
+        let ctx = &case["context"];
+        let event = &case["event"];
+        let context = ListboxContext {
+            items: ctx["items"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|item| {
+                    ListboxItem::new(s(item, "value"), s(item, "label"))
+                        .with_disabled(b(item, "disabled"))
+                })
+                .collect(),
+            selection_mode: if s(ctx, "selectionMode") == "multiple" {
+                ListboxSelectionMode::Multiple
+            } else {
+                ListboxSelectionMode::Single
+            },
+            orientation: Default::default(),
+            disabled: b(ctx, "disabled"),
+            selected_values: ctx["selectedValues"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|value| value.as_str().unwrap().to_owned())
+                .collect(),
+            focused_value: opt_string(ctx, "focusedValue"),
+            anchor_value: opt_string(ctx, "anchorValue"),
+            typeahead: String::new(),
+            typeahead_at: 0,
+        };
+        let event = match s(event, "type") {
+            "MOVE" => ListboxEvent::Move {
+                direction: if event["direction"].as_i64() == Some(1) {
+                    1
+                } else {
+                    -1
+                },
+                extend_selection: b(event, "extendSelection"),
+            },
+            "BOUNDARY" => ListboxEvent::Boundary {
+                boundary: if s(event, "boundary") == "first" {
+                    ListboxBoundary::First
+                } else {
+                    ListboxBoundary::Last
+                },
+            },
+            "SPACE" => ListboxEvent::Space,
+            "SELECT" => ListboxEvent::Select {
+                value: s(event, "value").to_owned(),
+                additive: b(event, "additive"),
+                range: b(event, "range"),
+            },
+            other => panic!("unknown listbox event: {other}"),
+        };
+        let result = listbox_transition(&context, event);
+        let effects = result
+            .effects
+            .into_iter()
+            .map(|effect| match effect {
+                ListboxEffect::Focus { value } => json!({ "type": "focus", "value": value }),
+                ListboxEffect::SelectionChanged { values } => {
+                    json!({ "type": "selectionChanged", "values": values })
+                }
+                ListboxEffect::Activate { value } => json!({ "type": "activate", "value": value }),
+            })
+            .collect();
+        assert_case(
+            "listbox",
+            case,
+            effects,
+            None,
+            Some(json!({
+                "focusedValue": result.context.focused_value,
+                "anchorValue": result.context.anchor_value,
+                "selectedValues": result.context.selected_values,
+            })),
+        );
     }
 }
 

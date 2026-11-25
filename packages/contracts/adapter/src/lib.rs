@@ -1,15 +1,6 @@
-//! Renderer adapter traits for Poodle.
+//! Shared theme and event contracts for native Poodle rendering.
 //!
-//! These traits define the contract that rendering adapters implement to map
-//! Poodle component specs and resolved styles to a target renderer's native
-//! element/node types.
-//!
-//! ## Adapter Implementations
-//!
-//! - **GPUI adapter** (`poodle-gpui`, g07): Maps specs to GPUI `Element` types
-//!   using GPUI's styling API and event subscription model.
-//! - **Jetstream adapter** (`poodle-jetstream`, g08): Maps specs to Jetstream
-//!   `UiTree` widget variants using `UiStyle` and `UiEvent` pipeline.
+//! The legacy GPUI adapter also uses the direct-rendering traits and manifest.
 
 use poodle_events::SemanticEvent;
 use poodle_style::StyleDescriptor;
@@ -17,11 +8,8 @@ use poodle_tokens::typed::ColorValue;
 
 /// Provides resolved token values for the current theme context.
 ///
-/// Adapters use this to resolve token references in spec structs to concrete
-/// typed values. Each rendering target implements this based on its theme system:
-///
-/// - **GPUI**: Reads from GPUI's theme system (CSS-like token → typed value)
-/// - **Jetstream**: Reads from Jetstream's `Theme` struct (Vec4 colors, f32 sizes)
+/// The shared renderer uses this to resolve semantic tokens into concrete
+/// values in a node tree. Each backend can supply its own theme provider.
 pub trait ThemeProvider {
     /// Resolve a color token path to an RGBA color value.
     fn resolve_color(&self, token: &str) -> ColorValue;
@@ -79,13 +67,7 @@ pub trait EventSink {
     fn handle_event(&mut self, component_id: &str, event: SemanticEvent);
 }
 
-/// The output type that a rendering adapter produces.
-///
-/// Each adapter defines its own `Target` that represents a native rendered
-/// element or node:
-///
-/// - **GPUI**: A GPUI `Element` or `AnyElement`
-/// - **Jetstream**: A `UiTree` widget node ID
+/// The output type that a legacy direct renderer produces.
 pub trait RenderTarget {
     /// An opaque handle to a rendered element in the target system.
     type Handle;
@@ -93,9 +75,8 @@ pub trait RenderTarget {
 
 /// Maps a Poodle component spec and resolved style to the renderer's native output.
 ///
-/// This is the core trait that adapters implement for each component. The
-/// `Spec` type parameter is a Poodle spec struct (e.g., `ButtonSpec`, `DialogSpec`),
-/// and `Target` is the rendering system.
+/// The legacy GPUI adapter implements this trait for each direct-rendered
+/// component. `Spec` is the component's input and `Target` is the output type.
 ///
 /// ## Example (conceptual)
 ///
@@ -134,7 +115,7 @@ pub trait RenderComponent<Spec> {
 /// `poodle-render` coverage is validated separately through its backends and
 /// previews; this manifest does not claim whole-runtime parity.
 pub trait AdapterManifest {
-    /// The adapter's display name (e.g., "GPUI", "Jetstream").
+    /// The adapter's display name.
     fn name(&self) -> &str;
 
     /// List of component spec type names this adapter supports.

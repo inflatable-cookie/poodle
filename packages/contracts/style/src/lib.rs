@@ -111,11 +111,9 @@ impl Default for CursorHint {
 
 /// Complete resolved visual style for a component instance.
 ///
-/// Produced by a spec struct's `resolve_style()` method after token resolution.
-/// Rendering adapters consume this to produce their native visual output:
-///
-/// - **GPUI**: Maps to `Style` struct fields + GPUI-specific paint calls
-/// - **Jetstream**: Maps to `UiStyle` fields + `Theme` color/size lookups
+/// The shared renderer populates this descriptor after token resolution.
+/// The GPUI node backend and the Jetstream converter turn it into native
+/// styles at their respective runtime boundaries.
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct StyleDescriptor {
     // --- Colors ---

@@ -248,9 +248,7 @@ mod tests {
     use poodle_specs::SwitchSpec;
     use std::sync::{Arc, Mutex};
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     #[test]
     fn activation_emits_the_next_checked_value() {

@@ -181,10 +181,11 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--poodle-recipe-card-selected-border, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)))` |
-| `box-shadow` | `var(--poodle-recipe-card-selected-shadow, 0 0 0 0.0625rem var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)), inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)) 12%, transparent))` |
+| `border-color` | `var(--poodle-recipe-card-selected-border, var(--poodle-style-selection-itemBorder, var(--poodle-color-accent-base)))` |
+| `background` | `var(--poodle-style-selection-itemFill, var(--poodle-card-fill))` |
+| `box-shadow` | `var(--poodle-recipe-card-selected-shadow, 0 0 0 0.0625rem var(--poodle-style-selection-itemBorder, var(--poodle-color-accent-base)), inset 0 0 0 0.0625rem var(--poodle-style-selection-itemBorder, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)))` |
 
-Interactive selected hover (`[data-interactive="true"][data-selected="true"]:hover`) resolves through `--poodle-recipe-card-selected-hover-border` and `--poodle-recipe-card-selected-hover-shadow` with the same `style.selection.indicator` fallback chain.
+Interactive selected hover (`[data-interactive="true"][data-selected="true"]:hover`) resolves through `--poodle-recipe-card-selected-hover-border`, `--poodle-style-selection-itemFill` over `--poodle-card-hover-fill`, and `--poodle-recipe-card-selected-hover-shadow` with the same `style.selection.itemBorder` fallback chain.
 
 ### Interactive hover
 

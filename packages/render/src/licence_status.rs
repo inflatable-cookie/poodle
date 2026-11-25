@@ -243,9 +243,7 @@ mod tests {
     use poodle_headless::licence::{LicenceAttention, LicenceUsability};
     use poodle_specs::LicenceStatusSpec;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn spec() -> LicenceStatusSpec {
         LicenceStatusSpec::new()

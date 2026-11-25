@@ -91,37 +91,30 @@ applying direct overrides.
 | --- | --- | --- |
 | `fill` | `outlined`, `filled`, `ghost` | Controls at rest, including hover and press fills where used |
 | `surface` | `border`, `elevation`, `tonal` | Containers |
-| `selection` | `accent-outline`, `accent-tint`, `neutral` | Selected items in Select, Tabs, ToggleGroup, SegmentedControl, Card (CardRadioGroup, CardToggleGroup), ThemeSelect, AgentQuestion and Rating |
+| `selection` | `accent-outline`, `accent-tint`, `neutral` | Selected items in Select, Tabs, ToggleGroup, the list and data components (ListCard, Tree, LogList, DataTable, Calendar, RelationPicker, ActionDiscoveryPanel, ModelPicker, HistoryCenter), and choice controls (SegmentedControl, Card, CardRadioGroup, CardToggleGroup, ThemeSelect, AgentQuestion, Rating) |
 
 The default uses `outlined`, `border` and `accent-outline` to reproduce
-the prior paint. `accent-tint` keeps tint and suppresses selection borders
-for components wired to `selection.border` or `selection.borderStrong`
-(Select, Tabs, ToggleGroup). `neutral` uses a neutral fill, stronger text and
-an accent only for an existing small indicator. Each component retains its
-selection anatomy.
+the prior paint. `accent-tint` keeps tint and suppresses selection borders.
+`neutral` uses a neutral fill, stronger text and an accent only for an
+existing small indicator. Each component retains its selection anatomy.
 
-Selected borders and rings on Card (including CardRadioGroup and
-CardToggleGroup), ThemeSelect tiles and AgentQuestion options, plus Rating
-glyph fills, currently bind `--poodle-style-selection-indicator` to preserve
-their existing `--poodle-color-accent-base` default without introducing an
-unruled default delta (`selection.border` and `selection.borderStrong` use
-alpha-mixed borders in `accent-outline`). Because `style.selection.indicator`
-resolves to `{color.accent.base}` in all three `selection` switch values unless
-a style mode overrides it:
+`style.selection.itemBorder` is the selected item's border colour. It is
+`initial` under `accent-outline`, so the component's own accent border applies.
+It is `transparent` under `accent-tint` and `neutral`. Components route their
+selected border through the recipe hook, then `itemBorder`, then the current
+literal. A sibling component that needs a selected border can use the same
+role (used by Card, ThemeSelect selected tiles, and AgentQuestion selected
+options alongside ListCard, Tree, LogList, RelationPicker, and
+ActionDiscoveryPanel).
 
-- Under `accent-tint`, Card (which reads no fill role) renders identically to
-  `accent-outline`, and ThemeSelect and AgentQuestion keep an accent border.
-- Under plain `selection: neutral` without a style override, Card, ThemeSelect,
-  AgentQuestion and Rating stay accent-colored.
+Rating's filled glyphs and AgentQuestion's progress dots bind
+`style.selection.indicator`, so they keep `{color.accent.base}` under plain
+`selection: neutral` (with no style override) and become neutral under `quiet`.
 
 `quiet` is an experimental style (`status: "experimental"` in style metadata)
 that combines `filled`, `tonal`, and `neutral` with a neutral selection
 indicator (`style.selection.indicator` mapped to `color.text.primary`), leaving
-only primary buttons and focus rings using the accent colour (and rendering
-Card, ThemeSelect, AgentQuestion and Rating neutral as well). Adding a
-`selection` border role that resolves to `{color.accent.base}` in
-`accent-outline` and suppresses in `accent-tint` and `neutral` (pending
-planner ruling) would remove the `indicator` overload on those borders.
+only primary buttons and focus rings using the accent colour.
 
 Themes define `color.fill.{rest,hover,active}` for filled controls and
 `color.select.{accent,neutral}` for selected items. Neutral fills use the
@@ -230,9 +223,10 @@ poodle-tokens + poodle-specs
 GPUI backend    Jetstream backend
 ```
 
-`poodle-gpui` and `poodle-jetstream` provide runtime-specific theme providers
-and style mapping. They resolve the same semantic token roles and must not
-introduce backend-only theme values.
+`poodle-gpui` and `poodle-jetstream` provide runtime theme providers that
+resolve the same semantic token roles. `poodle-render` tests resolve these roles
+from `poodle-tokens` through a local fixture. The Jetstream node converter
+owns runtime layout and style mapping in the sibling repository.
 
 ## Package Ownership
 
@@ -244,7 +238,7 @@ packages/react/components/  React component package
 packages/contracts/tokens/  generated Rust token consumer crate
 packages/render/            shared Rust component renderer
 packages/gpui/              GPUI adapter and node backend
-packages/jetstream/         Jetstream adapter
+packages/jetstream/         Jetstream theme, role map, and preview
 ```
 
 Downstream consumers may translate Poodle tokens into host-owned names, in

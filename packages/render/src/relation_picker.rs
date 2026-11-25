@@ -661,9 +661,7 @@ mod tests {
     use super::*;
     use poodle_specs::{PickerFilterConfig, PickerFilterOption, PickerItemSpec};
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     #[test]
     fn two_relation_pickers_do_not_share_select_runtime_ids() {

@@ -96,8 +96,8 @@
   }
 
   .poodle-pagination__button[data-current="true"] {
-    background: var(--poodle-recipe-pagination-current-button-fill, color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent));
-    border-color: var(--poodle-recipe-pagination-current-button-border, color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default)));
+    background: var(--poodle-recipe-pagination-current-button-fill, var(--poodle-style-selection-fill, var(--poodle-color-select-accent)));
+    border-color: var(--poodle-recipe-pagination-current-button-border, var(--poodle-style-selection-borderStrong, var(--poodle-color-select-accentBorderStrong)));
   }
 
   .poodle-pagination__button:hover:not(:disabled),

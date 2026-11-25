@@ -565,9 +565,7 @@ mod tests {
     use super::*;
     use crate::context::RenderContext;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     #[test]
     fn editable_spin_button_declares_edit_channels() {

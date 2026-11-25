@@ -317,9 +317,7 @@ mod tests {
     use poodle_specs::ChoiceOption;
     use std::sync::Mutex;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn plan_options() -> Vec<ChoiceOption> {
         vec![

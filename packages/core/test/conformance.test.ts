@@ -8,6 +8,7 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { moveActiveOption, reconcileActiveOption, type ActiveOption, type ActiveOptionMove } from "../src/active-option.ts";
 import {
   createFaderContext, createKnobContext, faderPointToNorm, faderTransition,
   knobPointToNorm, knobTransition,
@@ -19,9 +20,11 @@ import { editLabelTransition } from "../src/edit.ts";
 import { disclosureTransition } from "../src/disclosure.ts";
 import { dragSessionTransition, resolveDropTarget } from "../src/drag-drop.ts";
 import { hoverTransition } from "../src/hover.ts";
+import { listboxTransition } from "../src/listbox.ts";
 import { menuTransition } from "../src/menu.ts";
 import { modalTransition } from "../src/modal.ts";
 import { selectTransition } from "../src/select.ts";
+import { selectionTransition, type SelectionEvent, type SelectionOptions } from "../src/selection.ts";
 import { singleSelectTransition } from "../src/single-select.ts";
 import {
   rangeSliderTransition,
@@ -61,6 +64,32 @@ function runMachine(machine: string, vector: VectorCase): void {
   const { context, event } = vector as never as { context: never; event: never };
 
   switch (machine) {
+    case "activeOption": {
+      const input: {
+        context: { items: ActiveOption[]; activeValue: string | null; wrap?: boolean };
+        event: { type: "REPLACE"; items: ActiveOption[] } | { type: "MOVE"; movement: ActiveOptionMove };
+      } = { context, event };
+      const { context: { items, activeValue, wrap }, event: action } = input;
+      const value = action.type === "REPLACE"
+        ? reconcileActiveOption(items, action.items, activeValue)
+        : moveActiveOption(items, activeValue, action.movement, wrap);
+      checkContextSubset({ activeValue: value }, vector.expect.context);
+      return;
+    }
+    case "selection": {
+      type Choice = { value: string; label?: string };
+      const { selected, mode, max }: SelectionOptions<Choice> & { selected: Choice[] } = context;
+      const action: SelectionEvent<Choice> = event;
+      const next = selectionTransition(selected, action, { mode, max, key: (item) => item.value });
+      checkContextSubset({ selected: next }, vector.expect.context);
+      return;
+    }
+    case "listbox": {
+      const result = listboxTransition(context, event);
+      checkContextSubset({ ...result.context }, vector.expect.context);
+      expect(result.effects).toEqual(vector.expect.effects as never);
+      return;
+    }
     case "checkbox": {
       const result = checkboxTransition(context, event);
       checkContextSubset(result.context as never, vector.expect.context);

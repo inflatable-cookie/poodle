@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; font-src 'none'">
+<title>Poodle typography prototype</title>
+<style>
+/* Iceberg and Eclipse roles resolved from the approved theming prototype. */
+:root {
+  color-scheme: light;
+  --layer-canvas: #dce6f1;
+  --layer-surface: #e7eef5;
+  --layer-raised: #f2f6fa;
+  --layer-overlay: #fdfdfe;
+  --text-primary: #1d1f21;
+  --text-secondary: #56595d;
+  --text-disabled: #7f8286;
+  --fill-rest: #1316190b;
+  --fill-hover: #13161912;
+  --fill-active: #1316191a;
+  --select-neutral: #1316191a;
+  --select-accent: #0c61cf24;
+  --border-subtle: #13161917;
+  --border-strong: #7e8287;
+  --accent-fill: #0054ba;
+  --accent-fill-hover: #004aa5;
+  --accent-fill-active: #004090;
+  --accent-on: #ffffff;
+  --accent-text: #0c61cf;
+  --accent-line: #1668d6;
+  --accent-edge: #1668d600;
+  --status-success-fg: #006c35;
+  --status-success-bg: #007e3f1a;
+  --status-warning-fg: #7c5600;
+  --status-warning-bg: #8961001a;
+  --status-danger-fg: #a43734;
+  --status-danger-bg: #ad3f3b1a;
+  --status-info-fg: #005fa6;
+  --status-info-bg: #006bb91a;
+  --status-danger-solid: #b1101d;
+  --status-danger-on: #ffffff;
+  --status-danger-edge: #a4373400;
+  --syntax-comment: #506882;
+  --syntax-keyword: #7550b4;
+  --syntax-string: #0a762d;
+  --syntax-literal: #955700;
+  --syntax-type: #007273;
+  --syntax-callable: #1365bd;
+  --syntax-property: #9b457e;
+  --syntax-operator: #55585b;
+  --syntax-punctuation: #636669;
+  --syntax-invalid: #b33639;
+  --scrim: #0d121752;
+  --shadow: #161b201a;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --layer-canvas: #0b0e10;
+  --layer-surface: #15181b;
+  --layer-raised: #1d2024;
+  --layer-overlay: #24282c;
+  --text-primary: #edeff0;
+  --text-secondary: #adb0b3;
+  --text-disabled: #696b6e;
+  --fill-rest: #f3f5f80e;
+  --fill-hover: #f3f5f816;
+  --fill-active: #f3f5f81f;
+  --select-neutral: #f3f5f821;
+  --select-accent: #f0b24d2e;
+  --border-subtle: #f3f5f81a;
+  --border-strong: #727578;
+  --accent-fill: #f0b24d;
+  --accent-fill-hover: #e3a53f;
+  --accent-fill-active: #d69830;
+  --accent-on: #1b0f00;
+  --accent-text: #f0b24d;
+  --accent-line: #f0b24d;
+  --accent-edge: #f0b24d00;
+  --status-success-fg: #72d38e;
+  --status-success-bg: #72d38e24;
+  --status-warning-fg: #e9b042;
+  --status-warning-bg: #e9b04224;
+  --status-danger-fg: #ff9b92;
+  --status-danger-bg: #ff9b9224;
+  --status-info-fg: #82c0ff;
+  --status-info-bg: #82c0ff24;
+  --status-danger-solid: #b1101d;
+  --status-danger-on: #ffffff;
+  --status-danger-edge: #ff9b9200;
+  --syntax-comment: #879eb6;
+  --syntax-keyword: #c5a9ff;
+  --syntax-string: #80d189;
+  --syntax-literal: #f5a857;
+  --syntax-type: #43d2d4;
+  --syntax-callable: #8abeff;
+  --syntax-property: #f19acf;
+  --syntax-operator: #ccced0;
+  --syntax-punctuation: #a6a8aa;
+  --syntax-invalid: #ff9b94;
+  --scrim: #0000008c;
+  --shadow: #00000073;
+}
+
+.btn {
+  height: var(--control-h); padding: 0 12px; border: 0; border-radius: var(--r-md);
+  display: inline-flex; align-items: center; gap: 6px; font-weight: 500; white-space: nowrap;
+}
+.btn .i { width: 15px; height: 15px; }
+/* accent.edge is transparent unless the fill would vanish against a layer (round five). */
+.btn-primary { background: var(--accent-fill); color: var(--accent-on); box-shadow: inset 0 0 0 1px var(--accent-edge); }
+.btn-primary:hover { background: var(--accent-fill-hover); }
+.btn-primary:active { background: var(--accent-fill-active); }
+.btn-secondary { background: var(--fill-rest); color: var(--text-primary); }
+.btn-secondary:hover { background: var(--fill-hover); }
+.btn-secondary:active { background: var(--fill-active); }
+.btn-ghost { background: transparent; color: var(--text-secondary); padding: 0 8px; }
+.btn-ghost:hover { background: var(--fill-hover); color: var(--text-primary); }
+/* status.danger.edge follows the accent edge rule (round six): transparent unless the fill would vanish. */
+.btn-danger { background: var(--status-danger-solid); color: var(--status-danger-on); box-shadow: inset 0 0 0 1px var(--status-danger-edge); }
+.icon-btn {
+  width: var(--control-h); height: var(--control-h); border: 0; border-radius: var(--r-md);
+  background: transparent; color: var(--text-secondary); display: inline-grid; place-items: center;
+}
+.icon-btn:hover { background: var(--fill-hover); color: var(--text-primary); }
+
+.input {
+  height: var(--control-h); border: 0; border-radius: var(--r-md); padding: 0 10px;
+  background: var(--fill-rest); color: var(--text-primary); min-width: 0;
+}
+.input::placeholder { color: var(--text-secondary); }
+.input:hover { background: var(--fill-hover); }
+.input:focus-visible, .input.is-focus { outline: 2px solid var(--accent-line); outline-offset: 0; background: var(--fill-rest); }
+.input-icon { position: relative; display: flex; align-items: center; }
+.input-icon .i { position: absolute; left: 9px; color: var(--text-secondary); pointer-events: none; }
+.input-icon .input { padding-left: 31px; width: 100%; }
+
+.select {
+  height: var(--control-h); border: 0; border-radius: var(--r-md); padding: 0 8px 0 10px;
+  background: var(--fill-rest); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+  color: var(--text-secondary);
+}
+.select:hover { background: var(--fill-hover); }
+.select b { font-weight: 500; color: var(--text-primary); }
+.select .i { width: 14px; height: 14px; color: var(--text-secondary); }
+.select-block { width: 100%; justify-content: space-between; color: var(--text-primary); }
+
+.checkbox {
+  width: 16px; height: 16px; border-radius: 4px; flex: none; display: inline-grid; place-items: center;
+  box-shadow: inset 0 0 0 1.5px var(--border-strong); color: var(--accent-on);
+}
+.checkbox .i { width: 12px; height: 12px; stroke-width: 2.4; visibility: hidden; }
+.checkbox.on { background: var(--accent-fill); box-shadow: inset 0 0 0 1px var(--accent-edge); }
+.checkbox.on .i { visibility: visible; }
+.check { display: flex; align-items: center; gap: 9px; cursor: pointer; }
+.toggle-row { display: flex; align-items: center; gap: 9px; margin-top: 12px; padding: 0; border: 0; background: none; text-align: left; font-weight: 500; }
+.toggle-row[aria-checked="true"] .checkbox { background: var(--accent-fill); box-shadow: inset 0 0 0 1px var(--accent-edge); }
+.toggle-row[aria-checked="true"] .checkbox .i { visibility: visible; }
+.toggle-row + .hint { margin-left: 25px; }
+
+.switch { width: 30px; height: 18px; border-radius: 9px; background: var(--fill-active); position: relative; flex: none; border: 0; padding: 0; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 12px; height: 12px; border-radius: 50%; background: var(--border-strong); transition: transform .15s ease; }
+.switch[aria-checked="true"] { background: var(--accent-fill); box-shadow: inset 0 0 0 1px var(--accent-edge); }
+.switch[aria-checked="true"]::after { transform: translateX(12px); background: var(--accent-on); }
+
+/* ── App specimen ───────────────────────────────────────────────────────── */
+.app {
+  background: var(--layer-canvas); border-radius: var(--r-xl); overflow: hidden;
+  box-shadow: 0 0 0 1px var(--border-subtle); max-width: 1260px;
+}
+.app-header { height: 48px; display: grid; grid-template-columns: 212px 1fr auto; align-items: center; padding: 0 10px 0 0; }
+.brand { display: flex; align-items: center; gap: 8px; padding-left: 16px; font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
+.brand .i { width: 18px; height: 18px; stroke-width: 1.8; }
+.ws { margin-left: 2px; }
+.global-search { width: 380px; }
+.global-search kbd { position: absolute; right: 7px; font: 11px var(--font); color: var(--text-secondary); background: var(--fill-rest); padding: 1px 6px; border-radius: 4px; }
+.header-actions { display: flex; align-items: center; gap: 2px; }
+.avatar { width: 26px; height: 26px; border-radius: 6px; display: grid; place-items: center; background: var(--fill-active); font-size: 11px; font-weight: 600; margin-left: 6px; }
+
+.app-body { display: grid; grid-template-columns: 212px 1fr; }
+.sidebar { padding: 4px 10px 12px; display: flex; flex-direction: column; gap: 1px; }
+.nav-item {
+  height: 30px; display: flex; align-items: center; gap: 10px; padding: 0 8px; border-radius: var(--r-md);
+  color: var(--text-secondary); text-decoration: none; font-weight: 450;
+}
+.nav-item .i { color: var(--text-secondary); }
+.nav-item:hover { background: var(--fill-hover); color: var(--text-primary); }
+.nav-item[aria-current="page"] { background: var(--select-neutral); color: var(--text-primary); font-weight: 500; }
+.nav-item[aria-current="page"] .i { color: var(--accent-line); }
+.nav-item .count { margin-left: auto; font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.nav-group { font-size: 12px; color: var(--text-secondary); padding: 16px 8px 4px; }
+.glyph { width: 16px; height: 16px; border-radius: 4px; background: var(--fill-active); display: grid; place-items: center; font-size: 9.5px; font-weight: 600; color: var(--text-secondary); }
+.sidebar-foot { margin-top: auto; padding-top: 16px; }
+
+.content { background: var(--layer-surface); border-radius: var(--r-lg); margin: 0 8px 8px 0; padding: 18px 24px 24px; min-width: 0; }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.crumbs { color: var(--text-secondary); font-size: 12px; display: flex; gap: 6px; }
+.crumbs span { color: var(--text-disabled); }
+.page-head h1 { font-size: 20px; line-height: 1.25; font-weight: 600; margin: 2px 0 0; letter-spacing: -0.015em; }
+.actions { display: flex; gap: 8px; }
+
+.tabs { display: flex; gap: 22px; margin-top: 14px; }
+.tab { border: 0; background: none; padding: 7px 0 8px; color: var(--text-secondary); font-weight: 500; position: relative; display: flex; gap: 6px; align-items: baseline; }
+.tab:hover { color: var(--text-primary); }
+.tab[aria-selected="true"] { color: var(--text-primary); }
+.tab[aria-selected="true"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 1px; background: var(--accent-line); }
+.tab small { font-size: 12px; font-weight: 400; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+.toolbar { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+.toolbar .input-icon { width: 280px; }
+.spacer { flex: 1; }
+.segmented { display: inline-flex; padding: 2px; border-radius: var(--r-md); background: var(--fill-rest); gap: 2px; }
+.segmented button { height: 26px; border: 0; border-radius: var(--r-sm); padding: 0 9px; background: transparent; color: var(--text-secondary); display: inline-flex; gap: 6px; align-items: center; font-weight: 500; }
+.segmented button .i { width: 14px; height: 14px; }
+.segmented button[aria-pressed="true"] { background: var(--layer-raised); color: var(--text-primary); box-shadow: 0 1px 2px var(--shadow); }
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+.card { background: var(--layer-raised); border-radius: var(--r-lg); }
+.stat { padding: 13px 16px 14px; }
+.stat-label { color: var(--text-secondary); font-size: 12.5px; }
+.stat-value { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.stat-delta { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+.stat-delta.up { color: var(--status-success-fg); }
+.stat-delta.down { color: var(--status-danger-fg); }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 12px; margin-top: 12px; align-items: start; }
+.table-card { padding: 4px 0 0; overflow: hidden; }
+.table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.table th:first-child { width: 44px; } .c-svc { width: 26%; } .c-status { width: 19%; } .c-when { width: 104px; }
+.table th { text-align: left; font-weight: 500; font-size: 12.5px; color: var(--text-secondary); padding: 8px 12px; border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
+.table td { padding: 8px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; white-space: nowrap; }
+.table th:first-child, .table td:first-child { padding-left: 16px; }
+.table tbody tr:hover, .table tr.is-hover { background: var(--fill-hover); }
+.table tr[aria-selected="true"] { background: var(--select-neutral); }
+.table tr[aria-selected="true"] td:first-child { box-shadow: inset 2px 0 0 var(--accent-line); }
+.svc b { font-weight: 500; display: block; }
+.svc span { color: var(--text-secondary); font-size: 12px; }
+.status { display: inline-flex; align-items: center; gap: 7px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+.status.live { color: var(--status-success-fg); }
+.status.building { color: var(--status-info-fg); }
+.status.failed { color: var(--status-danger-fg); }
+.status.rolled { color: var(--status-warning-fg); }
+.status.queued { color: var(--text-disabled); }
+.status em { font-style: normal; color: var(--text-primary); }
+.commit { display: flex; gap: 8px; align-items: baseline; min-width: 0; }
+.commit code { font-family: var(--mono); font-size: 12px; color: var(--text-secondary); }
+.commit span { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.branch { font-family: var(--mono); font-size: 12px; color: var(--text-secondary); }
+.muted { color: var(--text-secondary); }
+.table-foot { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px 6px 16px; color: var(--text-secondary); font-size: 12px; }
+.pager { display: flex; gap: 2px; }
+
+.form-card { padding: 16px; display: grid; gap: 12px; }
+.form-card h2 { font-size: 14px; font-weight: 600; margin: 0; }
+.form-card > p { margin: -10px 0 0; color: var(--text-secondary); font-size: 12.5px; }
+.field { display: grid; gap: 5px; }
+.field-label { font-weight: 500; font-size: 12.5px; }
+.field .input { width: 100%; }
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.switch-row small { display: block; color: var(--text-secondary); font-size: 12px; }
+.form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+
+.lower { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-top: 12px; }
+.callouts { display: grid; gap: 8px; align-content: start; }
+.callout { display: flex; gap: 10px; padding: 10px 12px; border-radius: var(--r-md); align-items: flex-start; }
+.callout .i { margin-top: 1.5px; }
+.callout p { margin: 0; }
+.callout p span { color: var(--text-secondary); }
+.callout a { color: inherit; font-weight: 500; text-underline-offset: 2px; margin-left: 4px; }
+.callout.info { background: var(--status-info-bg); color: var(--status-info-fg); }
+.callout.success { background: var(--status-success-bg); color: var(--status-success-fg); }
+.callout.warning { background: var(--status-warning-bg); color: var(--status-warning-fg); }
+.callout.danger { background: var(--status-danger-bg); color: var(--status-danger-fg); }
+.callout p b { color: var(--text-primary); font-weight: 600; }
+.callout p { color: var(--text-primary); }
+
+.dialog-stage { position: relative; border-radius: var(--r-lg); overflow: hidden; background: var(--layer-raised); min-height: 236px; display: grid; place-items: center; padding: 20px; }
+.ghost-rows { position: absolute; inset: 18px 18px auto; display: grid; gap: 14px; }
+.ghost-rows i { display: block; height: 9px; border-radius: 4px; background: var(--fill-active); }
+.scrim { position: absolute; inset: 0; background: var(--scrim); }
+.dialog {
+  position: relative; width: 360px; max-width: 100%; background: var(--layer-overlay); border-radius: var(--r-xl);
+  padding: 18px 18px 16px; box-shadow: 0 16px 40px -8px var(--shadow), 0 2px 8px var(--shadow);
+}
+.dialog h3 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.dialog p { margin: 6px 0 14px; color: var(--text-secondary); line-height: 1.5; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+
+.code-card { overflow: hidden; }
+.code-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-bottom: 1px solid var(--border-subtle); font-size: 12px; color: var(--text-secondary); }
+.code-head b { font: 500 12px var(--mono); color: var(--text-primary); }
+.code { margin: 0; padding: 10px 14px 12px; font: 12px/1.7 var(--mono); white-space: pre; overflow: hidden; color: var(--text-primary); }
+.code .ln { display: inline-block; width: 22px; color: var(--text-disabled); user-select: none; }
+.t-comment { color: var(--syntax-comment); font-style: italic; }
+.t-keyword { color: var(--syntax-keyword); }
+.t-string { color: var(--syntax-string); }
+.t-literal { color: var(--syntax-literal); }
+.t-type { color: var(--syntax-type); }
+.t-call { color: var(--syntax-callable); }
+.t-prop { color: var(--syntax-property); }
+.t-op { color: var(--syntax-operator); }
+.t-punct { color: var(--syntax-punctuation); }
+.t-invalid { color: var(--syntax-invalid); text-decoration: underline wavy; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.lower { align-items: stretch; }
+.lower-left { display: grid; gap: 12px; align-content: start; min-width: 0; }
+
+
+:root {
+  --system: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --font: var(--system);
+  --r-sm: 5px;
+  --r-md: 7px;
+  --r-lg: 10px;
+  --r-xl: 12px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--layer-canvas);
+  color: var(--text-primary);
+  font: 13px/1.45 var(--system);
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select { color: inherit; font: inherit; }
+button, select { cursor: pointer; }
+::selection { background: var(--select-accent); }
+:focus-visible { outline: 2px solid var(--accent-line); outline-offset: 2px; }
+[hidden] { display: none !important; }
+svg.i { width: 16px; height: 16px; flex: none; }
+.mono, code, kbd { font-family: var(--mono); }
+.num, .count { text-align: right; font-variant-numeric: tabular-nums; }
+.lab { display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 100vh; }
+.panel {
+  padding: 22px 16px 24px;
+  background: var(--layer-surface);
+  border-inline-end: 1px solid var(--border-subtle);
+}
+.panel-head { margin: 0 2px 20px; }
+.panel-head h1 { margin: 0 0 4px; font-size: 22px; line-height: 1.15; font-weight: 650; letter-spacing: -.02em; }
+.panel-head p, .note { margin: 0; color: var(--text-secondary); }
+fieldset { min-width: 0; margin: 0; padding: 0; border: 0; position: relative; }
+legend { padding: 0; margin-bottom: 5px; font-weight: 600; }
+.settings { display: grid; gap: 13px; padding-top: 14px; }
+.version { padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle); }
+.choices {
+  display: flex; width: 100%; padding: 2px; gap: 2px;
+  border-radius: var(--r-md); background: var(--fill-rest);
+}
+.choices label { display: grid; grid-template-areas: "choice"; flex: 1 auto; min-width: 0; cursor: pointer; }
+.choices span {
+  grid-area: choice; padding: 4px 6px; border-radius: var(--r-sm); color: var(--text-secondary);
+  text-align: center; font-size: 12px; line-height: 17px; font-weight: 500;
+}
+.choices input { grid-area: choice; width: 1px; height: 1px; opacity: 0; margin: 0; }
+.choices label:hover span { background: var(--fill-hover); }
+.choices input:checked + span { background: var(--layer-raised); color: var(--text-primary); box-shadow: 0 1px 2px var(--shadow); }
+.choices input:focus-visible + span { outline: 2px solid var(--accent-line); outline-offset: -1px; }
+fieldset:disabled .choices { opacity: .5; }
+fieldset:disabled .choices label { cursor: default; }
+.choice-row { padding-top: 6px; }
+.choice-row .choices { position: absolute; inset: -22px 0 auto auto; width: auto; }
+.choice-row .choices span { padding: 2px 6px; }
+.note { margin-top: 5px; font-size: 12px; line-height: 1.4; }
+.readout { display: block; margin-top: 3px; font-size: 12px; font-weight: 550; font-variant-numeric: tabular-nums; }
+.stage { min-width: 0; padding: 16px; }
+.app {
+  --page-size: 30px;
+  --section-size: 19px;
+  --dialog-size: 24px;
+  --card-size: 15px;
+  --body-size: 15px;
+  --secondary-size: 13px;
+  --utility-size: 13px;
+  --caption-size: 12px;
+  --table-primary: 15px;
+  --table-secondary: 13px;
+  --table-primary-leading: 20px;
+  --table-secondary-leading: 18px;
+  --row-padding: 8px;
+  --nav-width: 204px;
+  position: relative;
+  overflow: visible;
+  max-width: 1420px;
+  font: var(--body-size)/1.45 var(--font);
+  overflow-wrap: anywhere;
+  container: console / inline-size;
+}
+.app[data-font="inter"] { --font: "Inter", var(--system); }
+.app[data-page="28"] { --page-size: 28px; }
+.app[data-section="18"] { --section-size: 18px; }
+.app[data-dialog="22"] { --dialog-size: 22px; }
+.app[data-pair="14"] {
+  --table-primary: 14px; --table-secondary: 12px;
+  --table-primary-leading: 18px; --table-secondary-leading: 16px;
+}
+.app[data-density="high"] { --row-padding: 4px; }
+.app[data-size="xs"] { --control-type: 13px; --control-line: 16px; --control-h: 26px; --check-size: 14px; }
+.app[data-size="sm"] { --control-type: 14px; --control-line: 18px; --control-h: 30px; --check-size: 16px; }
+.app[data-size="md"] { --control-type: 15px; --control-line: 20px; --control-h: 34px; --check-size: 16px; }
+.app[data-size="lg"] { --control-type: 16px; --control-line: 22px; --control-h: 38px; --check-size: 18px; }
+.app[data-size="xl"] { --control-type: 17px; --control-line: 24px; --control-h: 42px; --check-size: 18px; }
+.app[data-mode="today"] {
+  --page-size: 28px; --section-size: 16px; --dialog-size: 16px; --card-size: 16px;
+  --body-size: 14px; --utility-size: 12px;
+  --table-primary: 13px; --table-secondary: 14px;
+  --table-primary-leading: 18px; --table-secondary-leading: 20px;
+}
+.app[data-mode="today"][data-size="xs"] { --table-primary: 11px; --table-primary-leading: 16px; }
+.app[data-mode="today"][data-size="sm"] { --table-primary: 11.5px; --table-primary-leading: 16px; }
+.app[data-mode="today"][data-size="xl"] { --table-primary: 14px; --table-primary-leading: 20px; }
+.app[data-mode="today"] :is(.btn, .input, .select, select, .field-label, .check, .switch-row, .ws, .region-option) {
+  font-size: calc(var(--control-type) - 1px);
+  line-height: calc(var(--control-line) - 2px);
+}
+.app :is(.btn, .input, .select, select, .field-label, .check, .switch-row, .nav-item, .tab, .segmented button, .region-option) {
+  font-size: var(--control-type); line-height: var(--control-line);
+}
+.app :is(.btn, .select, .segmented button) { min-height: var(--control-h); height: auto; white-space: normal; padding-block: 4px; }
+.app .segmented button { min-height: calc(var(--control-h) - 4px); }
+.app .btn { text-align: start; }
+.app .i { width: clamp(13px, 1.1em, 18px); height: clamp(13px, 1.1em, 18px); }
+.app :is(.btn, .tab, .nav-item, .icon-btn, select, input) { min-width: 0; }
+.app-header {
+  grid-template-columns: max-content minmax(0, 1fr) auto;
+  min-height: max(48px, calc(var(--control-h) + 12px)); height: auto;
+  column-gap: 8px;
+}
+.brand { min-width: var(--nav-width); padding-right: 8px; }
+.brand-name { flex: none; }
+.app .brand .ws { flex: none; padding-inline: 5px; margin: 0; white-space: nowrap; }
+.header-actions { position: relative; }
+.global-search { width: min(100%, 380px); min-width: 0; }
+.global-search .input { padding-right: 50px; }
+.global-search .keycap { font: 11px/15px var(--mono); }
+[role="tooltip"] {
+  visibility: hidden; position: absolute; z-index: 4; top: 100%; right: 0;
+  width: max-content; max-width: 205px; padding: 6px 9px; border-radius: var(--r-md);
+  background: var(--layer-overlay); color: var(--text-secondary);
+  font-size: var(--utility-size); line-height: 1.35; box-shadow: 0 3px 12px var(--shadow);
+}
+[aria-describedby="help-tooltip"]:is(:hover, :focus-visible) + [role="tooltip"] { visibility: visible; }
+.app-body { grid-template-columns: var(--nav-width) minmax(0, 1fr); }
+.nav-links { display: grid; gap: 1px; }
+.nav-links + .nav-links { margin-top: 11px; }
+.nav-item { min-height: var(--control-h); height: auto; padding-block: 3px; }
+.sidebar-foot { width: 100%; }
+.nav-group, .menu-group { font-size: 13px; line-height: 18px; font-weight: 500; color: var(--text-secondary); }
+.nav-group { padding: 5px 8px 4px; }
+.menu-group { padding: 2px 8px 3px; }
+.app:is([data-groups="caps"], [data-mode="today"]) :is(.nav-group, .menu-group) {
+  font-size: 11px; line-height: 16px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--accent-text);
+}
+.app[data-mode="today"] .nav-group { font-size: 9.75px; }
+.app[data-mode="proposal"][data-groups="none"] :is(.nav-group, .menu-group) { display: none; }
+.content { padding-top: 18px; }
+.page-head, .actions, .toolbar, .tabs, .dialog-actions, .form-actions { flex-wrap: wrap; }
+.page-head { gap: 10px 16px; }
+.overline {
+  margin: 0 0 3px; color: var(--text-secondary); font-size: var(--caption-size);
+  font-weight: 600; line-height: 16px; letter-spacing: .065em; text-transform: uppercase;
+}
+.page-head h2 { margin: 0; font-size: var(--page-size); font-weight: 600; line-height: 1.18; letter-spacing: -.025em; }
+.tabs { gap: 4px 22px; }
+.tab { min-height: var(--control-h); align-items: baseline; }
+.tab small { font-size: var(--caption-size); }
+.toolbar .input-icon { flex: 1 1 180px; max-width: 280px; min-width: min(100%, 156px); }
+.toolbar .spacer { flex: 1 0 0; }
+.native-select { display: inline-grid; align-items: center; position: relative; min-width: 0; }
+.native-select select {
+  appearance: none; background: var(--fill-rest); border: 0; border-radius: var(--r-md);
+  padding: 0 29px 0 10px; height: var(--control-h); max-width: 100%;
+}
+.native-select .i { position: absolute; right: 7px; pointer-events: none; color: var(--text-secondary); }
+.native-select select:hover { background: var(--fill-hover); }
+.stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.stat-label { font-size: var(--utility-size); line-height: 18px; }
+.stat-value { font-size: 24px; line-height: 1.18; }
+.stat-delta { font-size: var(--caption-size); margin-top: 4px; }
+.app[data-mode="today"] :is(.stat-label, .stat-delta) { font-family: var(--mono); }
+.app[data-mode="today"] .stat-value { font-size: 16px; }
+.grid { grid-template-columns: minmax(0, 1fr) 292px; }
+.table-card { padding: 0; }
+.table-head {
+  min-height: 42px; padding: 10px 14px 6px; display: flex; align-items: baseline;
+  justify-content: space-between; flex-wrap: wrap; gap: 2px 10px;
+}
+.table-head h3 { margin: 0; font-size: var(--section-size); line-height: 1.25; font-weight: 600; letter-spacing: -.012em; }
+.caption { color: var(--text-secondary); font-size: var(--caption-size); }
+.table th, .table td { white-space: normal; padding-inline: 8px; }
+.table th:first-child, .table td:first-child { width: 34px; padding: 0 0 0 14px; }
+.table th { font-size: var(--utility-size); padding-block: 6px; }
+.table td { font-size: var(--utility-size); padding-block: var(--row-padding); }
+.table .num { text-align: right; padding-right: 14px; }
+.c-svc { width: 24%; }
+.c-status { width: 20%; }
+.c-when { width: 94px; }
+.svc b { font-size: var(--table-primary); line-height: var(--table-primary-leading); }
+.svc span { display: block; font-size: var(--table-secondary); line-height: var(--table-secondary-leading); }
+.commit { gap: 2px 7px; flex-wrap: wrap; }
+.commit span { overflow: visible; }
+.status {
+  gap: 5px; max-width: 100%; width: max-content; padding: 2px 6px; border-radius: var(--r-sm);
+  font-size: var(--caption-size); line-height: 1.3;
+}
+.status.live { background: var(--status-success-bg); }
+.status.building { background: var(--status-info-bg); }
+.status.failed { background: var(--status-danger-bg); }
+.status.rolled { background: var(--status-warning-bg); }
+.status.queued { background: var(--fill-rest); color: var(--text-secondary); }
+.status .dot { width: 5px; height: 5px; }
+.status em { color: inherit; }
+.table tr[aria-selected="true"] .status em { color: var(--text-primary); }
+input.checkbox {
+  appearance: none; width: var(--check-size); height: var(--check-size);
+  padding: 0; margin: 0; vertical-align: middle; cursor: pointer;
+}
+input.checkbox:checked { background: var(--accent-fill); box-shadow: inset 0 0 0 1px var(--accent-edge); }
+input.checkbox:checked::before {
+  content: ""; display: block; box-sizing: content-box; width: 45%; height: 23%;
+  border-left: 2px solid currentColor; border-bottom: 2px solid currentColor;
+  transform: translateY(-1px) rotate(-45deg);
+}
+.form-card { min-width: 0; gap: 10px; }
+.form-card h3 { margin: 0; font-size: var(--card-size); line-height: 1.3; font-weight: 600; }
+.form-card > p { font-size: var(--secondary-size); margin: -6px 0 0; }
+.input { caret-color: var(--accent-line); }
+.input[aria-invalid="true"] { box-shadow: inset 0 0 0 1px var(--status-danger-fg); }
+.validation { color: var(--status-danger-fg); }
+.switch-row small, .validation { font-size: var(--utility-size); line-height: 1.4; }
+.switch-row .switch {
+  width: clamp(28px, var(--control-h), 36px);
+  height: clamp(16px, calc(var(--control-h) - 12px), 22px);
+}
+.switch-row .switch::after { width: auto; height: auto; right: 50%; bottom: 3px; }
+.switch-row .switch[aria-checked="true"]::after { transform: none; left: 50%; right: 3px; }
+.region-field { position: relative; }
+.region-menu {
+  position: absolute; z-index: 3; top: calc(100% + 4px); inset-inline: 0;
+  padding: 5px; border-radius: var(--r-md); background: var(--layer-overlay);
+  box-shadow: 0 6px 24px var(--shadow), 0 0 0 1px var(--border-subtle);
+}
+.region-menu .named-group + .named-group { margin-top: 8px; }
+.region-option {
+  display: flex; justify-content: space-between; flex-wrap: wrap; align-items: baseline;
+  gap: 0 6px; padding: 4px 8px; min-height: var(--control-h); border-radius: var(--r-sm); cursor: pointer;
+}
+.region-option[aria-selected="true"] { background: var(--select-neutral); }
+.region-option:hover, .region-option:focus-visible { background: var(--fill-hover); }
+.region-option code { font-size: var(--caption-size); color: var(--text-secondary); }
+.callout p { min-width: 0; line-height: 1.4; }
+.callout p span, .callout a { font-size: var(--secondary-size); }
+.code { white-space: pre-wrap; overflow-wrap: anywhere; }
+.code-head { gap: 2px 8px; flex-wrap: wrap; }
+.dialog-stage { grid-template-columns: minmax(0, 1fr); }
+.dialog { width: min(100%, 360px); min-width: 0; }
+.dialog h3 { font-size: var(--dialog-size); line-height: 1.2; letter-spacing: -.02em; }
+.dialog p { font-size: var(--body-size); }
+.dialog code, .form-card p code { font-size: .9em; }
+
+@container console (max-width: 1080px) {
+  .app-header, .app-body { --nav-width: 178px; }
+  .grid { grid-template-columns: minmax(0, 1fr) 260px; }
+  .content { padding-inline: 16px; }
+}
+@container console (max-width: 940px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .stat { padding-inline: 12px; }
+}
+@container console (max-width: 720px) {
+  .app-header, .app-body { --nav-width: 148px; }
+  .lower { grid-template-columns: minmax(0, 1fr); }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .brand { flex-wrap: wrap; gap: 3px 6px; padding-block: 4px; }
+  .global-search .keycap { display: none; }
+  .global-search .input { padding-right: 10px; }
+}
+@container console (max-width: 560px) {
+  .app-header { grid-template-columns: minmax(0, 1fr) auto; gap: 6px; padding: 6px 8px; }
+  .brand { min-width: 0; padding-left: 3px; }
+  .global-search { grid-row: 2; grid-column: 1 / -1; width: 100%; }
+  .global-search .keycap { display: block; }
+  .global-search .input { padding-right: 50px; }
+  .app-body { display: block; }
+  .sidebar { padding: 8px 8px 10px; }
+  .sidebar-foot { margin: 0; padding: 4px 0 0; }
+  .nav-links { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .nav-group { grid-column: 1 / -1; }
+  .nav-item { gap: 4px; padding-inline: 5px; }
+  .nav-item :is(.i, .glyph) { width: 13px; }
+  .content { margin: 0; padding: 14px 10px; }
+  .c-svc { width: 30%; }
+  .c-status { width: 21%; }
+  .c-when { width: 57px; }
+  .table th, .table td { padding-inline: 4px; }
+  .table th:first-child, .table td:first-child { width: 24px; padding-left: 5px; }
+  .table .num { padding-right: 6px; }
+  .status { padding-inline: 4px; }
+  .status .dot { display: none; }
+}
+@container console (max-width: 500px) {
+  .nav-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dialog-stage { padding: 12px; }
+}
+@media (max-width: 1040px) {
+  .lab { display: block; }
+  .panel { border-inline-end: 0; border-bottom: 1px solid var(--border-subtle); }
+  .settings { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 20px; }
+}
+@media (max-width: 730px) {
+  .settings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 475px) {
+  .panel-head { margin-bottom: 14px; }
+  .settings { grid-template-columns: minmax(0, 1fr); }
+  .stage { padding: 10px; }
+}
+
+</style>
+</head>
+<body>
+<div class="lab">
+  <aside class="panel" aria-labelledby="lab-title">
+    <header class="panel-head">
+      <h1 id="lab-title">Typography</h1>
+      <p>Compare type on the same deployment console.</p>
+    </header>
+    <form id="type-controls">
+      <fieldset class="version">
+        <legend>Type system</legend>
+        <div class="choices">
+          <label><input type="radio" name="mode" value="today"><span>Today</span></label>
+          <label><input type="radio" name="mode" value="proposal" checked><span>Proposal</span></label>
+        </div>
+        <p class="note">Today uses 14px body and 16px headings. Proposal roles span 12–30px, with 15px body.</p>
+      </fieldset>
+
+      <div class="settings">
+        <fieldset class="choice-row">
+          <legend>Page title</legend>
+          <div class="choices">
+            <label><input type="radio" name="page" value="30" checked><span>30px</span></label>
+            <label><input type="radio" name="page" value="28"><span>28px</span></label>
+          </div>
+          <p class="note">PageHeader uses 28px at md. Compare the 30px scale with 28px quiet.</p>
+        </fieldset>
+        <fieldset class="choice-row">
+          <legend>Section title</legend>
+          <div class="choices">
+            <label><input type="radio" name="section" value="19" checked><span>19px</span></label>
+            <label><input type="radio" name="section" value="18"><span>18px</span></label>
+          </div>
+          <p class="note">The base heading is 16px. Try a 19px section title or 18px quiet.</p>
+        </fieldset>
+        <fieldset class="choice-row">
+          <legend>Dialog title</legend>
+          <div class="choices">
+            <label><input type="radio" name="dialog" value="24" checked><span>24px</span></label>
+            <label><input type="radio" name="dialog" value="22"><span>22px</span></label>
+          </div>
+          <p class="note">Dialog uses 16px at md. Try 24px or 22px quiet.</p>
+        </fieldset>
+        <fieldset>
+          <legend>Group labels</legend>
+          <div class="choices">
+            <label><input type="radio" name="groups" value="caps"><span>Caps</span></label>
+            <label><input type="radio" name="groups" value="sentence" checked><span>Sentence case</span></label>
+            <label><input type="radio" name="groups" value="none"><span>Spacing</span></label>
+          </div>
+          <p class="note">Today uses 9.75px caps in the sidebar and 11px in menus. Compare 13px sentence case or spacing. Open Region to see both groups.</p>
+        </fieldset>
+        <fieldset class="choice-row">
+          <legend>Table pair</legend>
+          <div class="choices">
+            <label><input type="radio" name="pair" value="15" checked><span>15 / 13</span></label>
+            <label><input type="radio" name="pair" value="14"><span>14 / 12</span></label>
+          </div>
+          <p class="note">At sm, DataTable puts 11.5px above 14px. Both proposed pairs give the name more emphasis.</p>
+        </fieldset>
+        <fieldset class="choice-row">
+          <legend>Row density</legend>
+          <div class="choices">
+            <label><input type="radio" name="density" value="normal" checked><span>Normal</span></label>
+            <label><input type="radio" name="density" value="high"><span>High</span></label>
+          </div>
+          <p class="note">Table padding is independent of type. Compare 8px and 4px of vertical padding per side.</p>
+        </fieldset>
+        <fieldset>
+          <legend>Control size</legend>
+          <div class="choices size-choices">
+            <label><input type="radio" name="size" value="xs"><span>XS</span></label>
+            <label><input type="radio" name="size" value="sm" checked><span>SM</span></label>
+            <label><input type="radio" name="size" value="md"><span>MD</span></label>
+            <label><input type="radio" name="size" value="lg"><span>LG</span></label>
+            <label><input type="radio" name="size" value="xl"><span>XL</span></label>
+          </div>
+          <p class="note">Buttons and inputs use different ladders today. The proposal shares 13–17px type with 16–24px line heights.</p>
+          <output class="readout" id="size-report" aria-live="polite">14px type · 18px line height</output>
+        </fieldset>
+        <fieldset>
+          <legend>Font</legend>
+          <div class="choices">
+            <label><input type="radio" name="font" value="system" checked><span>System</span></label>
+            <label><input type="radio" name="font" value="inter"><span>Local Inter</span></label>
+          </div>
+          <p class="note">Tokens lead with Inter today. Compare it with system UI. Proposed mono is for code, IDs, paths and keys.</p>
+          <output class="readout" id="font-report" aria-live="polite"></output>
+        </fieldset>
+        <fieldset class="choice-row">
+          <legend>Theme</legend>
+          <div class="choices">
+            <label><input type="radio" name="theme" value="light" checked><span>Light</span></label>
+            <label><input type="radio" name="theme" value="dark"><span>Dark</span></label>
+          </div>
+          <p class="note">Iceberg and Eclipse use the same type settings with the approved quiet colours.</p>
+        </fieldset>
+      </div>
+    </form>
+  </aside>
+  <main class="stage" id="preview" aria-label="Typography preview">
+        <div class="app" id="specimen" data-mode="proposal" data-page="30" data-section="19" data-dialog="24" data-groups="sentence" data-pair="15" data-density="normal" data-size="sm" data-font="system">
+      <header class="app-header">
+        <div class="brand"><i data-icon="logo"></i><span class="brand-name">Harbor</span><button class="btn btn-ghost ws">Acme Cloud<i data-icon="chevron"></i></button></div>
+        <label class="input-icon global-search"><i data-icon="search"></i><input id="global-search" class="input" aria-label="Search or jump to" placeholder="Search or jump to"><kbd class="keycap">⌘K</kbd></label>
+        <div class="header-actions">
+          <button class="icon-btn" aria-label="Notifications"><i data-icon="bell"></i></button>
+          <button class="icon-btn" aria-label="Help" aria-describedby="help-tooltip"><i data-icon="help"></i></button><span role="tooltip" id="help-tooltip">Search, navigate, and find keyboard shortcuts.</span>
+          <span class="avatar" aria-label="Account">MK</span>
+        </div>
+      </header>
+
+      <div class="app-body">
+        <nav class="sidebar" aria-label="Main">
+          <div class="nav-links">
+          <a class="nav-item" href="#"><i data-icon="home"></i>Overview</a>
+          <a class="nav-item" href="#" aria-current="page"><i data-icon="deploy"></i>Deployments<span class="count">3</span></a>
+          <a class="nav-item" href="#"><i data-icon="server"></i>Services</a>
+          <a class="nav-item" href="#"><i data-icon="logs"></i>Logs</a>
+          <a class="nav-item" href="#"><i data-icon="bell"></i>Alerts<span class="count">1</span></a>
+          </div>
+          <div class="nav-links named-group" role="group" aria-label="Projects">
+            <div class="nav-group">Projects</div>
+          <a class="nav-item" href="#"><span class="glyph">S</span>Storefront</a>
+          <a class="nav-item" href="#"><span class="glyph">B</span>Billing</a>
+          <a class="nav-item" href="#"><span class="glyph">I</span>Internal tools</a>
+          </div>
+          <div class="sidebar-foot"><a class="nav-item" href="#"><i data-icon="settings"></i>Settings</a></div>
+        </nav>
+
+        <section class="content" aria-labelledby="deployments-title">
+          <div class="page-head">
+            <div>
+              <p class="overline">Production</p>
+              <h2 id="deployments-title">Deployments</h2>
+            </div>
+            <div class="actions">
+              <button class="btn btn-secondary">Export</button>
+              <button class="btn btn-primary"><i data-icon="plus"></i>New deployment</button>
+            </div>
+          </div>
+
+          <div class="tabs" role="tablist">
+            <button class="tab" role="tab" aria-selected="true">All<small>128</small></button>
+            <button class="tab" role="tab" aria-selected="false">Running<small>3</small></button>
+            <button class="tab" role="tab" aria-selected="false">Failed<small>2</small></button>
+            <button class="tab" role="tab" aria-selected="false">Archived</button>
+          </div>
+
+          <div class="toolbar">
+            <label class="input-icon"><i data-icon="search"></i><input class="input" aria-label="Filter deployments" placeholder="Filter deployments"></label>
+            <label class="native-select"><select aria-label="Environment"><option>Production</option><option>Staging</option></select><i data-icon="chevron"></i></label>
+            <label class="native-select"><select aria-label="Status"><option>Any status</option><option>Live</option><option>Failed</option></select><i data-icon="chevron"></i></label>
+            <button class="btn btn-ghost"><i data-icon="filter"></i>More filters</button>
+            <div class="spacer"></div>
+            <div class="segmented" role="group" aria-label="View">
+              <button aria-pressed="true"><i data-icon="list"></i>List</button>
+              <button aria-pressed="false"><i data-icon="board"></i>Board</button>
+            </div>
+          </div>
+
+          <div class="stats">
+            <div class="card stat"><div class="stat-label">Success rate</div><div class="stat-value">99.2%</div><div class="stat-delta up">+0.4 pts in 7 days</div></div>
+            <div class="card stat"><div class="stat-label">Median build</div><div class="stat-value">3m 12s</div><div class="stat-delta up">18s faster</div></div>
+            <div class="card stat"><div class="stat-label">Deploys today</div><div class="stat-value">27</div><div class="stat-delta">6 queued</div></div>
+            <div class="card stat"><div class="stat-label">Open incidents</div><div class="stat-value">1</div><div class="stat-delta down"><code>worker-billing</code></div></div>
+          </div>
+
+          <div class="grid">
+            <section class="card table-card" aria-labelledby="recent-title">
+              <header class="table-head"><h3 id="recent-title">Recent deployments</h3><span class="caption">Updated just now</span></header>
+              <table class="table">
+                <thead><tr>
+                  <th scope="col"><input class="checkbox" type="checkbox" aria-label="Select all deployments"></th>
+                  <th scope="col" class="c-svc">Service</th><th scope="col" class="c-status">Status</th><th scope="col">Commit</th><th scope="col" class="num c-when">When</th>
+                </tr></thead>
+                <tbody>
+                  <tr><td><input class="checkbox" type="checkbox" aria-label="Select deployment"></td>
+                    <td class="svc"><b>API Gateway</b><span>Ireland</span></td>
+                    <td><span class="status live"><span class="dot"></span><em>Live</em></span></td>
+                    <td><div class="commit"><code>9f2c41e</code><span>Raise pool limit</span></div></td>
+                    <td class="num muted">4 min ago</td></tr>
+                  <tr><td><input class="checkbox" type="checkbox" aria-label="Select deployment"></td>
+                    <td class="svc"><b>Web Storefront</b><span>N. Virginia</span></td>
+                    <td><span class="status building"><span class="dot"></span><em>Building</em></span></td>
+                    <td><div class="commit"><code>d81a0b7</code><span>Lazy-load product images</span></div></td>
+                    <td class="num muted">Just now</td></tr>
+                  <tr aria-selected="true"><td><input class="checkbox" type="checkbox" aria-label="Select deployment" checked></td>
+                    <td class="svc"><b>Billing Worker</b><span>Ireland</span></td>
+                    <td><span class="status failed"><span class="dot"></span><em>Failed</em></span></td>
+                    <td><div class="commit"><code>c03e9d2</code><span>Retry invoice batches</span></div></td>
+                    <td class="num muted">22 min ago</td></tr>
+                  <tr><td><input class="checkbox" type="checkbox" aria-label="Select deployment"></td>
+                    <td class="svc"><b>Search Indexer</b><span>Frankfurt</span></td>
+                    <td><span class="status live"><span class="dot"></span><em>Live</em></span></td>
+                    <td><div class="commit"><code>5be7710</code><span>Upgrade tokenizer</span></div></td>
+                    <td class="num muted">1 h ago</td></tr>
+                  <tr><td><input class="checkbox" type="checkbox" aria-label="Select deployment"></td>
+                    <td class="svc"><b>Auth Service</b><span>N. Virginia</span></td>
+                    <td><span class="status queued"><span class="dot"></span><em>Queued</em></span></td>
+                    <td><div class="commit"><code>a77f01c</code><span>Rotate signing keys</span></div></td>
+                    <td class="num muted">—</td></tr>
+                  <tr><td><input class="checkbox" type="checkbox" aria-label="Select deployment"></td>
+                    <td class="svc"><b>Notifier</b><span>Ireland</span></td>
+                    <td><span class="status rolled"><span class="dot"></span><em>Rolled back</em></span></td>
+                    <td><div class="commit"><code>31d6e8a</code><span>Batch digest emails</span></div></td>
+                    <td class="num muted">3 h ago</td></tr>
+                </tbody>
+              </table>
+              <div class="table-foot">Showing 6 of 128
+                <div class="pager"><button class="icon-btn" aria-label="Previous page"><i data-icon="left"></i></button><button class="icon-btn" aria-label="Next page"><i data-icon="right"></i></button></div>
+              </div>
+            </section>
+
+            <form class="card form-card" onsubmit="return false">
+              <h3>Deployment settings</h3>
+              <p>Applies to <code>api-gateway</code> in production.</p>
+              <label class="field"><span class="field-label">Display name</span><input class="input" value="API Gateway"></label>
+              <div class="field region-field">
+                <label class="field-label" id="region-label" for="region-trigger">Region</label>
+                <button type="button" class="select select-block" id="region-trigger" aria-labelledby="region-label region-value" aria-haspopup="listbox" aria-expanded="false" aria-controls="regions"><span id="region-value">Ireland</span><i data-icon="chevron"></i></button>
+                <div class="region-menu" id="regions" role="listbox" aria-labelledby="region-label" hidden>
+                  <div class="named-group" role="group" aria-label="Europe">
+                    <div class="menu-group" aria-hidden="true">Europe</div>
+                    <div class="region-option" role="option" aria-selected="true" tabindex="-1"><span>Ireland</span><code>eu-west-1</code></div>
+                    <div class="region-option" role="option" aria-selected="false" tabindex="-1"><span>Frankfurt</span><code>eu-central-1</code></div>
+                  </div>
+                  <div class="named-group" role="group" aria-label="North America">
+                    <div class="menu-group" aria-hidden="true">North America</div>
+                    <div class="region-option" role="option" aria-selected="false" tabindex="-1"><span>N. Virginia</span><code>us-east-1</code></div>
+                    <div class="region-option" role="option" aria-selected="false" tabindex="-1"><span>Oregon</span><code>us-west-2</code></div>
+                  </div>
+                </div>
+              </div>
+              <label class="field"><span class="field-label">Health check path</span><input class="input mono" value="healthz" aria-invalid="true" aria-describedby="path-error"><span class="validation" id="path-error">Start the path with a slash.</span></label>
+              <label class="check"><input type="checkbox" class="checkbox" checked><span>Run database migrations</span></label>
+              <div class="switch-row"><span>Auto-rollback<small>Revert after 2 minutes of failed health checks.</small></span><button type="button" class="switch" role="switch" aria-checked="true" aria-label="Auto-rollback"></button></div>
+              <div class="switch-row"><span>Notify on-call</span><button type="button" class="switch" role="switch" aria-checked="false" aria-label="Notify on-call"></button></div>
+              <div class="form-actions"><button type="button" class="btn btn-secondary">Cancel</button><button type="button" class="btn btn-primary">Save changes</button></div>
+            </form>
+          </div>
+
+          <div class="lower">
+            <div class="lower-left">
+            <div class="callouts">
+              <div class="callout info"><i data-icon="info"></i><p><b>2 deployments queued</b> <span>in Ireland. Builds start in about 4 minutes.</span></p></div>
+              <div class="callout success"><i data-icon="success"></i><p><b>API Gateway is live</b> <span>in production after 3m 12s.</span></p></div>
+              <div class="callout warning"><i data-icon="warning"></i><p><b>Certificate expires in 9 days</b> <span>for <code>status.harbor.dev</code>.</span></p></div>
+              <div class="callout danger"><i data-icon="danger"></i><p><b>Billing Worker failed health checks</b> <span>and rolled back.</span><a href="#">View logs</a></p></div>
+            </div>
+            <div class="card code-card">
+              <div class="code-head"><b>rollback-policy.ts</b><span>TypeScript</span></div>
+<pre class="code"><span class="ln">1</span><span class="t-comment">// Roll back after two minutes</span>
+<span class="ln">2</span><span class="t-keyword">export const</span> policy <span class="t-op">=</span> <span class="t-punct">{</span>
+<span class="ln">3</span>  <span class="t-prop">service</span><span class="t-punct">:</span> <span class="t-string">"worker-billing"</span><span class="t-punct">,</span>
+<span class="ln">4</span>  <span class="t-prop">window</span><span class="t-punct">:</span> <span class="t-literal">120_000</span><span class="t-punct">,</span>
+<span class="ln">5</span>  <span class="t-prop">onFail</span><span class="t-punct">:</span> <span class="t-call">rollback</span><span class="t-punct">(</span>target<span class="t-punct">,</span> <span class="t-punct">{</span> <span class="t-prop">notify</span><span class="t-punct">:</span> <span class="t-literal">true</span> <span class="t-punct">}),</span>
+<span class="ln">6</span>  <span class="t-prop">region</span><span class="t-punct">:</span> <span class="t-invalid">eu_west</span><span class="t-punct">,</span>
+<span class="ln">7</span><span class="t-punct">}</span> <span class="t-op">satisfies</span> <span class="t-type">Policy</span><span class="t-punct">;</span></pre>
+            </div>
+            </div>
+            <div class="dialog-stage">
+              <div class="ghost-rows"><i style="width:40%"></i><i style="width:85%"></i><i style="width:70%"></i><i style="width:78%"></i><i style="width:55%"></i><i style="width:82%"></i></div>
+              <div class="scrim"></div>
+              <div class="dialog" role="dialog" aria-labelledby="dlg-title">
+                <h3 id="dlg-title">Roll back Billing Worker?</h3>
+                <p>Production returns to <code>a41f9c2</code> from 2 days ago. Jobs already running finish first.</p>
+                <label class="check"><input type="checkbox" class="checkbox"><span>Pause auto-deploys for this service</span></label>
+                <div class="dialog-actions"><button class="btn btn-secondary">Cancel</button><button class="btn btn-danger">Roll back</button></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+(() => {
+'use strict';
+const ICONS = {
+    search: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
+    chevron: '<path d="M7 10l5 5 5-5"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    filter: '<path d="M4 7h16M7 12h10M10 17h4"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.1"/>',
+    warning: '<path d="M10.3 4.6L2.9 17.5A2 2 0 0 0 4.6 20.5h14.8a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z"/><path d="M12 9.5v4.5M12 17.3v.1"/>',
+    danger: '<circle cx="12" cy="12" r="9"/><path d="M9.2 9.2l5.6 5.6M14.8 9.2l-5.6 5.6"/>',
+    success: '<circle cx="12" cy="12" r="9"/><path d="M8.3 12.4l2.6 2.6 4.9-5.2"/>',
+    home: '<path d="M4 10.5L12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
+    deploy: '<path d="M12 15V4.5M7.5 9L12 4.5 16.5 9M5 14.5V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4.5"/>',
+    server: '<rect x="4" y="4.5" width="16" height="6.5" rx="1.5"/><rect x="4" y="13" width="16" height="6.5" rx="1.5"/><path d="M7.5 7.75h.1M7.5 16.25h.1"/>',
+    logs: '<path d="M5 6.5h14M5 10.5h14M5 14.5h9M5 18.5h6"/>',
+    bell: '<path d="M6.5 16.5v-5a5.5 5.5 0 0 1 11 0v5l1.5 2h-14z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
+    settings: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
+    help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8 1c0 1.7-2.4 2.1-2.4 3.6M12 17.3v.1"/>',
+    list: '<path d="M9 6.5h11M9 12h11M9 17.5h11M4.5 6.5h.1M4.5 12h.1M4.5 17.5h.1"/>',
+    board: '<rect x="4" y="4.5" width="6.5" height="15" rx="1.5"/><rect x="13.5" y="4.5" width="6.5" height="9" rx="1.5"/>',
+    left: '<path d="M14.5 6.5L9 12l5.5 5.5"/>',
+    right: '<path d="M9.5 6.5L15 12l-5.5 5.5"/>',
+    logo: '<path d="M4 10l8-5 8 5-8 5z"/><path d="M4 14.5l8 5 8-5"/>',
+  };
+  document.querySelectorAll("i[data-icon]").forEach(function (el) {
+    el.outerHTML = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[el.dataset.icon] + "</svg>";
+  });
+
+
+const root = document.documentElement;
+const app = document.getElementById('specimen');
+const controls = document.getElementById('type-controls');
+const fontReport = document.getElementById('font-report');
+const sizeReport = document.getElementById('size-report');
+const system = getComputedStyle(root).getPropertyValue('--system').trim();
+const mono = getComputedStyle(root).getPropertyValue('--mono').trim();
+
+function metricProbe() {
+  const probe = document.createElement('span');
+  probe.style.cssText = 'position:fixed; inset:0 auto auto 0; visibility:hidden; white-space:pre; font:48px sans-serif';
+  probe.setAttribute('aria-hidden', 'true');
+  document.body.append(probe);
+  const samples = ['Hamburgefonts 0123456789', 'il1 MW @ & Qag'];
+  const cache = new Map();
+  function widths(stack) {
+    if (cache.has(stack)) return cache.get(stack);
+    probe.style.fontFamily = stack;
+    const measured = [400, 600].flatMap(weight => {
+      probe.style.fontWeight = weight;
+      return samples.map(sample => {
+        probe.textContent = sample;
+        return probe.getBoundingClientRect().width;
+      });
+    });
+    cache.set(stack, measured);
+    return measured;
+  }
+  function sameMetrics(left, right) {
+    const comparison = widths(right);
+    return widths(left).every((value, index) => Math.abs(value - comparison[index]) < .04);
+  }
+  function hasFont(name) {
+    const family = '"' + name + '"';
+    return sameMetrics(family + ', serif', family + ', sans-serif');
+  }
+  function matchingFace(stack, candidates) {
+    return candidates.find(name => hasFont(name) && sameMetrics(stack, '"' + name + '"'));
+  }
+  return { probe, hasFont, matchingFace };
+}
+function reportFonts() {
+  const { probe, hasFont, matchingFace } = metricProbe();
+  const platform = navigator.userAgentData?.platform || navigator.platform || '';
+  const systemName = matchingFace(system, ['Segoe UI', 'Roboto', 'Ubuntu', 'Noto Sans', 'DejaVu Sans', 'Arial'])
+    || (/mac|iphone|ipad/i.test(platform) ? 'San Francisco' : 'System UI');
+  const monoName = matchingFace(mono, ['SF Mono', 'Menlo', 'Consolas', 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New'])
+    || 'Platform monospace';
+  const sansName = app.dataset.font === 'inter'
+    ? (hasFont('Inter') ? 'Inter' : systemName + ' (Inter unavailable)')
+    : systemName;
+  probe.remove();
+  fontReport.textContent = 'Sans: ' + sansName + ' · Mono: ' + monoName;
+}
+
+function updatePreview() {
+  const values = Object.fromEntries(new FormData(controls));
+  const today = values.mode === 'today';
+  for (const name of ['mode', 'page', 'section', 'dialog', 'groups', 'pair', 'density', 'size', 'font']) {
+    if (values[name]) app.dataset[name] = values[name];
+  }
+  root.dataset.theme = values.theme;
+  for (const name of ['page', 'section', 'dialog', 'groups', 'pair']) {
+    controls.elements.namedItem(name)[0].closest('fieldset').disabled = today;
+  }
+  const style = getComputedStyle(app.querySelector('.form-card .input'));
+  sizeReport.textContent = style.fontSize + ' type · ' + style.lineHeight + ' line height';
+  reportFonts();
+}
+controls.addEventListener('change', updatePreview);
+controls.addEventListener('submit', event => event.preventDefault());
+updatePreview();
+document.fonts.ready.then(reportFonts);
+
+const trigger = document.getElementById('region-trigger');
+const menu = document.getElementById('regions');
+const value = document.getElementById('region-value');
+const options = [...menu.querySelectorAll('[role="option"]')];
+function setMenu(open, focus) {
+  menu.hidden = !open;
+  trigger.setAttribute('aria-expanded', String(open));
+  if (focus) {
+    if (open) menu.querySelector('[aria-selected="true"]').focus();
+    else trigger.focus();
+  }
+}
+function selectRegion(option) {
+  for (const entry of options) entry.setAttribute('aria-selected', String(entry === option));
+  value.textContent = option.querySelector('span').textContent;
+  setMenu(false, true);
+}
+trigger.addEventListener('click', event => setMenu(menu.hidden, event.detail === 0));
+trigger.addEventListener('keydown', event => {
+  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+    event.preventDefault();
+    setMenu(true, true);
+  } else if (event.key === 'Escape' && !menu.hidden) {
+    setMenu(false, true);
+  }
+});
+menu.addEventListener('click', event => {
+  const option = event.target.closest('[role="option"]');
+  if (option) selectRegion(option);
+});
+menu.addEventListener('keydown', event => {
+  const index = options.indexOf(event.target);
+  const nextIndex = { ArrowDown: index + 1, ArrowUp: index - 1, Home: 0, End: options.length - 1 }[event.key];
+  if (nextIndex !== undefined) {
+    event.preventDefault();
+    options[(nextIndex + options.length) % options.length].focus();
+  } else if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    selectRegion(event.target);
+  } else if (event.key === 'Escape') {
+    event.preventDefault();
+    setMenu(false, true);
+  } else if (event.key === 'Tab') {
+    trigger.focus();
+    setMenu(false, false);
+  }
+});
+document.addEventListener('pointerdown', event => {
+  if (!menu.hidden && !event.target.closest('.region-field, #type-controls')) setMenu(false, false);
+});
+
+for (const toggle of app.querySelectorAll('[role="switch"]')) {
+  toggle.addEventListener('click', () => toggle.setAttribute('aria-checked', String(toggle.getAttribute('aria-checked') !== 'true')));
+}
+const pathError = document.getElementById('path-error');
+const pathInput = document.querySelector('[aria-describedby="path-error"]');
+pathInput.addEventListener('input', () => {
+  const valid = pathInput.value.startsWith('/');
+  pathInput.setAttribute('aria-invalid', String(!valid));
+  pathError.hidden = valid;
+});
+const rowChecks = [...app.querySelectorAll('td .checkbox')];
+const selectAll = app.querySelector('th .checkbox');
+function updateRowChecks() {
+  for (const checkbox of rowChecks) checkbox.closest('tr').setAttribute('aria-selected', String(checkbox.checked));
+  selectAll.checked = rowChecks.every(checkbox => checkbox.checked);
+  selectAll.indeterminate = !selectAll.checked && rowChecks.some(checkbox => checkbox.checked);
+}
+selectAll.addEventListener('change', () => {
+  for (const checkbox of rowChecks) checkbox.checked = selectAll.checked;
+  updateRowChecks();
+});
+for (const checkbox of rowChecks) checkbox.addEventListener('change', updateRowChecks);
+updateRowChecks();
+const search = document.getElementById('global-search');
+document.addEventListener('keydown', event => {
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+    event.preventDefault();
+    search.focus();
+  }
+});
+
+})();
+</script>
+</body>
+</html>

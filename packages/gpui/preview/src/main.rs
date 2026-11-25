@@ -2341,11 +2341,6 @@ fn print_specimen_state(window: &mut Window, cx: &mut App, prefix: &str) {
             lines.push(format!("{key}={value}"));
         }
     }
-    for (key, value) in &state.state.specimens.counters {
-        if key.starts_with(prefix) {
-            lines.push(format!("{key}={value}"));
-        }
-    }
 
     // Sorted so the output is stable enough to assert on.
     lines.sort();

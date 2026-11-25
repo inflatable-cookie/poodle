@@ -36,11 +36,23 @@
     line-height: 1;
   }
 
-  .poodle-menubar__trigger[data-open="true"],
   .poodle-menubar__trigger:hover:not(:disabled),
   .poodle-menubar__trigger:focus-visible {
     background: var(--poodle-recipe-menubar-open-hover-focus-trigger-fill, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent));
     outline: none;
+  }
+
+  /* The open trigger is the active item: its fill is the selection item fill.
+     Declared after focus-visible so an open, focused trigger takes this fill. */
+  .poodle-menubar__trigger[data-open="true"] {
+    background: var(--poodle-recipe-menubar-open-hover-focus-trigger-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)));
+    outline: none;
+  }
+
+  /* An open trigger that is hovered is still the active item. This outranks the
+     generic hover rule (0,3,0), so the selection fill holds under hover. */
+  .poodle-menubar__trigger[data-open="true"]:hover:not(:disabled) {
+    background: var(--poodle-recipe-menubar-open-hover-focus-trigger-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)));
   }
 
   /* Portalled to the theme root and placed in viewport coordinates by the

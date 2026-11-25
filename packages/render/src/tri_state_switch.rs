@@ -358,9 +358,7 @@ mod tests {
     use poodle_node::NodeModifiers;
     use std::sync::Mutex;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn render(spec: &TriStateSwitchSpec, handlers: TriStateSwitchHandlers) -> Node {
         tri_state_switch(spec, &RenderContext::new(&theme()), handlers)

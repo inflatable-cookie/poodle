@@ -471,6 +471,7 @@ pub struct AppState {
     pub theme_options: Vec<poodle_specs::ThemeOption>,
     /// Active specimen-page view (Examples/Sizes/Densities).
     pub specimen_view: SpecimenView,
+    pub shared_specimens: poodle_specimens::Session,
     pub active_component_idx: Option<usize>,
     pub active_demo_screen: DemoScreen,
     pub disabled: bool,
@@ -509,6 +510,7 @@ impl AppState {
             theme_select_open: false,
             theme_options: build_theme_options(),
             specimen_view: SpecimenView::Examples,
+            shared_specimens: poodle_specimens::Session::default(),
             active_component_idx: None,
             active_demo_screen: DemoScreen::OverviewShell,
             disabled: false,

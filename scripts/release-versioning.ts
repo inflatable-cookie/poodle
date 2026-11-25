@@ -22,6 +22,7 @@ export const LOCKSTEP_CARGO_MANIFEST_PATHS = [
   "packages/gpui/adapter/Cargo.toml",
   "packages/gpui/node-backend/Cargo.toml",
   "packages/gpui/preview/Cargo.toml",
+  // The Jetstream theme provider is still a versioned source package.
   "packages/jetstream/adapter/Cargo.toml",
   "packages/jetstream/preview/Cargo.toml",
   "packages/render/Cargo.toml",

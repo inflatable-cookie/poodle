@@ -49,9 +49,22 @@ CardToggleGroup), ThemeSelect, AgentQuestion, and Rating. Existing recipe
 hooks for Select options, Tabs edges and fills, ToggleGroup items,
 SegmentedControl labels, Card selected edges, and Rating filled glyphs still
 take precedence in all three selection styles (ThemeSelect and AgentQuestion
-expose no selected-state recipe hooks). A recipe can supply a visible Tabs
-outline even when `accent-tint` supplies a transparent fallback border. See
+expose no selected-state recipe hooks). Selected edges on Card, ThemeSelect, and
+AgentQuestion read `--poodle-style-selection-itemBorder` (and selected fills
+read `--poodle-style-selection-itemFill`), keeping `accent-outline` identical
+while suppressing borders under `accent-tint` and `neutral`. A recipe can
+supply a visible Tabs outline even when `accent-tint` supplies a transparent
+fallback border. See
 [002 Token System and Package Layout](002-token-system-and-package-layout.md#modes).
+
+The selected state of sidebar nav, navigation menu, pagination, stepper,
+menubar, menu surface, dock region and breadcrumbs follows the same chain.
+Where a component's hand-mixed default has no matching role, the fallback
+reads `--poodle-style-selection-itemFill` (unset in `accent-outline`) and
+keeps its own mix, so the default style stays pixel-identical while
+`accent-tint` and `neutral` reach it. The sidebar's inset ring stays
+accent-coloured under every selection style; it is a doubled edge, listed for
+the redesign.
 
 ## Public Surface vs Internal Variables
 

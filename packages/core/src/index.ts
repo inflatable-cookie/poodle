@@ -32,6 +32,8 @@ export {
 } from "./motion-policy";
 
 export { findNextEnabledIndex, firstEnabledIndex } from "./nav";
+export { moveActiveOption, reconcileActiveOption, type ActiveOption, type ActiveOptionMove } from "./active-option";
+export { selectionTransition, type SelectionEvent, type SelectionOptions } from "./selection";
 
 export {
   actionIcon,
@@ -684,6 +686,7 @@ export * from "./color";
 
 export * from "./theme-resolver";
 export { themePresets, type ThemePreset } from "./theme-presets";
+export { previewThemeCssProperties } from "./theme-css";
 
 export * from "./embed-input";
 

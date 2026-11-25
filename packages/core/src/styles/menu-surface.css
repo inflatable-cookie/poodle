@@ -77,7 +77,7 @@
   }
 
   .poodle-menu-surface__item[data-kind="submenu"][aria-expanded="true"] {
-    background: var(--poodle-recipe-menu-surface-hover-focus-item-fill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
+    background: var(--poodle-recipe-menu-surface-hover-focus-item-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)));
   }
 
   .poodle-menu-surface__submenu-indicator {

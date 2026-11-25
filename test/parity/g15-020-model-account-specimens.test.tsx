@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import {
   cleanup as cleanupReact,
   render as renderReact,
@@ -16,6 +14,7 @@ import { IconProvider, type IconSet } from "../../packages/react/components/src"
 import { specimenMap as reactMap } from "../../packages/react/preview/src/gallery/specimen-map";
 import { specimenMap as svelteMap } from "../../packages/svelte/preview/src/specimens/registry";
 import PilotSpecimenHarness from "../../packages/svelte/preview/test/PilotSpecimenHarness.svelte";
+import { readNativeSpecimenSource } from "./native-specimen-source";
 
 /**
  * `g15.020` curated the model-connection and account-lifecycle family back to
@@ -38,7 +37,6 @@ interface Page {
   slug: string;
   /** `true` when the curation left the page untouched. */
   noOp?: boolean;
-  /** File stem under `packages/gpui/preview/src/specimens`. */
   gpui: string;
   expected: string[];
 }
@@ -139,11 +137,6 @@ const PAGES: Page[] = [
   },
 ];
 
-const GPUI_SPECIMENS = join(
-  import.meta.dirname,
-  "../../packages/gpui/preview/src/specimens",
-);
-
 /**
  * GPUI caption order, read from the specimen source.
  *
@@ -152,8 +145,8 @@ const GPUI_SPECIMENS = join(
  * specimen declares through its local `group`/`section` helper — the same
  * helpers that feed the native `Eyebrow`.
  */
-function gpuiCaptions(stem: string): string[] {
-  const source = readFileSync(join(GPUI_SPECIMENS, `${stem}.rs`), "utf8");
+function gpuiCaptions(page: Page): string[] {
+  const source = readNativeSpecimenSource(page);
   const labels: string[] = [];
   for (const match of source.matchAll(/\bgroup\(\s*(?:&?theme|state)[^,]*,\s*"([^"]+)"/g)) {
     labels.push(match[1]!);
@@ -229,7 +222,7 @@ describe("g15.020 model-connection and account-lifecycle specimens", () => {
       });
 
       it("teaches the same ordered sections in GPUI", () => {
-        expect(gpuiCaptions(page.gpui)).toEqual(page.expected);
+        expect(gpuiCaptions(page)).toEqual(page.expected);
       });
 
       it("keeps the axis matrices out of Examples", () => {
@@ -341,10 +334,10 @@ describe("g15.020 model-connection and account-lifecycle specimens", () => {
   });
 
   it("keeps GPUI's auto-detected route on the choose stage too", () => {
-    const source = readFileSync(
-      join(GPUI_SPECIMENS, "model_connection_setup_specimen.rs"),
-      "utf8",
-    );
+    const source = readNativeSpecimenSource({
+      slug: "model-connection-setup",
+      gpui: "model_connection_setup_specimen",
+    });
     // Both outcomes stay on Choose. Their option sets carry the actual host
     // detection result, rather than invisible configure-stage feedback.
     expect(source).toMatch(
@@ -359,10 +352,10 @@ describe("g15.020 model-connection and account-lifecycle specimens", () => {
   });
 
   it("seeds GPUI's open-details example open, as both web runtimes do", () => {
-    const source = readFileSync(
-      join(GPUI_SPECIMENS, "model_connection_card_specimen.rs"),
-      "utf8",
-    );
+    const source = readNativeSpecimenSource({
+      slug: "model-connection-card",
+      gpui: "model_connection_card_specimen",
+    });
     expect(source).toMatch(/const CARD_LIVE_ID: &str = "conn-openai-work";/);
     // `card_is_open(id, default)` mirrors `card_is_enabled`: seeded open, and
     // still yielding to the host map once the reader toggles the disclosure.

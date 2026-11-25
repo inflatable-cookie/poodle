@@ -208,8 +208,7 @@ mod tests {
 
     #[test]
     fn loading_shell_keeps_the_header_rule_and_grid_spinner_row() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let spec = DetailShellSpec::new()
             .with_title("Loading")

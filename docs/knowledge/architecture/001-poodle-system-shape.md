@@ -1,7 +1,7 @@
 # 001 Poodle System Shape
 
 Status: active
-Updated: 2026-09-01
+Updated: 2026-11-25
 
 ## Purpose
 
@@ -185,6 +185,9 @@ effective motion policy. Component composition, token selection, state
 treatment, motion declarations, and interaction intent belong here when they
 are shared across native targets.
 
+Renderer unit tests build their theme from shared tokens. The renderer and
+contract crates have backend-independent dependency trees, including tests.
+
 ### GPUI
 
 `poodle-gpui` maps common layout and style vocabulary and provides the GPUI
@@ -193,10 +196,10 @@ elements and owns backend-specific input, text editing, and event plumbing.
 
 ### Jetstream
 
-`poodle-jetstream` maps common layout and style vocabulary and provides the
-Jetstream theme provider. The `jetstream-poodle` crate in the Jetstream
-repository converts Poodle nodes into Jetstream `JsEl` trees at the engine
-boundary.
+`poodle-jetstream` provides the Jetstream theme and accessibility role
+mappings. All Jetstream component composition comes from `poodle-render`.
+The `jetstream-poodle` crate in the Jetstream repository converts Poodle nodes
+into Jetstream `JsEl` trees at the engine boundary.
 
 Jetstream integration is currently deferred. Normal Poodle development and QA
 must not require a sibling Jetstream checkout. Its paired build, accessibility,

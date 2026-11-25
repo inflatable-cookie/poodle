@@ -2,11 +2,8 @@
 //!
 //! Contract: `docs/contracts/components/select.md`
 //! Reference: `packages/svelte/components/src/Select.svelte`
-//! Ported from: `packages/jetstream/components/src/select.rs`, whose structure
-//! this transcribes exactly — same anatomy, same token paths, same state
-//! recipes — so a backend interpreting these nodes reproduces that tier's
-//! output verbatim. That is the parity gate, and it is asserted by diffing
-//! draw commands in the Jetstream adapter's suite, not by inspection here.
+//! The shared node tree carries the anatomy, token paths, and state recipes
+//! used by GPUI and Jetstream.
 //!
 //! Closed state: trigger with chevron. Open state: relative wrapper holding
 //! the trigger plus an absolutely-positioned overlay panel of options.
@@ -21,7 +18,7 @@ use poodle_node::{
     LayoutOverflow, LayoutSizing, MainAxisAlignment, Node, NodeKey, NodePosition, NodeRole,
     StylePatch,
 };
-use poodle_specs::{SelectSpec, ValidationState};
+use poodle_specs::{ControlDensity, SelectSpec, ValidationState};
 
 use crate::color::with_alpha;
 use crate::context::RenderContext;
@@ -272,8 +269,14 @@ pub fn select(spec: &SelectSpec, ctx: &RenderContext<'_>, handlers: &SelectHandl
     let height = ctx.theme().resolve_space("size.control.height")
         + rem_to_px(size_height_offset_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
+    // Match the density adjustment on --poodle-select-inline-padding.
+    let density_adjustment = match ctx.resolve_density(spec.density) {
+        ControlDensity::Compact => -0.125,
+        ControlDensity::Default => 0.0,
+        ControlDensity::Comfortable => 0.125,
+    };
     let pad_x = ctx.theme().resolve_space("space.control.x")
-        + rem_to_px(size_padding_x_offset_rem(effective_size));
+        + rem_to_px(size_padding_x_offset_rem(effective_size) + density_adjustment);
     // The indicator is always the sm icon token (the old GPUI tier's
     // `IconSize::Sm`), not a per-control-size ladder stop.
     let icon_size = ctx.theme().resolve_space("size.icon.sm");
@@ -1033,12 +1036,8 @@ fn parse_css_length_to_px(value: &str) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::test_theme as theme;
     use poodle_specs::ChoiceOption;
-
-    /// The real token resolver over the ECLIPSE theme. Pure — no backend.
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
 
     fn fruit_options() -> Vec<ChoiceOption> {
         vec![

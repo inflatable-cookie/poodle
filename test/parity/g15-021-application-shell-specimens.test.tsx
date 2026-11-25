@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import {
   cleanup as cleanupReact,
   fireEvent as fireEventReact,
@@ -18,6 +16,7 @@ import { IconProvider, type IconSet } from "../../packages/react/components/src"
 import { specimenMap as reactMap } from "../../packages/react/preview/src/gallery/specimen-map";
 import { specimenMap as svelteMap } from "../../packages/svelte/preview/src/specimens/registry";
 import PilotSpecimenHarness from "../../packages/svelte/preview/test/PilotSpecimenHarness.svelte";
+import { readNativeSpecimenSource } from "./native-specimen-source";
 
 /**
  * `g15.021` curates the application-shell family to the outline's section
@@ -37,7 +36,6 @@ interface Page {
   slug: string;
   /** `true` when the curation left the page untouched. */
   noOp?: boolean;
-  /** File stem under `packages/gpui/preview/src/specimens`. */
   gpui: string;
   expected: string[];
 }
@@ -114,13 +112,8 @@ const PAGES: Page[] = [
   },
 ];
 
-const GPUI_SPECIMENS = join(
-  import.meta.dirname,
-  "../../packages/gpui/preview/src/specimens",
-);
-
-function gpuiCaptions(stem: string): string[] {
-  const source = readFileSync(join(GPUI_SPECIMENS, `${stem}.rs`), "utf8");
+function gpuiCaptions(page: Page): string[] {
+  const source = readNativeSpecimenSource(page);
   const examplesMatch = source.match(/\n\s*specimen_layout\(/);
   const examples = examplesMatch
     ? source.slice(0, examplesMatch.index)
@@ -129,7 +122,9 @@ function gpuiCaptions(stem: string): string[] {
   for (const match of examples.matchAll(/\bgroup(?:_block)?\(\s*"([^"]+)"/g)) {
     labels.push(match[1]!);
   }
-  return labels;
+  if (labels.length > 0) return labels;
+
+  return [...examples.matchAll(/\bsection\(\s*"([^"]+)"/g)].map((match) => match[1]!);
 }
 
 function svelteCaptions(slug: string): string[] {
@@ -194,7 +189,7 @@ describe("g15.021 application-shell specimens", () => {
       });
 
       it("teaches the same ordered sections in GPUI", () => {
-        expect(gpuiCaptions(page.gpui)).toEqual(page.expected);
+        expect(gpuiCaptions(page)).toEqual(page.expected);
       });
 
       it("keeps the axis matrices out of Examples", () => {
@@ -280,7 +275,10 @@ describe("g15.021 application-shell specimens", () => {
       "Failure and incomplete metadata",
     ]);
     expect(document.querySelectorAll("[data-part='trigger']").length).toBeGreaterThanOrEqual(9);
-    const gpui = readFileSync(join(GPUI_SPECIMENS, "history_center_specimen.rs"), "utf8");
+    const gpui = readNativeSpecimenSource({
+      slug: "history-center",
+      gpui: "history_center_specimen",
+    });
     expect(gpui).toContain("with_delete_handlers");
     expect(gpui).toContain('value: format!("delete {entry_id}")');
     cleanupSvelte();

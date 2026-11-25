@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import {
   cleanup as cleanupReact,
   fireEvent as fireEventReact,
@@ -23,6 +21,7 @@ import { specimenMap as reactMap } from "../../packages/react/preview/src/galler
 import { specimenMap as svelteMap } from "../../packages/svelte/preview/src/specimens/registry";
 import AxisSceneFixture from "../../packages/svelte/preview/test/AxisSceneFixture.svelte";
 import PilotSpecimenHarness from "../../packages/svelte/preview/test/PilotSpecimenHarness.svelte";
+import { readNativeSpecimenSource } from "./native-specimen-source";
 
 /**
  * `g15.023` curates the foundation entry, content, and status family back to
@@ -43,7 +42,7 @@ interface Page {
   scene?: boolean;
   /** Stated 7–9 exception against the normal 3–6 budget. */
   budgetException?: 7 | 8 | 9;
-  gpui: string;
+  gpui?: string;
   expected: string[];
   /** GPUI may shorten a no-op caption; omit when it matches `expected`. */
   gpuiExpected?: string[];
@@ -71,7 +70,6 @@ const PAGES: Page[] = [
     slug: "drag-number-field",
     noOp: true,
     budgetException: 8,
-    gpui: "audio_specimens",
     expected: [
       "Default",
       "Integer step",
@@ -130,7 +128,6 @@ const PAGES: Page[] = [
   },
   {
     slug: "select",
-    gpui: "select",
     expected: [
       "Native select",
       "Custom dropdown",
@@ -178,19 +175,13 @@ const PAGES: Page[] = [
   },
 ];
 
-const GPUI_SPECIMENS = join(import.meta.dirname, "../../packages/gpui/preview/src/specimens");
-const AUDIO_SPECIMENS = join(
-  import.meta.dirname,
-  "../../packages/render/src/audio_specimens.rs",
-);
-
 function collect(source: string, pattern: RegExp): string[] {
   return [...source.matchAll(pattern)].map((match) => match[1]!);
 }
 
 function gpuiCaptions(page: Page): string[] {
+  const source = readNativeSpecimenSource(page);
   if (page.slug === "drag-number-field") {
-    const source = readFileSync(AUDIO_SPECIMENS, "utf8");
     const block = source.match(
       /fn drag_number_field_examples[\s\S]*?fn envelope/,
     )?.[0];
@@ -198,7 +189,6 @@ function gpuiCaptions(page: Page): string[] {
     return collect(block!, /\(\s*"([^"]+)",\s*vec!\[/g);
   }
 
-  const source = readFileSync(join(GPUI_SPECIMENS, `${page.gpui}.rs`), "utf8");
   const examplesMatch = source.match(/\n\s*specimen_layout\(/);
   const examples = examplesMatch ? source.slice(0, examplesMatch.index) : source;
 
@@ -367,7 +357,7 @@ describe("g15.023 foundation entry, content, and status specimens", () => {
     expect(sizeRings.length).toBeGreaterThanOrEqual(5);
     cleanupSvelte();
 
-    const gpui = readFileSync(join(GPUI_SPECIMENS, "meter.rs"), "utf8");
+    const gpui = readNativeSpecimenSource({ slug: "meter" });
     expect(gpui).toMatch(/MeterShape::Ring/);
     expect(gpui).toMatch(/with_show_value\(true\)/);
     expect(gpui).toMatch(/MeterTone::Warning/);

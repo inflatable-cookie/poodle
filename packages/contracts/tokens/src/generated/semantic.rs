@@ -108,6 +108,7 @@ pub const STYLE_SURFACE_BORDER: &str = "style.surface.border";
 pub const STYLE_SURFACE_SHADOW: &str = "style.surface.shadow";
 pub const STYLE_SURFACE_FLOATING_FILL: &str = "style.surface.floatingFill";
 pub const STYLE_SELECTION_ITEM_FILL: &str = "style.selection.itemFill";
+pub const STYLE_SELECTION_ITEM_BORDER: &str = "style.selection.itemBorder";
 pub const STYLE_SELECTION_FILL: &str = "style.selection.fill";
 pub const STYLE_SELECTION_FILL_STRONG: &str = "style.selection.fillStrong";
 pub const STYLE_SELECTION_FILL_STRONG_BACKDROP: &str = "style.selection.fillStrongBackdrop";

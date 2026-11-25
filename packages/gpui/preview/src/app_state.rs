@@ -255,11 +255,10 @@ impl TokenPanel {
 
 /// Generic specimen interaction state.
 /// Keyed by specimen-scoped string IDs so each specimen can store
-/// toggles, selections, and counters without dedicated struct fields.
+/// toggles, selections, and text without dedicated struct fields.
 pub struct SpecimenState {
     pub toggles: HashMap<String, bool>,
     pub selections: HashMap<String, usize>,
-    pub counters: HashMap<String, u32>,
     pub text: HashMap<String, String>,
     /// Caret/selection per text specimen key. The Rust targets have no native
     /// editor, so the caret is host state exactly like the value is — a field
@@ -290,7 +289,6 @@ impl SpecimenState {
         Self {
             toggles,
             selections: HashMap::new(),
-            counters: HashMap::new(),
             text: HashMap::new(),
             carets: HashMap::new(),
             durations: HashMap::new(),
@@ -317,15 +315,6 @@ impl SpecimenState {
 
     pub fn select(&mut self, key: &str, idx: usize) {
         self.selections.insert(key.to_string(), idx);
-    }
-
-    pub fn count(&self, key: &str) -> u32 {
-        self.counters.get(key).copied().unwrap_or(0)
-    }
-
-    pub fn increment(&mut self, key: &str) {
-        let val = self.counters.entry(key.to_string()).or_insert(0);
-        *val += 1;
     }
 }
 
@@ -467,13 +456,6 @@ pub enum NodeSpecimenEvent {
     },
     /// Set a selection index (e.g. a tri-state control's chosen segment).
     Select { key: String, index: usize },
-    /// Increment a counter specimen key (e.g. `btn-clicks`).
-    Increment(String),
-    /// Update the DataTable sort state using the component's host-owned
-    /// sort-cycle contract.
-    DataTableSort { column: String },
-    /// Toggle a DataTable row and record the visible row action caption.
-    DataTableRowClick { row_id: String },
     /// Apply a context-menu action to the mutable tree demo, then close it.
     TreeContextAction {
         action: String,
@@ -872,6 +854,7 @@ pub struct AppState {
     pub active_token_panel: TokenPanel,
     pub token_inspector_query: String,
     pub specimens: SpecimenState,
+    pub shared_specimens: poodle_specimens::Session,
     /// Pending events from node-backed specimens; drained at render start.
     pub node_events: std::sync::Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
     /// Live TimeInput machine context, keyed by specimen id, so incomplete
@@ -945,6 +928,7 @@ impl AppState {
             active_token_panel: TokenPanel::Summary,
             token_inspector_query: String::new(),
             specimens: SpecimenState::new(),
+            shared_specimens: poodle_specimens::Session::default(),
             node_events: std::sync::Arc::new(std::sync::Mutex::new(Vec::new())),
             time_input_live: std::sync::Arc::new(std::sync::Mutex::new(HashMap::new())),
             tree: TreePreviewState::new(),
@@ -1030,43 +1014,6 @@ impl AppState {
                 },
                 NodeSpecimenEvent::Select { key, index } => {
                     self.specimens.select(&key, index);
-                }
-                NodeSpecimenEvent::Increment(key) => {
-                    self.specimens.increment(&key);
-                }
-                NodeSpecimenEvent::DataTableSort { column } => {
-                    let current_col = self
-                        .specimens
-                        .text
-                        .get("dt-sort-col")
-                        .cloned()
-                        .unwrap_or_else(|| "name".to_string());
-                    let current_dir = self
-                        .specimens
-                        .text
-                        .get("dt-sort-dir")
-                        .cloned()
-                        .unwrap_or_else(|| "asc".to_string());
-                    if column == current_col {
-                        let next_dir = if current_dir == "asc" { "desc" } else { "asc" };
-                        self.specimens
-                            .text
-                            .insert("dt-sort-dir".to_string(), next_dir.to_string());
-                    } else {
-                        self.specimens
-                            .text
-                            .insert("dt-sort-col".to_string(), column);
-                        self.specimens
-                            .text
-                            .insert("dt-sort-dir".to_string(), "asc".to_string());
-                    }
-                }
-                NodeSpecimenEvent::DataTableRowClick { row_id } => {
-                    self.specimens.toggle(&format!("dt-row-{row_id}"));
-                    self.specimens.text.insert(
-                        "dt-last-action".to_string(),
-                        format!("Clicked row {row_id}"),
-                    );
                 }
                 NodeSpecimenEvent::TreeContextAction {
                     action,
@@ -1259,7 +1206,13 @@ impl AppState {
                 },
             }
         }
-        specimen_changed
+        let (shared_changed, effects) = self.shared_specimens.drain();
+        for effect in effects {
+            match effect {
+                poodle_specimens::Effect::Focus(id) => poodle_gpui_node_backend::request_focus(&id),
+            }
+        }
+        specimen_changed || shared_changed
     }
 
     pub fn set_theme(&mut self, preset: ThemePreset) {

@@ -188,7 +188,7 @@
 /* Declared after hover so the current step keeps its accent rather than
    flattening to the neutral hover fill. */
 .poodle-stepper__step:has(.poodle-stepper__trigger[aria-current="step"]) {
-  background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
+  background: var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent));
 }
 
 /* …and hovering the current step deepens its own colour instead of swapping
@@ -196,11 +196,11 @@
 .poodle-stepper__step:has(.poodle-stepper__trigger[aria-current="step"]):has(
     .poodle-stepper__trigger:not(:disabled):hover
   ) {
-  background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
+  background: var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
 }
 
 .poodle-stepper__trigger[aria-current="step"] {
-  color: var(--poodle-color-text-primary);
+  color: var(--poodle-style-selection-text, var(--poodle-color-text-primary));
 }
 
 .poodle-stepper__step[data-status="complete"] .poodle-stepper__trigger,
@@ -228,10 +228,16 @@
 }
 
 .poodle-stepper__step[data-status="complete"] .poodle-stepper__marker,
-.poodle-stepper__step[data-status="running"] .poodle-stepper__marker,
-.poodle-stepper__trigger[aria-current="step"] .poodle-stepper__marker {
+.poodle-stepper__step[data-status="running"] .poodle-stepper__marker {
   border-color: var(--poodle-color-accent-base);
   color: var(--poodle-color-accent-base);
+}
+
+/* The current marker is the selection indicator. Complete and running keep the
+   accent: those are status codes, not selection. */
+.poodle-stepper__trigger[aria-current="step"] .poodle-stepper__marker {
+  border-color: var(--poodle-style-selection-indicator, var(--poodle-color-accent-base));
+  color: var(--poodle-style-selection-indicator, var(--poodle-color-accent-base));
 }
 
 .poodle-stepper__step[data-status="failed"] .poodle-stepper__marker {

@@ -817,6 +817,8 @@ function ordinaryCargoForbiddenLabels(
   before: string | null,
   after: string | null,
 ): string[] {
+  // Dependency changes may remove local paths from a crate's graph. Compare
+  // package identity and transport separately so that cleanup stays ordinary.
   const labels: string[] = [];
   if (before !== null && after !== null) {
     if (cargoPackageVersionSignal(before) !== cargoPackageVersionSignal(after)) {

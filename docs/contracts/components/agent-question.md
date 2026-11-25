@@ -269,7 +269,7 @@ composer owns the editor, the toolbar and the submit control; see
 | option description | `--poodle-color-text-secondary` |
 | option fill | `--poodle-color-background-elevated` |
 | option fill, selected | `var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, var(--poodle-color-background-elevated)))` |
-| option border, selected | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |
+| option border, selected | `var(--poodle-style-selection-itemBorder, var(--poodle-color-accent-base))` |
 | option radius | `--poodle-radius-control` |
 | shortcut colour | `--poodle-color-text-tertiary` |
 | progress dot, answered / current | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |

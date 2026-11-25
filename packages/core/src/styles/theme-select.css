@@ -152,7 +152,7 @@
   }
 
   .poodle-theme-select__tile[data-selected="true"] {
-    border-color: var(--poodle-style-selection-indicator, var(--poodle-color-accent-base));
+    border-color: var(--poodle-style-selection-itemBorder, var(--poodle-color-accent-base));
     background: var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent));
   }
 

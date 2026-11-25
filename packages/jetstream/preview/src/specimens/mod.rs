@@ -14,7 +14,6 @@ pub mod banner;
 pub mod block_editor;
 pub mod breadcrumbs;
 pub mod bulk_action_bar;
-pub mod button;
 pub mod bx;
 pub mod calendar;
 pub mod card;
@@ -29,7 +28,6 @@ pub mod color_picker;
 pub mod command_palette;
 pub mod confirm_action;
 pub mod context_menu;
-pub mod data_table;
 pub mod date_picker;
 pub mod date_range_picker;
 pub mod date_time_picker;
@@ -115,9 +113,9 @@ pub mod motion_policy_provider;
 pub mod resize_handle;
 pub mod scroll_shell;
 pub mod segmented_control;
-pub mod select;
 pub mod selection_summary;
 pub mod separator;
+mod shared;
 pub mod shell_status_bar;
 pub mod sidebar_nav;
 pub mod skeleton;
@@ -159,6 +157,8 @@ use poodle_jetstream::JetstreamThemeProvider;
 use crate::app_state::SpecimenView;
 use crate::app_state::{AppState, Section};
 use crate::component_registry::{self, ComponentEntry};
+
+pub use shared::apply_effects;
 
 // ── Content routing ──
 
@@ -288,19 +288,30 @@ fn build_specimen_page(
     // Specimen section — filtered to the active Examples/Sizes/Densities view,
     // with a text-variant Tabs switcher when the specimen has those sections
     // (mirrors the Svelte SpecimenLayout).
-    if let Some(specimen) = render_specimen(entry.slug, theme, state) {
-        let (filtered, has_sizes, has_densities) =
-            filter_specimen_view(specimen, state.specimen_view);
-
+    let mounted = match poodle_specimens::Specimen::from_slug(entry.slug) {
+        Some(specimen) => Some((
+            shared::render(specimen, theme, state),
+            shared::tabs(specimen),
+        )),
+        None => render_specimen(entry.slug, theme, state).map(|specimen| {
+            let (body, has_sizes, has_densities) =
+                filter_specimen_view(specimen, state.specimen_view);
+            let mut tabs = Vec::new();
+            if has_sizes || has_densities {
+                tabs.push(poodle_specs::TabDefinition::new("examples", "Examples"));
+                if has_sizes {
+                    tabs.push(poodle_specs::TabDefinition::new("sizes", "Sizes"));
+                }
+                if has_densities {
+                    tabs.push(poodle_specs::TabDefinition::new("densities", "Densities"));
+                }
+            }
+            (body, tabs)
+        }),
+    };
+    if let Some((body, items)) = mounted {
         let mut section = div().flex_col().gap(12.0);
-        if has_sizes || has_densities {
-            let mut items = vec![poodle_specs::TabDefinition::new("examples", "Examples")];
-            if has_sizes {
-                items.push(poodle_specs::TabDefinition::new("sizes", "Sizes"));
-            }
-            if has_densities {
-                items.push(poodle_specs::TabDefinition::new("densities", "Densities"));
-            }
+        if items.len() > 1 {
             let value = match state.specimen_view {
                 SpecimenView::Examples => "examples",
                 SpecimenView::Sizes => "sizes",
@@ -323,7 +334,7 @@ fn build_specimen_page(
                 .border_1()
                 .border_color(border)
                 .rounded(8.0)
-                .child(filtered),
+                .child(body),
         );
         page = page.child(section);
     } else {
@@ -350,6 +361,9 @@ pub fn render_specimen(
     theme: &JetstreamThemeProvider,
     state: &AppState,
 ) -> Option<JsEl> {
+    if let Some(specimen) = poodle_specimens::Specimen::from_slug(slug) {
+        return Some(shared::render(specimen, theme, state));
+    }
     match slug {
         "accordion" => Some(el(accordion::render(theme))),
         "action-discovery-panel" => Some(el(action_discovery_panel::render(theme))),
@@ -364,7 +378,6 @@ pub fn render_specimen(
         "box" => Some(el(bx::render(theme))),
         "breadcrumbs" => Some(el(breadcrumbs::render(theme))),
         "bulk-action-bar" => Some(el(bulk_action_bar::render(theme))),
-        "button" => Some(el(button::render(theme))),
         "calendar" => Some(el(calendar::render(theme))),
         "callout" => scene_specimen::render("callout", theme).map(el),
         "card" => Some(el(card::render(theme))),
@@ -378,7 +391,6 @@ pub fn render_specimen(
         "command-palette" => Some(el(command_palette::render(theme))),
         "confirm-action" => Some(el(confirm_action::render(theme))),
         "context-menu" => Some(el(context_menu::render(theme))),
-        "data-table" => Some(el(data_table::render(theme))),
         "debug-dialog" => Some(el(debug_dialog::render(theme))),
         "date-picker" => Some(el(date_picker::render(theme))),
         "date-range-picker" => Some(el(date_range_picker::render(theme))),
@@ -460,7 +472,6 @@ pub fn render_specimen(
         "resize-handle" => Some(el(resize_handle::render(theme))),
         "scroll-shell" => Some(el(scroll_shell::render(theme))),
         "segmented-control" => Some(el(segmented_control::render(theme))),
-        "select" => Some(el(select::render(theme))),
         "selection-summary" => Some(el(selection_summary::render(theme))),
         "separator" => Some(el(separator::render(theme))),
         "shell-status-bar" => Some(el(shell_status_bar::render(theme))),

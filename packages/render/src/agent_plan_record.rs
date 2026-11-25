@@ -158,9 +158,7 @@ mod tests {
     use super::*;
     use poodle_headless::agent_plan::AgentPlanStatus;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     fn spec(expanded: bool) -> AgentPlanRecordSpec {
         AgentPlanRecordSpec::new("## Plan", AgentPlanStatus::Accepted).with_expanded(expanded)

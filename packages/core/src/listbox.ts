@@ -6,6 +6,9 @@
  * focus remain adapter-side so rows can contain host-rendered content.
  */
 
+import { moveActiveOption } from "./active-option";
+import { selectionTransition } from "./selection";
+
 export interface ListboxItem {
   value: string;
   label: string;
@@ -60,13 +63,13 @@ export function listboxInitialFocus(
 ): string | null {
   if (disabled) return null;
   return items.find((item) => !item.disabled && selectedValues.includes(item.value))?.value ??
-    items.find((item) => !item.disabled)?.value ?? null;
+    moveActiveOption(items, null, "first");
 }
 
 function normalizeValues(values: readonly string[], context: ListboxContext): string[] {
   const available = new Set(context.items.filter((item) => !item.disabled).map((item) => item.value));
-  const unique = [...new Set(values)].filter((value) => available.has(value));
-  return context.selectionMode === "single" ? unique.slice(0, 1) : unique;
+  const items = values.filter((value) => available.has(value));
+  return [...selectionTransition([], { type: "REPLACE", items }, { mode: context.selectionMode })];
 }
 
 function focusResult(context: ListboxContext, value: string, anchorValue = context.anchorValue): ListboxResult {
@@ -91,43 +94,35 @@ function enabledIndex(context: ListboxContext, value: string | null): number {
 }
 
 function moveFocus(context: ListboxContext, direction: -1 | 1, extendSelection = false): ListboxResult {
-  const enabled = listboxEnabledItems(context);
-  if (enabled.length === 0) return { context, effects: [] };
+  const next = moveActiveOption(context.items, context.focusedValue, direction > 0 ? "next" : "previous", false);
+  if (next === null || next === context.focusedValue) return { context, effects: [] };
 
-  const currentIndex = enabledIndex(context, context.focusedValue);
-  const nextIndex = currentIndex < 0
-    ? (direction > 0 ? 0 : enabled.length - 1)
-    : Math.max(0, Math.min(enabled.length - 1, currentIndex + direction));
-  const next = enabled[nextIndex];
-  if (!next || next.value === context.focusedValue) return { context, effects: [] };
-
-  const nextContext = { ...context, focusedValue: next.value };
+  const nextContext = { ...context, focusedValue: next };
   if (context.selectionMode === "single") {
-    const selected = withSelection(nextContext, [next.value]);
-    return { context: { ...selected.context, anchorValue: next.value }, effects: [{ type: "focus", value: next.value }, ...selected.effects] };
+    const selected = withSelection(nextContext, [next]);
+    return { context: { ...selected.context, anchorValue: next }, effects: [{ type: "focus", value: next }, ...selected.effects] };
   }
 
   if (extendSelection) {
-    const anchor = context.anchorValue ?? context.focusedValue ?? next.value;
+    const anchor = context.anchorValue ?? context.focusedValue ?? next;
     const all = context.items;
     const anchorIndex = all.findIndex((item) => item.value === anchor);
-    const targetIndex = all.findIndex((item) => item.value === next.value);
+    const targetIndex = all.findIndex((item) => item.value === next);
     const [start, end] = anchorIndex <= targetIndex ? [anchorIndex, targetIndex] : [targetIndex, anchorIndex];
     const range = all.slice(start, end + 1).filter((item) => !item.disabled).map((item) => item.value);
     const selected = withSelection({ ...nextContext, anchorValue: anchor }, range);
-    return { context: selected.context, effects: [{ type: "focus", value: next.value }, ...selected.effects] };
+    return { context: selected.context, effects: [{ type: "focus", value: next }, ...selected.effects] };
   }
 
-  return { context: { ...nextContext, anchorValue: context.anchorValue }, effects: [{ type: "focus", value: next.value }] };
+  return { context: nextContext, effects: [{ type: "focus", value: next }] };
 }
 
 function focusBoundary(context: ListboxContext, boundary: "first" | "last"): ListboxResult {
-  const enabled = listboxEnabledItems(context);
-  const item = boundary === "first" ? enabled[0] : enabled.at(-1);
-  if (!item) return { context, effects: [] };
-  const next = focusResult(context, item.value, item.value);
+  const value = moveActiveOption(context.items, null, boundary);
+  if (value === null) return { context, effects: [] };
+  const next = focusResult(context, value, value);
   if (context.selectionMode !== "single") return next;
-  const selected = withSelection(next.context, [item.value]);
+  const selected = withSelection(next.context, [value]);
   return { context: selected.context, effects: [...next.effects, ...selected.effects] };
 }
 
@@ -197,9 +192,7 @@ export function listboxTransition(context: ListboxContext, event: ListboxEvent):
       const value = context.focusedValue;
       if (!value || !context.items.some((item) => item.value === value && !item.disabled)) return { context, effects: [] };
       if (context.selectionMode === "single") return withSelection(context, [value]);
-      const selected = context.selectedValues.includes(value)
-        ? context.selectedValues.filter((candidate) => candidate !== value)
-        : [...context.selectedValues, value];
+      const selected = selectionTransition(context.selectedValues, { type: "TOGGLE", item: value }, { mode: "multiple" });
       return withSelection({ ...context, anchorValue: value }, selected);
     }
     case "SELECT": {
@@ -214,9 +207,7 @@ export function listboxTransition(context: ListboxContext, event: ListboxEvent):
         return { context: result.context, effects: [{ type: "focus", value: item.value }, ...result.effects] };
       }
       if (event.additive) {
-        const values = context.selectedValues.includes(item.value)
-          ? context.selectedValues.filter((candidate) => candidate !== item.value)
-          : [...context.selectedValues, item.value];
+        const values = selectionTransition(context.selectedValues, { type: "TOGGLE", item: item.value }, { mode: "multiple" });
         const result = withSelection({ ...context, focusedValue: item.value, anchorValue: item.value }, values);
         return { context: result.context, effects: [{ type: "focus", value: item.value }, ...result.effects] };
       }

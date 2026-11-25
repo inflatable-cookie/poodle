@@ -1,10 +1,11 @@
 <script lang="ts">
   import {
-    findNextEnabledIndex,
-    firstEnabledIndex,
     layerContains,
+    moveActiveOption,
     registerDismissLayer,
+    selectionTransition,
     tokenBackspaceRemoves,
+    type SelectionOptions,
   } from "@inflatable-cookie/poodle-core";
   import { anchored, Icon } from "@inflatable-cookie/poodle-svelte";
 
@@ -14,6 +15,8 @@
     | { kind: "loading" }
     | { kind: "ready"; tags: readonly Tag[] }
     | { kind: "error" };
+
+  const tagSelection = { mode: "multiple", key: (tag: Tag) => tag.id } satisfies SelectionOptions<Tag>;
 
   let { searchTags }: {
     searchTags: (query: string, signal: AbortSignal) => Promise<readonly Tag[]>;
@@ -27,19 +30,20 @@
   let retry = $state<HTMLButtonElement>();
 
   let query = $state("");
-  let selected = $state.raw<Tag[]>([]);
+  let selected = $state.raw<readonly Tag[]>([]);
   let result = $state.raw<SearchState>({ kind: "idle" });
   let activeId = $state<string | null>(null);
   let selectionMessage = $state("");
   let composing = false;
   let request: AbortController | undefined;
-  let pendingDirection: 1 | -1 | undefined;
+  let pendingMovement: "next" | "previous" | undefined;
 
   const options = $derived(
     result.kind === "ready"
       ? result.tags.filter((tag) => !selected.some((chosen) => chosen.id === tag.id))
       : [],
   );
+  const activeOptions = $derived(options.map((tag) => ({ value: tag.id, disabled: tag.disabled })));
   const activeIndex = $derived(options.findIndex((tag) => tag.id === activeId));
   const expanded = $derived(options.length > 0);
   const searchOpen = $derived(result.kind !== "idle");
@@ -53,19 +57,11 @@
     return options.length === 1 ? "1 suggestion." : `${options.length} suggestions.`;
   });
 
-  function moveActive(direction: 1 | -1) {
-    const next = direction === 1 && activeIndex === -1
-      ? firstEnabledIndex(options)
-      : findNextEnabledIndex(options, Math.max(0, activeIndex), direction);
-    const tag = options[next];
-    activeId = tag && !tag.disabled ? tag.id : null;
-  }
-
-  async function search(direction?: 1 | -1) {
+  async function search(movement?: "next" | "previous") {
     request?.abort();
     const current = new AbortController();
     request = current;
-    pendingDirection = direction;
+    pendingMovement = movement;
     activeId = null;
     result = { kind: "loading" };
 
@@ -73,7 +69,7 @@
       const tags = await searchTags(query, current.signal);
       if (current.signal.aborted) return;
       result = { kind: "ready", tags };
-      if (pendingDirection) moveActive(pendingDirection);
+      if (pendingMovement) activeId = moveActiveOption(activeOptions, null, pendingMovement);
     } catch {
       if (current.signal.aborted) return;
       result = { kind: "error" };
@@ -83,7 +79,7 @@
   function close() {
     request?.abort();
     request = undefined;
-    pendingDirection = undefined;
+    pendingMovement = undefined;
     activeId = null;
     result = { kind: "idle" };
   }
@@ -100,8 +96,9 @@
   }
 
   function addTag(tag: Tag) {
-    if (tag.disabled || selected.some((chosen) => chosen.id === tag.id)) return;
-    selected = [...selected, tag];
+    const next = selectionTransition(selected, { type: "SELECT", item: tag, disabled: tag.disabled }, tagSelection);
+    if (next === selected) return;
+    selected = next;
     query = "";
     close();
     input?.focus();
@@ -109,7 +106,7 @@
   }
 
   function removeTag(tag: Tag) {
-    selected = selected.filter((chosen) => chosen.id !== tag.id);
+    selected = selectionTransition(selected, { type: "REMOVE", item: tag }, tagSelection);
     input?.focus();
     announceSelection("Removed", tag);
   }
@@ -125,10 +122,10 @@
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       if (result.kind === "error" || (result.kind === "ready" && !expanded)) return;
       event.preventDefault();
-      const direction = event.key === "ArrowDown" ? 1 : -1;
-      if (result.kind === "idle") void search(direction);
-      else if (result.kind === "loading") pendingDirection = direction;
-      else moveActive(direction);
+      const movement = event.key === "ArrowDown" ? "next" : "previous";
+      if (result.kind === "idle") void search(movement);
+      else if (result.kind === "loading") pendingMovement = movement;
+      else activeId = moveActiveOption(activeOptions, activeId, movement);
     } else if (event.key === "Enter") {
       const active = options[activeIndex];
       if (active) {

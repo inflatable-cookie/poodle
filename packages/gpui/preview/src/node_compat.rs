@@ -25,7 +25,7 @@ use poodle_specs::{
     ButtonSpec, CalendarSpec, CallOutSpec, CardRadioGroupSpec, ChangedFilesSpec, CheckboxSpec,
     CodeInputSpec, CodeSpec, CollapseToggleSpec, CollapsibleSpec, ColorPickerSpec,
     CommandPaletteSpec, ConfirmActionSpec, ContextMenuSpec, ControlDensity, ControlSize,
-    DataTableSpec, DatePickerSpec, DateRangePickerSpec, DateRangeValue, DateTimePickerSpec,
+    DatePickerSpec, DateRangePickerSpec, DateRangeValue, DateTimePickerSpec,
     DateTimeRangePickerSpec, DateTimeZonePickerSpec, DebugDialogSpec, DetailItemSpec,
     DetailSectionGroupSpec, DetailSectionSpec, DetailShellSpec, DialogSpec, DockRegionSpec,
     DrawerSpec, DurationInputSpec, EditableLabelSpec, EditableListSpec, EmbedInputSpec,
@@ -853,12 +853,6 @@ pub(crate) struct MediaPicker {
     handlers: poodle_render::MediaPickerHandlers,
 }
 
-pub(crate) struct DataTable {
-    spec: DataTableSpec,
-    theme: GpuiThemeProvider,
-    handlers: poodle_render::DataTableHandlers,
-}
-
 pub(crate) struct AgentQuestion {
     spec: AgentQuestionSpec,
     theme: GpuiThemeProvider,
@@ -1222,26 +1216,6 @@ impl MediaPicker {
 
     fn into_node(self) -> poodle_node::Node {
         poodle_render::media_picker(&self.spec, &RenderContext::new(&self.theme), self.handlers)
-    }
-}
-
-impl DataTable {
-    pub(crate) fn from_spec(spec: DataTableSpec, theme: &GpuiThemeProvider) -> Self {
-        Self {
-            spec,
-            theme: theme.clone(),
-            handlers: poodle_render::DataTableHandlers::default(),
-        }
-    }
-
-    pub(crate) fn on_sort(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.handlers.on_sort = Some(handler);
-        self
-    }
-
-    pub(crate) fn on_row_click(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.handlers.on_row_click = Some(handler);
-        self
     }
 }
 
@@ -2854,18 +2828,6 @@ impl IntoElement for Drawer {
 
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&self.into_node())
-    }
-}
-
-impl IntoElement for DataTable {
-    type Element = AnyElement;
-
-    fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::data_table(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-            self.handlers,
-        ))
     }
 }
 

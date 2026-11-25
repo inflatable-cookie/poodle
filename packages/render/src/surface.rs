@@ -99,9 +99,7 @@ mod tests {
     use poodle_specs::{PaddingScale, SurfaceBorder, SurfaceRole, SurfaceTone};
     use poodle_tokens::semantic;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     #[test]
     fn surface_resolves_exact_contract_tones_borders_elevation_radius_and_padding() {

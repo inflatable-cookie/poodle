@@ -103,8 +103,7 @@ mod tests {
 
     #[test]
     fn icon_and_count_share_the_secondary_tone() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = crate::test_support::test_theme();
         let ctx = RenderContext::new(&theme);
         let spec = ListCardCounterSpec::new("file-text", 24);
         let node = list_card_counter(&spec, &ctx, None);

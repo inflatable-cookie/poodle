@@ -247,9 +247,7 @@ mod tests {
     use super::*;
     use poodle_headless::agent_plan::AgentPlanStatus;
 
-    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
-        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
-    }
+    use crate::test_support::test_theme as theme;
 
     #[test]
     fn an_instance_scope_isolates_backend_state_ids() {
