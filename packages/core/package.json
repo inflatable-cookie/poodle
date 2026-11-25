@@ -112,6 +112,7 @@
   "files": [
     "dist",
     "README.md",
+    "llms.txt",
     "LICENSE",
     "THIRD_PARTY_NOTICES.md"
   ],

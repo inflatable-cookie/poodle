@@ -106,7 +106,7 @@ describe("core compiled distribution", () => {
       bin: { "poodle-icons": string };
     };
     expect(manifest.exports).toEqual(corePackageExports());
-    expect(manifest.files).toEqual(["dist", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md"]);
+    expect(manifest.files).toEqual(["dist", "README.md", "llms.txt", "LICENSE", "THIRD_PARTY_NOTICES.md"]);
     expect(manifest.sideEffects).toEqual(["**/*.css"]);
     expect(manifest.bin["poodle-icons"]).toBe("./dist/icons/build.mjs");
     expect(JSON.stringify(manifest.exports)).not.toContain("/src/");

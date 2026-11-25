@@ -85,6 +85,24 @@ Two routing cautions the contracts make explicit:
   content with no interactive descendants; when a row needs its own actions or
   sortable columns, use `DataTable` or a `ListCard` composition instead.
 
+### Build from behaviour
+
+When Poodle lacks the control you need, use the installed core package's
+`llms.txt` alongside its `package.json`. It points to the supported root
+exports, the async tag combobox recipe and the appearance hooks at the
+installed core version. For older packages without the index, look for
+`docs/contracts/core-behaviour.md` and
+`docs/guides/015-async-tag-combobox.md` at the core package's release tag.
+Use the exports documented for that installation. If the tag or reference
+is missing, confirm each import against the installed package and flag the
+missing versioned reference.
+
+Build the control in the application. Use supported core behaviours for
+interaction, public Svelte helpers for DOM wiring, and Poodle tokens and
+appearance hooks for styling. Keep the application's data loading and state
+with the app. Record missing reusable behaviour and where you supplied it
+when reporting a gap.
+
 ## 3. Look up components, helpers and rules
 
 Search `references/reference.md` for a component name, a helper export, a
@@ -156,9 +174,8 @@ application-owned icons; do not add an icon library the contract does not name.
 
 Before calling the view done:
 
-- **Component choice** — each Poodle surface is a documented component, not a
-  local reimplementation of one. No consumer wrapper layer that restates a
-  component contract.
+- **Component choice** — use a documented component when it fits. For a
+  missing control, follow the build-from-behaviour route above.
 - **Contract** — the props, states, events and slots used exist in the contract
   at the pinned version. No invented variants or aliases.
 - **Semantic tokens** — no raw visual values in app CSS; theme switching does
@@ -176,8 +193,8 @@ Before calling the view done:
 
 ## 6. Report gaps, keep domain behavior
 
-If a view needs a reusable composition Poodle does not provide, report it to
-Poodle's planner or issue tracker with:
+When a composition exposes a reusable gap, report it to Poodle's planner or
+issue tracker. Include:
 
 - the consumer package version,
 - the composition you attempted (component names and contract links),

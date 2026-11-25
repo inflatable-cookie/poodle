@@ -35,7 +35,7 @@ contract. React `publicIntent: true` is not publication authority.
 
 ```json
 {
-  "coreFiles": ["dist", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md"],
+  "coreFiles": ["dist", "README.md", "llms.txt", "LICENSE", "THIRD_PARTY_NOTICES.md"],
   "shellFiles": ["dist", "README.md", "LICENSE"],
   "sideEffects": ["**/*.css"]
 }
