@@ -151,6 +151,11 @@ test("a treatment added in schema expands into CSS and a typed Rust mode", () =>
     const css = read("tokens/artifacts/css/poodle-style-default.css");
     expect(css).toContain("--poodle-radius-control: 0rem;");
     expect(css).toContain("--poodle-style-control-fill: var(--poodle-color-background-elevated);");
+    expect(css).toContain(`@scope ([data-style="default"]) to ([data-style]) {
+  [data-theme] {
+    --poodle-style-control-fill: var(--poodle-color-background-elevated);
+  }
+}`);
     const rust = read("contracts/tokens/src/generated/styles.rs");
     expect(rust).toContain("shape: ShapeTreatment::Flat");
     expect(rust).toContain('("style.control.fill", "{color.background.elevated}")');

@@ -16,6 +16,8 @@ function jsExport(jsPath: string, typesPath: string): JsExportMap {
 export const CORE_PACKAGE_NAME = "@inflatable-cookie/poodle-core";
 export const CORE_PACKAGE_DIR = "packages/core";
 
+const styleNames = Object.keys(styles);
+
 export const CORE_THEME_NAMES = [
   "clay",
   "cobalt",
@@ -361,7 +363,7 @@ export function tokenCssBasenames(): string[] {
     "poodle-tokens.css",
     "poodle-themes.css",
     "poodle-styles.css",
-    ...Object.keys(styles).map((name) => `poodle-style-${name}.css`),
+    ...styleNames.map((name) => `poodle-style-${name}.css`),
     ...CORE_THEME_NAMES.map((name) => `poodle-theme-${name}.css`),
     ...CORE_DENSITY_NAMES.map((name) => `poodle-density-${name}.css`),
     ...CORE_CONTROL_SIZE_NAMES.map((name) => `poodle-control-size-${name}.css`),
@@ -473,7 +475,11 @@ export function corePackageExports(): Record<string, string | JsExportMap> {
     "./tokens/css/poodle-tokens.css": "./dist/tokens/generated/css/poodle-tokens.css",
     "./tokens/themes.css": "./dist/tokens/generated/css/poodle-themes.css",
     "./tokens/css/poodle-styles.css": "./dist/tokens/generated/css/poodle-styles.css",
-    "./tokens/style-*.css": "./dist/tokens/generated/css/poodle-style-*.css",
+    ...Object.fromEntries(
+      styleNames.map((name) =>
+        tokenCss(`./tokens/style-${name}.css`, `poodle-style-${name}.css`),
+      ),
+    ),
     ...Object.fromEntries(
       CORE_THEME_NAMES.map((name) =>
         tokenCss(`./tokens/theme-${name}.css`, `poodle-theme-${name}.css`),

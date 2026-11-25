@@ -89,7 +89,7 @@
     "./tokens/css/poodle-tokens.css": "./dist/tokens/generated/css/poodle-tokens.css",
     "./tokens/themes.css": "./dist/tokens/generated/css/poodle-themes.css",
     "./tokens/css/poodle-styles.css": "./dist/tokens/generated/css/poodle-styles.css",
-    "./tokens/style-*.css": "./dist/tokens/generated/css/poodle-style-*.css",
+    "./tokens/style-default.css": "./dist/tokens/generated/css/poodle-style-default.css",
     "./tokens/theme-clay.css": "./dist/tokens/generated/css/poodle-theme-clay.css",
     "./tokens/theme-cobalt.css": "./dist/tokens/generated/css/poodle-theme-cobalt.css",
     "./tokens/theme-eclipse.css": "./dist/tokens/generated/css/poodle-theme-eclipse.css",
