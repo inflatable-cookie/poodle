@@ -18,6 +18,10 @@
       "emphasized": {
         "$type": "cubicBezier",
         "$value": "{primitives.motion.easing.emphasized}"
+      },
+      "ease": {
+        "$type": "cubicBezier",
+        "$value": "ease"
       }
     }
   }

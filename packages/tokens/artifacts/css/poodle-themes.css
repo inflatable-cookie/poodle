@@ -28,6 +28,25 @@
   --poodle-color-syntax-operator: #54616f;
   --poodle-color-syntax-punctuation: #5e6e7e;
   --poodle-color-syntax-invalid: #c22f38;
+  --poodle-color-surface-tonal: #eadfd1;
+  --poodle-color-control-neutral-fill: #f3ebde;
+  --poodle-color-control-neutral-hover: #eee5d8;
+  --poodle-color-control-neutral-active: #eadecf;
+  --poodle-color-selection-accent-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-selection-accent-fillSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-selection-accent-fillStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-selection-accent-fillSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSolid: #c96442;
+  --poodle-color-selection-accent-border: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-selection-accent-borderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-selection-accent-text: #2a2622;
+  --poodle-color-selection-accent-textSolid: #faf6ef;
+  --poodle-color-selection-accent-indicator: #c96442;
+  --poodle-color-selection-neutral-fill: #eadecf;
+  --poodle-color-selection-neutral-border: transparent;
+  --poodle-color-selection-neutral-text: #191613;
+  --poodle-color-selection-neutral-indicator: #c96442;
 }
 
 [data-theme="cobalt"] {
@@ -53,6 +72,25 @@
   --poodle-color-status-info: #5b9dff;
   --poodle-color-icon-primary: #ededed;
   --poodle-color-icon-muted: #a3a3a3;
+  --poodle-color-surface-tonal: #2b2b2b;
+  --poodle-color-control-neutral-fill: #212121;
+  --poodle-color-control-neutral-hover: #292929;
+  --poodle-color-control-neutral-active: #303030;
+  --poodle-color-selection-accent-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-selection-accent-fillSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-selection-accent-fillStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-selection-accent-fillSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSolid: #5b9dff;
+  --poodle-color-selection-accent-border: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-selection-accent-borderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-selection-accent-text: #ededed;
+  --poodle-color-selection-accent-textSolid: #121212;
+  --poodle-color-selection-accent-indicator: #5b9dff;
+  --poodle-color-selection-neutral-fill: #303030;
+  --poodle-color-selection-neutral-border: transparent;
+  --poodle-color-selection-neutral-text: #fcfdff;
+  --poodle-color-selection-neutral-indicator: #5b9dff;
 }
 
 [data-theme="eclipse"] {
@@ -74,6 +112,25 @@
   --poodle-color-accent-focusRing: #ffca73;
   --poodle-color-icon-primary: #eef2f6;
   --poodle-color-icon-muted: #99a4b0;
+  --poodle-color-surface-tonal: #2d3238;
+  --poodle-color-control-neutral-fill: #22262b;
+  --poodle-color-control-neutral-hover: #292e34;
+  --poodle-color-control-neutral-active: #30363d;
+  --poodle-color-selection-accent-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-selection-accent-fillSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-selection-accent-fillStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-selection-accent-fillSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSolid: #f0b24d;
+  --poodle-color-selection-accent-border: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-selection-accent-borderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-selection-accent-text: #eef2f6;
+  --poodle-color-selection-accent-textSolid: #161a1f;
+  --poodle-color-selection-accent-indicator: #f0b24d;
+  --poodle-color-selection-neutral-fill: #30363d;
+  --poodle-color-selection-neutral-border: transparent;
+  --poodle-color-selection-neutral-text: #fcfdff;
+  --poodle-color-selection-neutral-indicator: #f0b24d;
 }
 
 [data-theme="forest"] {
@@ -95,6 +152,25 @@
   --poodle-color-accent-focusRing: #6fe0a3;
   --poodle-color-icon-primary: #e9f0ea;
   --poodle-color-icon-muted: #99a49d;
+  --poodle-color-surface-tonal: #2a352c;
+  --poodle-color-control-neutral-fill: #202922;
+  --poodle-color-control-neutral-hover: #273229;
+  --poodle-color-control-neutral-active: #2e3a31;
+  --poodle-color-selection-accent-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-selection-accent-fillSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-selection-accent-fillStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-selection-accent-fillSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSolid: #4dc98a;
+  --poodle-color-selection-accent-border: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-selection-accent-borderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-selection-accent-text: #e9f0ea;
+  --poodle-color-selection-accent-textSolid: #0e1210;
+  --poodle-color-selection-accent-indicator: #4dc98a;
+  --poodle-color-selection-neutral-fill: #2e3a31;
+  --poodle-color-selection-neutral-border: transparent;
+  --poodle-color-selection-neutral-text: #fcfdff;
+  --poodle-color-selection-neutral-indicator: #4dc98a;
 }
 
 [data-theme="graphite"] {
@@ -120,6 +196,25 @@
   --poodle-color-status-info: #6ea9d4;
   --poodle-color-icon-primary: #efefef;
   --poodle-color-icon-muted: #a6a6a6;
+  --poodle-color-surface-tonal: #303030;
+  --poodle-color-control-neutral-fill: #242424;
+  --poodle-color-control-neutral-hover: #2c2c2c;
+  --poodle-color-control-neutral-active: #343434;
+  --poodle-color-selection-accent-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-selection-accent-fillSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-selection-accent-fillStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-selection-accent-fillSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSolid: #97d14d;
+  --poodle-color-selection-accent-border: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-selection-accent-borderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-selection-accent-text: #efefef;
+  --poodle-color-selection-accent-textSolid: #151515;
+  --poodle-color-selection-accent-indicator: #97d14d;
+  --poodle-color-selection-neutral-fill: #343434;
+  --poodle-color-selection-neutral-border: transparent;
+  --poodle-color-selection-neutral-text: #fcfdff;
+  --poodle-color-selection-neutral-indicator: #97d14d;
 }
 
 [data-theme="hornet"] {
@@ -141,6 +236,25 @@
   --poodle-color-accent-focusRing: #ffe14d;
   --poodle-color-icon-primary: #ffffff;
   --poodle-color-icon-muted: #d4d4d4;
+  --poodle-color-surface-tonal: #262626;
+  --poodle-color-control-neutral-fill: #191919;
+  --poodle-color-control-neutral-hover: #222222;
+  --poodle-color-control-neutral-active: #2c2c2c;
+  --poodle-color-selection-accent-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-selection-accent-fillSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-selection-accent-fillStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-selection-accent-fillSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSolid: #ffd400;
+  --poodle-color-selection-accent-border: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-selection-accent-borderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-selection-accent-text: #ffffff;
+  --poodle-color-selection-accent-textSolid: #000000;
+  --poodle-color-selection-accent-indicator: #ffd400;
+  --poodle-color-selection-neutral-fill: #2c2c2c;
+  --poodle-color-selection-neutral-border: transparent;
+  --poodle-color-selection-neutral-text: #ffffff;
+  --poodle-color-selection-neutral-indicator: #ffd400;
 }
 
 [data-theme="iceberg"] {
@@ -169,6 +283,25 @@
   --poodle-color-accent-base: #1668d6;
   --poodle-color-accent-hover: #2d86f3;
   --poodle-color-accent-focusRing: #1668d6;
+  --poodle-color-surface-tonal: #d4deea;
+  --poodle-color-control-neutral-fill: #d7e0eb;
+  --poodle-color-control-neutral-hover: #ced9e5;
+  --poodle-color-control-neutral-active: #c4d1e0;
+  --poodle-color-selection-accent-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-selection-accent-fillSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-selection-accent-fillStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-selection-accent-fillSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSolid: #1668d6;
+  --poodle-color-selection-accent-border: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-selection-accent-borderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-selection-accent-text: #131a22;
+  --poodle-color-selection-accent-textSolid: #fcfdff;
+  --poodle-color-selection-accent-indicator: #1668d6;
+  --poodle-color-selection-neutral-fill: #c4d1e0;
+  --poodle-color-selection-neutral-border: transparent;
+  --poodle-color-selection-neutral-text: #0b0f14;
+  --poodle-color-selection-neutral-indicator: #1668d6;
 }
 
 [data-theme="meadow"] {
@@ -200,6 +333,25 @@
   --poodle-color-syntax-operator: #54616f;
   --poodle-color-syntax-punctuation: #5e6e7e;
   --poodle-color-syntax-invalid: #c22f38;
+  --poodle-color-surface-tonal: #dbe4da;
+  --poodle-color-control-neutral-fill: #e4ece3;
+  --poodle-color-control-neutral-hover: #dfe8de;
+  --poodle-color-control-neutral-active: #d9e3d8;
+  --poodle-color-selection-accent-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-selection-accent-fillSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-selection-accent-fillStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-selection-accent-fillSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSolid: #188f52;
+  --poodle-color-selection-accent-border: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-selection-accent-borderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-selection-accent-text: #1b241e;
+  --poodle-color-selection-accent-textSolid: #f4f7f1;
+  --poodle-color-selection-accent-indicator: #188f52;
+  --poodle-color-selection-neutral-fill: #d9e3d8;
+  --poodle-color-selection-neutral-border: transparent;
+  --poodle-color-selection-neutral-text: #111913;
+  --poodle-color-selection-neutral-indicator: #188f52;
 }
 
 [data-theme="midnight"] {
@@ -221,6 +373,25 @@
   --poodle-color-accent-focusRing: #8aa4ff;
   --poodle-color-icon-primary: #e8ebf2;
   --poodle-color-icon-muted: #969ca8;
+  --poodle-color-surface-tonal: #2a2f3a;
+  --poodle-color-control-neutral-fill: #1f232d;
+  --poodle-color-control-neutral-hover: #272b36;
+  --poodle-color-control-neutral-active: #2f343f;
+  --poodle-color-selection-accent-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-selection-accent-fillSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-selection-accent-fillStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-selection-accent-fillSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSolid: #6d8cff;
+  --poodle-color-selection-accent-border: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-selection-accent-borderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-selection-accent-text: #e8ebf2;
+  --poodle-color-selection-accent-textSolid: #0c0e13;
+  --poodle-color-selection-accent-indicator: #6d8cff;
+  --poodle-color-selection-neutral-fill: #2f343f;
+  --poodle-color-selection-neutral-border: transparent;
+  --poodle-color-selection-neutral-text: #fcfdff;
+  --poodle-color-selection-neutral-indicator: #6d8cff;
 }
 
 [data-theme="nord"] {
@@ -242,6 +413,25 @@
   --poodle-color-accent-focusRing: #9fd0de;
   --poodle-color-icon-primary: #e9edf4;
   --poodle-color-icon-muted: #99a2b2;
+  --poodle-color-surface-tonal: #303744;
+  --poodle-color-control-neutral-fill: #292f3a;
+  --poodle-color-control-neutral-hover: #2d3440;
+  --poodle-color-control-neutral-active: #313744;
+  --poodle-color-selection-accent-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-selection-accent-fillSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-selection-accent-fillStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-selection-accent-fillSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSolid: #88c0d0;
+  --poodle-color-selection-accent-border: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-selection-accent-borderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-selection-accent-text: #e9edf4;
+  --poodle-color-selection-accent-textSolid: #191d24;
+  --poodle-color-selection-accent-indicator: #88c0d0;
+  --poodle-color-selection-neutral-fill: #313744;
+  --poodle-color-selection-neutral-border: transparent;
+  --poodle-color-selection-neutral-text: #fcfdff;
+  --poodle-color-selection-neutral-indicator: #88c0d0;
 }
 
 [data-theme="rose"] {
@@ -263,6 +453,25 @@
   --poodle-color-accent-focusRing: #ff7ba3;
   --poodle-color-icon-primary: #f0eaeb;
   --poodle-color-icon-muted: #a89fa1;
+  --poodle-color-surface-tonal: #362b2d;
+  --poodle-color-control-neutral-fill: #292123;
+  --poodle-color-control-neutral-hover: #32282a;
+  --poodle-color-control-neutral-active: #3a2f32;
+  --poodle-color-selection-accent-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-selection-accent-fillSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-selection-accent-fillStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-selection-accent-fillSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSolid: #f65c8a;
+  --poodle-color-selection-accent-border: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-selection-accent-borderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-selection-accent-text: #f0eaeb;
+  --poodle-color-selection-accent-textSolid: #141010;
+  --poodle-color-selection-accent-indicator: #f65c8a;
+  --poodle-color-selection-neutral-fill: #3a2f32;
+  --poodle-color-selection-neutral-border: transparent;
+  --poodle-color-selection-neutral-text: #fcfdff;
+  --poodle-color-selection-neutral-indicator: #f65c8a;
 }
 
 [data-theme="solarized"] {
@@ -284,4 +493,23 @@
   --poodle-color-accent-focusRing: #cb9a10;
   --poodle-color-icon-primary: #eee8d5;
   --poodle-color-icon-muted: #93a1a1;
+  --poodle-color-surface-tonal: #001e28;
+  --poodle-color-control-neutral-fill: #123741;
+  --poodle-color-control-neutral-hover: #15333d;
+  --poodle-color-control-neutral-active: #152f38;
+  --poodle-color-selection-accent-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-selection-accent-fillSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-selection-accent-fillStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-selection-accent-fillSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSolid: #b58900;
+  --poodle-color-selection-accent-border: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-selection-accent-borderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-selection-accent-text: #eee8d5;
+  --poodle-color-selection-accent-textSolid: #002b36;
+  --poodle-color-selection-accent-indicator: #b58900;
+  --poodle-color-selection-neutral-fill: #152f38;
+  --poodle-color-selection-neutral-border: transparent;
+  --poodle-color-selection-neutral-text: #fcfdff;
+  --poodle-color-selection-neutral-indicator: #b58900;
 }

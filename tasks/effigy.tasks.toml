@@ -9,6 +9,7 @@
 
 # Token system
 "tokens:build" = "bun packages/tokens/scripts/build-tokens.ts"
+"tokens:contrast" = "bun packages/tokens/scripts/report-contrast.ts"
 "icons:build" = "bun scripts/build-default-icons.ts"
 "audit:icons" = "bun scripts/build-default-icons.ts --check"
 # Generated token artifacts are committed so a clean clone packs a complete

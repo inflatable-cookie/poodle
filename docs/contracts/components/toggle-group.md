@@ -184,7 +184,7 @@ In single mode with `allowDeactivation=true`, `onValueChange` may receive
 |----------|-------|
 | `min-height` | `var(--poodle-toggle-group-height)` |
 | `padding` | `0 var(--poodle-toggle-group-x)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` |
+| `border` | `var(--poodle-border-width-default) solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` |
 | `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `var(--poodle-recipe-toggle-group-item-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)))` |
 | `box-shadow` | `var(--poodle-recipe-toggle-group-item-shadow, none)` |
@@ -192,25 +192,26 @@ In single mode with `allowDeactivation=true`, `onValueChange` may receive
 | `cursor` | `pointer` |
 | `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `var(--poodle-typography-label-size)` |
-| `font-weight` | `600` |
-| `line-height` | `1` |
-| `transition` | `border-color 180ms ease, background 180ms ease, box-shadow 180ms ease, color 180ms ease` |
+| `font-weight` | `var(--poodle-typography-heading-weight)` |
+| `line-height` | `var(--poodle-typography-label-lineHeightTight)` |
+| `transition` | Border colour, background, shadow and text use `motion-duration-interaction` with `motion-easing-ease` |
 
 ### Item — selected (`.toggle-group__item.poodle-selected`)
 
-The selected fill layers a flat accent tint **over** the unselected item fill (the surface base stays beneath), via a `linear-gradient` stacked on the fill:
+The selected fill layers the style’s colour over the base item fill. The
+default uses the original translucent accent. A neutral fill covers the base.
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-toggle-group-selected-item-fill, accent tint over the item fill)` |
-| `border-color` | `var(--poodle-recipe-toggle-group-item-border, color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default)))` |
+| `background` | `var(--poodle-recipe-toggle-group-selected-item-fill, selection role over the item fill)` |
+| `border-color` | `var(--poodle-recipe-toggle-group-item-border, var(--poodle-style-selection-borderStrong, var(--poodle-color-selection-accent-borderStrong)))` |
 
 ### Item — focus visible (`:focus-visible`)
 
 | Property | Value |
 |----------|-------|
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
-| `outline-offset` | `0.125rem` |
+| `outline-offset` | `var(--poodle-focus-outline-offset)` |
 
 ### Item — disabled (`:disabled`)
 

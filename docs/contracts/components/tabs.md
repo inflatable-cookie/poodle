@@ -575,8 +575,8 @@ These component tokens are emitted from the token schema. Set them on the
 |----------|-------|
 | `width` | `fit-content` |
 | `padding` | `0.1875rem` |
-| `border` | `0.125rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 68%, transparent)` |
-| `border-radius` | `999px` |
+| `border` | `var(--poodle-border-width-strong) solid color-mix(in srgb, var(--poodle-color-border-subtle) 68%, transparent)` |
+| `border-radius` | `var(--poodle-radius-pill)` |
 | `gap` | `0.125rem` |
 
 ### The edge axis: one enum, mutually exclusive by construction
@@ -611,13 +611,13 @@ item also carries the chip radius, so the outline is correctly rounded.
 
 | Property | Value |
 |----------|-------|
-| `border` | `0.0625rem solid transparent` |
+| `border` | `var(--poodle-border-width-default) solid transparent` |
 
 ### Item (activeEdge="outline", selected)
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))` |
+| `border-color` | `var(--poodle-style-selection-border, var(--poodle-color-selection-accent-border))` |
 
 This is the former `card` variant's selected-border value, so opting in restores
 exactly the outline the old variant drew by default.
@@ -633,7 +633,7 @@ measured from the selected item rather than painted as a selected-item border.
 | vertical | selected item's scroll-content block offset and height; 0.125rem inline size on the list's right edge |
 
 The indicator uses `var(--poodle-recipe-tabs-active-underline-border,
-var(--poodle-color-accent-base))`. It never owns selection, focus, hit testing,
+var(--poodle-style-selection-indicator, var(--poodle-color-selection-accent-indicator)))`. It never owns selection, focus, hit testing,
 or accessibility semantics.
 
 First measurement paints the selected endpoint without motion. A semantic
@@ -650,15 +650,15 @@ remeasurement do not displace the indicator by the current scroll offset.
 The selection edge and fill resolve through recipe hooks, one per treatment,
 per the grammar in `docs/knowledge/architecture/007-appearance-recipe-contract.md`
 (`--poodle-recipe-<component>[-<variant>]-<slot>[-<state>]`). Each falls back
-to the semantic token, so with no override active rendering is identical.
+to the semantic token, adjusted by the selection style.
 
 | Hook | Applies To | Fallback |
 |------|------------|----------|
-| `--poodle-recipe-tabs-active-outline-border` | `activeEdge="outline"` selected item border | `color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))` |
-| `--poodle-recipe-tabs-active-underline-border` | `activeEdge="underline"` measured indicator fill, both orientations | `var(--poodle-color-accent-base)` |
+| `--poodle-recipe-tabs-active-outline-border` | `activeEdge="outline"` selected item border | `var(--poodle-style-selection-border, var(--poodle-color-selection-accent-border))` |
+| `--poodle-recipe-tabs-active-underline-border` | `activeEdge="underline"` measured indicator fill, both orientations | `var(--poodle-style-selection-indicator, var(--poodle-color-selection-accent-indicator))` |
 | `--poodle-recipe-tabs-card-item-fill` | every card item background before selection treatment | `var(--poodle-color-background-surface)` |
-| `--poodle-recipe-tabs-active-solid-fill` | `activeFill="solid"` selected item background | `var(--poodle-color-accent-base)` |
-| `--poodle-recipe-tabs-active-solid-text` | `activeFill="solid"` selected tab/close foreground | `var(--poodle-color-text-inverse)` |
+| `--poodle-recipe-tabs-active-solid-fill` | `activeFill="solid"` selected item background | `var(--poodle-style-selection-fillSolid, var(--poodle-color-selection-accent-fillSolid))` |
+| `--poodle-recipe-tabs-active-solid-text` | `activeFill="solid"` selected tab/close foreground | `var(--poodle-style-selection-textSolid, var(--poodle-color-selection-accent-textSolid))` |
 
 The underline hook is one paint role in both orientations, so one variable
 covers horizontal and vertical.
@@ -679,7 +679,7 @@ covers horizontal and vertical.
 | `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `0.75rem` |
 | `font-weight` | `600` |
-| `line-height` | `1` |
+| `line-height` | `var(--poodle-typography-label-lineHeightTight)` |
 | `white-space` | `nowrap` |
 
 ### Selection surface: which element carries what
@@ -713,29 +713,29 @@ card in the strip.
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)` |
+| `background` | `var(--poodle-style-selection-fill, var(--poodle-color-selection-accent-fill))` |
 
 ### Tab and Close — Card variant (selected)
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-color-text-primary)` |
+| `color` | `var(--poodle-style-selection-text, var(--poodle-color-selection-accent-text))` |
 
 ### Item — Card variant (activeFill="solid", selected)
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-color-accent-base)` |
+| `background` | `var(--poodle-style-selection-fillSolid, var(--poodle-color-selection-accent-fillSolid))` |
 
 ### Tab and Close — activeFill="solid", selected
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-color-text-inverse)` |
+| `color` | `var(--poodle-style-selection-textSolid, var(--poodle-color-selection-accent-textSolid))` |
 
-The solid fill applies to the selected tab on any variant; the foreground
-switches to `text-inverse`, the same token the primary Button uses on
-`accent-base`, so the filled tab keeps legible contrast against every accent.
+The solid fill applies across variants. The default style pairs the existing
+accent and inverse text. Other styles supply their own solid fill and its
+paired foreground.
 
 ### Item — activeFill="none", selected
 
@@ -756,14 +756,14 @@ selection fill goes. `block` + `activeFill="none"` +
 |----------|-------|
 | `min-height` | `calc(var(--poodle-size-control-height) - 0.5rem)` |
 | `padding` | `0 0.625rem` |
-| `border-radius` | `999px` |
+| `border-radius` | `var(--poodle-radius-pill)` |
 
 ### Item — Pill variant (selected)
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)` |
-| `color` | `var(--poodle-color-text-primary)` |
+| `background` | `var(--poodle-style-selection-fill, var(--poodle-color-selection-accent-fill))` |
+| `color` | `var(--poodle-style-selection-text, var(--poodle-color-selection-accent-text))` |
 
 ### List — Block variant
 
@@ -809,17 +809,17 @@ Note: In the block variant, the selected background is applied on the **item wra
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))` |
-| `color` | `var(--poodle-color-text-primary)` |
+| `background` | `var(--poodle-style-selection-fillSurface, var(--poodle-color-selection-accent-fillSurface))` |
+| `color` | `var(--poodle-style-selection-text, var(--poodle-color-selection-accent-text))` |
 
 ### Item — Block variant (hover)
 
-Note: In the block variant, the hover background is applied on the **item wrapper**, not the tab button itself. Block absorbed the former strip variant's item hover treatment; the selected item's hover keeps the accent-tinted surface fill.
+Note: In the block variant, the hover background is applied on the **item wrapper**, not the tab button itself. Block absorbed the former strip variant's item hover treatment; the selected item uses its style’s selected-hover fill.
 
 | Property | Value |
 |----------|-------|
 | `background` (unselected) | `color-mix(in srgb, var(--poodle-color-surface-hover) 50%, transparent)` |
-| `background` (selected) | `color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))` |
+| `background` (selected) | `var(--poodle-style-selection-fillSurfaceHover, var(--poodle-color-selection-accent-fillSurfaceHover))` |
 
 ### Close button — Block variant
 
@@ -882,7 +882,7 @@ so the paint-only indicator is not clipped.
 | Property | Value |
 |----------|-------|
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
-| `outline-offset` | `0.125rem` |
+| `outline-offset` | `var(--poodle-focus-outline-offset)` |
 
 ### Tab — Disabled
 
@@ -928,7 +928,7 @@ so the paint-only indicator is not clipped.
 | Property | Value |
 |----------|-------|
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
-| `outline-offset` | `0.125rem` |
+| `outline-offset` | `var(--poodle-focus-outline-offset)` |
 
 ### Full-width (`data-full-width="true"`, non-vertical)
 

@@ -8,6 +8,10 @@
       "focus": {
         "$type": "dimension",
         "$value": "{primitives.stroke.focus}"
+      },
+      "strong": {
+        "$type": "dimension",
+        "$value": "{primitives.border.width.strong}"
       }
     }
   }

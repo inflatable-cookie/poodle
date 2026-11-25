@@ -12,6 +12,14 @@
       "shadow": {
         "$type": "shadow",
         "$value": "initial"
+      },
+      "fillHover": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "fillActive": {
+        "$type": "color",
+        "$value": "initial"
       }
     },
     "surface": {
@@ -25,6 +33,64 @@
       },
       "shadow": {
         "$type": "shadow",
+        "$value": "initial"
+      }
+    },
+    "selection": {
+      "itemFill": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "fill": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "fillStrong": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "fillStrongBackdrop": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "fillSurface": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "fillSurfaceHover": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "fillSolid": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "highlightFill": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "border": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "borderStrong": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "textSolid": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "indicator": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "detailText": {
+        "$type": "color",
         "$value": "initial"
       }
     }

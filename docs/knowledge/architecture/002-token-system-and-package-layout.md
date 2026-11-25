@@ -85,12 +85,32 @@ theme and style writes and theme selectors in shared component CSS.
 
 A style mode declares a `treatment` group alongside any direct semantic token
 overrides. The build expands the choices from `schema/style-treatments/` before
-applying direct overrides. The shipped switches are `fill` (`outlined`,
-`filled`, `ghost`) for controls at rest, and `surface` (`border`, `elevation`,
-`tonal`) for containers. The default choices preserve the component's
-underlying paint through fallback slots. Nested style modes start from the
-base values for style-owned tokens, and nested themes resolve style aliases
-against their own colour roles.
+applying direct overrides.
+
+| Switch | Choices | Applies to |
+| --- | --- | --- |
+| `fill` | `outlined`, `filled`, `ghost` | Controls at rest, including hover and press fills where used |
+| `surface` | `border`, `elevation`, `tonal` | Containers |
+| `selection` | `accent-outline`, `accent-tint`, `neutral` | Selected items in Select, Tabs and ToggleGroup |
+
+The default uses `outlined`, `border` and `accent-outline` to reproduce
+the prior paint. `accent-tint` keeps tint and suppresses selection borders.
+`neutral` uses a neutral fill, stronger text and an accent only for an
+existing small indicator. Each component retains its selection anatomy.
+
+Themes define `color.selection.accent.*` and `color.selection.neutral.*`
+roles for fill, border, text and indicator. The accent fill and border
+variants preserve the default weights and backdrops across components.
+`filled` reads `color.control.neutral.{fill,hover,active}`. `tonal` reads
+`color.surface.tonal`. Tune the values in each file under
+`schema/modes/themes/`. Run `effigy tokens:contrast` to compare the layers
+and foregrounds at the shipped web contrast setting. New fills are checked
+with their paired text roles. The tonal surface targets an OKLCH lightness
+step of at least 0.04 against the canvas and panel.
+
+Nested style modes start from the base values for style-owned tokens, and
+nested themes resolve style aliases against their own colour roles. Style
+data references the roles. The themes own the colour values.
 
 Native theme providers support theme, density, and control size. Generated
 Rust style definitions carry treatment enums and token references for future

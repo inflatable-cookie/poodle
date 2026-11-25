@@ -38,6 +38,10 @@
       "letterSpacing": {
         "$type": "dimension",
         "$value": "{primitives.typography.font.letterSpacing.subtle}"
+      },
+      "lineHeightTight": {
+        "$type": "number",
+        "$value": 1
       }
     },
     "counter": {
@@ -62,6 +66,10 @@
       "weight": {
         "$type": "fontWeight",
         "$value": "{primitives.typography.font.weight.medium}"
+      },
+      "lineHeightRatio": {
+        "$type": "number",
+        "$value": 1.35
       }
     },
     "overline": {

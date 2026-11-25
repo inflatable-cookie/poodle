@@ -298,6 +298,12 @@
     text-align: left;
   }
 
+  .poodle-select__option[aria-selected="true"] {
+    background: var(--poodle-recipe-select-option-fill, var(--poodle-style-selection-itemFill, transparent));
+    color: var(--poodle-recipe-select-option-text, var(--poodle-style-selection-text, var(--poodle-color-selection-accent-text)));
+    font-weight: var(--poodle-typography-label-weight);
+  }
+
   .poodle-select__option[data-highlighted="true"],
   .poodle-select__option:hover:not(:disabled) {
     background: var(--poodle-recipe-select-highlighted-hover-option-fill, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent));
@@ -308,8 +314,9 @@
     outline-offset: var(--poodle-focus-outline-offset);
   }
 
-  .poodle-select__option[aria-selected="true"] {
-    font-weight: var(--poodle-typography-label-weight);
+  .poodle-select__option[aria-selected="true"][data-highlighted="true"],
+  .poodle-select__option[aria-selected="true"]:hover:not(:disabled) {
+    background: var(--poodle-recipe-select-highlighted-hover-option-fill, var(--poodle-style-selection-highlightFill, var(--poodle-color-selection-accent-fillSubtle)));
   }
 
   .poodle-select__option:disabled {
@@ -345,6 +352,10 @@
     display: block;
     color: var(--poodle-recipe-select-option-description-text, var(--poodle-color-text-secondary));
     font-size: 0.6875rem;
+  }
+
+  .poodle-select__option[aria-selected="true"] .poodle-select__option-description {
+    color: var(--poodle-recipe-select-option-description-text, var(--poodle-style-selection-detailText, var(--poodle-color-text-secondary)));
   }
 
   .poodle-select__empty {

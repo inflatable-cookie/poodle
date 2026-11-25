@@ -40,7 +40,7 @@
       "surface": {
         "fill": {
           "$type": "color",
-          "$value": "{color.background.panel}"
+          "$value": "{color.surface.tonal}"
         },
         "border": {
           "$type": "color",

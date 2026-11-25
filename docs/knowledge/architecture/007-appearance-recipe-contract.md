@@ -33,13 +33,21 @@ spec field / token override on the GPUI/Jetstream side).
   in g11.005.)
 - Components read the recipe hook first, then the style-adjusted semantic
   token and its base fallback. A style applies across a subtree independently
-  of its colour theme. The `fill` and `surface` treatments expand to
-  token values during the build. Shared CSS consumes the resulting tokens.
+  of its colour theme. The `fill`, `surface` and `selection` switches expand
+  to token overrides during the build. Shared CSS consumes the resulting
+  tokens.
 - Variant-specific rules get variant-scoped hooks (e.g.
   `-button-primary-*`); semantic tone rules (danger/success) keep token
   semantics unless a variant hook is added on demand.
 - Slots correspond to the component's contract anatomy parts; states to its
   documented visual states.
+
+The selection switch resolves selected fills, borders, text and indicators
+through theme roles. Existing recipe hooks for Select options, Tabs edges and
+fills, and ToggleGroup items still take precedence in all three selection
+styles. For example, a recipe can supply a visible Tabs outline even when
+`accent-tint` supplies a transparent fallback border. See
+[002 Token System and Package Layout](002-token-system-and-package-layout.md#modes).
 
 ## Public Surface vs Internal Variables
 

@@ -6,4 +6,34 @@
   --poodle-style-surface-fill: initial;
   --poodle-style-surface-border: initial;
   --poodle-style-surface-shadow: initial;
+  --poodle-style-selection-itemFill: initial;
+  --poodle-style-selection-fill: var(--poodle-color-selection-accent-fill);
+  --poodle-style-selection-fillStrong: var(--poodle-color-selection-accent-fillStrong);
+  --poodle-style-selection-fillStrongBackdrop: initial;
+  --poodle-style-selection-fillSurface: var(--poodle-color-selection-accent-fillSurface);
+  --poodle-style-selection-fillSurfaceHover: var(--poodle-color-selection-accent-fillSurfaceHover);
+  --poodle-style-selection-fillSolid: var(--poodle-color-selection-accent-fillSolid);
+  --poodle-style-selection-highlightFill: var(--poodle-color-selection-accent-fillSubtle);
+  --poodle-style-selection-border: var(--poodle-color-selection-accent-border);
+  --poodle-style-selection-borderStrong: var(--poodle-color-selection-accent-borderStrong);
+  --poodle-style-selection-text: var(--poodle-color-selection-accent-text);
+  --poodle-style-selection-textSolid: var(--poodle-color-selection-accent-textSolid);
+  --poodle-style-selection-indicator: var(--poodle-color-selection-accent-indicator);
+  --poodle-style-selection-detailText: initial;
+}
+
+@scope ([data-style="default"]) to ([data-style]) {
+  [data-theme] {
+    --poodle-style-selection-fill: var(--poodle-color-selection-accent-fill);
+    --poodle-style-selection-fillStrong: var(--poodle-color-selection-accent-fillStrong);
+    --poodle-style-selection-fillSurface: var(--poodle-color-selection-accent-fillSurface);
+    --poodle-style-selection-fillSurfaceHover: var(--poodle-color-selection-accent-fillSurfaceHover);
+    --poodle-style-selection-fillSolid: var(--poodle-color-selection-accent-fillSolid);
+    --poodle-style-selection-highlightFill: var(--poodle-color-selection-accent-fillSubtle);
+    --poodle-style-selection-border: var(--poodle-color-selection-accent-border);
+    --poodle-style-selection-borderStrong: var(--poodle-color-selection-accent-borderStrong);
+    --poodle-style-selection-text: var(--poodle-color-selection-accent-text);
+    --poodle-style-selection-textSolid: var(--poodle-color-selection-accent-textSolid);
+    --poodle-style-selection-indicator: var(--poodle-color-selection-accent-indicator);
+  }
 }

@@ -10,6 +10,14 @@ pub enum FillTreatment {
     Ghost,
 }
 
+/// Available values for the `selection` treatment.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SelectionTreatment {
+    AccentOutline,
+    AccentTint,
+    Neutral,
+}
+
 /// Available values for the `surface` treatment.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SurfaceTreatment {
@@ -24,6 +32,7 @@ pub struct StyleDefinition {
     pub name: &'static str,
     pub selector: &'static str,
     pub fill: FillTreatment,
+    pub selection: SelectionTreatment,
     pub surface: SurfaceTreatment,
     /// Semantic paths and portable values. Braced paths refer to active tokens.
     pub overrides: &'static [(&'static str, &'static str)],
@@ -33,6 +42,7 @@ pub const DEFAULT: StyleDefinition = StyleDefinition {
     name: "default",
     selector: "[data-style=\"default\"]",
     fill: FillTreatment::Outlined,
+    selection: SelectionTreatment::AccentOutline,
     surface: SurfaceTreatment::Border,
     overrides: &[
     ("style.control.fill", "initial"),
@@ -41,5 +51,19 @@ pub const DEFAULT: StyleDefinition = StyleDefinition {
     ("style.surface.fill", "initial"),
     ("style.surface.border", "initial"),
     ("style.surface.shadow", "initial"),
+    ("style.selection.itemFill", "initial"),
+    ("style.selection.fill", "{color.selection.accent.fill}"),
+    ("style.selection.fillStrong", "{color.selection.accent.fillStrong}"),
+    ("style.selection.fillStrongBackdrop", "initial"),
+    ("style.selection.fillSurface", "{color.selection.accent.fillSurface}"),
+    ("style.selection.fillSurfaceHover", "{color.selection.accent.fillSurfaceHover}"),
+    ("style.selection.fillSolid", "{color.selection.accent.fillSolid}"),
+    ("style.selection.highlightFill", "{color.selection.accent.fillSubtle}"),
+    ("style.selection.border", "{color.selection.accent.border}"),
+    ("style.selection.borderStrong", "{color.selection.accent.borderStrong}"),
+    ("style.selection.text", "{color.selection.accent.text}"),
+    ("style.selection.textSolid", "{color.selection.accent.textSolid}"),
+    ("style.selection.indicator", "{color.selection.accent.indicator}"),
+    ("style.selection.detailText", "initial"),
     ],
 };

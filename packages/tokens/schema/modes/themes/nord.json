@@ -73,6 +73,94 @@
         "$type": "color",
         "$value": "#99a2b2"
       }
+    },
+    "surface": {
+      "tonal": {
+        "$type": "color",
+        "$value": "#303744"
+      }
+    },
+    "control": {
+      "neutral": {
+        "fill": {
+          "$type": "color",
+          "$value": "#292f3a"
+        },
+        "hover": {
+          "$type": "color",
+          "$value": "#2d3440"
+        },
+        "active": {
+          "$type": "color",
+          "$value": "#313744"
+        }
+      }
+    },
+    "selection": {
+      "accent": {
+        "fill": {
+          "$type": "color",
+          "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)"
+        },
+        "fillSubtle": {
+          "$type": "color",
+          "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)"
+        },
+        "fillStrong": {
+          "$type": "color",
+          "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)"
+        },
+        "fillSurface": {
+          "$type": "color",
+          "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))"
+        },
+        "fillSurfaceHover": {
+          "$type": "color",
+          "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))"
+        },
+        "fillSolid": {
+          "$type": "color",
+          "$value": "{color.accent.base}"
+        },
+        "border": {
+          "$type": "color",
+          "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))"
+        },
+        "borderStrong": {
+          "$type": "color",
+          "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{color.text.primary}"
+        },
+        "textSolid": {
+          "$type": "color",
+          "$value": "{color.text.inverse}"
+        },
+        "indicator": {
+          "$type": "color",
+          "$value": "{color.accent.base}"
+        }
+      },
+      "neutral": {
+        "fill": {
+          "$type": "color",
+          "$value": "#313744"
+        },
+        "border": {
+          "$type": "color",
+          "$value": "transparent"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{primitives.color.neutral.0}"
+        },
+        "indicator": {
+          "$type": "color",
+          "$value": "{color.accent.base}"
+        }
+      }
     }
   }
 }

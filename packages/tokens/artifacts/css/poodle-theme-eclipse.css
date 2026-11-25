@@ -18,4 +18,23 @@
   --poodle-color-accent-focusRing: #ffca73;
   --poodle-color-icon-primary: #eef2f6;
   --poodle-color-icon-muted: #99a4b0;
+  --poodle-color-surface-tonal: #2d3238;
+  --poodle-color-control-neutral-fill: #22262b;
+  --poodle-color-control-neutral-hover: #292e34;
+  --poodle-color-control-neutral-active: #30363d;
+  --poodle-color-selection-accent-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  --poodle-color-selection-accent-fillSubtle: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  --poodle-color-selection-accent-fillStrong: color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
+  --poodle-color-selection-accent-fillSurface: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSurfaceHover: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+  --poodle-color-selection-accent-fillSolid: #f0b24d;
+  --poodle-color-selection-accent-border: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
+  --poodle-color-selection-accent-borderStrong: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+  --poodle-color-selection-accent-text: #eef2f6;
+  --poodle-color-selection-accent-textSolid: #161a1f;
+  --poodle-color-selection-accent-indicator: #f0b24d;
+  --poodle-color-selection-neutral-fill: #30363d;
+  --poodle-color-selection-neutral-border: transparent;
+  --poodle-color-selection-neutral-text: #fcfdff;
+  --poodle-color-selection-neutral-indicator: #f0b24d;
 }

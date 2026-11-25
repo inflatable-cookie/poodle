@@ -8,6 +8,10 @@
       "muted": {
         "$type": "number",
         "$value": "{primitives.state.opacity.muted}"
+      },
+      "dragSource": {
+        "$type": "number",
+        "$value": 0.4
       }
     }
   }
