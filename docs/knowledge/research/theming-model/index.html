@@ -1,0 +1,1560 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Theme Resolver</title>
+<style>
+/* Theme roles arrive as custom properties set by resolveTheme (see script). The fallbacks below
+   are the resolved Iceberg preset, so the page reads correctly before the script runs. */
+:root {
+  --layer-canvas: #dfe6ed; --layer-surface: #e7eef5; --layer-raised: #eff6fd; --layer-overlay: #fcfdff;
+  --text-primary: #1d1f21; --text-secondary: #56595d; --text-disabled: #7f8286;
+  --fill-rest: #1416190b; --fill-hover: #14161912; --fill-active: #1416191a;
+  --select-neutral: #1416191a; --select-accent: #0d62cf24;
+  --border-subtle: #14161917; --border-strong: #7e8287;
+  --accent-fill: #0054ba; --accent-fill-hover: #004aa5; --accent-fill-active: #004090; --accent-on: #ffffff; --accent-text: #0c61cf; --accent-line: #1668d6; --accent-edge: #1668d600;
+  --status-success-fg: #006c35; --status-success-bg: #007e3f1a; --status-warning-fg: #7c5600; --status-warning-bg: #8961001a;
+  --status-danger-fg: #a43734; --status-danger-bg: #ad3f3b1a; --status-info-fg: #005fa6; --status-info-bg: #006bb91a;
+  --status-danger-solid: #b1101d; --status-danger-on: #ffffff; --status-danger-edge: #a4373400;
+  --syntax-comment: #506882; --syntax-keyword: #7650b4; --syntax-string: #0c762d; --syntax-literal: #955700; --syntax-type: #007274;
+  --syntax-callable: #1466bd; --syntax-property: #9b457e; --syntax-operator: #55585b; --syntax-punctuation: #646669; --syntax-invalid: #b33639;
+  --scrim: #0d121752; --shadow: #161b201a;
+
+  /* Rendering-style axis (fixed here): shape, type, elevation. Holds no colour values. */
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --r-sm: 5px; --r-md: 7px; --r-lg: 10px; --r-xl: 12px;
+  --control-h: 30px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--layer-canvas); color: var(--text-primary);
+  font: 13px/1.45 var(--font); -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum" 0;
+}
+::selection { background: var(--select-accent); }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--accent-line); outline-offset: 2px; }
+svg.i { width: 16px; height: 16px; flex: none; }
+.mono { font-family: var(--mono); }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ── Lab layout ─────────────────────────────────────────────────────────── */
+.lab { display: grid; grid-template-columns: 324px 1fr; min-height: 100%; }
+.panel {
+  position: sticky; top: 0; height: 100vh; overflow: auto;
+  padding: 18px 20px 28px; border-right: 1px solid var(--border-subtle);
+}
+.stage { padding: 20px 24px 24px; min-width: 0; }
+
+/* ── Controls panel ─────────────────────────────────────────────────────── */
+.panel-head h1 { font-size: 15px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+.panel-head p { margin: 2px 0 0; color: var(--text-secondary); font-size: 11.5px; }
+.panel section { margin-top: 16px; }
+.panel h2 { font-size: 12.5px; font-weight: 600; margin: 0 0 8px; }
+.row-between { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.row-between h2 { margin-bottom: 6px; }
+.value { color: var(--text-secondary); font-size: 12px; font-variant-numeric: tabular-nums; }
+.hint { color: var(--text-secondary); font-size: 12px; margin: 6px 0 0; }
+
+.mini { display: block; height: 32px; border-radius: 5px; padding: 5px 0 0 12px; position: relative; overflow: hidden; }
+.mini-pane { display: block; height: 100%; border-radius: 3px 0 0 0; padding: 4px; }
+.mini-card { display: block; height: 8px; width: 62%; border-radius: 2px; }
+.mini-line { position: absolute; left: 3px; top: 8px; width: 6px; height: 2px; border-radius: 1px; opacity: .7; }
+.mini-line.b { top: 12px; } .mini-line.c { top: 16px; }
+.mini-btn { position: absolute; right: 5px; bottom: 4px; width: 14px; height: 6px; border-radius: 2px; }
+
+.swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+.swatch {
+  width: 22px; height: 22px; border-radius: 6px; border: 0; padding: 0;
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
+}
+.swatch[aria-checked="true"] { box-shadow: 0 0 0 2px var(--layer-canvas), 0 0 0 3.5px var(--text-primary); }
+.custom { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+.color-well { position: relative; width: 30px; height: 30px; border-radius: 7px; flex: none; box-shadow: inset 0 0 0 1px var(--border-subtle); }
+.color-well[aria-checked="true"] { box-shadow: 0 0 0 2px var(--layer-canvas), 0 0 0 3.5px var(--text-primary); }
+.color-well input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.custom .input { width: 100px; }
+.custom-label { color: var(--text-secondary); font-size: 12px; }
+.fit { margin: 10px 0 0; font-size: 12px; color: var(--text-secondary); display: grid; gap: 3px; }
+.fit div { display: flex; align-items: center; gap: 6px; }
+.chip { width: 10px; height: 10px; border-radius: 3px; flex: none; box-shadow: inset 0 0 0 1px var(--border-subtle); }
+.fit code { font-family: var(--mono); font-size: 11.5px; color: var(--text-primary); }
+
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 18px; background: transparent; margin: 0; }
+input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, var(--text-secondary) 0 var(--p, 0%), var(--fill-active) var(--p, 0%) 100%); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--text-primary); margin-top: -5px; }
+input[type=range]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--fill-active); }
+input[type=range]::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--text-secondary); }
+input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border: 0; border-radius: 50%; background: var(--text-primary); }
+input[type=range]:disabled { opacity: .4; }
+
+.summary { font-size: 12px; font-weight: 500; }
+.summary.ok { color: var(--status-success-fg); }
+.summary.bad { color: var(--status-danger-fg); }
+.matrix { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+.matrix th { font-weight: 500; color: var(--text-secondary); text-align: right; padding: 3px 0 3px 6px; }
+.matrix th:first-child, .matrix td:first-child { text-align: left; padding-left: 0; }
+.matrix td { text-align: right; padding: 3px 0 3px 6px; border-top: 1px solid var(--border-subtle); }
+.checks { list-style: none; margin: 10px 0 0; padding: 0; font-size: 12px; }
+.checks li { display: grid; grid-template-columns: 1fr auto 14px; gap: 8px; align-items: baseline; padding: 3px 0; border-top: 1px solid var(--border-subtle); }
+.checks .t { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.checks .v { font-variant-numeric: tabular-nums; }
+.fail, .checks li.fail .v { color: var(--status-danger-fg); font-weight: 600; }
+.mark { color: var(--text-disabled); text-align: center; }
+li.fail .mark { color: var(--status-danger-fg); }
+.subhead { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin: 12px 0 2px; }
+.notes { font-size: 12px; color: var(--text-secondary); margin: 10px 0 0; display: grid; gap: 3px; }
+.notes code { font-family: var(--mono); font-size: 11.5px; }
+details { margin-top: 18px; }
+summary { font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.roles { display: grid; grid-template-columns: 1fr; gap: 2px; margin-top: 8px; font-size: 11.5px; }
+.roles div { display: grid; grid-template-columns: 14px 1fr auto; gap: 8px; align-items: center; }
+.roles code { font-family: var(--mono); color: var(--text-secondary); }
+
+/* ── Shared controls (the quiet direction) ──────────────────────────────── */
+.btn {
+  height: var(--control-h); padding: 0 12px; border: 0; border-radius: var(--r-md);
+  display: inline-flex; align-items: center; gap: 6px; font-weight: 500; white-space: nowrap;
+}
+.btn .i { width: 15px; height: 15px; }
+/* accent.edge is transparent unless the fill would vanish against a layer (round five). */
+.btn-primary { background: var(--accent-fill); color: var(--accent-on); box-shadow: inset 0 0 0 1px var(--accent-edge); }
+.btn-primary:hover { background: var(--accent-fill-hover); }
+.btn-primary:active { background: var(--accent-fill-active); }
+.btn-secondary { background: var(--fill-rest); color: var(--text-primary); }
+.btn-secondary:hover { background: var(--fill-hover); }
+.btn-secondary:active { background: var(--fill-active); }
+.btn-ghost { background: transparent; color: var(--text-secondary); padding: 0 8px; }
+.btn-ghost:hover { background: var(--fill-hover); color: var(--text-primary); }
+/* status.danger.edge follows the accent edge rule (round six): transparent unless the fill would vanish. */
+.btn-danger { background: var(--status-danger-solid); color: var(--status-danger-on); box-shadow: inset 0 0 0 1px var(--status-danger-edge); }
+.icon-btn {
+  width: var(--control-h); height: var(--control-h); border: 0; border-radius: var(--r-md);
+  background: transparent; color: var(--text-secondary); display: inline-grid; place-items: center;
+}
+.icon-btn:hover { background: var(--fill-hover); color: var(--text-primary); }
+
+.input {
+  height: var(--control-h); border: 0; border-radius: var(--r-md); padding: 0 10px;
+  background: var(--fill-rest); color: var(--text-primary); min-width: 0;
+}
+.input::placeholder { color: var(--text-secondary); }
+.input:hover { background: var(--fill-hover); }
+.input:focus-visible, .input.is-focus { outline: 2px solid var(--accent-line); outline-offset: 0; background: var(--fill-rest); }
+.input-icon { position: relative; display: flex; align-items: center; }
+.input-icon .i { position: absolute; left: 9px; color: var(--text-secondary); pointer-events: none; }
+.input-icon .input { padding-left: 31px; width: 100%; }
+
+.select {
+  height: var(--control-h); border: 0; border-radius: var(--r-md); padding: 0 8px 0 10px;
+  background: var(--fill-rest); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+  color: var(--text-secondary);
+}
+.select:hover { background: var(--fill-hover); }
+.select b { font-weight: 500; color: var(--text-primary); }
+.select .i { width: 14px; height: 14px; color: var(--text-secondary); }
+.select-block { width: 100%; justify-content: space-between; color: var(--text-primary); }
+
+.checkbox {
+  width: 16px; height: 16px; border-radius: 4px; flex: none; display: inline-grid; place-items: center;
+  box-shadow: inset 0 0 0 1.5px var(--border-strong); color: var(--accent-on);
+}
+.checkbox .i { width: 12px; height: 12px; stroke-width: 2.4; visibility: hidden; }
+.checkbox.on { background: var(--accent-fill); box-shadow: inset 0 0 0 1px var(--accent-edge); }
+.checkbox.on .i { visibility: visible; }
+.check { display: flex; align-items: center; gap: 9px; cursor: pointer; }
+.toggle-row { display: flex; align-items: center; gap: 9px; margin-top: 12px; padding: 0; border: 0; background: none; text-align: left; font-weight: 500; }
+.toggle-row[aria-checked="true"] .checkbox { background: var(--accent-fill); box-shadow: inset 0 0 0 1px var(--accent-edge); }
+.toggle-row[aria-checked="true"] .checkbox .i { visibility: visible; }
+.toggle-row + .hint { margin-left: 25px; }
+
+.switch { width: 30px; height: 18px; border-radius: 9px; background: var(--fill-active); position: relative; flex: none; border: 0; padding: 0; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 12px; height: 12px; border-radius: 50%; background: var(--border-strong); transition: transform .15s ease; }
+.switch[aria-checked="true"] { background: var(--accent-fill); box-shadow: inset 0 0 0 1px var(--accent-edge); }
+.switch[aria-checked="true"]::after { transform: translateX(12px); background: var(--accent-on); }
+
+/* ── App specimen ───────────────────────────────────────────────────────── */
+.app {
+  background: var(--layer-canvas); border-radius: var(--r-xl); overflow: hidden;
+  box-shadow: 0 0 0 1px var(--border-subtle); max-width: 1260px;
+}
+.app-header { height: 48px; display: grid; grid-template-columns: 212px 1fr auto; align-items: center; padding: 0 10px 0 0; }
+.brand { display: flex; align-items: center; gap: 8px; padding-left: 16px; font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
+.brand .i { width: 18px; height: 18px; stroke-width: 1.8; }
+.ws { margin-left: 2px; }
+.global-search { width: 380px; }
+.global-search kbd { position: absolute; right: 7px; font: 11px var(--font); color: var(--text-secondary); background: var(--fill-rest); padding: 1px 6px; border-radius: 4px; }
+.header-actions { display: flex; align-items: center; gap: 2px; }
+.avatar { width: 26px; height: 26px; border-radius: 6px; display: grid; place-items: center; background: var(--fill-active); font-size: 11px; font-weight: 600; margin-left: 6px; }
+
+.app-body { display: grid; grid-template-columns: 212px 1fr; }
+.sidebar { padding: 4px 10px 12px; display: flex; flex-direction: column; gap: 1px; }
+.nav-item {
+  height: 30px; display: flex; align-items: center; gap: 10px; padding: 0 8px; border-radius: var(--r-md);
+  color: var(--text-secondary); text-decoration: none; font-weight: 450;
+}
+.nav-item .i { color: var(--text-secondary); }
+.nav-item:hover { background: var(--fill-hover); color: var(--text-primary); }
+.nav-item[aria-current="page"] { background: var(--select-neutral); color: var(--text-primary); font-weight: 500; }
+.nav-item[aria-current="page"] .i { color: var(--accent-line); }
+.nav-item .count { margin-left: auto; font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.nav-group { font-size: 12px; color: var(--text-secondary); padding: 16px 8px 4px; }
+.glyph { width: 16px; height: 16px; border-radius: 4px; background: var(--fill-active); display: grid; place-items: center; font-size: 9.5px; font-weight: 600; color: var(--text-secondary); }
+.sidebar-foot { margin-top: auto; padding-top: 16px; }
+
+.content { background: var(--layer-surface); border-radius: var(--r-lg); margin: 0 8px 8px 0; padding: 18px 24px 24px; min-width: 0; }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.crumbs { color: var(--text-secondary); font-size: 12px; display: flex; gap: 6px; }
+.crumbs span { color: var(--text-disabled); }
+.page-head h1 { font-size: 20px; line-height: 1.25; font-weight: 600; margin: 2px 0 0; letter-spacing: -0.015em; }
+.actions { display: flex; gap: 8px; }
+
+.tabs { display: flex; gap: 22px; margin-top: 14px; }
+.tab { border: 0; background: none; padding: 7px 0 8px; color: var(--text-secondary); font-weight: 500; position: relative; display: flex; gap: 6px; align-items: baseline; }
+.tab:hover { color: var(--text-primary); }
+.tab[aria-selected="true"] { color: var(--text-primary); }
+.tab[aria-selected="true"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 1px; background: var(--accent-line); }
+.tab small { font-size: 12px; font-weight: 400; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+.toolbar { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+.toolbar .input-icon { width: 280px; }
+.spacer { flex: 1; }
+.segmented { display: inline-flex; padding: 2px; border-radius: var(--r-md); background: var(--fill-rest); gap: 2px; }
+.segmented button { height: 26px; border: 0; border-radius: var(--r-sm); padding: 0 9px; background: transparent; color: var(--text-secondary); display: inline-flex; gap: 6px; align-items: center; font-weight: 500; }
+.segmented button .i { width: 14px; height: 14px; }
+.segmented button[aria-pressed="true"] { background: var(--layer-raised); color: var(--text-primary); box-shadow: 0 1px 2px var(--shadow); }
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+.card { background: var(--layer-raised); border-radius: var(--r-lg); }
+.stat { padding: 13px 16px 14px; }
+.stat-label { color: var(--text-secondary); font-size: 12.5px; }
+.stat-value { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.stat-delta { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+.stat-delta.up { color: var(--status-success-fg); }
+.stat-delta.down { color: var(--status-danger-fg); }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 12px; margin-top: 12px; align-items: start; }
+.table-card { padding: 4px 0 0; overflow: hidden; }
+.table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.table th:first-child { width: 44px; } .c-svc { width: 26%; } .c-status { width: 19%; } .c-when { width: 104px; }
+.table th { text-align: left; font-weight: 500; font-size: 12.5px; color: var(--text-secondary); padding: 8px 12px; border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
+.table td { padding: 8px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; white-space: nowrap; }
+.table th:first-child, .table td:first-child { padding-left: 16px; }
+.table tbody tr:hover, .table tr.is-hover { background: var(--fill-hover); }
+.table tr[aria-selected="true"] { background: var(--select-neutral); }
+.table tr[aria-selected="true"] td:first-child { box-shadow: inset 2px 0 0 var(--accent-line); }
+.svc b { font-weight: 500; display: block; }
+.svc span { color: var(--text-secondary); font-size: 12px; }
+.status { display: inline-flex; align-items: center; gap: 7px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+.status.live { color: var(--status-success-fg); }
+.status.building { color: var(--status-info-fg); }
+.status.failed { color: var(--status-danger-fg); }
+.status.rolled { color: var(--status-warning-fg); }
+.status.queued { color: var(--text-disabled); }
+.status em { font-style: normal; color: var(--text-primary); }
+.commit { display: flex; gap: 8px; align-items: baseline; min-width: 0; }
+.commit code { font-family: var(--mono); font-size: 12px; color: var(--text-secondary); }
+.commit span { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.branch { font-family: var(--mono); font-size: 12px; color: var(--text-secondary); }
+.muted { color: var(--text-secondary); }
+.table-foot { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px 6px 16px; color: var(--text-secondary); font-size: 12px; }
+.pager { display: flex; gap: 2px; }
+
+.form-card { padding: 16px; display: grid; gap: 12px; }
+.form-card h2 { font-size: 14px; font-weight: 600; margin: 0; }
+.form-card > p { margin: -10px 0 0; color: var(--text-secondary); font-size: 12.5px; }
+.field { display: grid; gap: 5px; }
+.field-label { font-weight: 500; font-size: 12.5px; }
+.field .input { width: 100%; }
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.switch-row small { display: block; color: var(--text-secondary); font-size: 12px; }
+.form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+
+.lower { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-top: 12px; }
+.callouts { display: grid; gap: 8px; align-content: start; }
+.callout { display: flex; gap: 10px; padding: 10px 12px; border-radius: var(--r-md); align-items: flex-start; }
+.callout .i { margin-top: 1.5px; }
+.callout p { margin: 0; }
+.callout p span { color: var(--text-secondary); }
+.callout a { color: inherit; font-weight: 500; text-underline-offset: 2px; margin-left: 4px; }
+.callout.info { background: var(--status-info-bg); color: var(--status-info-fg); }
+.callout.success { background: var(--status-success-bg); color: var(--status-success-fg); }
+.callout.warning { background: var(--status-warning-bg); color: var(--status-warning-fg); }
+.callout.danger { background: var(--status-danger-bg); color: var(--status-danger-fg); }
+.callout p b { color: var(--text-primary); font-weight: 600; }
+.callout p { color: var(--text-primary); }
+
+.dialog-stage { position: relative; border-radius: var(--r-lg); overflow: hidden; background: var(--layer-raised); min-height: 236px; display: grid; place-items: center; padding: 20px; }
+.ghost-rows { position: absolute; inset: 18px 18px auto; display: grid; gap: 14px; }
+.ghost-rows i { display: block; height: 9px; border-radius: 4px; background: var(--fill-active); }
+.scrim { position: absolute; inset: 0; background: var(--scrim); }
+.dialog {
+  position: relative; width: 360px; max-width: 100%; background: var(--layer-overlay); border-radius: var(--r-xl);
+  padding: 18px 18px 16px; box-shadow: 0 16px 40px -8px var(--shadow), 0 2px 8px var(--shadow);
+}
+.dialog h3 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.dialog p { margin: 6px 0 14px; color: var(--text-secondary); line-height: 1.5; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+/* ── Round two additions (same quiet direction) ─────────────────────────── */
+.group-label { font-size: 11.5px; color: var(--text-secondary); margin: 8px 0 4px; }
+.group-label:first-of-type { margin-top: 0; }
+.presets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.preset-tile {
+  display: grid; gap: 3px; padding: 3px 3px 4px; border: 0; border-radius: var(--r-md);
+  background: transparent; text-align: left; min-width: 0;
+}
+.preset-tile:hover { background: var(--fill-hover); }
+.preset-tile[aria-checked="true"] { background: var(--select-neutral); }
+.preset-tile .mini { height: 30px; padding: 5px 0 0 11px; }
+.preset-tile .mini-line { left: 2px; width: 5px; }
+.preset-tile .mini-btn { right: 4px; width: 12px; }
+.preset-name { font-weight: 500; font-size: 11.5px; padding: 0 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.scheme { display: flex; width: 100%; }
+.swatch-grid { display: grid; grid-template-columns: repeat(10, 22px); gap: 6px; }
+.swatch-grid .gap { width: 22px; height: 22px; }
+.swatch.mono-swatch { background: linear-gradient(135deg, #f4f4f4 50%, #161616 50%); }
+.blend-head { margin-top: 14px; }
+.blend-head h3 { font-size: 12px; font-weight: 500; margin: 0 0 4px; }
+.scheme button { flex: 1; justify-content: center; }
+
+.code-card { overflow: hidden; }
+.code-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-bottom: 1px solid var(--border-subtle); font-size: 12px; color: var(--text-secondary); }
+.code-head b { font: 500 12px var(--mono); color: var(--text-primary); }
+.code { margin: 0; padding: 10px 14px 12px; font: 12px/1.7 var(--mono); white-space: pre; overflow: hidden; color: var(--text-primary); }
+.code .ln { display: inline-block; width: 22px; color: var(--text-disabled); user-select: none; }
+.t-comment { color: var(--syntax-comment); font-style: italic; }
+.t-keyword { color: var(--syntax-keyword); }
+.t-string { color: var(--syntax-string); }
+.t-literal { color: var(--syntax-literal); }
+.t-type { color: var(--syntax-type); }
+.t-call { color: var(--syntax-callable); }
+.t-prop { color: var(--syntax-property); }
+.t-op { color: var(--syntax-operator); }
+.t-punct { color: var(--syntax-punctuation); }
+.t-invalid { color: var(--syntax-invalid); text-decoration: underline wavy; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.lower { align-items: stretch; }
+.lower-left { display: grid; gap: 12px; align-content: start; min-width: 0; }
+
+/* Reference comparison */
+.compare { max-width: 1260px; margin-top: 16px; background: var(--layer-surface); border-radius: var(--r-xl); padding: 18px 20px 20px; box-shadow: 0 0 0 1px var(--border-subtle); }
+.compare[hidden] { display: none; }
+.compare-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.compare-head h2 { font-size: 15px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+.compare-head p { margin: 2px 0 0; color: var(--text-secondary); font-size: 12.5px; }
+.compare-grid.two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.compare-grid.two > div:last-child { display: none; }
+.cmp-summary { display: flex; gap: 18px; font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.cmp-summary b { display: block; font-size: 16px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em; }
+.compare-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.05fr); gap: 24px; margin-top: 14px; align-items: start; }
+.cmp { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+.cmp th { font-weight: 500; color: var(--text-secondary); text-align: left; padding: 0 0 4px; }
+.cmp th.num, .cmp td.num { text-align: right; }
+.cmp td { padding: 3px 0; border-top: 1px solid var(--border-subtle); white-space: nowrap; }
+.cmp td + td, .cmp th + th { padding-left: 8px; }
+.cmp .role { color: var(--text-secondary); }
+.cmp code { font-family: var(--mono); font-size: 11.5px; }
+.pair { display: inline-flex; vertical-align: middle; border-radius: 4px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--border-subtle); }
+.pair i { display: block; width: 22px; height: 16px; }
+.de-mid { color: var(--status-warning-fg); }
+.de-far { color: var(--status-danger-fg); font-weight: 600; }
+.cov { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 8px; margin-top: 4px; }
+.cov-tile { display: grid; gap: 3px; font-size: 11.5px; min-width: 0; }
+.cov-sw { height: 34px; border-radius: 5px; overflow: hidden; display: grid; grid-template-rows: 1fr 1fr; box-shadow: inset 0 0 0 1px var(--border-subtle); }
+.cov-name { display: flex; justify-content: space-between; gap: 4px; }
+.cov-name span:first-child { font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cov-role { color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.legend { display: flex; gap: 14px; align-items: center; font-size: 12px; color: var(--text-secondary); margin-top: 12px; }
+.legend .pair i { width: 16px; height: 12px; }
+</style>
+</head>
+<body>
+<div class="lab">
+  <aside class="panel" aria-label="Theme controls">
+    <header class="panel-head">
+      <h1>Theme</h1>
+      <p class="mono">resolveTheme({ scheme, base, baseBlend, accent, accentBlend, contrast })</p>
+    </header>
+
+    <section>
+      <h2>Presets</h2>
+      <div class="group-label">Light</div>
+      <div class="presets" role="radiogroup" aria-label="Light presets" id="presets-light"></div>
+      <div class="group-label">Dark</div>
+      <div class="presets" role="radiogroup" aria-label="Dark presets" id="presets-dark"></div>
+    </section>
+
+    <section>
+      <h2>Scheme</h2>
+      <div class="segmented scheme" role="group" aria-label="Scheme">
+        <button id="scheme-light" aria-pressed="false">Light</button>
+        <button id="scheme-dark" aria-pressed="false">Dark</button>
+      </div>
+      <button class="toggle-row" id="even-tint" role="checkbox" aria-checked="true"><span class="checkbox"><i data-icon="check"></i></span>Even tint in light and dark</button>
+      <p class="hint" id="even-hint"></p>
+    </section>
+
+    <section class="chooser" data-kind="base" aria-label="Base"></section>
+    <section class="chooser" data-kind="accent" aria-label="Accent"></section>
+
+    <section>
+      <div class="row-between"><h2>Layer contrast</h2><span class="value" id="contrast-value">1.00×</span></div>
+      <input type="range" id="contrast" min="50" max="200" step="5" value="100" aria-label="Layer contrast">
+    </section>
+
+    <section>
+      <div class="row-between"><h2>Checks</h2><span class="summary" id="summary"></span></div>
+      <table class="matrix" id="matrix"></table>
+      <ul class="checks" id="checks"></ul>
+      <p class="hint">Tints are the neutral fills, both selections and the status backgrounds, each composited on every layer.</p>
+      <div class="subhead">Layer steps (ΔL ≥ 0.02)</div>
+      <ul class="checks" id="steps" style="margin-top:0"></ul>
+      <div class="notes" id="notes"></div>
+    </section>
+
+    <details>
+      <summary>Resolved roles</summary>
+      <div class="roles" id="roles"></div>
+    </details>
+  </aside>
+
+  <main class="stage">
+    <div class="app">
+      <header class="app-header">
+        <div class="brand"><i data-icon="logo"></i>Harbor<button class="btn btn-ghost ws">Acme Cloud<i data-icon="chevron"></i></button></div>
+        <label class="input-icon global-search"><i data-icon="search"></i><input class="input" placeholder="Search or jump to"><kbd>⌘K</kbd></label>
+        <div class="header-actions">
+          <button class="icon-btn" aria-label="Notifications"><i data-icon="bell"></i></button>
+          <button class="icon-btn" aria-label="Help"><i data-icon="help"></i></button>
+          <span class="avatar" aria-label="Account">MK</span>
+        </div>
+      </header>
+
+      <div class="app-body">
+        <nav class="sidebar" aria-label="Main">
+          <a class="nav-item" href="#"><i data-icon="home"></i>Overview</a>
+          <a class="nav-item" href="#" aria-current="page"><i data-icon="deploy"></i>Deployments<span class="count">3</span></a>
+          <a class="nav-item" href="#"><i data-icon="server"></i>Services</a>
+          <a class="nav-item" href="#"><i data-icon="logs"></i>Logs</a>
+          <a class="nav-item" href="#"><i data-icon="bell"></i>Alerts<span class="count">1</span></a>
+          <div class="nav-group">Projects</div>
+          <a class="nav-item" href="#"><span class="glyph">S</span>Storefront</a>
+          <a class="nav-item" href="#"><span class="glyph">B</span>Billing</a>
+          <a class="nav-item" href="#"><span class="glyph">I</span>Internal tools</a>
+          <div class="sidebar-foot"><a class="nav-item" href="#"><i data-icon="settings"></i>Settings</a></div>
+        </nav>
+
+        <main class="content">
+          <div class="page-head">
+            <div>
+              <div class="crumbs">Production<span>/</span>Deployments</div>
+              <h1>Deployments</h1>
+            </div>
+            <div class="actions">
+              <button class="btn btn-secondary">Export</button>
+              <button class="btn btn-primary"><i data-icon="plus"></i>New deployment</button>
+            </div>
+          </div>
+
+          <div class="tabs" role="tablist">
+            <button class="tab" role="tab" aria-selected="true">All<small>128</small></button>
+            <button class="tab" role="tab" aria-selected="false">Running<small>3</small></button>
+            <button class="tab" role="tab" aria-selected="false">Failed<small>2</small></button>
+            <button class="tab" role="tab" aria-selected="false">Archived</button>
+          </div>
+
+          <div class="toolbar">
+            <label class="input-icon"><i data-icon="search"></i><input class="input" placeholder="Filter by service, commit or author"></label>
+            <button class="select">Environment <b>Production</b><i data-icon="chevron"></i></button>
+            <button class="select">Status <b>Any</b><i data-icon="chevron"></i></button>
+            <button class="btn btn-ghost"><i data-icon="filter"></i>More filters</button>
+            <div class="spacer"></div>
+            <div class="segmented" role="group" aria-label="View">
+              <button aria-pressed="true"><i data-icon="list"></i>List</button>
+              <button aria-pressed="false"><i data-icon="board"></i>Board</button>
+            </div>
+          </div>
+
+          <div class="stats">
+            <div class="card stat"><div class="stat-label">Success rate, 7 days</div><div class="stat-value">99.2%</div><div class="stat-delta up">+0.4 points</div></div>
+            <div class="card stat"><div class="stat-label">Median build</div><div class="stat-value">3m 12s</div><div class="stat-delta up">18s faster</div></div>
+            <div class="card stat"><div class="stat-label">Deploys today</div><div class="stat-value">27</div><div class="stat-delta">6 queued</div></div>
+            <div class="card stat"><div class="stat-label">Open incidents</div><div class="stat-value">1</div><div class="stat-delta down">worker-billing</div></div>
+          </div>
+
+          <div class="grid">
+            <div class="card table-card">
+              <table class="table">
+                <thead><tr>
+                  <th><span class="checkbox"><i data-icon="check"></i></span></th>
+                  <th class="c-svc">Service</th><th class="c-status">Status</th><th>Commit</th><th class="num c-when">When</th>
+                </tr></thead>
+                <tbody>
+                  <tr><td><span class="checkbox"><i data-icon="check"></i></span></td>
+                    <td class="svc"><b>api-gateway</b><span>eu-west-1</span></td>
+                    <td><span class="status live"><span class="dot"></span><em>Live</em></span></td>
+                    <td><div class="commit"><code>9f2c41e</code><span>Raise connection pool limit</span></div></td>
+                    <td class="num muted">4 min ago</td></tr>
+                  <tr class="is-hover"><td><span class="checkbox"><i data-icon="check"></i></span></td>
+                    <td class="svc"><b>web-storefront</b><span>us-east-1</span></td>
+                    <td><span class="status building"><span class="dot"></span><em>Building</em></span></td>
+                    <td><div class="commit"><code>d81a0b7</code><span>Lazy-load product images on category pages</span></div></td>
+                    <td class="num muted">Just now</td></tr>
+                  <tr aria-selected="true"><td><span class="checkbox on"><i data-icon="check"></i></span></td>
+                    <td class="svc"><b>worker-billing</b><span>eu-west-1</span></td>
+                    <td><span class="status failed"><span class="dot"></span><em>Failed</em></span></td>
+                    <td><div class="commit"><code>c03e9d2</code><span>Retry invoices in batches</span></div></td>
+                    <td class="num muted">22 min ago</td></tr>
+                  <tr><td><span class="checkbox"><i data-icon="check"></i></span></td>
+                    <td class="svc"><b>search-indexer</b><span>eu-central-1</span></td>
+                    <td><span class="status live"><span class="dot"></span><em>Live</em></span></td>
+                    <td><div class="commit"><code>5be7710</code><span>Upgrade tokenizer</span></div></td>
+                    <td class="num muted">1 h ago</td></tr>
+                  <tr><td><span class="checkbox"><i data-icon="check"></i></span></td>
+                    <td class="svc"><b>auth-service</b><span>us-east-1</span></td>
+                    <td><span class="status queued"><span class="dot"></span><em>Queued</em></span></td>
+                    <td><div class="commit"><code>a77f01c</code><span>Rotate signing keys</span></div></td>
+                    <td class="num muted">Queued</td></tr>
+                  <tr><td><span class="checkbox"><i data-icon="check"></i></span></td>
+                    <td class="svc"><b>notifications</b><span>eu-west-1</span></td>
+                    <td><span class="status rolled"><span class="dot"></span><em>Rolled back</em></span></td>
+                    <td><div class="commit"><code>31d6e8a</code><span>Batch digest emails</span></div></td>
+                    <td class="num muted">3 h ago</td></tr>
+                </tbody>
+              </table>
+              <div class="table-foot">Showing 6 of 128
+                <div class="pager"><button class="icon-btn" aria-label="Previous page"><i data-icon="left"></i></button><button class="icon-btn" aria-label="Next page"><i data-icon="right"></i></button></div>
+              </div>
+            </div>
+
+            <form class="card form-card" onsubmit="return false">
+              <h2>Deployment settings</h2>
+              <p>Applies to api-gateway in production.</p>
+              <label class="field"><span class="field-label">Name</span><input class="input is-focus" value="api-gateway"></label>
+              <div class="field"><span class="field-label">Region</span><button type="button" class="select select-block">eu-west-1 (Ireland)<i data-icon="chevron"></i></button></div>
+              <label class="field"><span class="field-label">Health check path</span><input class="input mono" value="/healthz"></label>
+              <label class="check"><span class="checkbox on"><i data-icon="check"></i></span>Run database migrations</label>
+              <div class="switch-row"><span>Auto-rollback<small>Revert when health checks fail for 2 minutes</small></span><button type="button" class="switch" role="switch" aria-checked="true" aria-label="Auto-rollback"></button></div>
+              <div class="switch-row"><span>Notify on-call</span><button type="button" class="switch" role="switch" aria-checked="false" aria-label="Notify on-call"></button></div>
+              <div class="form-actions"><button type="button" class="btn btn-secondary">Cancel</button><button type="button" class="btn btn-primary">Save changes</button></div>
+            </form>
+          </div>
+
+          <div class="lower">
+            <div class="lower-left">
+            <div class="callouts">
+              <div class="callout info"><i data-icon="info"></i><p><b>2 deployments queued</b> <span>in eu-west-1. Builds start in about 4 minutes.</span></p></div>
+              <div class="callout success"><i data-icon="success"></i><p><b>api-gateway is live</b> <span>in production after 3m 12s.</span></p></div>
+              <div class="callout warning"><i data-icon="warning"></i><p><b>Certificate expires in 9 days</b> <span>for status.harbor.dev.</span></p></div>
+              <div class="callout danger"><i data-icon="danger"></i><p><b>worker-billing failed health checks</b> <span>and rolled back.</span><a href="#">View logs</a></p></div>
+            </div>
+            <div class="card code-card">
+              <div class="code-head"><b>rollback-policy.ts</b><span>TypeScript</span></div>
+<pre class="code"><span class="ln">1</span><span class="t-comment">// Roll back when health checks fail for two minutes</span>
+<span class="ln">2</span><span class="t-keyword">export const</span> policy <span class="t-op">=</span> <span class="t-punct">{</span>
+<span class="ln">3</span>  <span class="t-prop">service</span><span class="t-punct">:</span> <span class="t-string">"worker-billing"</span><span class="t-punct">,</span>
+<span class="ln">4</span>  <span class="t-prop">window</span><span class="t-punct">:</span> <span class="t-literal">120_000</span><span class="t-punct">,</span>
+<span class="ln">5</span>  <span class="t-prop">onFail</span><span class="t-punct">:</span> <span class="t-call">rollback</span><span class="t-punct">(</span>target<span class="t-punct">,</span> <span class="t-punct">{</span> <span class="t-prop">notify</span><span class="t-punct">:</span> <span class="t-literal">true</span> <span class="t-punct">}),</span>
+<span class="ln">6</span>  <span class="t-prop">region</span><span class="t-punct">:</span> <span class="t-invalid">eu_west</span><span class="t-punct">,</span>
+<span class="ln">7</span><span class="t-punct">}</span> <span class="t-op">satisfies</span> <span class="t-type">Policy</span><span class="t-punct">;</span></pre>
+            </div>
+            </div>
+            <div class="dialog-stage">
+              <div class="ghost-rows"><i style="width:40%"></i><i style="width:85%"></i><i style="width:70%"></i><i style="width:78%"></i><i style="width:55%"></i><i style="width:82%"></i></div>
+              <div class="scrim"></div>
+              <div class="dialog" role="dialog" aria-labelledby="dlg-title">
+                <h3 id="dlg-title">Roll back worker-billing?</h3>
+                <p>Production returns to a41f9c2 from 2 days ago. Jobs already running finish first.</p>
+                <label class="check"><span class="checkbox"><i data-icon="check"></i></span>Pause auto-deploys for this service</label>
+                <div class="dialog-actions"><button class="btn btn-secondary">Cancel</button><button class="btn btn-danger">Roll back</button></div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+    <section class="compare" id="compare" aria-labelledby="cmp-title" hidden>
+      <div class="compare-head">
+        <div><h2 id="cmp-title"></h2><p id="cmp-sub"></p></div>
+        <div class="cmp-summary" id="cmp-summary" aria-label="Mean ΔE by group"></div>
+      </div>
+      <div class="compare-grid">
+        <table class="cmp" id="cmp-roles-a"></table>
+        <table class="cmp" id="cmp-roles-b"></table>
+        <div><div class="subhead" id="cmp-cov-title" style="margin-top:0"></div><div class="cov" id="cmp-cov"></div></div>
+      </div>
+      <p class="hint">Swatch pairs show the derived colour on the left and the reference on the right. Tiles, for canonical palettes, show the reference on top and the nearest derived role below.</p>
+    </section>
+  </main>
+</div>
+
+<script id="presets">
+// Presets are plain input tuples. Nothing else about a theme is authored.
+// References are evaluation data only (canonical palettes and today's Poodle themes); the
+// resolver never reads them.
+var PoodlePresets = (function () {
+  "use strict";
+  // [id, name, scheme, base, base blend, accent, accent blend, contrast, even-tint base, even-tint blend]
+  // Each base was solved (tools/solve.js) so the preset's surface lands on its round-two surface:
+  // a mid-lightness colour (OKLab L about 0.6) on the line the rule needs at that blend. Base blend
+  // sets depth, so the surface's lightness fixes it. Dark presets are the same in both tint modes;
+  // light presets need a different base under even tint, given in the last two columns. Two are
+  // not exact: Solarized (ΔE 0.7; base03 is on the sRGB edge, so no blend below 1 reaches it) and
+  // Solarized Light (ΔE 1.4; a ground that shallow can't carry that much tint).
+  var ROWS = [
+    ["iceberg", "Iceberg", "light", "#4285c1", 0.53, "#1668d6", 0, 1, "#6b839a", 0.53],
+    ["clay", "Clay", "light", "#c89514", 0.45, "#c96442", 0, 1, "#967c4c", 0.45],
+    ["meadow", "Meadow", "light", "#56932b", 0.33, "#188f52", 0, 1, "#718865", 0.33],
+    ["solarized-light", "Solarized Light", "light", "#f3c52d", 0.23, "#268bd2", 0, 1, "#a27901", 0.27],
+    ["eclipse", "Eclipse", "dark", "#6384a3", 0.2, "#f0b24d", 0, 1],
+    ["cobalt", "Cobalt", "dark", "mono", 0.13, "#5b9dff", 0, 1],
+    ["graphite", "Graphite", "dark", "mono", 0.21, "#97d14d", 0, 1],
+    ["hornet", "Hornet", "dark", "mono", 0, "#ffd400", 0, 1],
+    ["midnight", "Midnight", "dark", "#5a7dcb", 0.17, "#6d8cff", 0, 1],
+    ["forest", "Forest", "dark", "#5e8d69", 0.23, "#4dc98a", 0, 1],
+    ["rose", "Rose", "dark", "#a3707b", 0.2, "#f65c8a", 0, 1],
+    ["nord", "Nord", "dark", "#73809a", 0.98, "#88c0d0", 0, 1.35],
+    ["solarized", "Solarized", "dark", "#038eaf", 0.61, "#b58900", 0, 1.4],
+  ];
+  // Plain and even-tint preset lists. Each entry is a complete resolveTheme input plus id and name.
+  var mk = function (p, even) {
+    var alt = even && p[8];
+    return { id: p[0], name: p[1], scheme: p[2], base: alt ? p[8] : p[3], baseBlend: alt ? p[9] : p[4], accent: p[5], accentBlend: p[6], contrast: p[7], evenTint: even };
+  };
+  var PRESETS = ROWS.map(function (p) { return mk(p, false); });
+  var PRESETS_EVEN = ROWS.map(function (p) { return mk(p, true); });
+  // Round-two surfaces, for the exactness check (the new presets must land on them).
+  var ROUND2_SURFACE = { iceberg: "#e7eef5", clay: "#f4eee3", meadow: "#eef2ec", "solarized-light": "#fdf6e3", eclipse: "#15181b", cobalt: "#141414", graphite: "#181818", hornet: "#0c0c0c", midnight: "#13161c", forest: "#151a16", rose: "#1b1617", nord: "#2e3440", solarized: "#002b36" };
+
+  // One swatch set, offered by both the base and the accent chooser. Columns are hues; the
+  // second row is the same hue at the same lightness with a third of the chroma.
+  var SWATCHES = [
+    [["Mono", "mono"], ["Blue", "#2f6fed"], ["Indigo", "#5b5bd6"], ["Violet", "#8b5cf6"], ["Pink", "#e5487f"],
+      ["Orange", "#e5652e"], ["Amber", "#f0a92e"], ["Yellow", "#ffd400"], ["Green", "#2fa86a"], ["Teal", "#0fa3a3"]],
+    [null, ["Muted blue", "#6379a0"], ["Muted indigo", "#666b92"], ["Muted violet", "#837aaa"], ["Muted pink", "#ad7b87"],
+      ["Muted orange", "#b08676"], ["Muted amber", "#ccb595"], ["Muted yellow", "#e4d8ac"], ["Muted green", "#799884"], ["Muted teal", "#769695"]],
+  ];
+
+  var NORD = [["nord0", "#2e3440"], ["nord1", "#3b4252"], ["nord2", "#434c5e"], ["nord3", "#4c566a"], ["nord4", "#d8dee9"], ["nord5", "#e5e9f0"], ["nord6", "#eceff4"], ["nord7", "#8fbcbb"], ["nord8", "#88c0d0"], ["nord9", "#81a1c1"], ["nord10", "#5e81ac"], ["nord11", "#bf616a"], ["nord12", "#d08770"], ["nord13", "#ebcb8b"], ["nord14", "#a3be8c"], ["nord15", "#b48ead"]];
+  var SOLARIZED = [["base03", "#002b36"], ["base02", "#073642"], ["base01", "#586e75"], ["base00", "#657b83"], ["base0", "#839496"], ["base1", "#93a1a1"], ["base2", "#eee8d5"], ["base3", "#fdf6e3"], ["yellow", "#b58900"], ["orange", "#cb4b16"], ["red", "#dc322f"], ["magenta", "#d33682"], ["violet", "#6c71c4"], ["blue", "#268bd2"], ["cyan", "#2aa198"], ["green", "#859900"]];
+  var SOL_SYNTAX = { "syntax.comment": "base01", "syntax.keyword": "green", "syntax.string": "cyan", "syntax.literal": "cyan", "syntax.type": "yellow", "syntax.callable": "blue", "syntax.property": "blue", "syntax.operator": "green", "syntax.invalid": "red", "status.success.fg": "green", "status.warning.fg": "yellow", "status.danger.fg": "red", "status.info.fg": "blue" };
+  function extend(a, b) { var o = {}; [a, b].forEach(function (x) { for (var k in x) o[k] = x[k]; }); return o; }
+
+  // Canonical references. `map` is the intended role for each canonical colour (Nord's and
+  // Solarized's own usage guides); the comparison also reports the nearest colour.
+  var CANONICAL = {
+    nord: {
+      title: "Canonical Nord", palette: NORD,
+      map: { "layer.surface": "nord0", "layer.raised": "nord1", "layer.overlay": "nord2", "text.primary": "nord6", "text.secondary": "nord4", "text.disabled": "nord3", "border.strong": "nord3", "accent.fill": "nord8", "accent.text": "nord8", "status.success.fg": "nord14", "status.warning.fg": "nord13", "status.danger.fg": "nord11", "status.info.fg": "nord9", "syntax.comment": "nord3", "syntax.keyword": "nord9", "syntax.string": "nord14", "syntax.literal": "nord15", "syntax.type": "nord7", "syntax.callable": "nord8", "syntax.property": "nord4", "syntax.operator": "nord9", "syntax.punctuation": "nord6", "syntax.invalid": "nord11" },
+    },
+    solarized: {
+      title: "Canonical Solarized (dark)", palette: SOLARIZED,
+      map: extend(SOL_SYNTAX, { "layer.surface": "base03", "layer.raised": "base02", "text.primary": "base0", "text.secondary": "base01", "text.disabled": "base01", "border.strong": "base01", "accent.fill": "yellow", "accent.text": "yellow", "syntax.punctuation": "base0" }),
+    },
+    "solarized-light": {
+      title: "Canonical Solarized (light)", palette: SOLARIZED,
+      map: extend(SOL_SYNTAX, { "layer.canvas": "base2", "layer.surface": "base3", "text.primary": "base00", "text.secondary": "base1", "text.disabled": "base1", "border.strong": "base1", "accent.fill": "blue", "accent.text": "blue", "syntax.comment": "base1", "syntax.punctuation": "base00" }),
+    },
+  };
+
+  // Today's Poodle themes (packages/tokens/schema/modes/themes), by role, for the preset comparison.
+  var STATUS_DEFAULT = ["#7fd24d", "#f0b24d", "#e06a5f", "#2d86f3"];
+  var SYN_DARK = ["#9db2c6", "#c9b7fd", "#97d9a2", "#f4c37a", "#7fd6dc", "#8fb8ff", "#f0a7c6", "#aebccf", "#98adbe", "#ff8f86"];
+  var SYN_LIGHT = ["#5b6b7b", "#6c2fd2", "#237a38", "#95580a", "#0c7089", "#2559cf", "#ad2678", "#54616f", "#5e6e7e", "#c22f38"];
+  var SYN_KEYS = ["comment", "keyword", "string", "literal", "type", "callable", "property", "operator", "punctuation", "invalid"];
+  // [id, canvas, surface, panel, elevated, text primary, text secondary, accent, status or null]
+  var TODAY_RAW = [
+    ["iceberg", "#e7eef5", "#dbe5ef", "#f7fafd", "#fcfdff", "#131a22", "#314255", "#1668d6"],
+    ["clay", "#f4eee3", "#ece4d5", "#f9f4ea", "#fffdf8", "#2a2622", "#6b6157", "#c96442"],
+    ["meadow", "#eef2ec", "#e6ebe3", "#f4f7f1", "#ffffff", "#1b241e", "#5b655d", "#188f52"],
+    ["eclipse", "#0e1012", "#15181b", "#1b1f23", "#20252a", "#eef2f6", "#99a4b0", "#f0b24d"],
+    ["cobalt", "#0d0d0d", "#141414", "#1c1c1c", "#242424", "#ededed", "#a3a3a3", "#5b9dff", ["#7fc99a", "#f0ba55", "#ef7c72", "#5b9dff"]],
+    ["graphite", "#111111", "#181818", "#202020", "#292929", "#efefef", "#a6a6a6", "#97d14d", ["#97d14d", "#f0ba55", "#ef7c72", "#6ea9d4"]],
+    ["hornet", "#000000", "#0a0a0a", "#141414", "#1f1f1f", "#ffffff", "#d4d4d4", "#ffd400"],
+    ["midnight", "#0c0e13", "#13161c", "#191d24", "#1f242c", "#e8ebf2", "#969ca8", "#6d8cff"],
+    ["forest", "#0e1210", "#151a16", "#1b211d", "#212823", "#e9f0ea", "#99a49d", "#4dc98a"],
+    ["rose", "#141010", "#1b1617", "#221d1e", "#292325", "#f0eaeb", "#a89fa1", "#f65c8a"],
+    ["nord", "#191d24", "#20252e", "#272d38", "#2f3542", "#e9edf4", "#99a2b2", "#88c0d0"],
+    ["solarized", "#002b36", "#04303a", "#0a4250", "#0f4d5c", "#eee8d5", "#93a1a1", "#b58900"],
+  ];
+  var LIGHT_TODAY = { iceberg: 1, clay: 1, meadow: 1 };
+  var TODAY = {};
+  TODAY_RAW.forEach(function (r) {
+    var roles = {
+      "layer.canvas": r[1], "layer.surface": r[2], "layer.raised": r[3], "layer.overlay": r[4],
+      "text.primary": r[5], "text.secondary": r[6], "accent.fill": r[7],
+    };
+    var st = r[8] || STATUS_DEFAULT;
+    ["success", "warning", "danger", "info"].forEach(function (s, i) { roles["status." + s + ".fg"] = st[i]; });
+    var syn = LIGHT_TODAY[r[0]] ? SYN_LIGHT : SYN_DARK;
+    SYN_KEYS.forEach(function (s, i) { roles["syntax." + s] = syn[i]; });
+    TODAY[r[0]] = roles;
+  });
+
+  return { PRESETS: PRESETS, PRESETS_EVEN: PRESETS_EVEN, SWATCHES: SWATCHES, ROUND2_SURFACE: ROUND2_SURFACE, CANONICAL: CANONICAL, TODAY: TODAY };
+})();
+</script>
+
+<script id="resolve-theme">
+// resolveTheme: one pure function from { scheme, base, baseBlend, accent, accentBlend, contrast } to every colour role.
+// No DOM access and no authored palettes. Every number here is a design constant that the
+// TypeScript and Rust ports would share, pinned by vectors. Colours are [r, g, b, a] with channels
+// in 0..1, quantised to 8 bits so every check runs on the value that is actually emitted.
+var PoodleTheme = (function () {
+  "use strict";
+  var M = Math;
+
+  // ── Colour math (same OKLab constants as headless/src/color.rs) ──────────────
+  function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+  function toLin(c) { return c <= 0.04045 ? c / 12.92 : M.pow((c + 0.055) / 1.055, 2.4); }
+  function toGam(c) { return c <= 0.0031308 ? 12.92 * c : 1.055 * M.pow(c, 1 / 2.4) - 0.055; }
+  function q8(c) { return M.round(clamp(c, 0, 1) * 255) / 255; }
+  function rgb(r, g, b, a) { return [q8(r), q8(g), q8(b), a === undefined ? 1 : q8(a)]; }
+
+  function rgbToLab(c) {
+    var r = toLin(c[0]), g = toLin(c[1]), b = toLin(c[2]);
+    var l = M.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+    var m = M.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+    var s = M.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    return [
+      0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+      1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+      0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+    ];
+  }
+  function labToLin(L, a, b) {
+    var l = M.pow(L + 0.3963377774 * a + 0.2158037573 * b, 3);
+    var m = M.pow(L - 0.1055613458 * a - 0.0638541728 * b, 3);
+    var s = M.pow(L - 0.0894841775 * a - 1.291485548 * b, 3);
+    return [
+      4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+      -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+      -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+    ];
+  }
+  function inGamut(v) { return v[0] >= -1e-7 && v[0] <= 1 + 1e-7 && v[1] >= -1e-7 && v[1] <= 1 + 1e-7 && v[2] >= -1e-7 && v[2] <= 1 + 1e-7; }
+
+  // OKLCH → linear sRGB. Out-of-gamut colours keep L and h and lose chroma (24-step bisection).
+  function lchLin(L, C, h) {
+    L = clamp(L, 0, 1);
+    var hr = (h * M.PI) / 180, ca = M.cos(hr), sa = M.sin(hr);
+    var lin = labToLin(L, C * ca, C * sa);
+    if (!inGamut(lin)) {
+      var lo = 0, hi = C;
+      for (var i = 0; i < 24; i++) {
+        var mid = (lo + hi) / 2;
+        if (inGamut(labToLin(L, mid * ca, mid * sa))) lo = mid; else hi = mid;
+      }
+      lin = labToLin(L, lo * ca, lo * sa);
+    }
+    return [clamp(lin[0], 0, 1), clamp(lin[1], 0, 1), clamp(lin[2], 0, 1)];
+  }
+  function lch(L, C, h, a) {
+    var lin = lchLin(L, C, h);
+    return rgb(toGam(lin[0]), toGam(lin[1]), toGam(lin[2]), a);
+  }
+  // A grey reads back with rounding-noise chroma (about 1e-8). It is snapped to 0, or a fit that
+  // lands on a rounding split would tip one channel and turn a grey slightly off-grey.
+  function toLch(c) {
+    var lab = rgbToLab(c), C = M.hypot(lab[1], lab[2]), h = (M.atan2(lab[2], lab[1]) * 180) / M.PI;
+    if (C < 1e-6) return [lab[0], 0, 0];
+    return [lab[0], C, h < 0 ? h + 360 : h];
+  }
+  function lum(c) { return 0.2126 * toLin(c[0]) + 0.7152 * toLin(c[1]) + 0.0722 * toLin(c[2]); }
+  // Alpha compositing in gamma-encoded sRGB, as browsers do, then quantised.
+  function over(fg, bg) {
+    var a = fg[3];
+    return rgb(fg[0] * a + bg[0] * (1 - a), fg[1] * a + bg[1] * (1 - a), fg[2] * a + bg[2] * (1 - a));
+  }
+  function contrast(x, y) {
+    if (x[3] < 1) throw new Error("contrast needs opaque colours; composite first");
+    var a = lum(x), b = lum(y);
+    return (M.max(a, b) + 0.05) / (M.min(a, b) + 0.05);
+  }
+  function hex(c) {
+    var s = "#";
+    for (var i = 0; i < 3; i++) s += M.round(c[i] * 255).toString(16).padStart(2, "0");
+    if (c[3] < 1) s += M.round(c[3] * 255).toString(16).padStart(2, "0");
+    return s;
+  }
+  function parseHex(s) {
+    var h = s.replace("#", "");
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    var n = parseInt(h.slice(0, 6), 16);
+    return rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255, h.length === 8 ? parseInt(h.slice(6, 8), 16) / 255 : 1);
+  }
+  function alpha(c, a) { return [c[0], c[1], c[2], q8(a)]; }
+
+  // ── Search helpers: fixed 24-step bisection, no tolerance exits (portable) ───
+  // pred is monotone on [lo, hi]. Results always satisfy pred when non-null.
+  function lowestIn(pred, lo, hi) {
+    if (!pred(hi)) return null;
+    if (pred(lo)) return lo;
+    for (var i = 0; i < 24; i++) { var m = (lo + hi) / 2; if (pred(m)) hi = m; else lo = m; }
+    return hi;
+  }
+  function highestIn(pred, lo, hi) {
+    if (!pred(lo)) return null;
+    if (pred(hi)) return hi;
+    for (var i = 0; i < 24; i++) { var m = (lo + hi) / 2; if (pred(m)) lo = m; else hi = m; }
+    return lo;
+  }
+  function minContrast(c, bgs) {
+    var v = Infinity;
+    for (var i = 0; i < bgs.length; i++) v = M.min(v, contrast(c, bgs[i]));
+    return v;
+  }
+
+  // The one perceptual correction: yellows darken toward amber instead of olive.
+  // Hue weight peaks at 105° and fades to zero at 70° and 140°.
+  function hueAt(h, dL) {
+    if (dL >= 0) return h;
+    var w = M.max(0, 1 - M.abs(h - 105) / 35);
+    return h - 28 * w * M.min(1, -dL / 0.35);
+  }
+
+  // Fit a foreground so it reaches `target` against every background. Moves OKLCH
+  // lightness only when it must: OKLCH lightness the shortest way away
+  // from the backgrounds (dir +1 = lighter, -1 = darker), keeping hue and chroma.
+  // Every fitted value clears its target by FIT_MARGIN, so a renderer that rounds a composite
+  // by 1/255 differently cannot flip a pass. A start that already clears it is kept as is.
+  var FIT_MARGIN = 0.05;
+  function fitAway(start, bgs, target, dir) {
+    target += FIT_MARGIN;
+    if (minContrast(start, bgs) >= target) return { color: start, moved: false, ok: true };
+    var s = toLch(start);
+    var at = function (L) { return lch(L, s[1], hueAt(s[2], L - s[0])); };
+    var ok = function (L) { return minContrast(at(L), bgs) >= target; };
+    var L = dir > 0 ? lowestIn(ok, s[0], 1) : highestIn(ok, 0, s[0]);
+    if (L === null) {
+      var end = dir > 0 ? lch(1, 0, 0) : lch(0, 0, 0);
+      return { color: end, moved: true, ok: minContrast(end, bgs) >= target };
+    }
+    return { color: at(L), moved: true, ok: true };
+  }
+
+  // Accent fill (round five). A filled control is found by its label and shape, so the fill has
+  // no contrast duty against the layers. It stays the picked colour unless its own label can't
+  // reach ON_STRONG (7:1) with dark ink or white. Only a mid-tone moves, and only out of the
+  // mid-tones: lighter with dark ink, or darker with white, whichever exit is nearer the picked
+  // colour in OKLab. That distance counts chroma lost at the sRGB edge and the yellow hue drift,
+  // so the muddy direction (yellow to olive, orange to rust) costs more and loses. It moves no
+  // further than FILL_REACH; if 7:1 needs more, it stops there (at least ON_MIN) and says so.
+  var ON_STRONG = 7, ON_MIN = 4.5, FILL_REACH = 0.12, ON_DARK_L = 0.18;
+  function labDist(x, y) { var a = rgbToLab(x), b = rgbToLab(y); return M.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]); }
+  function fitAccentFill(start) {
+    var s = toLch(start);
+    var onLight = rgb(1, 1, 1), onDark = lch(ON_DARK_L, M.min(s[1] * 0.3, 0.04), s[2]);
+    var at = function (L) { return lch(clamp(L, 0, 1), s[1], hueAt(s[2], L - s[0])); };
+    var strong = ON_STRONG + FIT_MARGIN, floor = ON_MIN + FIT_MARGIN;
+    var inkFor = function (c) { return contrast(c, onLight) >= contrast(c, onDark) ? onLight : onDark; };
+    var pick;
+    var on0 = inkFor(start);
+    if (contrast(start, on0) >= strong) pick = { on: on0, color: start, strong: true };
+    else {
+      // The two exits. d = +1: lighter, dark ink. d = -1: darker, white.
+      var exits = [[onDark, 1], [onLight, -1]].map(function (p) {
+        var on = p[0], d = p[1];
+        var ok = function (L) { return contrast(at(L), on) >= strong; };
+        var L = d > 0 ? lowestIn(ok, s[0], 1) : highestIn(ok, 0, s[0]);
+        var c = L === null ? null : at(L);
+        // The farthest point this way that stays within FILL_REACH of the picked colour.
+        var near = function (x) { return labDist(at(s[0] + d * x), start) <= FILL_REACH; };
+        var room = d > 0 ? 1 - s[0] : s[0], x = highestIn(near, 0, room), edgeC = at(s[0] + d * x);
+        return { on: on, d: d, color: c, cost: c ? labDist(c, start) : Infinity, reachC: edgeC, reachCr: contrast(edgeC, on) };
+      });
+      var fits = exits.filter(function (e) { return e.cost <= FILL_REACH; }).sort(function (a, b) { return a.cost - b.cost; });
+      if (fits.length) pick = { on: fits[0].on, color: fits[0].color, strong: true };
+      else {
+        // 7:1 is out of reach: go as far as allowed toward the nearer exit, the same way an
+        // unlimited reach would go, so the result never flips to the muddier side.
+        var e = exits[0].cost < exits[1].cost || (exits[0].cost === exits[1].cost && exits[0].reachCr >= exits[1].reachCr) ? exits[0] : exits[1];
+        var c = e.reachC;
+        if (contrast(c, e.on) < floor) { // never happens in practice; 4.5:1 wins over the reach
+          var ok2 = function (L) { return contrast(at(L), e.on) >= floor; };
+          var L2 = e.d > 0 ? lowestIn(ok2, s[0], 1) : highestIn(ok2, 0, s[0]);
+          c = L2 === null ? (e.d > 0 ? rgb(1, 1, 1) : rgb(0, 0, 0)) : at(L2);
+        }
+        pick = { on: e.on, color: c, strong: false };
+      }
+    }
+    var fill = pick.color, on = pick.on, rest = contrast(fill, on), keep = M.min(rest, strong); // strong = 7 + fit margin
+    var bl = toLch(fill), ACTIVE = 0.08;
+    // Hover and active darken (0.04 and up to 0.08 OKLab L), as buttons usually do, while text
+    // keeps min(rest, 7:1). Under white text darkening only raises contrast. Under dark text it
+    // lowers it, so a light fill darkens only as far as 7:1 allows (yellow: 13.1 to 11.5 and
+    // 10.0; amber's press stops short of 0.08), and never less on press than on hover. A fill
+    // that can't darken by 0.04 (one fitted to exactly 7:1, or one at black) lightens instead:
+    // under dark text that raises contrast; under white it is held at min(rest, 7:1). Stepping
+    // away from the ink in every case would turn a pressed yellow cream, nearly the colour of a
+    // light layer. One direction for both states, so pressing continues hovering.
+    var HOVER = 0.04;
+    var shade = function (x) { return lch(clamp(bl[0] + x, 0, 1), bl[1], hueAt(bl[2], x)); };
+    var holds = function (x) { return contrast(shade(x), on) >= keep; };
+    var darken = bl[0] - HOVER >= 0.03 && holds(-HOVER);
+    var press = darken ? highestIn(function (x) { return bl[0] - x >= 0.03 && holds(-x); }, HOVER, ACTIVE) : 0;
+    var step = function (d) {
+      if (darken) return shade(-(d === HOVER ? HOVER : press));
+      return shade(highestIn(function (x) { return bl[0] + x <= 0.985 && holds(x); }, 0, d));
+    };
+    // The search aims at 7.05 (the fit margin); the report counts 7.00 as reaching the aim.
+    return { fill: fill, hover: step(HOVER), active: step(ACTIVE), on: on, onContrast: rest, strong: rest >= ON_STRONG, moved: fill !== start, dist: labDist(fill, start) };
+  }
+
+  // The accent fill gets an edge only when it would vanish: when it sits within EDGE_NEAR of a
+  // layer, measured as OKLab distance with flare lightness in place of L (so near-black
+  // differences aren't overstated, as with the layer steps). 0.10 is about four layer steps at
+  // contrast 1: closer than that, a fill reads as one more layer rather than a control.
+  var EDGE_NEAR = 0.1;
+  function flareDist(x, y) { var a = rgbToLab(x), b = rgbToLab(y); return M.hypot(lf(lum(x)) - lf(lum(y)), a[1] - b[1], a[2] - b[2]); }
+
+
+  function parseColor(v) {
+    if (Array.isArray(v) && v.length >= 3 && v.every(function (x) { return typeof x === "number" && isFinite(x); })) return rgb(v[0], v[1], v[2]);
+    if (typeof v === "string" && /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v.trim())) return parseHex(v.trim());
+    return null;
+  }
+  function vec(C, h) { var r = (h * M.PI) / 180; return [C * M.cos(r), C * M.sin(r)]; }
+  function polar(v) { var h = (M.atan2(v[1], v[0]) * 180) / M.PI; return [M.hypot(v[0], v[1]), h < 0 ? h + 360 : h]; }
+
+  // ── Constants ────────────────────────────────────────────────────────────────
+  // Layer spacing uses a flare lightness: the cube root of luminance plus a small flare term.
+  // It matches OKLab L away from black and keeps steps near black visible, so equal steps
+  // look equal from pure black to white. Today's dark themes already step evenly in it.
+  var FLARE = 0.01, STEP = 0.024;
+  function lf(Y) { return M.cbrt(Y + FLARE); }
+  function lfToY(v) { return v * v * v - FLARE; }
+
+  // limit: the dimmest the ramp may go, in flare lightness (the overlay in dark, the canvas in
+  // light). Text hierarchy needs the dark limit; the light one is taste.
+  var SCHEME = {
+    light: {
+      dir: -1, limit: 0.9,
+      inkL: 0.2, textL: [0.24, 0.47, 0.72], borderStrongL: 0.64, derivedL: 0.52,
+      fill: [0.045, 0.07, 0.1], select: [0.1, 0.14], borderSubtle: 0.09, statusBg: 0.1, scrim: 0.32, shadow: 0.1,
+    },
+    dark: {
+      dir: 1, limit: 0.42,
+      inkL: 0.97, textL: [0.95, 0.75, 0.5], borderStrongL: 0.56, derivedL: 0.79,
+      fill: [0.055, 0.085, 0.12], select: [0.13, 0.18], borderSubtle: 0.1, statusBg: 0.14, scrim: 0.55, shadow: 0.45,
+    },
+  };
+  // Tint cap: no layer at the dimmest end of either range carries more than this OKLCH chroma.
+  // It becomes a slope cap per scheme (TOP_CHROMA over the depth of the limit), so a base that is
+  // too saturated is muted before mixing and its line stays straight. Dark ≈ 0.26, light ≈ 1.0.
+  var TOP_CHROMA = 0.105;
+  var DEFAULT_BLEND = 0.25;          // base blend for a fresh theme in either scheme
+  var EVEN_TINT = true;              // comparison switch: light reads a colour's tint the way dark does
+  var TEXT_CHROMA = [0.4, 0.6, 0.6]; // share of the surface chroma in primary, secondary, disabled text
+  var HIERARCHY = 0.06;              // primary text sits at least this far (OKLCH L) beyond secondary
+  var PULL = 0.5;                    // share of the surface tint added to every derived colour (OKLab a, b)
+  var VIVID = [0.06, 0.15];          // derived chroma follows the accent's chroma, inside this range
+  // Derived colours: [hue°, chroma scale, lightness offset toward the layers].
+  var ANCHORS = {
+    "status.success": [150, 1, 0], "status.warning": [80, 1.05, 0], "status.danger": [27, 1, 0], "status.info": [250, 1, 0],
+    "syntax.keyword": [300, 1, 0], "syntax.string": [145, 0.95, 0], "syntax.literal": [65, 1, 0],
+    "syntax.type": [195, 0.85, 0], "syntax.callable": [255, 1, 0], "syntax.property": [345, 0.9, 0],
+    "syntax.invalid": [25, 1.1, 0], "syntax.comment": [250, 0.3, 0.1], "syntax.operator": [0, 0, -0.06],
+    "syntax.punctuation": [0, 0, 0.06],
+  };
+  var STATUS = ["success", "warning", "danger", "info"];
+  var SYNTAX = ["comment", "keyword", "string", "literal", "type", "callable", "property", "operator", "punctuation", "invalid"];
+
+  // Surface range in flare lightness: [deepest, dimmest]. Dark: the canvas may reach black and
+  // the overlay may reach the dark limit. Light: the raised layer may reach white and the
+  // canvas may reach the light limit. The larger of the two blends moves the surface evenly across it.
+  function depthRange(scheme, s) {
+    return scheme === "dark" ? [lf(0) + s, SCHEME.dark.limit - 2 * s] : [lf(1) - s, SCHEME.light.limit + s];
+  }
+  // A colour's tint slope: its OKLab (a, b) per unit of lightness away from the end colour.
+  // Mixing a colour into black or white in OKLab moves along a straight line whose slope this is,
+  // so the colour's own lightness drops out: every colour on that line gives the same layers.
+  function slopeOf(c, scheme) {
+    var lab = rgbToLab(c), d = scheme === "dark" ? lab[0] : 1 - lab[0];
+    if (M.hypot(lab[1], lab[2]) < 1e-4) return [0, 0];
+    d = M.max(d, 1e-3);
+    return [lab[1] / d, lab[2] / d];
+  }
+  function slopeMax(scheme) {
+    var L = M.cbrt(lfToY(SCHEME[scheme].limit));
+    return TOP_CHROMA / (scheme === "dark" ? L : 1 - L);
+  }
+  // A colour's tint in this scheme, before the cap. Plain: its slope from this scheme's end
+  // colour. Even: its slope from black, as dark reads it, rescaled to this scheme's cap, so one
+  // colour is the same fraction of the cap in light and dark. Dark is the same either way.
+  function tintOf(c, scheme, even) {
+    var from = even ? "dark" : scheme, v = slopeOf(c, from), r = slopeMax(scheme) / slopeMax(from);
+    return [v[0] * r, v[1] * r];
+  }
+  // A blend's share of its colour's tint: 0 at 0 (no trace of the colour), 1 at 1 (round three's
+  // top). It rises with slope 2 at 0 and eases to 0 at 1, so the surface's chroma grows about
+  // evenly. Base blend and accent blend each use it for their own colour (round six).
+  function tintWeight(b) { return b * (2 - b); }
+  function capSlope(v, max) {
+    var n = M.hypot(v[0], v[1]);
+    return n > max ? [v[0] * max / n, v[1] * max / n] : v;
+  }
+  function num(v, dflt, lo, hi, name, report) {
+    if (v === undefined || v === null || v === "") return dflt;
+    var n = +v;
+    if (!isFinite(n)) { report.clamped.push({ input: name, from: String(v), to: String(dflt), why: "not a number" }); return dflt; }
+    var c = clamp(n, lo, hi);
+    if (c !== n) report.clamped.push({ input: name, from: String(n), to: String(c), why: "outside " + lo + " to " + hi });
+    return c;
+  }
+  function colourInput(v, name, report) {
+    if (v === "mono") return { mono: true, c: null };
+    var c = parseColor(v);
+    if (!c) { report.clamped.push({ input: name, from: String(v), to: "mono", why: "not a colour" }); return { mono: true, c: null }; }
+    return { mono: false, c: c };
+  }
+
+  // ── resolveTheme ─────────────────────────────────────────────────────────────
+  // Total: every input is clamped or replaced, and the report says what changed. Never throws.
+  function resolveTheme(input) {
+    input = input || {};
+    var report = { clamped: [], adjusted: [], warnings: [], notes: [] };
+    var scheme = input.scheme === "light" ? "light" : "dark";
+    if (input.scheme !== "light" && input.scheme !== "dark") report.clamped.push({ input: "scheme", from: String(input.scheme), to: "dark", why: "not light or dark" });
+    var sc = SCHEME[scheme], dir = sc.dir;
+    var k = num(input.contrast, 1, 0.5, 2, "contrast", report);
+    var baseBlend = num(input.baseBlend, DEFAULT_BLEND, 0, 1, "baseBlend", report);
+    var accentBlend = num(input.accentBlend, 0, 0, 1, "accentBlend", report);
+    var base = colourInput(input.base === undefined ? "mono" : input.base, "base", report);
+    var acc0 = colourInput(input.accent === undefined ? "mono" : input.accent, "accent", report);
+    var mono = acc0.mono, picked = acc0.c;
+    var even = typeof input.evenTint === "boolean" ? input.evenTint : EVEN_TINT;
+    if (input.evenTint !== undefined && typeof input.evenTint !== "boolean") report.clamped.push({ input: "evenTint", from: String(input.evenTint), to: String(EVEN_TINT), why: "not true or false" });
+
+    // 1. Tint (round six). Base and accent are two independent tint sources, treated alike.
+    //    Each gives a slope (chroma per unit of depth), muted to the scheme's maximum and
+    //    weighted by its own blend through w = b(2 − b). The neutrals take the sum, muted again
+    //    to the same maximum. A blend at 0 contributes exactly nothing, whatever the other is.
+    var smax = slopeMax(scheme), wb = tintWeight(baseBlend), wa = tintWeight(accentBlend);
+    var sb = base.mono ? [0, 0] : tintOf(base.c, scheme, even), sbCap = capSlope(sb, smax);
+    if (M.hypot(sb[0], sb[1]) > smax * 1.01) report.clamped.push({ input: "base", from: "slope " + M.hypot(sb[0], sb[1]).toFixed(3), to: smax.toFixed(3), why: "too saturated for a " + scheme + " ground, muted" });
+    var sa = mono ? [0, 0] : tintOf(picked, scheme, even), saCap = capSlope(sa, smax);
+    var tb = [sbCap[0] * wb, sbCap[1] * wb], ta = [saCap[0] * wa, saCap[1] * wa];
+    var sum = [tb[0] + ta[0], tb[1] + ta[1]];
+    var sp = polar(capSlope(sum, smax)), slope = sp[0], h = sp[1];
+    var nb = M.hypot(tb[0], tb[1]), na = M.hypot(ta[0], ta[1]);
+    if (nb > 0.1 * smax && na > 0.1 * smax && M.hypot(sum[0], sum[1]) < 0.5 * M.max(nb, na)) report.notes.push("Base and accent hues cancel, so the neutrals lose most of their tint.");
+
+    // 2. Depth. Every layer is a point on the straight OKLab line from the end colour (black or
+    //    white) along the slope. The larger blend puts the surface at an even fraction of the
+    //    scheme's range in flare lightness (a ground needs distance from black or white to carry
+    //    a tint); the other layers sit one contrast step either side.
+    var depth = M.max(baseBlend, accentBlend);
+    var s = STEP * k, rg = depthRange(scheme, s);
+    var surfaceLf = rg[0] + (rg[1] - rg[0]) * depth;
+    var dist = function (L) { return scheme === "dark" ? L : 1 - L; };
+    var clipped = false;
+    var lumAt = function (L) { var v = lchLin(L, slope * dist(L), h); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
+    var layerAt = function (v) { // unquantised search, so the result never lands on a rounding split
+      var Y = lfToY(v);
+      if (Y <= 1e-9) return { c: rgb(0, 0, 0), L: 0 };
+      if (Y >= 1) return { c: rgb(1, 1, 1), L: 1 };
+      var L = lowestIn(function (x) { return lumAt(x) >= Y; }, 0, 1), C = slope * dist(L), c = lch(L, C, h);
+      if (C - toLch(c)[1] > 0.01) clipped = true; // lost visible tint at the sRGB edge
+      return { c: c, L: L };
+    };
+    var ramp = [-1, 0, 1, 2].map(function (i) { return layerAt(surfaceLf + i * s); });
+    var layers = ramp.map(function (r) { return r.c; });
+    var canvas = layers[0], surface = layers[1], raised = layers[2];
+    var C = slope * dist(ramp[1].L), tv = vec(C, h); // the surface tint drives text, fills and derived colours
+    if (clipped) report.notes.push("Some layers reach the edge of sRGB, so they carry less tint than the line asks for.");
+    var dh = M.abs(((h - ANCHORS["status.danger"][0]) % 360 + 540) % 360 - 180);
+    if (C > 0.04 && dh < 30) report.notes.push("The ground is close to the danger hue, so danger colours stand out less from it.");
+
+    // 4. Ink and the translucent neutrals made from it (layer-independent).
+    var ink = lch(sc.inkL, C * 0.6, h);
+    var fills = sc.fill.map(function (a) { return alpha(ink, a); });
+    var selectNeutral = alpha(ink, sc.select[0]), borderSubtle = alpha(ink, sc.borderSubtle);
+
+    // 5. Accent, in three forms fitted separately:
+    //    line: thin marks (focus ring, indicators, the fill's edge), 3:1 on every layer;
+    //    text: text in the accent colour (links), 4.5:1 on every layer;
+    //    fill: large filled areas and checked controls, kept as picked where its label allows.
+    if (mono) picked = ink;
+    var accLine = fitAway(picked, layers, 3, dir);
+    var accText = fitAway(picked, layers, 4.5, dir);
+    if (accLine.moved && !mono) report.adjusted.push({ role: "accent.line", from: hex(picked), to: hex(accLine.color) });
+    if (accText.moved && !mono) report.adjusted.push({ role: "accent.text", from: hex(picked), to: hex(accText.color) });
+    var acc = fitAccentFill(picked);
+    var darkInk = acc.on[0] < 0.5;
+    if (acc.moved && !mono) report.adjusted.push({ role: "accent.fill", from: hex(picked), to: hex(acc.fill), why: (darkInk ? "lighter, so dark text" : "darker, so white text") + (acc.strong ? " reaches 7:1" : " gets as close to 7:1 as allowed") });
+    if (!acc.strong) report.notes.push("Text on the accent fill reaches " + acc.onContrast.toFixed(2) + ":1, short of 7:1: reaching it would move the fill more than ΔE " + Math.round(FILL_REACH * 100) + " from the picked colour.");
+    var edgeDist = M.min.apply(null, layers.map(function (Lc) { return flareDist(acc.fill, Lc); })), edge = edgeDist < EDGE_NEAR;
+    if (edge) report.notes.push("The accent fill is close to a layer, so filled controls get a hairline edge in the accent line colour.");
+    var selectAccent = alpha(accText.color, sc.select[1]);
+
+    // 6. Derived colours (status, syntax): a fixed hue anchor, chroma that follows the accent,
+    //    plus a share of the neutral tint so they sit in the same light. Fitted below.
+    var vivid = clamp(mono ? 0 : toLch(picked)[1], VIVID[0], VIVID[1]);
+    var start = {};
+    Object.keys(ANCHORS).forEach(function (key) {
+      var a = ANCHORS[key], v = vec(vivid * a[1], a[0]);
+      var p = polar([v[0] + PULL * tv[0], v[1] + PULL * tv[1]]);
+      start[key] = lch(sc.derivedL - dir * a[2], p[0], p[1]);
+    });
+    var statusBg = {};
+    STATUS.forEach(function (key) { statusBg[key] = alpha(start["status." + key], sc.statusBg); });
+
+    // 7. Text, fitted last against every layer and every tint composited on every layer.
+    var tints = fills.concat([selectNeutral, selectAccent], STATUS.map(function (key) { return statusBg[key]; }));
+    var allBgs = layers.slice();
+    layers.forEach(function (Lc) { tints.forEach(function (tn) { allBgs.push(over(tn, Lc)); }); });
+    var textStart = function (i) { return lch(sc.textL[i], C * TEXT_CHROMA[i], h); };
+    var lower3 = [canvas, surface, raised];
+    var primary = fitAway(fitAway(textStart(0), lower3, 7, dir).color, allBgs, 4.5, dir).color;
+    var secondary = fitAway(textStart(1), allBgs, 4.5, dir).color;
+    var Lp = toLch(primary)[0], Ls = toLch(secondary)[0];
+    if (dir * (Lp - Ls) < HIERARCHY) {
+      var Lh = Ls + dir * (HIERARCHY + 0.004);
+      if (dir * (clamp(Lh, 0, 1) - Ls) < HIERARCHY) report.warnings.push("No room for a text hierarchy: secondary text is too close to " + (dir > 0 ? "white" : "black") + ".");
+      var lifted = lch(clamp(Lh, 0, 1), C * TEXT_CHROMA[0], h);
+      report.adjusted.push({ role: "text.primary", from: hex(primary), to: hex(lifted), why: "hierarchy" });
+      primary = lifted;
+    }
+    var disabled = fitAway(textStart(2), lower3, 3, dir).color;
+    var borderStrong = fitAway(lch(sc.borderStrongL, C * 0.8, h), layers, 3, dir).color;
+
+    // 8. Status and syntax foregrounds: 4.5:1 on every layer; status also on its own tint.
+    var roles = {
+      "layer.canvas": canvas, "layer.surface": surface, "layer.raised": raised, "layer.overlay": layers[3],
+      "text.primary": primary, "text.secondary": secondary, "text.disabled": disabled,
+      "fill.rest": fills[0], "fill.hover": fills[1], "fill.active": fills[2],
+      "select.neutral": selectNeutral, "select.accent": selectAccent,
+      "border.subtle": borderSubtle, "border.strong": borderStrong,
+      "accent.fill": acc.fill, "accent.fill-hover": acc.hover, "accent.fill-active": acc.active,
+      "accent.on": acc.on, "accent.text": accText.color, "accent.line": accLine.color,
+      "accent.edge": alpha(accLine.color, edge ? 1 : 0), // transparent unless the fill would vanish
+    };
+    STATUS.forEach(function (key) {
+      var bgs = layers.concat(layers.map(function (Lc) { return over(statusBg[key], Lc); }));
+      roles["status." + key + ".fg"] = fitAway(start["status." + key], bgs, 4.5, dir).color;
+      roles["status." + key + ".bg"] = statusBg[key];
+    });
+    // The danger button follows the accent fill's rule (round six): as derived unless its label
+    // can't reach 7:1, then out of the mid-tones by the nearer exit. It has no duty to the layers.
+    var danger = fitAccentFill(lch(0.58, 0.19, toLch(start["status.danger"])[2]));
+    roles["status.danger.solid"] = danger.fill;
+    roles["status.danger.on"] = danger.on;
+    var dangerEdgeDist = M.min.apply(null, layers.map(function (Lc) { return flareDist(danger.fill, Lc); })), dangerEdge = dangerEdgeDist < EDGE_NEAR;
+    roles["status.danger.edge"] = alpha(roles["status.danger.fg"], dangerEdge ? 1 : 0); // danger text is 4.5:1 on every layer
+    if (dangerEdge) report.notes.push("The danger fill is close to a layer, so the danger button gets a hairline edge in the danger text colour.");
+    SYNTAX.forEach(function (key) { roles["syntax." + key] = fitAway(start["syntax." + key], layers, 4.5, dir).color; });
+    roles.scrim = alpha(dir > 0 ? rgb(0, 0, 0) : lch(0.18, C, h), sc.scrim);
+    roles.shadow = alpha(dir > 0 ? rgb(0, 0, 0) : lch(0.22, C, h), sc.shadow);
+    return {
+      roles: roles, scheme: scheme, picked: picked, base: base.c, report: report,
+      meta: { depth: depth, weights: [wb, wa], even: even, slope: slope, baseSlope: M.hypot(sb[0], sb[1]), accentSlope: M.hypot(sa[0], sa[1]), smax: smax, chroma: C, hue: h, step: s, surfaceLf: surfaceLf, range: rg,
+        accent: { onContrast: acc.onContrast, strong: acc.strong, moved: acc.moved, dist: acc.dist, edge: edge, edgeDist: edgeDist } },
+    };
+  }
+
+  // ── Audit: independent measurement of the emitted values ─────────────────────
+  function audit(t) {
+    var r = t.roles;
+    var layers = ["layer.canvas", "layer.surface", "layer.raised", "layer.overlay"].map(function (k2) { return r[k2]; });
+    var onLayers = function (tintKey) { return layers.map(function (Lc) { return over(r[tintKey], Lc); }); };
+    var tintKeys = ["fill.rest", "fill.hover", "fill.active", "select.neutral", "select.accent", "status.success.bg", "status.warning.bg", "status.danger.bg", "status.info.bg"];
+    var fills = [];
+    tintKeys.forEach(function (k2) { fills = fills.concat(onLayers(k2)); });
+    var matrix = ["text.primary", "text.secondary", "accent.text"].map(function (k2) {
+      return { role: k2, values: layers.map(function (Lc) { return contrast(r[k2], Lc); }), target: k2 === "text.primary" ? [7, 7, 7, 4.5] : [4.5, 4.5, 4.5, 4.5] };
+    });
+    var checks = [];
+    var add = function (label, value, target, shown) { checks.push({ label: label, value: value, target: target, shown: shown || String(target), pass: value >= target }); };
+    add("Primary text on tints", minContrast(r["text.primary"], fills), 4.5);
+    add("Secondary text on tints", minContrast(r["text.secondary"], fills), 4.5);
+    // The accent fill has no duty against the layers (round five). Its label does: 4.5:1 always,
+    // 7:1 as the aim, and hover and active never below min(rest, 7).
+    var onRest = contrast(r["accent.on"], r["accent.fill"]), onKeep = M.min(onRest, ON_STRONG);
+    add("Text on accent fill (aim 7)", onRest, ON_MIN);
+    add("Text on fill, hover and active", M.min(contrast(r["accent.on"], r["accent.fill-hover"]), contrast(r["accent.on"], r["accent.fill-active"])), onKeep - 1e-9, onKeep >= ON_STRONG ? "7" : onKeep.toFixed(2));
+    add("Accent line on layers", minContrast(r["accent.line"], layers), 3);
+    add("Strong border on layers", minContrast(r["border.strong"], layers), 3);
+    STATUS.forEach(function (s) {
+      var key = "status." + s;
+      add(s[0].toUpperCase() + s.slice(1) + " text on layers, tint", minContrast(r[key + ".fg"], layers.concat(onLayers(key + ".bg"))), 4.5);
+    });
+    add("Text on danger fill (aim 7)", contrast(r["status.danger.on"], r["status.danger.solid"]), ON_MIN);
+    var syn = Infinity, synRole = "";
+    SYNTAX.forEach(function (s) { var v = minContrast(r["syntax." + s], layers); if (v < syn) { syn = v; synRole = s; } });
+    add("Syntax on layers (lowest: " + synRole + ")", syn, 4.5);
+    var gap = t.scheme === "dark" ? toLch(r["text.primary"])[0] - toLch(r["text.secondary"])[0] : toLch(r["text.secondary"])[0] - toLch(r["text.primary"])[0];
+    var hierarchy = { value: gap, target: HIERARCHY, pass: gap >= HIERARCHY - 1e-6 };
+    var steps = [];
+    var Lk = layers.map(function (c) { return toLch(c)[0]; });
+    var pairs = [[0, 1], [1, 2]];
+    if (t.scheme === "dark") pairs.push([2, 3]);
+    var names = ["canvas", "surface", "raised", "overlay"];
+    pairs.forEach(function (p) {
+      var dL = M.abs(Lk[p[1]] - Lk[p[0]]);
+      steps.push({ label: names[p[0]] + " → " + names[p[1]], dL: dL, ratio: contrast(layers[p[0]], layers[p[1]]), target: 0.02, pass: dL >= 0.02 - 1e-6 });
+    });
+    var edgeDist = M.min.apply(null, layers.map(function (Lc) { return flareDist(r["accent.fill"], Lc); }));
+    return { matrix: matrix, checks: checks, steps: steps, hierarchy: hierarchy, disabled: minContrast(r["text.disabled"], layers),
+      edge: { on: r["accent.edge"][3] > 0, dist: edgeDist, near: EDGE_NEAR },
+      dangerEdge: { on: r["status.danger.edge"][3] > 0, dist: M.min.apply(null, layers.map(function (Lc) { return flareDist(r["status.danger.solid"], Lc); })) } };
+  }
+
+  return {
+    resolveTheme: resolveTheme, audit: audit, SCHEME: SCHEME, ON_STRONG: ON_STRONG, ON_MIN: ON_MIN, FILL_REACH: FILL_REACH, EDGE_NEAR: EDGE_NEAR, flareDist: flareDist, labDist: labDist, slopeOf: slopeOf, slopeMax: slopeMax, tintOf: tintOf, tintWeight: tintWeight, EVEN_TINT: EVEN_TINT, DEFAULT_BLEND: DEFAULT_BLEND, depthRange: depthRange, lf: lf, lfToY: lfToY, labToLin: labToLin, inGamut: inGamut, toGam: toGam, rgb: rgb, ANCHORS: ANCHORS, SYNTAX: SYNTAX, STATUS: STATUS,
+    hex: hex, parseHex: parseHex, parseColor: parseColor, toLch: toLch, toLab: rgbToLab, contrast: contrast, lch: lch, lum: lum,
+  };
+})();
+</script>
+
+<script>
+(function () {
+  "use strict";
+  var T = PoodleTheme;
+  var ICONS = {
+    search: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
+    chevron: '<path d="M7 10l5 5 5-5"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    filter: '<path d="M4 7h16M7 12h10M10 17h4"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.1"/>',
+    warning: '<path d="M10.3 4.6L2.9 17.5A2 2 0 0 0 4.6 20.5h14.8a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z"/><path d="M12 9.5v4.5M12 17.3v.1"/>',
+    danger: '<circle cx="12" cy="12" r="9"/><path d="M9.2 9.2l5.6 5.6M14.8 9.2l-5.6 5.6"/>',
+    success: '<circle cx="12" cy="12" r="9"/><path d="M8.3 12.4l2.6 2.6 4.9-5.2"/>',
+    home: '<path d="M4 10.5L12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
+    deploy: '<path d="M12 15V4.5M7.5 9L12 4.5 16.5 9M5 14.5V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4.5"/>',
+    server: '<rect x="4" y="4.5" width="16" height="6.5" rx="1.5"/><rect x="4" y="13" width="16" height="6.5" rx="1.5"/><path d="M7.5 7.75h.1M7.5 16.25h.1"/>',
+    logs: '<path d="M5 6.5h14M5 10.5h14M5 14.5h9M5 18.5h6"/>',
+    bell: '<path d="M6.5 16.5v-5a5.5 5.5 0 0 1 11 0v5l1.5 2h-14z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
+    settings: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
+    help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8 1c0 1.7-2.4 2.1-2.4 3.6M12 17.3v.1"/>',
+    list: '<path d="M9 6.5h11M9 12h11M9 17.5h11M4.5 6.5h.1M4.5 12h.1M4.5 17.5h.1"/>',
+    board: '<rect x="4" y="4.5" width="6.5" height="15" rx="1.5"/><rect x="13.5" y="4.5" width="6.5" height="9" rx="1.5"/>',
+    left: '<path d="M14.5 6.5L9 12l5.5 5.5"/>',
+    right: '<path d="M9.5 6.5L15 12l-5.5 5.5"/>',
+    logo: '<path d="M4 10l8-5 8 5-8 5z"/><path d="M4 14.5l8 5 8-5"/>',
+  };
+  document.querySelectorAll("i[data-icon]").forEach(function (el) {
+    el.outerHTML = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[el.dataset.icon] + "</svg>";
+  });
+
+  var D = PoodlePresets;
+  var state = { scheme: "light", base: "#6b839a", baseBlend: 0.53, accent: "#1668d6", accentBlend: 0, contrast: 1, evenTint: T.EVEN_TINT, ref: "iceberg" };
+  var $ = function (id) { return document.getElementById(id); };
+  var clamp = function (v, lo, hi) { return isNaN(v) ? lo : Math.min(hi, Math.max(lo, v)); };
+  var isHex = function (v) { return /^#?[0-9a-f]{6}$/i.test(v || ""); };
+  var norm = function (v) { return "#" + String(v).replace("#", "").toLowerCase(); };
+  var hex = T.hex;
+  var fmt = function (v) { return v >= 10 ? v.toFixed(1) : v.toFixed(2); };
+  var INPUTS = ["scheme", "base", "baseBlend", "accent", "accentBlend", "contrast", "evenTint"];
+  // The base and accent choosers are one control built twice: same swatches, same free picker,
+  // each with its own blend slider beneath. Custom remembers the last free pick per chooser.
+  var CHOOSERS = {
+    base: { title: "Base", blend: "baseBlend", blendTitle: "Base blend", custom: "#808080" },
+    accent: { title: "Accent", blend: "accentBlend", blendTitle: "Accent blend", custom: "#808080" },
+  };
+
+  // Presets come in a plain and an even-tint list (light presets need a different base under
+  // even tint); the list follows the checkbox.
+  function presetList() { return state.evenTint ? D.PRESETS_EVEN : D.PRESETS; }
+  function presetById(id) { return presetList().filter(function (p) { return p.id === id; })[0] || null; }
+  function matches(p) { return p && INPUTS.every(function (k) { return p[k] === state[k]; }); }
+  function currentPreset() { return presetList().filter(matches)[0] || null; }
+  function applyPreset(p) { INPUTS.forEach(function (k) { state[k] = p[k]; }); state.ref = p.id; }
+
+  function readHash() {
+    var p = new URLSearchParams(location.hash.slice(1));
+    if (p.get("even") === "1" || p.get("even") === "0") state.evenTint = p.get("even") === "1";
+    var pre = presetById(p.get("preset") || p.get("ref") || "");
+    applyPreset(pre || presetById("iceberg"));
+    if (p.get("scheme") === "light" || p.get("scheme") === "dark") state.scheme = p.get("scheme");
+    ["base", "accent"].forEach(function (k) {
+      var v = p.get(k);
+      if (v === "mono") state[k] = "mono"; else if (isHex(v)) state[k] = norm(v);
+    });
+    ["baseBlend", "accentBlend"].forEach(function (k) { if (p.get(k) !== null) state[k] = clamp(parseFloat(p.get(k)), 0, 1); });
+    if (p.get("contrast") !== null) state.contrast = clamp(parseFloat(p.get("contrast")), 0.5, 2);
+  }
+  function writeHash() {
+    var pre = currentPreset(), p = new URLSearchParams();
+    p.set("even", state.evenTint ? "1" : "0");
+    if (pre) p.set("preset", pre.id);
+    else {
+      INPUTS.forEach(function (k) { if (k === "evenTint") return; var v = state[k]; p.set(k, typeof v === "string" ? v.replace("#", "") : String(v)); });
+      if (state.ref) p.set("ref", state.ref);
+    }
+    history.replaceState(null, "", "#" + p.toString());
+  }
+  function resolve(over) {
+    var o = {};
+    INPUTS.forEach(function (k) { o[k] = state[k]; });
+    return T.resolveTheme(Object.assign(o, over || {}));
+  }
+  function el(tag, attrs, html) {
+    var e = document.createElement(tag);
+    for (var k in attrs || {}) e.setAttribute(k, attrs[k]);
+    if (html !== undefined) e.innerHTML = html;
+    return e;
+  }
+  function mini(r) {
+    return '<span class="mini" style="background:' + hex(r["layer.canvas"]) + '">' +
+      '<span class="mini-line" style="background:' + hex(r["text.secondary"]) + '"></span>' +
+      '<span class="mini-line b" style="background:' + hex(r["text.secondary"]) + '"></span>' +
+      '<span class="mini-line c" style="background:' + hex(r["text.secondary"]) + '"></span>' +
+      '<span class="mini-pane" style="background:' + hex(r["layer.surface"]) + '">' +
+        '<span class="mini-card" style="background:' + hex(r["layer.raised"]) + '"></span>' +
+      "</span>" +
+      '<span class="mini-btn" style="background:' + hex(r["accent.fill"]) + '"></span>' +
+    "</span>";
+  }
+
+  // Tiles resolve once per tint mode.
+  var tileMode = null;
+  function buildPresets() {
+    D.PRESETS.forEach(function (p) {
+      var tile = el("button", { class: "preset-tile", role: "radio", "data-preset": p.id });
+      tile.addEventListener("click", function () { applyPreset(presetById(p.id)); render(); });
+      $(p.scheme === "light" ? "presets-light" : "presets-dark").appendChild(tile);
+    });
+  }
+  function renderPresets() {
+    if (tileMode !== state.evenTint) {
+      tileMode = state.evenTint;
+      presetList().forEach(function (p) {
+        var tile = document.querySelector('.preset-tile[data-preset="' + p.id + '"]');
+        tile.title = p.name + " · " + p.scheme + ", base " + p.base + " at " + p.baseBlend + ", accent " + p.accent + (p.contrast !== 1 ? ", contrast " + p.contrast : "");
+        tile.innerHTML = mini(T.resolveTheme(p).roles) + '<span class="preset-name">' + p.name.replace(" Light", "") + "</span>";
+      });
+    }
+    var cur = currentPreset();
+    document.querySelectorAll(".preset-tile").forEach(function (t) { t.setAttribute("aria-checked", String(!!cur && t.dataset.preset === cur.id)); });
+  }
+
+  function renderScheme() {
+    $("scheme-light").setAttribute("aria-pressed", String(state.scheme === "light"));
+    $("scheme-dark").setAttribute("aria-pressed", String(state.scheme === "dark"));
+    $("even-tint").setAttribute("aria-checked", String(state.evenTint));
+    $("even-hint").textContent = state.evenTint
+      ? "Light reads the base's strength the way dark does, so one base tints both schemes about equally."
+      : "Off: light reads the base's strength from white, so the same base tints light about a quarter as much.";
+  }
+
+  function buildChooser(kind) {
+    var c = CHOOSERS[kind], box = document.querySelector('.chooser[data-kind="' + kind + '"]');
+    box.innerHTML =
+      "<h2>" + c.title + "</h2>" +
+      '<div class="swatch-grid" role="radiogroup" aria-label="' + c.title + ' colour"></div>' +
+      '<div class="custom"><label class="color-well" role="radio" aria-checked="false" title="Custom ' + kind + '">' +
+        '<input type="color" aria-label="Custom ' + kind + ' colour"></label>' +
+        '<input class="input mono" spellcheck="false" aria-label="Custom ' + kind + ' hex"><span class="custom-label">Custom</span></div>' +
+      '<div class="row-between blend-head"><h3>' + c.blendTitle + '</h3><span class="value"></span></div>' +
+      '<input type="range" min="0" max="100" step="1" aria-label="' + c.blendTitle + '">' +
+      '<div class="fit"></div>';
+    var grid = box.querySelector(".swatch-grid");
+    D.SWATCHES.forEach(function (row) {
+      row.forEach(function (sw) {
+        if (!sw) { grid.appendChild(el("span", { class: "gap", "aria-hidden": "true" })); return; }
+        var b = el("button", { class: "swatch" + (sw[1] === "mono" ? " mono-swatch" : ""), role: "radio", title: sw[0] + (sw[1] === "mono" ? "" : " " + sw[1]), "aria-label": sw[0], "data-value": sw[1] });
+        if (sw[1] !== "mono") b.style.background = sw[1];
+        b.addEventListener("click", function () { state[kind] = sw[1]; render(); });
+        grid.appendChild(b);
+      });
+    });
+    var picker = box.querySelector('input[type="color"]'), hexIn = box.querySelector("input.input"), range = box.querySelector('input[type="range"]');
+    picker.addEventListener("input", function (e) { state[kind] = c.custom = e.target.value.toLowerCase(); render(); });
+    hexIn.addEventListener("input", function (e) { var v = e.target.value.trim(); if (isHex(v)) { state[kind] = c.custom = norm(v); render(); } });
+    range.addEventListener("input", function (e) { state[c.blend] = e.target.value / 100; render(); });
+    c.box = box;
+  }
+  var SWATCH_VALUES = [];
+  D.SWATCHES.forEach(function (row) { row.forEach(function (sw) { if (sw) SWATCH_VALUES.push(sw[1]); }); });
+
+  function renderChooser(kind, theme) {
+    var c = CHOOSERS[kind], box = c.box, v = state[kind], known = SWATCH_VALUES.indexOf(v) >= 0;
+    if (!known) c.custom = v;
+    box.querySelectorAll(".swatch").forEach(function (b) { b.setAttribute("aria-checked", String(b.dataset.value === v)); });
+    var well = box.querySelector(".color-well"), hexIn = box.querySelector("input.input");
+    well.style.background = c.custom;
+    well.setAttribute("aria-checked", String(!known));
+    box.querySelector('input[type="color"]').value = c.custom;
+    if (document.activeElement !== hexIn) hexIn.value = c.custom;
+    var range = box.querySelector('input[type="range"]'), bv = state[c.blend];
+    range.value = Math.round(bv * 100);
+    range.style.setProperty("--p", bv * 100 + "%");
+    box.querySelector(".value").textContent = Math.round(bv * 100) + "%";
+    var r = theme.roles, rep = theme.report, lines = [];
+    var chip = function (label, color, text) { return '<span class="chip" style="background:' + color + '"></span>' + label + " <code>" + text + "</code>"; };
+    var cancel = rep.notes.filter(function (n) { return /cancel/.test(n); })[0];
+    if (kind === "base") {
+      var muted = rep.clamped.filter(function (x) { return x.input === "base" && /saturated/.test(x.why); })[0];
+      lines.push(chip("Picked", v === "mono" ? "#808080" : v, v) + '<span style="margin-left:6px"></span>' + chip("Surface", hex(r["layer.surface"]), hex(r["layer.surface"])));
+      var dp = theme.meta.depth, fromAccent = state.accentBlend > bv;
+      var depthText = dp === 0 ? (theme.scheme === "dark" ? "the canvas is pure black" : "the raised layers are pure white")
+        : "depth " + Math.round(dp * 100) + "% of the way to the dimmest " + theme.scheme + " ground" + (fromAccent ? ", set by accent blend" : "");
+      if (v === "mono") lines.push("Mono adds no tint; " + depthText + ".");
+      else if (bv === 0) lines.push("At 0% the base has no effect: the theme is the same as with a mono base, and " + depthText + ".");
+      else lines.push("Adds its tint at " + Math.round(theme.meta.weights[0] * 100) + "% of full strength; " + depthText + ".");
+      if (muted && v !== "mono") lines.push("Too saturated for a " + theme.scheme + " ground, so full strength is muted to the strongest tint allowed.");
+      rep.notes.filter(function (n) { return /sRGB|danger/.test(n); }).forEach(function (n) { lines.push(n); });
+    } else {
+      var ma = theme.meta.accent, gap = '<span style="margin-left:6px"></span>';
+      var dark = r["accent.on"][0] < 0.5, lineMoved = rep.adjusted.some(function (x) { return x.role === "accent.line"; });
+      lines.push(chip("Picked", v === "mono" ? "#808080" : v, v) + gap + chip("Fill", hex(r["accent.fill"]), hex(r["accent.fill"])));
+      lines.push(chip("Text on fill", hex(r["accent.on"]), hex(r["accent.on"])) + " <code>" + ma.onContrast.toFixed(1) + ":1</code>");
+      lines.push(chip("Line", hex(r["accent.line"]), hex(r["accent.line"])) + gap + "Edge <code>" + (ma.edge ? "on" : "off") + "</code>");
+      var fillText = v === "mono" ? "Mono uses the neutral ink." :
+        !ma.moved ? "Fill as picked, with " + (dark ? "dark" : "white") + " text." :
+        "Fill " + (dark ? "lightened" : "darkened") + " by ΔE " + Math.round(ma.dist * 100) + " so " + (dark ? "dark" : "white") + " text " + (ma.strong ? "reaches 7:1." : "gets as close to 7:1 as allowed: " + ma.onContrast.toFixed(2) + ":1. Reaching 7:1 would move it more than ΔE " + Math.round(T.FILL_REACH * 100) + " from the picked colour.");
+      lines.push(fillText + (v === "mono" ? "" : lineMoved ? " The line is " + (theme.scheme === "light" ? "darker" : "lighter") + ", to hold 3:1 on every layer." : " The line is the picked colour."));
+      var ed = Math.round(ma.edgeDist * 100), en = Math.round(T.EDGE_NEAR * 100);
+      lines.push(ma.edge ? "Edge on: the fill is ΔE " + ed + " from the nearest layer, below " + en + ", so filled controls get a hairline in the line colour."
+        : "No edge: the fill is ΔE " + ed + " from the nearest layer (an edge appears below " + en + ").");
+      // Round six: accent blend adds the accent's own tint, independent of base blend.
+      var aw = Math.round(theme.meta.weights[1] * 100), sets = bv > state.baseBlend;
+      if (bv === 0) lines.push("At 0% the accent adds no tint to the neutrals.");
+      else if (v === "mono") lines.push("Mono adds no tint" + (sets ? "; accent blend sets depth (" + Math.round(theme.meta.depth * 100) + "%), as the larger blend." : "."));
+      else lines.push("Adds its tint to the neutrals at " + aw + "% of full strength" + (sets ? ", and sets depth (" + Math.round(theme.meta.depth * 100) + "%), as the larger blend." : ", on the base's depth."));
+      if (bv > 0 && v !== "mono" && theme.meta.accentSlope > theme.meta.smax * 1.01) lines.push("Too saturated for a " + theme.scheme + " ground, so its tint is muted to the strongest allowed. The fill is not affected.");
+    }
+    if (cancel && kind === "accent") lines.push(cancel);
+    box.querySelector(".fit").innerHTML = lines.map(function (l) { return "<div>" + l + "</div>"; }).join("");
+  }
+
+  function renderSliders() {
+    $("contrast").value = Math.round(state.contrast * 100);
+    $("contrast").style.setProperty("--p", ((state.contrast - 0.5) / 1.5) * 100 + "%");
+    $("contrast-value").textContent = state.contrast.toFixed(2) + "×";
+  }
+
+  function renderAudit(theme) {
+    var a = T.audit(theme);
+    var fails = 0, total = 0;
+    var head = "<tr><th></th><th>Canvas</th><th>Surface</th><th>Raised</th><th>Overlay</th></tr>";
+    var names = { "text.primary": "Primary text", "text.secondary": "Secondary text", "accent.text": "Accent text" };
+    var rows = a.matrix.map(function (m) {
+      return "<tr><td>" + names[m.role] + "</td>" + m.values.map(function (v, i) {
+        total++; var ok = v >= m.target[i]; if (!ok) fails++;
+        return '<td class="' + (ok ? "" : "fail") + '" title="target ' + m.target[i] + '">' + fmt(v) + "</td>";
+      }).join("") + "</tr>";
+    }).join("");
+    $("matrix").innerHTML = head + rows;
+    var hier = a.hierarchy;
+    total++; if (!hier.pass) fails++;
+    $("checks").innerHTML = a.checks.map(function (c) {
+      total++; if (!c.pass) fails++;
+      return '<li class="' + (c.pass ? "" : "fail") + '"><span>' + c.label + '</span><span><span class="v">' + fmt(c.value) + '</span> <span class="t">≥ ' + c.shown + '</span></span><span class="mark">' + (c.pass ? "✓" : "✗") + "</span></li>";
+    }).join("") +
+      '<li class="' + (hier.pass ? "" : "fail") + '"><span>Text hierarchy (ΔL primary to secondary)</span><span><span class="v">' + hier.value.toFixed(3) + '</span> <span class="t">≥ ' + hier.target + '</span></span><span class="mark">' + (hier.pass ? "✓" : "✗") + "</span></li>" +
+      '<li><span class="muted">Disabled text (no target)</span><span class="t">' + fmt(a.disabled) + '</span><span class="mark"></span></li>' +
+      '<li><span class="muted">Fill edge (on below ΔE ' + Math.round(a.edge.near * 100) + ' to a layer)</span><span class="t">' + (a.edge.on ? "on, " : "off, ") + (a.edge.dist * 100).toFixed(1) + '</span><span class="mark"></span></li>' +
+      '<li><span class="muted">Danger fill edge</span><span class="t">' + (a.dangerEdge.on ? "on, " : "off, ") + (a.dangerEdge.dist * 100).toFixed(1) + '</span><span class="mark"></span></li>';
+    $("steps").innerHTML = a.steps.map(function (s) {
+      total++; if (!s.pass) fails++;
+      var label = s.label.charAt(0).toUpperCase() + s.label.slice(1);
+      return '<li class="' + (s.pass ? "" : "fail") + '"><span>' + label + '</span><span><span class="v">' + s.dL.toFixed(3) + '</span> <span class="t">' + s.ratio.toFixed(2) + ':1</span></span><span class="mark">' + (s.pass ? "✓" : "✗") + "</span></li>";
+    }).join("");
+    var sum = $("summary");
+    sum.className = "summary " + (fails ? "bad" : "ok");
+    sum.textContent = fails ? fails + " of " + total + " fail" : "All " + total + " pass";
+    var rep = theme.report;
+    var notes = rep.clamped.filter(function (c) { return c.input !== "base"; }).map(function (c) { return "<div>Clamped <code>" + c.input + "</code> " + c.from + " → " + c.to + " (" + c.why + ")</div>"; })
+      .concat(rep.adjusted.filter(function (x) { return x.role.indexOf("accent.") !== 0; }).map(function (x) { return "<div>Adjusted <code>" + x.role + "</code> " + x.from + " → " + x.to + (x.why ? " (" + x.why + ")" : "") + "</div>"; }))
+      .concat(rep.warnings.map(function (w) { return "<div>" + w + "</div>"; }));
+    $("notes").innerHTML = notes.join("");
+    return a;
+  }
+
+  function renderRoles(theme) {
+    $("roles").innerHTML = Object.keys(theme.roles).map(function (k) {
+      var h = hex(theme.roles[k]);
+      return '<div><span class="chip" style="background:' + h + '"></span><span>' + k + "</span><code>" + h + "</code></div>";
+    }).join("");
+  }
+
+  // ── Reference comparison: derived roles beside a canonical palette or today's theme ──
+  var CMP_ROLES = ["layer.canvas", "layer.surface", "layer.raised", "layer.overlay", "text.primary", "text.secondary", "text.disabled", "border.strong", "accent.fill", "accent.text",
+    "status.success.fg", "status.warning.fg", "status.danger.fg", "status.info.fg"].concat(T.SYNTAX.map(function (s) { return "syntax." + s; }));
+  function dE(a, b) { var x = T.toLab(a), y = T.toLab(b); return 100 * Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]); }
+  function deClass(d) { return d > 10 ? "de-far" : d > 5 ? "de-mid" : ""; }
+  function shortRole(r) { return r.replace("layer.", "").replace(".fg", ""); }
+  function groupOf(r) { return r.indexOf("layer") === 0 ? "Layers" : r.indexOf("text") === 0 || r === "border.strong" ? "Text" : r.indexOf("accent") === 0 ? "Accent" : r.indexOf("status") === 0 ? "Status" : "Syntax"; }
+  function renderCompare(theme) {
+    var box = $("compare"), id = state.ref, canon = D.CANONICAL[id], today = D.TODAY[id];
+    if (!id || (!canon && !today)) { box.hidden = true; return; }
+    box.hidden = false;
+    var pre = presetById(id), r = theme.roles, rows = [], groups = {};
+    var palette = canon ? canon.palette.map(function (p) { return { name: p[0], hex: p[1] }; })
+      : Object.keys(today).map(function (k) { return { name: shortRole(k), hex: today[k] }; });
+    CMP_ROLES.forEach(function (role) {
+      var refHex = canon ? (canon.map[role] ? palette.filter(function (p) { return p.name === canon.map[role]; })[0].hex : null) : today[role];
+      var refName = canon ? canon.map[role] : "<code>" + refHex + "</code>";
+      var near = palette.map(function (p) { return { p: p, d: dE(r[role], T.parseHex(p.hex)) }; }).sort(function (x, y) { return x.d - y.d; })[0];
+      if (!refHex) { if (!canon) return; refHex = near.p.hex; refName = near.p.name + " (nearest)"; }
+      var d = dE(r[role], T.parseHex(refHex));
+      (groups[groupOf(role)] = groups[groupOf(role)] || []).push(d);
+      rows.push('<tr><td class="role">' + shortRole(role) + '</td><td><span class="pair"><i style="background:' + hex(r[role]) + '"></i><i style="background:' + refHex + '"></i></span></td>' +
+        "<td><code>" + hex(r[role]) + "</code></td><td>" + refName + '</td><td class="num ' + deClass(d) + '">' + d.toFixed(1) + "</td></tr>");
+    });
+    var head = '<tr><th>Role</th><th></th><th>Derived</th><th>' + (canon ? "Intended" : "Today") + '</th><th class="num">ΔE</th></tr>';
+    var half = Math.ceil(rows.length / 2);
+    $("cmp-roles-a").innerHTML = head + rows.slice(0, half).join("");
+    $("cmp-roles-b").innerHTML = head + rows.slice(half).join("");
+    box.querySelector(".compare-grid").classList.toggle("two", !canon);
+    $("cmp-cov").innerHTML = !canon ? "" : palette.map(function (p) {
+      var best = CMP_ROLES.map(function (role) { return { role: role, d: dE(r[role], T.parseHex(p.hex)) }; }).sort(function (x, y) { return x.d - y.d; })[0];
+      return '<div class="cov-tile"><div class="cov-sw"><i style="background:' + p.hex + '"></i><i style="background:' + hex(r[best.role]) + '"></i></div>' +
+        '<div class="cov-name"><span>' + p.name + '</span><span class="' + deClass(best.d) + '">' + best.d.toFixed(1) + '</span></div><div class="cov-role">' + shortRole(best.role) + "</div></div>";
+    }).join("");
+    $("cmp-title").textContent = canon ? canon.title + " beside the " + pre.name + " preset" : pre.name + " preset beside today's Poodle " + pre.name;
+    $("cmp-sub").textContent = (matches(pre) ? "" : "Inputs changed from the preset. ") + "ΔE is the OKLab distance × 100; about 2 is the smallest difference you can see side by side.";
+    $("cmp-cov-title").textContent = canon ? "Every canonical colour, with the nearest derived role" : "";
+    $("cmp-summary").innerHTML = Object.keys(groups).map(function (g) {
+      var m = groups[g].reduce(function (x, y) { return x + y; }, 0) / groups[g].length;
+      return "<span><b>" + m.toFixed(1) + "</b>" + g + "</span>";
+    }).join("");
+  }
+
+  function render() {
+    var theme = resolve();
+    var root = document.documentElement;
+    Object.keys(theme.roles).forEach(function (role) {
+      root.style.setProperty("--" + role.replace(/\./g, "-"), hex(theme.roles[role]));
+    });
+    root.style.colorScheme = theme.scheme;
+    renderPresets(); renderScheme(); renderChooser("base", theme); renderChooser("accent", theme); renderSliders();
+    var a = renderAudit(theme); renderRoles(theme); renderCompare(theme);
+    writeHash();
+    window.__theme = theme;
+    window.__audit = a;
+  }
+
+  $("scheme-light").addEventListener("click", function () { state.scheme = "light"; render(); });
+  $("scheme-dark").addEventListener("click", function () { state.scheme = "dark"; render(); });
+  $("even-tint").addEventListener("click", function () { state.evenTint = !state.evenTint; render(); });
+  $("contrast").addEventListener("input", function (e) { state.contrast = e.target.value / 100; render(); });
+  document.querySelectorAll(".switch").forEach(function (s) {
+    s.addEventListener("click", function () { s.setAttribute("aria-checked", String(s.getAttribute("aria-checked") !== "true")); });
+  });
+  document.querySelectorAll(".check").forEach(function (c) {
+    c.addEventListener("click", function () { c.querySelector(".checkbox").classList.toggle("on"); });
+  });
+  window.addEventListener("hashchange", function () { readHash(); render(); });
+  window.lab = { set: function (o) { Object.assign(state, o); render(); }, state: state };
+
+  buildPresets();
+  buildChooser("base");
+  buildChooser("accent");
+  readHash();
+  render();
+})();
+</script>
+</body>
+</html>
