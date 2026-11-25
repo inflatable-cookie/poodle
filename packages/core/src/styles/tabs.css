@@ -362,14 +362,14 @@
   }
 
   .poodle-tabs[data-variant="card"] .poodle-tabs__item[data-selected="true"] {
-    background: var(--poodle-recipe-tabs-card-selected-tab-fill, var(--poodle-style-selection-fill, var(--poodle-color-selection-accent-fill)));
+    background: var(--poodle-recipe-tabs-card-selected-tab-fill, var(--poodle-style-selection-fill, var(--poodle-color-select-accent)));
   }
 
   /* Colour stays targeted at the tab and close: `.poodle-tabs__tab` sets an
      explicit `color`, so it does not inherit from the chip. */
   .poodle-tabs[data-variant="card"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab,
   .poodle-tabs[data-variant="card"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__close {
-    color: var(--poodle-recipe-tabs-card-selected-tab-text, var(--poodle-style-selection-text, var(--poodle-color-selection-accent-text)));
+    color: var(--poodle-recipe-tabs-card-selected-tab-text, var(--poodle-style-selection-text, var(--poodle-color-text-primary)));
   }
 
   .poodle-tabs[data-variant="block"] .poodle-tabs__tab {
@@ -381,11 +381,11 @@
   }
 
   .poodle-tabs[data-variant="block"] .poodle-tabs__item[data-selected="true"] {
-    background: var(--poodle-recipe-tabs-block-selected-item-fill, var(--poodle-style-selection-fillSurface, var(--poodle-color-selection-accent-fillSurface)));
+    background: var(--poodle-recipe-tabs-block-selected-item-fill, var(--poodle-style-selection-fillSurface, var(--poodle-color-select-accentSurface)));
   }
 
   .poodle-tabs[data-variant="block"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab {
-    color: var(--poodle-recipe-tabs-block-selected-tab-text, var(--poodle-style-selection-text, var(--poodle-color-selection-accent-text)));
+    color: var(--poodle-recipe-tabs-block-selected-tab-text, var(--poodle-style-selection-text, var(--poodle-color-text-primary)));
   }
 
   /* Block absorbed the former strip variant's item hover background. */
@@ -394,7 +394,7 @@
   }
 
   .poodle-tabs[data-variant="block"] .poodle-tabs__item[data-selected="true"]:hover {
-    background: var(--poodle-recipe-tabs-block-selected-hover-item-fill, var(--poodle-style-selection-fillSurfaceHover, var(--poodle-color-selection-accent-fillSurfaceHover)));
+    background: var(--poodle-recipe-tabs-block-selected-hover-item-fill, var(--poodle-style-selection-fillSurfaceHover, var(--poodle-color-select-accentSurfaceHover)));
   }
 
   /* Block vertical absorbed the former strip variant's compact icon tab
@@ -444,12 +444,12 @@
   }
 
   .poodle-tabs[data-variant="pill"] .poodle-tabs__item[data-selected="true"] {
-    background: var(--poodle-recipe-tabs-pill-selected-tab-fill, var(--poodle-style-selection-fill, var(--poodle-color-selection-accent-fill)));
+    background: var(--poodle-recipe-tabs-pill-selected-tab-fill, var(--poodle-style-selection-fill, var(--poodle-color-select-accent)));
   }
 
   .poodle-tabs[data-variant="pill"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab,
   .poodle-tabs[data-variant="pill"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__close {
-    color: var(--poodle-recipe-tabs-pill-selected-tab-text, var(--poodle-style-selection-text, var(--poodle-color-selection-accent-text)));
+    color: var(--poodle-recipe-tabs-pill-selected-tab-text, var(--poodle-style-selection-text, var(--poodle-color-text-primary)));
   }
 
   /* activeEdge="outline": outline on the selected item, reusing the former
@@ -465,7 +465,7 @@
   }
 
   .poodle-tabs[data-active-edge="outline"] .poodle-tabs__item[data-selected="true"] {
-    border-color: var(--poodle-recipe-tabs-active-outline-border, var(--poodle-style-selection-border, var(--poodle-color-selection-accent-border)));
+    border-color: var(--poodle-recipe-tabs-active-outline-border, var(--poodle-style-selection-border, var(--poodle-color-select-accentBorder)));
   }
 
   /* activeEdge="underline": one paint-only measured indicator, not a
@@ -477,7 +477,7 @@
   .poodle-tabs__indicator {
     position: absolute;
     pointer-events: none;
-    background: var(--poodle-recipe-tabs-active-underline-border, var(--poodle-style-selection-indicator, var(--poodle-color-selection-accent-indicator)));
+    background: var(--poodle-recipe-tabs-active-underline-border, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)));
   }
 
   .poodle-tabs[data-orientation="horizontal"] .poodle-tabs__indicator,
@@ -507,12 +507,12 @@
 
   /* activeFill="solid" uses the selection style's solid fill and its paired text. */
   .poodle-tabs[data-active-fill="solid"] .poodle-tabs__item[data-selected="true"] {
-    background: var(--poodle-recipe-tabs-active-solid-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-selection-accent-fillSolid)));
+    background: var(--poodle-recipe-tabs-active-solid-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)));
   }
 
   .poodle-tabs[data-active-fill="solid"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab,
   .poodle-tabs[data-active-fill="solid"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__close {
-    color: var(--poodle-recipe-tabs-active-solid-text, var(--poodle-style-selection-textSolid, var(--poodle-color-selection-accent-textSolid)));
+    color: var(--poodle-recipe-tabs-active-solid-text, var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse)));
   }
 
   /* Solid fill must survive hover. Block defines its own item-hover
@@ -520,16 +520,16 @@
      stays text-inverse, leaving inverse text on a light tint. This selector
      is variant-agnostic and one step more specific than any of them. */
   .poodle-tabs[data-active-fill="solid"] .poodle-tabs__item[data-selected="true"]:hover {
-    background: var(--poodle-recipe-tabs-active-solid-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-selection-accent-fillSolid)));
+    background: var(--poodle-recipe-tabs-active-solid-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)));
   }
 
   /* Tint the close hover with the selected tab’s foreground. */
   .poodle-tabs[data-active-fill="solid"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__close:hover {
     background: var(
       --poodle-recipe-tabs-active-solid-hover-close-fill,
-      color-mix(in srgb, var(--poodle-style-selection-textSolid, var(--poodle-color-selection-accent-textSolid)) 18%, transparent)
+      color-mix(in srgb, var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse)) 18%, transparent)
     );
-    color: var(--poodle-recipe-tabs-active-solid-hover-close-text, var(--poodle-style-selection-textSolid, var(--poodle-color-selection-accent-textSolid)));
+    color: var(--poodle-recipe-tabs-active-solid-hover-close-text, var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse)));
   }
 
   /* activeFill="none": suppress the *selection* fill, not the variant's idle

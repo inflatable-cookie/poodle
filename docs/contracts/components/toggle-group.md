@@ -198,13 +198,13 @@ In single mode with `allowDeactivation=true`, `onValueChange` may receive
 
 ### Item — selected (`.toggle-group__item.poodle-selected`)
 
-The selected fill layers the style’s colour over the base item fill. The
-default uses the original translucent accent. A neutral fill covers the base.
+The accent styles layer the original translucent accent over the base item
+fill. Neutral selection layers its ink wash directly over the host surface.
 
 | Property | Value |
 |----------|-------|
 | `background` | `var(--poodle-recipe-toggle-group-selected-item-fill, selection role over the item fill)` |
-| `border-color` | `var(--poodle-recipe-toggle-group-item-border, var(--poodle-style-selection-borderStrong, var(--poodle-color-selection-accent-borderStrong)))` |
+| `border-color` | `var(--poodle-recipe-toggle-group-item-border, var(--poodle-style-selection-borderStrong, var(--poodle-color-select-accentBorderStrong)))` |
 
 ### Item — focus visible (`:focus-visible`)
 

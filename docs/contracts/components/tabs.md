@@ -617,7 +617,7 @@ item also carries the chip radius, so the outline is correctly rounded.
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--poodle-style-selection-border, var(--poodle-color-selection-accent-border))` |
+| `border-color` | `var(--poodle-style-selection-border, var(--poodle-color-select-accentBorder))` |
 
 This is the former `card` variant's selected-border value, so opting in restores
 exactly the outline the old variant drew by default.
@@ -633,7 +633,7 @@ measured from the selected item rather than painted as a selected-item border.
 | vertical | selected item's scroll-content block offset and height; 0.125rem inline size on the list's right edge |
 
 The indicator uses `var(--poodle-recipe-tabs-active-underline-border,
-var(--poodle-style-selection-indicator, var(--poodle-color-selection-accent-indicator)))`. It never owns selection, focus, hit testing,
+var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)))`. It never owns selection, focus, hit testing,
 or accessibility semantics.
 
 First measurement paints the selected endpoint without motion. A semantic
@@ -654,11 +654,11 @@ to the semantic token, adjusted by the selection style.
 
 | Hook | Applies To | Fallback |
 |------|------------|----------|
-| `--poodle-recipe-tabs-active-outline-border` | `activeEdge="outline"` selected item border | `var(--poodle-style-selection-border, var(--poodle-color-selection-accent-border))` |
-| `--poodle-recipe-tabs-active-underline-border` | `activeEdge="underline"` measured indicator fill, both orientations | `var(--poodle-style-selection-indicator, var(--poodle-color-selection-accent-indicator))` |
+| `--poodle-recipe-tabs-active-outline-border` | `activeEdge="outline"` selected item border | `var(--poodle-style-selection-border, var(--poodle-color-select-accentBorder))` |
+| `--poodle-recipe-tabs-active-underline-border` | `activeEdge="underline"` measured indicator fill, both orientations | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |
 | `--poodle-recipe-tabs-card-item-fill` | every card item background before selection treatment | `var(--poodle-color-background-surface)` |
-| `--poodle-recipe-tabs-active-solid-fill` | `activeFill="solid"` selected item background | `var(--poodle-style-selection-fillSolid, var(--poodle-color-selection-accent-fillSolid))` |
-| `--poodle-recipe-tabs-active-solid-text` | `activeFill="solid"` selected tab/close foreground | `var(--poodle-style-selection-textSolid, var(--poodle-color-selection-accent-textSolid))` |
+| `--poodle-recipe-tabs-active-solid-fill` | `activeFill="solid"` selected item background | `var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base))` |
+| `--poodle-recipe-tabs-active-solid-text` | `activeFill="solid"` selected tab/close foreground | `var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse))` |
 
 The underline hook is one paint role in both orientations, so one variable
 covers horizontal and vertical.
@@ -713,29 +713,29 @@ card in the strip.
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-style-selection-fill, var(--poodle-color-selection-accent-fill))` |
+| `background` | `var(--poodle-style-selection-fill, var(--poodle-color-select-accent))` |
 
 ### Tab and Close — Card variant (selected)
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-style-selection-text, var(--poodle-color-selection-accent-text))` |
+| `color` | `var(--poodle-style-selection-text, var(--poodle-color-text-primary))` |
 
 ### Item — Card variant (activeFill="solid", selected)
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-style-selection-fillSolid, var(--poodle-color-selection-accent-fillSolid))` |
+| `background` | `var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base))` |
 
 ### Tab and Close — activeFill="solid", selected
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-style-selection-textSolid, var(--poodle-color-selection-accent-textSolid))` |
+| `color` | `var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse))` |
 
 The solid fill applies across variants. The default style pairs the existing
-accent and inverse text. Other styles supply their own solid fill and its
-paired foreground.
+accent and inverse text. The other styles paint this state with their own
+selection fill and primary text.
 
 ### Item — activeFill="none", selected
 
@@ -762,8 +762,8 @@ selection fill goes. `block` + `activeFill="none"` +
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-style-selection-fill, var(--poodle-color-selection-accent-fill))` |
-| `color` | `var(--poodle-style-selection-text, var(--poodle-color-selection-accent-text))` |
+| `background` | `var(--poodle-style-selection-fill, var(--poodle-color-select-accent))` |
+| `color` | `var(--poodle-style-selection-text, var(--poodle-color-text-primary))` |
 
 ### List — Block variant
 
@@ -809,8 +809,8 @@ Note: In the block variant, the selected background is applied on the **item wra
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-style-selection-fillSurface, var(--poodle-color-selection-accent-fillSurface))` |
-| `color` | `var(--poodle-style-selection-text, var(--poodle-color-selection-accent-text))` |
+| `background` | `var(--poodle-style-selection-fillSurface, var(--poodle-color-select-accentSurface))` |
+| `color` | `var(--poodle-style-selection-text, var(--poodle-color-text-primary))` |
 
 ### Item — Block variant (hover)
 
@@ -819,7 +819,7 @@ Note: In the block variant, the hover background is applied on the **item wrappe
 | Property | Value |
 |----------|-------|
 | `background` (unselected) | `color-mix(in srgb, var(--poodle-color-surface-hover) 50%, transparent)` |
-| `background` (selected) | `var(--poodle-style-selection-fillSurfaceHover, var(--poodle-color-selection-accent-fillSurfaceHover))` |
+| `background` (selected) | `var(--poodle-style-selection-fillSurfaceHover, var(--poodle-color-select-accentSurfaceHover))` |
 
 ### Close button — Block variant
 

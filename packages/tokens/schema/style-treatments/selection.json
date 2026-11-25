@@ -8,11 +8,11 @@
         },
         "fill": {
           "$type": "color",
-          "$value": "{color.selection.accent.fill}"
+          "$value": "{color.select.accent}"
         },
         "fillStrong": {
           "$type": "color",
-          "$value": "{color.selection.accent.fillStrong}"
+          "$value": "{color.select.accentStrong}"
         },
         "fillStrongBackdrop": {
           "$type": "color",
@@ -20,39 +20,39 @@
         },
         "fillSurface": {
           "$type": "color",
-          "$value": "{color.selection.accent.fillSurface}"
+          "$value": "{color.select.accentSurface}"
         },
         "fillSurfaceHover": {
           "$type": "color",
-          "$value": "{color.selection.accent.fillSurfaceHover}"
+          "$value": "{color.select.accentSurfaceHover}"
         },
         "fillSolid": {
           "$type": "color",
-          "$value": "{color.selection.accent.fillSolid}"
+          "$value": "initial"
         },
         "highlightFill": {
           "$type": "color",
-          "$value": "{color.selection.accent.fillSubtle}"
+          "$value": "{color.select.accentSubtle}"
         },
         "border": {
           "$type": "color",
-          "$value": "{color.selection.accent.border}"
+          "$value": "{color.select.accentBorder}"
         },
         "borderStrong": {
           "$type": "color",
-          "$value": "{color.selection.accent.borderStrong}"
+          "$value": "{color.select.accentBorderStrong}"
         },
         "text": {
           "$type": "color",
-          "$value": "{color.selection.accent.text}"
+          "$value": "{color.text.primary}"
         },
         "textSolid": {
           "$type": "color",
-          "$value": "{color.selection.accent.textSolid}"
+          "$value": "initial"
         },
         "indicator": {
           "$type": "color",
-          "$value": "{color.selection.accent.indicator}"
+          "$value": "{color.accent.base}"
         },
         "detailText": {
           "$type": "color",
@@ -66,15 +66,15 @@
       "selection": {
         "itemFill": {
           "$type": "color",
-          "$value": "{color.selection.accent.fillSubtle}"
+          "$value": "{color.select.accentSubtle}"
         },
         "fill": {
           "$type": "color",
-          "$value": "{color.selection.accent.fill}"
+          "$value": "{color.select.accent}"
         },
         "fillStrong": {
           "$type": "color",
-          "$value": "{color.selection.accent.fillStrong}"
+          "$value": "{color.select.accentStrong}"
         },
         "fillStrongBackdrop": {
           "$type": "color",
@@ -82,43 +82,43 @@
         },
         "fillSurface": {
           "$type": "color",
-          "$value": "{color.selection.accent.fillSurface}"
+          "$value": "{color.select.accentSurface}"
         },
         "fillSurfaceHover": {
           "$type": "color",
-          "$value": "{color.selection.accent.fillSurfaceHover}"
+          "$value": "{color.select.accentSurfaceHover}"
         },
         "fillSolid": {
           "$type": "color",
-          "$value": "{color.selection.accent.fillSurface}"
+          "$value": "{color.select.accentSurface}"
         },
         "highlightFill": {
           "$type": "color",
-          "$value": "{color.selection.accent.fillSubtle}"
+          "$value": "{color.select.accentSubtle}"
         },
         "border": {
           "$type": "color",
-          "$value": "{color.selection.neutral.border}"
+          "$value": "transparent"
         },
         "borderStrong": {
           "$type": "color",
-          "$value": "{color.selection.neutral.border}"
+          "$value": "transparent"
         },
         "text": {
           "$type": "color",
-          "$value": "{color.selection.accent.text}"
+          "$value": "{color.text.primary}"
         },
         "textSolid": {
           "$type": "color",
-          "$value": "{color.selection.accent.text}"
+          "$value": "{color.text.primary}"
         },
         "indicator": {
           "$type": "color",
-          "$value": "{color.selection.accent.indicator}"
+          "$value": "{color.accent.base}"
         },
         "detailText": {
           "$type": "color",
-          "$value": "{color.selection.accent.text}"
+          "$value": "{color.text.primary}"
         }
       }
     }
@@ -128,59 +128,63 @@
       "selection": {
         "itemFill": {
           "$type": "color",
-          "$value": "{color.selection.neutral.fill}"
+          "$value": "{color.select.neutral}"
         },
         "fill": {
           "$type": "color",
-          "$value": "{color.selection.neutral.fill}"
+          "$value": "{color.select.neutral}"
         },
         "fillStrong": {
           "$type": "color",
-          "$value": "{color.selection.neutral.fill}"
+          "$value": "{color.select.neutral}"
         },
         "fillStrongBackdrop": {
           "$type": "color",
-          "$value": "{color.background.canvas}"
+          "$value": "initial"
         },
         "fillSurface": {
           "$type": "color",
-          "$value": "{color.selection.neutral.fill}"
+          "$value": "{color.select.neutral}"
         },
         "fillSurfaceHover": {
           "$type": "color",
-          "$value": "{color.selection.neutral.fill}"
+          "$value": "{color.select.neutral}"
         },
         "fillSolid": {
           "$type": "color",
-          "$value": "{color.selection.neutral.fill}"
+          "$value": "{color.select.neutral}"
         },
         "highlightFill": {
           "$type": "color",
-          "$value": "{color.control.neutral.hover}"
+          "$value": "{color.select.neutral}"
         },
         "border": {
           "$type": "color",
-          "$value": "{color.selection.neutral.border}"
+          "$value": "transparent"
         },
         "borderStrong": {
           "$type": "color",
-          "$value": "{color.selection.neutral.border}"
+          "$value": "transparent"
         },
         "text": {
           "$type": "color",
-          "$value": "{color.selection.neutral.text}"
+          "$value": "{color.text.primary}"
         },
         "textSolid": {
           "$type": "color",
-          "$value": "{color.selection.neutral.text}"
+          "$value": "{color.text.primary}"
         },
         "indicator": {
           "$type": "color",
-          "$value": "{color.selection.neutral.indicator}"
+          "$value": "{color.accent.base}"
         },
         "detailText": {
           "$type": "color",
-          "$value": "initial"
+          "$value": "{color.text.primary}"
+        },
+        "fillStrongUnderlay": {
+          "$type": "color",
+          "$value": "transparent"
         }
       }
     }

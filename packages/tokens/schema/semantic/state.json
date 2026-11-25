@@ -11,7 +11,7 @@
       },
       "dragSource": {
         "$type": "number",
-        "$value": 0.4
+        "$value": "{primitives.state.opacity.dragSource}"
       }
     }
   }

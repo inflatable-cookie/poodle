@@ -67,12 +67,12 @@
 
   .poodle-toggle-group__item.poodle-selected {
     background: var(--poodle-recipe-toggle-group-selected-item-fill, linear-gradient(
-        var(--poodle-style-selection-fillStrong, var(--poodle-color-selection-accent-fillStrong)),
-        var(--poodle-style-selection-fillStrong, var(--poodle-color-selection-accent-fillStrong))
+        var(--poodle-style-selection-fillStrong, var(--poodle-color-select-accentStrong)),
+        var(--poodle-style-selection-fillStrong, var(--poodle-color-select-accentStrong))
       ),
-      color-mix(in srgb, var(--poodle-surface, var(--poodle-style-selection-fillStrongBackdrop)) 93%, var(--poodle-color-text-primary)));
-    border-color: var(--poodle-recipe-toggle-group-item-border, var(--poodle-style-selection-borderStrong, var(--poodle-color-selection-accent-borderStrong)));
-    color: var(--poodle-recipe-toggle-group-item-text, var(--poodle-style-selection-text, var(--poodle-color-selection-accent-text)));
+      var(--poodle-style-selection-fillStrongUnderlay, color-mix(in srgb, var(--poodle-surface, var(--poodle-style-selection-fillStrongBackdrop)) 93%, var(--poodle-color-text-primary))));
+    border-color: var(--poodle-recipe-toggle-group-item-border, var(--poodle-style-selection-borderStrong, var(--poodle-color-select-accentBorderStrong)));
+    color: var(--poodle-recipe-toggle-group-item-text, var(--poodle-style-selection-text, var(--poodle-color-text-primary)));
   }
 
   .poodle-toggle-group__item:focus-visible {

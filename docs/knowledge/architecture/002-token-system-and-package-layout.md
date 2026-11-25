@@ -98,15 +98,21 @@ the prior paint. `accent-tint` keeps tint and suppresses selection borders.
 `neutral` uses a neutral fill, stronger text and an accent only for an
 existing small indicator. Each component retains its selection anatomy.
 
-Themes define `color.selection.accent.*` and `color.selection.neutral.*`
-roles for fill, border, text and indicator. The accent fill and border
-variants preserve the default weights and backdrops across components.
-`filled` reads `color.control.neutral.{fill,hover,active}`. `tonal` reads
-`color.surface.tonal`. Tune the values in each file under
-`schema/modes/themes/`. Run `effigy tokens:contrast` to compare the layers
-and foregrounds at the shipped web contrast setting. New fills are checked
-with their paired text roles. The tonal surface targets an OKLCH lightness
-step of at least 0.04 against the canvas and panel.
+Themes define `color.fill.{rest,hover,active}` for filled controls and
+`color.select.{accent,neutral}` for selected items. Neutral fills use the
+theme's primary-text ink at a fixed alpha over the current layer. Light
+themes use 0.045, 0.07, 0.10 and 0.10 for those four neutral fills. Dark
+themes use 0.055, 0.085, 0.12 and 0.13. The additional accent fill and
+border roles preserve the previous component weights and backdrops. The
+selection switch reuses the primary text and accent indicator roles.
+Default solid Tabs keep their existing accent and inverse text tokens.
+
+Tonal goes from canvas to `color.background.panel` for Card and from
+panel to `color.background.elevated` for floating Dialog. Both use the
+existing colour steps. Run `effigy tokens:contrast` to check the new fills
+with their paired text on the content layers. The report shows the existing
+steps below 0.04 OKLCH lightness so themes can address small steps in a
+later palette revision.
 
 Nested style modes start from the base values for style-owned tokens, and
 nested themes resolve style aliases against their own colour roles. Style

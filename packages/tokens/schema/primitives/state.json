@@ -8,6 +8,10 @@
       "muted": {
         "$type": "number",
         "$value": 0.72
+      },
+      "dragSource": {
+        "$type": "number",
+        "$value": 0.4
       }
     }
   }

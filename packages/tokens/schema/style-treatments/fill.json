@@ -22,7 +22,7 @@
       "control": {
         "fill": {
           "$type": "color",
-          "$value": "{color.control.neutral.fill}"
+          "$value": "{color.fill.rest}"
         },
         "border": {
           "$type": "color",
@@ -34,11 +34,19 @@
         },
         "fillHover": {
           "$type": "color",
-          "$value": "{color.control.neutral.hover}"
+          "$value": "{color.fill.hover}"
         },
         "fillActive": {
           "$type": "color",
-          "$value": "{color.control.neutral.active}"
+          "$value": "{color.fill.active}"
+        },
+        "secondaryText": {
+          "$type": "color",
+          "$value": "{color.text.primary}"
+        },
+        "secondaryOpacity": {
+          "$type": "number",
+          "$value": 1
         }
       }
     }

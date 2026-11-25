@@ -473,8 +473,8 @@ cannot drift between targets.
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-color-text-secondary)` |
-| `opacity` | `var(--poodle-state-opacity-muted)` |
+| `color` | `var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary))` |
+| `opacity` | `var(--poodle-style-control-secondaryOpacity, var(--poodle-state-opacity-muted))` |
 
 ### Affordance `.text-input__affordance`
 
@@ -526,8 +526,8 @@ indicator slot.
 | `align-items` | `center` |
 | `align-self` | `stretch` |
 | `padding-inline` | `0.625rem` |
-| `color` | `var(--poodle-color-text-secondary)` |
-| `opacity` | `var(--poodle-state-opacity-muted)` |
+| `color` | `var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary))` |
+| `opacity` | `var(--poodle-style-control-secondaryOpacity, var(--poodle-state-opacity-muted))` |
 | `font-family` | `var(--poodle-typography-body-family)` |
 | `font-size` | `var(--poodle-typography-body-size)` |
 | `white-space` | `nowrap` |

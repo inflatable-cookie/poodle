@@ -98,7 +98,7 @@
   }
 
   .poodle-select[data-placeholder="true"] .poodle-select__control {
-    color: var(--poodle-recipe-select-placeholder-control-text, var(--poodle-color-text-secondary));
+    color: var(--poodle-recipe-select-placeholder-control-text, var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary)));
   }
 
   .poodle-select__control optgroup { font-weight: var(--poodle-typography-heading-weight); color: var(--poodle-recipe-select-group-control-text, var(--poodle-color-text-secondary)); }
@@ -144,7 +144,7 @@
   }
 
   .poodle-select__input::placeholder {
-    color: var(--poodle-recipe-select-placeholder-input-text, var(--poodle-color-text-secondary));
+    color: var(--poodle-recipe-select-placeholder-input-text, var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary)));
   }
 
   /* Trigger button (non-searchable custom) */
@@ -197,7 +197,7 @@
   }
 
   .poodle-select__value[data-placeholder="true"] {
-    color: var(--poodle-recipe-select-value-text, var(--poodle-color-text-secondary));
+    color: var(--poodle-recipe-select-value-text, var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary)));
   }
 
   /* Clear button */
@@ -300,7 +300,7 @@
 
   .poodle-select__option[aria-selected="true"] {
     background: var(--poodle-recipe-select-option-fill, var(--poodle-style-selection-itemFill, transparent));
-    color: var(--poodle-recipe-select-option-text, var(--poodle-style-selection-text, var(--poodle-color-selection-accent-text)));
+    color: var(--poodle-recipe-select-option-text, var(--poodle-style-selection-text, var(--poodle-color-text-primary)));
     font-weight: var(--poodle-typography-label-weight);
   }
 
@@ -316,7 +316,7 @@
 
   .poodle-select__option[aria-selected="true"][data-highlighted="true"],
   .poodle-select__option[aria-selected="true"]:hover:not(:disabled) {
-    background: var(--poodle-recipe-select-highlighted-hover-option-fill, var(--poodle-style-selection-highlightFill, var(--poodle-color-selection-accent-fillSubtle)));
+    background: var(--poodle-recipe-select-highlighted-hover-option-fill, var(--poodle-style-selection-highlightFill, var(--poodle-color-select-accentSubtle)));
   }
 
   .poodle-select__option:disabled {

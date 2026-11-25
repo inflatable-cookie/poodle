@@ -133,7 +133,8 @@ export const tokens = {
       },
       "easing": {
         "standard": "cubic-bezier(0.2, 0, 0, 1)",
-        "emphasized": "cubic-bezier(0.16, 1, 0.3, 1)"
+        "emphasized": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "ease": "cubic-bezier(0.25, 0.1, 0.25, 1)"
       }
     },
     "overlay": {
@@ -157,7 +158,8 @@ export const tokens = {
     "state": {
       "opacity": {
         "disabled": 0.48,
-        "muted": 0.72
+        "muted": 0.72,
+        "dragSource": 0.4
       }
     },
     "typography": {
@@ -207,8 +209,7 @@ export const tokens = {
         "overlay": "rgba(11, 15, 20, 0.64)"
       },
       "surface": {
-        "hover": "rgba(148, 163, 184, 0.12)",
-        "tonal": "#d4deea"
+        "hover": "rgba(148, 163, 184, 0.12)"
       },
       "text": {
         "primary": "#131a22",
@@ -248,33 +249,20 @@ export const tokens = {
         "punctuation": "#98adbe",
         "invalid": "#ff8f86"
       },
-      "control": {
-        "neutral": {
-          "fill": "#d7e0eb",
-          "hover": "#ced9e5",
-          "active": "#c4d1e0"
-        }
+      "fill": {
+        "rest": "rgba(19, 26, 34, 0.045)",
+        "hover": "rgba(19, 26, 34, 0.07)",
+        "active": "rgba(19, 26, 34, 0.10)"
       },
-      "selection": {
-        "accent": {
-          "fill": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
-          "fillSubtle": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)",
-          "fillStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)",
-          "fillSurface": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
-          "fillSurfaceHover": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))",
-          "fillSolid": "#2d86f3",
-          "border": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))",
-          "borderStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))",
-          "text": "#131a22",
-          "textSolid": "#fcfdff",
-          "indicator": "#2d86f3"
-        },
-        "neutral": {
-          "fill": "#c4d1e0",
-          "border": "transparent",
-          "text": "#0b0f14",
-          "indicator": "#2d86f3"
-        }
+      "select": {
+        "accent": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
+        "accentSubtle": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)",
+        "accentStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)",
+        "accentSurface": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
+        "accentSurfaceHover": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))",
+        "accentBorder": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))",
+        "accentBorderStrong": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))",
+        "neutral": "rgba(19, 26, 34, 0.10)"
       }
     },
     "elevation": {
@@ -303,7 +291,7 @@ export const tokens = {
       "easing": {
         "standard": "cubic-bezier(0.2, 0, 0, 1)",
         "emphasized": "cubic-bezier(0.16, 1, 0.3, 1)",
-        "ease": "ease"
+        "ease": "cubic-bezier(0.25, 0.1, 0.25, 1)"
       }
     },
     "overlay": {
@@ -397,12 +385,15 @@ export const tokens = {
         "border": "initial",
         "shadow": "initial",
         "fillHover": "initial",
-        "fillActive": "initial"
+        "fillActive": "initial",
+        "secondaryText": "initial",
+        "secondaryOpacity": "initial"
       },
       "surface": {
         "fill": "initial",
         "border": "initial",
-        "shadow": "initial"
+        "shadow": "initial",
+        "floatingFill": "initial"
       },
       "selection": {
         "itemFill": "initial",
@@ -418,7 +409,8 @@ export const tokens = {
         "text": "initial",
         "textSolid": "initial",
         "indicator": "initial",
-        "detailText": "initial"
+        "detailText": "initial",
+        "fillStrongUnderlay": "initial"
       }
     },
     "tabs": {
@@ -553,6 +545,7 @@ export const tokenPaths = [
   "primitives.motion.duration.slow",
   "primitives.motion.easing.standard",
   "primitives.motion.easing.emphasized",
+  "primitives.motion.easing.ease",
   "primitives.overlay.z.base",
   "primitives.overlay.z.menu",
   "primitives.overlay.z.dialog",
@@ -565,6 +558,7 @@ export const tokenPaths = [
   "primitives.radius.pill",
   "primitives.state.opacity.disabled",
   "primitives.state.opacity.muted",
+  "primitives.state.opacity.dragSource",
   "primitives.typography.font.family.sans",
   "primitives.typography.font.family.mono",
   "primitives.typography.font.weight.regular",
@@ -589,7 +583,6 @@ export const tokenPaths = [
   "color.background.elevated",
   "color.background.overlay",
   "color.surface.hover",
-  "color.surface.tonal",
   "color.text.primary",
   "color.text.secondary",
   "color.text.tertiary",
@@ -616,24 +609,17 @@ export const tokenPaths = [
   "color.syntax.operator",
   "color.syntax.punctuation",
   "color.syntax.invalid",
-  "color.control.neutral.fill",
-  "color.control.neutral.hover",
-  "color.control.neutral.active",
-  "color.selection.accent.fill",
-  "color.selection.accent.fillSubtle",
-  "color.selection.accent.fillStrong",
-  "color.selection.accent.fillSurface",
-  "color.selection.accent.fillSurfaceHover",
-  "color.selection.accent.fillSolid",
-  "color.selection.accent.border",
-  "color.selection.accent.borderStrong",
-  "color.selection.accent.text",
-  "color.selection.accent.textSolid",
-  "color.selection.accent.indicator",
-  "color.selection.neutral.fill",
-  "color.selection.neutral.border",
-  "color.selection.neutral.text",
-  "color.selection.neutral.indicator",
+  "color.fill.rest",
+  "color.fill.hover",
+  "color.fill.active",
+  "color.select.accent",
+  "color.select.accentSubtle",
+  "color.select.accentStrong",
+  "color.select.accentSurface",
+  "color.select.accentSurfaceHover",
+  "color.select.accentBorder",
+  "color.select.accentBorderStrong",
+  "color.select.neutral",
   "elevation.surface",
   "elevation.overlay",
   "elevation.dialog",
@@ -689,9 +675,12 @@ export const tokenPaths = [
   "style.control.shadow",
   "style.control.fillHover",
   "style.control.fillActive",
+  "style.control.secondaryText",
+  "style.control.secondaryOpacity",
   "style.surface.fill",
   "style.surface.border",
   "style.surface.shadow",
+  "style.surface.floatingFill",
   "style.selection.itemFill",
   "style.selection.fill",
   "style.selection.fillStrong",
@@ -706,6 +695,7 @@ export const tokenPaths = [
   "style.selection.textSolid",
   "style.selection.indicator",
   "style.selection.detailText",
+  "style.selection.fillStrongUnderlay",
   "tabs.gap",
   "tabs.list.padding",
   "tabs.list.background",
@@ -748,7 +738,6 @@ export const cssVars = {
   "color.background.elevated": "--poodle-color-background-elevated",
   "color.background.overlay": "--poodle-color-background-overlay",
   "color.surface.hover": "--poodle-color-surface-hover",
-  "color.surface.tonal": "--poodle-color-surface-tonal",
   "color.text.primary": "--poodle-color-text-primary",
   "color.text.secondary": "--poodle-color-text-secondary",
   "color.text.tertiary": "--poodle-color-text-tertiary",
@@ -775,24 +764,17 @@ export const cssVars = {
   "color.syntax.operator": "--poodle-color-syntax-operator",
   "color.syntax.punctuation": "--poodle-color-syntax-punctuation",
   "color.syntax.invalid": "--poodle-color-syntax-invalid",
-  "color.control.neutral.fill": "--poodle-color-control-neutral-fill",
-  "color.control.neutral.hover": "--poodle-color-control-neutral-hover",
-  "color.control.neutral.active": "--poodle-color-control-neutral-active",
-  "color.selection.accent.fill": "--poodle-color-selection-accent-fill",
-  "color.selection.accent.fillSubtle": "--poodle-color-selection-accent-fillSubtle",
-  "color.selection.accent.fillStrong": "--poodle-color-selection-accent-fillStrong",
-  "color.selection.accent.fillSurface": "--poodle-color-selection-accent-fillSurface",
-  "color.selection.accent.fillSurfaceHover": "--poodle-color-selection-accent-fillSurfaceHover",
-  "color.selection.accent.fillSolid": "--poodle-color-selection-accent-fillSolid",
-  "color.selection.accent.border": "--poodle-color-selection-accent-border",
-  "color.selection.accent.borderStrong": "--poodle-color-selection-accent-borderStrong",
-  "color.selection.accent.text": "--poodle-color-selection-accent-text",
-  "color.selection.accent.textSolid": "--poodle-color-selection-accent-textSolid",
-  "color.selection.accent.indicator": "--poodle-color-selection-accent-indicator",
-  "color.selection.neutral.fill": "--poodle-color-selection-neutral-fill",
-  "color.selection.neutral.border": "--poodle-color-selection-neutral-border",
-  "color.selection.neutral.text": "--poodle-color-selection-neutral-text",
-  "color.selection.neutral.indicator": "--poodle-color-selection-neutral-indicator",
+  "color.fill.rest": "--poodle-color-fill-rest",
+  "color.fill.hover": "--poodle-color-fill-hover",
+  "color.fill.active": "--poodle-color-fill-active",
+  "color.select.accent": "--poodle-color-select-accent",
+  "color.select.accentSubtle": "--poodle-color-select-accentSubtle",
+  "color.select.accentStrong": "--poodle-color-select-accentStrong",
+  "color.select.accentSurface": "--poodle-color-select-accentSurface",
+  "color.select.accentSurfaceHover": "--poodle-color-select-accentSurfaceHover",
+  "color.select.accentBorder": "--poodle-color-select-accentBorder",
+  "color.select.accentBorderStrong": "--poodle-color-select-accentBorderStrong",
+  "color.select.neutral": "--poodle-color-select-neutral",
   "elevation.surface": "--poodle-elevation-surface",
   "elevation.overlay": "--poodle-elevation-overlay",
   "elevation.dialog": "--poodle-elevation-dialog",
@@ -848,9 +830,12 @@ export const cssVars = {
   "style.control.shadow": "--poodle-style-control-shadow",
   "style.control.fillHover": "--poodle-style-control-fillHover",
   "style.control.fillActive": "--poodle-style-control-fillActive",
+  "style.control.secondaryText": "--poodle-style-control-secondaryText",
+  "style.control.secondaryOpacity": "--poodle-style-control-secondaryOpacity",
   "style.surface.fill": "--poodle-style-surface-fill",
   "style.surface.border": "--poodle-style-surface-border",
   "style.surface.shadow": "--poodle-style-surface-shadow",
+  "style.surface.floatingFill": "--poodle-style-surface-floatingFill",
   "style.selection.itemFill": "--poodle-style-selection-itemFill",
   "style.selection.fill": "--poodle-style-selection-fill",
   "style.selection.fillStrong": "--poodle-style-selection-fillStrong",
@@ -865,6 +850,7 @@ export const cssVars = {
   "style.selection.textSolid": "--poodle-style-selection-textSolid",
   "style.selection.indicator": "--poodle-style-selection-indicator",
   "style.selection.detailText": "--poodle-style-selection-detailText",
+  "style.selection.fillStrongUnderlay": "--poodle-style-selection-fillStrongUnderlay",
   "tabs.gap": "--poodle-tabs-gap",
   "tabs.list.padding": "--poodle-tabs-list-padding",
   "tabs.list.background": "--poodle-tabs-list-background",

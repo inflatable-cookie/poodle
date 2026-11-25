@@ -32,11 +32,6 @@
         "$type": "color",
         "$value": "rgba(148, 163, 184, 0.12)",
         "$description": "Subtle hover and active-line fill on a surface."
-      },
-      "tonal": {
-        "$type": "color",
-        "$value": "#d4deea",
-        "$description": "Borderless container surface with a visible tone step from the underlying layer."
       }
     },
     "text": {
@@ -165,92 +160,58 @@
         "$description": "Syntax invalid or malformed text; always paired with a non-colour cue. Dark base by default; light theme modes reference the light primitives."
       }
     },
-    "control": {
-      "neutral": {
-        "fill": {
-          "$type": "color",
-          "$value": "#d7e0eb",
-          "$description": "Neutral fill for filled controls at rest."
-        },
-        "hover": {
-          "$type": "color",
-          "$value": "#ced9e5",
-          "$description": "Neutral filled-control hover step."
-        },
-        "active": {
-          "$type": "color",
-          "$value": "#c4d1e0",
-          "$description": "Neutral filled-control pressed step."
-        }
+    "fill": {
+      "rest": {
+        "$type": "color",
+        "$value": "rgba(19, 26, 34, 0.045)",
+        "$description": "Neutral ink wash for a filled control at rest."
+      },
+      "hover": {
+        "$type": "color",
+        "$value": "rgba(19, 26, 34, 0.07)",
+        "$description": "Neutral ink wash for a hovered filled control."
+      },
+      "active": {
+        "$type": "color",
+        "$value": "rgba(19, 26, 34, 0.10)",
+        "$description": "Neutral ink wash for a pressed filled control."
       }
     },
-    "selection": {
+    "select": {
       "accent": {
-        "fill": {
-          "$type": "color",
-          "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
-          "$description": "Translucent accent selection fill."
-        },
-        "fillSubtle": {
-          "$type": "color",
-          "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)"
-        },
-        "fillStrong": {
-          "$type": "color",
-          "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)"
-        },
-        "fillSurface": {
-          "$type": "color",
-          "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
-          "$description": "Accent selection composited with the control surface."
-        },
-        "fillSurfaceHover": {
-          "$type": "color",
-          "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))"
-        },
-        "fillSolid": {
-          "$type": "color",
-          "$value": "{color.accent.base}"
-        },
-        "border": {
-          "$type": "color",
-          "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))"
-        },
-        "borderStrong": {
-          "$type": "color",
-          "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))"
-        },
-        "text": {
-          "$type": "color",
-          "$value": "{color.text.primary}"
-        },
-        "textSolid": {
-          "$type": "color",
-          "$value": "{color.text.inverse}"
-        },
-        "indicator": {
-          "$type": "color",
-          "$value": "{color.accent.base}"
-        }
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)",
+        "$description": "Translucent accent selection fill."
+      },
+      "accentSubtle": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)"
+      },
+      "accentStrong": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)"
+      },
+      "accentSurface": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))",
+        "$description": "Accent selection composited with the control surface."
+      },
+      "accentSurfaceHover": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface))"
+      },
+      "accentBorder": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))"
+      },
+      "accentBorderStrong": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))"
       },
       "neutral": {
-        "fill": {
-          "$type": "color",
-          "$value": "#c4d1e0",
-          "$description": "Opaque neutral selection fill."
-        },
-        "border": {
-          "$type": "color",
-          "$value": "transparent"
-        },
-        "text": {
-          "$type": "color",
-          "$value": "{primitives.color.slate.950}"
-        },
-        "indicator": {
-          "$type": "color",
-          "$value": "{color.accent.base}"
-        }
+        "$type": "color",
+        "$value": "rgba(19, 26, 34, 0.10)",
+        "$description": "Neutral ink wash for a selected item."
       }
     }
   }

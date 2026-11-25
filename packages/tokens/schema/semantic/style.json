@@ -20,6 +20,14 @@
       "fillActive": {
         "$type": "color",
         "$value": "initial"
+      },
+      "secondaryText": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "secondaryOpacity": {
+        "$type": "number",
+        "$value": "initial"
       }
     },
     "surface": {
@@ -33,6 +41,10 @@
       },
       "shadow": {
         "$type": "shadow",
+        "$value": "initial"
+      },
+      "floatingFill": {
+        "$type": "color",
         "$value": "initial"
       }
     },
@@ -90,6 +102,10 @@
         "$value": "initial"
       },
       "detailText": {
+        "$type": "color",
+        "$value": "initial"
+      },
+      "fillStrongUnderlay": {
         "$type": "color",
         "$value": "initial"
       }

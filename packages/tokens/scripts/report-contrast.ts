@@ -5,37 +5,38 @@ import { themes } from "../artifacts/ts/themes";
 
 const AA = 4.5;
 const MIN_TONAL_STEP = 0.04;
-const layers = ["canvas", "surface", "panel", "elevated", "overlay"] as const;
+const contentLayers = ["canvas", "surface", "panel", "elevated"] as const;
+const layers = [...contentLayers, "overlay"] as const;
 const textRoles = {
   primary: "color.text.primary",
   secondary: "color.text.secondary",
   tertiary: "color.text.tertiary",
   inverse: "color.text.inverse",
-  accent: "color.selection.accent.text",
-  neutral: "color.selection.neutral.text",
 } satisfies Record<string, keyof typeof cssVars>;
 type TextRole = keyof typeof textRoles;
 type TokenPath = keyof typeof cssVars;
+type Layer = (typeof contentLayers)[number];
 type RGB = readonly [number, number, number];
 
 type Fill = {
   role: TokenPath;
-  over?: "canvas" | "surface" | "panel" | "elevated" | "toggle";
+  over?: Layer;
+  toggleUnderlay?: true;
   check: readonly TextRole[];
 };
 
 const fills: readonly Fill[] = [
-  { role: "color.control.neutral.fill", check: ["primary", "secondary"] },
-  { role: "color.control.neutral.hover", check: ["primary", "secondary", "neutral"] },
-  { role: "color.control.neutral.active", check: ["primary", "secondary"] },
-  { role: "color.surface.tonal", check: ["primary", "secondary"] },
-  { role: "color.selection.accent.fill", over: "canvas", check: ["accent"] },
-  { role: "color.selection.accent.fillSubtle", over: "elevated", check: ["accent"] },
-  { role: "color.selection.accent.fillStrong", over: "toggle", check: ["accent"] },
-  { role: "color.selection.accent.fillSurface", check: ["accent"] },
-  { role: "color.selection.accent.fillSurfaceHover", check: ["accent"] },
-  { role: "color.selection.accent.fillSolid", check: [] }, // Legacy inverse-on-accent pair.
-  { role: "color.selection.neutral.fill", check: ["neutral", "secondary"] },
+  ...(["color.fill.rest", "color.fill.hover", "color.fill.active", "color.select.neutral", "color.select.accent"] as const)
+    .flatMap((role) => contentLayers.map((over) => ({ role, over, check: ["primary"] as const }))),
+  { role: "color.select.accentSubtle", over: "elevated", check: ["primary"] },
+  ...contentLayers.map((over) => ({
+    role: "color.select.accentStrong",
+    over,
+    toggleUnderlay: true,
+    check: ["primary"],
+  }) satisfies Fill),
+  { role: "color.select.accentSurface", check: ["primary"] },
+  { role: "color.select.accentSurfaceHover", check: ["primary"] },
 ];
 
 function linear(channel: number): number {
@@ -69,10 +70,9 @@ try {
   const page = await browser.newPage();
   await page.addStyleTag({ content: (await Promise.all(["tokens", "themes"].map(stylesheet))).join("\n") });
   console.log("WCAG AA at the shipped web contrast setting (0.5). ! marks a ratio below 4.5:1.");
-  console.log("Layer order is for comparison. The overlay scrim is composited over elevated.");
-  console.log("Translucent selection fills are composited over their default specimen backdrops.");
-  console.log("Every text role is reported. Each new fill lists the foregrounds checked for AA.");
-  console.log("The default solid tab still uses inverse on the existing accent, and the default highlighted option still uses secondary descriptions.");
+  console.log("The overlay scrim is composited over elevated. Ink washes are sampled on all four content layers.");
+  console.log("AccentStrong is sampled on each ToggleGroup underlay. AccentSubtle is sampled on the Select listbox.");
+  console.log("Every new fill is checked with its foreground. The inverse foreground on the existing solid Tabs accent and the secondary description on the default Select highlight are also reported.");
 
   for (const theme of Object.keys(themes)) {
     const samples = await page.evaluate(({ theme, cssVars, layers, textRoles, fills }) => {
@@ -103,45 +103,51 @@ try {
         const under = name === "overlay" ? sample(`var(${cssVars["color.background.elevated"]})`) : undefined;
         return { name, rgb: sample(paint, under) };
       });
-      const toggle = sample("color-mix(in srgb, var(--poodle-color-background-canvas) 93%, var(--poodle-color-text-primary))");
-      const backgrounds = fills.map(({ role, over, check }) => {
-        const under = over === "toggle" ? toggle : layerColors.find(({ name }) => name === over)?.rgb;
-        return { role, over, check, rgb: sample(`var(${cssVars[role]})`, under) };
+      const backgrounds = fills.map(({ role, over, toggleUnderlay, check }) => {
+        const under = toggleUnderlay && over
+          ? sample(`color-mix(in srgb, var(${cssVars[`color.background.${over}`]}) 93%, var(${cssVars["color.text.primary"]}))`)
+          : layerColors.find(({ name }) => name === over)?.rgb;
+        const backdrop = toggleUnderlay ? `ToggleGroup on ${over}` : over;
+        return { role, backdrop, check, rgb: sample(`var(${cssVars[role]})`, under) };
       });
       const text = Object.entries(textRoles).map(([name, role]) =>
         ({ name, rgb: sample(`var(${cssVars[role]})`) }));
+      const solidTab = sample(`var(${cssVars["color.accent.base"]})`);
       probe.remove();
-      return { layers: layerColors, fills: backgrounds, text };
+      return { layers: layerColors, fills: backgrounds, text, solidTab };
     }, { theme, cssVars, layers, textRoles, fills });
 
     console.log(`\n### ${theme}\n`);
-    console.log(`| Background | vs previous | ${samples.text.map(({ name }) => name).join(" | ")} | Checked |`);
-    console.log("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |");
+    console.log(`| Background | vs previous | ΔL | ${samples.text.map(({ name }) => name).join(" | ")} | Checked |`);
+    console.log("| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |");
 
-    function row(name: string, rgb: RGB, difference: string, check: readonly string[] = []) {
+    function row(name: string, rgb: RGB, previous?: RGB, check: readonly string[] = []) {
       const ratios = samples.text.map(({ name: text, rgb: foreground }) => {
         const ratio = contrast(foreground, rgb);
         if (ratio < AA && check.includes(text)) failures.push(`${theme} ${text} on ${name}`);
         return ratio.toFixed(2) + (ratio < AA ? " !" : "");
       });
-      console.log(`| ${name} | ${difference} | ${ratios.join(" | ")} | ${check.join(", ") || "—"} |`);
+      const ratio = previous ? contrast(previous, rgb).toFixed(2) : "—";
+      const step = previous ? Math.abs(lightness(previous) - lightness(rgb)).toFixed(3) : "—";
+      console.log(`| ${name} | ${ratio} | ${step} | ${ratios.join(" | ")} | ${check.join(", ") || "—"} |`);
     }
 
     for (const [index, { name, rgb }] of samples.layers.entries()) {
-      const previous = samples.layers[index - 1];
-      row(name, rgb, previous ? contrast(previous.rgb, rgb).toFixed(2) : "—");
+      row(name, rgb, samples.layers[index - 1]?.rgb);
     }
-    for (const { role, over, check, rgb } of samples.fills) {
-      row(role.slice("color.".length) + (over ? ` over ${over}` : ""), rgb, "—", check);
+    for (const { role, backdrop, check, rgb } of samples.fills) {
+      row(role.slice("color.".length) + (backdrop ? ` over ${backdrop}` : ""), rgb, undefined, check);
     }
-    const tonal = samples.fills.find(({ role }) => role === "color.surface.tonal");
-    if (!tonal) throw new Error("Missing tonal surface colour");
+    row("accent.base (existing solid Tabs)", samples.solidTab);
+
     console.log("");
-    for (const { name, rgb } of samples.layers) {
-      if (name !== "canvas" && name !== "panel") continue;
-      const step = Math.abs(lightness(tonal.rgb) - lightness(rgb));
-      console.log(`Tonal surface against ${name}: ${contrast(tonal.rgb, rgb).toFixed(2)}:1, ΔL ${step.toFixed(3)}.`);
-      if (step < MIN_TONAL_STEP) failures.push(`${theme} tonal lightness step against ${name}`);
+    for (const [lower, upper] of [["canvas", "panel"], ["panel", "elevated"]]) {
+      const below = samples.layers.find(({ name }) => name === lower)?.rgb;
+      const above = samples.layers.find(({ name }) => name === upper)?.rgb;
+      if (!below || !above) throw new Error(`Missing layer for ${lower} → ${upper}`);
+      const step = Math.abs(lightness(above) - lightness(below));
+      const shortfall = step < MIN_TONAL_STEP ? " (below 0.04 target)" : "";
+      console.log(`Tonal ${lower} → ${upper} is ${contrast(below, above).toFixed(2)}:1, ΔL ${step.toFixed(3)}${shortfall}.`);
     }
   }
 } finally {

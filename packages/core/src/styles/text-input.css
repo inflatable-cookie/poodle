@@ -113,8 +113,8 @@
     font-size: var(--poodle-text-input-font-size);
     line-height: var(--poodle-text-input-line-height);
     font-weight: var(--poodle-typography-body-weight);
-    color: var(--poodle-color-text-secondary);
-    opacity: var(--poodle-state-opacity-muted);
+    color: var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary));
+    opacity: var(--poodle-style-control-secondaryOpacity, var(--poodle-state-opacity-muted));
     user-select: none;
     white-space: nowrap;
   }
@@ -153,8 +153,8 @@
   }
 
   .poodle-text-input__control::placeholder {
-    color: var(--poodle-color-text-secondary);
-    opacity: var(--poodle-state-opacity-muted);
+    color: var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary));
+    opacity: var(--poodle-style-control-secondaryOpacity, var(--poodle-state-opacity-muted));
   }
 
   .poodle-text-input__control[type="search"]::-webkit-search-cancel-button,

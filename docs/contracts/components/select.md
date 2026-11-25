@@ -476,6 +476,8 @@ In the custom listbox, selected options read the selection fill and text
 roles through the existing option recipes. The default leaves the selected
 option unfilled until highlighted, when its original accent tint applies.
 The other selection styles also fill unhighlighted selected options.
+Filled controls use primary text for placeholders to keep the ink wash
+legible. Placeholder recipes still take precedence.
 
 ### Listbox -- auto-width `.select__listbox--auto-width`
 

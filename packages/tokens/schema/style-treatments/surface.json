@@ -40,7 +40,7 @@
       "surface": {
         "fill": {
           "$type": "color",
-          "$value": "{color.surface.tonal}"
+          "$value": "{color.background.panel}"
         },
         "border": {
           "$type": "color",
@@ -49,6 +49,10 @@
         "shadow": {
           "$type": "shadow",
           "$value": "none"
+        },
+        "floatingFill": {
+          "$type": "color",
+          "$value": "{color.background.elevated}"
         }
       }
     }

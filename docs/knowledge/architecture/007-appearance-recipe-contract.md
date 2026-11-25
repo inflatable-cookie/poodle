@@ -42,10 +42,11 @@ spec field / token override on the GPUI/Jetstream side).
 - Slots correspond to the component's contract anatomy parts; states to its
   documented visual states.
 
-The selection switch resolves selected fills, borders, text and indicators
-through theme roles. Existing recipe hooks for Select options, Tabs edges and
-fills, and ToggleGroup items still take precedence in all three selection
-styles. For example, a recipe can supply a visible Tabs outline even when
+The selection switch resolves selected fills and borders through
+`color.select.*` and reuses existing text and indicator roles. Existing
+recipe hooks for Select options, Tabs edges and fills, and ToggleGroup
+items still take precedence in all three selection styles. A recipe can
+supply a visible Tabs outline even when
 `accent-tint` supplies a transparent fallback border. See
 [002 Token System and Package Layout](002-token-system-and-package-layout.md#modes).
 

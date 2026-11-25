@@ -21,7 +21,7 @@
       },
       "ease": {
         "$type": "cubicBezier",
-        "$value": "ease"
+        "$value": "{primitives.motion.easing.ease}"
       }
     }
   }
