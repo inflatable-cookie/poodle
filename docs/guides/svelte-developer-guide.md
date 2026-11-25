@@ -254,6 +254,26 @@ Component Recipe hooks (app-scoped appearance overrides)
 --poodle-state-opacity-disabled: 0.48
 ```
 
+### Font families
+
+Set `--poodle-typography-family-sans` or `--poodle-typography-family-mono`
+on `:root` for app-wide branding. Load the family's font files in your
+app if it needs a face beyond the system stack.
+
+```css
+:root {
+  --poodle-typography-family-sans: "My App Sans", system-ui, sans-serif;
+}
+```
+
+PageHeader, SidebarNav, Dialog, DataTable, Button, and TextInput also read
+the family tokens at their own rendering location, so the same override
+works on a containing subtree. For a portaled dialog, put it on the
+portal host or an ancestor. Quiet typography uses the system sans and
+mono stacks when there is no app-wide or subtree family input. The
+existing per-role family tokens still serve the component typography
+treatment.
+
 ### Themes
 
 Twelve generated themes are activated via `data-theme`:

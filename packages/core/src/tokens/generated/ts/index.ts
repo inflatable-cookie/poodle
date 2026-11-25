@@ -188,6 +188,10 @@ export const tokens = {
           "sm": "1rem",
           "md": "1.25rem",
           "lg": "1.5rem"
+        },
+        "systemFamily": {
+          "sans": "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "mono": "ui-monospace, \"SFMono-Regular\", Menlo, Consolas, monospace"
         }
       }
     }
@@ -380,6 +384,169 @@ export const tokens = {
       }
     },
     "style": {
+      "typography": {
+        "pageTitle": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial",
+          "letterSpacing": "initial"
+        },
+        "dialogTitle": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial",
+          "letterSpacing": "initial"
+        },
+        "sectionTitle": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial",
+          "letterSpacing": "initial"
+        },
+        "cardTitle": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial"
+        },
+        "body": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial"
+        },
+        "secondary": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial"
+        },
+        "groupLabel": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial",
+          "letterSpacing": "initial",
+          "textTransform": "initial",
+          "color": "initial"
+        },
+        "overline": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial",
+          "letterSpacing": "initial",
+          "textTransform": "initial"
+        },
+        "tableHeader": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial",
+          "letterSpacing": "initial",
+          "textTransform": "initial",
+          "color": "initial"
+        },
+        "tablePrimary": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial"
+        },
+        "tableSecondary": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial"
+        },
+        "badge": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial"
+        },
+        "caption": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial"
+        },
+        "code": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial"
+        },
+        "keyCap": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial"
+        },
+        "metricValue": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial",
+          "letterSpacing": "initial"
+        },
+        "tooltip": {
+          "size": "initial",
+          "lineHeight": "initial",
+          "weight": "initial"
+        },
+        "controlLabel": {
+          "xs": {
+            "size": "initial",
+            "lineHeight": "initial",
+            "weight": "initial",
+            "letterSpacing": "initial"
+          },
+          "sm": {
+            "size": "initial",
+            "lineHeight": "initial",
+            "weight": "initial",
+            "letterSpacing": "initial"
+          },
+          "md": {
+            "size": "initial",
+            "lineHeight": "initial",
+            "weight": "initial",
+            "letterSpacing": "initial"
+          },
+          "lg": {
+            "size": "initial",
+            "lineHeight": "initial",
+            "weight": "initial",
+            "letterSpacing": "initial"
+          },
+          "xl": {
+            "size": "initial",
+            "lineHeight": "initial",
+            "weight": "initial",
+            "letterSpacing": "initial"
+          }
+        },
+        "inputText": {
+          "xs": {
+            "size": "initial",
+            "lineHeight": "initial",
+            "weight": "initial"
+          },
+          "sm": {
+            "size": "initial",
+            "lineHeight": "initial",
+            "weight": "initial"
+          },
+          "md": {
+            "size": "initial",
+            "lineHeight": "initial",
+            "weight": "initial"
+          },
+          "lg": {
+            "size": "initial",
+            "lineHeight": "initial",
+            "weight": "initial"
+          },
+          "xl": {
+            "size": "initial",
+            "lineHeight": "initial",
+            "weight": "initial"
+          }
+        },
+        "family": {
+          "sans": "initial",
+          "mono": "initial"
+        },
+        "numeric": "initial"
+      },
       "control": {
         "fill": "initial",
         "border": "initial",
@@ -462,6 +629,10 @@ export const tokens = {
         "size": "0.8125rem",
         "lineHeight": "1rem",
         "weight": "400"
+      },
+      "family": {
+        "sans": "initial",
+        "mono": "initial"
       }
     }
   }
@@ -575,6 +746,8 @@ export const tokenPaths = [
   "primitives.typography.font.lineHeight.sm",
   "primitives.typography.font.lineHeight.md",
   "primitives.typography.font.lineHeight.lg",
+  "primitives.typography.font.systemFamily.sans",
+  "primitives.typography.font.systemFamily.mono",
   "border.width.default",
   "border.width.focus",
   "border.width.strong",
@@ -671,6 +844,107 @@ export const tokenPaths = [
   "state.opacity.disabled",
   "state.opacity.muted",
   "state.opacity.dragSource",
+  "style.typography.pageTitle.size",
+  "style.typography.pageTitle.lineHeight",
+  "style.typography.pageTitle.weight",
+  "style.typography.pageTitle.letterSpacing",
+  "style.typography.dialogTitle.size",
+  "style.typography.dialogTitle.lineHeight",
+  "style.typography.dialogTitle.weight",
+  "style.typography.dialogTitle.letterSpacing",
+  "style.typography.sectionTitle.size",
+  "style.typography.sectionTitle.lineHeight",
+  "style.typography.sectionTitle.weight",
+  "style.typography.sectionTitle.letterSpacing",
+  "style.typography.cardTitle.size",
+  "style.typography.cardTitle.lineHeight",
+  "style.typography.cardTitle.weight",
+  "style.typography.body.size",
+  "style.typography.body.lineHeight",
+  "style.typography.body.weight",
+  "style.typography.secondary.size",
+  "style.typography.secondary.lineHeight",
+  "style.typography.secondary.weight",
+  "style.typography.groupLabel.size",
+  "style.typography.groupLabel.lineHeight",
+  "style.typography.groupLabel.weight",
+  "style.typography.groupLabel.letterSpacing",
+  "style.typography.groupLabel.textTransform",
+  "style.typography.groupLabel.color",
+  "style.typography.overline.size",
+  "style.typography.overline.lineHeight",
+  "style.typography.overline.weight",
+  "style.typography.overline.letterSpacing",
+  "style.typography.overline.textTransform",
+  "style.typography.tableHeader.size",
+  "style.typography.tableHeader.lineHeight",
+  "style.typography.tableHeader.weight",
+  "style.typography.tableHeader.letterSpacing",
+  "style.typography.tableHeader.textTransform",
+  "style.typography.tableHeader.color",
+  "style.typography.tablePrimary.size",
+  "style.typography.tablePrimary.lineHeight",
+  "style.typography.tablePrimary.weight",
+  "style.typography.tableSecondary.size",
+  "style.typography.tableSecondary.lineHeight",
+  "style.typography.tableSecondary.weight",
+  "style.typography.badge.size",
+  "style.typography.badge.lineHeight",
+  "style.typography.badge.weight",
+  "style.typography.caption.size",
+  "style.typography.caption.lineHeight",
+  "style.typography.caption.weight",
+  "style.typography.code.size",
+  "style.typography.code.lineHeight",
+  "style.typography.code.weight",
+  "style.typography.keyCap.size",
+  "style.typography.keyCap.lineHeight",
+  "style.typography.keyCap.weight",
+  "style.typography.metricValue.size",
+  "style.typography.metricValue.lineHeight",
+  "style.typography.metricValue.weight",
+  "style.typography.metricValue.letterSpacing",
+  "style.typography.tooltip.size",
+  "style.typography.tooltip.lineHeight",
+  "style.typography.tooltip.weight",
+  "style.typography.controlLabel.xs.size",
+  "style.typography.controlLabel.xs.lineHeight",
+  "style.typography.controlLabel.xs.weight",
+  "style.typography.controlLabel.xs.letterSpacing",
+  "style.typography.controlLabel.sm.size",
+  "style.typography.controlLabel.sm.lineHeight",
+  "style.typography.controlLabel.sm.weight",
+  "style.typography.controlLabel.sm.letterSpacing",
+  "style.typography.controlLabel.md.size",
+  "style.typography.controlLabel.md.lineHeight",
+  "style.typography.controlLabel.md.weight",
+  "style.typography.controlLabel.md.letterSpacing",
+  "style.typography.controlLabel.lg.size",
+  "style.typography.controlLabel.lg.lineHeight",
+  "style.typography.controlLabel.lg.weight",
+  "style.typography.controlLabel.lg.letterSpacing",
+  "style.typography.controlLabel.xl.size",
+  "style.typography.controlLabel.xl.lineHeight",
+  "style.typography.controlLabel.xl.weight",
+  "style.typography.controlLabel.xl.letterSpacing",
+  "style.typography.inputText.xs.size",
+  "style.typography.inputText.xs.lineHeight",
+  "style.typography.inputText.xs.weight",
+  "style.typography.inputText.sm.size",
+  "style.typography.inputText.sm.lineHeight",
+  "style.typography.inputText.sm.weight",
+  "style.typography.inputText.md.size",
+  "style.typography.inputText.md.lineHeight",
+  "style.typography.inputText.md.weight",
+  "style.typography.inputText.lg.size",
+  "style.typography.inputText.lg.lineHeight",
+  "style.typography.inputText.lg.weight",
+  "style.typography.inputText.xl.size",
+  "style.typography.inputText.xl.lineHeight",
+  "style.typography.inputText.xl.weight",
+  "style.typography.family.sans",
+  "style.typography.family.mono",
+  "style.typography.numeric",
   "style.control.fill",
   "style.control.border",
   "style.control.shadow",
@@ -727,7 +1001,9 @@ export const tokenPaths = [
   "typography.code.adjustmentRatio",
   "typography.code.size",
   "typography.code.lineHeight",
-  "typography.code.weight"
+  "typography.code.weight",
+  "typography.family.sans",
+  "typography.family.mono"
 ] as const;
 
 export const cssVars = {
@@ -827,6 +1103,107 @@ export const cssVars = {
   "state.opacity.disabled": "--poodle-state-opacity-disabled",
   "state.opacity.muted": "--poodle-state-opacity-muted",
   "state.opacity.dragSource": "--poodle-state-opacity-dragSource",
+  "style.typography.pageTitle.size": "--poodle-style-typography-pageTitle-size",
+  "style.typography.pageTitle.lineHeight": "--poodle-style-typography-pageTitle-lineHeight",
+  "style.typography.pageTitle.weight": "--poodle-style-typography-pageTitle-weight",
+  "style.typography.pageTitle.letterSpacing": "--poodle-style-typography-pageTitle-letterSpacing",
+  "style.typography.dialogTitle.size": "--poodle-style-typography-dialogTitle-size",
+  "style.typography.dialogTitle.lineHeight": "--poodle-style-typography-dialogTitle-lineHeight",
+  "style.typography.dialogTitle.weight": "--poodle-style-typography-dialogTitle-weight",
+  "style.typography.dialogTitle.letterSpacing": "--poodle-style-typography-dialogTitle-letterSpacing",
+  "style.typography.sectionTitle.size": "--poodle-style-typography-sectionTitle-size",
+  "style.typography.sectionTitle.lineHeight": "--poodle-style-typography-sectionTitle-lineHeight",
+  "style.typography.sectionTitle.weight": "--poodle-style-typography-sectionTitle-weight",
+  "style.typography.sectionTitle.letterSpacing": "--poodle-style-typography-sectionTitle-letterSpacing",
+  "style.typography.cardTitle.size": "--poodle-style-typography-cardTitle-size",
+  "style.typography.cardTitle.lineHeight": "--poodle-style-typography-cardTitle-lineHeight",
+  "style.typography.cardTitle.weight": "--poodle-style-typography-cardTitle-weight",
+  "style.typography.body.size": "--poodle-style-typography-body-size",
+  "style.typography.body.lineHeight": "--poodle-style-typography-body-lineHeight",
+  "style.typography.body.weight": "--poodle-style-typography-body-weight",
+  "style.typography.secondary.size": "--poodle-style-typography-secondary-size",
+  "style.typography.secondary.lineHeight": "--poodle-style-typography-secondary-lineHeight",
+  "style.typography.secondary.weight": "--poodle-style-typography-secondary-weight",
+  "style.typography.groupLabel.size": "--poodle-style-typography-groupLabel-size",
+  "style.typography.groupLabel.lineHeight": "--poodle-style-typography-groupLabel-lineHeight",
+  "style.typography.groupLabel.weight": "--poodle-style-typography-groupLabel-weight",
+  "style.typography.groupLabel.letterSpacing": "--poodle-style-typography-groupLabel-letterSpacing",
+  "style.typography.groupLabel.textTransform": "--poodle-style-typography-groupLabel-textTransform",
+  "style.typography.groupLabel.color": "--poodle-style-typography-groupLabel-color",
+  "style.typography.overline.size": "--poodle-style-typography-overline-size",
+  "style.typography.overline.lineHeight": "--poodle-style-typography-overline-lineHeight",
+  "style.typography.overline.weight": "--poodle-style-typography-overline-weight",
+  "style.typography.overline.letterSpacing": "--poodle-style-typography-overline-letterSpacing",
+  "style.typography.overline.textTransform": "--poodle-style-typography-overline-textTransform",
+  "style.typography.tableHeader.size": "--poodle-style-typography-tableHeader-size",
+  "style.typography.tableHeader.lineHeight": "--poodle-style-typography-tableHeader-lineHeight",
+  "style.typography.tableHeader.weight": "--poodle-style-typography-tableHeader-weight",
+  "style.typography.tableHeader.letterSpacing": "--poodle-style-typography-tableHeader-letterSpacing",
+  "style.typography.tableHeader.textTransform": "--poodle-style-typography-tableHeader-textTransform",
+  "style.typography.tableHeader.color": "--poodle-style-typography-tableHeader-color",
+  "style.typography.tablePrimary.size": "--poodle-style-typography-tablePrimary-size",
+  "style.typography.tablePrimary.lineHeight": "--poodle-style-typography-tablePrimary-lineHeight",
+  "style.typography.tablePrimary.weight": "--poodle-style-typography-tablePrimary-weight",
+  "style.typography.tableSecondary.size": "--poodle-style-typography-tableSecondary-size",
+  "style.typography.tableSecondary.lineHeight": "--poodle-style-typography-tableSecondary-lineHeight",
+  "style.typography.tableSecondary.weight": "--poodle-style-typography-tableSecondary-weight",
+  "style.typography.badge.size": "--poodle-style-typography-badge-size",
+  "style.typography.badge.lineHeight": "--poodle-style-typography-badge-lineHeight",
+  "style.typography.badge.weight": "--poodle-style-typography-badge-weight",
+  "style.typography.caption.size": "--poodle-style-typography-caption-size",
+  "style.typography.caption.lineHeight": "--poodle-style-typography-caption-lineHeight",
+  "style.typography.caption.weight": "--poodle-style-typography-caption-weight",
+  "style.typography.code.size": "--poodle-style-typography-code-size",
+  "style.typography.code.lineHeight": "--poodle-style-typography-code-lineHeight",
+  "style.typography.code.weight": "--poodle-style-typography-code-weight",
+  "style.typography.keyCap.size": "--poodle-style-typography-keyCap-size",
+  "style.typography.keyCap.lineHeight": "--poodle-style-typography-keyCap-lineHeight",
+  "style.typography.keyCap.weight": "--poodle-style-typography-keyCap-weight",
+  "style.typography.metricValue.size": "--poodle-style-typography-metricValue-size",
+  "style.typography.metricValue.lineHeight": "--poodle-style-typography-metricValue-lineHeight",
+  "style.typography.metricValue.weight": "--poodle-style-typography-metricValue-weight",
+  "style.typography.metricValue.letterSpacing": "--poodle-style-typography-metricValue-letterSpacing",
+  "style.typography.tooltip.size": "--poodle-style-typography-tooltip-size",
+  "style.typography.tooltip.lineHeight": "--poodle-style-typography-tooltip-lineHeight",
+  "style.typography.tooltip.weight": "--poodle-style-typography-tooltip-weight",
+  "style.typography.controlLabel.xs.size": "--poodle-style-typography-controlLabel-xs-size",
+  "style.typography.controlLabel.xs.lineHeight": "--poodle-style-typography-controlLabel-xs-lineHeight",
+  "style.typography.controlLabel.xs.weight": "--poodle-style-typography-controlLabel-xs-weight",
+  "style.typography.controlLabel.xs.letterSpacing": "--poodle-style-typography-controlLabel-xs-letterSpacing",
+  "style.typography.controlLabel.sm.size": "--poodle-style-typography-controlLabel-sm-size",
+  "style.typography.controlLabel.sm.lineHeight": "--poodle-style-typography-controlLabel-sm-lineHeight",
+  "style.typography.controlLabel.sm.weight": "--poodle-style-typography-controlLabel-sm-weight",
+  "style.typography.controlLabel.sm.letterSpacing": "--poodle-style-typography-controlLabel-sm-letterSpacing",
+  "style.typography.controlLabel.md.size": "--poodle-style-typography-controlLabel-md-size",
+  "style.typography.controlLabel.md.lineHeight": "--poodle-style-typography-controlLabel-md-lineHeight",
+  "style.typography.controlLabel.md.weight": "--poodle-style-typography-controlLabel-md-weight",
+  "style.typography.controlLabel.md.letterSpacing": "--poodle-style-typography-controlLabel-md-letterSpacing",
+  "style.typography.controlLabel.lg.size": "--poodle-style-typography-controlLabel-lg-size",
+  "style.typography.controlLabel.lg.lineHeight": "--poodle-style-typography-controlLabel-lg-lineHeight",
+  "style.typography.controlLabel.lg.weight": "--poodle-style-typography-controlLabel-lg-weight",
+  "style.typography.controlLabel.lg.letterSpacing": "--poodle-style-typography-controlLabel-lg-letterSpacing",
+  "style.typography.controlLabel.xl.size": "--poodle-style-typography-controlLabel-xl-size",
+  "style.typography.controlLabel.xl.lineHeight": "--poodle-style-typography-controlLabel-xl-lineHeight",
+  "style.typography.controlLabel.xl.weight": "--poodle-style-typography-controlLabel-xl-weight",
+  "style.typography.controlLabel.xl.letterSpacing": "--poodle-style-typography-controlLabel-xl-letterSpacing",
+  "style.typography.inputText.xs.size": "--poodle-style-typography-inputText-xs-size",
+  "style.typography.inputText.xs.lineHeight": "--poodle-style-typography-inputText-xs-lineHeight",
+  "style.typography.inputText.xs.weight": "--poodle-style-typography-inputText-xs-weight",
+  "style.typography.inputText.sm.size": "--poodle-style-typography-inputText-sm-size",
+  "style.typography.inputText.sm.lineHeight": "--poodle-style-typography-inputText-sm-lineHeight",
+  "style.typography.inputText.sm.weight": "--poodle-style-typography-inputText-sm-weight",
+  "style.typography.inputText.md.size": "--poodle-style-typography-inputText-md-size",
+  "style.typography.inputText.md.lineHeight": "--poodle-style-typography-inputText-md-lineHeight",
+  "style.typography.inputText.md.weight": "--poodle-style-typography-inputText-md-weight",
+  "style.typography.inputText.lg.size": "--poodle-style-typography-inputText-lg-size",
+  "style.typography.inputText.lg.lineHeight": "--poodle-style-typography-inputText-lg-lineHeight",
+  "style.typography.inputText.lg.weight": "--poodle-style-typography-inputText-lg-weight",
+  "style.typography.inputText.xl.size": "--poodle-style-typography-inputText-xl-size",
+  "style.typography.inputText.xl.lineHeight": "--poodle-style-typography-inputText-xl-lineHeight",
+  "style.typography.inputText.xl.weight": "--poodle-style-typography-inputText-xl-weight",
+  "style.typography.family.sans": "--poodle-style-typography-family-sans",
+  "style.typography.family.mono": "--poodle-style-typography-family-mono",
+  "style.typography.numeric": "--poodle-style-typography-numeric",
   "style.control.fill": "--poodle-style-control-fill",
   "style.control.border": "--poodle-style-control-border",
   "style.control.shadow": "--poodle-style-control-shadow",
@@ -883,7 +1260,9 @@ export const cssVars = {
   "typography.code.adjustmentRatio": "--poodle-typography-code-adjustmentRatio",
   "typography.code.size": "--poodle-typography-code-size",
   "typography.code.lineHeight": "--poodle-typography-code-lineHeight",
-  "typography.code.weight": "--poodle-typography-code-weight"
+  "typography.code.weight": "--poodle-typography-code-weight",
+  "typography.family.sans": "--poodle-typography-family-sans",
+  "typography.family.mono": "--poodle-typography-family-mono"
 } as const;
 
 export type TokenPath = (typeof tokenPaths)[number];

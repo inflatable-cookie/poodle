@@ -196,6 +196,15 @@ Available theme constants are in `poodle_tokens::themes`; density and control
 size constants are in `poodle_tokens::density`. Use these generated constants
 instead of constructing theme values in application code.
 
+### Font families
+
+Register the font bytes with `cx.text_system().add_fonts(...)` and use the registered
+family name when binding Poodle's `typography.family.sans` and
+`typography.family.mono` roles in the application. The names correspond
+to the web family tokens. GPUI currently uses its runtime font
+configuration for these categories. The generated rendering-style data
+does not apply the web typography treatment to native components.
+
 ## Ownership by Layer
 
 | Layer | Owns |

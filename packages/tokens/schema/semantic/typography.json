@@ -117,6 +117,16 @@
         "$type": "fontWeight",
         "$value": "{primitives.typography.font.weight.regular}"
       }
+    },
+    "family": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "initial"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "initial"
+      }
     }
   }
 }

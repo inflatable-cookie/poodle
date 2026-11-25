@@ -121,7 +121,7 @@ function withStyleFixture(run: (fixture: {
 
 test("the style builder rejects a theme token written by a style mode or treatment", () => {
   withStyleFixture(({ writeJson, build }) => {
-    const treatment = { fill: "outlined", surface: "border", selection: "accent-outline" };
+    const treatment = { fill: "outlined", surface: "border", selection: "accent-outline", typography: "component" };
     const color = { background: { canvas: { $value: "{color.background.surface}" } } };
     writeJson("modes/style/default.json", { treatment, color });
     const direct = build();
@@ -148,7 +148,7 @@ test("a treatment added in schema expands into CSS and a typed Rust mode", () =>
       const existing = JSON.parse(fs.readFileSync(path.join(root, "tokens/schema/modes/style", file), "utf8"));
       writeJson(`modes/style/${file}`, {
         ...existing,
-        treatment: { fill: "filled", surface: "tonal", selection: "neutral", shape: "flat" },
+        treatment: { ...existing.treatment, fill: "filled", surface: "tonal", selection: "neutral", shape: "flat" },
       });
     }
     const result = build();

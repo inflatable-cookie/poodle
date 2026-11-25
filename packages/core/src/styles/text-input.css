@@ -31,6 +31,9 @@
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+    --poodle-text-input-input-type-size: var(--poodle-style-typography-inputText-md-size);
+    --poodle-text-input-input-type-lineHeight: var(--poodle-style-typography-inputText-md-lineHeight);
+    --poodle-text-input-input-type-weight: var(--poodle-style-typography-inputText-md-weight);
   }
 
   .poodle-text-input:focus-within {
@@ -60,6 +63,9 @@
     --poodle-text-input-padding-inline: calc(var(--poodle-space-control-x) - 0.25rem);
     --poodle-text-input-padding-block: calc(var(--poodle-space-control-y) - 0.125rem);
     --poodle-text-input-font-size: 0.75rem;
+    --poodle-text-input-input-type-size: var(--poodle-style-typography-inputText-xs-size);
+    --poodle-text-input-input-type-lineHeight: var(--poodle-style-typography-inputText-xs-lineHeight);
+    --poodle-text-input-input-type-weight: var(--poodle-style-typography-inputText-xs-weight);
   }
 
   .poodle-text-input[data-size="sm"] {
@@ -67,6 +73,9 @@
     --poodle-text-input-padding-inline: calc(var(--poodle-space-control-x) - 0.125rem);
     --poodle-text-input-padding-block: calc(var(--poodle-space-control-y) - 0.0625rem);
     --poodle-text-input-font-size: 0.8125rem;
+    --poodle-text-input-input-type-size: var(--poodle-style-typography-inputText-sm-size);
+    --poodle-text-input-input-type-lineHeight: var(--poodle-style-typography-inputText-sm-lineHeight);
+    --poodle-text-input-input-type-weight: var(--poodle-style-typography-inputText-sm-weight);
   }
 
   .poodle-text-input[data-size="md"] {
@@ -81,6 +90,9 @@
     --poodle-text-input-padding-inline: calc(var(--poodle-space-control-x) + 0.125rem);
     --poodle-text-input-padding-block: calc(var(--poodle-space-control-y) + 0.0625rem);
     --poodle-text-input-font-size: 0.9375rem;
+    --poodle-text-input-input-type-size: var(--poodle-style-typography-inputText-lg-size);
+    --poodle-text-input-input-type-lineHeight: var(--poodle-style-typography-inputText-lg-lineHeight);
+    --poodle-text-input-input-type-weight: var(--poodle-style-typography-inputText-lg-weight);
   }
 
   .poodle-text-input[data-size="xl"] {
@@ -88,6 +100,9 @@
     --poodle-text-input-padding-inline: calc(var(--poodle-space-control-x) + 0.1875rem);
     --poodle-text-input-padding-block: calc(var(--poodle-space-control-y) + 0.125rem);
     --poodle-text-input-font-size: 1rem;
+    --poodle-text-input-input-type-size: var(--poodle-style-typography-inputText-xl-size);
+    --poodle-text-input-input-type-lineHeight: var(--poodle-style-typography-inputText-xl-lineHeight);
+    --poodle-text-input-input-type-weight: var(--poodle-style-typography-inputText-xl-weight);
   }
 
   .poodle-text-input:not(.poodle-text-input--multiline) {
@@ -109,10 +124,10 @@
     align-items: center;
     align-self: stretch;
     padding-inline: 0.625rem;
-    font-family: var(--poodle-typography-body-family);
-    font-size: var(--poodle-text-input-font-size);
-    line-height: var(--poodle-text-input-line-height);
-    font-weight: var(--poodle-typography-body-weight);
+    font-family: var(--poodle-recipe-text-input-affix-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-body-family))));
+    font-size: var(--poodle-recipe-text-input-affix-font-size, var(--poodle-text-input-input-type-size, var(--poodle-text-input-font-size)));
+    line-height: var(--poodle-recipe-text-input-affix-line-height, var(--poodle-text-input-input-type-lineHeight, var(--poodle-text-input-line-height)));
+    font-weight: var(--poodle-recipe-text-input-affix-font-weight, var(--poodle-text-input-input-type-weight, var(--poodle-typography-body-weight)));
     color: var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary));
     opacity: var(--poodle-style-control-secondaryOpacity, var(--poodle-state-opacity-muted));
     user-select: none;
@@ -142,10 +157,10 @@
     border: none;
     background: transparent;
     color: inherit;
-    font-family: var(--poodle-typography-body-family);
-    font-size: var(--poodle-text-input-font-size);
-    line-height: var(--poodle-text-input-line-height);
-    font-weight: var(--poodle-typography-body-weight);
+    font-family: var(--poodle-recipe-text-input-control-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-body-family))));
+    font-size: var(--poodle-recipe-text-input-control-font-size, var(--poodle-text-input-input-type-size, var(--poodle-text-input-font-size)));
+    line-height: var(--poodle-recipe-text-input-control-line-height, var(--poodle-text-input-input-type-lineHeight, var(--poodle-text-input-line-height)));
+    font-weight: var(--poodle-recipe-text-input-control-font-weight, var(--poodle-text-input-input-type-weight, var(--poodle-typography-body-weight)));
     padding-block: calc(var(--poodle-text-input-padding-block) + var(--poodle-text-input-density-block-adjust));
     padding-inline-start: var(--poodle-text-input-control-padding-start);
     padding-inline-end: var(--poodle-text-input-control-padding-end);
@@ -231,17 +246,23 @@
     position: absolute;
     inset-inline-end: 0.5rem;
     inset-block-end: 0.375rem;
-    font: var(--poodle-typography-code-xs);
+    font: var(--poodle-recipe-text-input-char-count-font,
+      var(--poodle-typography-code-xs,
+        var(--poodle-style-typography-caption-weight)
+        var(--poodle-style-typography-caption-size)/var(--poodle-style-typography-caption-lineHeight)
+        var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-body-family)))));
     color: var(--poodle-color-text-muted);
     pointer-events: none;
+    font-variant-numeric: var(--poodle-style-typography-numeric, inherit);
   }
 
   .poodle-text-input__validation-message {
     margin: var(--poodle-space-stack-xs, 0.25rem) 0 0;
     color: var(--poodle-color-status-danger);
-    font-family: var(--poodle-typography-body-family);
-    font-size: 0.75rem;
-    line-height: var(--poodle-typography-body-lineHeight);
+    font-family: var(--poodle-recipe-text-input-validation-message-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-body-family))));
+    font-size: var(--poodle-recipe-text-input-validation-message-font-size, var(--poodle-style-typography-secondary-size, 0.75rem));
+    line-height: var(--poodle-recipe-text-input-validation-message-line-height, var(--poodle-style-typography-secondary-lineHeight, var(--poodle-typography-body-lineHeight)));
+    font-weight: var(--poodle-recipe-text-input-validation-message-font-weight, var(--poodle-style-typography-secondary-weight, inherit));
   }
 
   .poodle-text-input__char-count--over {
@@ -251,6 +272,6 @@
   .poodle-text-input[data-type="slug"] .poodle-text-input__control,
   .poodle-text-input[data-type="slug"] .poodle-text-input__affix--prefix,
   .poodle-text-input[data-type="slug"] .poodle-text-input__affix--suffix {
-    font-family: var(--poodle-typography-code-family);
-    font-size: calc(1em * var(--poodle-typography-code-adjustmentRatio));
+    font-family: var(--poodle-recipe-text-input-slug-font-family, var(--poodle-typography-family-mono, var(--poodle-style-typography-family-mono, var(--poodle-typography-code-family))));
+    font-size: var(--poodle-recipe-text-input-slug-font-size, var(--poodle-text-input-input-type-size, calc(1em * var(--poodle-typography-code-adjustmentRatio))));
   }

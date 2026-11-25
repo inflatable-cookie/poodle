@@ -163,6 +163,10 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ### Sizing
 
+Quiet typography uses the control-label role, which steps through
+13/16, 14/18, 15/20, 16/22, and 17/24 at weight 500. The height,
+padding, and icon boxes continue to use the control's existing geometry.
+
 - Extra-small: `height: 1.5rem`, `min-width: 3.75rem`, `padding: 0 space-control-x`, `font-size: 0.6875rem`
 - Small: `height: 1.75rem`, `min-width: 4.25rem`, `padding: 0 space-control-x`, `font-size: 0.75rem`
 - Default: `height: 2.25rem`, `min-width: 5rem`, `padding: 0 space-control-x`, `font-size: 0.8125rem`

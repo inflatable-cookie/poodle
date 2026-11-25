@@ -407,7 +407,11 @@ function buildCssBlock(selector: string, entries: ResolvedTokenEntry[]): string 
     const value = String(entry.resolvedValue);
     const scaled =
       canvasRgb && CONTRAST_SCALED.test(entry.path) ? contrastScaledCssValue(value) : null;
-    lines.push(`  ${cssVarName(entry.path)}: ${scaled ?? value};`);
+    // Keep the legacy family names usable by stylesheets that still read them.
+    // The new family slots are optional so an inherited legacy override still works.
+    const family = /^\{primitives\.typography\.font\.family\.(sans|mono)\}$/.exec(String(entry.rawValue));
+    const cssValue = family ? `var(${cssVarName(`typography.family.${family[1]}`)}, ${value})` : value;
+    lines.push(`  ${cssVarName(entry.path)}: ${scaled ?? cssValue};`);
   }
   return `${selector} {\n${lines.join("\n")}\n}\n`;
 }

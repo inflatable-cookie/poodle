@@ -42,6 +42,15 @@ spec field / token override on the GPUI/Jetstream side).
 - Slots correspond to the component's contract anatomy parts; states to its
   documented visual states.
 
+Typography follows the same recipe → style role → component fallback order.
+For example, a button reads `--poodle-recipe-button-label-font-size` before
+the control-label role for the button's resolved size. An `initial` style
+value falls through to the component's existing value, including in a
+default-styled subtree nested inside quiet. A case recipe or role sets CSS
+`text-transform` and leaves the author's text and accessible name intact.
+Type recipes affect text metrics. Control height continues to come from the
+size contract.
+
 The selection switch resolves selected fills and borders through
 `color.select.*` and reuses existing text and indicator roles. Existing
 recipe hooks for Select options, Tabs edges and fills, and ToggleGroup
@@ -75,8 +84,8 @@ Two classes, machine-classified by
   data-attributes and pseudo-state in the defining selector.
 
 - **Metric variables** (internal): sizing, padding, gaps, font sizes. These
-  belong to the size/density system and are NOT part of the recipe
-  contract. Overriding them is unsupported (density must never change
+  local fallback variables belong to the size/density system and are NOT
+  part of the recipe contract. Overriding them is unsupported (density must never change
   component height — see the size/density contract).
 
 The 2026-11-25 rendering-style ruling removed

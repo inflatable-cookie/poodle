@@ -2,6 +2,7 @@
   "treatment": {
     "fill": "outlined",
     "surface": "border",
-    "selection": "accent-outline"
+    "selection": "accent-outline",
+    "typography": "component"
   }
 }

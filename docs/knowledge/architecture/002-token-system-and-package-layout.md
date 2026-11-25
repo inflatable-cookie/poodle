@@ -92,6 +92,7 @@ applying direct overrides.
 | `fill` | `outlined`, `filled`, `ghost` | Controls at rest, including hover and press fills where used |
 | `surface` | `border`, `elevation`, `tonal` | Containers |
 | `selection` | `accent-outline`, `accent-tint`, `neutral` | Selected items in Select, Tabs, ToggleGroup, and the list and data components (ListCard, Tree, LogList, DataTable, Calendar, RelationPicker, ActionDiscoveryPanel, ModelPicker, HistoryCenter) |
+| `typography` | `component`, `scale` | Type size, leading, weight, tracking, case, and associated family and neutral text roles |
 
 The default uses `outlined`, `border` and `accent-outline` to reproduce
 the prior paint. `accent-tint` keeps tint and suppresses selection borders.
@@ -109,6 +110,22 @@ role.
 that combines `filled`, `tonal`, and `neutral` with a neutral selection
 indicator (`style.selection.indicator` mapped to `color.text.primary`), leaving
 only primary buttons and focus rings using the accent colour.
+
+The `component` typography treatment leaves `style.typography.*` at
+`initial`. Each consumer of a role supplies its own legacy fallback.
+`scale` fills those roles, and `quiet` selects it. Buttons and inputs
+take the `controlLabel` and `inputText` entries for their resolved control
+size (`xs`–`xl`). The stylesheet reads the matching token for its
+`data-size`. The build expands the sized paths like any other treatment
+entry. Density continues to control spacing.
+
+The `scale` treatment supplies system sans and mono stacks. App-provided
+`typography.family.sans` and `typography.family.mono` take precedence
+over the style families in the type cohort. The base CSS family aliases
+also read these override tokens at the root, so existing component CSS
+receives an app-wide override. Their original stacks supply the component
+treatment's fallback. Theme writes stay independent of type roles, including
+the group and table-header text roles that reference the theme's neutral ink.
 
 Themes define `color.fill.{rest,hover,active}` for filled controls and
 `color.select.{accent,neutral}` for selected items. Neutral fills use the

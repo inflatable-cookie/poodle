@@ -7,6 +7,16 @@
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-surface);
     background: var(--poodle-recipe-data-table-fill, var(--poodle-color-background-panel));
+    --poodle-data-table-toolbar-label-size: var(--poodle-typography-label-size);
+    --poodle-data-table-cell-size: var(--poodle-typography-label-size);
+    --poodle-data-table-auxiliary-size: initial;
+    --poodle-data-table-control-type-size: var(--poodle-style-typography-controlLabel-md-size);
+    --poodle-data-table-control-type-lineHeight: var(--poodle-style-typography-controlLabel-md-lineHeight);
+    --poodle-data-table-control-type-weight: var(--poodle-style-typography-controlLabel-md-weight);
+    --poodle-data-table-control-type-letterSpacing: var(--poodle-style-typography-controlLabel-md-letterSpacing);
+    --poodle-data-table-input-type-size: var(--poodle-style-typography-inputText-md-size);
+    --poodle-data-table-input-type-lineHeight: var(--poodle-style-typography-inputText-md-lineHeight);
+    --poodle-data-table-input-type-weight: var(--poodle-style-typography-inputText-md-weight);
   }
 
   .poodle-data-table__toolbar {
@@ -30,9 +40,12 @@
     color: var(--poodle-recipe-data-table-toolbar-btn-text, var(--poodle-color-text-secondary));
     cursor: pointer;
     font: inherit;
-    font-size: var(--poodle-typography-label-size);
-    line-height: 1;
+    font-size: var(--poodle-recipe-data-table-toolbar-btn-font-size, var(--poodle-data-table-control-type-size, var(--poodle-data-table-toolbar-label-size)));
+    line-height: var(--poodle-recipe-data-table-toolbar-btn-line-height, var(--poodle-data-table-control-type-lineHeight, 1));
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+    font-family: var(--poodle-recipe-data-table-toolbar-btn-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, inherit)));
+    font-weight: var(--poodle-recipe-data-table-toolbar-btn-font-weight, var(--poodle-data-table-control-type-weight, inherit));
+    letter-spacing: var(--poodle-recipe-data-table-toolbar-btn-letter-spacing, var(--poodle-data-table-control-type-letterSpacing, inherit));
   }
 
   .poodle-data-table__toolbar-btn:hover {
@@ -61,8 +74,12 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
     cursor: pointer;
-    font-size: var(--poodle-typography-label-size);
+    font-size: var(--poodle-recipe-data-table-col-menu-item-font-size, var(--poodle-data-table-control-type-size, var(--poodle-typography-label-size)));
     color: var(--poodle-recipe-data-table-col-menu-item-text, var(--poodle-color-text-primary));
+    font-family: var(--poodle-recipe-data-table-col-menu-item-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, inherit)));
+    line-height: var(--poodle-recipe-data-table-col-menu-item-line-height, var(--poodle-data-table-control-type-lineHeight, inherit));
+    font-weight: var(--poodle-recipe-data-table-col-menu-item-font-weight, var(--poodle-data-table-control-type-weight, inherit));
+    letter-spacing: var(--poodle-recipe-data-table-col-menu-item-letter-spacing, var(--poodle-data-table-control-type-letterSpacing, inherit));
   }
 
   .poodle-data-table__col-menu-item:hover {
@@ -95,13 +112,27 @@
     font-size: var(--poodle-typography-label-size);
   }
 
+  .poodle-data-table tbody :where(td, th) {
+    font-family: var(--poodle-recipe-data-table-cell-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, inherit)));
+    font-size: var(--poodle-recipe-data-table-cell-font-size, var(--poodle-style-typography-tablePrimary-size, var(--poodle-data-table-cell-size)));
+    line-height: var(--poodle-recipe-data-table-cell-line-height, var(--poodle-style-typography-tablePrimary-lineHeight, inherit));
+  }
+
+  .poodle-data-table table td.poodle-end-align,
+  .poodle-data-table__pagination-summary,
+  .poodle-data-table__pagination-page {
+    font-variant-numeric: var(--poodle-style-typography-numeric, inherit);
+  }
+
   .poodle-data-table thead th {
-    color: var(--poodle-recipe-data-table-th-text, var(--poodle-color-text-secondary));
-    font-family: var(--poodle-typography-label-family);
-    font-size: var(--poodle-typography-label-size);
-    font-weight: var(--poodle-typography-label-weight);
-    line-height: var(--poodle-typography-label-lineHeight);
+    color: var(--poodle-recipe-data-table-th-text, var(--poodle-style-typography-tableHeader-color, var(--poodle-color-text-secondary)));
+    font-family: var(--poodle-recipe-data-table-th-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-label-family))));
+    font-size: var(--poodle-recipe-data-table-th-font-size, var(--poodle-style-typography-tableHeader-size, var(--poodle-data-table-cell-size)));
+    font-weight: var(--poodle-recipe-data-table-th-font-weight, var(--poodle-style-typography-tableHeader-weight, var(--poodle-typography-label-weight)));
+    line-height: var(--poodle-recipe-data-table-th-line-height, var(--poodle-style-typography-tableHeader-lineHeight, var(--poodle-typography-label-lineHeight)));
     background: var(--poodle-recipe-data-table-th-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent));
+    letter-spacing: var(--poodle-recipe-data-table-th-letter-spacing, var(--poodle-style-typography-tableHeader-letterSpacing, inherit));
+    text-transform: var(--poodle-recipe-data-table-th-text-transform, var(--poodle-style-typography-tableHeader-textTransform, inherit));
   }
 
   .poodle-data-table--sticky-header thead th {
@@ -114,6 +145,10 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-panel-x);
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
     background: var(--poodle-recipe-data-table-filters-row-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent));
+    font-family: var(--poodle-recipe-data-table-filters-row-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, inherit)));
+    font-size: var(--poodle-recipe-data-table-filters-row-font-size, var(--poodle-style-typography-secondary-size, var(--poodle-data-table-cell-size)));
+    line-height: var(--poodle-recipe-data-table-filters-row-line-height, var(--poodle-style-typography-secondary-lineHeight, inherit));
+    font-weight: var(--poodle-recipe-data-table-filters-row-font-weight, var(--poodle-style-typography-secondary-weight, inherit));
   }
 
   .poodle-data-table__filters-row .poodle-select,
@@ -165,11 +200,16 @@
     gap: 0.25rem;
   }
 
+  .poodle-data-table :is(td, th):nth-child(1 of :has(> .poodle-data-table__cell)) .poodle-data-table__cell > span {
+    font-weight: var(--poodle-recipe-data-table-cell-primary-font-weight, var(--poodle-style-typography-tablePrimary-weight, inherit));
+  }
+
   .poodle-data-table__cell small {
     color: var(--poodle-recipe-data-table-cell-text, var(--poodle-color-text-secondary));
-    font-family: var(--poodle-typography-body-family);
-    font-size: var(--poodle-typography-body-size);
-    line-height: var(--poodle-typography-body-lineHeight);
+    font-family: var(--poodle-recipe-data-table-cell-secondary-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-body-family))));
+    font-size: var(--poodle-recipe-data-table-cell-secondary-font-size, var(--poodle-style-typography-tableSecondary-size, var(--poodle-typography-body-size)));
+    line-height: var(--poodle-recipe-data-table-cell-secondary-line-height, var(--poodle-style-typography-tableSecondary-lineHeight, var(--poodle-typography-body-lineHeight)));
+    font-weight: var(--poodle-recipe-data-table-cell-secondary-font-weight, var(--poodle-style-typography-tableSecondary-weight, inherit));
   }
 
   .poodle-center-align {
@@ -210,11 +250,12 @@
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
   }
 
-  .poodle-data-table__empty {
+  .poodle-data-table tbody .poodle-data-table__empty {
     color: var(--poodle-recipe-data-table-empty-text, var(--poodle-color-text-secondary));
-    font-family: var(--poodle-typography-body-family);
-    font-size: var(--poodle-typography-body-size);
-    line-height: var(--poodle-typography-body-lineHeight);
+    font-family: var(--poodle-recipe-data-table-empty-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-body-family))));
+    font-size: var(--poodle-recipe-data-table-empty-font-size, var(--poodle-style-typography-body-size, var(--poodle-data-table-auxiliary-size, var(--poodle-typography-body-size))));
+    line-height: var(--poodle-recipe-data-table-empty-line-height, var(--poodle-style-typography-body-lineHeight, var(--poodle-typography-body-lineHeight)));
+    font-weight: var(--poodle-recipe-data-table-empty-font-weight, var(--poodle-style-typography-body-weight, inherit));
   }
 
   .poodle-data-table__footer {
@@ -225,12 +266,19 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-panel-x);
     border-top: 0.0625rem solid var(--poodle-color-border-subtle);
     background: var(--poodle-recipe-data-table-footer-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent));
+    font-family: var(--poodle-recipe-data-table-footer-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, inherit)));
+    font-size: var(--poodle-recipe-data-table-footer-font-size, var(--poodle-style-typography-caption-size, var(--poodle-data-table-auxiliary-size, inherit)));
+    line-height: var(--poodle-recipe-data-table-footer-line-height, var(--poodle-style-typography-caption-lineHeight, inherit));
+    font-weight: var(--poodle-recipe-data-table-footer-font-weight, var(--poodle-style-typography-caption-weight, inherit));
   }
 
   .poodle-data-table__pagination-summary {
     margin: 0;
     color: var(--poodle-recipe-data-table-pagination-summary-text, var(--poodle-color-text-secondary));
-    font-size: var(--poodle-typography-label-size);
+    font-size: var(--poodle-recipe-data-table-pagination-summary-font-size, var(--poodle-style-typography-caption-size, var(--poodle-typography-label-size)));
+    font-family: var(--poodle-recipe-data-table-pagination-summary-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, inherit)));
+    font-weight: var(--poodle-recipe-data-table-pagination-summary-font-weight, var(--poodle-style-typography-caption-weight, inherit));
+    line-height: var(--poodle-recipe-data-table-pagination-summary-line-height, var(--poodle-style-typography-caption-lineHeight, inherit));
   }
 
   .poodle-data-table__pagination-actions {
@@ -246,7 +294,10 @@
     align-items: center;
     gap: var(--poodle-space-inline-sm);
     color: var(--poodle-recipe-data-table-limit-text, var(--poodle-color-text-secondary));
-    font-size: var(--poodle-typography-label-size);
+    font-size: var(--poodle-recipe-data-table-limit-font-size, var(--poodle-data-table-input-type-size, var(--poodle-typography-label-size)));
+    font-family: var(--poodle-recipe-data-table-limit-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, inherit)));
+    line-height: var(--poodle-recipe-data-table-limit-line-height, var(--poodle-data-table-input-type-lineHeight, inherit));
+    font-weight: var(--poodle-recipe-data-table-limit-font-weight, var(--poodle-data-table-input-type-weight, inherit));
   }
 
   .poodle-data-table__limit .poodle-select {
@@ -263,8 +314,12 @@
 
   .poodle-data-table__pagination-page {
     color: var(--poodle-recipe-data-table-pagination-page-text, var(--poodle-color-text-secondary));
-    font-size: var(--poodle-typography-label-size);
+    font-size: var(--poodle-recipe-data-table-pagination-page-font-size, var(--poodle-data-table-control-type-size, var(--poodle-typography-label-size)));
     white-space: nowrap;
+    font-family: var(--poodle-recipe-data-table-pagination-page-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, inherit)));
+    line-height: var(--poodle-recipe-data-table-pagination-page-line-height, var(--poodle-data-table-control-type-lineHeight, inherit));
+    font-weight: var(--poodle-recipe-data-table-pagination-page-font-weight, var(--poodle-data-table-control-type-weight, inherit));
+    letter-spacing: var(--poodle-recipe-data-table-pagination-page-letter-spacing, var(--poodle-data-table-control-type-letterSpacing, inherit));
   }
 
   .poodle-data-table__loading-block {
@@ -311,21 +366,26 @@
     background: var(--poodle-recipe-data-table-selected-even-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)));
   }
 
+  .poodle-data-table[data-size="xs"] {
+    --poodle-data-table-control-type-size: var(--poodle-style-typography-controlLabel-xs-size);
+    --poodle-data-table-control-type-lineHeight: var(--poodle-style-typography-controlLabel-xs-lineHeight);
+    --poodle-data-table-control-type-weight: var(--poodle-style-typography-controlLabel-xs-weight);
+    --poodle-data-table-control-type-letterSpacing: var(--poodle-style-typography-controlLabel-xs-letterSpacing);
+    --poodle-data-table-input-type-size: var(--poodle-style-typography-inputText-xs-size);
+    --poodle-data-table-input-type-lineHeight: var(--poodle-style-typography-inputText-xs-lineHeight);
+    --poodle-data-table-input-type-weight: var(--poodle-style-typography-inputText-xs-weight);
+    --poodle-data-table-cell-size: 0.6875rem;
+    --poodle-data-table-auxiliary-size: 0.6875rem;
+  }
+
   .poodle-data-table[data-size="xs"] .poodle-data-table__toolbar-btn {
-    font-size: 0.6875rem;
+    --poodle-data-table-toolbar-label-size: 0.6875rem;
     padding: 0.1875rem 0.375rem;
   }
 
   .poodle-data-table[data-size="xs"] .poodle-data-table__toolbar-btn .poodle-icon {
     width: 0.75rem;
     height: 0.75rem;
-  }
-
-  .poodle-data-table[data-size="xs"] th,
-  .poodle-data-table[data-size="xs"] td,
-  .poodle-data-table[data-size="xs"] .poodle-data-table__filters-row td,
-  .poodle-data-table[data-size="xs"] .poodle-data-table__footer {
-    font-size: 0.6875rem;
   }
 
   .poodle-data-table[data-size="xs"] th,
@@ -346,16 +406,21 @@
     width: 2.5rem;
   }
 
-  .poodle-data-table[data-size="sm"] .poodle-data-table__toolbar-btn {
-    font-size: 0.71875rem;
-    padding: 0.25rem 0.4375rem;
+  .poodle-data-table[data-size="sm"] {
+    --poodle-data-table-control-type-size: var(--poodle-style-typography-controlLabel-sm-size);
+    --poodle-data-table-control-type-lineHeight: var(--poodle-style-typography-controlLabel-sm-lineHeight);
+    --poodle-data-table-control-type-weight: var(--poodle-style-typography-controlLabel-sm-weight);
+    --poodle-data-table-control-type-letterSpacing: var(--poodle-style-typography-controlLabel-sm-letterSpacing);
+    --poodle-data-table-input-type-size: var(--poodle-style-typography-inputText-sm-size);
+    --poodle-data-table-input-type-lineHeight: var(--poodle-style-typography-inputText-sm-lineHeight);
+    --poodle-data-table-input-type-weight: var(--poodle-style-typography-inputText-sm-weight);
+    --poodle-data-table-cell-size: 0.71875rem;
+    --poodle-data-table-auxiliary-size: 0.71875rem;
   }
 
-  .poodle-data-table[data-size="sm"] th,
-  .poodle-data-table[data-size="sm"] td,
-  .poodle-data-table[data-size="sm"] .poodle-data-table__filters-row td,
-  .poodle-data-table[data-size="sm"] .poodle-data-table__footer {
-    font-size: 0.71875rem;
+  .poodle-data-table[data-size="sm"] .poodle-data-table__toolbar-btn {
+    --poodle-data-table-toolbar-label-size: 0.71875rem;
+    padding: 0.25rem 0.4375rem;
   }
 
   .poodle-data-table[data-size="sm"] th,
@@ -376,21 +441,26 @@
     width: 2.75rem;
   }
 
+  .poodle-data-table[data-size="lg"] {
+    --poodle-data-table-control-type-size: var(--poodle-style-typography-controlLabel-lg-size);
+    --poodle-data-table-control-type-lineHeight: var(--poodle-style-typography-controlLabel-lg-lineHeight);
+    --poodle-data-table-control-type-weight: var(--poodle-style-typography-controlLabel-lg-weight);
+    --poodle-data-table-control-type-letterSpacing: var(--poodle-style-typography-controlLabel-lg-letterSpacing);
+    --poodle-data-table-input-type-size: var(--poodle-style-typography-inputText-lg-size);
+    --poodle-data-table-input-type-lineHeight: var(--poodle-style-typography-inputText-lg-lineHeight);
+    --poodle-data-table-input-type-weight: var(--poodle-style-typography-inputText-lg-weight);
+    --poodle-data-table-cell-size: 0.8125rem;
+    --poodle-data-table-auxiliary-size: 0.8125rem;
+  }
+
   .poodle-data-table[data-size="lg"] .poodle-data-table__toolbar-btn {
-    font-size: 0.8125rem;
+    --poodle-data-table-toolbar-label-size: 0.8125rem;
     padding: 0.375rem 0.625rem;
   }
 
   .poodle-data-table[data-size="lg"] .poodle-data-table__toolbar-btn .poodle-icon {
     width: 1rem;
     height: 1rem;
-  }
-
-  .poodle-data-table[data-size="lg"] th,
-  .poodle-data-table[data-size="lg"] td,
-  .poodle-data-table[data-size="lg"] .poodle-data-table__filters-row td,
-  .poodle-data-table[data-size="lg"] .poodle-data-table__footer {
-    font-size: 0.8125rem;
   }
 
   .poodle-data-table[data-size="lg"] th,
@@ -411,21 +481,26 @@
     width: 3.625rem;
   }
 
+  .poodle-data-table[data-size="xl"] {
+    --poodle-data-table-control-type-size: var(--poodle-style-typography-controlLabel-xl-size);
+    --poodle-data-table-control-type-lineHeight: var(--poodle-style-typography-controlLabel-xl-lineHeight);
+    --poodle-data-table-control-type-weight: var(--poodle-style-typography-controlLabel-xl-weight);
+    --poodle-data-table-control-type-letterSpacing: var(--poodle-style-typography-controlLabel-xl-letterSpacing);
+    --poodle-data-table-input-type-size: var(--poodle-style-typography-inputText-xl-size);
+    --poodle-data-table-input-type-lineHeight: var(--poodle-style-typography-inputText-xl-lineHeight);
+    --poodle-data-table-input-type-weight: var(--poodle-style-typography-inputText-xl-weight);
+    --poodle-data-table-cell-size: 0.875rem;
+    --poodle-data-table-auxiliary-size: 0.875rem;
+  }
+
   .poodle-data-table[data-size="xl"] .poodle-data-table__toolbar-btn {
-    font-size: 0.875rem;
+    --poodle-data-table-toolbar-label-size: 0.875rem;
     padding: 0.4375rem 0.75rem;
   }
 
   .poodle-data-table[data-size="xl"] .poodle-data-table__toolbar-btn .poodle-icon {
     width: 1.125rem;
     height: 1.125rem;
-  }
-
-  .poodle-data-table[data-size="xl"] th,
-  .poodle-data-table[data-size="xl"] td,
-  .poodle-data-table[data-size="xl"] .poodle-data-table__filters-row td,
-  .poodle-data-table[data-size="xl"] .poodle-data-table__footer {
-    font-size: 0.875rem;
   }
 
   .poodle-data-table[data-size="xl"] th,

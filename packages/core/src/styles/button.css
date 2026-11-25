@@ -29,11 +29,11 @@
     box-shadow: var(--poodle-button-shadow);
     color: var(--poodle-button-text);
     cursor: pointer;
-    font-family: var(--poodle-typography-label-family);
-    font-size: var(--poodle-typography-label-size);
-    font-weight: var(--poodle-typography-label-weight);
-    letter-spacing: var(--poodle-typography-label-letterSpacing);
-    line-height: 1;
+    font-family: var(--poodle-recipe-button-label-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-label-family))));
+    font-size: var(--poodle-recipe-button-label-font-size, var(--poodle-button-label-type-size, var(--poodle-button-label-size)));
+    font-weight: var(--poodle-recipe-button-label-font-weight, var(--poodle-button-label-type-weight, var(--poodle-typography-label-weight)));
+    letter-spacing: var(--poodle-recipe-button-label-letter-spacing, var(--poodle-button-label-type-letterSpacing, var(--poodle-typography-label-letterSpacing)));
+    line-height: var(--poodle-recipe-button-label-line-height, var(--poodle-button-label-type-lineHeight, 1));
     text-decoration: none;
     transition:
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
@@ -41,41 +41,62 @@
       color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+    --poodle-button-label-type-size: var(--poodle-style-typography-controlLabel-md-size);
+    --poodle-button-label-type-lineHeight: var(--poodle-style-typography-controlLabel-md-lineHeight);
+    --poodle-button-label-type-weight: var(--poodle-style-typography-controlLabel-md-weight);
+    --poodle-button-label-type-letterSpacing: var(--poodle-style-typography-controlLabel-md-letterSpacing);
+    --poodle-button-label-size: var(--poodle-typography-label-size);
   }
 
   .poodle-button[data-size="xs"] {
     min-width: 3.75rem;
     height: 1.5rem;
     padding: 0 var(--poodle-space-control-x);
-    font-size: 0.6875rem;
+    --poodle-button-label-size: 0.6875rem;
+    --poodle-button-label-type-size: var(--poodle-style-typography-controlLabel-xs-size);
+    --poodle-button-label-type-lineHeight: var(--poodle-style-typography-controlLabel-xs-lineHeight);
+    --poodle-button-label-type-weight: var(--poodle-style-typography-controlLabel-xs-weight);
+    --poodle-button-label-type-letterSpacing: var(--poodle-style-typography-controlLabel-xs-letterSpacing);
   }
 
   .poodle-button[data-size="sm"] {
     min-width: 4.25rem;
     height: 1.75rem;
     padding: 0 var(--poodle-space-control-x);
-    font-size: 0.75rem;
+    --poodle-button-label-size: 0.75rem;
+    --poodle-button-label-type-size: var(--poodle-style-typography-controlLabel-sm-size);
+    --poodle-button-label-type-lineHeight: var(--poodle-style-typography-controlLabel-sm-lineHeight);
+    --poodle-button-label-type-weight: var(--poodle-style-typography-controlLabel-sm-weight);
+    --poodle-button-label-type-letterSpacing: var(--poodle-style-typography-controlLabel-sm-letterSpacing);
   }
 
   .poodle-button[data-size="md"] {
     min-width: 5rem;
     height: 2.25rem;
     padding: 0 var(--poodle-space-control-x);
-    font-size: 0.8125rem;
+    --poodle-button-label-size: 0.8125rem;
   }
 
   .poodle-button[data-size="lg"] {
     min-width: 5.75rem;
     height: 2.75rem;
     padding: 0 var(--poodle-space-control-x);
-    font-size: 0.875rem;
+    --poodle-button-label-size: 0.875rem;
+    --poodle-button-label-type-size: var(--poodle-style-typography-controlLabel-lg-size);
+    --poodle-button-label-type-lineHeight: var(--poodle-style-typography-controlLabel-lg-lineHeight);
+    --poodle-button-label-type-weight: var(--poodle-style-typography-controlLabel-lg-weight);
+    --poodle-button-label-type-letterSpacing: var(--poodle-style-typography-controlLabel-lg-letterSpacing);
   }
 
   .poodle-button[data-size="xl"] {
     min-width: 6.5rem;
     height: 3.25rem;
     padding: 0 var(--poodle-space-control-x);
-    font-size: 0.9375rem;
+    --poodle-button-label-size: 0.9375rem;
+    --poodle-button-label-type-size: var(--poodle-style-typography-controlLabel-xl-size);
+    --poodle-button-label-type-lineHeight: var(--poodle-style-typography-controlLabel-xl-lineHeight);
+    --poodle-button-label-type-weight: var(--poodle-style-typography-controlLabel-xl-weight);
+    --poodle-button-label-type-letterSpacing: var(--poodle-style-typography-controlLabel-xl-letterSpacing);
   }
 
   /* Icon padding adjustment: reduce padding on icon side by 0.125rem */
@@ -317,7 +338,7 @@
     justify-content: center;
     width: var(--poodle-size-icon-md);
     height: var(--poodle-size-icon-md);
-    font-family: var(--poodle-typography-code-family);
+    font-family: var(--poodle-recipe-button-icon-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-code-family))));
     font-size: 0.875rem;
     line-height: 1;
   }

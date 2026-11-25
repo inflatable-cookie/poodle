@@ -109,3 +109,5 @@ pub const TYPOGRAPHY_FONT_SIZE_XL: SpaceValue = SpaceValue(20.0);
 pub const TYPOGRAPHY_FONT_LINE_HEIGHT_SM: SpaceValue = SpaceValue(16.0);
 pub const TYPOGRAPHY_FONT_LINE_HEIGHT_MD: SpaceValue = SpaceValue(20.0);
 pub const TYPOGRAPHY_FONT_LINE_HEIGHT_LG: SpaceValue = SpaceValue(24.0);
+pub const TYPOGRAPHY_FONT_SYSTEM_FAMILY_SANS: &str = "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif";
+pub const TYPOGRAPHY_FONT_SYSTEM_FAMILY_MONO: &str = "ui-monospace, \"SFMono-Regular\", Menlo, Consolas, monospace";

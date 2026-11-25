@@ -2,7 +2,8 @@
   "treatment": {
     "fill": "filled",
     "surface": "tonal",
-    "selection": "neutral"
+    "selection": "neutral",
+    "typography": "scale"
   },
   "style": {
     "selection": {
