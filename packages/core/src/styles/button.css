@@ -5,17 +5,17 @@
   .poodle-button {
     /* Recipe hooks (--poodle-recipe-*) are read-only from the app's scope:
        recipe → token. See architecture 007. */
-    --poodle-button-fill: var(--poodle-recipe-button-fill, color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 88%, var(--poodle-color-text-primary)));
+    --poodle-button-fill: var(--poodle-recipe-button-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 88%, var(--poodle-color-text-primary))));
     --poodle-button-fill-hover: var(--poodle-recipe-button-fill-hover, color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 80%, var(--poodle-color-text-primary)));
     --poodle-button-fill-active: var(--poodle-recipe-button-fill-active, color-mix(
       in srgb,
       var(--poodle-surface, var(--poodle-color-background-surface)) 84%,
       var(--poodle-color-text-primary)
     ));
-    --poodle-button-border: var(--poodle-recipe-button-border, var(--poodle-color-border-default));
+    --poodle-button-border: var(--poodle-recipe-button-border, var(--poodle-style-control-border, var(--poodle-color-border-default)));
     --poodle-button-border-hover: var(--poodle-recipe-button-border-hover, color-mix(in srgb, var(--poodle-button-border) 78%, var(--poodle-color-text-primary)));
     --poodle-button-text: var(--poodle-recipe-button-text, var(--poodle-color-text-primary));
-    --poodle-button-shadow: var(--poodle-recipe-button-shadow, inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent));
+    --poodle-button-shadow: var(--poodle-recipe-button-shadow, var(--poodle-style-control-shadow, inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)));
     display: inline-flex;
     align-items: center;
     justify-content: center;

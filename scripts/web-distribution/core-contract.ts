@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { styles } from "../../packages/tokens/artifacts/ts/themes";
 import { assertSorted } from "./hash";
 import type { AssetCopy, JsExportMap, LibraryEntry } from "./types";
 
@@ -359,6 +360,8 @@ export function tokenCssBasenames(): string[] {
   return [
     "poodle-tokens.css",
     "poodle-themes.css",
+    "poodle-styles.css",
+    ...Object.keys(styles).map((name) => `poodle-style-${name}.css`),
     ...CORE_THEME_NAMES.map((name) => `poodle-theme-${name}.css`),
     ...CORE_DENSITY_NAMES.map((name) => `poodle-density-${name}.css`),
     ...CORE_CONTROL_SIZE_NAMES.map((name) => `poodle-control-size-${name}.css`),
@@ -469,6 +472,8 @@ export function corePackageExports(): Record<string, string | JsExportMap> {
     "./tokens/styles.css": "./dist/tokens/generated/css/poodle-tokens.css",
     "./tokens/css/poodle-tokens.css": "./dist/tokens/generated/css/poodle-tokens.css",
     "./tokens/themes.css": "./dist/tokens/generated/css/poodle-themes.css",
+    "./tokens/css/poodle-styles.css": "./dist/tokens/generated/css/poodle-styles.css",
+    "./tokens/style-*.css": "./dist/tokens/generated/css/poodle-style-*.css",
     ...Object.fromEntries(
       CORE_THEME_NAMES.map((name) =>
         tokenCss(`./tokens/theme-${name}.css`, `poodle-theme-${name}.css`),

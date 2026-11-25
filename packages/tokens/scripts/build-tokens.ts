@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { parse } from "postcss";
 
 // `--check` compares what would be written against what is committed, including
 // files the generator no longer emits, mirroring `scripts/build-default-icons.ts --check`.
@@ -40,6 +41,10 @@ interface NamedModeDefinition {
   selector: string;
   description: string;
   entries: ResolvedTokenEntry[];
+}
+
+interface StyleDefinition extends NamedModeDefinition {
+  treatment: Record<string, string>;
 }
 
 interface ThemeMetadata {
@@ -413,6 +418,7 @@ const metadata = loadDirectoryObject("metadata");
 const themesMetadata = metadata.themes as unknown as Record<string, ThemeMetadata>;
 const densityMetadata = metadata.density as unknown as Record<string, ThemeMetadata>;
 const controlSizeMetadata = metadata.controlSize as unknown as Record<string, ThemeMetadata>;
+const stylesMetadata = metadata.styles as unknown as Record<string, ThemeMetadata>;
 const aliasesMetadata = metadata.aliases as unknown as AliasMetadata[];
 const deprecationsMetadata = metadata.deprecations as unknown as DeprecationMetadata[];
 
@@ -423,6 +429,7 @@ const schema = {
     themes: loadNamedDirectory("modes/themes"),
     density: loadNamedDirectory("modes/density"),
     controlSize: loadNamedDirectory("modes/control-size"),
+    style: loadNamedDirectory("modes/style"),
   },
   metadata,
   manifest: readJson<Manifest>(path.join(schemaDir, "manifest.json")),
@@ -440,6 +447,7 @@ const semanticEntries = resolvedBaseEntries.filter((entry) =>
 );
 
 function resolveModeEntries(modeEntries: TokenEntry[]): ResolvedTokenEntry[] {
+  if (modeEntries.length === 0) return [];
   const resolvedEntries = resolveEntries([...resolvedBaseEntries, ...modeEntries]);
   return resolvedEntries.slice(-modeEntries.length);
 }
@@ -481,6 +489,142 @@ const controlSizeDefinitions = Object.entries(schema.modes.controlSize).map<Name
   },
 );
 
+const themeWrites = new Map<string, string>();
+for (const theme of themeDefinitions) {
+  for (const { path } of theme.entries) themeWrites.set(cssVarName(path), theme.name);
+}
+const baseByPath = new Map(resolvedBaseEntries.map((entry) => [entry.path, entry]));
+const modeName = /^[a-z][a-z0-9]*(?:-[a-z][a-z0-9]*)*$/;
+
+function readStyleOverrides(source: JsonObject, label: string): TokenEntry[] {
+  return collectTokenEntries(source).map((entry) => {
+    const theme = themeWrites.get(cssVarName(entry.path));
+    if (theme) {
+      throw new Error(`${label} and theme "${theme}" both override ${entry.path}`);
+    }
+    const base = baseByPath.get(entry.path);
+    if (!base || entry.path.startsWith("primitives.")) {
+      throw new Error(`${label} must override an existing semantic token: ${entry.path}`);
+    }
+    const { value } = entry;
+    const reference = isReference(value) ? baseByPath.get(value.slice(1, -1)) : undefined;
+    const keyword = typeof value === "string" && /^[a-z][a-z-]*$/i.test(value);
+    const dimension = typeof value === "string" && /^-?(?:\d+\.?\d*|\.\d+)(?:[a-z]+|%)$/i.test(value);
+    const portable = reference
+      ? base.type !== "color" || reference.path.startsWith("color.")
+      : base.type === "color"
+        ? value === "initial" || value === "transparent"
+        : keyword || dimension || (typeof value === "number" && Number.isFinite(value));
+    if (!portable) {
+      throw new Error(`${label} has a non-portable style value for ${entry.path}: ${value}`);
+    }
+    return { ...entry, type: base.type };
+  });
+}
+
+const treatmentDefinitions = new Map(
+  Object.entries(loadNamedDirectory("style-treatments")).map(([name, choices]) => {
+    if (!modeName.test(name)) throw new Error(`Invalid style treatment name: ${name}`);
+    const values = new Map<string, TokenEntry[]>();
+    for (const [choice, overrides] of Object.entries(choices)) {
+      if (!modeName.test(choice) || !isJsonObject(overrides)) {
+        throw new Error(`Invalid style treatment choice: ${name}=${choice}`);
+      }
+      values.set(choice, readStyleOverrides(overrides, `Treatment "${name}=${choice}"`));
+    }
+    return [name, values];
+  }),
+);
+
+const stylesWithTreatments = Object.entries(schema.modes.style).map(
+  ([name, { treatment, ...overrides }]) => {
+    const styleMetadata = stylesMetadata[name];
+    if (
+      !modeName.test(name)
+      || !Object.hasOwn(stylesMetadata, name)
+      || styleMetadata.selector !== `[data-style="${name}"]`
+      || !isJsonObject(treatment)
+    ) {
+      throw new Error(`Style "${name}" requires a valid name, metadata, and treatment group`);
+    }
+    const entries = new Map<string, TokenEntry>();
+    const choices: Record<string, string> = {};
+    for (const key of Object.keys(treatment)) {
+      if (!treatmentDefinitions.has(key)) throw new Error(`Style "${name}" has unknown treatment "${key}"`);
+    }
+    for (const [key, values] of treatmentDefinitions) {
+      const choice = treatment[key];
+      const selected = typeof choice === "string" ? values.get(choice) : undefined;
+      if (!selected || typeof choice !== "string") {
+        throw new Error(`Style "${name}" must set ${key} to one of: ${[...values.keys()].join(", ")}`);
+      }
+      choices[key] = choice;
+      for (const entry of selected) {
+        if (entries.has(entry.path)) {
+          throw new Error(`Style "${name}" treatments both override ${entry.path}`);
+        }
+        entries.set(entry.path, entry);
+      }
+    }
+    for (const entry of readStyleOverrides(overrides, `Style "${name}"`)) entries.set(entry.path, entry);
+    return {
+      name,
+      selector: styleMetadata.selector,
+      description: styleMetadata.description,
+      treatment: choices,
+      entries,
+    };
+  },
+);
+
+// A nested style starts from base values for any slots it does not override.
+// Include every style-owned slot so an outer style cannot leak into it.
+const styledPaths = new Set(stylesWithTreatments.flatMap(({ entries }) => [...entries.keys()]));
+const styleDefinitions = stylesWithTreatments.map<StyleDefinition>(({ entries, ...style }) => ({
+  ...style,
+  entries: resolveModeEntries(
+    baseEntries.filter((entry) => styledPaths.has(entry.path)).map((entry) => entries.get(entry.path) ?? entry),
+  ),
+}));
+
+function checkSharedStyleSelectors(): void {
+  const directory = path.resolve(tokensDir, "../core/src/styles");
+  for (const filePath of walkFiles(directory)) {
+    if (!filePath.endsWith(".css")) continue;
+    const css = parse(fs.readFileSync(filePath, "utf8"), { from: rel(filePath) });
+    css.walkRules((rule) => {
+      if (/\[\s*data-theme(?=[\s~|^$*=\]])/i.test(rule.selector)) {
+        throw new Error(`${rel(filePath)}:${rule.source?.start?.line}: shared CSS must not select on data-theme`);
+      }
+    });
+  }
+}
+checkSharedStyleSelectors();
+
+function buildStyleCss(style: StyleDefinition): string {
+  const styleByPath = new Map(style.entries.map((entry) => [entry.path, entry]));
+  const declarations = (entries: ResolvedTokenEntry[], indent: string) =>
+    entries.map(({ path, rawValue }) => {
+      const value = isReference(rawValue) ? `var(${cssVarName(rawValue.slice(1, -1))})` : rawValue;
+      return `${indent}${cssVarName(path)}: ${value};`;
+    }).join("\n");
+
+  const dependsOnTheme = (entry: ResolvedTokenEntry): boolean => {
+    if (!isReference(entry.rawValue)) return false;
+    const target = entry.rawValue.slice(1, -1);
+    if (target.startsWith("color.") || themeWrites.has(cssVarName(target))) return true;
+    const referenced = styleByPath.get(target) ?? baseByPath.get(target);
+    return referenced !== undefined && dependsOnTheme(referenced);
+  };
+  const block = `${style.selector} {\n${declarations(style.entries, "  ")}\n}\n`;
+  const themeAliases = style.entries.filter(dependsOnTheme);
+  if (themeAliases.length === 0) return block;
+
+  // CSS inherits the computed value of var() aliases. Rebind role aliases at
+  // nested theme roots within this style, up to the next style boundary.
+  return `${block}\n@scope (${style.selector}) to ([data-style]) {\n  [data-theme] {\n${declarations(themeAliases, "    ")}\n  }\n}\n`;
+}
+
 const cssHeader =
   "/* Generated by packages/tokens/scripts/build-tokens.ts. Do not edit manually. */\n";
 writeFile(
@@ -503,6 +647,11 @@ writeFile(
     .map((theme) => buildCssBlock(theme.selector, theme.entries))
     .join("\n")}`,
 );
+
+for (const style of styleDefinitions) {
+  writeFile(`css/poodle-style-${style.name}.css`, `${cssHeader}${buildStyleCss(style)}`);
+}
+writeFile("css/poodle-styles.css", `${cssHeader}${styleDefinitions.map(buildStyleCss).join("\n")}`);
 
 for (const density of densityDefinitions) {
   writeFile(
@@ -591,6 +740,22 @@ export const controlSizes = ${JSON.stringify(
           overrides: Object.fromEntries(
             mode.entries.map((entry) => [entry.path, entry.resolvedValue]),
           ),
+        },
+      ]),
+    ),
+    null,
+    2,
+  )} as const;
+
+export const styles = ${JSON.stringify(
+    Object.fromEntries(
+      styleDefinitions.map(({ name, selector, description, treatment, entries }) => [
+        name,
+        {
+          selector,
+          description,
+          treatment,
+          overrides: Object.fromEntries(entries.map((entry) => [entry.path, entry.rawValue])),
         },
       ]),
     ),
@@ -808,10 +973,17 @@ function buildRustSemanticPathConstants(entries: ResolvedTokenEntry[], stripPref
     .join("\n");
 }
 
-function buildRustDefinitionArray(entries: ResolvedTokenEntry[]): string {
+function rustVariant(name: string): string {
+  return name.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join("");
+}
+
+function buildRustDefinitionArray(
+  entries: ResolvedTokenEntry[],
+  valueKey: "resolvedValue" | "rawValue" = "resolvedValue",
+): string {
   return entries
     .map(
-      (entry) => `    (${jsString(entry.path)}, ${jsString(String(entry.resolvedValue))}),`,
+      (entry) => `    (${jsString(entry.path)}, ${jsString(String(entry[valueKey]))}),`,
     )
     .join("\n");
 }
@@ -823,6 +995,7 @@ pub mod density;
 pub mod metadata;
 pub mod primitives;
 pub mod semantic;
+pub mod styles;
 pub mod themes;
 pub mod typed;
 `,
@@ -906,6 +1079,46 @@ ${buildRustDefinitionArray(mode.entries)}
 };`,
     )
     .join("\n\n")}
+`,
+);
+
+writeRustFile(
+  "styles.rs",
+  `${formatHeader("//")}
+//! Rendering style modes and their expanded semantic token overrides.
+
+${[...treatmentDefinitions].map(([name, values]) =>
+    `/// Available values for the \`${name}\` treatment.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ${rustVariant(name)}Treatment {
+${[...values.keys()].map((choice) => `    ${rustVariant(choice)},`).join("\n")}
+}`,
+  ).join("\n\n")}
+
+/// A rendering style and the treatments that produced its overrides.
+#[derive(Debug, Clone, Copy)]
+pub struct StyleDefinition {
+    pub name: &'static str,
+    pub selector: &'static str,
+${[...treatmentDefinitions.keys()].map((name) =>
+    `    pub ${name.replaceAll("-", "_")}: ${rustVariant(name)}Treatment,`,
+  ).join("\n")}
+    /// Semantic paths and portable values. Braced paths refer to active tokens.
+    pub overrides: &'static [(&'static str, &'static str)],
+}
+
+${styleDefinitions.map(({ name, selector, treatment, entries }) =>
+    `pub const ${name.replaceAll("-", "_").toUpperCase()}: StyleDefinition = StyleDefinition {
+    name: ${jsString(name)},
+    selector: ${jsString(selector)},
+${Object.entries(treatment).map(([key, value]) =>
+    `    ${key.replaceAll("-", "_")}: ${rustVariant(key)}Treatment::${rustVariant(value)},`,
+  ).join("\n")}
+    overrides: &[
+${buildRustDefinitionArray(entries, "rawValue")}
+    ],
+};`,
+  ).join("\n\n")}
 `,
 );
 

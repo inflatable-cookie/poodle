@@ -4,5 +4,6 @@ pub mod density;
 pub mod metadata;
 pub mod primitives;
 pub mod semantic;
+pub mod styles;
 pub mod themes;
 pub mod typed;

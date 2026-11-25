@@ -257,12 +257,14 @@ Import subpaths present in the published package manifests.
 - `@inflatable-cookie/poodle-core/tokens/control-size-xl.css`
 - `@inflatable-cookie/poodle-core/tokens/control-size-xs.css`
 - `@inflatable-cookie/poodle-core/tokens/css`
+- `@inflatable-cookie/poodle-core/tokens/css/poodle-styles.css`
 - `@inflatable-cookie/poodle-core/tokens/css/poodle-tokens.css`
 - `@inflatable-cookie/poodle-core/tokens/density-comfortable.css`
 - `@inflatable-cookie/poodle-core/tokens/density-compact.css`
 - `@inflatable-cookie/poodle-core/tokens/density-default.css`
 - `@inflatable-cookie/poodle-core/tokens/metadata`
 - `@inflatable-cookie/poodle-core/tokens/runtime`
+- `@inflatable-cookie/poodle-core/tokens/style-*.css`
 - `@inflatable-cookie/poodle-core/tokens/styles.css`
 - `@inflatable-cookie/poodle-core/tokens/theme-clay.css`
 - `@inflatable-cookie/poodle-core/tokens/theme-cobalt.css`

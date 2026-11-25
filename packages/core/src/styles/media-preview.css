@@ -64,6 +64,7 @@
     padding: var(--poodle-media-preview-meta-padding-y) var(--poodle-media-preview-meta-padding-x);
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-recipe-media-preview-meta-fill, color-mix(in srgb, var(--poodle-color-background-surface) 70%, transparent));
+    box-shadow: var(--poodle-recipe-media-preview-meta-shadow, none);
   }
 
   .poodle-media-preview[data-size="xs"] {
@@ -114,8 +115,4 @@
   .poodle-media-preview[data-density="comfortable"] {
     --poodle-media-preview-header-gap: 1rem;
     --poodle-media-preview-section-gap: 0.625rem;
-  }
-
-  [data-theme="iceberg"] .poodle-media-preview__meta li {
-    box-shadow: var(--poodle-recipe-media-preview-meta-shadow, inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent));
   }

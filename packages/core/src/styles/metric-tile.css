@@ -76,10 +76,3 @@
     --poodle-state-tile-padding-x: 1.25rem;
     --poodle-state-tile-body-gap: 0.875rem;
   }
-
-  [data-theme="iceberg"] .poodle-state-tile {
-    background: var(
-      --poodle-recipe-metric-tile-theme-iceberg-fill,
-      color-mix(in srgb, var(--poodle-color-background-panel) 96%, var(--poodle-color-background-elevated))
-    );
-  }
