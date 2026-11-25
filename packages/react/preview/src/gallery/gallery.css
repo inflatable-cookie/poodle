@@ -699,3 +699,75 @@ input {
 [data-component="dock-region"] .poodle-specimen__static-panel:last-child {
   border-right: 0;
 }
+
+/* Live theme panel: mirrors the Svelte preview's scoped styles. */
+.live-theme-panel {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+  background: var(--poodle-color-background-panel);
+}
+
+.live-theme-panel h2 {
+  margin: 0;
+  font-size: var(--poodle-typography-heading-size);
+  font-weight: var(--poodle-typography-heading-weight);
+}
+
+.live-theme-panel .settings,
+.live-theme-panel .presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: end;
+}
+
+.live-theme-panel .presets,
+.live-theme-panel .colour-choice {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.live-theme-panel .presets > span {
+  margin-right: 0.5rem;
+}
+
+.live-theme-panel .setting {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.live-theme-panel .setting,
+.live-theme-panel .presets > span {
+  color: var(--poodle-color-text-secondary);
+  font-size: var(--poodle-typography-label-size);
+}
+
+.live-theme-panel .range {
+  min-width: 8rem;
+}
+
+.live-theme-panel .range-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.live-theme-panel input[type="color"] {
+  box-sizing: border-box;
+  width: var(--poodle-size-control-height);
+  height: var(--poodle-size-control-height);
+  padding: 0.125rem;
+  border: 0.0625rem solid var(--poodle-color-border-default);
+  border-radius: var(--poodle-radius-control);
+  background: var(--poodle-color-fill-rest);
+  cursor: pointer;
+}
+
+.live-theme-panel input[type="color"]:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: var(--poodle-focus-outline-offset);
+}
