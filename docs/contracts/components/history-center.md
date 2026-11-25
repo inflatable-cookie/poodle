@@ -667,7 +667,7 @@ Semantic roles by default; recipes are the override surface (architecture
 | entry row (current) | `--poodle-recipe-history-center-current-fill` | accent 7% mix |
 | entry hover | `--poodle-recipe-history-center-item-hover-fill` | surface 72% mix |
 | checkpoint pin | `--poodle-recipe-history-center-checkpoint-fill` | `--poodle-color-accent-base` |
-| position marker | `--poodle-recipe-history-center-current-marker` | `--poodle-color-accent-base` |
+| position marker | `--poodle-recipe-history-center-current-marker` | selection indicator role (`--poodle-style-selection-indicator`), then `--poodle-color-accent-base` |
 | fork icon | `--poodle-recipe-history-center-fork-color` | text-secondary |
 | fork badge fill | `--poodle-recipe-history-center-fork-badge-fill` | accent 16% mix |
 | fork badge text | `--poodle-recipe-history-center-fork-badge-text` | `--poodle-color-accent-base` |

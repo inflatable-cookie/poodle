@@ -65,7 +65,7 @@
   .poodle-log-list__filter-btn.poodle-active {
     background: var(--poodle-recipe-log-list-active-filter-btn-fill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
     border-color: var(--poodle-recipe-log-list-active-filter-btn-border, color-mix(in srgb, var(--poodle-color-accent-base) 42%, transparent));
-    color: var(--poodle-recipe-log-list-active-filter-btn-text, var(--poodle-color-text-primary));
+    color: var(--poodle-recipe-log-list-active-filter-btn-text, var(--poodle-style-selection-text, var(--poodle-color-text-primary)));
   }
 
   .poodle-log-list__filter-btn:focus-visible {

@@ -77,7 +77,7 @@
    */
   .poodle-list-card[data-active="true"] {
     box-shadow: inset var(--poodle-recipe-list-card-active-bar-width, 0.1875rem) 0 0 0
-      var(--poodle-recipe-list-card-active-bar, var(--poodle-color-accent-base));
+      var(--poodle-recipe-list-card-active-bar, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)));
   }
 
   /* The title takes primary weight so the state survives for anyone who cannot
@@ -122,7 +122,7 @@
   .poodle-list-card[data-active="true"][data-selected="true"] {
     box-shadow:
       inset var(--poodle-recipe-list-card-active-bar-width, 0.1875rem) 0 0 0
-        var(--poodle-recipe-list-card-active-bar, var(--poodle-color-accent-base)),
+        var(--poodle-recipe-list-card-active-bar, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))),
       0 0 0 0.0625rem var(--poodle-color-accent-base),
       inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
   }
@@ -130,7 +130,7 @@
   .poodle-list-card[data-active="true"][data-highlighted="true"] {
     box-shadow:
       inset var(--poodle-recipe-list-card-active-bar-width, 0.1875rem) 0 0 0
-        var(--poodle-recipe-list-card-active-bar, var(--poodle-color-accent-base)),
+        var(--poodle-recipe-list-card-active-bar, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))),
       inset 0 0 0 0.0625rem color-mix(
         in srgb,
         var(--list-card-accent, var(--poodle-color-accent-base)) 12%,

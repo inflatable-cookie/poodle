@@ -220,7 +220,7 @@
 }
 
 .poodle-history-center__position-marker[data-position="current"] {
-  background: var(--poodle-recipe-history-center-current-marker, var(--poodle-color-accent-base));
+  background: var(--poodle-recipe-history-center-current-marker, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)));
   box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-base) 15%, transparent);
 }
 
