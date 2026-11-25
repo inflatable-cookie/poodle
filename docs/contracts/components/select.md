@@ -1,7 +1,7 @@
 # Select
 
 Status: detailed contract
-Updated: 2026-09-07
+Updated: 2026-11-25
 
 ## 1. Purpose
 
@@ -305,7 +305,7 @@ uses the dismissable-layer stack (innermost-first), guarded by
 
 ### Focus And Announcement
 
-- focus entry: root receives visible focus treatment (border-color, background, box-shadow changes); option buttons in custom mode draw the standard ring (`border-width-focus` solid `accent-focusRing`, offset `0.125rem`)
+- focus entry: root receives visible focus treatment (border-color, background, box-shadow changes); option buttons in custom mode draw the standard ring (`border-width-focus` solid `accent-focusRing`, offset `focus-outline-offset`)
 - focus exit: focus treatment clears
 - custom mode: highlight moves via `aria-activedescendant` (no DOM focus change); closing the dropdown keeps focus on the input/trigger
 - live-region behavior: none; native select handles value announcement; custom mode uses `aria-activedescendant`
@@ -337,7 +337,7 @@ uses the dismissable-layer stack (innermost-first), guarded by
 | `gap` | `var(--poodle-space-inline-sm)` |
 | `min-height` | `var(--poodle-size-control-height)` |
 | `padding` | `0 var(--poodle-space-control-x)` |
-| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border` | `var(--poodle-border-width-default) solid var(--poodle-color-border-default)` |
 | `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `var(--poodle-recipe-select-fill, var(--poodle-color-background-surface))` |
 | `box-shadow` | `var(--poodle-recipe-select-shadow, none)` |
@@ -392,14 +392,14 @@ uses the dismissable-layer stack (innermost-first), guarded by
 
 | Property | Value |
 |----------|-------|
-| `font-weight` | `600` |
+| `font-weight` | `var(--poodle-typography-heading-weight)` |
 | `color` | `var(--poodle-color-text-secondary)` |
 
 ### Option `.select__control option`
 
 | Property | Value |
 |----------|-------|
-| `font-weight` | `normal` |
+| `font-weight` | `var(--poodle-typography-body-weight)` |
 | `color` | `var(--poodle-color-text-primary)` |
 
 ### Ghost variant `.select[data-variant="ghost"]`
@@ -443,6 +443,34 @@ The chevron indicator **is rendered** in non-searchable custom mode when
 `variant="ghost"`. Ghost drops the border and the fill, not the signal that the
 control is a select; the trigger still reserves the indicator's decoration lane
 so the value ellipsizes before it.
+
+### Listbox `.select__listbox`
+
+| Property | Value |
+|----------|-------|
+| `border` | `var(--poodle-border-width-default) solid var(--poodle-color-border-default)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `var(--poodle-recipe-select-listbox-fill, var(--poodle-color-background-elevated))` |
+| `box-shadow` | `var(--poodle-recipe-select-listbox-shadow, var(--poodle-elevation-overlay))` |
+
+### Group Label `.select__group-label`
+
+| Property | Value |
+|----------|-------|
+| `font-family` | `var(--poodle-typography-label-family)` |
+| `font-size` | `0.6875rem` |
+| `font-weight` | `var(--poodle-typography-heading-weight)` |
+| `letter-spacing` | `var(--poodle-typography-overline-letterSpacing)` |
+| `text-transform` | `uppercase` |
+
+### Option Button `.select__option`
+
+| Property | Value |
+|----------|-------|
+| `border-radius` | `calc(var(--poodle-radius-control) - 0.125rem)` |
+| `:focus-visible outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
+| `:focus-visible outline-offset` | `var(--poodle-focus-outline-offset)` |
+| `[aria-selected="true"] font-weight` | `var(--poodle-typography-label-weight)` |
 
 ### Listbox -- auto-width `.select__listbox--auto-width`
 
@@ -548,7 +576,7 @@ Applied when viewport-aware horizontal flipping determines the menu would overfl
 - [ ] placeholder color (text-secondary) matches
 - [ ] indicator color (icon-muted) matches
 - [ ] disabled opacity matches
-- [ ] optgroup font-weight (600) and color (text-secondary) match
+- [ ] optgroup font-weight (typography-heading-weight) and color (text-secondary) match
 - [ ] all five sizes visually match (height, padding, font-size per size table)
 
 ### Tier 3: Implementation Freedom

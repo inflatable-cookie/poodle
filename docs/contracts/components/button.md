@@ -1,7 +1,7 @@
 # Button
 
 Status: detailed contract
-Updated: 2026-09-05
+Updated: 2026-11-25
 
 ## 1. Purpose
 
@@ -103,7 +103,7 @@ Updated: 2026-09-05
 | default | resting | variant-specific fill, border, text, shadow |
 | hover | pointer enters (not disabled) | `background: button-fill-hover`, `border-color` mix with text-primary 78% |
 | active | press (not disabled) | `background: button-fill-active`, `transform: translateY(0.03125rem)` |
-| focus | keyboard focus | `outline: border-width-focus solid accent-focusRing`, `outline-offset: 0.125rem` |
+| focus | keyboard focus | `outline: border-width-focus solid accent-focusRing`, `outline-offset: focus-outline-offset` |
 | disabled | `disabled=true` or `loading=true` | `opacity: state-opacity-disabled`, `cursor: not-allowed` |
 | loading | `loading=true` | spinner visible, button disabled |
 | icon-only | no children content | square button, no min-width |
@@ -191,7 +191,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | `min-width` | `5rem` |
 | `height` | `var(--poodle-size-control-height)` |
 | `padding` | `0 var(--poodle-space-control-x)` |
-| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border` | `var(--poodle-border-width-default) solid var(--poodle-button-border)` |
 | `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `var(--poodle-button-fill)` (see CSS Custom Properties table for per-variant values) |
 | `box-shadow` | `var(--poodle-button-shadow)` (see CSS Custom Properties table for per-variant values) |
@@ -200,7 +200,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `var(--poodle-typography-label-size)` |
 | `font-weight` | `var(--poodle-typography-label-weight)` |
-| `letter-spacing` | `0.01em` |
+| `letter-spacing` | `var(--poodle-typography-label-letterSpacing)` |
 | `line-height` | `1` |
 | `text-decoration` | `none` |
 | `transition` | `background, border-color, color, box-shadow, transform` all at `motion-duration-interaction motion-easing-standard` |
@@ -357,7 +357,7 @@ more, lg does not reduce, xl adds slightly).
 | Property | Value |
 |----------|-------|
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
-| `outline-offset` | `0.125rem` |
+| `outline-offset` | `var(--poodle-focus-outline-offset)` |
 
 ### Disabled
 
