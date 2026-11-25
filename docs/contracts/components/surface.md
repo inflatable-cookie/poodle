@@ -175,7 +175,7 @@ first and falls back to the computed semantic-token default. The full set:
 
 | Var | Value |
 |-----|-------|
-| `--poodle-surface-fill` | `var(--poodle-recipe-surface-elevated-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel)))` (elevated tone keeps its own fill; the switch sets its border and shadow) |
+| `--poodle-surface-fill` | `var(--poodle-recipe-surface-elevated-fill, var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel)))))` |
 | `--poodle-surface-border` | `var(--poodle-recipe-surface-elevated-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent)))` |
 | `--poodle-surface-shadow` | `var(--poodle-recipe-surface-elevated-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-surface)))` |
 
