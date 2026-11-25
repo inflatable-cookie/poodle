@@ -50,6 +50,15 @@ supply a visible Tabs outline even when
 `accent-tint` supplies a transparent fallback border. See
 [002 Token System and Package Layout](002-token-system-and-package-layout.md#modes).
 
+The selected state of sidebar nav, navigation menu, pagination, stepper,
+menubar, menu surface, dock region and breadcrumbs follows the same chain.
+Where a component's hand-mixed default has no matching role, the fallback
+reads `--poodle-style-selection-itemFill` (unset in `accent-outline`) and
+keeps its own mix, so the default style stays pixel-identical while
+`accent-tint` and `neutral` reach it. The sidebar's inset ring stays
+accent-coloured under every selection style; it is a doubled edge, listed for
+the redesign.
+
 ## Public Surface vs Internal Variables
 
 Two classes, machine-classified by

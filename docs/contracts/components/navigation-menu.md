@@ -213,10 +213,24 @@ a panel is open; the outside-interaction path is guarded by
 
 ### Trigger — Open (active)
 
+The open trigger is the active item. Its fill reads the selection item fill; the
+hand-mixed 16% is the fallback that keeps `accent-outline` unchanged. The recipe
+hook `--poodle-recipe-navigation-menu-open-trigger-fill` still resolves first.
+
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` |
+| `background` | `var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent))` |
 | `color` | `var(--poodle-color-text-primary)` |
+
+### Trigger — Open, hovered (activeFill not `none` or `solid`)
+
+A hovered open trigger keeps the selection fill instead of the generic hover
+tint. The hover recipe hook `--poodle-recipe-navigation-menu-hover-focus-trigger-fill`
+still resolves first.
+
+| Property | Value |
+|----------|-------|
+| `background` | `var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent))` |
 
 ### Trigger — Hover / Focus
 
@@ -255,7 +269,7 @@ border at all.
 | Property | Value |
 |----------|-------|
 | `border` (all triggers, `[data-active-edge="outline"]`) | `0.0625rem solid transparent` |
-| `border-color` (open trigger) | `color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))` |
+| `border-color` (open trigger) | `var(--poodle-style-selection-borderStrong, var(--poodle-color-select-accentBorderStrong))` — `accent-outline` resolves to the 42% accent mix on `border-default`; `neutral` resolves to transparent |
 
 ### Trigger — activeEdge="underline"
 
@@ -266,15 +280,15 @@ from shifting when the open trigger's edge becomes visible.
 | Property | Value |
 |----------|-------|
 | `border-bottom` (all triggers, `[data-active-edge="underline"]`) | `0.125rem solid transparent` |
-| `border-bottom-color` (open trigger) | `var(--poodle-color-accent-base)` |
+| `border-bottom-color` (open trigger) | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |
 
 ### Trigger — activeFill="solid"
 
 | Property | Value |
 |----------|-------|
-| `background` (open trigger) | `var(--poodle-color-accent-base)` |
-| `color` (open trigger) | `var(--poodle-color-text-inverse)` — the same token the primary Button uses on `accent-base`, so the filled trigger stays legible against every accent |
-| `background` (open trigger, hover / focus-visible) | `var(--poodle-color-accent-base)` — the fill survives hover/focus; the generic accent-12% hover rule must not override it |
+| `background` (open trigger) | `var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base))` — `accent-outline` keeps the accent fill; `neutral` uses the neutral selection fill |
+| `color` (open trigger) | `var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse))` — `accent-outline` keeps the text-inverse token the primary Button uses on `accent-base`, so the filled trigger stays legible against every accent |
+| `background` (open trigger, hover / focus-visible) | `var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base))` — the fill survives hover/focus; the generic hover rule must not override it |
 
 ### Trigger — activeFill="none"
 

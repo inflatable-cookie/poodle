@@ -395,15 +395,16 @@ siblings, so it is density.
 
 | State | Property | Value |
 |-------|----------|-------|
-| Current | Step `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)` — on the **Step**, not the Trigger, so the fill spans the whole column even when a Rerun control sits beside the trigger |
-| Current | Trigger `color` | `var(--poodle-color-text-primary)` |
-| Current, Complete, Running | marker `border-color`, `color` | `var(--poodle-color-accent-base)` |
+| Current | Step `background` | `var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent))` — on the **Step**, not the Trigger, so the fill spans the whole column even when a Rerun control sits beside the trigger |
+| Current | Trigger `color` | `var(--poodle-style-selection-text, var(--poodle-color-text-primary))` |
+| Current | marker `border-color`, `color` | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |
+| Complete, Running | marker `border-color`, `color` | `var(--poodle-color-accent-base)` — status codes, not selection; they stay accent under every selection style |
 | Failed | marker `border-color`, `color` | `var(--poodle-color-status-danger)` |
 | Failed | label `color` | `var(--poodle-color-status-danger)` |
 | Complete | `color` | `var(--poodle-color-text-primary)` |
 | Disabled | `opacity` | `var(--poodle-state-opacity-disabled)` |
 | Hover (enabled) | Step `background` | `color-mix(in srgb, var(--poodle-color-text-primary) 6%, transparent)` — on the **Step**, for the same reason as the current fill |
-| Hover on current | Step `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` — deepens the accent rather than replacing it with the neutral hover |
+| Hover on current | Step `background` | `var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent))` — under `accent-outline` the hover deepens the accent; under `neutral` it is the neutral selection fill, the same as at rest |
 | Hover (Summary) | Summary `background` | `color-mix(in srgb, var(--poodle-color-text-primary) 6%, transparent)` — the same neutral fill a Step gets |
 | Rail segment, `complete` | `background` | `var(--poodle-color-accent-base)` |
 | Rail segment, `running` | `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 55%, transparent)` |
