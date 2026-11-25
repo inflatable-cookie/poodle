@@ -123,7 +123,7 @@
   }
 
   tbody tr.poodle-selected {
-    background: var(--poodle-recipe-data-table-selected-fill, color-mix(in srgb, var(--poodle-color-accent-base) 8%, transparent));
+    background: var(--poodle-recipe-data-table-selected-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 8%, transparent)));
   }
 
   .poodle-data-table tbody tr:hover {
@@ -308,7 +308,7 @@
   }
 
   .poodle-data-table--striped tbody tr.poodle-selected:nth-child(even) {
-    background: var(--poodle-recipe-data-table-selected-even-fill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent));
+    background: var(--poodle-recipe-data-table-selected-even-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)));
   }
 
   .poodle-data-table[data-size="xs"] .poodle-data-table__toolbar-btn {

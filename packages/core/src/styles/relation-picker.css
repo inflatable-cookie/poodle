@@ -242,7 +242,7 @@
 
   .poodle-relation-picker__item[data-selected="true"] {
     border-color: var(--poodle-recipe-relation-picker-selected-item-border, color-mix(in srgb, var(--poodle-color-accent-base) 60%, transparent));
-    background: var(--poodle-recipe-relation-picker-selected-item-fill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent));
+    background: var(--poodle-recipe-relation-picker-selected-item-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)));
   }
 
   .poodle-relation-picker__item[data-disabled="true"] {
