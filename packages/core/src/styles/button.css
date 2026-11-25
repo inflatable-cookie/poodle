@@ -29,7 +29,7 @@
     box-shadow: var(--poodle-button-shadow);
     color: var(--poodle-button-text);
     cursor: pointer;
-    font-family: var(--poodle-recipe-button-label-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-label-family))));
+    font-family: var(--poodle-recipe-button-label-font-family, var(--poodle-font-sans, var(--poodle-typography-label-family)));
     font-size: var(--poodle-recipe-button-label-font-size, var(--poodle-button-label-type-size, var(--poodle-button-label-size)));
     font-weight: var(--poodle-recipe-button-label-font-weight, var(--poodle-button-label-type-weight, var(--poodle-typography-label-weight)));
     letter-spacing: var(--poodle-recipe-button-label-letter-spacing, var(--poodle-button-label-type-letterSpacing, var(--poodle-typography-label-letterSpacing)));
@@ -338,7 +338,7 @@
     justify-content: center;
     width: var(--poodle-size-icon-md);
     height: var(--poodle-size-icon-md);
-    font-family: var(--poodle-recipe-button-icon-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-code-family))));
+    font-family: var(--poodle-recipe-button-icon-font-family, var(--poodle-font-sans, var(--poodle-typography-code-family)));
     font-size: 0.875rem;
     line-height: 1;
   }

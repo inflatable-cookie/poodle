@@ -72,7 +72,7 @@
   }
 
   .poodle-dialog__title {
-    font-family: var(--poodle-recipe-dialog-title-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-heading-family))));
+    font-family: var(--poodle-recipe-dialog-title-font-family, var(--poodle-font-sans, var(--poodle-typography-heading-family)));
     font-size: var(--poodle-recipe-dialog-title-font-size, var(--poodle-style-typography-dialogTitle-size, 1rem));
     line-height: var(--poodle-recipe-dialog-title-line-height, var(--poodle-style-typography-dialogTitle-lineHeight, 1.2));
     font-weight: var(--poodle-recipe-dialog-title-font-weight, var(--poodle-style-typography-dialogTitle-weight, bolder));
@@ -85,7 +85,7 @@
     color: var(--poodle-recipe-dialog-header-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-recipe-dialog-description-font-size, var(--poodle-style-typography-secondary-size, 0.8125rem));
     line-height: var(--poodle-recipe-dialog-description-line-height, var(--poodle-style-typography-secondary-lineHeight, 1.5));
-    font-family: var(--poodle-recipe-dialog-description-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, inherit)));
+    font-family: var(--poodle-recipe-dialog-description-font-family, var(--poodle-font-sans, var(--poodle-style-typography-family-sans, inherit)));
     font-weight: var(--poodle-recipe-dialog-description-font-weight, var(--poodle-style-typography-secondary-weight, inherit));
   }
 

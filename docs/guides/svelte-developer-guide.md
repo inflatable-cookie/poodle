@@ -256,13 +256,13 @@ Component Recipe hooks (app-scoped appearance overrides)
 
 ### Font families
 
-Set `--poodle-typography-family-sans` or `--poodle-typography-family-mono`
-on `:root` for app-wide branding. Load the family's font files in your
-app if it needs a face beyond the system stack.
+Set `--poodle-font-sans` or `--poodle-font-mono` on `:root` for app-wide
+branding. Load the family's font files in your app if it needs a face
+beyond the system stack.
 
 ```css
 :root {
-  --poodle-typography-family-sans: "My App Sans", system-ui, sans-serif;
+  --poodle-font-sans: "My App Sans", system-ui, sans-serif;
 }
 ```
 
@@ -271,11 +271,17 @@ the family tokens at their own rendering location, so the same override
 works on a containing subtree. For a portaled dialog, put it on the
 portal host or an ancestor.
 
-The default typography treatment uses the existing per-role tokens such as
-`--poodle-typography-label-family`. In these six components, Quiet reads the
-shared sans or mono override first and then its system stack, ahead of the
-existing per-role token. A component's font-family recipe takes precedence
-where one is available.
+After any component font-family recipe, these components use the shared
+override first, then the existing per-role family token for that part,
+such as `--poodle-typography-label-family`. The style supplies the per-role
+default. The default style keeps the original stacks, and Quiet uses system
+sans and mono. A per-role rule on the style scope or within it can override
+that default in either style.
+
+Existing CSS can keep reading the per-role tokens. To let your own CSS
+respond to a shared override on an inner element, use the same fallback
+chain, for example
+`font-family: var(--poodle-font-sans, var(--poodle-typography-body-family))`.
 
 ### Themes
 

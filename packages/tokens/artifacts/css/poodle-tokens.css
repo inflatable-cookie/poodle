@@ -339,32 +339,32 @@
   --poodle-tabs-list-padding: 0;
   --poodle-tabs-list-background: color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent);
   --poodle-tabs-list-border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
-  --poodle-typography-body-family: var(--poodle-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif);
   --poodle-typography-body-size: 0.875rem;
   --poodle-typography-body-lineHeight: 1.25rem;
   --poodle-typography-body-weight: 400;
-  --poodle-typography-label-family: var(--poodle-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif);
   --poodle-typography-label-size: 0.8125rem;
   --poodle-typography-label-lineHeight: 1rem;
   --poodle-typography-label-weight: 500;
   --poodle-typography-label-letterSpacing: 0.01em;
   --poodle-typography-label-lineHeightTight: 1;
   --poodle-typography-counter-size: 0.75rem;
-  --poodle-typography-caption-family: var(--poodle-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif);
   --poodle-typography-caption-size: 0.6875rem;
   --poodle-typography-caption-lineHeight: 1rem;
   --poodle-typography-caption-weight: 500;
   --poodle-typography-caption-lineHeightRatio: 1.35;
   --poodle-typography-overline-letterSpacing: 0.04em;
-  --poodle-typography-heading-family: var(--poodle-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif);
   --poodle-typography-heading-size: 1rem;
   --poodle-typography-heading-lineHeight: 1.5rem;
   --poodle-typography-heading-weight: 600;
-  --poodle-typography-code-family: var(--poodle-typography-family-mono, "IBM Plex Mono", "SFMono-Regular", monospace);
   --poodle-typography-code-adjustmentRatio: 0.8125;
   --poodle-typography-code-size: 0.8125rem;
   --poodle-typography-code-lineHeight: 1rem;
   --poodle-typography-code-weight: 400;
-  --poodle-typography-family-sans: initial;
-  --poodle-typography-family-mono: initial;
+}
+:where(:root) {
+  --poodle-typography-body-family: var(--poodle-font-sans, var(--poodle-style-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif));
+  --poodle-typography-label-family: var(--poodle-font-sans, var(--poodle-style-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif));
+  --poodle-typography-caption-family: var(--poodle-font-sans, var(--poodle-style-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif));
+  --poodle-typography-heading-family: var(--poodle-font-sans, var(--poodle-style-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif));
+  --poodle-typography-code-family: var(--poodle-font-mono, var(--poodle-style-typography-family-mono, "IBM Plex Mono", "SFMono-Regular", monospace));
 }

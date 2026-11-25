@@ -105,7 +105,7 @@
     margin: 0;
     padding: 0 var(--poodle-sidebar-nav-item-padding-inline) var(--poodle-sidebar-nav-title-gap);
     color: var(--poodle-recipe-sidebar-nav-group-title-text, var(--poodle-style-typography-groupLabel-color, var(--poodle-color-accent-base)));
-    font-family: var(--poodle-recipe-sidebar-nav-group-title-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-label-family))));
+    font-family: var(--poodle-recipe-sidebar-nav-group-title-font-family, var(--poodle-font-sans, var(--poodle-typography-label-family)));
     font-size: var(--poodle-recipe-sidebar-nav-group-title-font-size, var(--poodle-style-typography-groupLabel-size, var(--poodle-sidebar-nav-title-font-size)));
     font-weight: var(--poodle-recipe-sidebar-nav-group-title-font-weight, var(--poodle-style-typography-groupLabel-weight, 700));
     letter-spacing: var(--poodle-recipe-sidebar-nav-group-title-letter-spacing, var(--poodle-style-typography-groupLabel-letterSpacing, var(--poodle-sidebar-nav-title-letter-spacing)));
@@ -134,7 +134,7 @@
     border-radius: 0.1875rem calc(var(--poodle-radius-control) - 0.125rem) calc(var(--poodle-radius-control) - 0.125rem) 0.1875rem;
     background: var(--poodle-recipe-sidebar-nav-item-fill, transparent);
     color: var(--poodle-recipe-sidebar-nav-item-text, var(--poodle-color-text-secondary));
-    font-family: var(--poodle-recipe-sidebar-nav-item-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-label-family))));
+    font-family: var(--poodle-recipe-sidebar-nav-item-font-family, var(--poodle-font-sans, var(--poodle-typography-label-family)));
     font-size: var(--poodle-recipe-sidebar-nav-item-font-size, var(--poodle-sidebar-nav-item-type-size, var(--poodle-sidebar-nav-item-font-size)));
     font-weight: var(--poodle-recipe-sidebar-nav-item-font-weight, var(--poodle-sidebar-nav-item-type-weight, 500));
     line-height: var(--poodle-recipe-sidebar-nav-item-line-height, var(--poodle-sidebar-nav-item-type-lineHeight, 1.3));

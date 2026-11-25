@@ -256,5 +256,3 @@ pub const TYPOGRAPHY_CODE_ADJUSTMENT_RATIO: f32 = 0.8125;
 pub const TYPOGRAPHY_CODE_SIZE: SpaceValue = SpaceValue(13.0);
 pub const TYPOGRAPHY_CODE_LINE_HEIGHT: SpaceValue = SpaceValue(16.0);
 pub const TYPOGRAPHY_CODE_WEIGHT: f32 = 400.0;
-pub const TYPOGRAPHY_FAMILY_SANS: &str = "initial";
-pub const TYPOGRAPHY_FAMILY_MONO: &str = "initial";

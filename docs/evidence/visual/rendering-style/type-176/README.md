@@ -17,8 +17,10 @@ those that the six components do not use yet. The [capture receipt](receipt.json
 records exact RGBA comparisons against base `837260b15`, Button and TextInput
 heights in every density, and the root font-family override on every component.
 The capture also checks a subtree override on each component and a default
-scope nested under quiet. SidebarNav’s library specimen receives the same
-`data-size` attribute that an explicit size prop sets.
+scope nested under quiet. The font-cascade rows cover style defaults and
+shared and per-role overrides on the root and inner scopes in Chromium and
+WebKit. SidebarNav’s library specimen receives the same `data-size`
+attribute that an explicit size prop sets.
 
 ## Migration decisions
 
@@ -34,9 +36,8 @@ scope nested under quiet. SidebarNav’s library specimen receives the same
   shorthand remains available to consumers who define it. Slugs use the
   input role's size and leading with the mono family reserved for the
   identifier.
-- Button glyph and spinner boxes keep their dimensions. Quiet gives text
-  glyphs the sans family. Dialog descriptions use secondary copy and
-  navigation end labels use caption.
+- Button glyph and spinner boxes keep their dimensions and family fallback.
+  Dialog descriptions use secondary copy and navigation end labels use caption.
 
 ## Reproduce
 

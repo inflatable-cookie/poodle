@@ -124,7 +124,7 @@
     align-items: center;
     align-self: stretch;
     padding-inline: 0.625rem;
-    font-family: var(--poodle-recipe-text-input-affix-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-body-family))));
+    font-family: var(--poodle-recipe-text-input-affix-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
     font-size: var(--poodle-recipe-text-input-affix-font-size, var(--poodle-text-input-input-type-size, var(--poodle-text-input-font-size)));
     line-height: var(--poodle-recipe-text-input-affix-line-height, var(--poodle-text-input-input-type-lineHeight, var(--poodle-text-input-line-height)));
     font-weight: var(--poodle-recipe-text-input-affix-font-weight, var(--poodle-text-input-input-type-weight, var(--poodle-typography-body-weight)));
@@ -157,7 +157,7 @@
     border: none;
     background: transparent;
     color: inherit;
-    font-family: var(--poodle-recipe-text-input-control-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-body-family))));
+    font-family: var(--poodle-recipe-text-input-control-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
     font-size: var(--poodle-recipe-text-input-control-font-size, var(--poodle-text-input-input-type-size, var(--poodle-text-input-font-size)));
     line-height: var(--poodle-recipe-text-input-control-line-height, var(--poodle-text-input-input-type-lineHeight, var(--poodle-text-input-line-height)));
     font-weight: var(--poodle-recipe-text-input-control-font-weight, var(--poodle-text-input-input-type-weight, var(--poodle-typography-body-weight)));
@@ -246,7 +246,7 @@
      consumers to define the legacy token. */
   @layer poodle-text-input-count {
     .poodle-text-input__char-count {
-      font-family: var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, inherit));
+      font-family: var(--poodle-font-sans, var(--poodle-style-typography-family-sans, inherit));
       font-size: var(--poodle-style-typography-caption-size, inherit);
       line-height: var(--poodle-style-typography-caption-lineHeight, inherit);
       font-weight: var(--poodle-style-typography-caption-weight, inherit);
@@ -266,7 +266,7 @@
   .poodle-text-input__validation-message {
     margin: var(--poodle-space-stack-xs, 0.25rem) 0 0;
     color: var(--poodle-color-status-danger);
-    font-family: var(--poodle-recipe-text-input-validation-message-font-family, var(--poodle-typography-family-sans, var(--poodle-style-typography-family-sans, var(--poodle-typography-body-family))));
+    font-family: var(--poodle-recipe-text-input-validation-message-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
     font-size: var(--poodle-recipe-text-input-validation-message-font-size, var(--poodle-style-typography-secondary-size, 0.75rem));
     line-height: var(--poodle-recipe-text-input-validation-message-line-height, var(--poodle-style-typography-secondary-lineHeight, var(--poodle-typography-body-lineHeight)));
     font-weight: var(--poodle-recipe-text-input-validation-message-font-weight, var(--poodle-style-typography-secondary-weight, inherit));
@@ -279,6 +279,6 @@
   .poodle-text-input[data-type="slug"] .poodle-text-input__control,
   .poodle-text-input[data-type="slug"] .poodle-text-input__affix--prefix,
   .poodle-text-input[data-type="slug"] .poodle-text-input__affix--suffix {
-    font-family: var(--poodle-recipe-text-input-slug-font-family, var(--poodle-typography-family-mono, var(--poodle-style-typography-family-mono, var(--poodle-typography-code-family))));
+    font-family: var(--poodle-recipe-text-input-slug-font-family, var(--poodle-font-mono, var(--poodle-typography-code-family)));
     font-size: var(--poodle-recipe-text-input-slug-font-size, var(--poodle-text-input-input-type-size, calc(1em * var(--poodle-typography-code-adjustmentRatio))));
   }

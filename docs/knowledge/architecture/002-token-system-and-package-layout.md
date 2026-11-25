@@ -125,12 +125,13 @@ size (`xs`–`xl`). The stylesheet reads the matching token for its
 `data-size`. The build expands the sized paths like any other treatment
 entry. Density continues to control spacing.
 
-The `scale` treatment supplies system sans and mono stacks. App-provided
-`typography.family.sans` and `typography.family.mono` take precedence
-over the style families in the type cohort. The base CSS family aliases
-also read these override tokens at the root, so existing component CSS
-receives an app-wide override. Their original stacks supply the component
-treatment's fallback. Theme writes stay independent of type roles, including
+The `scale` treatment supplies system sans and mono stacks. The generated
+CSS gives legacy per-role family tokens zero-specificity defaults at the
+document root and each rendering-style scope. The aliases read
+`--poodle-font-sans` or `--poodle-font-mono`, then the style's family and
+the original stack. The cohort also reads the shared inputs directly so
+that overrides on inner elements reach it. The shared inputs are unset in
+the generated CSS. Theme writes stay independent of type roles, including
 the group and table-header text roles that reference the theme's neutral ink.
 
 Themes define `color.fill.{rest,hover,active}` for filled controls and

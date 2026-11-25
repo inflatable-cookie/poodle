@@ -3,7 +3,7 @@
 import { strict as assert } from "node:assert";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { chromium, type Browser, type Page } from "playwright";
+import { chromium, webkit, type Browser, type Page } from "playwright";
 import { PNG } from "pngjs";
 import { pinPage } from "../../../../../test/visual/capture";
 
@@ -173,13 +173,13 @@ async function render(dist: string, slug: Slug, theme: Theme, style: Style, size
       });
       const actual = await read();
       if (style === "quiet") quietSpecimens.push({ slug, ...actual });
-      await page.evaluate(() => document.documentElement.style.setProperty("--poodle-typography-family-sans", "Georgia, serif"));
+      await page.evaluate(() => document.documentElement.style.setProperty("--poodle-font-sans", "Georgia, serif"));
       assert.match((await read()).fontFamily, /Georgia/);
       familyOverrides.push({ slug, style, before: actual.fontFamily, root: (await read()).fontFamily });
-      await page.evaluate(() => document.documentElement.style.removeProperty("--poodle-typography-family-sans"));
+      await page.evaluate(() => document.documentElement.style.removeProperty("--poodle-font-sans"));
       await target.evaluate((node) => {
         const wrapper = document.createElement("div");
-        wrapper.style.setProperty("--poodle-typography-family-sans", "Verdana, sans-serif");
+        wrapper.style.setProperty("--poodle-font-sans", "Verdana, sans-serif");
         node.before(wrapper);
         wrapper.append(node);
       });
@@ -189,6 +189,54 @@ async function render(dist: string, slug: Slug, theme: Theme, style: Style, size
   } finally {
     await page.close();
   }
+}
+
+async function checkFontCascade() {
+  const results = [];
+  for (const engine of [chromium, webkit]) {
+    const browser = await engine.launch();
+    try {
+      for (const style of ["default", "quiet"] as const) {
+        const page = await browser.newPage();
+        const button = await openSpecimen(page, afterDist, "button", "eclipse", style, "md", "default");
+        // Model an app with its rendering style on html and a local font
+        // scope. Put the app rule before the package CSS to test specificity.
+        await button.evaluate((button) => {
+          const scope = document.createElement("div");
+          scope.id = "font-probe";
+          scope.append(button.cloneNode(true));
+          const legacy = document.createElement("span");
+          legacy.style.fontFamily = "var(--poodle-typography-label-family)";
+          scope.append(legacy);
+          document.body.append(scope);
+          const rules = document.createElement("style");
+          rules.id = "font-probe-rules";
+          document.head.prepend(rules);
+        });
+        assert.equal(await page.locator("html").getAttribute("data-style"), style);
+        const defaultFamily = style === "default" ? /Inter/ : /^system-ui/;
+        const cases = [
+          { name: "style-default", css: "", expected: defaultFamily, alias: defaultFamily },
+          { name: "shared-root", css: ":root { --poodle-font-sans: Georgia, serif; }", expected: /Georgia/, alias: /Georgia/ },
+          { name: "shared-inner", css: "#font-probe { --poodle-font-sans: Verdana, sans-serif; }", expected: /Verdana/, alias: defaultFamily },
+          { name: "legacy-inner", css: "#font-probe { --poodle-typography-label-family: Georgia, serif; }", expected: /Georgia/, alias: /Georgia/ },
+          { name: "legacy-root", css: ":root { --poodle-typography-label-family: Georgia, serif; }", expected: /Georgia/, alias: /Georgia/ },
+        ];
+        for (const { name, css, expected, alias } of cases) {
+          await page.locator("#font-probe-rules").evaluate((rules, css) => { rules.textContent = css; }, css);
+          const font = await page.locator("#font-probe button").evaluate((node) => getComputedStyle(node).fontFamily);
+          const legacy = await page.locator("#font-probe > span").evaluate((node) => getComputedStyle(node).fontFamily);
+          assert.match(font, expected, `${engine.name()} ${style} ${name}`);
+          assert.match(legacy, alias, `${engine.name()} ${style} ${name} legacy reader`);
+          results.push({ engine: engine.name(), style, case: name, font, legacy });
+        }
+        await page.close();
+      }
+    } finally {
+      await browser.close();
+    }
+  }
+  return results;
 }
 
 try {
@@ -260,7 +308,8 @@ try {
     }
   }
 
-  const receipt = { compared: differences.length, differences, quietSpecimens, controlGeometry, familyOverrides };
+  const fontCascade = await checkFontCascade();
+  const receipt = { compared: differences.length, differences, quietSpecimens, controlGeometry, familyOverrides, fontCascade };
   await writeFile(resolve(output, "receipt.json"), JSON.stringify(receipt, null, 2) + "\n");
   assert(differences.every(({ pixels }) => pixels === 0), "Default specimen diff detected");
 } finally {

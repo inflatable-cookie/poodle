@@ -129,6 +129,13 @@
   --poodle-style-selection-detailText: initial;
   --poodle-style-selection-fillStrongUnderlay: initial;
 }
+:where([data-style="default"]) {
+  --poodle-typography-body-family: var(--poodle-font-sans, var(--poodle-style-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif));
+  --poodle-typography-label-family: var(--poodle-font-sans, var(--poodle-style-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif));
+  --poodle-typography-caption-family: var(--poodle-font-sans, var(--poodle-style-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif));
+  --poodle-typography-heading-family: var(--poodle-font-sans, var(--poodle-style-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif));
+  --poodle-typography-code-family: var(--poodle-font-mono, var(--poodle-style-typography-family-mono, "IBM Plex Mono", "SFMono-Regular", monospace));
+}
 
 @scope ([data-style="default"]) to ([data-style]) {
   [data-theme] {
@@ -273,6 +280,13 @@
   --poodle-style-selection-indicator: var(--poodle-color-text-primary);
   --poodle-style-selection-detailText: var(--poodle-color-text-primary);
   --poodle-style-selection-fillStrongUnderlay: transparent;
+}
+:where([data-style="quiet"]) {
+  --poodle-typography-body-family: var(--poodle-font-sans, var(--poodle-style-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif));
+  --poodle-typography-label-family: var(--poodle-font-sans, var(--poodle-style-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif));
+  --poodle-typography-caption-family: var(--poodle-font-sans, var(--poodle-style-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif));
+  --poodle-typography-heading-family: var(--poodle-font-sans, var(--poodle-style-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif));
+  --poodle-typography-code-family: var(--poodle-font-mono, var(--poodle-style-typography-family-mono, "IBM Plex Mono", "SFMono-Regular", monospace));
 }
 
 @scope ([data-style="quiet"]) to ([data-style]) {

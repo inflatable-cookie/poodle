@@ -254,5 +254,3 @@ pub const TYPOGRAPHY_CODE_ADJUSTMENT_RATIO: &str = "typography.code.adjustmentRa
 pub const TYPOGRAPHY_CODE_SIZE: &str = "typography.code.size";
 pub const TYPOGRAPHY_CODE_LINE_HEIGHT: &str = "typography.code.lineHeight";
 pub const TYPOGRAPHY_CODE_WEIGHT: &str = "typography.code.weight";
-pub const TYPOGRAPHY_FAMILY_SANS: &str = "typography.family.sans";
-pub const TYPOGRAPHY_FAMILY_MONO: &str = "typography.family.mono";

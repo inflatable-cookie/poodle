@@ -1115,18 +1115,12 @@
     },
     {
       "slug": "sidebar-nav",
-      "style": "quiet",
-      "before": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "style": "default",
+      "before": "Inter, \"SF Pro Display\", system-ui, sans-serif",
       "root": "Georgia, serif"
     },
     {
       "slug": "sidebar-nav",
-      "style": "default",
-      "before": "Inter, \"SF Pro Display\", system-ui, sans-serif",
-      "root": "Georgia, serif"
-    },
-    {
-      "slug": "dialog",
       "style": "quiet",
       "before": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
       "root": "Georgia, serif"
@@ -1138,15 +1132,21 @@
       "root": "Georgia, serif"
     },
     {
-      "slug": "data-table",
-      "style": "default",
-      "before": "Inter, \"SF Pro Display\", system-ui, sans-serif",
+      "slug": "dialog",
+      "style": "quiet",
+      "before": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
       "root": "Georgia, serif"
     },
     {
       "slug": "data-table",
       "style": "quiet",
       "before": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "root": "Georgia, serif"
+    },
+    {
+      "slug": "data-table",
+      "style": "default",
+      "before": "Inter, \"SF Pro Display\", system-ui, sans-serif",
       "root": "Georgia, serif"
     },
     {
@@ -1172,6 +1172,148 @@
       "style": "default",
       "before": "Inter, \"SF Pro Display\", system-ui, sans-serif",
       "root": "Georgia, serif"
+    }
+  ],
+  "fontCascade": [
+    {
+      "engine": "chromium",
+      "style": "default",
+      "case": "style-default",
+      "font": "Inter, \"SF Pro Display\", system-ui, sans-serif",
+      "legacy": "Inter, \"SF Pro Display\", system-ui, sans-serif"
+    },
+    {
+      "engine": "chromium",
+      "style": "default",
+      "case": "shared-root",
+      "font": "Georgia, serif",
+      "legacy": "Georgia, serif"
+    },
+    {
+      "engine": "chromium",
+      "style": "default",
+      "case": "shared-inner",
+      "font": "Verdana, sans-serif",
+      "legacy": "Inter, \"SF Pro Display\", system-ui, sans-serif"
+    },
+    {
+      "engine": "chromium",
+      "style": "default",
+      "case": "legacy-inner",
+      "font": "Georgia, serif",
+      "legacy": "Georgia, serif"
+    },
+    {
+      "engine": "chromium",
+      "style": "default",
+      "case": "legacy-root",
+      "font": "Georgia, serif",
+      "legacy": "Georgia, serif"
+    },
+    {
+      "engine": "chromium",
+      "style": "quiet",
+      "case": "style-default",
+      "font": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "legacy": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif"
+    },
+    {
+      "engine": "chromium",
+      "style": "quiet",
+      "case": "shared-root",
+      "font": "Georgia, serif",
+      "legacy": "Georgia, serif"
+    },
+    {
+      "engine": "chromium",
+      "style": "quiet",
+      "case": "shared-inner",
+      "font": "Verdana, sans-serif",
+      "legacy": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif"
+    },
+    {
+      "engine": "chromium",
+      "style": "quiet",
+      "case": "legacy-inner",
+      "font": "Georgia, serif",
+      "legacy": "Georgia, serif"
+    },
+    {
+      "engine": "chromium",
+      "style": "quiet",
+      "case": "legacy-root",
+      "font": "Georgia, serif",
+      "legacy": "Georgia, serif"
+    },
+    {
+      "engine": "webkit",
+      "style": "default",
+      "case": "style-default",
+      "font": "Inter, SF Pro Display, system-ui, sans-serif",
+      "legacy": "Inter, SF Pro Display, system-ui, sans-serif"
+    },
+    {
+      "engine": "webkit",
+      "style": "default",
+      "case": "shared-root",
+      "font": "Georgia, serif",
+      "legacy": "Georgia, serif"
+    },
+    {
+      "engine": "webkit",
+      "style": "default",
+      "case": "shared-inner",
+      "font": "Verdana, sans-serif",
+      "legacy": "Inter, SF Pro Display, system-ui, sans-serif"
+    },
+    {
+      "engine": "webkit",
+      "style": "default",
+      "case": "legacy-inner",
+      "font": "Georgia, serif",
+      "legacy": "Georgia, serif"
+    },
+    {
+      "engine": "webkit",
+      "style": "default",
+      "case": "legacy-root",
+      "font": "Georgia, serif",
+      "legacy": "Georgia, serif"
+    },
+    {
+      "engine": "webkit",
+      "style": "quiet",
+      "case": "style-default",
+      "font": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+      "legacy": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+    },
+    {
+      "engine": "webkit",
+      "style": "quiet",
+      "case": "shared-root",
+      "font": "Georgia, serif",
+      "legacy": "Georgia, serif"
+    },
+    {
+      "engine": "webkit",
+      "style": "quiet",
+      "case": "shared-inner",
+      "font": "Verdana, sans-serif",
+      "legacy": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+    },
+    {
+      "engine": "webkit",
+      "style": "quiet",
+      "case": "legacy-inner",
+      "font": "Georgia, serif",
+      "legacy": "Georgia, serif"
+    },
+    {
+      "engine": "webkit",
+      "style": "quiet",
+      "case": "legacy-root",
+      "font": "Georgia, serif",
+      "legacy": "Georgia, serif"
     }
   ]
 }

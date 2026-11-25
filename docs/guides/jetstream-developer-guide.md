@@ -92,9 +92,9 @@ same DTCG source as the web CSS.
 ### Font families
 
 Register the font bytes with the application's text renderer and use the registered
-family name when binding Poodle's `typography.family.sans` and
-`typography.family.mono` roles in the application. The names correspond
-to the web family tokens. Jetstream currently uses its runtime font
+family name for the application's sans or mono binding. These categories
+correspond to `--poodle-font-sans` and `--poodle-font-mono` on the web.
+Jetstream currently uses its runtime font
 configuration for these categories. The generated rendering-style data
 does not apply the web typography treatment to native components.
 

@@ -629,10 +629,6 @@ export const tokens = {
         "size": "0.8125rem",
         "lineHeight": "1rem",
         "weight": "400"
-      },
-      "family": {
-        "sans": "initial",
-        "mono": "initial"
       }
     }
   }
@@ -1001,9 +997,7 @@ export const tokenPaths = [
   "typography.code.adjustmentRatio",
   "typography.code.size",
   "typography.code.lineHeight",
-  "typography.code.weight",
-  "typography.family.sans",
-  "typography.family.mono"
+  "typography.code.weight"
 ] as const;
 
 export const cssVars = {
@@ -1260,9 +1254,7 @@ export const cssVars = {
   "typography.code.adjustmentRatio": "--poodle-typography-code-adjustmentRatio",
   "typography.code.size": "--poodle-typography-code-size",
   "typography.code.lineHeight": "--poodle-typography-code-lineHeight",
-  "typography.code.weight": "--poodle-typography-code-weight",
-  "typography.family.sans": "--poodle-typography-family-sans",
-  "typography.family.mono": "--poodle-typography-family-mono"
+  "typography.code.weight": "--poodle-typography-code-weight"
 } as const;
 
 export type TokenPath = (typeof tokenPaths)[number];
