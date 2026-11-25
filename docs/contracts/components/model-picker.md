@@ -85,7 +85,7 @@ level set behind it changes.
 | Axis | no | one section per applicable axis; carries `data-kind` and `data-control` | `--poodle-color-border-subtle` |
 | Axis Control | no | `SegmentedControl` or the Axis List for `kind="select"` (see Axis Control Resolution), `Switch` for `kind="toggle"` | (composed primitives) |
 | Axis List | no | scrolling `role="radiogroup"` of option rows for a many-level select axis; capped at `max-height: 12rem` | `--poodle-radius-control` |
-| Axis Option | no | one level row; `role="radio"`, `aria-checked`, `data-selected`, `data-disabled`; selected row is bolded with a check glyph | `--poodle-color-accent-base`, `--poodle-color-text-primary` / `--poodle-color-text-secondary` |
+| Axis Option | no | one level row; `role="radio"`, `aria-checked`, `data-selected`, `data-disabled`; selected row is bolded with a check glyph | `--poodle-style-selection-indicator` (check), `--poodle-style-selection-text` (selected) / `--poodle-color-text-secondary` |
 
 ## 3. Props And Inputs
 
@@ -431,7 +431,7 @@ adjust them. Escape or an outside interaction dismisses.
 | Summary / Chevron | `--poodle-color-text-secondary` | secondary text |
 | Surface | `--poodle-overlay-z-menu`, `--poodle-radius-surface`, `--poodle-color-background-elevated`, `--poodle-elevation-overlay` | anchored panel |
 | Option hover | `--poodle-color-background-hover` | row hover fill |
-| Option check | `--poodle-color-accent-base` | selected glyph |
+| Option check | `--poodle-style-selection-indicator`, then `--poodle-color-accent-base` | selected glyph |
 | Option description | `--poodle-color-text-secondary` | supporting text |
 | Option badge | `--poodle-color-border-subtle`, `--poodle-color-text-secondary` | tag outline + text |
 | Axis divider | `--poodle-color-border-subtle` | section rule |

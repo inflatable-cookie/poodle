@@ -91,12 +91,19 @@ applying direct overrides.
 | --- | --- | --- |
 | `fill` | `outlined`, `filled`, `ghost` | Controls at rest, including hover and press fills where used |
 | `surface` | `border`, `elevation`, `tonal` | Containers |
-| `selection` | `accent-outline`, `accent-tint`, `neutral` | Selected items in Select, Tabs and ToggleGroup |
+| `selection` | `accent-outline`, `accent-tint`, `neutral` | Selected items in Select, Tabs, ToggleGroup, and the list and data components (ListCard, Tree, LogList, DataTable, Calendar, RelationPicker, ActionDiscoveryPanel, ModelPicker, HistoryCenter) |
 
 The default uses `outlined`, `border` and `accent-outline` to reproduce
 the prior paint. `accent-tint` keeps tint and suppresses selection borders.
 `neutral` uses a neutral fill, stronger text and an accent only for an
 existing small indicator. Each component retains its selection anatomy.
+
+`style.selection.itemBorder` is the selected item's border colour. It is
+`initial` under `accent-outline`, so the component's own accent border applies.
+It is `transparent` under `accent-tint` and `neutral`. Components route their
+selected border through the recipe hook, then `itemBorder`, then the current
+literal. A sibling component that needs a selected border can use the same
+role.
 
 `quiet` is an experimental style (`status: "experimental"` in style metadata)
 that combines `filled`, `tonal`, and `neutral` with a neutral selection

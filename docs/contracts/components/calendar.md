@@ -349,8 +349,8 @@ Header editing:
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-color-accent-base)` |
-| `color` | `var(--poodle-color-text-inverse)` |
+| `background` | `var(--poodle-recipe-calendar-selected-day-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)))` |
+| `color` | `var(--poodle-recipe-calendar-selected-day-text, var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse)))` |
 
 ### Day Button — hover / focus-visible
 
@@ -364,26 +364,26 @@ Header editing:
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 88%, white 8%)` |
+| `background` | `var(--poodle-recipe-calendar-selected-hover-focus-day-fill, color-mix(in srgb, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)) 88%, white 8%))` |
 
 ### Day Button — in-range `[data-in-range="true"]` (range mode)
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` |
+| `background` | `var(--poodle-recipe-calendar-in-range-day-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)))` |
 
 ### Day Button — range-start / range-end (range mode)
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-color-accent-base)` |
-| `color` | `var(--poodle-color-text-inverse)` |
+| `background` | `var(--poodle-recipe-calendar-range-start-range-end-day-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)))` |
+| `color` | `var(--poodle-recipe-calendar-range-start-range-end-day-text, var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse)))` |
 
 ### Day Button — range endpoint hover (range mode)
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 88%, white 8%)` |
+| `background` | `var(--poodle-recipe-calendar-range-start-range-end-hover-focus-day-fill, color-mix(in srgb, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)) 88%, white 8%))` |
 
 ### Nav Button — disabled (`.calendar__nav:disabled`)
 

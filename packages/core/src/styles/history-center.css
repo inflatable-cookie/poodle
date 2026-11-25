@@ -142,7 +142,7 @@
 .poodle-history-center__row[data-part="entry"][data-position="current"] {
   background: var(
     --poodle-recipe-history-center-current-fill,
-    color-mix(in srgb, var(--poodle-color-accent-base) 7%, transparent)
+    var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 7%, transparent))
   );
 }
 
@@ -220,8 +220,8 @@
 }
 
 .poodle-history-center__position-marker[data-position="current"] {
-  background: var(--poodle-recipe-history-center-current-marker, var(--poodle-color-accent-base));
-  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-base) 15%, transparent);
+  background: var(--poodle-recipe-history-center-current-marker, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)));
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)) 15%, transparent);
 }
 
 /* Fork disclosure affordance (R3): icon + optional counter badge + chevron.

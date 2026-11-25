@@ -397,6 +397,7 @@ export const tokens = {
       },
       "selection": {
         "itemFill": "initial",
+        "itemBorder": "initial",
         "fill": "initial",
         "fillStrong": "initial",
         "fillStrongBackdrop": "initial",
@@ -682,6 +683,7 @@ export const tokenPaths = [
   "style.surface.shadow",
   "style.surface.floatingFill",
   "style.selection.itemFill",
+  "style.selection.itemBorder",
   "style.selection.fill",
   "style.selection.fillStrong",
   "style.selection.fillStrongBackdrop",
@@ -837,6 +839,7 @@ export const cssVars = {
   "style.surface.shadow": "--poodle-style-surface-shadow",
   "style.surface.floatingFill": "--poodle-style-surface-floatingFill",
   "style.selection.itemFill": "--poodle-style-selection-itemFill",
+  "style.selection.itemBorder": "--poodle-style-selection-itemBorder",
   "style.selection.fill": "--poodle-style-selection-fill",
   "style.selection.fillStrong": "--poodle-style-selection-fillStrong",
   "style.selection.fillStrongBackdrop": "--poodle-style-selection-fillStrongBackdrop",

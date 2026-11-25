@@ -12,6 +12,7 @@
   --poodle-style-surface-shadow: initial;
   --poodle-style-surface-floatingFill: initial;
   --poodle-style-selection-itemFill: initial;
+  --poodle-style-selection-itemBorder: initial;
   --poodle-style-selection-fill: var(--poodle-color-select-accent);
   --poodle-style-selection-fillStrong: var(--poodle-color-select-accentStrong);
   --poodle-style-selection-fillStrongBackdrop: initial;
@@ -55,6 +56,7 @@
   --poodle-style-surface-shadow: none;
   --poodle-style-surface-floatingFill: var(--poodle-color-background-elevated);
   --poodle-style-selection-itemFill: var(--poodle-color-select-neutral);
+  --poodle-style-selection-itemBorder: transparent;
   --poodle-style-selection-fill: var(--poodle-color-select-neutral);
   --poodle-style-selection-fillStrong: var(--poodle-color-select-neutral);
   --poodle-style-selection-fillStrongBackdrop: initial;

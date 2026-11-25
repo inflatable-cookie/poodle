@@ -527,10 +527,10 @@ The chevron rotates from right (collapsed) to down (expanded). Svelte uses
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-color-text-primary)` |
+| `color` | `var(--poodle-recipe-tree-selected-row-text, var(--poodle-style-selection-text, var(--poodle-color-text-primary)))` |
 | `font-weight` | `600` |
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)` |
-| `box-shadow` | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent)` |
+| `background` | `var(--poodle-recipe-tree-selected-row-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)))` |
+| `box-shadow` | `var(--poodle-recipe-tree-selected-row-shadow, inset 0 0 0 0.0625rem var(--poodle-style-selection-itemBorder, color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent)))` |
 
 ### `.tree__item:focus-visible > .tree__row`
 

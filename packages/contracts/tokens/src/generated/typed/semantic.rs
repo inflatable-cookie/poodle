@@ -110,6 +110,7 @@ pub const STYLE_SURFACE_BORDER: &str = "initial";
 pub const STYLE_SURFACE_SHADOW: &str = "initial";
 pub const STYLE_SURFACE_FLOATING_FILL: &str = "initial";
 pub const STYLE_SELECTION_ITEM_FILL: &str = "initial";
+pub const STYLE_SELECTION_ITEM_BORDER: &str = "initial";
 pub const STYLE_SELECTION_FILL: &str = "initial";
 pub const STYLE_SELECTION_FILL_STRONG: &str = "initial";
 pub const STYLE_SELECTION_FILL_STRONG_BACKDROP: &str = "initial";

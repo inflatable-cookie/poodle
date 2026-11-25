@@ -89,8 +89,8 @@
 
   .poodle-action-discovery-panel__list li[aria-selected="true"] .poodle-list-card {
     border-color: var(--poodle-recipe-action-discovery-panel-list-border, transparent);
-    background: var(--poodle-recipe-action-discovery-panel-list-fill, color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-elevated)));
-    box-shadow: var(--poodle-recipe-action-discovery-panel-list-shadow, inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent));
+    background: var(--poodle-recipe-action-discovery-panel-list-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-elevated))));
+    box-shadow: var(--poodle-recipe-action-discovery-panel-list-shadow, inset 0 0 0 0.0625rem var(--poodle-style-selection-itemBorder, color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)));
   }
 
   .poodle-action-discovery-panel__trailing {
