@@ -23,7 +23,7 @@
     min-width: 5rem;
     height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
-    border: 0.0625rem solid var(--poodle-button-border);
+    border: var(--poodle-border-width-default) solid var(--poodle-button-border);
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-button-fill);
     box-shadow: var(--poodle-button-shadow);
@@ -32,7 +32,7 @@
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);
     font-weight: var(--poodle-typography-label-weight);
-    letter-spacing: 0.01em;
+    letter-spacing: var(--poodle-typography-label-letterSpacing);
     line-height: 1;
     text-decoration: none;
     transition:
@@ -277,7 +277,7 @@
 
   .poodle-button:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-    outline-offset: 0.125rem;
+    outline-offset: var(--poodle-focus-outline-offset);
   }
 
   .poodle-button:disabled {

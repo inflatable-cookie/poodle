@@ -18,7 +18,7 @@
     align-content: start;
     gap: var(--poodle-card-gap);
     padding: var(--poodle-card-padding-block) var(--poodle-card-padding-inline);
-    border: 0.0625rem solid var(--poodle-card-border);
+    border: var(--poodle-border-width-default) solid var(--poodle-card-border);
     border-radius: var(--poodle-card-radius);
     background: var(--poodle-card-fill);
     box-shadow: var(--poodle-card-shadow);
@@ -115,5 +115,5 @@
 
   .poodle-card__footer {
     padding-top: var(--poodle-card-footer-padding-top);
-    border-top: 0.0625rem solid var(--poodle-card-divider);
+    border-top: var(--poodle-border-width-default) solid var(--poodle-card-divider);
   }

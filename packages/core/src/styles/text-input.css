@@ -22,7 +22,7 @@
     display: flex;
     align-items: center;
     min-height: var(--poodle-text-input-control-height);
-    border: 0.0625rem solid var(--poodle-text-input-border);
+    border: var(--poodle-border-width-default) solid var(--poodle-text-input-border);
     border-radius: var(--poodle-text-input-radius);
     background: var(--poodle-text-input-fill);
     color: var(--poodle-color-text-primary);
@@ -120,11 +120,11 @@
   }
 
   .poodle-text-input__affix--prefix {
-    border-right: 0.0625rem solid var(--poodle-color-border-default);
+    border-right: var(--poodle-border-width-default) solid var(--poodle-color-border-default);
   }
 
   .poodle-text-input__affix--suffix {
-    border-left: 0.0625rem solid var(--poodle-color-border-default);
+    border-left: var(--poodle-border-width-default) solid var(--poodle-color-border-default);
   }
 
   .poodle-text-input__field {
