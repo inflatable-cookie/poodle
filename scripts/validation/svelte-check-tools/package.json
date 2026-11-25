@@ -1,0 +1,10 @@
+{
+  "name": "@poodle/svelte-check-tools",
+  "private": true,
+  "license": "MIT",
+  "devDependencies": {
+    "svelte": "5.58.0",
+    "svelte-check": "4.7.5",
+    "typescript": "6.0.3"
+  }
+}
