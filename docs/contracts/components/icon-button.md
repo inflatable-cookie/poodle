@@ -267,8 +267,11 @@ same machine Tooltip runs). Pressed state is plain controllable state.
 
 | Property | Value |
 |----------|-------|
-| `--poodle-icon-button-fill` | `var(--poodle-color-background-surface)` |
-| `--poodle-icon-button-border` | `var(--poodle-color-border-default)` |
+| `--poodle-icon-button-fill` | `var(--poodle-recipe-icon-button-secondary-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)))` |
+| `--poodle-icon-button-border` | `var(--poodle-recipe-icon-button-secondary-border, var(--poodle-style-control-border, var(--poodle-color-border-default)))` |
+| `--poodle-icon-button-shadow` | `var(--poodle-recipe-icon-button-secondary-shadow, var(--poodle-style-control-shadow, inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)))` |
+
+When `secondary` is neither pressed nor toned, `--poodle-icon-button-fill-hover` and `--poodle-icon-button-fill-active` resolve through `--poodle-style-control-fillHover` and `--poodle-style-control-fillActive` before their `color-mix` fallbacks.
 
 ### Tone: danger
 

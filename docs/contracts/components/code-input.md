@@ -156,9 +156,10 @@ Slots are square. The border color is `--code-slot-border`, derived from
 | `width` | `2.25rem` |
 | `height` | `2.25rem` |
 | `padding` | `0` |
-| `border` | `0.0625rem solid var(--code-slot-border, var(--poodle-color-border-default))` |
+| `border` | `0.0625rem solid var(--poodle-style-control-border, var(--code-slot-border, var(--poodle-color-border-default)))` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `var(--poodle-color-background-surface)` |
+| `background` | `var(--poodle-recipe-code-input-slot-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)))` |
+| `box-shadow` | `var(--poodle-style-control-shadow, none)` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `1rem` |

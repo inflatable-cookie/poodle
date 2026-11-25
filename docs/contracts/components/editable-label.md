@@ -253,7 +253,7 @@ ECMAScript `String.trim` or Rust `str::trim` as the authority.
 | `padding` | `0.375rem 0.5rem` |
 | `border` | `0.0625rem solid transparent` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `transparent` |
+| `background` | `var(--poodle-recipe-editable-label-input-fill, var(--poodle-style-control-fill, transparent))` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `var(--poodle-typography-label-size)` |
@@ -274,8 +274,8 @@ ECMAScript `String.trim` or Rust `str::trim` as the authority.
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 52%, transparent)` |
+| `border-color` | `var(--poodle-recipe-editable-label-hover-focus-display-border, var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)))` |
+| `background` | `var(--poodle-recipe-editable-label-hover-focus-display-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 52%, transparent)))` |
 | `outline` | `none` |
 
 ### Display — focus-visible
@@ -290,7 +290,7 @@ ECMAScript `String.trim` or Rust `str::trim` as the authority.
 | Property | Value |
 |----------|-------|
 | `border-color` | `var(--poodle-color-accent-focusRing)` |
-| `background` | `var(--poodle-color-background-surface)` |
+| `background` | `var(--poodle-recipe-editable-label-input-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)))` |
 | `outline` | `none` |
 | `box-shadow` | `0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
 
@@ -305,7 +305,7 @@ ECMAScript `String.trim` or Rust `str::trim` as the authority.
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-color-text-secondary)` |
+| `color` | `var(--poodle-recipe-editable-label-text-text, var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary)))` |
 | `font-style` | `italic` |
 
 ### Edit icon `.editable-label__icon`
@@ -324,6 +324,7 @@ ECMAScript `String.trim` or Rust `str::trim` as the authority.
 | Display/Input `padding` | `0` |
 | Display/Input `border` | `none` |
 | Display/Input `border-radius` | `0` |
+| Display `background` | `var(--poodle-recipe-editable-label-input-fill, transparent)` |
 | Display hover/focus `background` | `transparent` |
 | Input `border-bottom` | `0.0625rem solid var(--poodle-color-accent-focusRing)` |
 | Input `box-shadow` | `none` |

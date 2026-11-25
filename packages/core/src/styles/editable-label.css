@@ -16,7 +16,7 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-editable-label-input-fill, transparent);
+    background: var(--poodle-recipe-editable-label-input-fill, var(--poodle-style-control-fill, transparent));
     color: var(--poodle-recipe-editable-label-input-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);
@@ -34,8 +34,8 @@
 
   .poodle-editable-label__display:hover:not(:disabled),
   .poodle-editable-label__display:focus-visible {
-    border-color: var(--poodle-recipe-editable-label-hover-focus-display-border, color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent));
-    background: var(--poodle-recipe-editable-label-hover-focus-display-fill, color-mix(in srgb, var(--poodle-color-background-surface) 52%, transparent));
+    border-color: var(--poodle-recipe-editable-label-hover-focus-display-border, var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)));
+    background: var(--poodle-recipe-editable-label-hover-focus-display-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 52%, transparent)));
     outline: none;
   }
 
@@ -47,7 +47,7 @@
   .poodle-editable-label__input {
     appearance: none;
     border-color: var(--poodle-recipe-editable-label-input-border, var(--poodle-color-accent-focusRing));
-    background: var(--poodle-recipe-editable-label-input-fill, var(--poodle-color-background-surface));
+    background: var(--poodle-recipe-editable-label-input-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
     outline: none;
     box-shadow: var(--poodle-recipe-editable-label-input-shadow, 0 0 0 var(--poodle-border-width-focus)
       color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
@@ -59,7 +59,7 @@
   }
 
   .poodle-editable-label__display--empty .poodle-editable-label__text {
-    color: var(--poodle-recipe-editable-label-text-text, var(--poodle-color-text-secondary));
+    color: var(--poodle-recipe-editable-label-text-text, var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary)));
     font-style: italic;
   }
 
@@ -82,6 +82,10 @@
     padding: 0;
     border: none;
     border-radius: 0;
+  }
+
+  .poodle-editable-label[data-variant="flush"] .poodle-editable-label__display {
+    background: var(--poodle-recipe-editable-label-input-fill, transparent);
   }
 
   .poodle-editable-label[data-variant="flush"] .poodle-editable-label__display:hover:not(:disabled),
