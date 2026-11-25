@@ -6,6 +6,10 @@
           "$type": "color",
           "$value": "initial"
         },
+        "itemBorder": {
+          "$type": "color",
+          "$value": "initial"
+        },
         "fill": {
           "$type": "color",
           "$value": "{color.select.accent}"
@@ -68,6 +72,10 @@
           "$type": "color",
           "$value": "{color.select.accentSubtle}"
         },
+        "itemBorder": {
+          "$type": "color",
+          "$value": "transparent"
+        },
         "fill": {
           "$type": "color",
           "$value": "{color.select.accent}"
@@ -129,6 +137,10 @@
         "itemFill": {
           "$type": "color",
           "$value": "{color.select.neutral}"
+        },
+        "itemBorder": {
+          "$type": "color",
+          "$value": "transparent"
         },
         "fill": {
           "$type": "color",
