@@ -62,14 +62,19 @@ async function runCapture(output: string, styles: string[]) {
   if (!root) throw new Error("Set PREVIEW_URL to a Svelte preview started from this checkout.");
   const browser = await chromium.launch();
   try {
-    const page = await browser.newPage({ viewport: { width: 1280, height: 900 }, deviceScaleFactor: 1 });
-    await pinPage(page);
+    // A fresh page per capture: one reused page stalls on navigation after about 29 captures.
     for (const style of styles) {
       const dir = resolve(output, style);
       mkdirSync(dir, { recursive: true });
       for (const theme of themes) {
         for (const slug of slugs) {
-          writeFileSync(resolve(dir, `${theme}-${slug}.png`), await capture(page, root, slug, theme, style));
+          const page = await browser.newPage({ viewport: { width: 1280, height: 900 }, deviceScaleFactor: 1 });
+          try {
+            await pinPage(page);
+            writeFileSync(resolve(dir, `${theme}-${slug}.png`), await capture(page, root, slug, theme, style));
+          } finally {
+            await page.close();
+          }
           console.log(style, theme, slug);
         }
       }
