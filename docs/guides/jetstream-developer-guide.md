@@ -115,21 +115,34 @@ Build the complete Poodle node tree first, then call
 `jetstream_poodle::to_js_el()` once at the boundary. Converting early moves
 composition into the backend and creates cross-runtime drift.
 
-## Run the Preview
+## Set Up Jetstream
 
-The preview needs the sibling Jetstream repository configured as expected by
-the local workspace (`../jetstream` from the Poodle root, or the Paseo
-worktree sibling link). Paseo setup links `../jetstream`, resolved from the
-registered primary checkout (so `~/Dev/projects/jetstream`), as the
-`jetstream` sibling. It is required: Queue project QA accepts only a static
-relative sibling source, and the lab hosts the Jetstream preview (2026-10-08).
-Treat the linked checkout as read-only input; make Jetstream changes in its
-own repository.
-`effigy jetstream:build` fails at once if the required checkout is missing or
-stale; Poodle does not vendor Jetstream. From the Poodle repository root:
+Cargo expects an existing Jetstream checkout at `../jetstream` relative to
+the Poodle root. If that checkout is already there, skip the link step.
+Otherwise, set `JETSTREAM_CHECKOUT` to the full path to your existing checkout
+and run the following from the Poodle root when `../jetstream` is free.
 
 ```sh
-bun install
+ln -s "$JETSTREAM_CHECKOUT" ../jetstream
+```
+
+The sibling link lives outside Poodle's working tree. Treat the checkout as
+read-only input and make Jetstream changes in its own repository.
+
+## Run the Preview
+
+`effigy jetstream:build` checks for a missing or stale sibling before invoking
+Cargo. From the Poodle root, install the locked dependencies and build the
+preview.
+
+```sh
+bun install --frozen-lockfile
+effigy jetstream:build
+```
+
+To launch it, run:
+
+```sh
 effigy jetstream:preview
 ```
 

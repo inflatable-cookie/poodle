@@ -45,9 +45,8 @@ export function requiredEngineCrates(manifestSource: string): string[] {
 export function missingSiblingMessage(engineRoot: string): string {
   return [
     `sibling Jetstream checkout not found at ${engineRoot}.`,
-    "jetstream:build needs a paired checkout next to this repository",
-    "(../jetstream from the Poodle root, or the Paseo worktree sibling link).",
-    "Poodle does not vendor Jetstream.",
+    "Place or link an existing checkout at ../jetstream from the Poodle root.",
+    "See docs/guides/jetstream-developer-guide.md#set-up-jetstream.",
   ].join(" ");
 }
 
