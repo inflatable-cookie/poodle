@@ -46,11 +46,10 @@ contract references the rule rather than restating it:
 - `005-agent-local-paths.md` — local-only agent paths and manual worktree
   locations are explicit, ignored, and operator-selected
 
-- [Supported core behaviour](core-behaviour.md) — exports for building
-  custom web controls
-
 ## Current Contracts
 
+- [Supported core behaviour](core-behaviour.md) — exports for building
+  custom web controls
 - `template/component-contract-template.md`
 - `components/README.md`
 - `components/accordion.md`
