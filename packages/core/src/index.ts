@@ -32,6 +32,8 @@ export {
 } from "./motion-policy";
 
 export { findNextEnabledIndex, firstEnabledIndex } from "./nav";
+export { moveActiveOption, reconcileActiveOption, type ActiveOption, type ActiveOptionMove } from "./active-option";
+export { selectionTransition, type SelectionEvent, type SelectionOptions } from "./selection";
 
 export {
   actionIcon,

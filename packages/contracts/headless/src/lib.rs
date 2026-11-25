@@ -7,6 +7,7 @@
 //! vectors in `vectors/`, executed by both runtimes.
 //! See docs/architecture/006-headless-core-and-machine-model.md.
 
+pub mod active_option;
 pub mod agent_plan;
 pub mod agent_question;
 pub mod agent_subagent;
@@ -36,6 +37,7 @@ pub mod pagination;
 pub mod popover;
 pub mod rating;
 pub mod select;
+pub mod selection;
 pub mod single_select;
 pub mod slider;
 pub mod switch;
