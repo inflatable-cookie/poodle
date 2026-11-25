@@ -121,6 +121,12 @@ Renderer-specific input, lifecycle, and drawing remain in the backend.
   uses subtle fills, few borders and subtle ones where a border is needed,
   minimal labelling, and far less accent colour. The aim is sleek and
   simple.
+- **Theming is flexible, in three kinds.** Operator ruling 2026-11-25. Poodle
+  keeps full palettes such as Nord and Solarized, offers neutral bases that
+  take an accent choice, and lets a consumer blend a mutable accent into a
+  base's colours to make a custom toned theme. A theme defines colour only,
+  and no component rule selects on a theme; the three Iceberg overrides
+  that did are removed (operator ruling the same day).
 - **The design sweep lands on web first.** Operator ruling 2026-11-25.
   Soundcheck is the test consumer for a second style; Loophole is the
   long-term case. The route for GPUI and Jetstream is a separate, open
