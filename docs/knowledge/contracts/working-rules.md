@@ -366,11 +366,6 @@ proof. After review feedback, rerun the affected leaf selector only. Reviewers
 read the diff, run the same targeted checks and exercise the behaviour; they
 add focused adversarial proof for a finding, never a complete local board.
 
-The Svelte component and preview type checks use the frozen toolchain in
-`scripts/validation/svelte-check-tools`. Keep the checker and its Svelte and
-TypeScript peers in that lockfile. Verify generic test harnesses and callback
-prop inference when updating those pins.
-
 Aggregate selectors must emit live child progress and elapsed time. A full
 headless board hard-stops after fifteen minutes and an individual silent child
 after five unless its contract declares a smaller bound. An over-budget run is

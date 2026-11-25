@@ -26,8 +26,8 @@ describe("Svelte built-in overlay geometry", () => {
     const menu: OverlaySurfaceGeometryChange[] = [];
     const view = render(Harness, {
       props: {
-        onPopoverGeometry: (change) => popover.push(change),
-        onMenuGeometry: (change) => menu.push(change),
+        onPopoverGeometry: (change: OverlaySurfaceGeometryChange) => popover.push(change),
+        onMenuGeometry: (change: OverlaySurfaceGeometryChange) => menu.push(change),
       },
     });
 
