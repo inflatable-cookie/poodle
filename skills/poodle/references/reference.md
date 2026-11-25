@@ -265,6 +265,7 @@ Import subpaths present in the published package manifests.
 - `@inflatable-cookie/poodle-core/tokens/metadata`
 - `@inflatable-cookie/poodle-core/tokens/runtime`
 - `@inflatable-cookie/poodle-core/tokens/style-default.css`
+- `@inflatable-cookie/poodle-core/tokens/style-quiet.css`
 - `@inflatable-cookie/poodle-core/tokens/styles.css`
 - `@inflatable-cookie/poodle-core/tokens/theme-clay.css`
 - `@inflatable-cookie/poodle-core/tokens/theme-cobalt.css`

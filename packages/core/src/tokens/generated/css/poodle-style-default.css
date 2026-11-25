@@ -3,9 +3,14 @@
   --poodle-style-control-fill: initial;
   --poodle-style-control-border: initial;
   --poodle-style-control-shadow: initial;
+  --poodle-style-control-fillHover: initial;
+  --poodle-style-control-fillActive: initial;
+  --poodle-style-control-secondaryText: initial;
+  --poodle-style-control-secondaryOpacity: initial;
   --poodle-style-surface-fill: initial;
   --poodle-style-surface-border: initial;
   --poodle-style-surface-shadow: initial;
+  --poodle-style-surface-floatingFill: initial;
   --poodle-style-selection-itemFill: initial;
   --poodle-style-selection-fill: var(--poodle-color-select-accent);
   --poodle-style-selection-fillStrong: var(--poodle-color-select-accentStrong);
@@ -20,6 +25,7 @@
   --poodle-style-selection-textSolid: initial;
   --poodle-style-selection-indicator: var(--poodle-color-accent-base);
   --poodle-style-selection-detailText: initial;
+  --poodle-style-selection-fillStrongUnderlay: initial;
 }
 
 @scope ([data-style="default"]) to ([data-style]) {

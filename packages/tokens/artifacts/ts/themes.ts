@@ -534,9 +534,14 @@ export const styles = {
       "style.control.fill": "initial",
       "style.control.border": "initial",
       "style.control.shadow": "initial",
+      "style.control.fillHover": "initial",
+      "style.control.fillActive": "initial",
+      "style.control.secondaryText": "initial",
+      "style.control.secondaryOpacity": "initial",
       "style.surface.fill": "initial",
       "style.surface.border": "initial",
       "style.surface.shadow": "initial",
+      "style.surface.floatingFill": "initial",
       "style.selection.itemFill": "initial",
       "style.selection.fill": "{color.select.accent}",
       "style.selection.fillStrong": "{color.select.accentStrong}",
@@ -550,7 +555,46 @@ export const styles = {
       "style.selection.text": "{color.text.primary}",
       "style.selection.textSolid": "initial",
       "style.selection.indicator": "{color.accent.base}",
-      "style.selection.detailText": "initial"
+      "style.selection.detailText": "initial",
+      "style.selection.fillStrongUnderlay": "initial"
+    }
+  },
+  "quiet": {
+    "selector": "[data-style=\"quiet\"]",
+    "description": "Experimental low-noise rendering style with filled controls, tonal surfaces, and neutral selection.",
+    "status": "experimental",
+    "treatment": {
+      "fill": "filled",
+      "selection": "neutral",
+      "surface": "tonal"
+    },
+    "overrides": {
+      "style.control.fill": "{color.fill.rest}",
+      "style.control.border": "transparent",
+      "style.control.shadow": "none",
+      "style.control.fillHover": "{color.fill.hover}",
+      "style.control.fillActive": "{color.fill.active}",
+      "style.control.secondaryText": "{color.text.primary}",
+      "style.control.secondaryOpacity": 1,
+      "style.surface.fill": "{color.background.panel}",
+      "style.surface.border": "transparent",
+      "style.surface.shadow": "none",
+      "style.surface.floatingFill": "{color.background.elevated}",
+      "style.selection.itemFill": "{color.select.neutral}",
+      "style.selection.fill": "{color.select.neutral}",
+      "style.selection.fillStrong": "{color.select.neutral}",
+      "style.selection.fillStrongBackdrop": "initial",
+      "style.selection.fillSurface": "{color.select.neutral}",
+      "style.selection.fillSurfaceHover": "{color.select.neutral}",
+      "style.selection.fillSolid": "{color.select.neutral}",
+      "style.selection.highlightFill": "{color.select.neutral}",
+      "style.selection.border": "transparent",
+      "style.selection.borderStrong": "transparent",
+      "style.selection.text": "{color.text.primary}",
+      "style.selection.textSolid": "{color.text.primary}",
+      "style.selection.indicator": "{color.text.primary}",
+      "style.selection.detailText": "{color.text.primary}",
+      "style.selection.fillStrongUnderlay": "transparent"
     }
   }
 } as const;

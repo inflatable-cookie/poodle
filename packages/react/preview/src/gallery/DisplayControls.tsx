@@ -1,5 +1,6 @@
 import {
   Eyebrow,
+  Select,
   Slider,
   TextInput,
   ThemeSelect,
@@ -7,11 +8,12 @@ import {
   UiPresentationProvider,
   type ToggleGroupOption,
 } from "@inflatable-cookie/poodle-react";
-import { themeOptions, densityModes, controlSizes } from "@inflatable-cookie/poodle-core/tokens";
+import { themeOptions, densityModes, controlSizes, styles, type StyleName } from "@inflatable-cookie/poodle-core/tokens";
 import { previewShell } from "../generated/preview-shell";
 
 export interface DisplayControlsProps {
   theme: string;
+  style?: StyleName;
   // The header follows the specimen `controlSize` selection (xs–xl), so every
   // painted control resolves the same shared ladder stop. Density stays
   // ambient too.
@@ -20,6 +22,7 @@ export interface DisplayControlsProps {
   search?: string;
   contrast?: number;
   onThemeChange?: (value: string) => void;
+  onStyleChange?: (value: string) => void;
   onDensityChange?: (value: string) => void;
   onControlSizeChange?: (value: string) => void;
   onSearchChange?: (value: string) => void;
@@ -47,6 +50,7 @@ const contrastControl = previewShell.controls.find((control): control is RangeCo
 const searchControl = previewShell.controls.find((control): control is SearchControl => (control.kind as string) === "search");
 
 const themeCatalogue = themeOptions();
+const styleOptions = Object.keys(styles).map((name) => ({ value: name, label: name }));
 const themeList = themeControl
   ? themeCatalogue.filter((option) => (themeControl.values as readonly string[]).includes(option.value))
   : [];
@@ -63,11 +67,13 @@ const controlSizeOptions: ToggleGroupOption[] = sizeControl
 
 export function DisplayControls({
   theme,
+  style = "default",
   density,
   controlSize,
   search = "",
   contrast = 1,
   onThemeChange = () => {},
+  onStyleChange = () => {},
   onDensityChange = () => {},
   onControlSizeChange = () => {},
   onSearchChange = () => {},
@@ -87,6 +93,11 @@ export function DisplayControls({
             />
           </div>
         )}
+
+        <div className="poodle-display-controls__group">
+          <Eyebrow>Style</Eyebrow>
+          <Select native value={style} options={styleOptions} ariaLabel="Style" onValueChange={onStyleChange} />
+        </div>
 
         {densityControl && (
           <div className="poodle-display-controls__group">

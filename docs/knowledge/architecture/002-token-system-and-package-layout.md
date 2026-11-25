@@ -66,7 +66,7 @@ independent inherited axes.
 | Axis | Values |
 | --- | --- |
 | Theme | `iceberg`, `eclipse`, `graphite`, `midnight`, `nord`, `rose`, `forest`, `solarized`, `hornet`, `cobalt`, `clay`, `meadow` |
-| Rendering style | `default` |
+| Rendering style | `default`, `quiet` (experimental) |
 | Density | `compact`, `default`, `comfortable` |
 | Control size | `xs`, `sm`, `md`, `lg`, `xl` |
 
@@ -97,6 +97,11 @@ The default uses `outlined`, `border` and `accent-outline` to reproduce
 the prior paint. `accent-tint` keeps tint and suppresses selection borders.
 `neutral` uses a neutral fill, stronger text and an accent only for an
 existing small indicator. Each component retains its selection anatomy.
+
+`quiet` is an experimental style (`status: "experimental"` in style metadata)
+that combines `filled`, `tonal`, and `neutral` with a neutral selection
+indicator (`style.selection.indicator` mapped to `color.text.primary`), leaving
+only primary buttons and focus rings using the accent colour.
 
 Themes define `color.fill.{rest,hover,active}` for filled controls and
 `color.select.{accent,neutral}` for selected items. Neutral fills use the
@@ -154,7 +159,8 @@ import "@inflatable-cookie/poodle-core/tokens/control-size-md.css";
 
 Individual theme, style, density, and control-size stylesheets are available
 for consumers that need a narrower CSS payload. For example,
-`/tokens/style-default.css` loads just the default style.
+`/tokens/style-default.css` loads just the default style and
+`/tokens/style-quiet.css` loads the experimental quiet style.
 
 ### Framework packages
 

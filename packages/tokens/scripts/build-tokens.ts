@@ -44,12 +44,14 @@ interface NamedModeDefinition {
 }
 
 interface StyleDefinition extends NamedModeDefinition {
+  status?: string;
   treatment: Record<string, string>;
 }
 
 interface ThemeMetadata {
   selector: string;
   description: string;
+  status?: string;
 }
 
 interface AliasMetadata {
@@ -571,6 +573,7 @@ const stylesWithTreatments = Object.entries(schema.modes.style).map(
       name,
       selector: styleMetadata.selector,
       description: styleMetadata.description,
+      ...(styleMetadata.status ? { status: styleMetadata.status } : {}),
       treatment: choices,
       entries,
     };
@@ -749,11 +752,12 @@ export const controlSizes = ${JSON.stringify(
 
 export const styles = ${JSON.stringify(
     Object.fromEntries(
-      styleDefinitions.map(({ name, selector, description, treatment, entries }) => [
+      styleDefinitions.map(({ name, selector, description, status, treatment, entries }) => [
         name,
         {
           selector,
           description,
+          ...(status ? { status } : {}),
           treatment,
           overrides: Object.fromEntries(entries.map((entry) => [entry.path, entry.rawValue])),
         },

@@ -48,6 +48,7 @@ export const manifest = {
       "packages/tokens/artifacts/css/poodle-density-default.css",
       "packages/tokens/artifacts/css/poodle-density-comfortable.css",
       "packages/tokens/artifacts/css/poodle-style-default.css",
+      "packages/tokens/artifacts/css/poodle-style-quiet.css",
       "packages/tokens/artifacts/css/poodle-styles.css"
     ],
     "ts": [
