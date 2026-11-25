@@ -148,8 +148,12 @@ two targets.
 | `gap` | `var(--poodle-space-inline-sm)` |
 | `width` | `max-content` |
 
-Slots are square. The border color is `--code-slot-border`, derived from
-`validationState` (see Validation state rows below).
+Slots are square. At rest, the border color resolves from
+`--poodle-style-control-border` first, then `--code-slot-border` (derived
+from `validationState`), then `--poodle-color-border-default`. When invalid,
+`:where(.poodle-code-input:has(.poodle-code-input__control[aria-invalid="true"])) .poodle-code-input__slot`
+sets `border-color` to `var(--code-slot-border, var(--poodle-color-status-danger))`
+so error framing holds under any rendering style (see Validation state rows below).
 
 | Property | Value |
 |----------|-------|
@@ -195,10 +199,10 @@ the `check` icon and `--poodle-color-status-success`; a failed result uses the
 
 ### Slot -- validation state (drives `--code-slot-border` / `--code-slot-focus` / `--code-slot-focus-ring`)
 
-| validationState | `--code-slot-border` | `--code-slot-focus` | `--code-slot-focus-ring` |
-|-----------------|----------------------|---------------------|---------------------------|
-| not invalid (default) | `var(--poodle-color-border-default)` | `var(--poodle-color-accent-border)` | `color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
-| `"invalid"` (or `error` set) | `var(--poodle-color-status-danger)` | `var(--poodle-color-status-danger)` | `color-mix(in srgb, var(--poodle-color-status-danger) 24%, transparent)` |
+| validationState | `--code-slot-border` | Resolved resting `border-color` | `--code-slot-focus` | `--code-slot-focus-ring` |
+|-----------------|----------------------|----------------------------------|---------------------|---------------------------|
+| not invalid (default) | `var(--poodle-color-border-default)` | `var(--poodle-style-control-border, var(--code-slot-border, var(--poodle-color-border-default)))` | `var(--poodle-color-accent-border)` | `color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
+| `"invalid"` (or `error` set) | `var(--poodle-color-status-danger)` | `var(--code-slot-border, var(--poodle-color-status-danger))` via `:where(.poodle-code-input:has(.poodle-code-input__control[aria-invalid="true"])) .poodle-code-input__slot` | `var(--poodle-color-status-danger)` | `color-mix(in srgb, var(--poodle-color-status-danger) 24%, transparent)` |
 
 ### Slot -- disabled
 
