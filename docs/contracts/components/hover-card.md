@@ -212,11 +212,11 @@ screen boundaries or inside scrollable containers.
 | `min-width` | `14rem` |
 | `max-width` | `min(22rem, 90vw)` |
 | `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)` |
+| `border` | `0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent))` |
 | `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
-| `--poodle-surface` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
-| `box-shadow` | `var(--poodle-elevation-overlay)` |
+| `background` | `var(--poodle-recipe-hover-card-surface-fill, var(--poodle-surface))` |
+| `--poodle-surface` | `var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))))` |
+| `box-shadow` | `var(--poodle-recipe-hover-card-surface-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay)))` |
 
 ### Surface Positioning
 

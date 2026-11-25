@@ -112,9 +112,21 @@ border roles preserve the previous component weights and backdrops. The
 selection switch reuses the primary text and accent indicator roles.
 Default solid Tabs keep their existing accent and inverse text tokens.
 
-Tonal goes from canvas to `color.background.panel` for Card and from
-panel to `color.background.elevated` for floating Dialog. Both use the
-existing colour steps. Run `effigy tokens:contrast` to check the new fills
+Tonal goes from canvas to `color.background.panel` for a container and from
+panel to `color.background.elevated` for one that floats. Both use the
+existing colour steps. Containers read the switch as
+`--poodle-style-surface-fill` (the inline step) and
+`--poodle-style-surface-floatingFill` (the elevated step), with
+`--poodle-style-surface-border` and `--poodle-style-surface-shadow` for the
+other two edges; each component reads its recipe hook first, then the role.
+Card, Dialog, Popover, Tooltip, Drawer, HoverCard, CommandPalette,
+ToastStack, PickerShell's popover and modal variants, Surface, Callout and
+EmptyState all resolve through that chain, so a style reaches them without
+per-component CSS. Popover, Tooltip, Drawer, HoverCard, CommandPalette, the
+toast body, Surface's elevated tone and PickerShell's floating variants fall
+back from `-floatingFill` to `-fill`; Surface, Callout, EmptyState and the
+inline PickerShell read `-fill`. Run `effigy tokens:contrast` to check the
+new fills
 with their paired text on the content layers. The report shows the existing
 steps below 0.04 OKLCH lightness so themes can address small steps in a
 later palette revision.

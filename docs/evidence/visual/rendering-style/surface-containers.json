@@ -1,0 +1,48 @@
+{
+  "capturedAt": "2026-11-25",
+  "themes": [
+    "eclipse",
+    "iceberg"
+  ],
+  "targets": [
+    "surface",
+    "picker-shell",
+    "toast-stack",
+    "callout",
+    "empty-state",
+    "popover",
+    "tooltip",
+    "hover-card",
+    "drawer",
+    "command-palette",
+    "alert-dialog"
+  ],
+  "defaultStylePixelChanges": {
+    "eclipse": {
+      "surface": 0,
+      "picker-shell": 0,
+      "toast-stack": 0,
+      "callout": 0,
+      "empty-state": 0,
+      "popover": 0,
+      "tooltip": 0,
+      "hover-card": 0,
+      "drawer": 0,
+      "command-palette": 0,
+      "alert-dialog": 0
+    },
+    "iceberg": {
+      "surface": 0,
+      "picker-shell": 0,
+      "toast-stack": 0,
+      "callout": 0,
+      "empty-state": 0,
+      "popover": 0,
+      "tooltip": 0,
+      "hover-card": 0,
+      "drawer": 0,
+      "command-palette": 0,
+      "alert-dialog": 0
+    }
+  }
+}

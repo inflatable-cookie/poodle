@@ -2,8 +2,8 @@
    shared-styles move). Unique poodle-* selectors; safe as global CSS. */
 
   .poodle-callout {
-    --poodle-callout-fill: var(--poodle-recipe-callout-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent));
-    --poodle-callout-border: var(--poodle-recipe-callout-border, color-mix(in srgb, var(--poodle-color-border-subtle) 88%, transparent));
+    --poodle-callout-fill: var(--poodle-recipe-callout-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)));
+    --poodle-callout-border: var(--poodle-recipe-callout-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 88%, transparent)));
     --poodle-callout-tone-base: var(--poodle-color-text-primary);
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
@@ -20,31 +20,31 @@
   .poodle-callout[data-tone="info"] {
     --poodle-callout-tone-base: var(--poodle-color-status-info, #3b82f6);
     --poodle-callout-fill: var(--poodle-recipe-callout-info-fill, color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 10%, var(--poodle-color-background-panel)));
-    --poodle-callout-border: var(--poodle-recipe-callout-info-border, color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 34%, var(--poodle-color-border-default)));
+    --poodle-callout-border: var(--poodle-recipe-callout-info-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 34%, var(--poodle-color-border-default))));
   }
 
   .poodle-callout[data-tone="success"] {
     --poodle-callout-tone-base: var(--poodle-color-status-success);
     --poodle-callout-fill: var(--poodle-recipe-callout-success-fill, color-mix(in srgb, var(--poodle-color-status-success) 10%, var(--poodle-color-background-panel)));
-    --poodle-callout-border: var(--poodle-recipe-callout-success-border, color-mix(in srgb, var(--poodle-color-status-success) 34%, var(--poodle-color-border-default)));
+    --poodle-callout-border: var(--poodle-recipe-callout-success-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-success) 34%, var(--poodle-color-border-default))));
   }
 
   .poodle-callout[data-tone="warning"] {
     --poodle-callout-tone-base: var(--poodle-color-status-warning);
     --poodle-callout-fill: var(--poodle-recipe-callout-warning-fill, color-mix(in srgb, var(--poodle-color-status-warning) 10%, var(--poodle-color-background-panel)));
-    --poodle-callout-border: var(--poodle-recipe-callout-warning-border, color-mix(in srgb, var(--poodle-color-status-warning) 34%, var(--poodle-color-border-default)));
+    --poodle-callout-border: var(--poodle-recipe-callout-warning-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-warning) 34%, var(--poodle-color-border-default))));
   }
 
   .poodle-callout[data-tone="danger"] {
     --poodle-callout-tone-base: var(--poodle-color-status-danger);
     --poodle-callout-fill: var(--poodle-recipe-callout-danger-fill, color-mix(in srgb, var(--poodle-color-status-danger) 10%, var(--poodle-color-background-panel)));
-    --poodle-callout-border: var(--poodle-recipe-callout-danger-border, color-mix(in srgb, var(--poodle-color-status-danger) 34%, var(--poodle-color-border-default)));
+    --poodle-callout-border: var(--poodle-recipe-callout-danger-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-danger) 34%, var(--poodle-color-border-default))));
   }
 
   .poodle-callout[data-tone="pending"] {
     --poodle-callout-tone-base: var(--poodle-color-accent-base);
     --poodle-callout-fill: var(--poodle-recipe-callout-pending-fill, color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-panel)));
-    --poodle-callout-border: var(--poodle-recipe-callout-pending-border, color-mix(in srgb, var(--poodle-color-accent-base) 26%, var(--poodle-color-border-default)));
+    --poodle-callout-border: var(--poodle-recipe-callout-pending-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-accent-base) 26%, var(--poodle-color-border-default))));
   }
 
   .poodle-callout__body {
@@ -174,7 +174,7 @@
   /* Solid fill promotes the tint-border colour into one continuous surface. */
   .poodle-callout[data-fill="solid"] {
     --poodle-callout-fill: var(--poodle-recipe-callout-solid-fill, color-mix(in srgb, var(--poodle-callout-tone-base) 34%, var(--poodle-color-border-default)));
-    --poodle-callout-border: var(--poodle-recipe-callout-solid-border, var(--poodle-callout-fill));
+    --poodle-callout-border: var(--poodle-recipe-callout-solid-border, var(--poodle-style-surface-border, var(--poodle-callout-fill)));
     background: var(--poodle-callout-fill);
     background-clip: padding-box;
     color: var(--poodle-recipe-callout-solid-foreground, var(--poodle-color-text-primary));
@@ -182,7 +182,7 @@
 
   .poodle-callout[data-fill="solid"][data-tone="neutral"] {
     --poodle-callout-fill: var(--poodle-recipe-callout-solid-fill, color-mix(in srgb, var(--poodle-color-text-secondary) 50%, var(--poodle-color-background-surface)));
-    --poodle-callout-border: var(--poodle-recipe-callout-solid-border, var(--poodle-callout-fill));
+    --poodle-callout-border: var(--poodle-recipe-callout-solid-border, var(--poodle-style-surface-border, var(--poodle-callout-fill)));
   }
 
   .poodle-callout[data-fill="solid"][data-tone="pending"] {

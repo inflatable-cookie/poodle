@@ -229,11 +229,11 @@ identical.
 | `height` | `100vh` |
 | `overflow` | `auto` |
 | `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent)` |
+| `border` | `0 solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent))` (per-edge width in the edge rules) |
 | `border-radius` | `0` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
-| `--poodle-surface` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
-| `box-shadow` | `var(--poodle-elevation-dialog)` |
+| `background` | `var(--poodle-recipe-drawer-surface-fill, var(--poodle-surface))` |
+| `--poodle-surface` | `var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))))` |
+| `box-shadow` | `var(--poodle-recipe-drawer-surface-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-dialog)))` |
 
 ### Surface — top/bottom edge override
 
