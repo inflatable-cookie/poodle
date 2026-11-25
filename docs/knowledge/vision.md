@@ -121,12 +121,19 @@ Renderer-specific input, lifecycle, and drawing remain in the backend.
   uses subtle fills, few borders and subtle ones where a border is needed,
   minimal labelling, and far less accent colour. The aim is sleek and
   simple.
-- **Theming is flexible, in three kinds.** Operator ruling 2026-11-25. Poodle
-  keeps full palettes such as Nord and Solarized, offers neutral bases that
-  take an accent choice, and lets a consumer blend a mutable accent into a
-  base's colours to make a custom toned theme. A theme defines colour only,
-  and no component rule selects on a theme; the three Iceberg overrides
-  that did are removed (operator ruling the same day).
+- **A theme is a few settings, and every named theme is a preset.** Operator
+  ruling 2026-11-25, a clean break that replaces authored palettes. A theme
+  is a scheme (light or dark), a base colour and how far it blends into
+  black or white, an accent colour and how far it blends into the neutrals,
+  and a contrast amount. Base and accent are picked the same way, from the
+  same range of colours. At a blend of zero the colour has no effect on any
+  neutral. Every colour role is derived from those settings by one function
+  that holds text contrast; Nord, Solarized and the other named themes are
+  saved combinations of the settings, and none authors its own palette. A
+  consumer can offer the presets, or the settings themselves, at run time.
+  A theme defines colour only, and no component rule selects on a theme;
+  the three Iceberg overrides that did are removed (operator ruling the
+  same day).
 - **The design sweep lands on web first.** Operator ruling 2026-11-25.
   Soundcheck is the test consumer for a second style; Loophole is the
   long-term case. The route for GPUI and Jetstream is a separate, open
