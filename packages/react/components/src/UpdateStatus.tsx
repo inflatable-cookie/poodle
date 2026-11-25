@@ -28,6 +28,7 @@ export interface UpdateStatusProps {
   installedVersion?: string;
   deferral?: UpdateDeferral;
   lastRejection?: UpdateRejectionCode;
+  lastRejectionDetail?: string | null;
   aheadOfChannel?: UpdateAheadOfChannel;
   pending?: boolean;
   observe?: ((observer: () => void) => () => void) | null;
@@ -38,10 +39,12 @@ export interface UpdateStatusProps {
   deferLabel?: string;
   checkLabel?: string;
   retryLabel?: string;
+  downloadAgainLabel?: string;
   confirmInstall?: boolean;
   onCheck?: (() => void) | null;
   onInstall?: (() => void) | null;
   onDefer?: (() => void) | null;
+  onDownloadAgain?: (() => void) | null;
 }
 
 export function UpdateStatus({
@@ -52,6 +55,7 @@ export function UpdateStatus({
   installedVersion,
   deferral,
   lastRejection,
+  lastRejectionDetail,
   aheadOfChannel,
   pending = false,
   observe = null,
@@ -62,10 +66,12 @@ export function UpdateStatus({
   deferLabel = "Later",
   checkLabel = "Check for updates",
   retryLabel = "Try again",
+  downloadAgainLabel = "Download again",
   confirmInstall = true,
   onCheck = null,
   onInstall = null,
   onDefer = null,
+  onDownloadAgain = null,
 }: UpdateStatusProps) {
   const uiPresentation = useUiPresentation();
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
@@ -86,6 +92,7 @@ export function UpdateStatus({
     progress,
     deferral,
     lastRejection,
+    lastRejectionDetail,
     aheadOfChannel,
     channel,
     installedVersion,
@@ -95,6 +102,7 @@ export function UpdateStatus({
     install: installLabel,
     defer: deferLabel,
     check: checkLabel,
+    downloadAgain: downloadAgainLabel,
   };
 
   function dispatch(action: UpdateStatusAction): void {
@@ -106,6 +114,8 @@ export function UpdateStatus({
       onInstall?.();
     } else if (action.type === "check") {
       onCheck?.();
+    } else if (action.type === "downloadAgain") {
+      onDownloadAgain?.();
     } else {
       onDefer?.();
     }

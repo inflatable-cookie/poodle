@@ -149,4 +149,36 @@ describe("UpdateStatus (react)", () => {
 
     expect(screen.getByRole("button", { name: "Try again" })).toBeTruthy();
   });
+
+  it("renders unavailable-for-target as information with no action", () => {
+    const { container } = render(
+      <UpdateStatus status={ready} availability={{ state: "unavailableForTarget", version: "1.4.0" }} />,
+    );
+
+    expect(screen.getByText("No update for this system")).toBeTruthy();
+    expect(screen.getByText("Version 1.4.0 is not built for this system.")).toBeTruthy();
+    expect(screen.queryAllByRole("button")).toHaveLength(0);
+    expect(container.querySelector(".poodle-update-status")?.getAttribute("data-tone")).toBe("info");
+  });
+
+  it("renders an invalid artifact as a warning with its detail and a download-again action", () => {
+    const onDownloadAgain = vi.fn();
+    const { container } = render(
+      <UpdateStatus
+        status={ready}
+        lastRejection="malformedArtifact"
+        lastRejectionDetail="invalid archive"
+        onDownloadAgain={onDownloadAgain}
+      />,
+    );
+
+    expect(screen.getByText("The downloaded update was invalid")).toBeTruthy();
+    expect(screen.getByText("invalid archive")).toBeTruthy();
+    expect(container.querySelector(".poodle-update-status")?.getAttribute("data-tone")).toBe("warning");
+    expect(screen.queryByRole("button", { name: "Install and restart" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Check for updates" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Download again" }));
+    expect(onDownloadAgain).toHaveBeenCalledOnce();
+  });
 });

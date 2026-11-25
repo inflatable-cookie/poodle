@@ -155,6 +155,34 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         ))
         .child(group(
             theme,
+            "Unavailable for this system",
+            status_element(
+                UpdateStatusSpec::new()
+                    .with_status(UpdateControllerStatus::Ready)
+                    .with_availability(UpdateAvailabilityProjection::UnavailableForTarget {
+                        version: "1.4.0".to_string(),
+                    }),
+                theme,
+                UpdateStatusHandlers::default(),
+            ),
+        ))
+        .child(group(
+            theme,
+            "Invalid artifact",
+            status_element(
+                UpdateStatusSpec::new()
+                    .with_status(UpdateControllerStatus::Ready)
+                    .with_last_rejection(UpdateRejectionCode::MalformedArtifact)
+                    .with_last_rejection_detail("invalid archive"),
+                theme,
+                UpdateStatusHandlers {
+                    instance_id: Some("update-status-invalid".to_string()),
+                    ..UpdateStatusHandlers::default()
+                },
+            ),
+        ))
+        .child(group(
+            theme,
             "Signature rejected",
             status_element(
                 UpdateStatusSpec::new()

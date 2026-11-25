@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { UpdateCenter } from "../src/UpdateCenter";
 
@@ -39,6 +39,26 @@ describe("UpdateCenter (react)", () => {
     expect(screen.getByRole("dialog", { name: "Updates" })).toBeTruthy();
     expect(screen.getByText("Version 1.4.0 is available")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Install and restart" })).toBeTruthy();
+  });
+
+  it("passes an invalid artifact through to the popover and its download-again event", () => {
+    const onDownloadAgain = vi.fn();
+    render(
+      <UpdateCenter
+        presence="attention"
+        status={{ kind: "ready" }}
+        lastRejection="malformedArtifact"
+        lastRejectionDetail="invalid archive"
+        onDownloadAgain={onDownloadAgain}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Updates" }));
+
+    expect(screen.getByText("The downloaded update was invalid")).toBeTruthy();
+    expect(screen.getByText("invalid archive")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Download again" }));
+    expect(onDownloadAgain).toHaveBeenCalledOnce();
   });
 
   it("swaps the icon for a determinate progress ring while downloading", () => {

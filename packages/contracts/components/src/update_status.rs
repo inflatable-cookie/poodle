@@ -21,6 +21,8 @@ pub struct UpdateStatusSpec {
     pub installed_version: Option<String>,
     pub deferral: Option<UpdateDeferral>,
     pub last_rejection: Option<UpdateRejectionCode>,
+    /// The installer detail for `last_rejection`; shown on a malformed artifact.
+    pub last_rejection_detail: Option<String>,
     pub ahead_of_channel: Option<UpdateAheadOfChannel>,
     pub pending: bool,
     /// `None` inherits from the presentation context; an explicit value wins.
@@ -32,6 +34,7 @@ pub struct UpdateStatusSpec {
     pub defer_label: String,
     pub check_label: String,
     pub retry_label: String,
+    pub download_again_label: String,
     pub confirm_install: bool,
     /// Host-owned confirmation dialog. Native has no internal overlay store.
     pub confirm_open: bool,
@@ -47,6 +50,7 @@ impl Default for UpdateStatusSpec {
             installed_version: None,
             deferral: None,
             last_rejection: None,
+            last_rejection_detail: None,
             ahead_of_channel: None,
             pending: false,
             size: None,
@@ -56,6 +60,7 @@ impl Default for UpdateStatusSpec {
             defer_label: "Later".to_string(),
             check_label: "Check for updates".to_string(),
             retry_label: "Try again".to_string(),
+            download_again_label: "Download again".to_string(),
             confirm_install: true,
             confirm_open: false,
         }
@@ -102,6 +107,11 @@ impl UpdateStatusSpec {
         self
     }
 
+    pub fn with_last_rejection_detail(mut self, detail: impl Into<String>) -> Self {
+        self.last_rejection_detail = Some(detail.into());
+        self
+    }
+
     pub fn with_ahead_of_channel(mut self, ahead: UpdateAheadOfChannel) -> Self {
         self.ahead_of_channel = Some(ahead);
         self
@@ -144,6 +154,11 @@ impl UpdateStatusSpec {
 
     pub fn with_retry_label(mut self, label: impl Into<String>) -> Self {
         self.retry_label = label.into();
+        self
+    }
+
+    pub fn with_download_again_label(mut self, label: impl Into<String>) -> Self {
+        self.download_again_label = label.into();
         self
     }
 

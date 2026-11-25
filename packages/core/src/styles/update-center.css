@@ -133,6 +133,10 @@
   color: var(--poodle-color-text-danger, var(--poodle-color-status-danger));
 }
 
+.poodle-update-status[data-tone="warning"] .poodle-update-status__title {
+  color: var(--poodle-color-status-warning);
+}
+
 .poodle-update-status__notice {
   display: flex;
   align-items: center;
