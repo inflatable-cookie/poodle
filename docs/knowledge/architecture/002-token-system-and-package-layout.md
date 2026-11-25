@@ -91,17 +91,37 @@ applying direct overrides.
 | --- | --- | --- |
 | `fill` | `outlined`, `filled`, `ghost` | Controls at rest, including hover and press fills where used |
 | `surface` | `border`, `elevation`, `tonal` | Containers |
-| `selection` | `accent-outline`, `accent-tint`, `neutral` | Selected items in Select, Tabs and ToggleGroup |
+| `selection` | `accent-outline`, `accent-tint`, `neutral` | Selected items in Select, Tabs, ToggleGroup, SegmentedControl, Card (CardRadioGroup, CardToggleGroup), ThemeSelect, AgentQuestion and Rating |
 
 The default uses `outlined`, `border` and `accent-outline` to reproduce
-the prior paint. `accent-tint` keeps tint and suppresses selection borders.
-`neutral` uses a neutral fill, stronger text and an accent only for an
-existing small indicator. Each component retains its selection anatomy.
+the prior paint. `accent-tint` keeps tint and suppresses selection borders
+for components wired to `selection.border` or `selection.borderStrong`
+(Select, Tabs, ToggleGroup). `neutral` uses a neutral fill, stronger text and
+an accent only for an existing small indicator. Each component retains its
+selection anatomy.
+
+Selected borders and rings on Card (including CardRadioGroup and
+CardToggleGroup), ThemeSelect tiles and AgentQuestion options, plus Rating
+glyph fills, currently bind `--poodle-style-selection-indicator` to preserve
+their existing `--poodle-color-accent-base` default without introducing an
+unruled default delta (`selection.border` and `selection.borderStrong` use
+alpha-mixed borders in `accent-outline`). Because `style.selection.indicator`
+resolves to `{color.accent.base}` in all three `selection` switch values unless
+a style mode overrides it:
+
+- Under `accent-tint`, Card (which reads no fill role) renders identically to
+  `accent-outline`, and ThemeSelect and AgentQuestion keep an accent border.
+- Under plain `selection: neutral` without a style override, Card, ThemeSelect,
+  AgentQuestion and Rating stay accent-colored.
 
 `quiet` is an experimental style (`status: "experimental"` in style metadata)
 that combines `filled`, `tonal`, and `neutral` with a neutral selection
 indicator (`style.selection.indicator` mapped to `color.text.primary`), leaving
-only primary buttons and focus rings using the accent colour.
+only primary buttons and focus rings using the accent colour (and rendering
+Card, ThemeSelect, AgentQuestion and Rating neutral as well). Adding a
+`selection` border role that resolves to `{color.accent.base}` in
+`accent-outline` and suppresses in `accent-tint` and `neutral` (pending
+planner ruling) would remove the `indicator` overload on those borders.
 
 Themes define `color.fill.{rest,hover,active}` for filled controls and
 `color.select.{accent,neutral}` for selected items. Neutral fills use the

@@ -43,11 +43,14 @@ spec field / token override on the GPUI/Jetstream side).
   documented visual states.
 
 The selection switch resolves selected fills and borders through
-`color.select.*` and reuses existing text and indicator roles. Existing
-recipe hooks for Select options, Tabs edges and fills, and ToggleGroup
-items still take precedence in all three selection styles. A recipe can
-supply a visible Tabs outline even when
-`accent-tint` supplies a transparent fallback border. See
+`color.select.*` and reuses existing text and indicator roles across Select,
+Tabs, ToggleGroup, SegmentedControl, Card (including CardRadioGroup and
+CardToggleGroup), ThemeSelect, AgentQuestion, and Rating. Existing recipe
+hooks for Select options, Tabs edges and fills, ToggleGroup items,
+SegmentedControl labels, Card selected edges, and Rating filled glyphs still
+take precedence in all three selection styles (ThemeSelect and AgentQuestion
+expose no selected-state recipe hooks). A recipe can supply a visible Tabs
+outline even when `accent-tint` supplies a transparent fallback border. See
 [002 Token System and Package Layout](002-token-system-and-package-layout.md#modes).
 
 ## Public Surface vs Internal Variables
