@@ -139,13 +139,18 @@ test("the style builder rejects a theme token written by a style mode or treatme
 });
 
 test("a treatment added in schema expands into CSS and a typed Rust mode", () => {
-  withStyleFixture(({ writeJson, build, read }) => {
+  withStyleFixture(({ root, writeJson, build, read }) => {
     writeJson("style-treatments/shape.json", {
       flat: { radius: { control: { $value: "0rem" } } },
     });
-    writeJson("modes/style/default.json", {
-      treatment: { fill: "filled", surface: "tonal", selection: "neutral", shape: "flat" },
-    });
+    for (const file of fs.readdirSync(path.join(root, "tokens/schema/modes/style"))) {
+      if (!file.endsWith(".json")) continue;
+      const existing = JSON.parse(fs.readFileSync(path.join(root, "tokens/schema/modes/style", file), "utf8"));
+      writeJson(`modes/style/${file}`, {
+        ...existing,
+        treatment: { fill: "filled", surface: "tonal", selection: "neutral", shape: "flat" },
+      });
+    }
     const result = build();
     expect(result.status).toBe(0);
     const css = read("tokens/artifacts/css/poodle-style-default.css");
@@ -177,4 +182,15 @@ test("shared component CSS cannot select on a colour theme", () => {
     expect(result.status).not.toBe(0);
     expect(result.output).toContain("test.css:2: shared CSS must not select on data-theme");
   });
+});
+
+test("the live quiet style builds as experimental with filled, tonal, neutral and a neutral indicator", () => {
+  const css = fs.readFileSync(path.join(tokensDir, "artifacts/css/poodle-style-quiet.css"), "utf8");
+  expect(css).toContain('[data-style="quiet"]');
+  expect(css).toContain("--poodle-style-control-fill: var(--poodle-color-fill-rest);");
+  expect(css).toContain("--poodle-style-surface-fill: var(--poodle-color-background-panel);");
+  expect(css).toContain("--poodle-style-selection-fill: var(--poodle-color-select-neutral);");
+  expect(css).toContain("--poodle-style-selection-indicator: var(--poodle-color-text-primary);");
+  const themesTs = fs.readFileSync(path.join(tokensDir, "artifacts/ts/themes.ts"), "utf8");
+  expect(themesTs).toContain('"status": "experimental"');
 });

@@ -1,0 +1,15 @@
+{
+  "treatment": {
+    "fill": "filled",
+    "surface": "tonal",
+    "selection": "neutral"
+  },
+  "style": {
+    "selection": {
+      "indicator": {
+        "$type": "color",
+        "$value": "{color.text.primary}"
+      }
+    }
+  }
+}

@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import "@inflatable-cookie/poodle-core/tokens/styles.css";
 // All theme layers in one aggregate — the selector offers every registered theme.
 import "../../../tokens/artifacts/css/poodle-themes.css";
+import "@inflatable-cookie/poodle-core/tokens/css/poodle-styles.css";
 import "../../../tokens/artifacts/css/poodle-density-comfortable.css";
 import "../../../tokens/artifacts/css/poodle-density-compact.css";
 import "../../../tokens/artifacts/css/poodle-density-default.css";

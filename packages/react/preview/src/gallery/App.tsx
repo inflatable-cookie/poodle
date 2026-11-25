@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Pill, Tabs, IconProvider, UiPresentationProvider, type IconSet, type TabItem } from "@inflatable-cookie/poodle-react";
-import { applyThemeAttributes, cssVars, themes, densityModes, controlSizes } from "@inflatable-cookie/poodle-core/tokens";
+import { applyThemeAttributes, cssVars, styles, themes, densityModes, controlSizes, type StyleName } from "@inflatable-cookie/poodle-core/tokens";
 import iconNodes from "lucide-static/icon-nodes.json";
 
 import { DisplayControls } from "./DisplayControls";
@@ -34,10 +34,15 @@ function parseRoute(hash: string): Route {
   return { section: "components" };
 }
 
+function isStyleName(value: string | null): value is StyleName {
+  return value !== null && Object.hasOwn(styles, value);
+}
+
 export function App() {
   const shellRef = useRef<HTMLDivElement | null>(null);
 
   const [theme, setTheme] = useState<ThemeName>("eclipse");
+  const [style, setStyle] = useState<StyleName>("default");
   const [density, setDensity] = useState<DensityName>("compact");
   const [controlSize, setControlSize] = useState<ControlSizeName>("sm");
   const [contrast, setContrast] = useState(0.5);
@@ -52,9 +57,11 @@ export function App() {
       setRoute(parseRoute(window.location.hash));
       const params = new URLSearchParams(window.location.search);
       const paramTheme = params.get("theme");
+      const paramStyle = params.get("style");
       const paramDensity = params.get("density");
       const paramControlSize = params.get("controlSize");
       if (paramTheme && paramTheme in themes) setTheme(paramTheme as ThemeName);
+      setStyle(isStyleName(paramStyle) ? paramStyle : "default");
       if (paramDensity && paramDensity in densityModes) setDensity(paramDensity as DensityName);
       if (paramControlSize && paramControlSize in controlSizes) setControlSize(paramControlSize as ControlSizeName);
     }
@@ -71,31 +78,31 @@ export function App() {
   // ── Theme application + live token readout ───────────────────────────
   useEffect(() => {
     if (typeof document !== "undefined") {
-      applyThemeAttributes(document.documentElement, { theme, density, controlSize });
+      applyThemeAttributes(document.documentElement, { theme, style, density, controlSize });
     }
     const shell = shellRef.current;
     if (shell) {
-      applyThemeAttributes(shell, { theme, density, controlSize });
-      const styles = getComputedStyle(shell);
+      applyThemeAttributes(shell, { theme, style, density, controlSize });
+      const computedStyles = getComputedStyle(shell);
       const next: Partial<Record<string, string>> = {};
       for (const path of semanticPaths) {
-        next[path] = styles.getPropertyValue(cssVars[path]).trim();
+        next[path] = computedStyles.getPropertyValue(cssVars[path]).trim();
       }
       setLiveTokenValues(next);
     }
-  }, [theme, density, controlSize, contrast]);
+  }, [theme, style, density, controlSize, contrast]);
 
   // ── Persist preview mode to the URL ──────────────────────────────────
   useEffect(() => {
     if (!mounted) return;
-    const searchParams = new URLSearchParams({ theme, density, controlSize });
+    const searchParams = new URLSearchParams({ theme, style, density, controlSize });
     const hash = window.location.hash || "#components";
     const nextUrl = `${window.location.pathname}?${searchParams.toString()}${hash}`;
     const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     if (nextUrl !== currentUrl) {
       window.history.replaceState(null, "", nextUrl);
     }
-  }, [mounted, theme, density, controlSize, route]);
+  }, [mounted, theme, style, density, controlSize, route]);
 
   function navigateToSection(section: SectionId): void {
     window.location.hash = section;
@@ -128,11 +135,15 @@ export function App() {
 
         <DisplayControls
           theme={theme}
+          style={style}
           density={density}
           controlSize={controlSize}
           search={search}
           contrast={contrast}
           onThemeChange={(value) => setTheme(value as ThemeName)}
+          onStyleChange={(value) => {
+            if (isStyleName(value)) setStyle(value);
+          }}
           onDensityChange={(value) => setDensity(value as DensityName)}
           onControlSizeChange={(value) => setControlSize(value as ControlSizeName)}
           onContrastChange={(value) => setContrast(Math.round(value * 100) / 100)}
