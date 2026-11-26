@@ -37,27 +37,29 @@ export const LOCKSTEP_CARGO_LOCK_PATHS = [
 
 export type CargoPackageIdentity = { name: string; version: string };
 
-export function cargoPackageIdentity(text: string, label: string): CargoPackageIdentity {
-  let section = "";
-  let name: string | undefined;
-  let version: string | undefined;
-  for (const line of text.split(/\r?\n/)) {
-    if (/^\s*\[\[/.test(line)) {
-      section = "";
-      continue;
-    }
-    const table = /^\s*\[([^\]]+)\]\s*(?:#.*)?$/.exec(line);
-    if (table) {
-      section = table[1];
-      continue;
-    }
-    if (section !== "package") continue;
-    const field = /^\s*(name|version)\s*=\s*"([^"]+)"\s*(?:#.*)?$/.exec(line);
-    if (field?.[1] === "name") name = field[2];
-    if (field?.[1] === "version") version = field[2];
+function isTable(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function parseCargoToml(text: string, label: string): unknown {
+  try {
+    return Bun.TOML.parse(text);
+  } catch (error) {
+    throw new Error(`${label} has invalid TOML`, { cause: error });
   }
-  if (!name || !version) throw new Error(`${label} must declare [package] name and version`);
-  return { name, version };
+}
+
+function readPackageIdentity(value: unknown, label: string): CargoPackageIdentity {
+  if (!isTable(value) || typeof value.name !== "string" || !value.name ||
+    typeof value.version !== "string" || !value.version) {
+    throw new Error(`${label} must declare package name and version`);
+  }
+  return { name: value.name, version: value.version };
+}
+
+export function cargoPackageIdentity(text: string, label: string): CargoPackageIdentity {
+  const document = parseCargoToml(text, label);
+  return readPackageIdentity(isTable(document) ? document.package : undefined, `${label} [package]`);
 }
 
 export function updateCargoManifestText(
@@ -117,27 +119,35 @@ export function updateCargoManifestText(
   return { text: lines.join("\n"), name: identity.name };
 }
 
-type CargoLockBlock = {
-  name: string;
-  version: string;
+type CargoLockBlock = CargoPackageIdentity & {
   source: string | null;
   start: number;
   end: number;
 };
 
 function cargoLockBlocks(text: string, label: string): CargoLockBlock[] {
-  const starts = [...text.matchAll(/^\[\[package\]\]\s*$/gm)].map((match) => match.index!);
-  if (starts.length === 0) throw new Error(`${label} has no Cargo package entries`);
-  return starts.map((start, index) => {
-    const end = starts[index + 1] ?? text.length;
-    const block = text.slice(start, end);
-    const name = /^name\s*=\s*"([^"]+)"\s*$/m.exec(block)?.[1];
-    const version = /^version\s*=\s*"([^"]+)"\s*$/m.exec(block)?.[1];
-    const source = /^source\s*=\s*"([^"]+)"\s*$/m.exec(block)?.[1] ?? null;
-    if (!name || !version) throw new Error(`${label} has an unparsable package entry`);
-    return { name, version, source, start, end };
+  const document = parseCargoToml(text, label);
+  const packages = isTable(document) ? document.package : undefined;
+  if (!Array.isArray(packages) || packages.length === 0) {
+    throw new Error(`${label} has no Cargo package entries`);
+  }
+  // Locate the original text only for edits that must preserve lockfile formatting.
+  const starts = [...text.matchAll(/^[ \t]*\[\[[ \t]*(?:package|"package"|'package')[ \t]*\]\][ \t]*(?:#[^\r\n]*)?\r?$/gm)]
+    .map((match) => match.index);
+  if (starts.length !== packages.length) {
+    throw new Error(`${label} package entries cannot be located for a version edit`);
+  }
+  return packages.map((entry: unknown, index) => {
+    const identity = readPackageIdentity(entry, `${label} package entry ${index + 1}`);
+    const source = isTable(entry) ? entry.source : undefined;
+    if (source !== undefined && typeof source !== "string") {
+      throw new Error(`${label} package ${identity.name} has an invalid source`);
+    }
+    return { ...identity, source: source ?? null, start: starts[index], end: starts[index + 1] ?? text.length };
   });
 }
+
+const LOCK_VERSION_LINE = /^([ \t]*version[ \t]*=[ \t]*)(["'])([^"']+)\2([ \t]*(?:#[^\r\n]*)?\r?)$/m;
 
 function rewriteLockDependencyVersions(
   block: string,
@@ -183,11 +193,11 @@ export function updateCargoLockText(
           `${label} requires local ${entry.name} at ${sourceVersion}, found ${entry.version}`,
         );
       }
-      const versionLine = new RegExp(`^(version\\s*=\\s*)"${sourceVersion.replaceAll(".", "\\.")}"(\\s*)$`, "m");
-      if (!versionLine.test(block)) {
+      if (LOCK_VERSION_LINE.exec(block)?.[3] !== sourceVersion) {
         throw new Error(`${label} has no version line for ${entry.name}`);
       }
-      block = block.replace(versionLine, `$1"${targetVersion}"$2`);
+      block = block.replace(LOCK_VERSION_LINE, (_line, prefix, quote, _version, suffix) =>
+        `${prefix}${quote}${targetVersion}${quote}${suffix}`);
       block = rewriteLockDependencyVersions(block, crateNames, sourceVersion, targetVersion);
       changedPackages += 1;
     } else if (entry.name.startsWith("poodle-") && entry.source === null) {
@@ -251,8 +261,8 @@ export function assertCargoLockVersionTransition(
       let block = text.slice(entry.start, entry.end);
       if (crateNames.has(entry.name) && entry.source === null) {
         block = block.replace(
-          /^version\s*=\s*"[^"]+"\s*$/m,
-          'version = "<lockstep>"',
+          LOCK_VERSION_LINE,
+          "$1$2<lockstep>$2$4",
         );
         block = block.replace(
           /"(poodle-[A-Za-z0-9_-]+) ([^"]+)"/g,

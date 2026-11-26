@@ -1,13 +1,14 @@
-import { afterAll, describe, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { afterAll, describe, expect, spyOn, test } from "bun:test";
+import fs, { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 
 import {
   LOCKSTEP_CARGO_LOCK_PATHS,
   LOCKSTEP_CARGO_MANIFEST_PATHS,
   LOCKSTEP_JS_MANIFEST_PATHS,
+  assertCargoLockVersionTransition,
   cargoPackageIdentity,
   updateCargoLockText,
 } from "./release-versioning";
@@ -187,12 +188,41 @@ function fixture(): string {
 }
 
 describe("lockstep release version bump", () => {
+  test("reads Cargo package identity from TOML syntax and rejects invalid TOML", () => {
+    const manifest = "[ 'package' ] # identity\n'name' = 'poodle-node'\nversion = '0.4.11'\n";
+    expect(cargoPackageIdentity(manifest, "Cargo.toml")).toEqual({
+      name: "poodle-node",
+      version: SOURCE_VERSION,
+    });
+    expect(() => cargoPackageIdentity(`${manifest}version = "0.4.12"\n`, "Cargo.toml"))
+      .toThrow(/Cargo\.toml has invalid TOML/);
+  });
+
+  test("reads lock package sources and preserves formatting around version edits", () => {
+    const before = [
+      "version = 4",
+      "[[ package ]] # local entry",
+      "name = 'poodle-node'",
+      "version = '0.4.11' # release version",
+      "[[package]]",
+      "name = 'poodle-node'",
+      "version = '0.4.11'",
+      "source = 'registry+https://github.com/rust-lang/crates.io-index'",
+      "",
+    ].join("\r\n");
+    const names = new Set(["poodle-node"]);
+    const after = updateCargoLockText(before, names, SOURCE_VERSION, TARGET_VERSION, "Cargo.lock");
+    expect(after).toBe(before.replace("0.4.11' # release version", "0.4.12' # release version"));
+    expect(() => assertCargoLockVersionTransition(before, after, names, SOURCE_VERSION, TARGET_VERSION, "Cargo.lock"))
+      .not.toThrow();
+  });
+
   test("includes every Rust release package, including the Jetstream theme provider", () => {
     const manifests = releaseManifest.packages
       .filter((entry) => entry.language === "rust")
       .map((entry) => `${entry.path}/Cargo.toml`)
       .sort();
-    expect([...LOCKSTEP_CARGO_MANIFEST_PATHS].sort()).toEqual(manifests);
+    expect(manifests).toEqual([...LOCKSTEP_CARGO_MANIFEST_PATHS].sort());
   });
 
   test("covers every versioned Poodle manifest and local crate in tracked GPUI locks", () => {
@@ -269,5 +299,39 @@ describe("lockstep release version bump", () => {
     const path = join(root, LOCKSTEP_CARGO_MANIFEST_PATHS[0]);
     writeFileSync(path, readFileSync(path, "utf8").replace(SOURCE_VERSION, "0.4.10"));
     expect(() => bumpLockstepVersion(root, TARGET_VERSION)).toThrow(/all Rust and JavaScript release manifests/);
+  });
+
+  test.each(["stage", "publish"])("leaves all version files intact on %s failure", (phase) => {
+    const root = fixture();
+    const paths = [...LOCKSTEP_JS_MANIFEST_PATHS, ...LOCKSTEP_CARGO_MANIFEST_PATHS, ...LOCKSTEP_CARGO_LOCK_PATHS, "bun.lock"]
+      .map((path) => join(root, path));
+    const before = paths.map((path) => readFileSync(path, "utf8"));
+    const lateDestination = join(root, LOCKSTEP_CARGO_LOCK_PATHS[1]);
+    const write = fs.writeFileSync;
+    const rename = fs.renameSync;
+    const failure = new Error(`planted ${phase} failure`);
+    const spy = phase === "stage"
+      ? spyOn(fs, "writeFileSync").mockImplementation((path, data, options) => {
+        if (typeof path === "string" && (
+          path === lateDestination ||
+          (basename(path) === "next" && dirname(dirname(path)) === dirname(lateDestination))
+        )) throw failure;
+        write(path, data, options);
+      })
+      : spyOn(fs, "renameSync").mockImplementation((path, destination) => {
+        if (typeof path === "string" && basename(path) === "next" && destination === lateDestination) {
+          throw failure;
+        }
+        rename(path, destination);
+      });
+    try {
+      expect(() => bumpLockstepVersion(root, TARGET_VERSION)).toThrow(failure.message);
+    } finally {
+      spy.mockRestore();
+    }
+    expect(paths.map((path) => readFileSync(path, "utf8"))).toEqual(before);
+    for (const directory of new Set(paths.map((path) => dirname(path)))) {
+      expect(readdirSync(directory).filter((name) => name.startsWith(".poodle-release-"))).toEqual([]);
+    }
   });
 });

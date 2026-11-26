@@ -60,6 +60,20 @@ describe("validation board repository inventory", () => {
     }
   });
 
+  test("expands every repository task and leaves no Effigy arguments in board commands", () => {
+    for (const name of nodes.keys()) {
+      const { units } = collectUnits(nodes, name, repoRoot, policy);
+      for (const { command, env } of units) {
+        for (const value of [command, ...Object.values(env)]) {
+          expect(value, name).not.toMatch(/(?<!\$)\{[A-Za-z_][\w:-]*\}/);
+        }
+      }
+    }
+    const { units } = collectUnits(nodes, "qa:board", repoRoot, policy);
+    const native = units.find((unit) => unit.name === "regressions:native");
+    expect(native?.command.trimEnd()).toEndWith("--test headless_regressions");
+  });
+
   test("the named specimen hang carries an explicit bound", () => {
     expect(policy.tasks["probe:gpui-specimens"]).toBeLessThanOrEqual(5 * 60 * 1000);
     expect(policy.boardTimeoutMs).toBeLessThanOrEqual(15 * 60 * 1000);
@@ -89,11 +103,13 @@ describe("validation board repository inventory", () => {
 describe("validation board graph", () => {
   test("parses quoted keys, bare keys, string, array and inline-table shapes", () => {
     const nodes = parseTaskGraph(`
+[tasks]
 # comment
 "a:one" = "echo one"
 b = [
   { task = "a:one" },
-  { run = "echo two", env = { FOO = "{repo}/foo" } },
+  { run = 'echo two', env = { FOO = "{repo}/foo" } },
+  "echo three", # String steps are run commands too.
 ]
 "c:three" = { run = "echo three", env = { BAR = "baz" } }
 `);
@@ -105,11 +121,12 @@ b = [
       env: { BAR: "baz" },
     });
     const composite = nodes.get("b");
-    expect(composite?.kind === "composite" && composite.steps.length).toBe(2);
+    expect(composite?.kind === "composite" && composite.steps.length).toBe(3);
   });
 
   test("deduplicates transitive repeats and keeps first-occurrence order", () => {
     const nodes = parseTaskGraph(`
+[tasks]
 "leaf" = "echo leaf"
 "left" = [{ task = "leaf" }, { run = "echo left" }]
 "right" = [{ task = "leaf" }, { run = "echo right" }]
@@ -121,8 +138,43 @@ b = [
     expect(reused).toEqual(["leaf"]);
   });
 
+  test("fails rather than dropping unsupported steps", () => {
+    for (const step of ['{ script = "skip me" }', "42", '{ run = "true", task = "other" }']) {
+      const source = `[tasks]\nboard = [{ run = "true" }, ${step}]\n`;
+      expect(() => parseTaskGraph(source)).toThrow(/board step 2.*run command or a task reference/);
+    }
+  });
+
+  test("rejects unknown placeholders in commands and env, while preserving shell expansions", () => {
+    const shell = 'echo "${USER}" {1..3}';
+    const nodes = parseTaskGraph(`
+[tasks]
+shell = '${shell}'
+command = 'echo {unexpected}'
+environment = { run = 'true', env = { VALUE = '{unexpected}' } }
+`);
+    expect(collectUnits(nodes, "shell", "/repo", bounds()).units[0].command).toBe(shell);
+    for (const task of ["command", "environment"]) {
+      expect(() => collectUnits(nodes, task, "/repo", bounds())).toThrow(/unknown.*\{unexpected\}/);
+    }
+  });
+
+  test("deduplicates inline commands only when their effective environments match", () => {
+    const nodes = parseTaskGraph(`
+[tasks]
+board = [
+  { run = "echo", env = { VALUE = "{repo}", OTHER = "ignored" } },
+  { run = "echo", env = { VALUE = "different", OTHER = "ignored" } },
+  { run = "echo", env = { OTHER = "ignored", VALUE = "/repo" } },
+]
+`);
+    const { units, reused } = collectUnits(nodes, "board", "/repo", bounds());
+    expect(units.map(({ env }) => env.VALUE)).toEqual(["/repo", "different"]);
+    expect(reused).toHaveLength(1);
+  });
+
   test("bounds come from policy per owned unit", () => {
-    const nodes = parseTaskGraph('"slow" = "echo slow"\n"board" = [{ task = "slow" }]\n');
+    const nodes = parseTaskGraph('[tasks]\n"slow" = "echo slow"\n"board" = [{ task = "slow" }]\n');
     const { units } = collectUnits(
       nodes,
       "board",
@@ -134,7 +186,7 @@ b = [
 
   test("keeps every env entry and substitutes {repo}", () => {
     const nodes = parseTaskGraph(
-      '"leaf" = { run = "true", env = { FIRST = "1", SECOND = "{repo}/out" } }\n"board" = [{ task = "leaf" }]\n',
+      '[tasks]\n"leaf" = { run = "true", env = { FIRST = "1", SECOND = "{repo}/out" } }\n"board" = [{ task = "leaf" }]\n',
     );
     const { units } = collectUnits(nodes, "board", "/repo", bounds());
     expect(units[0].env).toEqual({ FIRST: "1", SECOND: "/repo/out" });
@@ -142,6 +194,48 @@ b = [
 });
 
 describe("validation board process lifecycle", () => {
+  test.each([["SIGINT", 130], ["SIGTERM", 143]] as const)(
+    "%s kills the active child's group before exiting the runner",
+    async (signal, expectedExit) => {
+      const root = tempRoot();
+      const pidsPath = join(root, "pids");
+      const tasksPath = join(root, "tasks.toml");
+      const command = `sleep 30 & echo "$$ $!" > "${pidsPath}"; wait`;
+      await Bun.write(tasksPath, `[tasks]\nboard = ${JSON.stringify(command)}\n`);
+      const runner = Bun.spawn(
+        [process.execPath, join(import.meta.dir, "run-board.ts"), "--root", root, "--tasks", tasksPath, "board"],
+        { stdout: "ignore", stderr: "ignore" },
+      );
+      let groupPid: number | undefined;
+      try {
+        const startupDeadline = Date.now() + 8_000;
+        while (!existsSync(pidsPath) && runner.exitCode === null && Date.now() < startupDeadline) {
+          await Bun.sleep(20);
+        }
+        const [shell, descendant] = readFileSync(pidsPath, "utf8").trim().split(" ").map(Number);
+        if (!(shell > 0 && descendant > 0)) throw new Error("fixture did not report both process IDs");
+        groupPid = shell;
+        runner.kill(signal);
+        expect(await runner.exited).toBe(expectedExit);
+        const exitDeadline = Date.now() + 2_000;
+        while (alive(descendant) && Date.now() < exitDeadline) await Bun.sleep(20);
+        expect(alive(descendant)).toBe(false);
+        groupPid = undefined;
+      } finally {
+        if (runner.exitCode === null) runner.kill("SIGKILL");
+        if (groupPid !== undefined) {
+          try {
+            process.kill(-groupPid, "SIGKILL");
+          } catch (error) {
+            if (!(error instanceof Error) || !("code" in error) || error.code !== "ESRCH") throw error;
+          }
+        }
+        await runner.exited;
+      }
+    },
+    12_000,
+  );
+
   test("a planted hang names the child and is killed with its descendants", async () => {
     const root = tempRoot();
     const pidFile = join(root, "hang.pid");
@@ -150,6 +244,7 @@ describe("validation board process lifecycle", () => {
     await Bun.write(
       tasksPath,
       [
+        "[tasks]",
         `"hang" = "sleep 30 & echo $! > ${pidFile}; wait"`,
         `"board" = [{ task = "hang" }]`,
         "",
@@ -196,7 +291,7 @@ describe("validation board process lifecycle", () => {
     const neverReady = join(root, "never.ready");
     const tasksPath = join(root, "tasks.toml");
     const boundsPath = join(root, "bounds.json");
-    await Bun.write(tasksPath, [`"hang" = "sleep 30"`, `"board" = [{ task = "hang" }]`, ""].join("\n"));
+    await Bun.write(tasksPath, ["[tasks]", `"hang" = "sleep 30"`, `"board" = [{ task = "hang" }]`, ""].join("\n"));
     await Bun.write(
       boundsPath,
       JSON.stringify({
@@ -226,7 +321,7 @@ describe("validation board process lifecycle", () => {
   });
 
   test("the board cap stops the run and reports the ceiling", async () => {
-    const nodes = parseTaskGraph('"hang" = "sleep 30"\n"board" = [{ task = "hang" }]\n');
+    const nodes = parseTaskGraph('[tasks]\n"hang" = "sleep 30"\n"board" = [{ task = "hang" }]\n');
     const summary = await runBoard({
       nodes,
       selector: "board",
@@ -242,6 +337,7 @@ describe("validation board process lifecycle", () => {
 
   test("a passing board reports reused work and the slowest leaves", async () => {
     const nodes = parseTaskGraph(`
+[tasks]
 "shared" = "true"
 "board" = [{ task = "shared" }, { run = "true" }, { task = "shared" }]
 `);

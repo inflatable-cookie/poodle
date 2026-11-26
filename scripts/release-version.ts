@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /** Apply the one lockstep web and native version transition. */
 
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import fs, { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
@@ -91,6 +91,46 @@ function makeLockPlanningRoot(
   return root;
 }
 
+function applyChanges(root: string, changes: readonly PlannedChange[]): void {
+  const staged: { destination: string; stage: string }[] = [];
+  const cleanup = new Set<string>();
+  let published = 0;
+  try {
+    // Stage beside each destination so publishing and restoring are same-filesystem renames.
+    for (const { path, after } of changes) {
+      const destination = join(root, path);
+      const stage = mkdtempSync(join(dirname(destination), ".poodle-release-"));
+      cleanup.add(stage);
+      const next = join(stage, "next");
+      fs.writeFileSync(next, after);
+      fs.chmodSync(next, fs.statSync(destination).mode);
+      fs.linkSync(destination, join(stage, "previous"));
+      staged.push({ destination, stage });
+    }
+    for (const { destination, stage } of staged) {
+      fs.renameSync(join(stage, "next"), destination);
+      published += 1;
+    }
+  } catch (error) {
+    const failedRestores: string[] = [];
+    for (const { destination, stage } of staged.slice(0, published).reverse()) {
+      const backup = join(stage, "previous");
+      try {
+        fs.renameSync(backup, destination);
+      } catch {
+        cleanup.delete(stage);
+        failedRestores.push(`${backup} → ${destination}`);
+      }
+    }
+    if (failedRestores.length > 0) {
+      throw new Error(`release bump failed and could not restore: ${failedRestores.join(", ")}`, { cause: error });
+    }
+    throw error;
+  } finally {
+    for (const stage of cleanup) rmSync(stage, { recursive: true, force: true });
+  }
+}
+
 /** Plan and apply a strictly increasing lockstep release version. */
 export function bumpLockstepVersion(root: string, targetVersion: string): string[] {
   if (!/^0\.\d+\.\d+$/.test(targetVersion)) {
@@ -174,11 +214,9 @@ export function bumpLockstepVersion(root: string, targetVersion: string): string
   }
   changes.push({ path: BUN_LOCK_PATH, before: bunLockBefore, after: bunLockAfter });
 
-  for (const { path, after } of changes) writeFileSync(join(root, path), after);
-  return changes
-    .filter(({ before, after }) => before !== after)
-    .map(({ path }) => path)
-    .sort();
+  const changed = changes.filter(({ before, after }) => before !== after);
+  applyChanges(root, changed);
+  return changed.map(({ path }) => path).sort();
 }
 
 if (import.meta.main) {

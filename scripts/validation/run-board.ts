@@ -15,6 +15,7 @@
 // own selectors, rewrite commands, or decide policy.
 
 import { existsSync, readFileSync } from "node:fs";
+import { constants } from "node:os";
 import { join, resolve } from "node:path";
 
 export type Step =
@@ -59,143 +60,58 @@ export type BoardSummary = {
   failure: string | null;
 };
 
-// A task key is either a quoted key at any indentation or a bare key at column
-// zero. Indented bare keys are inline-table fields (`run`, `env`) and must not
-// be mistaken for tasks.
-const TASK_ASSIGNMENT = /^(?:[ \t]*"([A-Za-z0-9:_-]+)"|([A-Za-z0-9:_-]+))[ \t]*=[ \t]*/gm;
-
-function stripComments(text: string): string {
-  // Comments in this manifest always start a line; run commands never carry a
-  // shell comment in the shapes this repo uses.
-  return text
-    .split("\n")
-    .map((line) => (line.trimStart().startsWith("#") ? "" : line))
-    .join("\n");
+function isTable(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-function unescapeTomlString(value: string): string {
-  return value.replace(/\\(["\\])/g, "$1");
-}
-
-function parseStringValue(text: string): string | null {
-  const match = /^\s*"((?:[^"\\]|\\.)*)"/.exec(text);
-  return match ? unescapeTomlString(match[1]) : null;
-}
-
-function extractBracedBlock(text: string, openIndex: number): string | null {
-  if (text[openIndex] !== "{") return null;
-  let depth = 0;
-  let inString = false;
-  for (let index = openIndex; index < text.length; index += 1) {
-    const char = text[index];
-    if (inString) {
-      if (char === "\\") index += 1;
-      else if (char === '"') inString = false;
-      continue;
+function parseStep(value: unknown, label: string): Step {
+  if (typeof value === "string") return { kind: "run", command: value, env: {} };
+  if (isTable(value)) {
+    if (typeof value.task === "string" && !("run" in value)) {
+      return { kind: "task", task: value.task };
     }
-    if (char === '"') {
-      inString = true;
-      continue;
-    }
-    if (char === "{") depth += 1;
-    if (char === "}") {
-      depth -= 1;
-      if (depth === 0) return text.slice(openIndex + 1, index);
+    if (typeof value.run === "string" && !("task" in value)) {
+      const env = value.env;
+      if (env === undefined) return { kind: "run", command: value.run, env: {} };
+      if (!isTable(env)) throw new Error(`${label} env must be a table`);
+      const entries = Object.entries(env).map(([key, entry]) => {
+        if (typeof entry !== "string") throw new Error(`${label} env.${key} must be a string`);
+        return [key, entry];
+      });
+      return { kind: "run", command: value.run, env: Object.fromEntries(entries) };
     }
   }
-  return null;
+  throw new Error(`${label} must declare a run command or a task reference`);
 }
 
-function parseInlineTable(table: string): Step | null {
-  const task = /task\s*=\s*"((?:[^"\\]|\\.)*)"/.exec(table);
-  if (task) return { kind: "task", task: unescapeTomlString(task[1]) };
-  const run = /run\s*=\s*"((?:[^"\\]|\\.)*)"/.exec(table);
-  if (!run) return null;
-  const env: Record<string, string> = {};
-  const envKey = /env\s*=\s*/.exec(table);
-  if (envKey) {
-    const openIndex = envKey.index + envKey[0].length;
-    const block = extractBracedBlock(table, openIndex);
-    if (block !== null) {
-      for (const entry of block.matchAll(/([A-Za-z_][A-Za-z0-9_]*)\s*=\s*"((?:[^"\\]|\\.)*)"/g)) {
-        env[entry[1]] = unescapeTomlString(entry[2]);
-      }
-    }
-  }
-  return { kind: "run", command: unescapeTomlString(run[1]), env };
-}
-
-function splitInlineTables(value: string): string[] {
-  const tables: string[] = [];
-  let depth = 0;
-  let start = -1;
-  let inString = false;
-  for (let index = 0; index < value.length; index += 1) {
-    const char = value[index];
-    if (inString) {
-      if (char === "\\") index += 1;
-      else if (char === '"') inString = false;
-      continue;
-    }
-    if (char === '"') {
-      inString = true;
-      continue;
-    }
-    if (char === "{") {
-      if (depth === 0) start = index + 1;
-      depth += 1;
-      continue;
-    }
-    if (char === "}") {
-      depth -= 1;
-      if (depth === 0 && start !== -1) {
-        tables.push(value.slice(start, index));
-        start = -1;
-      }
-    }
-  }
-  return tables;
-}
-
-/** Parse the flat `tasks/effigy.tasks.toml` shape into task nodes. */
+/** Parse the Effigy task catalog into task nodes. */
 export function parseTaskGraph(source: string): Map<string, TaskNode> {
-  const text = stripComments(source);
-  const matches = [...text.matchAll(TASK_ASSIGNMENT)];
+  const manifest: unknown = Bun.TOML.parse(source);
+  if (!isTable(manifest) || !isTable(manifest.tasks)) {
+    throw new Error("validation board manifest must declare a [tasks] table");
+  }
   const nodes = new Map<string, TaskNode>();
-  for (let index = 0; index < matches.length; index += 1) {
-    const match = matches[index];
-    const name = match[1] ?? match[2];
-    const start = (match.index ?? 0) + match[0].length;
-    const end = index + 1 < matches.length ? matches[index + 1].index ?? text.length : text.length;
-    const value = text.slice(start, end).trim();
-    if (value.startsWith("[")) {
-      const steps: Step[] = [];
-      for (const table of splitInlineTables(value)) {
-        const step = parseInlineTable(table);
-        if (step) steps.push(step);
-      }
+  for (const [name, value] of Object.entries(manifest.tasks)) {
+    const label = `validation board task ${name}`;
+    if (Array.isArray(value)) {
+      const steps = value.map((step, index) => parseStep(step, `${label} step ${index + 1}`));
       nodes.set(name, { name, kind: "composite", steps });
       continue;
     }
-    if (value.startsWith("{")) {
-      const step = parseInlineTable(value.replace(/\n/g, " "));
-      if (!step) continue;
-      if (step.kind === "task") {
-        nodes.set(name, { name, kind: "composite", steps: [step] });
-      } else {
-        nodes.set(name, { name, kind: "command", command: step.command, env: step.env });
-      }
-      continue;
-    }
-    const command = parseStringValue(value);
-    if (command === null) continue;
-    nodes.set(name, { name, kind: "command", command, env: {} });
+    const step = parseStep(value, label);
+    if (step.kind === "task") nodes.set(name, { name, kind: "composite", steps: [step] });
+    else nodes.set(name, { name, kind: "command", command: step.command, env: step.env });
   }
   return nodes;
 }
 
 function substitute(value: string, root: string): string {
-  return value.replaceAll("{repo}", root);
+  // Shell parameter expansions (${NAME}) belong to bash.
+  return value.replace(/(?<!\$)\{([A-Za-z_][\w:-]*)\}/g, (placeholder, name: string) => {
+    if (name === "repo") return root;
+    if (name === "args") return "";
+    throw new Error(`unknown validation board placeholder ${placeholder} in ${JSON.stringify(value)}`);
+  });
 }
 
 /**
@@ -255,16 +171,18 @@ export function collectUnits(
         visit(step.task);
         continue;
       }
+      const command = substitute(step.command, root);
+      const env = substituteEnv(step.env);
       emit(
         {
           label: `${name}::${step.command}`,
           name: null,
-          command: substitute(step.command, root),
-          env: substituteEnv(step.env),
+          command,
+          env,
           timeoutMs: bounds.childTimeoutMs,
           readyFile: null,
         },
-        `run:${step.command}`,
+        JSON.stringify([command, Object.entries(env).sort()]),
         seenCommands,
       );
     }
@@ -324,45 +242,56 @@ async function runUnit(
       child.kill("SIGKILL");
     }
   };
-  // A unit that declares `readyFile` does not arm its child bound until that
-  // file appears. On a loaded host a login `bash` can still be starting when a
-  // short bound fires, so the bound would time process start rather than the
-  // work: run-board.test.ts's planted hang hit exactly that at 1500ms. Readiness
-  // is itself bounded by the remaining board budget, so a task that never
-  // signals is still killed and named.
-  if (unit.readyFile !== null) {
-    const deadline = Date.now() + remainingBoardMs;
-    while (child.exitCode === null && !existsSync(unit.readyFile) && Date.now() < deadline) {
-      await new Promise((resolve) => setTimeout(resolve, 20));
-    }
-    if (!existsSync(unit.readyFile)) {
-      const ownExit = child.exitCode;
-      killGroup();
-      const killedExit = await child.exited;
-      if (ownExit !== null && ownExit !== 0) {
-        log(`  ✘ ${unit.label} failed with exit ${ownExit} before readiness`);
-        return { status: "failed", exitCode: ownExit };
-      }
-      log(`  ✘ ${unit.label} killed before it signalled readiness (${unit.readyFile})`);
-      return { status: "timeout", exitCode: killedExit };
-    }
-  }
-  let timedOut = false;
-  const timer = setTimeout(() => {
-    timedOut = true;
+  const interrupt = (signal: NodeJS.Signals) => {
     killGroup();
-  }, timeoutMs);
-  const exitCode = await child.exited;
-  clearTimeout(timer);
-  if (timedOut) {
-    log(`  ✘ ${unit.label} killed after ${formatDuration(timeoutMs)} (child bound)`);
-    return { status: "timeout", exitCode };
+    process.exit(128 + constants.signals[signal]);
+  };
+  process.once("SIGINT", interrupt);
+  process.once("SIGTERM", interrupt);
+  try {
+    // A unit that declares `readyFile` does not arm its child bound until that
+    // file appears. On a loaded host a login `bash` can still be starting when a
+    // short bound fires, so the bound would time process start rather than the
+    // work: run-board.test.ts's planted hang hit exactly that at 1500ms. Readiness
+    // is itself bounded by the remaining board budget, so a task that never
+    // signals is still killed and named.
+    if (unit.readyFile !== null) {
+      const deadline = Date.now() + remainingBoardMs;
+      while (child.exitCode === null && !existsSync(unit.readyFile) && Date.now() < deadline) {
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+      if (!existsSync(unit.readyFile)) {
+        const ownExit = child.exitCode;
+        killGroup();
+        const killedExit = await child.exited;
+        if (ownExit !== null && ownExit !== 0) {
+          log(`  ✘ ${unit.label} failed with exit ${ownExit} before readiness`);
+          return { status: "failed", exitCode: ownExit };
+        }
+        log(`  ✘ ${unit.label} killed before it signalled readiness (${unit.readyFile})`);
+        return { status: "timeout", exitCode: killedExit };
+      }
+    }
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      killGroup();
+    }, timeoutMs);
+    const exitCode = await child.exited;
+    clearTimeout(timer);
+    if (timedOut) {
+      log(`  ✘ ${unit.label} killed after ${formatDuration(timeoutMs)} (child bound)`);
+      return { status: "timeout", exitCode };
+    }
+    if (exitCode !== 0) {
+      log(`  ✘ ${unit.label} failed with exit ${exitCode}`);
+      return { status: "failed", exitCode };
+    }
+    return { status: "ok", exitCode };
+  } finally {
+    process.off("SIGINT", interrupt);
+    process.off("SIGTERM", interrupt);
   }
-  if (exitCode !== 0) {
-    log(`  ✘ ${unit.label} failed with exit ${exitCode}`);
-    return { status: "failed", exitCode };
-  }
-  return { status: "ok", exitCode };
 }
 
 export async function runBoard(args: {
