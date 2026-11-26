@@ -1,0 +1,10 @@
+{
+  "themes": [
+    "eclipse",
+    "clay"
+  ],
+  "compared": 50,
+  "identical": 50,
+  "different": [],
+  "method": "Byte comparison of paired Chromium specimen captures from production builds; screenshots taken after font readiness and rendering settle."
+}

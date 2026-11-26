@@ -25,9 +25,9 @@
     justify-content: center;
     min-height: var(--poodle-file-upload-dropzone-min-height);
     padding: var(--poodle-file-upload-dropzone-padding-y) var(--poodle-file-upload-dropzone-padding-x);
-    border: 0.125rem dashed var(--poodle-color-border-default, #444);
+    border: 0.125rem dashed var(--poodle-style-control-border, var(--poodle-color-border-default, #444));
     border-radius: var(--poodle-radius-surface, 0.5rem);
-    background: var(--poodle-recipe-file-upload-dropzone-fill, transparent);
+    background: var(--poodle-recipe-file-upload-dropzone-fill, var(--poodle-style-control-fill, transparent));
     cursor: pointer;
     transition: border-color 0.15s, background 0.15s;
   }
@@ -35,7 +35,7 @@
   .poodle-file-upload__dropzone:hover,
   .poodle-file-upload__dropzone:focus-visible {
     border-color: var(--poodle-recipe-file-upload-hover-focus-dropzone-border, var(--poodle-color-border-focus, #888));
-    background: var(--poodle-recipe-file-upload-hover-focus-dropzone-fill, color-mix(in srgb, var(--poodle-color-background-panel, #1a1a1a) 50%, transparent));
+    background: var(--poodle-recipe-file-upload-hover-focus-dropzone-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-panel, #1a1a1a) 50%, transparent)));
     outline: none;
   }
 
@@ -105,7 +105,7 @@
     gap: 0.75rem;
     padding: var(--poodle-file-upload-item-padding);
     border-radius: var(--poodle-radius-surface, 0.5rem);
-    background: var(--poodle-recipe-file-upload-item-fill, var(--poodle-color-background-panel, #1a1a1a));
+    background: var(--poodle-recipe-file-upload-item-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-panel, #1a1a1a)));
   }
 
   .poodle-file-upload__item--error {
@@ -173,14 +173,14 @@
     padding: 0;
     border: none;
     border-radius: 999px;
-    background: var(--poodle-recipe-file-upload-remove-fill, transparent);
+    background: var(--poodle-recipe-file-upload-remove-fill, var(--poodle-style-control-fill, transparent));
     color: var(--poodle-recipe-file-upload-remove-text, var(--poodle-color-text-secondary, #999));
     cursor: pointer;
   }
 
   .poodle-file-upload__remove:hover,
   .poodle-file-upload__remove:focus-visible {
-    background: var(--poodle-recipe-file-upload-hover-focus-remove-fill, color-mix(in srgb, var(--poodle-color-background-surface, #111) 82%, transparent));
+    background: var(--poodle-recipe-file-upload-hover-focus-remove-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface, #111) 82%, transparent)));
     color: var(--poodle-recipe-file-upload-hover-focus-remove-text, var(--poodle-color-text-primary, #f5f5f5));
     outline: none;
   }
