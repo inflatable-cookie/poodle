@@ -391,14 +391,16 @@ function availabilityView(
       };
     case "unavailableForTarget":
       // Information, not an offer: the release exists for the channel but has
-      // no artifact for this system. Nothing to install, nothing to check.
+      // no artifact for this system. Nothing to install, nothing to check, so
+      // no notice either: a retryable rejection or deferral would otherwise
+      // hand the user a check or install action this state must not offer.
       return {
         state: "unavailableForTarget",
         tone: "info",
         title: "No update for this system",
         body: `Version ${availability.version} is not built for this system.`,
         progress: null,
-        notice,
+        notice: null,
         busy: false,
         actions: [],
       };

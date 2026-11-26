@@ -145,7 +145,7 @@ expect the trigger) passes in Svelte and fails in React.
 | State | Title | Body | Actions |
 |-------|-------|------|---------|
 | `offer` | `Version {version} is available` | notes, when present | install, defer |
-| `unavailableForTarget` | `No update for this system` | `Version {version} is not built for this system.` | none |
+| `unavailableForTarget` | `No update for this system` | `Version {version} is not built for this system.` | none; no notice either, even after a retryable rejection |
 | `upToDate` | `You're up to date` | `Version {installed} · {channel} channel`, when known | none |
 | `aheadOfChannel` | `You're ahead of your channel` | `Installed {installed} · channel {channel}` | none |
 | `withheldByRollout` | `Version {version} exists` | `Not staged to you yet.` | none |

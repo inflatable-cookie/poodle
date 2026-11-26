@@ -470,14 +470,16 @@ fn availability_view(
             busy: false,
             actions: vec![UpdateStatusAction::Install, UpdateStatusAction::Defer],
         },
-        // Information, not an offer: nothing to install, nothing to check.
+        // Information, not an offer: nothing to install, nothing to check, so
+        // no notice either (a retryable rejection would otherwise offer a
+        // check or install action this state must not offer).
         UpdateAvailabilityProjection::UnavailableForTarget { version } => UpdateStatusView {
             state: UpdateStatusViewState::UnavailableForTarget,
             tone: UpdateStatusTone::Info,
             title: "No update for this system".to_string(),
             body: Some(format!("Version {version} is not built for this system.")),
             progress: None,
-            notice,
+            notice: None,
             busy: false,
             actions: Vec::new(),
         },

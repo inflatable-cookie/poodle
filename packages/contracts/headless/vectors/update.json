@@ -31,6 +31,22 @@
       }
     },
     {
+      "id": "unavailable-for-target-with-retryable-rejection",
+      "input": {
+        "status": { "kind": "ready" },
+        "availability": { "state": "unavailableForTarget", "version": "1.4.0" },
+        "lastRejection": "unreachable"
+      },
+      "expect": {
+        "state": "unavailableForTarget",
+        "tone": "info",
+        "title": "No update for this system",
+        "body": "Version 1.4.0 is not built for this system.",
+        "actions": [],
+        "notice": null
+      }
+    },
+    {
       "id": "invalid-artifact-with-detail",
       "input": {
         "status": { "kind": "ready" },
