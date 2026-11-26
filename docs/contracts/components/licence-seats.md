@@ -1,6 +1,6 @@
 # LicenceSeats
 
-Status: approved web reference; active native/conformance pending g14.017
+Status: approved web reference; native/conformance work pending
 Updated: 2026-08-14
 
 ## 1. Purpose
@@ -126,7 +126,7 @@ resulting seat refresh.
 ## 8. Framework And Runtime Parity
 
 Svelte and React share types, row derivation, copy, CSS, and cases. The web
-reference is incomplete until g14.017 adds native composition and full
+reference is incomplete until it adds native composition and full
 active-cohort conformance. Jetstream remains a separate deferred backend
 admission.
 
@@ -147,11 +147,11 @@ admission.
 
 | Delta | Status | Follow-up |
 | --- | --- | --- |
-| no native implementation in web-reference PR | incomplete, not accepted parity | g14.017 |
+| no native implementation in web-reference PR | incomplete, not accepted parity | — |
 
-## 11. Rust Binding Notes (g15.007)
+## 11. Rust Binding Notes
 
-Status: **bound** — native implementation lands with `g15.007` (specs,
+Status: **bound** — native implementation lands with the Rust binding work (specs,
 `poodle-render`, GPUI specimen, headless evidence).
 
 - `LicenceSeatsSpec` is cloneable data: authority seats, pending machine id,

@@ -168,6 +168,6 @@ loading components and shows the effective value plus scheduled-clock receipt.
 ## 14. Approval And Adoption Notes
 
 - contract status: promoted from the operator-approved PR #121 packet
-- first adopter: `g16.034` five-family motion pilot
+- first adopter: five-family motion pilot
 - downstream icon morphing and shimmer decisions consume this policy only after
   the pilot lands

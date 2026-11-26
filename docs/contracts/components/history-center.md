@@ -251,7 +251,7 @@ The three continuation operations (`loadContinuations`,
 callbacks and leave as effects (ruling R2) — Poodle cannot call the host's
 controller, so the host wires the callbacks to it, exactly like `MessageCenter`.
 
-**Stale levels (R2, g13-034).** An open level caches `continuations`, `pick`,
+**Stale levels (R2).** An open level caches `continuations`, `pick`,
 `chosen` and `runPages` from when it loaded. When the host navigates into the
 fork — the new root pages already contain the run — that cache is stale: the
 derivation never splices a run that duplicates a spine entry, and the level
@@ -274,7 +274,7 @@ derivation. The re-requested data lands through the ordinary
 | Field | Type | Initial | Controllable | Meaning |
 |-------|------|---------|--------------|---------|
 | `pages` | `HistoryPathPage[] \| null` | `null` | no (host-supplied) | Root path pages in fetch order (newest page first). `null` disables the list: the machine has no rows and every row event is inert. |
-| `open` | `Map<string, HistoryCenterOpenFork> \| null` | `null` | no (machine-owned) | The disclosure tree: open forks keyed by anchor entry id, with `inner` levels for forks open inside runs. Holds only what is open (R5); dropped on close — nothing is cached across a close/reopen and pages are not cached or refreshed. A level whose shown fork's run is now on the root spine is **stale**: it keeps its anchor open, drops its loaded data and re-requests its continuations (R2, g13-034). |
+| `open` | `Map<string, HistoryCenterOpenFork> \| null` | `null` | no (machine-owned) | The disclosure tree: open forks keyed by anchor entry id, with `inner` levels for forks open inside runs. Holds only what is open (R5); dropped on close — nothing is cached across a close/reopen and pages are not cached or refreshed. A level whose shown fork's run is now on the root spine is **stale**: it keeps its anchor open, drops its loaded data and re-requests its continuations (R2). |
 | `focusRow` | `HistoryCenterRowId \| null` | `null` | no | Roving focus identity over the visible rows. |
 | `rejection` | `string \| null` | `null` | no | Currently displayed rejection message. |
 
@@ -341,13 +341,13 @@ with a fork off a fork, at any depth, with no cap):
   the open entry's `forkCount >= 1`, whatever `chosen` holds — the current
   selection stays visible and a second fork is one interaction away, never a
   close-and-reopen. `disabled` is true when `forkCount <= 1` and **governs
-  the `Select` alone** (R1, g13-034): with one fork there is nothing to
+  the `Select` alone** (R1): with one fork there is nothing to
   choose between, while the auto-chosen single fork still counts as picked
   for the actions menu — the menu never inherits the row's `disabled`.
   Picker rows never navigate.
 - `{ kind: "not-yet-loaded"; anchorEntryId; depth; parentEntryId; forkId; branchId }`
   — an open entry whose run has not arrived. Never an empty gap, never a
-  dropped entry. It is also the row a **stale** level renders (R2, g13-034):
+  dropped entry. It is also the row a **stale** level renders (R2):
   a level whose shown fork's first entry now sits on the root spine never
   splices its cached run — that would duplicate spine entries — and shows
   the not-yet-loaded row until the machine drops the level's data and
@@ -397,7 +397,7 @@ identity.
 | open | `DISCLOSE` | entry visible with `forkCount >= 1` | open | closed fork at the entry opens: add its level, `loadContinuations(entryId)`; open fork closes: drop its subtree (R5), clamp focus |
 | open | `CONTINUATIONS_LOADED` | entry open | open | store continuations; a single fork (`forkCount === 1`) auto-chooses it and emits `loadContinuationRun(fromEntryId)`; more than one fork selects the current one — `preferred`, else first in supplied order (R3) — and emits `loadContinuationRun` for it |
 | open | `PICK_CONTINUATION` | fork offered by a picker | open | set the tentative pick (one at a time); when the loaded run belongs to another fork, drop it and emit `loadContinuationRun(fromEntryId)` — the pick previews (R2) and emits no host operation |
-| open | `CONFIRM` | displayed fork set (pick, else the auto-chosen single fork — it counts as picked, R1 g13-034) | open | `checkoutContinuation(entryId)` — the picker's commit (R2): the selected fork becomes primary. Poodle does not build the new root: it clears the disclosure state for the anchor and renders whatever root pages the host supplies afterwards |
+| open | `CONFIRM` | displayed fork set (pick, else the auto-chosen single fork — it counts as picked, R1) | open | `checkoutContinuation(entryId)` — the picker's commit (R2): the selected fork becomes primary. Poodle does not build the new root: it clears the disclosure state for the anchor and renders whatever root pages the host supplies afterwards |
 | open | `RUN_LOADED` | level's displayed fork (pick, else chosen) is `fromEntryId` | open | append run pages (fetch order); the run renders through the same join |
 | any | `RENAME` | — | stay | `emitRenameBranch(branchId, name)` |
 | any | `SHOW_REJECTION` | mapped message differs from displayed | stay | set `rejection` |
@@ -415,7 +415,7 @@ always reports the entry actually clicked — the clicked row carries its own
 can never be reported.
 
 Every open-state transition except `CLOSE` and a closing `TOGGLE` reconciles
-stale levels first (R2, g13-034 — see above): the stale level's
+stale levels first (R2 — see above): the stale level's
 `loadContinuations` leaves before the event's own effects, and the event then
 runs against the reconciled tree.
 
@@ -512,8 +512,8 @@ the surface applies `trapFocusKeydown` while open.
 | fork disclosure | `data-part` / `data-open` / `aria-expanded` / `aria-label` | `fork-disclosure` / `true` when open / open state / `Show\|Hide N continuation(s)` — rendered only when `forkCount > 0` |
 | fork badge | `data-part` | `fork-badge` — rendered only when `forkCount > 1`, reads `forkCount` |
 | picker | `data-part` / `data-anchor` / roving tabindex | `picker` / the anchor entry id — rendered whenever the open entry's `forkCount >= 1`, persisting across a choice (R1) |
-| picker select | `data-part` (wrapper) | `picker-select` — Poodle's `Select`, its value the tentative pick, options the forks; `PICK_CONTINUATION` on change. The trigger and the option rows carry the fork label and its branch name. Disabled from the row's `disabled` signal alone (`forkCount <= 1` — nothing to choose between; R1, g13-034). Replaced by the rename input while a rename is open (R3) |
-| picker actions | `data-part` (wrapper) | `picker-actions` — an ellipsis `Menu` after the `Select`, holding `Rename`, `Checkout` and `Delete`. Every item acts on whichever fork the `Select` currently shows. `Delete` appears only when the host supplies its callback. `Checkout` is disabled when no fork is picked, when the picked fork is already the current one, or while a rename is open — it never inherits the row's `disabled` signal, so the auto-chosen single fork still counts as picked (R1, g13-034). Focus returns to the menu trigger after a rename commits or cancels. |
+| picker select | `data-part` (wrapper) | `picker-select` — Poodle's `Select`, its value the tentative pick, options the forks; `PICK_CONTINUATION` on change. The trigger and the option rows carry the fork label and its branch name. Disabled from the row's `disabled` signal alone (`forkCount <= 1` — nothing to choose between; R1). Replaced by the rename input while a rename is open (R3) |
+| picker actions | `data-part` (wrapper) | `picker-actions` — an ellipsis `Menu` after the `Select`, holding `Rename`, `Checkout` and `Delete`. Every item acts on whichever fork the `Select` currently shows. `Delete` appears only when the host supplies its callback. `Checkout` is disabled when no fork is picked, when the picked fork is already the current one, or while a rename is open — it never inherits the row's `disabled` signal, so the auto-chosen single fork still counts as picked (R1). Focus returns to the menu trigger after a rename commits or cancels. |
 | picker rename input | `data-part` | `picker-rename-input` — the inline input that takes the `Select`'s place while a rename is open, seeded with the selected fork's current name (R3) |
 | not-yet-loaded | `data-part` / `data-anchor` / roving tabindex | `not-yet-loaded` / the anchor entry id |
 | rejection | `data-part` / `role` | `rejection` / `status` |
@@ -538,7 +538,7 @@ composed `Popover`), `createInstanceId` for surface ids.
 | `onOpenChange` | open state actually changes | `boolean` | Never emitted speculatively. |
 | `onNavigateEntry` | entry row activation (pointer or keyboard) | `branchId`, `entryId` | Always the entry actually clicked, on the branch that owns its run — never an ancestor or another branch's divergence entry. `branchId` is `null` on the spine. Picker and not-yet-loaded rows never fire it. Replaces v1's `onSelectEntry`/`onCheckout` (ruling D1). |
 | `onRenameBranch` | rename input commit (Enter or blur) in the opened region or the picker | `branchId`, `name` | In the picker, `branchId` is the fork the `Select` currently shows (R1) — never the anchor's own branch or the preferred fork. Escape cancels without emitting. |
-| `onLoadContinuations` | fork disclosure opens an entry with `forkCount >= 1`; an open level becomes stale — its shown fork's run now sits on the root spine, so the machine re-requests the continuations (R2, g13-034) | `entryId` | Host op 1: the host loads the continuations at the anchor and feeds the result back as `continuationsResult`. |
+| `onLoadContinuations` | fork disclosure opens an entry with `forkCount >= 1`; an open level becomes stale — its shown fork's run now sits on the root spine, so the machine re-requests the continuations (R2) | `entryId` | Host op 1: the host loads the continuations at the anchor and feeds the result back as `continuationsResult`. |
 | `onLoadContinuationRun` | a single fork is auto-chosen (R3), or a fork is selected in the picker whose run is not loaded (R2) | `fromEntryId` | Host op 2: the host loads the run starting at the fork's first entry and feeds the result back as `runResult`. |
 | `onDeleteContinuation` | the operator confirms the delete dialog | `entryId` | Host op 4: delete the fork the `Select` shows. Emitted once, on confirmation only — picking the menu item emits nothing. Cancelling or dismissing the dialog emits nothing at all. |
 | `onCheckoutContinuation` | the picker's checkout is confirmed on a fork that is not the current one | `entryId` | Host op 3: checkout the picked fork — it becomes the primary history. The host maps the callback onto its own prefer operation (R2a). Emitted alone (the run was previewed by the pick, R2) and never with navigation. The document does not move forward: Poodle clears the anchor's disclosure state and renders whatever root pages the host supplies afterwards. |
@@ -617,7 +617,7 @@ region (R6) and the picker (R1) — one event, both sites.
   archive list itself is not a live region.
 - GPUI maps the same list, list-item, hierarchy, focus, selection, and command
   semantics through the shared `poodle-render::history_center` composition.
-  The g14.007 corpus executes those mappings on the headless GPUI test
+  The conformance corpus executes those mappings on the headless GPUI test
   platform alongside Svelte and React.
 
 ## 7. Layout
@@ -679,8 +679,7 @@ Semantic roles by default; recipes are the override surface (architecture
 
 The v2 lane hooks (`lane-color`, `lane-thickness`), the caption-row hooks and
 the branch-current-badge hooks are retired with the v2 renderer; the fork
-badge takes over the badge role (R3, picker). The `current-badge` hooks from
-g13-030 are retired with the badge itself (R4a): `preferred` stays on the
+badge takes over the badge role (R3, picker). The `current-badge` hooks are retired with the badge itself (R4a): `preferred` stays on the
 record and keeps its job — checkout is disabled when the selected fork is
 already the current one. Metric variables (widths, gaps, padding, the depth
 inset step, font sizes) are internal and not part of the recipe contract.
@@ -704,7 +703,7 @@ inset step, font sizes) are internal and not part of the recipe contract.
 
 ## 10. GPUI Notes
 
-- GPUI parity landed in g14.007. `poodle-headless::history_center` owns the
+- GPUI parity landed. `poodle-headless::history_center` owns the
   portable visible-row derivation and interaction machine;
   `poodle-render::history_center` owns the shared node composition. GPUI binds
   that tree to its backend rather than reimplementing the component.
@@ -752,13 +751,13 @@ inset step, font sizes) are internal and not part of the recipe contract.
 | Rejection dismissal is component-local | The fixed surface has no rejection-dismiss callback; the notice is transient inline UI | this contract | revisit if hosts need dismissal control |
 | No virtualisation | Out of scope: paging plus a bounded scrolling list is the shared implementation; virtualisation would add a second rendering policy | card scope | revisit only with measured need across runtimes |
 | Jetstream execution | Jetstream is outside the active cohort; GPUI already executes the shared Rust composition | working-rules deferral | resume in the dedicated Jetstream parity lane |
-| `continuationsResult` / `runResult` are web-shell props | The portable claim is that the host answers `onLoadContinuations` / `onLoadContinuationRun` and the answer reaches the picker — asserted on Svelte and React by `HistoryCenter.test.ts` / `.tsx`, and on the shared renderer by `poodle-render`'s `history_center` tests. (The g14.007 conformance corpus originally carried this claim; `g14.021` moved it.) How the answer arrives is shell mechanism: the web shells take a reference-diffed prop because that suits data-down flow, while a native host holds the fork tree in its own state and hands the renderer a resolved view. Same boundary as TextInput's DOM vs GPUI editing paths. | g14.007 | none; revisit if a portable result-feed shape is ever needed |
+| `continuationsResult` / `runResult` are web-shell props | The portable claim is that the host answers `onLoadContinuations` / `onLoadContinuationRun` and the answer reaches the picker — asserted on Svelte and React by `HistoryCenter.test.ts` / `.tsx`, and on the shared renderer by `poodle-render`'s `history_center` tests. (The conformance corpus originally carried this claim; a later change moved it.) How the answer arrives is shell mechanism: the web shells take a reference-diffed prop because that suits data-down flow, while a native host holds the fork tree in its own state and hands the renderer a resolved view. Same boundary as TextInput's DOM vs GPUI editing paths. | — | none; revisit if a portable result-feed shape is ever needed |
 
 ## 13. Approval And Adoption Notes
 
 - contract status: `implemented` (Svelte + React + shared Rust/GPUI;
   Jetstream program-deferred)
-- approvers: Poodle core (cards `019`, `028`–`034`, g14.007, g16.033)
+- approvers: Poodle core (cards `019`, `028`–`034`)
 - downstream adopters: Longhorn bridge (session → props mapping), consumer
   hosts that own undo/redo semantics
 - future follow-up: Jetstream execution when the deferred runtime lane resumes

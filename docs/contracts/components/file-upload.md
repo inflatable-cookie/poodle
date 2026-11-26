@@ -523,7 +523,7 @@ interface ImageCompressionOptions {
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| native file dialog appearance varies by platform | OS-native dialog | allowed | accept filter applied post-selection with honest rejection (g15.007) |
+| native file dialog appearance varies by platform | OS-native dialog | allowed | accept filter applied post-selection with honest rejection |
 | image preview mechanism differs (blob URL vs native image loading) | platform API differences | allowed | preview must display and be revocable |
 | drag-and-drop visual feedback may differ slightly in GPUI | platform DnD API differences | allowed | must indicate active drop target state |
 
@@ -556,10 +556,9 @@ interface ImageCompressionOptions {
 - future follow-up: chunked upload support, drag reordering of file list,
   camera capture integration
 
-## 15. Rust Binding Notes (g15.007)
+## 15. Rust Binding Notes
 
-Status: **bound** — generic single-file selection/read lands with `g15.007`
-Batch A.
+Status: **bound** — generic single-file selection/read lands with the Rust binding work.
 
 - The dropzone/browse affordance wires a generic browse intent:
   `FileUploadHandlers.on_browse` fires on dropzone activation; the OS dialog,

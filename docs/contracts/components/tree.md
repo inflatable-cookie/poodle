@@ -265,7 +265,7 @@ is no transient async or open/close machine.
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: adapter-owned interaction (long-tail sweep)
 
 Keyboard tree navigation (expand/collapse, roving). Extraction debt: tree-navigation machine (largest remaining gap).
 
@@ -320,11 +320,10 @@ helpers `visible_rows` / `next_visible` / `prev_visible` / `parent_of`.
 - focus entry: the first selected item, else the first item
 - focus exit: native; roving tabindex preserves the last focused item
 - live-region or announcement behavior: none; state is conveyed by ARIA on items
-- GPUI-native accessibility mapping notes: **not exposed yet.** GPUI 1.22.0
-  provides AccessKit, but Poodle's backend does not yet map role, level,
-  selected, or checked metadata into it. The GPUI Tree currently conveys state
-  visually only; task #127 owns that mapping and platform-tree proof. Svelte
-  emits the full ARIA tree.
+- GPUI-native accessibility mapping notes: partial. The GPUI node backend
+  projects direct roles, names, states and values through AccessKit. Tree
+  structure (`aria-level`, group nesting) has no live platform-tree assertion
+  yet, so the component keeps its A2 hold. Svelte emits the full ARIA tree.
 
 ### The Twisty Gutter On A Flat Tree
 
@@ -649,7 +648,7 @@ None.
   host's `drag_value` / `drop_target_value` stay latched after a cancelled
   drag; adding one is a public API decision that card owns.
 - chevron uses `▸` / `▾` glyphs; guides are left-bordered indent cells
-- known GPUI-native deltas: no accessibility (runtime limit, §6 + Known Deltas);
+- known GPUI-native deltas: tree structure is not yet proven on the platform tree (§6 + Known Deltas);
   no virtual scrolling; transition timing is platform-owned. The paired web
   `reorderAuthority` is not projected onto native: local Node commits are
   synchronous, intent presentation does not carry a rewritten destination,
@@ -704,11 +703,11 @@ None.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream has no `onActivate` | activation is a double-click or Enter on the web; the runtime reports single clicks with no click count, and raises no key events | accepted, tracked | g12.017 |
-| Jetstream has no rename, reorder or context-menu events | inline rename needs a text field and key handling, reorder needs drag, and the context menu needs a right-click — none of which this target raises yet | accepted, tracked | g12.017 |
+| Jetstream has no `onActivate` | activation is a double-click or Enter on the web; the runtime reports single clicks with no click count, and raises no key events | accepted, tracked | — |
+| Jetstream has no rename, reorder or context-menu events | inline rename needs a text field and key handling, reorder needs drag, and the context menu needs a right-click — none of which this target raises yet | accepted, tracked | — |
 | Jetstream has no `onLoadChildren` | lazy loading is driven by expansion, which the host already hears through `on_toggle_expand` | accepted (by design) | none |
-| GPUI accessibility is not mapped | GPUI 1.22.0 exposes AccessKit, but Poodle's backend does not yet project its node metadata | accepted (forced) | task #127: map and prove the platform tree |
-| Jetstream exposes no ARIA | immediate-mode runtime has no a11y tree | accepted (forced) | — |
+| GPUI tree structure is not proven on the platform tree | GPUI projects direct roles, names and states through AccessKit; no live assertion covers levels or groups | accepted (A2 hold) | add a named fixture to the GPUI live proof |
+| Jetstream per-item tree roles | the component root projects through AccessKit; per-item `treeitem` roles are not attached yet | accepted (A2 hold) | attach roles inside the component |
 | Virtual scroll is Svelte-only | GPUI/Jetstream have no row-windowing primitive; they render all visible rows | accepted | revisit if a Rust runtime gains windowing |
 | Rust interaction is host-driven | GPUI is stateless + driven by the owning view; Jetstream renders from spec with the app loop owning state/events | accepted | inherent to the runtimes |
 | Selected inset ring is Svelte-only | A layout-affecting border would jitter rows in the immediate/retained runtimes | accepted | — |

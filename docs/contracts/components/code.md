@@ -106,7 +106,7 @@ Updated: 2026-09-30
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: adapter-owned interaction (long-tail sweep)
 
 Copy-feedback timer only; otherwise presentational. Timer stays adapter-side.
 

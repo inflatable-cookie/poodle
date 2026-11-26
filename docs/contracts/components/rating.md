@@ -328,7 +328,7 @@ Rendering style roles (poodle#186): items read `--poodle-style-control-fill` at 
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream has no half-star precision by click | a click reports the star it lands on; sub-star precision needs pointer position within the glyph | accepted, tracked | g12.017 |
+| Jetstream has no half-star precision by click | a click reports the star it lands on; sub-star precision needs pointer position within the glyph | accepted, tracked | — |
 | glyph style may differ | shape rendering is implementation-specific | allowed | keep ordinal meaning strict |
 | `color-mix` implementation | GPUI may pre-compute blended colors | allowed | ensure visual equivalence across themes |
 

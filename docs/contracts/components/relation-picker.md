@@ -200,7 +200,7 @@ Internal drill-down state includes: `drillDepth`, `drillSelections` (map of leve
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: adapter-owned interaction (long-tail sweep)
 
 Composite over PickerShell; owns query/selection plumbing. Behavior belongs to composed primitives; classify with them.
 

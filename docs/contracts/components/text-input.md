@@ -676,7 +676,7 @@ The input control reserves inline padding for leading/trailing adornments so tex
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream raises no typing or key events | the runtime delivers pointer events only, so `onValueChange`, `onKeyDown`, `onSubmit` and `onCancel` have no route; the host owns the editor and feeds the value back through the spec | accepted, tracked | g12.017 |
+| Jetstream raises no typing or key events | the runtime delivers pointer events only, so `onValueChange`, `onKeyDown`, `onSubmit` and `onCancel` have no route; the host owns the editor and feeds the value back through the spec | accepted, tracked | — |
 | native text-caret visuals may differ | platform-native text rendering is acceptable | allowed | keep editing semantics strict |
 | CSS transition timing | GPUI may not support CSS-style transitions | allowed | match where possible |
 | Recipe fallback chain | CSS custom property vs Rust spec/token override | allowed | same visual result required |

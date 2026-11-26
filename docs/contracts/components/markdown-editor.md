@@ -115,7 +115,7 @@ confer trust.
 - Policy changes are live, deterministic, and do not emit editor callbacks.
 - Safe and trusted output use the same prose styles. Safety posture must not be
   inferred from visual treatment.
-- Migration: before `g18.019`, editor preview injected the parser result
+- Migration: before the change, editor preview injected the parser result
   unsanitized. Consumers that relied on raw Markdown HTML must pass
   `htmlPolicy="trusted"` for fully trusted content; no compatibility fallback
   restores trust implicitly.
@@ -163,7 +163,7 @@ Behavior classification: styled-only (no machine)
 
 Rendering and composition only, or interaction fully delegated to composed
 Poodle primitives / native elements; no component-owned behavioral state
-beyond plain props. Classified in the g11.004 long-tail sweep.
+beyond plain props. Classified in the long-tail sweep.
 
 ## 5. Callbacks
 

@@ -22,7 +22,7 @@ composition, renderer, specimen, accessibility, or backend parity.
 
 The attempted follow-up moved the useful pieces under component-level cases
 and observations in
-[066 Executable Component Conformance](../066-executable-component-conformance.md),
+[066 Executable Component Conformance](066-executable-component-conformance.md),
 which `g14.008` also rejected. Retain machine tests only for the focused claims
 they own. The full false-start evidence is archived in
 the `2026-08-14-g14-machine-pinning-false-start` roll-up in Git history.

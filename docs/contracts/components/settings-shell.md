@@ -151,7 +151,7 @@ Behavior classification: styled-only (no machine)
 Rendering and composition only; interaction is delegated to the composed
 primitives (Dialog's modal machine, SidebarNav activation, TextInput editing)
 and native elements. No component-owned behavioral state beyond the two
-bindable props. Classified in the g11.004 long-tail sweep.
+bindable props. Classified in the long-tail sweep.
 
 ## 6. Refused Close
 

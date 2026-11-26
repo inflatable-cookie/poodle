@@ -70,5 +70,5 @@ pilot PR. This pilot reuses the headless mount and replaces no existing probes.
 The prior cross-runtime component pilot was rejected in `g14.008` and its
 machinery removed in `g14.021`. It added 22,746 lines against 472 replaced,
 and the comparator exposed 1,205 differences after HistoryCenter was added
-to its scope. The [historical cost rules](../specs/066-executable-component-conformance.md#cost-and-replacement-rules)
+to its scope. The [historical cost rules](../specs/archive/066-executable-component-conformance.md#cost-and-replacement-rules)
 record the reasons for that decision.

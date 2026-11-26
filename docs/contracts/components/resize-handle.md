@@ -290,7 +290,7 @@ A consumer wanting a hairline divider sets `--poodle-resize-handle-thickness:
   accessibility range and stop there: GPUI 1.22.0 exposes AccessKit, but the
   Poodle backend does not yet project these values
   (`docs/contracts/003-native-accessibility.md`). The declaration is still the
-  component's job; task #127 owns the mapping and platform-tree proof.
+  component's job; the GPUI platform-tree proof owns the mapping.
 
 ## 10a. Jetstream Notes
 

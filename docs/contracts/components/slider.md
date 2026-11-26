@@ -1,6 +1,6 @@
 # Slider
 
-Status: approved contract — g18.026 shared-family implementation queued
+Status: approved contract — shared-family implementation queued
 Updated: 2026-10-06
 
 

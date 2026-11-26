@@ -13,7 +13,7 @@ Updated: 2026-07-10
   via a dedicated snippet
 - In scope: label, required/optional marker, description/hint popover
   via info icon, error text, pending text, size/density scaling,
-  control/message relationship wiring via slot props, grid-column span
+  control/message relationship wiring via snippet props, grid-column span
   and grid-area for form layout integration
 - Out of scope: input editing semantics (owned by child controls), submit
   buttons, multi-column form layout systems (owned by parent form/grid),
@@ -124,7 +124,7 @@ Behavior classification: styled-only (no machine)
 
 Rendering and composition only, or interaction fully delegated to composed
 Poodle primitives / native elements; no component-owned behavioral state
-beyond plain props. Classified in the g11.004 long-tail sweep.
+beyond plain props. Classified in the long-tail sweep.
 
 ## 5. Events
 
@@ -264,7 +264,7 @@ embedded Popover component.
   `:global(.popover__surface)` scoped selector
 - Info icon uses `em` units so it scales with the label row font-size
 - `data-size` and `data-density` attributes emitted on root
-- `descriptionId` slot prop is `{id}-description` when `description` is set
+- `descriptionId` snippet prop is `{id}-description` when `description` is set
   (a visually-hidden `.poodle-field__sr-description` element carries that id),
   else `null`
 - `hint` prop kept as deprecated alias for `description`

@@ -25,6 +25,7 @@ readable history and are never current authority.
 - 021-public-package-api-stability-and-parity-debt-baseline.md — Public Package API Stability And Parity Debt Baseline
 - 023-svelte-visual-hierarchy-and-contrast-baseline.md — Svelte Visual Hierarchy And Contrast Baseline
 - 024-token-evolution-migration-and-compatibility-policy.md — Token Evolution, Migration, And Compatibility Policy
+- 026-appearance-recipes-and-downstream-override-strategy.md — Appearance Recipes And Downstream Override Strategy (promoted into architecture 007)
 - 027-docs-completeness-contract-linting-and-publish-pipeline.md — Docs Completeness, Contract Linting, And Publish Pipeline
 - 028-primitive-baseline-and-bits-aligned-surface.md — Primitive Baseline And Bits-Aligned Surface
 - 029-advanced-primitive-promotion-and-substrate-mapping.md — Advanced Primitive Promotion And Substrate Mapping
@@ -53,3 +54,4 @@ readable history and are never current authority.
 - 061-svelte-demo-app-rebuild-and-coverage-upgrade-baseline.md — Svelte Demo-App Rebuild And Coverage Upgrade Baseline
 - 064-cross-runtime-machine-pinning.md — Cross-Runtime Machine Pinning
 - 065-scene-authoring-and-specimen-fixtures.md — Scene Authoring And Specimen Fixtures
+- 066-executable-component-conformance.md — Executable Component Conformance (rejected; retained as measured evidence)

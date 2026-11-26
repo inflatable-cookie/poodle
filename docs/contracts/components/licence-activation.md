@@ -1,6 +1,6 @@
 # LicenceActivation
 
-Status: approved web reference; active native/conformance pending g14.017
+Status: approved web reference; native/conformance work pending
 Updated: 2026-08-14
 
 ## 1. Purpose
@@ -289,7 +289,7 @@ implemented in Poodle.
 
 Svelte and React share data types, submit resolver, validation copy, CSS, and
 test cases. File reading is thin framework/browser plumbing. The web reference
-is incomplete until g14.017 supplies native file-selection semantics and full
+is incomplete until it supplies native file-selection semantics and full
 active-cohort conformance. Jetstream remains a separate deferred backend
 admission.
 
@@ -325,12 +325,12 @@ admission.
 
 | Delta | Status | Follow-up |
 | --- | --- | --- |
-| no native implementation in web-reference PR | incomplete, not accepted parity | g14.017 |
-| grouped key entry depended on the new web CodeInput `groups`/`separator` props; Rust CodeInput had a legacy inferred 3+3 split | closed by g15.007 Batch A (§11, code-input §12) | none — explicit groups, separators, and the completion result are native-bound |
+| no native implementation in web-reference PR | incomplete, not accepted parity | — |
+| grouped key entry depended on the new web CodeInput `groups`/`separator` props; Rust CodeInput had a legacy inferred 3+3 split | closed (§11, code-input §12) | none — explicit groups, separators, and the completion result are native-bound |
 
-## 11. Rust Binding Notes (g15.007)
+## 11. Rust Binding Notes
 
-Status: **bound** — native implementation lands with `g15.007` (specs,
+Status: **bound** — native implementation lands with the Rust binding work (specs,
 `poodle-render`, GPUI specimen, headless evidence).
 
 - `LicenceActivationSpec` is cloneable data: the activation model, the

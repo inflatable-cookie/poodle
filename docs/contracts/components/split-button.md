@@ -103,7 +103,7 @@ type MenuItem = {
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: adapter-owned interaction (long-tail sweep)
 
 Menu open/dismiss (now on the dismissable-layer stack); item activation via
 shared menu-list machinery. Outside dismissal is guarded by

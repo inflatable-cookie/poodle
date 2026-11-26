@@ -3,8 +3,8 @@
 Status: rejected — `g14.008`; machinery removed by `g14.021`
 Updated: 2026-08-16
 Owner: Poodle core
-Depends on: `../architecture/009-cross-runtime-component-conformance.md`,
-`../contracts/working-rules.md`
+Depends on: `../../architecture/009-cross-runtime-component-conformance.md`,
+`../../contracts/working-rules.md`
 
 ## Pilot Verdict
 

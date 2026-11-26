@@ -305,12 +305,12 @@ Density adjusts only the inter-slot gap: `compact` `0.25rem`, `default`
 
 | Delta | Status | Follow-up |
 | --- | --- | --- |
-| Rust CodeInput inferred a 3+3 split for length 6 and could not accept explicit groups, separators, or completion-result indication | closed by g15.007 Batch A (§12) | none — explicit groups/separators and the completion result are native-bound |
+| Rust CodeInput inferred a 3+3 split for length 6 and could not accept explicit groups, separators, or completion-result indication | closed (§12) | none — explicit groups/separators and the completion result are native-bound |
 
-## 12. Rust Binding Notes (g15.007)
+## 12. Rust Binding Notes
 
 Status: **bound** — native grouping, separators, and completion result land with
-`g15.007` Batch A.
+the Rust binding work.
 
 - `CodeInputSpec.groups` (`Option<Vec<usize>>`) and `separator`
   (`Option<String>`) mirror the web props exactly. `group_end_indices()`

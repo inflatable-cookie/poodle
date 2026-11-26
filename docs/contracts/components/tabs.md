@@ -99,7 +99,7 @@ selects CSS overflow ownership for the web panel; native renderers do not use a
 DOM panel overflow box and have no admitted native scroll-owner input yet.
 
 The old DOM-shaped `onDragPrepare`, `onDragStart`, and `onDragEnd` escape
-hatches are deleted by g16.026. `crossWindowSourceBridge` owns asynchronous host
+hatches are deleted by a later change. `crossWindowSourceBridge` owns asynchronous host
 preparation and the authoritative terminal result without exposing a browser
 event. Shared Rust preserves the observable lifecycle through semantic
 `TabsHandlers`: drag start/end carry the tab value, drop-target change carries
@@ -1087,7 +1087,7 @@ does not read the hook.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream has no reorder or drag events | `onReorder` and the `onDrag*` trio are keyboard- and drag-driven on the web; neither route exists on this target yet | accepted, tracked | g12.017 |
+| Jetstream has no reorder or drag events | `onReorder` and the `onDrag*` trio are keyboard- and drag-driven on the web; neither route exists on this target yet | accepted, tracked | — |
 | Inactive panels may stay mounted or unmounted | runtime rendering strategy differs | allowed | keep semantics and state continuity strict |
 | `focusOnValueChange` is web-only | DOM panel-unmount capture has no GPUI/Jetstream equivalent in this bounded consumer unblock | accepted, this card | later native focus-adapter work if a consumer needs it |
 | GPUI uses opacity multiplication instead of CSS color-mix | platform capability | allowed | visual result must match |

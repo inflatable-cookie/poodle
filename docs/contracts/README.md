@@ -1,7 +1,6 @@
 # Contracts
 
 Status: active
-Updated: 2026-09-01
 
 Contracts are the docs-first source of truth for Poodle components.
 
@@ -36,15 +35,13 @@ above it in downstream repos such as Loophole.
 Rules that bind more than one contract live beside them, and a component
 contract references the rule rather than restating it:
 
-- `001-working-rules.md` — roadmap/spec/log authority chain
+- [working rules](../knowledge/contracts/working-rules.md) — authority, validation and parity rules
 - `002-anchored-overlays.md` — every anchored surface portals to the theme root
   and is positioned in viewport coordinates
-- `003-native-accessibility.md` — neither native runtime exposes an
-  accessibility API, so `aria_label` is carried but inert there
+- `003-native-accessibility.md` — both native runtimes project roles, names
+  and states into AccessKit: Jetstream live, GPUI with a bounded live proof
 - `004-shared-control-types.md` — types shared by more than one component
   contract are defined once and referenced, never restated with fewer members
-- `005-agent-local-paths.md` — local-only agent paths and manual worktree
-  locations are explicit, ignored, and operator-selected
 
 ## Current Contracts
 

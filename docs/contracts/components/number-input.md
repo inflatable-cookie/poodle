@@ -1,6 +1,6 @@
 # NumberInput
 
-Status: active — g16.030 value/draft/mounted parity on worker PR; awaiting review/merge
+Status: active — value/draft/mounted parity
 Updated: 2026-09-28
 
 ## 1. Purpose
@@ -19,7 +19,7 @@ This is one numeric component, not a number-or-string union:
 - prefix/suffix text, validation, precision, and steppers decorate that numeric
   model without changing its value type.
 
-The pre-1.0 migration in `g16.030` removes the old string-value mode and the
+The pre-1.0 migration removes the old string-value mode and the
 old source-specific step callbacks. No alias or compatibility path remains.
 
 ## 2. Public Contract
@@ -304,7 +304,7 @@ Typing or parity is not claimed until backend admission.
 
 ## 11. Migration Boundary
 
-The `g16.030` worker must inventory every in-repository string-value and old
+The migration must inventory every in-repository string-value and old
 callback use, migrate Poodle's own composites/specimens/tests, and record a
 downstream migration table for inspected sibling consumers. It must not edit
 sibling repositories.

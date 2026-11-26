@@ -37,7 +37,7 @@ Updated: 2026-09-29 (endLabel and per-item context menu admitted portable)
 |------|---------|-------|
 | Root | `<nav>` | Class `poodle-sidebar-nav`, `data-size`, `data-density`, `data-size-role`, optional `aria-label` |
 | Group | `<section>` | Class `poodle-sidebar-nav__group`, `data-separated` attribute, optional `aria-label` from group label |
-| GroupTitle | `<h2>` | Class `poodle-sidebar-nav__group-title`, uppercase label, accent color. Carries `title={label}` **unconditionally** (R4a, g13-039): group labels render on one line — a host's long label is clipped by CSS, never wrapped — and the native `title` gives the sighted pointer user the full label on hover. The group `<section>` already carries `aria-label={label}`, so assistive tech is served without the `title`; the attribute exists for the clipped-visible-text case and is set without detecting truncation, matching the 13 components that already use native `title=` |
+| GroupTitle | `<h2>` | Class `poodle-sidebar-nav__group-title`, uppercase label, accent color. Carries `title={label}` **unconditionally** (R4a): group labels render on one line — a host's long label is clipped by CSS, never wrapped — and the native `title` gives the sighted pointer user the full label on hover. The group `<section>` already carries `aria-label={label}`, so assistive tech is served without the `title`; the attribute exists for the clipped-visible-text case and is set without detecting truncation, matching the 13 components that already use native `title=` |
 | ItemList | `<ul>` | Class `poodle-sidebar-nav__list`, unstyled list container |
 | Item | `<li>` | List item wrapper |
 | ItemLink | `<a>` | Class `poodle-sidebar-nav__item`, rendered when `item.href` is set and item is not disabled |
@@ -110,7 +110,7 @@ Behavior classification: styled-only (no machine)
 
 Rendering and composition only, or interaction fully delegated to composed
 Poodle primitives / native elements; no component-owned behavioral state
-beyond plain props. Classified in the g11.004 long-tail sweep. Per-item
+beyond plain props. Classified in the long-tail sweep. Per-item
 context menus delegate open, dismiss, keyboard navigation, and action to
 ContextMenu (`trigger={false}`); SidebarNav owns which item invoked the
 overlay and the anchor point.

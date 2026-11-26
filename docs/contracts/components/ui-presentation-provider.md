@@ -124,7 +124,7 @@ Behavior classification: styled-only (no machine)
 
 Rendering and composition only, or interaction fully delegated to composed
 Poodle primitives / native elements; no component-owned behavioral state
-beyond plain props. Classified in the g11.004 long-tail sweep.
+beyond plain props. Classified in the long-tail sweep.
 
 ## 5. Events
 
@@ -264,7 +264,7 @@ let subtree = ui_presentation_provider(&provider_spec, &ctx, |scoped| {
 });
 ```
 
-### Breaking Migration (g15.043, pre-v1)
+### Breaking Migration (pre-v1)
 
 - Every public `poodle-render` component renderer takes `&RenderContext`
   instead of `&dyn ThemeProvider`; build a root with

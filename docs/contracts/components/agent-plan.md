@@ -236,8 +236,7 @@ Region.
 
 ## 12. GPUI And Jetstream Notes
 
-Deferred. Svelte is the reference implementation and the React mirror landed
-in `g15.006`; the shared headless core, the conformance vectors, the spec
+Deferred. Svelte is the reference implementation and the React mirror landed; the shared headless core, the conformance vectors, the spec
 structs and the `poodle-render` functions (`agent_plan`, `agent_plan_record`)
 already land, so a native variant is wiring, not design. See §14.
 
@@ -268,7 +267,7 @@ already land, so a native variant is wiring, not design. See §14.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| GPUI/Jetstream variants deferred — Svelte is the reference and the React mirror landed in `g15.006` | the consumer integrating plan mode (nucleus) is Svelte-only today; the headless core, vectors, specs and shared renderer already landed, so each native variant is wiring | pending review | build the native variants when a second target needs them |
+| GPUI/Jetstream variants deferred — Svelte is the reference and the React mirror landed | the consumer integrating plan mode (nucleus) is Svelte-only today; the headless core, vectors, specs and shared renderer already landed, so each native variant is wiring | pending review | build the native variants when a second target needs them |
 | Settled statuses render on `AgentPlan` at all | the badge covers the moment between the decision and the host appending the record; forbidding it would make that gap a blank flash | accepted (by design) | none |
 | `dismissible` defaults to `true`, unlike `AgentQuestion` | the turn is complete, so "don't do this" is an ordinary answer rather than an escape from a blocking prompt | pending review | none |
 

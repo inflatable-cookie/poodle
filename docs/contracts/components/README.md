@@ -8,192 +8,229 @@ primitives and layout surfaces through higher-order application components.
 
 ## Current Contracts
 
-- `accordion.md`
-- `action-discovery-panel.md`
-- `agent-chat-input.md`
-- `agent-message.md`
-- `agent-plan-record.md`
-- `agent-plan.md`
-- `agent-question-record.md`
-- `agent-question.md`
-- `agent-subagent.md`
-- `agent-transcript.md`
-- `alert-dialog.md`
-- `app-header.md`
-- `audio-player.md`
-- `audio-meter.md`
-- `audio-switch.md`
+Hand-kept and grouped by family. `docs:lint` fails when a contract file is missing from this list.
+
+### Foundations
+
 - `avatar.md`
-- `block-editor.md`
 - `box.md`
-- `breadcrumbs.md`
+- `code.md`
+- `dock-region.md`
+- `error-boundary.md`
+- `eyebrow.md`
+- `format-display-date.md`
+- `format-file-size.md`
+- `grid.md`
+- `icon.md`
+- `icon-button.md`
+- `icon-provider.md`
+- `keyboard.md`
+- `motion-policy-provider.md`
+- `pill.md`
+- `progress.md`
+- `region.md`
+- `resize-handle.md`
+- `scroll-shell.md`
+- `separator.md`
+- `size-and-density.md`
+- `skeleton.md`
+- `spacer.md`
+- `spinner.md`
+- `split-view.md`
+- `stack.md`
+- `status-indicator.md`
+- `surface.md`
+- `surface-elevation.md`
+- `text.md`
+- `text-link.md`
+- `time-ago.md`
+- `ui-presentation-provider.md`
+- `value-readout.md`
+
+### Actions
+
 - `bulk-action-bar.md`
 - `button.md`
-- `calendar.md`
-- `callout.md`
+- `collapse-toggle.md`
+- `confirm-action.md`
+- `form-actions.md`
+- `segmented-control.md`
+- `split-button.md`
+- `toggle-group.md`
+- `toolbar.md`
+
+### Inputs and selection
+
+- `block-editor.md`
 - `card-radio-group.md`
 - `card-toggle-group.md`
-- `card.md`
-- `changed-files.md`
 - `checkbox.md`
 - `code-editor.md`
 - `code-input.md`
-- `code.md`
-- `collapse-toggle.md`
-- `collapsible.md`
 - `color-picker.md`
-- `command-palette.md`
-- `confirm-action.md`
-- `context-menu.md`
-- `data-table.md`
-- `date-picker.md`
-- `date-range-picker.md`
-- `date-time-picker.md`
-- `date-time-range-picker.md`
-- `date-time-zone-picker.md`
-- `debug-dialog.md`
-- `detail-item.md`
-- `detail-section.md`
-- `detail-section-group.md`
-- `detail-shell.md`
-- `dialog.md`
-- `dock-region.md`
-- `drawer.md`
 - `drag-number-field.md`
-- `envelope-editor.md`
 - `duration-input.md`
 - `editable-label.md`
 - `editable-list.md`
 - `embed-input.md`
-- `embed-preview.md`
-- `empty-state.md`
-- `error-boundary.md`
-- `eyebrow.md`
-- `field-set.md`
+- `envelope-editor.md`
 - `field.md`
+- `field-set.md`
 - `file-upload.md`
 - `filter-builder.md`
 - `filter-toolbar.md`
-- `form-actions.md`
-- `form-dialog.md`
-- `form-layout.md`
-- `form-shell.md`
-- `format-display-date.md`
-- `format-file-size.md`
-- `grid.md`
-- `hover-card.md`
-- `history-center.md`
-- `icon-button.md`
-- `icon-provider.md`
-- `icon.md`
-- `inline-list-section.md`
-- `inline-remediation.md`
-- `list-card-counter.md`
-- `list-card.md`
-- `list-container.md`
 - `listbox.md`
-- `message-center.md`
-- `list-grid.md`
-- `log-list.md`
 - `markdown-editor.md`
-- `media-browse-panel.md`
-- `media-picker.md`
-- `media-preview.md`
-- `media-thumbnail.md`
-- `menu.md`
-- `menubar.md`
-- `meta-bar.md`
-- `meta-item.md`
-- `meter.md`
-- `meter-surface.md`
-- `knob.md`
-- `keyboard.md`
-- `licence-activation.md`
-- `licence-seats.md`
-- `licence-status.md`
-- `fader.md`
-- `gain-reduction-meter.md`
-- `metric-tile.md`
-- `model-catalogue-editor.md`
-- `model-connection-card.md`
-- `model-connection-picker.md`
-- `model-connection-setup.md`
-- `model-picker.md`
-- `motion-policy-provider.md`
-- `mod-matrix-grid.md`
-- `nav-card.md`
-- `navigation-menu.md`
 - `number-input.md`
 - `order-by.md`
-- `page-header.md`
-- `page-loading.md`
-- `pagination-summary.md`
-- `pagination.md`
 - `password-requirements.md`
 - `picker-shell.md`
-- `pill.md`
-- `popover.md`
-- `progress.md`
 - `radio.md`
 - `radio-group.md`
 - `range-slider.md`
 - `rating.md`
 - `ref-select.md`
-- `rich-text-editor.md`
-- `region.md`
 - `relation-picker.md`
-- `remediation-banner.md`
-- `resize-handle.md`
-- `scroll-shell.md`
-- `segmented-control.md`
+- `rich-text-editor.md`
 - `select.md`
-- `selection-summary.md`
-- `separator.md`
-- `settings-shell.md`
-- `sidebar-nav.md`
-- `size-and-density.md`
-- `skeleton.md`
 - `slider.md`
-- `spacer.md`
-- `spinner.md`
-- `split-button.md`
-- `split-view.md`
-- `stack.md`
-- `state-tile.md`
-- `status-bar.md`
-- `status-indicator.md`
 - `stepper.md`
-- `surface-elevation.md`
-- `surface.md`
 - `switch.md`
-- `tab-strip.md`
-- `table.md`
-- `text.md`
-- `text-link.md`
-- `tabs.md`
 - `text-input.md`
 - `theme-select.md`
-- `token-input.md`
-- `time-ago.md`
 - `time-input.md`
 - `time-zone-select.md`
+- `token-input.md`
+- `tri-state-switch.md`
+- `validation-summary.md`
+
+### Dates
+
+- `calendar.md`
+- `date-picker.md`
+- `date-range-picker.md`
+- `date-time-picker.md`
+- `date-time-range-picker.md`
+- `date-time-zone-picker.md`
+
+### Forms
+
+- `form-dialog.md`
+- `form-layout.md`
+- `form-shell.md`
+
+### Overlays and menus
+
+- `alert-dialog.md`
+- `command-palette.md`
+- `context-menu.md`
+- `debug-dialog.md`
+- `dialog.md`
+- `drawer.md`
+- `hover-card.md`
+- `menu.md`
+- `menubar.md`
+- `navigation-menu.md`
+- `popover.md`
 - `toast-host.md`
 - `toast-stack.md`
-- `toggle-group.md`
-- `tool-call-group.md`
-- `tool-call.md`
-- `toolbar.md`
 - `tooltip.md`
+
+### Navigation and shells
+
+- `accordion.md`
+- `action-discovery-panel.md`
+- `app-header.md`
+- `breadcrumbs.md`
+- `collapsible.md`
+- `detail-shell.md`
+- `history-center.md`
+- `nav-card.md`
+- `page-header.md`
+- `pagination.md`
+- `pagination-summary.md`
+- `settings-shell.md`
+- `sidebar-nav.md`
+- `tab-strip.md`
+- `tabs.md`
 - `tree.md`
-- `tri-state-switch.md`
-- `ui-presentation-provider.md`
+
+### Data and lists
+
+- `card.md`
+- `changed-files.md`
+- `data-table.md`
+- `detail-item.md`
+- `detail-section.md`
+- `detail-section-group.md`
+- `empty-state.md`
+- `inline-list-section.md`
+- `list-card.md`
+- `list-card-counter.md`
+- `list-container.md`
+- `list-grid.md`
+- `log-list.md`
+- `meta-bar.md`
+- `meta-item.md`
+- `metric-tile.md`
+- `mod-matrix-grid.md`
+- `page-loading.md`
+- `selection-summary.md`
+- `state-tile.md`
+- `table.md`
+
+### Feedback and status
+
+- `callout.md`
+- `inline-remediation.md`
+- `message-center.md`
+- `remediation-banner.md`
+- `status-bar.md`
 - `update-center.md`
 - `update-status.md`
-- `validation-summary.md`
-- `value-readout.md`
+
+### Media and audio
+
+- `audio-meter.md`
+- `audio-player.md`
+- `audio-switch.md`
+- `embed-preview.md`
+- `fader.md`
+- `gain-reduction-meter.md`
+- `knob.md`
+- `media-browse-panel.md`
+- `media-picker.md`
+- `media-preview.md`
+- `media-thumbnail.md`
+- `meter.md`
+- `meter-surface.md`
 - `video-player.md`
 - `waveform-display.md`
 - `xy-pad.md`
+
+### Agents
+
+- `agent-chat-input.md`
+- `agent-message.md`
+- `agent-plan.md`
+- `agent-plan-record.md`
+- `agent-question.md`
+- `agent-question-record.md`
+- `agent-subagent.md`
+- `agent-transcript.md`
+- `tool-call.md`
+- `tool-call-group.md`
+
+### Models and licences
+
+- `licence-activation.md`
+- `licence-seats.md`
+- `licence-status.md`
+- `model-catalogue-editor.md`
+- `model-connection-card.md`
+- `model-connection-picker.md`
+- `model-connection-setup.md`
+- `model-picker.md`
 
 ## Accessibility Rule
 

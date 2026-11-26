@@ -424,8 +424,10 @@ siblings, so it is density.
 
 - Status colours resolve through the `StepperSpec` token methods; no literal
   colours in the component
-- GPUI has no accessibility API — see `003-native-accessibility.md`. The status
-  suffix in the accessible name is carried on the spec and is inert there.
+- GPUI projects the trigger's role and state through AccessKit, but no live
+  platform-tree assertion covers the stepper yet (see `003-native-accessibility.md`).
+  The status suffix in the accessible name is carried on the spec and is not
+  projected yet.
 - Orientation maps to the flex axis: vertical flows the same steps as a column
   with bottom dividers.
 - Keyboard navigation between triggers does not exist on the natives (no key
@@ -441,7 +443,7 @@ siblings, so it is density.
 
 - `Stepper::from_spec(spec, theme).on_change(...).on_rerun(...)`, each carrying
   the step's value. This is the component whose GPUI handlers were stored and
-  never attached — the defect that started g12.017 — so these tests are the
+  never attached — the defect that started this work — so these tests are the
   reference for what "actually wired" means.
 - The rerun sits inside a clickable step, so it takes its own handler, inert
   when unwired: rerunning a step must not also select it.
@@ -476,7 +478,7 @@ component accepts a handler it never reads.
 
 | Target | Delta | Reason |
 |--------|-------|--------|
-| GPUI | no accessibility surface | runtime limit — `003-native-accessibility.md` |
+| GPUI | no live platform-tree assertion yet | A2 hold — `003-native-accessibility.md` |
 | GPUI, Jetstream | selection, rerun and collapse wiring live in the preview event loop | components render from spec state |
 | GPUI, Jetstream | the collapsed chevron is the shared `chevron-right` / `chevron-down` icon; the rail is a row of rounded boxes | no CSS, so both are drawn as nodes |
 | GPUI | marker glyphs are text characters (`✓ ✕ ◌ ⟳`) rather than icon assets | matches the surrounding GPUI components, which draw glyphs the same way |

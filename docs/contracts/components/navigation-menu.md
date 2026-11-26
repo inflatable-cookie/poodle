@@ -48,7 +48,7 @@ Updated: 2026-07-10
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override for item spacing; when null, resolves from inherited presentation |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the nav element |
-| `activeEdge` | `ActiveEdge` | `"none"` | no | selection edge on the open trigger; shared type (see `004-shared-control-types.md`): `"none"` draws no edge, `"outline"` draws the accent border around the open trigger — the border the trigger carried by default before g13.016, `"underline"` draws the accent edge along the trigger's bottom edge |
+| `activeEdge` | `ActiveEdge` | `"none"` | no | selection edge on the open trigger; shared type (see `004-shared-control-types.md`): `"none"` draws no edge, `"outline"` draws the accent border around the open trigger — the border the trigger carried by default before the default-appearance change, `"underline"` draws the accent edge along the trigger's bottom edge |
 | `activeFill` | `ActiveFill` | `"tint"` | no | selection treatment on the open trigger; shared type (see `004-shared-control-types.md`): `none` draws no fill (the open trigger keeps its idle fill; the edge and the selected text colour carry selection alone), `tint` is the accent-tinted open fill, `solid` fills the trigger fully with `accent-base` and swaps the foreground to `text-inverse` for contrast |
 | `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal: a mousedown outside the navigation menu closes the active viewport |
 
@@ -159,7 +159,7 @@ a panel is open; the outside-interaction path is guarded by
 - List: `display: inline-flex`, `flex-wrap: wrap`,
   `gap: var(--poodle-space-inline-sm)`, `align-items: center`
 - Trigger: inline-flex with gap for optional icon, min-height from
-  `var(--poodle-size-control-height)`, borderless by default since g13.016
+  `var(--poodle-size-control-height)`, borderless by default since the default-appearance change
   (pill-style border is opt-in via `activeEdge`)
 - Viewport: block panel with surface-level padding, sizes to content within
   parent constraints
@@ -203,7 +203,7 @@ Rendering style roles (poodle#186): triggers read the control fill at rest and `
 | `gap` | `var(--poodle-space-inline-sm)` |
 | `min-height` | `var(--poodle-size-control-height)` |
 | `padding` | `0 var(--poodle-space-control-x)` |
-| `border` | `none` (since g13.016 — see "Default Appearance Change" below) |
+| `border` | `none` (since the default-appearance change — see "Default Appearance Change" below) |
 | `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent)` |
 | `color` | `var(--poodle-color-text-primary)` |
@@ -248,9 +248,9 @@ still resolves first.
 | `cursor` | `not-allowed` |
 | `opacity` | `var(--poodle-state-opacity-disabled)` |
 
-### Default Appearance Change (g13.016)
+### Default Appearance Change
 
-The trigger's unconditional border is gone. Before g13.016 every trigger drew
+The trigger's unconditional border is gone. Before the default-appearance change, every trigger drew
 `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 72%,
 transparent)` and the open trigger accented it
 (`color-mix(in srgb, var(--poodle-color-accent-base) 42%,
@@ -258,7 +258,7 @@ var(--poodle-color-border-default))`). With `activeEdge` defaulting to
 `"none"`, the default rendering is borderless; consumers opt the border back
 in with `activeEdge="outline"`. NavigationMenu has zero consumers outside
 Poodle (verified across every project), so nothing breaks. This is an accepted
-visual change per the g13-016 maintainer ruling — the old default is not
+visual change per the maintainer ruling — the old default is not
 preserved.
 
 ### Trigger — activeEdge="outline"
@@ -348,7 +348,7 @@ no height change):
 - Module-level `nextNavigationMenuId` counter for unique IDs across instances
 - Controlled/uncontrolled value via internal `uncontrolledValue` state
 - `focusIndex` tracks roving tabindex across triggers
-- Default slot receives `activeValue` and `activeItem` as slot props
+- Default snippet receives `activeValue` and `activeItem` as snippet props
 - Viewport conditionally rendered when value is non-null
 - Triggers use `data-open` attribute for open-state styling
 - Roving tabindex is implemented: the trigger at `focusIndex` gets
@@ -357,7 +357,7 @@ no height change):
   when a trigger receives focus
 - `aria-controls` on triggers references viewport panel id
 - The list element is a `<nav>` for landmark semantics
-- Triggers are borderless in their default state since g13.016 (unlike Menubar
+- Triggers are borderless in their default state since the default-appearance change (unlike Menubar
   triggers which are borderless, NavigationMenu triggers now only gain their
   pill-style border when `activeEdge` is set); this is an accepted visual
   change — the old unconditional border is gone
@@ -388,7 +388,7 @@ no height change):
   surface below the trigger strip
 - GPUI must model `color-mix` as `token.opacity(token.a * multiplier)` since GPUI has no CSS color-mix
 - Trigger bg opacity: 88% on background-surface
-- Trigger border: none by default since g13.016. `activeEdge::Outline` maps to a
+- Trigger border: none by default since the default-appearance change. `activeEdge::Outline` maps to a
   `0.0625rem` border on every trigger — transparent on idle, `mix_srgb(accent,
   border-default, 0.42)` on the open trigger (the former default open border
   value) — so selection does not shift layout. `activeEdge::Underline` maps to
@@ -433,7 +433,7 @@ no height change):
 - [ ] roving tabindex (0/-1) on triggers matches
 - [ ] `onValueChange` callback semantics match
 - [ ] disabled trigger behavior matches (aria-disabled, opacity, cursor)
-- [ ] slot receives activeValue and activeItem
+- [ ] snippet receives activeValue and activeItem
 
 ### Tier 2: Visual Parity
 
@@ -442,7 +442,7 @@ no height change):
 - [ ] list uses inline-flex wrap with 0.25rem gap
 - [ ] trigger uses label-family, 0.75rem, weight 600
 - [ ] trigger default background uses background-surface 88%
-- [ ] trigger has no border by default (g13.016; border is opt-in via `activeEdge`)
+- [ ] trigger has no border by default (default-appearance change; border is opt-in via `activeEdge`)
 - [ ] activeEdge="outline" gives every trigger a transparent 0.0625rem reserve border; the open trigger's border uses accent-base 42% blended with border-default; activeEdge="underline" gives the open trigger an accent 0.125rem bottom edge
 - [ ] activeFill="solid" fills the open trigger with accent-base and swaps the foreground to text-inverse; the fill survives hover and focus
 - [ ] activeFill="none" leaves the open trigger on its idle fill (no selection fill) while the edge and selected text colour still mark it
@@ -471,8 +471,8 @@ no height change):
 | exact viewport animation may differ | overlay and motion internals differ | allowed | keep nav meaning and focus rules strict |
 | GPUI viewport may use different layout primitive | desktop layout differs from CSS grid | allowed | spacing, padding, and visual density must match |
 | GPUI uses opacity multiplication instead of CSS color-mix | platform capability | allowed | visual result must match |
-| Viewport content rendering strategy may differ | platform rendering model | allowed | slot props must be equivalent |
-| Rust `NavigationMenuEntry` adds a per-item `description: Option<String>` field | the Rust targets have no `children` snippet, so the active item's `description` is the viewport content source (slot-prop equivalent) | allowed | keep slot props equivalent; `icon` is now present on the Rust entry per §3 |
+| Viewport content rendering strategy may differ | platform rendering model | allowed | snippet props must be equivalent |
+| Rust `NavigationMenuEntry` adds a per-item `description: Option<String>` field | the Rust targets have no `children` snippet, so the active item's `description` is the viewport content source (snippet-prop equivalent) | allowed | keep snippet props equivalent; `icon` is now present on the Rust entry per §3 |
 
 ## 13. Specimen Definitions
 
