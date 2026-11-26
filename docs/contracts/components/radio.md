@@ -157,8 +157,8 @@ browser behavior (`name`), not machine state.
 | Root | `--poodle-space-inline-sm` | indicator/label gap |
 | Root | `--poodle-color-text-primary` | label color |
 | Root disabled | `--poodle-state-opacity-disabled` | dimming |
-| Indicator | `--poodle-color-border-default` | resting border |
-| Indicator | `--poodle-color-background-surface` | fill |
+| Indicator | `--poodle-style-control-border`, falling back to `--poodle-color-border-default` | resting border (control `fill` treatment) |
+| Indicator | `--poodle-style-control-fill`, falling back to `--poodle-color-background-surface` | fill (control `fill` treatment) |
 | Indicator | `--poodle-size-icon-*` | per-size dimensions |
 | Indicator/Dot checked | `--poodle-radio-selected-color` (defaults to `--poodle-color-accent-base`) | selected border and dot |
 | Indicator focus | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing` | focus ring |

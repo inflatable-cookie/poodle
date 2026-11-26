@@ -5,11 +5,11 @@
     --switch-unit: var(--poodle-size-icon-md);
     --poodle-switch-off-color: var(--poodle-recipe-switch-off-color, var(--poodle-color-text-primary));
     --poodle-switch-on-color: var(--poodle-recipe-switch-on-color, var(--poodle-color-accent-base));
-    --poodle-switch-off-track: color-mix(in srgb, var(--poodle-switch-off-color) 18%, var(--poodle-color-background-surface));
+    --poodle-switch-off-track: var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-switch-off-color) 18%, var(--poodle-color-background-surface)));
     --poodle-switch-on-track: color-mix(in srgb, var(--poodle-switch-on-color) 24%, var(--poodle-color-background-surface));
     --poodle-switch-off-thumb: var(--poodle-switch-off-color);
     --poodle-switch-on-thumb: var(--poodle-switch-on-color);
-    --poodle-switch-off-border: var(--poodle-recipe-switch-off-border, var(--poodle-color-border-default));
+    --poodle-switch-off-border: var(--poodle-recipe-switch-off-border, var(--poodle-style-control-border, var(--poodle-color-border-default)));
     --poodle-switch-on-border: var(--poodle-recipe-switch-on-border, color-mix(in srgb, var(--poodle-switch-on-thumb) 58%, var(--poodle-color-border-default)));
     position: relative;
     display: inline-flex;
@@ -50,7 +50,7 @@
     border: 0.0625rem solid var(--poodle-switch-off-border);
     border-radius: 999px;
     background: var(--poodle-switch-off-track);
-    box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent);
+    box-shadow: var(--poodle-style-control-shadow, inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent));
     transition:
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),

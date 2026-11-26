@@ -223,9 +223,9 @@ Behavior classification: machine-backed (shared `singleSelectTransition` in
 | `justify-content` | `center` |
 | `width` | `1.125rem` |
 | `height` | `1.125rem` |
-| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border` | `0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default))` |
 | `border-radius` | `999px` |
-| `background` | `var(--poodle-color-background-surface)` |
+| `background` | `var(--poodle-recipe-radio-group-indicator-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)))` |
 | `transition` | `border-color, box-shadow` at `var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
 
 ### Indicator checked `:checked + .radio-group__indicator`

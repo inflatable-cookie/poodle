@@ -78,8 +78,8 @@ Updated: 2026-08-10
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Root fill | `color.background.panel` (from `fill_token()`) | base surface |
-| Root border | `color.border.subtle` (from `border_token()`) | subtle outline |
+| Root fill | `color.background.panel` (from `fill_token()`), routed through `--poodle-style-surface-fill` | base surface |
+| Root border | `color.border.subtle` (from `border_token()`), routed through `--poodle-style-surface-border` | subtle outline |
 | Root radius | `radius.surface` | tile shape |
 | Root padding | `space.panel.x`, `space.panel.y` | internal spacing |
 | Label | `typography.label`, `color.text.secondary` | caption treatment |

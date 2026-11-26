@@ -103,8 +103,8 @@ type AnnouncementMode = "none" | "polite" | "assertive";
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Fill | `color.background.panel` | base grouped surface |
-| Border | `color.status.danger` (blocking) or `color.accent.base` (pending-only) | from `border_token()` |
+| Fill | `color.background.panel`, routed through `--poodle-style-surface-fill` | base grouped surface |
+| Border | `color.accent.base` (pending-only), routed through `--poodle-style-surface-border`; `color.status.danger` (blocking) stays a status edge under every style | from `border_token()` |
 | Radius | `radius.surface` | grouped-surface shape |
 | Padding | `space.panel.x`, `space.panel.y` | internal spacing |
 | Title | `typography.label` | summary heading |

@@ -2,9 +2,9 @@
   display: grid;
   gap: var(--poodle-space-inline-md);
   padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
-  border: 0.0625rem solid var(--poodle-color-accent-base);
+  border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-accent-base));
   border-radius: var(--poodle-radius-surface);
-  background: var(--poodle-color-background-panel);
+  background: var(--poodle-style-surface-fill, var(--poodle-color-background-panel));
   color: var(--poodle-color-text-primary);
 }
 .poodle-validation-summary[data-state="blocking"] { border-color: var(--poodle-color-status-danger); }
