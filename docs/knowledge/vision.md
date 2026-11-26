@@ -115,16 +115,12 @@ Renderer-specific input, lifecycle, and drawing remain in the backend.
   but leave every component built the same way, so a second style would not
   be a second look. Each renderer implements each switch value once, and the
   switches live in the token sources, not in a preview application.
-- **The redesign removes noise.** Operator ruling 2026-11-25. The current
-  look has too many lines, surfaces and labels, most of all on clickable
-  items that carry a dimmed accent fill with an accent border. The redesign
-  uses subtle fills, few borders and subtle ones where a border is needed,
-  minimal labelling, and far less accent colour. The aim is sleek and
-  simple. The redesign is built as the `quiet` rendering style, opt-in
-  while it grows. When it covers the library, it becomes the default and
-  the current look is removed, not kept as a named style (operator ruling
-  2026-11-25). That switch changes every consumer's look, so it ships in a
-  release with notes.
+- **The redesign removes noise.** Operator ruling 2026-11-25. Use subtle
+  fills, fewer and softer borders, minimal labelling, and less accent colour.
+  On 2026-11-26 Tom made the experimental `quiet` look the web default and
+  retired both the previous look and the experimental style name. The
+  appearance change ships with the 0.5 release. Fallback cleanup and
+  wider type-role adoption follow.
 - **A theme is a few settings, and every named theme is a preset.** Operator
   ruling 2026-11-25, a clean break that replaces authored palettes. A theme
   is a scheme (light or dark), a base colour and how far it blends into

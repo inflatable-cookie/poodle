@@ -121,10 +121,12 @@ export function DisplayControls({
           </div>
         )}
 
-        <div className="poodle-display-controls__group">
-          <Eyebrow>Style</Eyebrow>
-          <Select native value={style} options={styleOptions} ariaLabel="Style" onValueChange={onStyleChange} />
-        </div>
+        {styleOptions.length > 1 && (
+          <div className="poodle-display-controls__group">
+            <Eyebrow>Style</Eyebrow>
+            <Select native value={style} options={styleOptions} ariaLabel="Style" onValueChange={onStyleChange} />
+          </div>
+        )}
 
         {densityControl && (
           <div className="poodle-display-controls__group">

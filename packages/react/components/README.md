@@ -103,6 +103,18 @@ import { icons } from "./icons.generated";
 </UiPresentationProvider>;
 ```
 
+## Theming and rendering style
+
+The base token stylesheet applies the default rendering style. It provides
+filled controls, tonal surfaces, neutral selection, and the type scale.
+`data-theme` selects colour roles independently. Set `data-style="default"`
+on an ancestor to scope the rendering style explicitly.
+
+Set `--poodle-font-sans` or `--poodle-font-mono` at the root or on a subtree
+to supply a shared family. The type-scale components read recipe overrides
+first, then the shared family, then the per-role token. Per-role tokens
+default to the style's system stacks.
+
 ## Coming from `@inflatable-cookie/poodle-svelte`
 
 The two packages are interface-invariant — same component names, same prop

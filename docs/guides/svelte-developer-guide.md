@@ -274,15 +274,20 @@ portal host or an ancestor.
 After any component font-family recipe, these parts use the shared
 override first, then their per-role family token, such as
 `--poodle-typography-label-family`. The style supplies the per-role
-default. The default style keeps the original stacks and keeps inheritance
-on parts that previously inherited. Quiet uses system sans and mono and
-assigns per-role family tokens to those inherited parts. An app can
-override a per-role token on the style scope or within it.
+default using system sans and mono. An app can override a per-role token on
+the document root, style scope or any descendant.
 
 Existing CSS can keep reading the per-role tokens. Those aliases inherit
 from the document or style scope and pick up a shared override inside that
 scope. An explicit app declaration of a per-role token on an element still
 wins the cascade for that alias on that element.
+
+### Rendering style
+
+The base token stylesheet provides filled controls, tonal surfaces, neutral
+selection, and the type scale by default. Style and theme inherit
+independently. You can set `data-style="default"` on a subtree to scope the
+style explicitly. The same subtree can inherit or set its own `data-theme`.
 
 ### Themes
 

@@ -33,7 +33,7 @@ spec field / token override on the GPUI/Jetstream side).
   in g11.005.)
 - Components read the recipe hook first, then the style-adjusted semantic
   token and its base fallback. A style applies across a subtree independently
-  of its colour theme. The `fill`, `surface` and `selection` switches expand
+  of its colour theme. The `fill`, `surface`, `selection` and `typography` switches expand
   to token overrides during the build. Shared CSS consumes the resulting
   tokens.
 - Variant-specific rules get variant-scoped hooks (e.g.
@@ -44,36 +44,25 @@ spec field / token override on the GPUI/Jetstream side).
 
 Typography follows the same recipe → style role → component fallback order.
 For example, a button reads `--poodle-recipe-button-label-font-size` before
-the control-label role for the button's resolved size. An `initial` style
-value falls through to the component's existing value, including in a
-default-styled subtree nested inside quiet. A case recipe or role sets CSS
+the control-label role for the button's resolved size. For font families,
+components resolve the recipe, shared family override, per-role family token
+and style default in that order. A case recipe or role sets CSS
 `text-transform` and leaves the author's text and accessible name intact.
-Type recipes affect text metrics. Control height continues to come from the
-size contract.
+Type recipes affect text metrics. Control height comes from the size contract.
 
 The selection switch resolves selected fills and borders through
-`color.select.*` and reuses existing text and indicator roles across Select,
-Tabs, ToggleGroup, SegmentedControl, Card (including CardRadioGroup and
-CardToggleGroup), ThemeSelect, AgentQuestion, and Rating. Existing recipe
-hooks for Select options, Tabs edges and fills, ToggleGroup items,
-SegmentedControl labels, Card selected edges, and Rating filled glyphs still
-take precedence in all three selection styles (ThemeSelect and AgentQuestion
-expose no selected-state recipe hooks). Selected edges on Card, ThemeSelect, and
-AgentQuestion read `--poodle-style-selection-itemBorder` (and selected fills
-read `--poodle-style-selection-itemFill`), keeping `accent-outline` identical
-while suppressing borders under `accent-tint` and `neutral`. A recipe can
-supply a visible Tabs outline even when `accent-tint` supplies a transparent
-fallback border. See
+`color.select.*` and reuses text and indicator roles across the component
+library. Existing recipe hooks take precedence. Select options, Tabs edges
+and fills, ToggleGroup items, SegmentedControl labels, Card selected edges
+and Rating filled glyphs expose these hooks. Card, ThemeSelect and
+AgentQuestion selected edges use `--poodle-style-selection-itemBorder`,
+which is transparent in the default. A Tabs recipe can supply a visible
+outline. See
 [002 Token System and Package Layout](002-token-system-and-package-layout.md#modes).
 
-The selected state of sidebar nav, navigation menu, pagination, stepper,
-menubar, menu surface, dock region and breadcrumbs follows the same chain.
-Where a component's hand-mixed default has no matching role, the fallback
-reads `--poodle-style-selection-itemFill` (unset in `accent-outline`) and
-keeps its own mix, so the default style stays pixel-identical while
-`accent-tint` and `neutral` reach it. The sidebar's inset ring stays
-accent-coloured under every selection style; it is a doubled edge, listed for
-the redesign.
+Sidebar nav, navigation menu, pagination, stepper, menubar, menu surface,
+dock region and breadcrumbs follow the same chain. The sidebar's inset
+ring retains its accent colour.
 
 The surface switch resolves a container's boundary through
 `--poodle-style-surface-border`, `-fill`, `-floatingFill` and `-shadow`:
@@ -99,8 +88,7 @@ chosen states. Meter levels, clipping and gain reduction keep their status or
 accent colours; slider and fader value fills remain accent. The shared slider
 family applies control roles to both Slider and RangeSlider. The XY value
 marker and envelope point outlines and selected points use the selection
-indicator role to stay visible against a quiet control fill; default keeps
-their accent. Keyboard key colours and audio-switch on indicators retain
+indicator role against the neutral control fill. Keyboard key colours and audio-switch on indicators retain
 their instrument meaning.
 
 The list, detail and form-layout stylesheets follow the same chains. Selection

@@ -406,7 +406,7 @@ siblings, so it is density.
 | Complete | `color` | `var(--poodle-color-text-primary)` |
 | Disabled | `opacity` | `var(--poodle-state-opacity-disabled)` |
 | Hover (enabled) | Step `background` | `color-mix(in srgb, var(--poodle-color-text-primary) 6%, transparent)` — on the **Step**, for the same reason as the current fill |
-| Hover on current | Step `background` | `var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent))` — under `accent-outline` the hover deepens the accent; under `neutral` it is the neutral selection fill, the same as at rest |
+| Hover on current | Step `background` | `var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent))` — the default uses the same neutral fill as at rest |
 | Hover (Summary) | Summary `background` | `color-mix(in srgb, var(--poodle-color-text-primary) 6%, transparent)` — the same neutral fill a Step gets |
 | Rail segment, `complete` | `background` | `var(--poodle-color-accent-base)` |
 | Rail segment, `running` | `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 55%, transparent)` |

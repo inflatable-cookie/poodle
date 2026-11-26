@@ -470,7 +470,7 @@ the table:
 
 ### Size Variants (`[data-size]`)
 
-Quiet typography uses untracked, authored-case headers at 13/18, the
+The default type scale uses untracked, authored-case headers at 13/18, the
 primary row label at 15/20 with weight 600, and row summaries at 13/18.
 Right-aligned cells and pagination numbers use tabular figures. Control
 labels and the limit control follow their size-dependent type roles.

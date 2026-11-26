@@ -19,6 +19,8 @@
  * found by a second sweep (text-input, embed-preview), recorded on both
  * axes with the evidence. The August figure (53 pairs over 308
  * comparisons) predates the current specimen set.
+ * The rendering-style promotion on 2026-11-26 verified the Icon rows
+ * against the former opt-in style at fc9b7ad24.
  */
 
 export type VisualDebtFailureKind = "capture" | "size" | "pixels";
@@ -116,6 +118,13 @@ export const DEBT: VisualDebtEntry[] = [
     kind: "pixels",
     reason:
       "0.05% of pixels differ — just above the 0.02% default floor, glyph/canvas-edge antialiasing scale; untriaged.",
+  },
+  {
+    slug: "icon",
+    axes: ["eclipse-compact-md", "iceberg-compact-md"],
+    kind: "pixels",
+    reason:
+      "0.024% in Eclipse and 0.025% in Iceberg. Both framework captures and their diff match the former opt-in style at fc9b7ad24 byte for byte.",
   },
   {
     slug: "listbox",

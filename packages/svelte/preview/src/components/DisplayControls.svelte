@@ -126,10 +126,12 @@
       </div>
     {/if}
 
-    <div class="poodle-display-controls__group">
-      <Eyebrow>Style</Eyebrow>
-      <Select native value={style} options={styleOptions} ariaLabel="Style" onValueChange={onStyleChange} />
-    </div>
+    {#if styleOptions.length > 1}
+      <div class="poodle-display-controls__group">
+        <Eyebrow>Style</Eyebrow>
+        <Select native value={style} options={styleOptions} ariaLabel="Style" onValueChange={onStyleChange} />
+      </div>
+    {/if}
 
     {#if densityControl}
       <div class="poodle-display-controls__group">

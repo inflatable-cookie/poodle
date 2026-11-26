@@ -251,8 +251,8 @@ Rendering style roles (poodle#186): the bar reads the surface border and fill, a
 
 ### Trigger — Open
 
-The open trigger is the active item. Its fill reads the selection item fill,
-with the hand-mixed 14% as the fallback that keeps `accent-outline` unchanged.
+The open trigger is the active item. Its fill reads the neutral selection
+item fill by default.
 
 | Property | Value |
 |----------|-------|

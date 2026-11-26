@@ -329,7 +329,7 @@ icon-only link.
 
 #### `.page-header__title`
 
-With quiet typography, the main title uses page title (30/36, 600);
+With the default type scale, the main title uses page title (30/36, 600);
 levels 3–6 and a subtitle that stands in for the title use section title
 (19/24, 600). The section label uses the untracked, authored-case group
 label (13/18). An explicit eyebrow keeps its overline treatment. Subtitle and

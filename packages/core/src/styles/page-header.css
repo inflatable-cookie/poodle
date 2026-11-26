@@ -401,26 +401,22 @@
     }
   }
 
-  /* Quiet gives formerly inherited text its own role. A nested style
-     starts a new typography scope. */
-  @scope ([data-style="quiet"]) to ([data-style]) {
-    .poodle-page-header__back {
-      font-family: var(--poodle-recipe-page-header-back-font-family, var(--poodle-font-sans, var(--poodle-typography-label-family)));
-    }
+  .poodle-page-header__back {
+    font-family: var(--poodle-recipe-page-header-back-font-family, var(--poodle-font-sans, var(--poodle-typography-label-family)));
+  }
 
-    .poodle-page-header__section {
-      font-family: var(--poodle-recipe-page-header-section-font-family, var(--poodle-font-sans, var(--poodle-typography-label-family)));
-    }
+  .poodle-page-header__section {
+    font-family: var(--poodle-recipe-page-header-section-font-family, var(--poodle-font-sans, var(--poodle-typography-label-family)));
+  }
 
-    .poodle-page-header__eyebrow {
-      font-family: var(--poodle-recipe-page-header-eyebrow-font-family, var(--poodle-font-sans, var(--poodle-typography-caption-family)));
-    }
+  .poodle-page-header__eyebrow {
+    font-family: var(--poodle-recipe-page-header-eyebrow-font-family, var(--poodle-font-sans, var(--poodle-typography-caption-family)));
+  }
 
-    .poodle-page-header__subtitle {
-      font-family: var(--poodle-recipe-page-header-subtitle-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
-    }
+  .poodle-page-header__subtitle {
+    font-family: var(--poodle-recipe-page-header-subtitle-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
+  }
 
-    .poodle-page-header__body {
-      font-family: var(--poodle-recipe-page-header-body-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
-    }
+  .poodle-page-header__body {
+    font-family: var(--poodle-recipe-page-header-body-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
   }

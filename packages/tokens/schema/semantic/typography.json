@@ -3,7 +3,7 @@
     "body": {
       "family": {
         "$type": "fontFamily",
-        "$value": "{primitives.typography.font.family.sans}"
+        "$value": "{primitives.typography.font.systemFamily.sans}"
       },
       "size": {
         "$type": "dimension",
@@ -21,7 +21,7 @@
     "label": {
       "family": {
         "$type": "fontFamily",
-        "$value": "{primitives.typography.font.family.sans}"
+        "$value": "{primitives.typography.font.systemFamily.sans}"
       },
       "size": {
         "$type": "dimension",
@@ -53,7 +53,7 @@
     "caption": {
       "family": {
         "$type": "fontFamily",
-        "$value": "{primitives.typography.font.family.sans}"
+        "$value": "{primitives.typography.font.systemFamily.sans}"
       },
       "size": {
         "$type": "dimension",
@@ -81,7 +81,7 @@
     "heading": {
       "family": {
         "$type": "fontFamily",
-        "$value": "{primitives.typography.font.family.sans}"
+        "$value": "{primitives.typography.font.systemFamily.sans}"
       },
       "size": {
         "$type": "dimension",
@@ -99,7 +99,7 @@
     "code": {
       "family": {
         "$type": "fontFamily",
-        "$value": "{primitives.typography.font.family.mono}"
+        "$value": "{primitives.typography.font.systemFamily.mono}"
       },
       "adjustmentRatio": {
         "$type": "number",

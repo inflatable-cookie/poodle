@@ -215,9 +215,9 @@ Rendering style roles (poodle#186): triggers read the control fill at rest and `
 
 ### Trigger — Open (active)
 
-The open trigger is the active item. Its fill reads the selection item fill; the
-hand-mixed 16% is the fallback that keeps `accent-outline` unchanged. The recipe
-hook `--poodle-recipe-navigation-menu-open-trigger-fill` still resolves first.
+The open trigger is the active item. Its fill reads the neutral selection item
+fill by default. The recipe hook
+`--poodle-recipe-navigation-menu-open-trigger-fill` resolves first.
 
 | Property | Value |
 |----------|-------|
@@ -271,7 +271,7 @@ border at all.
 | Property | Value |
 |----------|-------|
 | `border` (all triggers, `[data-active-edge="outline"]`) | `0.0625rem solid transparent` |
-| `border-color` (open trigger) | `var(--poodle-style-selection-borderStrong, var(--poodle-color-select-accentBorderStrong))` — `accent-outline` resolves to the 42% accent mix on `border-default`; `neutral` resolves to transparent |
+| `border-color` (open trigger) | `var(--poodle-style-selection-borderStrong, var(--poodle-color-select-accentBorderStrong))` — transparent by default |
 
 ### Trigger — activeEdge="underline"
 
@@ -288,8 +288,8 @@ from shifting when the open trigger's edge becomes visible.
 
 | Property | Value |
 |----------|-------|
-| `background` (open trigger) | `var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base))` — `accent-outline` keeps the accent fill; `neutral` uses the neutral selection fill |
-| `color` (open trigger) | `var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse))` — `accent-outline` keeps the text-inverse token the primary Button uses on `accent-base`, so the filled trigger stays legible against every accent |
+| `background` (open trigger) | `var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base))` — neutral selection fill by default |
+| `color` (open trigger) | `var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse))` — primary text by default |
 | `background` (open trigger, hover / focus-visible) | `var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base))` — the fill survives hover/focus; the generic hover rule must not override it |
 
 ### Trigger — activeFill="none"

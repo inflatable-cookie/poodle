@@ -244,16 +244,10 @@
 
   @layer poodle-text-input-count {
     .poodle-text-input__char-count {
-      font-family: var(--poodle-font-sans, inherit);
+      font-family: var(--poodle-font-sans, var(--poodle-typography-caption-family));
       font-size: var(--poodle-style-typography-caption-size, inherit);
       line-height: var(--poodle-style-typography-caption-lineHeight, inherit);
       font-weight: var(--poodle-style-typography-caption-weight, inherit);
-    }
-
-    @scope ([data-style="quiet"]) to ([data-style]) {
-      .poodle-text-input__char-count {
-        font-family: var(--poodle-font-sans, var(--poodle-typography-caption-family));
-      }
     }
   }
 

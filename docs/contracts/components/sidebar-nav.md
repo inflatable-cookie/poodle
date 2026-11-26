@@ -245,7 +245,7 @@ Rendering style roles (poodle#186): items read `--poodle-style-control-fill` at 
 
 ### `.poodle-sidebar-nav__group-title`
 
-Quiet typography renders group titles at 13/18 and weight 600 in the
+The default type scale renders group titles at 13/18 and weight 600 in the
 theme's secondary text colour. It removes tracking and forced uppercase.
 Item labels follow the control-label scale. Active items keep their
 semibold emphasis. End labels use the 12/16 caption role with tabular
@@ -344,7 +344,7 @@ item's colour and weight changes apply to the label only.
 | `box-shadow` | `inset 0 0 0 0.0625rem var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent))` |
 | `border-left-color` | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |
 
-The active indicator is implemented as a left border on the item element itself. When inactive, the left border is transparent. When active, it takes the selection indicator colour, which is the accent under `accent-outline`. This replaces the previous `::before` pseudo-element approach.
+The active indicator is implemented as a left border on the item element itself. When inactive, the left border is transparent. When active, it takes the selection indicator colour, which resolves to primary text by default.
 
 The inset ring also draws the left edge that `border-left-color` marks. That doubled edge is kept for the redesign to remove. The ring reads the item fill, so it goes neutral with the fill under a neutral selection style.
 

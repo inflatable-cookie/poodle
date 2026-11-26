@@ -163,7 +163,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ### Sizing
 
-Quiet typography uses the control-label role, which steps through
+The default type scale uses the control-label role, which steps through
 13/16, 14/18, 15/20, 16/22, and 17/24 at weight 500. The height,
 padding, and icon boxes continue to use the control's existing geometry.
 
