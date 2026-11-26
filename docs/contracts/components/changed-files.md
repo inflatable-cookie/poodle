@@ -1,7 +1,7 @@
 # ChangedFiles
 
 Status: detailed contract
-Updated: 2026-07-29
+Updated: 2026-11-26
 
 ## 1. Purpose
 
@@ -159,14 +159,18 @@ expanded view, with a trailing slot for the per-node counts.
 
 | Property | Token |
 |----------|-------|
-| card background | `--poodle-color-background-elevated` |
-| card border | `--poodle-color-border-subtle` |
+| card background | `var(--poodle-style-surface-fill, var(--poodle-color-background-elevated))` |
+| card border | `var(--poodle-style-surface-border, var(--poodle-color-border-subtle))` |
+| card shadow | `var(--poodle-style-surface-shadow, none)` |
 | card radius | `--poodle-radius-surface` |
 | count text | `--poodle-color-text-primary` |
 | additions | `--poodle-color-status-success` |
 | deletions | `--poodle-color-status-danger` |
 | scope text | `--poodle-color-text-secondary` |
-| chip background | `--poodle-color-background-surface` |
+| chip background | `var(--poodle-style-control-fill, var(--poodle-color-background-surface))` (`control.fillHover` on hover) |
+| chip border | `var(--poodle-style-control-border, var(--poodle-color-border-subtle))` |
+| chip shadow | `var(--poodle-style-control-shadow, none)` |
+| chip text | `var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary))` |
 | chip radius | `--poodle-radius-control` |
 | focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, offset outline, `--poodle-radius-control` radius — the toggle is the card's full-width header row, so a square ring cornered against the card's rounded corners |
 | numeric font | `--poodle-typography-code-family`, `font-variant-numeric: tabular-nums` |

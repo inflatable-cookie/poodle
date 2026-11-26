@@ -17,9 +17,10 @@
   flex-direction: column;
   gap: var(--poodle-agent-question-record-gap);
   padding: var(--poodle-agent-question-record-inset);
-  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
   border-radius: var(--poodle-radius-control);
-  background: var(--poodle-color-background-surface);
+  background: var(--poodle-style-surface-fill, var(--poodle-color-background-surface));
+  box-shadow: var(--poodle-style-surface-shadow, none);
   font-size: var(--poodle-agent-question-record-font-size);
 }
 
@@ -59,12 +60,12 @@
 }
 
 .poodle-agent-question-record__option[data-chosen="true"] {
-  color: var(--poodle-color-text-primary);
+  color: var(--poodle-style-selection-text, var(--poodle-color-text-primary));
 }
 
 .poodle-agent-question-record__option-mark {
   flex: 0 0 auto;
-  color: var(--poodle-color-accent-base);
+  color: var(--poodle-style-selection-indicator, var(--poodle-color-accent-base));
 }
 
 /* Keeps the labels aligned whether or not a row has a tick. */

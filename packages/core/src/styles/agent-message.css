@@ -111,7 +111,7 @@
   height: 1em;
   margin-left: 0.125rem;
   border-radius: 0.0625rem;
-  background: var(--poodle-color-accent-base);
+  background: var(--poodle-style-selection-indicator, var(--poodle-color-accent-base));
   vertical-align: text-bottom;
   animation: poodle-agent-message-blink 1s steps(2, start) infinite;
 }

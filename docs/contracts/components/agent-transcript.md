@@ -1,7 +1,7 @@
 # AgentTranscript
 
 Status: detailed contract
-Updated: 2026-08-19
+Updated: 2026-11-26
 
 ## 1. Purpose
 
@@ -340,11 +340,11 @@ its own scrolling; the composer never scrolls with it.
 | block gap | `--poodle-space-stack-lg` |
 | activity label | `--poodle-color-text-secondary` |
 | activity font size | `--poodle-typography-label-size` |
-| jump background | `--poodle-color-background-elevated` |
-| jump border | `--poodle-color-border-subtle` |
+| jump background | `var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, var(--poodle-color-background-elevated)))` |
+| jump border | `var(--poodle-style-surface-border, var(--poodle-color-border-subtle))` |
 | jump radius | `--poodle-radius-pill` |
 | focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, offset outline |
-| jump shadow | `--poodle-elevation-overlay` |
+| jump shadow | `var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay))` |
 
 ### Size Variants
 

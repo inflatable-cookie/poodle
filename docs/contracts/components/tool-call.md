@@ -1,7 +1,7 @@
 # ToolCall
 
 Status: detailed contract
-Updated: 2026-08-10
+Updated: 2026-11-26
 
 ## 1. Purpose
 
@@ -150,7 +150,7 @@ indicator out of the row.
 | icon colour | `--poodle-color-text-secondary` |
 | success | `--poodle-color-status-success` |
 | danger | `--poodle-color-status-danger` |
-| hover fill | `--poodle-color-background-elevated` |
+| hover fill | `var(--poodle-style-control-fillHover, var(--poodle-color-background-elevated))` |
 | focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, offset outline |
 | row radius | `--poodle-radius-control` |
 | row gap | `--poodle-space-inline-sm` |

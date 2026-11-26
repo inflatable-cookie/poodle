@@ -45,17 +45,23 @@
 
 .poodle-agent-plan__action {
   padding: 0.25rem 0.625rem;
-  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-subtle));
   border-radius: var(--poodle-radius-control);
-  background: transparent;
-  color: var(--poodle-color-text-secondary);
+  background: var(--poodle-style-control-fill, transparent);
+  box-shadow: var(--poodle-style-control-shadow, none);
+  color: var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary));
   font: inherit;
   font-size: var(--poodle-agent-plan-font-size);
   cursor: pointer;
 }
 
 .poodle-agent-plan__action:hover {
+  background: var(--poodle-style-control-fillHover, transparent);
   color: var(--poodle-color-text-primary);
+}
+
+.poodle-agent-plan__action:not([data-variant="primary"]):active {
+  background: var(--poodle-style-control-fillActive, transparent);
 }
 
 .poodle-agent-plan__action:focus-visible {
@@ -68,6 +74,7 @@
 .poodle-agent-plan__action[data-variant="primary"] {
   border-color: transparent;
   background: var(--poodle-color-accent-base);
+  box-shadow: none;
   color: var(--poodle-color-text-inverse);
   font-weight: var(--poodle-typography-label-weight);
 }
@@ -79,6 +86,9 @@
 
 .poodle-agent-plan__action[data-variant="ghost"] {
   border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  color: var(--poodle-color-text-secondary);
 }
 
 /* ── Settled badge ───────────────────────────────────────────────────────── */

@@ -1,7 +1,7 @@
 # AgentMessage
 
 Status: detailed contract
-Updated: 2026-07-29
+Updated: 2026-11-26
 
 ## 1. Purpose
 
@@ -224,7 +224,7 @@ surface that shows agent prose.
 | blockquote text | `--poodle-color-text-secondary` |
 | user surface | `--poodle-color-background-elevated` |
 | user radius | `--poodle-radius-surface` |
-| caret | `--poodle-color-accent-base` |
+| caret | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |
 
 ### Size Variants
 
