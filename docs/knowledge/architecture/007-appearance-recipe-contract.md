@@ -94,6 +94,12 @@ and are listed for the redesign: PickerShell's state block (a nested tone
 below the shell, which no role supplies) and the tinted icon circles in
 Callout and EmptyState, which are markup noise.
 
+The audio controls use the same chains for their control chrome, panels and
+chosen states. Meter levels, clipping and gain reduction keep their status or
+accent colours; slider and fader value fills remain accent. The shared slider
+family applies control roles to both Slider and RangeSlider. Keyboard key
+colours and audio-switch on indicators retain their instrument meaning.
+
 ## Public Surface vs Internal Variables
 
 Two classes, machine-classified by

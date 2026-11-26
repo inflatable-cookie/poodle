@@ -44,7 +44,7 @@
     overflow: hidden;
     min-height: var(--poodle-meter-track-thickness);
     border-radius: 999px;
-    background: var(--poodle-recipe-meter-track-fill, color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary)));
+    background: var(--poodle-recipe-meter-track-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary))));
   }
 
   .poodle-meter__fill {
@@ -108,7 +108,7 @@
   }
 
   .poodle-meter[data-shape="ring"] .poodle-meter__track {
-    background: var(--poodle-recipe-meter-track-fill, color-mix(in srgb, var(--poodle-surface) 88%, var(--poodle-color-text-primary)));
+    background: var(--poodle-recipe-meter-track-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-surface) 88%, var(--poodle-color-text-primary))));
   }
 
   .poodle-meter[data-shape="ring"] .poodle-meter__fill {
