@@ -1,6 +1,6 @@
 .poodle-keyboard { position: relative; display: inline-block; width: 22rem; height: 7rem; touch-action: none; opacity: 1; }
 .poodle-keyboard[aria-disabled="true"] { opacity: var(--poodle-recipe-keyboard-disabled-opacity, var(--poodle-state-opacity-disabled)); }
-.poodle-keyboard-visual { position: absolute; inset: 0; display: block; overflow: hidden; border: .0625rem solid var(--poodle-recipe-keyboard-border, var(--poodle-color-border-default)); border-radius: .375rem; background: var(--poodle-recipe-keyboard-fill, var(--poodle-color-background-surface)); }
+.poodle-keyboard-visual { position: absolute; inset: 0; display: block; overflow: hidden; border: .0625rem solid var(--poodle-recipe-keyboard-border, var(--poodle-style-surface-border, var(--poodle-color-border-default))); border-radius: .375rem; background: var(--poodle-recipe-keyboard-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-surface))); }
 .poodle-keyboard-visual__key { position: absolute; box-sizing: border-box; border: .0625rem solid var(--poodle-recipe-keyboard-border, color-mix(in srgb, var(--poodle-color-neutral-900) 42%, transparent)); background: var(--poodle-recipe-keyboard-white-key, var(--poodle-color-neutral-25)); }
 .poodle-keyboard-visual__key[data-kind="white"] { z-index: 1; }
 .poodle-keyboard-visual__key[data-kind="black"] { z-index: 2; background: var(--poodle-recipe-keyboard-black-key, var(--poodle-color-neutral-900)); }

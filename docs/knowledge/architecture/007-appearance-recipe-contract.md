@@ -94,6 +94,15 @@ and are listed for the redesign: PickerShell's state block (a nested tone
 below the shell, which no role supplies) and the tinted icon circles in
 Callout and EmptyState, which are markup noise.
 
+The audio controls use the same chains for their control chrome, panels and
+chosen states. Meter levels, clipping and gain reduction keep their status or
+accent colours; slider and fader value fills remain accent. The shared slider
+family applies control roles to both Slider and RangeSlider. The XY value
+marker and envelope point outlines and selected points use the selection
+indicator role to stay visible against a quiet control fill; default keeps
+their accent. Keyboard key colours and audio-switch on indicators retain
+their instrument meaning.
+
 The list, detail and form-layout stylesheets follow the same chains. Selection
 summary chips and their overflow pill read the control fill and shadow roles,
 because they are filled, removable controls. Clickable nav cards read the

@@ -22,9 +22,9 @@
         + var(--poodle-duration-input-padding-inline-size-adjust)
         + var(--poodle-duration-input-padding-inline-density-adjust)
       );
-    border: 0.0625rem solid var(--poodle-color-border-default);
+    border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-duration-input-fill, var(--poodle-color-background-surface));
+    background: var(--poodle-recipe-duration-input-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
     font-family: var(--poodle-typography-code-family);
     transition:
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
