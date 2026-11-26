@@ -13,7 +13,8 @@ use poodle_tokens::semantic;
 
 use crate::types::ValidationState;
 
-/// Input kind for `TextInputSpec`. Matches the contract `type` prop.
+/// Input kind for `TextInputSpec`. Covers the full standard HTML `<input type>`
+/// vocabulary plus Poodle's `"multiline"` and `"slug"` modes (contract `type` prop).
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum TextInputType {
     #[default]
@@ -26,6 +27,21 @@ pub enum TextInputType {
     Url,
     Tel,
     Number,
+    Date,
+    DateTimeLocal,
+    Month,
+    Time,
+    Week,
+    Color,
+    File,
+    Hidden,
+    Range,
+    Checkbox,
+    Radio,
+    Button,
+    Submit,
+    Reset,
+    Image,
 }
 
 impl TextInputType {
@@ -41,6 +57,21 @@ impl TextInputType {
             Self::Url => "url",
             Self::Tel => "tel",
             Self::Number => "number",
+            Self::Date => "date",
+            Self::DateTimeLocal => "datetime-local",
+            Self::Month => "month",
+            Self::Time => "time",
+            Self::Week => "week",
+            Self::Color => "color",
+            Self::File => "file",
+            Self::Hidden => "hidden",
+            Self::Range => "range",
+            Self::Checkbox => "checkbox",
+            Self::Radio => "radio",
+            Self::Button => "button",
+            Self::Submit => "submit",
+            Self::Reset => "reset",
+            Self::Image => "image",
         }
     }
 }
@@ -534,5 +565,11 @@ mod tests {
             configured.input_mode.map(TextInputMode::as_str),
             Some("decimal")
         );
+
+        assert_eq!(TextInputType::Date.as_str(), "date");
+        assert_eq!(TextInputType::Time.as_str(), "time");
+        assert_eq!(TextInputType::DateTimeLocal.as_str(), "datetime-local");
+        assert_eq!(TextInputType::Month.as_str(), "month");
+        assert_eq!(TextInputType::Week.as_str(), "week");
     }
 }
