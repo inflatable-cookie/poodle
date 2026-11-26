@@ -1,0 +1,113 @@
+{
+  "views": [
+    {
+      "id": "offer-staged",
+      "input": {
+        "status": { "kind": "ready" },
+        "availability": { "state": "offer", "version": "1.4.0", "reason": "staged", "notes": "Bug fixes." }
+      },
+      "expect": {
+        "state": "offer",
+        "tone": "attention",
+        "title": "Version 1.4.0 is available",
+        "body": "Bug fixes.",
+        "actions": ["install", "defer"],
+        "notice": null
+      }
+    },
+    {
+      "id": "unavailable-for-target",
+      "input": {
+        "status": { "kind": "ready" },
+        "availability": { "state": "unavailableForTarget", "version": "1.4.0" }
+      },
+      "expect": {
+        "state": "unavailableForTarget",
+        "tone": "info",
+        "title": "No update for this system",
+        "body": "Version 1.4.0 is not built for this system.",
+        "actions": [],
+        "notice": null
+      }
+    },
+    {
+      "id": "unavailable-for-target-with-retryable-rejection",
+      "input": {
+        "status": { "kind": "ready" },
+        "availability": { "state": "unavailableForTarget", "version": "1.4.0" },
+        "lastRejection": "unreachable"
+      },
+      "expect": {
+        "state": "unavailableForTarget",
+        "tone": "info",
+        "title": "No update for this system",
+        "body": "Version 1.4.0 is not built for this system.",
+        "actions": [],
+        "notice": null
+      }
+    },
+    {
+      "id": "invalid-artifact-with-detail",
+      "input": {
+        "status": { "kind": "ready" },
+        "availability": { "state": "offer", "version": "1.4.0", "reason": "staged", "notes": null },
+        "lastRejection": "malformedArtifact",
+        "lastRejectionDetail": "invalid archive"
+      },
+      "expect": {
+        "state": "invalidArtifact",
+        "tone": "warning",
+        "title": "The downloaded update was invalid",
+        "body": "invalid archive",
+        "actions": ["downloadAgain"],
+        "notice": null
+      }
+    },
+    {
+      "id": "invalid-artifact-null-detail",
+      "input": {
+        "status": { "kind": "ready" },
+        "lastRejection": "malformedArtifact",
+        "lastRejectionDetail": null
+      },
+      "expect": {
+        "state": "invalidArtifact",
+        "tone": "warning",
+        "title": "The downloaded update was invalid",
+        "body": null,
+        "actions": ["downloadAgain"],
+        "notice": null
+      }
+    },
+    {
+      "id": "signature-rejected-no-retry",
+      "input": {
+        "status": { "kind": "ready" },
+        "lastRejection": "signatureRejected"
+      },
+      "expect": {
+        "state": "rejected",
+        "tone": "danger",
+        "title": "Update unavailable",
+        "body": null,
+        "actions": [],
+        "notice": {
+          "tone": "danger",
+          "message": "The update failed its signature check and was not installed.",
+          "retry": null
+        }
+      }
+    }
+  ],
+  "rejections": [
+    { "code": "staleAuthority", "message": "The update service returned a stale result.", "retry": "check" },
+    { "code": "noOffer", "message": "No update is available right now.", "retry": "check" },
+    { "code": "unavailable", "message": "The update service is unavailable.", "retry": "check" },
+    { "code": "channelMismatch", "message": "The update feed answered for a different channel.", "retry": "check" },
+    { "code": "unreachable", "message": "The update service could not be reached.", "retry": "check" },
+    { "code": "signatureRejected", "message": "The update failed its signature check and was not installed.", "retry": null },
+    { "code": "notWritable", "message": "The update could not be written to disk.", "retry": "install" },
+    { "code": "malformedArtifact", "message": "The downloaded update was invalid.", "retry": "downloadAgain" },
+    { "code": "installFailed", "message": "The update could not be installed.", "retry": "install" }
+  ]
+}

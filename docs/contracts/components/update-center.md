@@ -1,7 +1,7 @@
 # UpdateCenter
 
 Status: active contract
-Updated: 2026-08-13
+Updated: 2026-11-25
 
 ## 1. Purpose
 
@@ -42,8 +42,9 @@ See `update-status.md` §3. `UpdateCenter` passes the same reads through without
 interpretation. `presence` is the authority's predicate:
 
 - `hidden` — **the operator cannot act.** `withheldByRollout` (not staged to
-  them) and `aheadOfChannel` (nothing to install). The icon collapses; the
-  states still render inside `UpdateStatus`.
+  them), `unavailableForTarget` (no artifact for this system) and
+  `aheadOfChannel` (nothing to install). The icon collapses; the states still
+  render inside `UpdateStatus`.
 - `quiet` — something exists but no press is expected now: work in flight, an
   offer the operator already postponed, or `managedElsewhere`.
 - `attention` — an offer, or an artifact downloaded and waiting.
@@ -81,6 +82,7 @@ themselves.
 | `installedVersion` | `string \| undefined` | `undefined` | Passed to `UpdateStatus`. |
 | `deferral` | `UpdateDeferral \| undefined` | `undefined` | Passed to `UpdateStatus`. |
 | `lastRejection` | `UpdateRejectionCode \| undefined` | `undefined` | Passed to `UpdateStatus`. |
+| `lastRejectionDetail` | `string \| null \| undefined` | `undefined` | Passed to `UpdateStatus`. |
 | `aheadOfChannel` | `UpdateAheadOfChannel \| undefined` | `undefined` | Passed to `UpdateStatus`. |
 | `pending` | `boolean` | `false` | Passed to `UpdateStatus`. |
 | `observe` | `((observer: () => void) => () => void) \| null` | `null` | **Web targets only** — the authority's subscription, re-derived here and passed through. A native host rerenders with fresh props (see Native Binding). |
@@ -97,6 +99,7 @@ themselves.
 | `deferLabel` | `string` | `"Later"` | Passed to `UpdateStatus`. |
 | `checkLabel` | `string` | `"Check for updates"` | Passed to `UpdateStatus`. |
 | `retryLabel` | `string` | `"Try again"` | Passed to `UpdateStatus`. |
+| `downloadAgainLabel` | `string` | `"Download again"` | Passed to `UpdateStatus`. |
 | `confirmInstall` | `boolean` | `true` | Passed to `UpdateStatus`. |
 
 ### `observe` and prop freshness — a real runtime difference
@@ -127,6 +130,7 @@ expect the trigger) passes in Svelte and fails in React.
 | `onCheck` | `UpdateStatus` emits a check | — | Pass-through. |
 | `onInstall` | `UpdateStatus` emits an install | — | Pass-through. |
 | `onDefer` | `UpdateStatus` emits a defer | — | Pass-through. |
+| `onDownloadAgain` | `UpdateStatus` emits a download-again | — | Pass-through. |
 | `onOpenChange` | The popover opens or closes | `boolean` | The next open state. |
 
 ## 6. States

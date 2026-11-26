@@ -32,6 +32,7 @@ pub struct UpdateCenterHandlers {
     pub on_check: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_install: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_defer: Option<Arc<dyn Fn() + Send + Sync>>,
+    pub on_download_again: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_confirm_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 }
 
@@ -115,6 +116,7 @@ pub fn update_center(
                 on_check: handlers.on_check.clone(),
                 on_install: handlers.on_install.clone(),
                 on_defer: handlers.on_defer.clone(),
+                on_download_again: handlers.on_download_again.clone(),
                 on_confirm_open_change: handlers.on_confirm_open_change.clone(),
             },
         );

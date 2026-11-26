@@ -22,6 +22,8 @@ pub struct UpdateCenterSpec {
     pub installed_version: Option<String>,
     pub deferral: Option<UpdateDeferral>,
     pub last_rejection: Option<UpdateRejectionCode>,
+    /// The installer detail for `last_rejection`; shown on a malformed artifact.
+    pub last_rejection_detail: Option<String>,
     pub ahead_of_channel: Option<UpdateAheadOfChannel>,
     pub pending: bool,
     pub open: Option<bool>,
@@ -39,6 +41,7 @@ pub struct UpdateCenterSpec {
     pub defer_label: String,
     pub check_label: String,
     pub retry_label: String,
+    pub download_again_label: String,
     pub confirm_install: bool,
     pub confirm_open: bool,
 }
@@ -54,6 +57,7 @@ impl Default for UpdateCenterSpec {
             installed_version: None,
             deferral: None,
             last_rejection: None,
+            last_rejection_detail: None,
             ahead_of_channel: None,
             pending: false,
             open: None,
@@ -69,6 +73,7 @@ impl Default for UpdateCenterSpec {
             defer_label: "Later".to_string(),
             check_label: "Check for updates".to_string(),
             retry_label: "Try again".to_string(),
+            download_again_label: "Download again".to_string(),
             confirm_install: true,
             confirm_open: false,
         }
@@ -120,6 +125,11 @@ impl UpdateCenterSpec {
 
     pub fn with_last_rejection(mut self, code: UpdateRejectionCode) -> Self {
         self.last_rejection = Some(code);
+        self
+    }
+
+    pub fn with_last_rejection_detail(mut self, detail: impl Into<String>) -> Self {
+        self.last_rejection_detail = Some(detail.into());
         self
     }
 
@@ -198,6 +208,11 @@ impl UpdateCenterSpec {
         self
     }
 
+    pub fn with_download_again_label(mut self, label: impl Into<String>) -> Self {
+        self.download_again_label = label.into();
+        self
+    }
+
     pub fn with_confirm_install(mut self, confirm_install: bool) -> Self {
         self.confirm_install = confirm_install;
         self
@@ -231,6 +246,7 @@ impl UpdateCenterSpec {
             installed_version: self.installed_version.clone(),
             deferral: self.deferral.clone(),
             last_rejection: self.last_rejection,
+            last_rejection_detail: self.last_rejection_detail.clone(),
             ahead_of_channel: self.ahead_of_channel.clone(),
             pending: self.pending,
             size: self.size,
@@ -240,6 +256,7 @@ impl UpdateCenterSpec {
             defer_label: self.defer_label.clone(),
             check_label: self.check_label.clone(),
             retry_label: self.retry_label.clone(),
+            download_again_label: self.download_again_label.clone(),
             confirm_install: self.confirm_install,
             confirm_open: self.confirm_open,
         }

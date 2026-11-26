@@ -57,6 +57,10 @@ pub enum UpdateAvailabilityProjection {
         reason: OfferReason,
         notes: Option<String>,
     },
+    /// The channel has a release but no artifact for this platform or target.
+    UnavailableForTarget {
+        version: String,
+    },
     UpToDate,
     AheadOfChannel {
         installed: String,
@@ -113,6 +117,7 @@ pub enum UpdateRejectionCode {
     Unreachable,
     SignatureRejected,
     NotWritable,
+    MalformedArtifact,
     InstallFailed,
 }
 
@@ -168,14 +173,18 @@ pub fn update_rejection_message(code: UpdateRejectionCode) -> &'static str {
             "The update failed its signature check and was not installed."
         }
         UpdateRejectionCode::NotWritable => "The update could not be written to disk.",
+        UpdateRejectionCode::MalformedArtifact => "The downloaded update was invalid.",
         UpdateRejectionCode::InstallFailed => "The update could not be installed.",
     }
 }
 
-/// The retry a rejection may offer. A signature rejection offers none.
+/// The retry a rejection may offer. A signature rejection offers none. A
+/// malformed artifact is terminal for the staged bytes: download again, not
+/// check again.
 pub fn update_rejection_retry(code: UpdateRejectionCode) -> Option<UpdateStatusAction> {
     match code {
         UpdateRejectionCode::SignatureRejected => None,
+        UpdateRejectionCode::MalformedArtifact => Some(UpdateStatusAction::DownloadAgain),
         UpdateRejectionCode::NotWritable | UpdateRejectionCode::InstallFailed => {
             Some(UpdateStatusAction::Install)
         }
@@ -205,6 +214,7 @@ pub enum UpdateStatusAction {
     Check,
     Install,
     Defer,
+    DownloadAgain,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -225,6 +235,7 @@ pub enum UpdateStatusTone {
     Neutral,
     Info,
     Attention,
+    Warning,
     Danger,
 }
 
@@ -234,6 +245,7 @@ impl UpdateStatusTone {
             Self::Neutral => "neutral",
             Self::Info => "info",
             Self::Attention => "attention",
+            Self::Warning => "warning",
             Self::Danger => "danger",
         }
     }
@@ -242,6 +254,7 @@ impl UpdateStatusTone {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum UpdateStatusViewState {
     Offer,
+    UnavailableForTarget,
     UpToDate,
     AheadOfChannel,
     WithheldByRollout,
@@ -253,6 +266,7 @@ pub enum UpdateStatusViewState {
     Checking,
     Failed,
     Rejected,
+    InvalidArtifact,
     Idle,
 }
 
@@ -260,6 +274,7 @@ impl UpdateStatusViewState {
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Offer => "offer",
+            Self::UnavailableForTarget => "unavailableForTarget",
             Self::UpToDate => "upToDate",
             Self::AheadOfChannel => "aheadOfChannel",
             Self::WithheldByRollout => "withheldByRollout",
@@ -271,6 +286,7 @@ impl UpdateStatusViewState {
             Self::Checking => "checking",
             Self::Failed => "failed",
             Self::Rejected => "rejected",
+            Self::InvalidArtifact => "invalidArtifact",
             Self::Idle => "idle",
         }
     }
@@ -301,6 +317,8 @@ pub struct UpdateStatusInput {
     pub progress: Option<UpdateProgressProjection>,
     pub deferral: Option<UpdateDeferral>,
     pub last_rejection: Option<UpdateRejectionCode>,
+    /// The installer detail for `last_rejection`, when the authority supplies one.
+    pub last_rejection_detail: Option<String>,
     pub ahead_of_channel: Option<UpdateAheadOfChannel>,
     pub channel: Option<Channel>,
     pub installed_version: Option<String>,
@@ -335,6 +353,12 @@ pub fn update_status_view(input: UpdateStatusInput) -> UpdateStatusView {
             busy: false,
             actions: vec![UpdateStatusAction::Check],
         };
+    }
+
+    // A malformed artifact replaces the availability line: the staged bytes are
+    // gone, so the offer underneath is not the story any more.
+    if input.last_rejection == Some(UpdateRejectionCode::MalformedArtifact) {
+        return invalid_artifact_view(input.last_rejection_detail.as_deref());
     }
 
     if let Some(availability) = &input.availability {
@@ -414,6 +438,21 @@ fn progress_view(progress: &UpdateProgressProjection) -> UpdateStatusView {
     }
 }
 
+/// The staged bytes were discarded as malformed. Warn, show the installer's
+/// detail when there is one, and offer to download again.
+fn invalid_artifact_view(detail: Option<&str>) -> UpdateStatusView {
+    UpdateStatusView {
+        state: UpdateStatusViewState::InvalidArtifact,
+        tone: UpdateStatusTone::Warning,
+        title: "The downloaded update was invalid".to_string(),
+        body: detail.filter(|d| !d.is_empty()).map(str::to_string),
+        progress: None,
+        notice: None,
+        busy: false,
+        actions: vec![UpdateStatusAction::DownloadAgain],
+    }
+}
+
 fn availability_view(
     availability: &UpdateAvailabilityProjection,
     input: &UpdateStatusInput,
@@ -430,6 +469,19 @@ fn availability_view(
             notice,
             busy: false,
             actions: vec![UpdateStatusAction::Install, UpdateStatusAction::Defer],
+        },
+        // Information, not an offer: nothing to install, nothing to check, so
+        // no notice either (a retryable rejection would otherwise offer a
+        // check or install action this state must not offer).
+        UpdateAvailabilityProjection::UnavailableForTarget { version } => UpdateStatusView {
+            state: UpdateStatusViewState::UnavailableForTarget,
+            tone: UpdateStatusTone::Info,
+            title: "No update for this system".to_string(),
+            body: Some(format!("Version {version} is not built for this system.")),
+            progress: None,
+            notice: None,
+            busy: false,
+            actions: Vec::new(),
         },
         UpdateAvailabilityProjection::UpToDate => UpdateStatusView {
             state: UpdateStatusViewState::UpToDate,
@@ -580,6 +632,7 @@ mod tests {
             progress: None,
             deferral: None,
             last_rejection: None,
+            last_rejection_detail: None,
             ahead_of_channel: None,
             channel: None,
             installed_version: None,
@@ -743,5 +796,66 @@ mod tests {
     fn download_label_never_says_zero_for_a_null_fraction() {
         assert_eq!(update_download_label(None), "Downloading update");
         assert_eq!(update_download_label(Some(0.42)), "Downloading update, 42%");
+    }
+
+    #[test]
+    fn unavailable_for_target_is_information_with_no_action() {
+        let mut input = ready_input();
+        input.availability = Some(UpdateAvailabilityProjection::UnavailableForTarget {
+            version: "1.4.0".to_string(),
+        });
+        let view = update_status_view(input);
+        assert_eq!(view.state, UpdateStatusViewState::UnavailableForTarget);
+        assert_eq!(view.tone, UpdateStatusTone::Info);
+        assert_eq!(view.title, "No update for this system");
+        assert_eq!(
+            view.body.as_deref(),
+            Some("Version 1.4.0 is not built for this system.")
+        );
+        assert!(view.actions.is_empty(), "no check and no install");
+    }
+
+    #[test]
+    fn malformed_artifact_is_a_warning_that_offers_download_again() {
+        let mut input = ready_input();
+        input.availability = Some(offer());
+        input.last_rejection = Some(UpdateRejectionCode::MalformedArtifact);
+        input.last_rejection_detail = Some("invalid archive".to_string());
+        let view = update_status_view(input);
+        assert_eq!(view.state, UpdateStatusViewState::InvalidArtifact);
+        assert_eq!(view.tone, UpdateStatusTone::Warning);
+        assert_eq!(view.title, "The downloaded update was invalid");
+        assert_eq!(view.body.as_deref(), Some("invalid archive"));
+        assert_eq!(view.actions, vec![UpdateStatusAction::DownloadAgain]);
+        assert!(
+            view.notice.is_none(),
+            "the state is the message, not a notice"
+        );
+    }
+
+    #[test]
+    fn malformed_artifact_without_detail_has_no_body() {
+        let mut input = ready_input();
+        input.last_rejection = Some(UpdateRejectionCode::MalformedArtifact);
+        let view = update_status_view(input);
+        assert_eq!(view.state, UpdateStatusViewState::InvalidArtifact);
+        assert_eq!(view.body, None);
+
+        let mut empty = ready_input();
+        empty.last_rejection = Some(UpdateRejectionCode::MalformedArtifact);
+        empty.last_rejection_detail = Some(String::new());
+        assert_eq!(update_status_view(empty).body, None);
+    }
+
+    #[test]
+    fn malformed_artifact_retries_by_download_not_by_check() {
+        assert_eq!(
+            update_rejection_retry(UpdateRejectionCode::MalformedArtifact),
+            Some(UpdateStatusAction::DownloadAgain)
+        );
+        assert_eq!(
+            update_rejection_message(UpdateRejectionCode::MalformedArtifact),
+            "The downloaded update was invalid."
+        );
     }
 }

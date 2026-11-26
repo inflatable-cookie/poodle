@@ -57,6 +57,10 @@ export function UpdateStatusSpecimen() {
           />
           <UpdateStatus
             status={ready}
+            availability={{ state: "unavailableForTarget", version: "1.4.0" }}
+          />
+          <UpdateStatus
+            status={ready}
             availability={{ state: "withheldByRollout", version: "2.0.0" }}
           />
           <UpdateStatus
@@ -93,6 +97,11 @@ export function UpdateStatusSpecimen() {
                 command: "brew upgrade finch",
               },
             }}
+          />
+          <UpdateStatus
+            status={ready}
+            lastRejection="malformedArtifact"
+            lastRejectionDetail="invalid archive"
           />
           <UpdateStatus status={ready} lastRejection="unreachable" />
           <UpdateStatus status={ready} lastRejection="signatureRejected" />

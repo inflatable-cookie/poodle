@@ -35,6 +35,8 @@ export type InstallManager =
 
 export type UpdateAvailabilityProjection =
   | { state: "offer"; version: string; reason: OfferReason; notes: string | null }
+  // The channel has a release but no artifact for this platform or target.
+  | { state: "unavailableForTarget"; version: string }
   | { state: "upToDate" }
   | { state: "aheadOfChannel"; installed: string; channel: string }
   | { state: "withheldByRollout"; version: string }
@@ -62,6 +64,7 @@ export type UpdateRejectionCode =
   | "unreachable"
   | "signatureRejected"
   | "notWritable"
+  | "malformedArtifact"
   | "installFailed";
 
 // ── Controller reads ──────────────────────────────────────────────────────
@@ -127,6 +130,8 @@ export function updateRejectionMessage(code: UpdateRejectionCode): string {
       return "The update failed its signature check and was not installed.";
     case "notWritable":
       return "The update could not be written to disk.";
+    case "malformedArtifact":
+      return "The downloaded update was invalid.";
     case "installFailed":
       return "The update could not be installed.";
   }
@@ -135,12 +140,16 @@ export function updateRejectionMessage(code: UpdateRejectionCode): string {
 /**
  * The retry a rejection may offer. A signature rejection offers none — the
  * artifact did not come from the signing key, and re-trying will not fix that.
- * Install-side failures retry the install; check-side failures re-check.
+ * A malformed artifact is terminal for the staged bytes: download again, not
+ * check again. Install-side failures retry the install; check-side failures
+ * re-check.
  */
 export function updateRejectionRetry(code: UpdateRejectionCode): UpdateStatusAction | null {
   switch (code) {
     case "signatureRejected":
       return null;
+    case "malformedArtifact":
+      return { type: "downloadAgain" };
     case "notWritable":
     case "installFailed":
       return { type: "install" };
@@ -168,7 +177,7 @@ export function updateErrorMessage(error: unknown): string {
 
 // ── View model ────────────────────────────────────────────────────────────
 
-export type UpdateStatusAction = { type: "check" | "install" | "defer" };
+export type UpdateStatusAction = { type: "check" | "install" | "defer" | "downloadAgain" };
 
 export type UpdateStatusNotice = {
   tone: "neutral" | "danger";
@@ -176,10 +185,11 @@ export type UpdateStatusNotice = {
   retry: UpdateStatusAction | null;
 };
 
-export type UpdateStatusTone = "neutral" | "info" | "attention" | "danger";
+export type UpdateStatusTone = "neutral" | "info" | "attention" | "warning" | "danger";
 
 export type UpdateStatusViewState =
   | "offer"
+  | "unavailableForTarget"
   | "upToDate"
   | "aheadOfChannel"
   | "withheldByRollout"
@@ -191,6 +201,7 @@ export type UpdateStatusViewState =
   | "checking"
   | "failed"
   | "rejected"
+  | "invalidArtifact"
   | "idle";
 
 export interface UpdateStatusView {
@@ -215,6 +226,8 @@ export interface UpdateStatusInput {
   progress?: UpdateProgressProjection;
   deferral?: UpdateDeferral;
   lastRejection?: UpdateRejectionCode;
+  /** The installer detail for `lastRejection`, when the authority supplies one. */
+  lastRejectionDetail?: string | null;
   aheadOfChannel?: UpdateAheadOfChannel;
   channel?: Channel;
   installedVersion?: string;
@@ -250,6 +263,12 @@ export function updateStatusView(input: UpdateStatusInput): UpdateStatusView {
       busy: false,
       actions: [{ type: "check" }],
     };
+  }
+
+  // A malformed artifact is terminal for the staged bytes, so it replaces the
+  // availability line rather than sitting under it.
+  if (input.lastRejection === "malformedArtifact") {
+    return invalidArtifactView(input.lastRejectionDetail ?? null);
   }
 
   if (input.availability !== undefined) {
@@ -334,6 +353,24 @@ function progressView(progress: UpdateProgressProjection): UpdateStatusView {
   }
 }
 
+/**
+ * The staged bytes were discarded as malformed. Warn, show the installer's
+ * detail when there is one, and offer to download again. Not a check: the
+ * next step is a fresh artifact, not a fresh look at the feed.
+ */
+function invalidArtifactView(detail: string | null): UpdateStatusView {
+  return {
+    state: "invalidArtifact",
+    tone: "warning",
+    title: "The downloaded update was invalid",
+    body: detail !== null && detail.length > 0 ? detail : null,
+    progress: null,
+    notice: null,
+    busy: false,
+    actions: [{ type: "downloadAgain" }],
+  };
+}
+
 function availabilityView(
   availability: UpdateAvailabilityProjection,
   input: UpdateStatusInput,
@@ -351,6 +388,21 @@ function availabilityView(
         notice,
         busy: false,
         actions: [{ type: "install" }, { type: "defer" }],
+      };
+    case "unavailableForTarget":
+      // Information, not an offer: the release exists for the channel but has
+      // no artifact for this system. Nothing to install, nothing to check, so
+      // no notice either: a retryable rejection or deferral would otherwise
+      // hand the user a check or install action this state must not offer.
+      return {
+        state: "unavailableForTarget",
+        tone: "info",
+        title: "No update for this system",
+        body: `Version ${availability.version} is not built for this system.`,
+        progress: null,
+        notice: null,
+        busy: false,
+        actions: [],
       };
     case "upToDate":
       return {

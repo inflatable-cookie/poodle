@@ -29,6 +29,7 @@ export interface UpdateCenterProps {
   installedVersion?: string;
   deferral?: UpdateDeferral;
   lastRejection?: UpdateRejectionCode;
+  lastRejectionDetail?: string | null;
   aheadOfChannel?: UpdateAheadOfChannel;
   pending?: boolean;
   observe?: ((observer: () => void) => () => void) | null;
@@ -45,10 +46,12 @@ export interface UpdateCenterProps {
   deferLabel?: string;
   checkLabel?: string;
   retryLabel?: string;
+  downloadAgainLabel?: string;
   confirmInstall?: boolean;
   onCheck?: (() => void) | null;
   onInstall?: (() => void) | null;
   onDefer?: (() => void) | null;
+  onDownloadAgain?: (() => void) | null;
   onOpenChange?: ((open: boolean) => void) | null;
 }
 
@@ -61,6 +64,7 @@ export function UpdateCenter({
   installedVersion,
   deferral,
   lastRejection,
+  lastRejectionDetail,
   aheadOfChannel,
   pending = false,
   observe = null,
@@ -77,10 +81,12 @@ export function UpdateCenter({
   deferLabel = "Later",
   checkLabel = "Check for updates",
   retryLabel = "Try again",
+  downloadAgainLabel = "Download again",
   confirmInstall = true,
   onCheck = null,
   onInstall = null,
   onDefer = null,
+  onDownloadAgain = null,
   onOpenChange = null,
 }: UpdateCenterProps) {
   const uiPresentation = useUiPresentation();
@@ -180,6 +186,7 @@ export function UpdateCenter({
               installedVersion={installedVersion}
               deferral={deferral}
               lastRejection={lastRejection}
+              lastRejectionDetail={lastRejectionDetail}
               aheadOfChannel={aheadOfChannel}
               pending={pending}
               observe={observe}
@@ -187,10 +194,12 @@ export function UpdateCenter({
               deferLabel={deferLabel}
               checkLabel={checkLabel}
               retryLabel={retryLabel}
+              downloadAgainLabel={downloadAgainLabel}
               confirmInstall={confirmInstall}
               onCheck={onCheck}
               onInstall={onInstall}
               onDefer={onDefer}
+              onDownloadAgain={onDownloadAgain}
             />
           </div>
         </section>

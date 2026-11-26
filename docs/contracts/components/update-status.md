@@ -1,7 +1,7 @@
 # UpdateStatus
 
 Status: active contract
-Updated: 2026-08-13
+Updated: 2026-11-25
 
 ## 1. Purpose
 
@@ -58,6 +58,7 @@ type InstallManager =
 
 type UpdateAvailabilityProjection =
   | { state: "offer"; version: string; reason: OfferReason; notes: string | null }
+  | { state: "unavailableForTarget"; version: string }
   | { state: "upToDate" }
   | { state: "aheadOfChannel"; installed: string; channel: string }
   | { state: "withheldByRollout"; version: string }
@@ -78,8 +79,8 @@ type DeferralCause =
   | { cause: "installFailed"; detail: string };
 
 type UpdateRejectionCode =
-  | "staleAuthority" | "noOffer" | "unavailable" | "unreachable"
-  | "signatureRejected" | "notWritable" | "installFailed";
+  | "staleAuthority" | "noOffer" | "unavailable" | "channelMismatch" | "unreachable"
+  | "signatureRejected" | "notWritable" | "malformedArtifact" | "installFailed";
 ```
 
 ## 4. Public Props
@@ -92,7 +93,8 @@ type UpdateRejectionCode =
 | `channel` | `Channel \| undefined` | `undefined` | The channel the install follows; shown with the installed version when up to date. |
 | `installedVersion` | `string \| undefined` | `undefined` | The running version; shown when up to date. |
 | `deferral` | `UpdateDeferral \| undefined` | `undefined` | A postponed install and its reason. Not a fault — rendered neutrally. |
-| `lastRejection` | `UpdateRejectionCode \| undefined` | `undefined` | The last rejection code. The only fault; rendered in danger styling. |
+| `lastRejection` | `UpdateRejectionCode \| undefined` | `undefined` | The last rejection code. The only fault; rendered in danger styling, except `malformedArtifact`, which replaces the availability line with the warning-toned invalid-artifact state. |
+| `lastRejectionDetail` | `string \| null \| undefined` | `undefined` | The installer's detail for `lastRejection`, as supplied by the authority. Poodle passes it through unchanged and does not redact it; a host that redacts secrets must redact before passing it in. Shown as the body of the invalid-artifact state. |
 | `aheadOfChannel` | `UpdateAheadOfChannel \| undefined` | `undefined` | The preferred source for the ahead-of-channel message (both versions). |
 | `pending` | `boolean` | `false` | Disables the actions while a command is in flight. |
 | `observe` | `((observer: () => void) => () => void) \| null` | `null` | **Web targets only** — the authority's subscription; the component re-derives on each notification. A native host rerenders with fresh props (see Native Binding). |
@@ -103,6 +105,7 @@ type UpdateRejectionCode =
 | `deferLabel` | `string` | `"Later"` | Defer action label. |
 | `checkLabel` | `string` | `"Check for updates"` | Check action label. |
 | `retryLabel` | `string` | `"Try again"` | Retry action label (deferral or rejection notices). |
+| `downloadAgainLabel` | `string` | `"Download again"` | Download-again action label (invalid-artifact state). |
 | `confirmInstall` | `boolean` | `true` | Whether install-and-restart confirms before emitting. It closes the application. |
 
 ### `observe` and prop freshness — a real runtime difference
@@ -133,6 +136,7 @@ expect the trigger) passes in Svelte and fails in React.
 | `onCheck` | The check action is activated (idle, failure, or a rejection retry) | — | Re-runs the update check. |
 | `onInstall` | The install action is activated and, when `confirmInstall`, confirmed | — | Installs and restarts. The host owns the operation. |
 | `onDefer` | The defer action is activated on an offer | — | Postpones the offer ("not now", not "never"). |
+| `onDownloadAgain` | The download-again action is activated on an invalid artifact (or its retry notice) | — | Re-runs prepare for the offered version. The host owns the operation. Never a re-check: a malformed artifact is terminal for the staged bytes. |
 
 ## 6. States
 
@@ -141,6 +145,7 @@ expect the trigger) passes in Svelte and fails in React.
 | State | Title | Body | Actions |
 |-------|-------|------|---------|
 | `offer` | `Version {version} is available` | notes, when present | install, defer |
+| `unavailableForTarget` | `No update for this system` | `Version {version} is not built for this system.` | none; no notice either, even after a retryable rejection |
 | `upToDate` | `You're up to date` | `Version {installed} · {channel} channel`, when known | none |
 | `aheadOfChannel` | `You're ahead of your channel` | `Installed {installed} · channel {channel}` | none |
 | `withheldByRollout` | `Version {version} exists` | `Not staged to you yet.` | none |
@@ -151,6 +156,19 @@ expect the trigger) passes in Svelte and fails in React.
 Supersedes the availability line while an install runs: `idle` (fall through),
 `downloading` (a `Progress` bar — `fraction: null` renders indeterminate, never a
 zero bar), `verifying`, `readyToInstall` (install action), `installing`.
+
+### Invalid artifact
+
+`lastRejection: "malformedArtifact"` replaces the availability line. The staged
+bytes were discarded, so the offer beneath is no longer the story.
+
+| State | Title | Body | Tone | Actions |
+|-------|-------|------|------|---------|
+| `invalidArtifact` | `The downloaded update was invalid` | `lastRejectionDetail`, when present | `warning` | download again |
+
+Download again is not check again. It re-runs prepare for the offered version
+and emits `onDownloadAgain`. The rejection message for the code is
+`The downloaded update was invalid.`, and its retry is `downloadAgain`.
 
 ### The Five Wrong Messages
 
@@ -187,6 +205,7 @@ Rendered once in core (`updateStatusView`), so the two renderers cannot drift:
 | rejection notice fill | `--poodle-recipe-update-status-rejection-fill` | danger 10% mix |
 | rejection notice text | `--poodle-recipe-update-status-rejection-text` | `--poodle-color-text-primary` |
 | danger title | — | `--poodle-color-text-danger` |
+| warning title (invalid artifact) | — | `--poodle-color-status-warning` |
 
 ## 9. Framework Parity
 

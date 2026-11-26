@@ -32,6 +32,7 @@ pub struct UpdateStatusHandlers {
     pub on_check: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_install: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_defer: Option<Arc<dyn Fn() + Send + Sync>>,
+    pub on_download_again: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_confirm_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 }
 
@@ -67,6 +68,11 @@ fn dispatch_action(
                 handler();
             }
         }
+        UpdateStatusAction::DownloadAgain => {
+            if let Some(handler) = &handlers.on_download_again {
+                handler();
+            }
+        }
     }
 }
 
@@ -75,6 +81,7 @@ fn action_label(action: UpdateStatusAction, spec: &UpdateStatusSpec) -> &str {
         UpdateStatusAction::Install => spec.install_label.as_str(),
         UpdateStatusAction::Defer => spec.defer_label.as_str(),
         UpdateStatusAction::Check => spec.check_label.as_str(),
+        UpdateStatusAction::DownloadAgain => spec.download_again_label.as_str(),
     }
 }
 
@@ -83,6 +90,7 @@ fn action_suffix(action: UpdateStatusAction) -> &'static str {
         UpdateStatusAction::Install => "install",
         UpdateStatusAction::Defer => "defer",
         UpdateStatusAction::Check => "check",
+        UpdateStatusAction::DownloadAgain => "download-again",
     }
 }
 
@@ -100,6 +108,7 @@ pub fn update_status(
         progress: spec.progress.clone(),
         deferral: spec.deferral.clone(),
         last_rejection: spec.last_rejection,
+        last_rejection_detail: spec.last_rejection_detail.clone(),
         ahead_of_channel: spec.ahead_of_channel.clone(),
         channel: spec.channel,
         installed_version: spec.installed_version.clone(),
@@ -111,10 +120,11 @@ pub fn update_status(
     // The rejection recipe mixes the status danger, not the danger text token
     // (contract §8: `color-mix(in srgb, var(--poodle-color-status-danger) …)`).
     let status_danger = ctx.theme().resolve_color("color.status.danger");
-    let title_color = if matches!(view.tone, poodle_headless::update::UpdateStatusTone::Danger) {
-        danger
-    } else {
-        text_primary
+    let warning = ctx.theme().resolve_color("color.status.warning");
+    let title_color = match view.tone {
+        poodle_headless::update::UpdateStatusTone::Danger => danger,
+        poodle_headless::update::UpdateStatusTone::Warning => warning,
+        _ => text_primary,
     };
 
     let mut head = Node::container();
@@ -230,6 +240,7 @@ pub fn update_status(
                 let on_check = handlers.on_check.clone();
                 let on_install = handlers.on_install.clone();
                 let on_defer = handlers.on_defer.clone();
+                let on_download_again = handlers.on_download_again.clone();
                 let on_confirm = handlers.on_confirm_open_change.clone();
                 Some(Arc::new(move || {
                     dispatch_action(
@@ -239,6 +250,7 @@ pub fn update_status(
                             on_check: on_check.clone(),
                             on_install: on_install.clone(),
                             on_defer: on_defer.clone(),
+                            on_download_again: on_download_again.clone(),
                             on_confirm_open_change: on_confirm.clone(),
                             instance_id: None,
                         },
@@ -276,6 +288,7 @@ pub fn update_status(
                 let on_check = handlers.on_check.clone();
                 let on_install = handlers.on_install.clone();
                 let on_defer = handlers.on_defer.clone();
+                let on_download_again = handlers.on_download_again.clone();
                 let on_confirm = handlers.on_confirm_open_change.clone();
                 Some(Arc::new(move || {
                     dispatch_action(
@@ -285,6 +298,7 @@ pub fn update_status(
                             on_check: on_check.clone(),
                             on_install: on_install.clone(),
                             on_defer: on_defer.clone(),
+                            on_download_again: on_download_again.clone(),
                             on_confirm_open_change: on_confirm.clone(),
                             instance_id: None,
                         },
@@ -539,6 +553,68 @@ mod tests {
         let rendered = texts(&node);
         assert!(rendered.iter().any(|t| t.contains("signature check")));
         assert!(!rendered.iter().any(|t| t == "Try again"));
+    }
+
+    #[test]
+    fn invalid_artifact_warns_with_detail_and_downloads_again() {
+        let downloads = Arc::new(Mutex::new(0usize));
+        let sink = Arc::clone(&downloads);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = update_status(
+            &ready()
+                .with_last_rejection(UpdateRejectionCode::MalformedArtifact)
+                .with_last_rejection_detail("invalid archive"),
+            &ctx,
+            UpdateStatusHandlers {
+                on_download_again: Some(Arc::new(move || *sink.lock().unwrap() += 1)),
+                ..UpdateStatusHandlers::default()
+            },
+        );
+        assert_eq!(
+            node.roles.get("state").map(String::as_str),
+            Some("invalidArtifact")
+        );
+        assert_eq!(node.roles.get("tone").map(String::as_str), Some("warning"));
+        let rendered = texts(&node);
+        assert!(rendered
+            .iter()
+            .any(|t| t == "The downloaded update was invalid"));
+        assert!(rendered.iter().any(|t| t == "invalid archive"));
+        assert!(!rendered.iter().any(|t| t == "Install and restart"));
+
+        let mut download = None;
+        walk(&node, &mut |n| {
+            if n.id.as_deref() == Some("update-status-download-again") {
+                download = n.interaction.on_activate.clone();
+            }
+        });
+        download.expect("download again action")();
+        assert_eq!(*downloads.lock().unwrap(), 1);
+    }
+
+    #[test]
+    fn unavailable_for_target_is_information_with_no_action() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = update_status(
+            &UpdateStatusSpec::new()
+                .with_status(UpdateControllerStatus::Ready)
+                .with_availability(UpdateAvailabilityProjection::UnavailableForTarget {
+                    version: "1.4.0".to_string(),
+                }),
+            &ctx,
+            UpdateStatusHandlers::default(),
+        );
+        assert_eq!(
+            node.roles.get("state").map(String::as_str),
+            Some("unavailableForTarget")
+        );
+        assert_eq!(node.roles.get("tone").map(String::as_str), Some("info"));
+        let rendered = texts(&node);
+        assert!(rendered.iter().any(|t| t == "No update for this system"));
+        assert!(!rendered.iter().any(|t| t == "Check for updates"));
+        assert!(!rendered.iter().any(|t| t == "Install and restart"));
     }
 
     #[test]

@@ -25,6 +25,7 @@
           availability={{ state: "aheadOfChannel", installed: "1.3.0-nightly.4", channel: "1.2.9" }}
           aheadOfChannel={{ installed: "1.3.0-nightly.4", channel: "1.2.9" }}
         />
+        <UpdateStatus status={ready} availability={{ state: "unavailableForTarget", version: "1.4.0" }} />
         <UpdateStatus status={ready} availability={{ state: "withheldByRollout", version: "2.0.0" }} />
         <UpdateStatus status={ready} availability={{ state: "managedElsewhere", version: "1.4.0", manager: "homebrewCask" }} />
       </SpecimenGroup>
@@ -48,6 +49,7 @@
           availability={{ state: "managedElsewhere", version: "1.4.0", manager: "homebrewCask" }}
           deferral={{ version: "1.4.0", cause: { cause: "externallyManaged", manager: "homebrewCask", command: "brew upgrade finch" } }}
         />
+        <UpdateStatus status={ready} lastRejection="malformedArtifact" lastRejectionDetail="invalid archive" />
         <UpdateStatus status={ready} lastRejection="unreachable" />
         <UpdateStatus status={ready} lastRejection="signatureRejected" />
       </SpecimenGroup>

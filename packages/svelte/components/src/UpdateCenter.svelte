@@ -29,6 +29,7 @@
     installedVersion?: string;
     deferral?: UpdateDeferral;
     lastRejection?: UpdateRejectionCode;
+    lastRejectionDetail?: string | null;
     aheadOfChannel?: UpdateAheadOfChannel;
     pending?: boolean;
     observe?: ((observer: () => void) => () => void) | null;
@@ -45,10 +46,12 @@
     deferLabel?: string;
     checkLabel?: string;
     retryLabel?: string;
+    downloadAgainLabel?: string;
     confirmInstall?: boolean;
     onCheck?: (() => void) | null;
     onInstall?: (() => void) | null;
     onDefer?: (() => void) | null;
+    onDownloadAgain?: (() => void) | null;
     onOpenChange?: ((open: boolean) => void) | null;
   }
 
@@ -61,6 +64,7 @@
     installedVersion = undefined,
     deferral = undefined,
     lastRejection = undefined,
+    lastRejectionDetail = undefined,
     aheadOfChannel = undefined,
     pending = false,
     observe = null,
@@ -77,10 +81,12 @@
     deferLabel = "Later",
     checkLabel = "Check for updates",
     retryLabel = "Try again",
+    downloadAgainLabel = "Download again",
     confirmInstall = true,
     onCheck = null,
     onInstall = null,
     onDefer = null,
+    onDownloadAgain = null,
     onOpenChange = null,
   }: Props = $props();
 
@@ -204,6 +210,7 @@
             {installedVersion}
             {deferral}
             {lastRejection}
+            {lastRejectionDetail}
             {aheadOfChannel}
             {pending}
             {observe}
@@ -211,10 +218,12 @@
             {deferLabel}
             {checkLabel}
             {retryLabel}
+            {downloadAgainLabel}
             {confirmInstall}
             {onCheck}
             {onInstall}
             {onDefer}
+            {onDownloadAgain}
           />
         </div>
       </section>
