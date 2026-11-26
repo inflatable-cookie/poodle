@@ -175,5 +175,5 @@ The current `g03.006` seed baseline is:
 
 - this normative spec
 - `docs/knowledge/specs/008-parity-evidence-documented-delta-and-downstream-extension-rules.md`
-- `docs/knowledge/specs/026-appearance-recipes-and-downstream-override-strategy.md`
+- `docs/knowledge/specs/archive/026-appearance-recipes-and-downstream-override-strategy.md`
 - `docs/roadmaps/g03/006-extension-sdk-composition-guidance-and-starter-packages.md`

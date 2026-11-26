@@ -424,10 +424,12 @@ siblings, so it is density.
 
 - Status colours resolve through the `StepperSpec` token methods; no literal
   colours in the component
-- GPUI projects the trigger's role and state through AccessKit, but no live
-  platform-tree assertion covers the stepper yet (see `003-native-accessibility.md`).
-  The status suffix in the accessible name is carried on the spec and is not
-  projected yet.
+- The shared renderer gives each trigger the button role and an accessible name
+  of the step label plus its status word (`, running`, `, complete`,
+  `, failed`). GPUI projects that role and name through AccessKit, but no live
+  platform-tree assertion covers the stepper yet, so it keeps its A2 hold (see
+  `003-native-accessibility.md`). The renderer sets no `aria-current` or
+  `aria-invalid` state on the trigger.
 - Orientation maps to the flex axis: vertical flows the same steps as a column
   with bottom dividers.
 - Keyboard navigation between triggers does not exist on the natives (no key
