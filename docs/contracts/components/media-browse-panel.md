@@ -205,11 +205,11 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 | State | Property | Value |
 |-------|----------|-------|
-| `:hover` | border-color | `var(--poodle-color-border-focus)` |
-| `:hover` | background | `var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 90%, transparent))` |
+| `:hover` | border-color | `var(--poodle-recipe-media-browse-panel-hover-focus-item-border, var(--poodle-color-border-focus))` |
+| `:hover` | background | `var(--poodle-recipe-media-browse-panel-hover-focus-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 90%, transparent)))` |
 | `:hover` | outline | `none` |
-| `:focus-visible` | border-color | `var(--poodle-color-border-focus)` |
-| `:focus-visible` | background | `var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 90%, transparent))` |
+| `:focus-visible` | border-color | `var(--poodle-recipe-media-browse-panel-hover-focus-item-border, var(--poodle-color-border-focus))` |
+| `:focus-visible` | background | `var(--poodle-recipe-media-browse-panel-hover-focus-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 90%, transparent)))` |
 | `:focus-visible` | outline | `none` |
 
 ### Image `.media-browse-panel__image`

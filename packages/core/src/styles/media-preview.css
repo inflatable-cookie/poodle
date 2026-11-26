@@ -63,8 +63,8 @@
   .poodle-media-preview__meta li {
     padding: var(--poodle-media-preview-meta-padding-y) var(--poodle-media-preview-meta-padding-x);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-media-preview-meta-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-surface) 70%, transparent)));
-    box-shadow: var(--poodle-recipe-media-preview-meta-shadow, var(--poodle-style-surface-shadow, none));
+    background: var(--poodle-recipe-media-preview-meta-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-surface) 70%, transparent)));
+    box-shadow: var(--poodle-recipe-media-preview-meta-shadow, var(--poodle-style-control-shadow, none));
   }
 
   .poodle-media-preview[data-size="xs"] {

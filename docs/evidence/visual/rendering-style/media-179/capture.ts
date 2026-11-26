@@ -26,6 +26,13 @@ export const slugs = [
 ] as const;
 export const themes = ["eclipse", "clay"] as const;
 
+// SLUGS=media-picker,video-player re-captures only those specimens (the same procedure, so
+// a before/after pair for one specimen stays comparable).
+function selectedSlugs(): readonly string[] {
+  const only = process.env.SLUGS?.split(",").filter(Boolean);
+  return only && only.length > 0 ? only : slugs;
+}
+
 async function capture(page: Page, root: string, slug: string, theme: string, style: string) {
   const params = new URLSearchParams({ theme, density: "compact", controlSize: "sm", style });
   await page.goto("about:blank");
@@ -44,9 +51,27 @@ async function capture(page: Page, root: string, slug: string, theme: string, st
     (name) => document.querySelector(".poodle-app-shell")?.getAttribute("data-style") === name,
     style,
   );
+  // The picker is a dialog that portals out of the specimen: open it, then shoot the dialog.
+  let target = specimen;
+  if (slug === "media-picker") {
+    await specimen.getByRole("button", { name: "Select media" }).first().click();
+    await page.locator(".poodle-media-picker__grid").first().waitFor({ timeout: 30_000 });
+    target = page.locator(".poodle-dialog").first();
+  }
+  // The video specimen loads a remote file, so the first frame paints at a random moment.
+  // Clearing the source gives every capture the same unpainted stage.
+  if (slug === "video-player") {
+    await page.evaluate(() => {
+      for (const video of document.querySelectorAll("video")) {
+        video.pause();
+        video.removeAttribute("src");
+        video.load();
+      }
+    });
+  }
   await page.evaluate(() => document.fonts.ready);
   await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
-  return await specimen.screenshot();
+  return await target.screenshot();
 }
 
 // The preview must be the checkout under test. The harness's fixed ports are reused when
@@ -62,7 +87,7 @@ async function runCapture(output: string, styles: string[]) {
       const dir = resolve(output, style);
       mkdirSync(dir, { recursive: true });
       for (const theme of themes) {
-        for (const slug of slugs) {
+        for (const slug of selectedSlugs()) {
           const page = await browser.newPage({ viewport: { width: 1280, height: 900 }, deviceScaleFactor: 1 });
           try {
             await pinPage(page);

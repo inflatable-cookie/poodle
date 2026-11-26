@@ -206,7 +206,8 @@ Card header and body always render regardless of media state.
 |----------|-------|
 | padding | `var(--poodle-media-preview-meta-padding-y) var(--poodle-media-preview-meta-padding-x)` |
 | border-radius | `var(--poodle-radius-control)` |
-| background | `var(--poodle-recipe-media-preview-meta-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-surface) 70%, transparent)))` |
+| background | `var(--poodle-recipe-media-preview-meta-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-surface) 70%, transparent)))` |
+| box-shadow | `var(--poodle-recipe-media-preview-meta-shadow, var(--poodle-style-control-shadow, none))` |
 
 ### Size Variants
 
