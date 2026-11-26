@@ -20,6 +20,7 @@ import {
   normalizeHex,
   rgbToHsv,
   layerContains,
+  registerDismissLayer,
 } from "@inflatable-cookie/poodle-core";
 
 import { AnchoredSurface } from "./AnchoredSurface";
@@ -308,34 +309,21 @@ export function ColorPicker({
     commitFromPinned(norm);
   }
 
+  const setOpenRef = useRef<(next: boolean) => void>(() => {});
+  setOpenRef.current = setOpenState;
+
   useEffect(() => {
     if (!isOpen) {
       return;
     }
 
-    function handlePointerDown(event: MouseEvent): void {
-      if (!rootElement) return;
-      // The surface is portalled out of the root, so both count as inside.
-      if (!layerContains(event.target as Node, rootElement, surfaceRef.current)) {
-        setOpenState(false);
-      }
-    }
-
-    function handleKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setOpenState(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeydown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeydown);
-    };
-  }, [isOpen]);
+    return registerDismissLayer({
+      contains: (target) => layerContains(target, rootElement, surfaceRef.current),
+      dismissOnOutsideInteract: true,
+      onDismiss: () => setOpenRef.current(false),
+      hostElement: rootElement,
+    });
+  }, [isOpen, rootElement]);
 
   const alphaField = (suffix: string) => (
     <div className="poodle-color-picker__channel-field">

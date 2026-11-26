@@ -144,7 +144,7 @@ function handlePointerDown(event: MouseEvent): void {
 }
 
 function handleKeydown(event: KeyboardEvent): void {
-  if (event.key !== "Escape") {
+  if (event.key !== "Escape" || event.defaultPrevented || event.isComposing || event.keyCode === 229) {
     return;
   }
 

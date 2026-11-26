@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { formatDateLabel, monthAnchorIso, todayIsoDate, layerContains } from "@inflatable-cookie/poodle-core";
+import { formatDateLabel, monthAnchorIso, todayIsoDate, layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/date-picker.css";
 
@@ -78,25 +78,13 @@ export function DatePicker({
 
   useEffect(() => {
     if (!isOpen) return;
-    function handlePointerDown(event: MouseEvent): void {
-      // The surface is portalled out of the root, so both count as inside.
-      if (!layerContains(event.target as Node, rootElement, surfaceRef.current)) {
-        setOpenRef.current(false);
-      }
-    }
-    function handleKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setOpenRef.current(false);
-      }
-    }
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeydown);
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeydown);
-    };
-  }, [isOpen]);
+    return registerDismissLayer({
+      contains: (target) => layerContains(target, rootElement, surfaceRef.current),
+      dismissOnOutsideInteract: true,
+      onDismiss: () => setOpenRef.current(false),
+      hostElement: rootElement,
+    });
+  }, [isOpen, rootElement]);
 
   function commitValue(nextValue: string): void {
     if (!hasControlledValue) setUncontrolledValue(nextValue);

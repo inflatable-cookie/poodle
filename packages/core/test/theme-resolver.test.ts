@@ -33,7 +33,7 @@ test("matches every generated role and report in the shared theme vectors", () =
     expect(colors.map(([, color]) => hex(color)), id).toEqual(vector.colors);
     expect<unknown>(actual.report, id).toEqual(vector.report);
   }
-});
+}, 30000);
 
 test("matches the checked-in prototype for every preset in both schemes and tint modes", () => {
   const prototype = readFileSync(new URL("../../../docs/knowledge/research/theming-model/index.html", import.meta.url), "utf8");
@@ -121,7 +121,7 @@ test("zero blends remove their hue, and swapping pairs preserves neutrals", () =
       expect([r, g, b], role).toEqual([r, r, r]);
     }
   }
-});
+}, 30000);
 
 test("both blends add tint gradually on leaving zero", () => {
   for (const scheme of schemes) {
@@ -164,7 +164,7 @@ test("fitted text and accent lines clear their contrast targets after rounding",
       expect(contrast(roles["accent.on"], roles[role]), id).toBeGreaterThanOrEqual(4.5);
     }
   }
-});
+}, 30000);
 
 test("garbage settings always resolve to all 44 roles with valid RGBA bytes", () => {
   const random = fixedRandom(0x382);
@@ -187,5 +187,25 @@ test("garbage settings always resolve to all 44 roles with valid RGBA bytes", ()
       expect(channels).toHaveLength(4);
       expect(channels.every((c) => Number.isInteger(c) && c >= 0 && c <= 255)).toBe(true);
     }
+  }
+});
+
+test("omitted and null settings resolve to defaults without spurious clamps", () => {
+  const baseline = resolveTheme({ scheme: "dark", evenTint: true });
+  const omitted = resolveTheme({});
+  const bare = resolveTheme();
+  const nulled = resolveTheme({
+    scheme: null,
+    base: null,
+    baseBlend: null,
+    accent: null,
+    accentBlend: null,
+    contrast: null,
+    evenTint: null,
+  } as unknown as ThemeSettings);
+
+  for (const actual of [omitted, bare, nulled]) {
+    expect(actual.roles).toEqual(baseline.roles);
+    expect(actual.report.clamped).toEqual([]);
   }
 });

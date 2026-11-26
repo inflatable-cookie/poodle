@@ -17,22 +17,30 @@ export interface TokenSplit {
   remainder: string;
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 /**
  * Separator-driven splitting of raw input. Returns null when the input
  * contains no completed tokens yet (no separator hit).
+ *
+ * Each non-empty character in `separators` becomes part of the split set.
  */
 export function splitTokenInput(
   rawValue: string,
-  splitPattern: RegExp | null,
-  separatorChars: string,
+  separators: readonly string[],
 ): TokenSplit | null {
-  if (!splitPattern) {
+  const separatorChars = Array.from(
+    new Set(separators.filter((separator) => separator.length > 0).join("")),
+  );
+  if (separatorChars.length === 0) {
     return null;
   }
 
+  const splitPattern = new RegExp(`[${escapeRegExp(separatorChars.join(""))}]+`);
   const rawParts = rawValue.split(splitPattern);
-  const endsWithSeparator =
-    separatorChars.length > 0 && separatorChars.split("").some((separator) => rawValue.endsWith(separator));
+  const endsWithSeparator = separatorChars.some((separator) => rawValue.endsWith(separator));
 
   if (rawParts.length <= 1 && !endsWithSeparator) {
     return null;

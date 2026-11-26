@@ -4,8 +4,7 @@
  *
  * States: closed | open. Focus restoration runs on every close path
  * (explicit, escape, outside). Dismissal wiring is the adapter's job via
- * registerDismissLayer while open; positioning stays CSS-anchored (documented
- * delta until the shared anchor-positioning service lands).
+ * registerDismissLayer while open.
  */
 
 import type { PartAttrs, TransitionResult } from "./machine";

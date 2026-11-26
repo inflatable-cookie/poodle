@@ -71,18 +71,6 @@
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const canEdit = $derived(!disabled && !readOnly);
-  const separatorChars = $derived(
-    Array.from(new Set(separators.filter((separator) => separator.length > 0))).join("")
-  );
-  const splitPattern = $derived(
-    separatorChars.length > 0
-      ? new RegExp(`[${escapeRegExp(separatorChars)}]+`)
-      : null
-  );
-
-  function escapeRegExp(value: string): string {
-    return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  }
 
   function normalizeToken(value: string, currentValues: string[]): string | null {
     const trimmed = value.trim();
@@ -138,7 +126,7 @@
   }
 
   function handleInput(nextValue: string): void {
-    const split = splitTokenInput(nextValue, splitPattern, separatorChars);
+    const split = splitTokenInput(nextValue, separators);
 
     if (!split) {
       inputValue = nextValue;

@@ -118,7 +118,7 @@ function numberInput(value: unknown, fallback: number, min: number, max: number,
 }
 
 function colorInput(value: unknown, input: "base" | "accent", report: ThemeReport): ThemeColor | null {
-  if (value === undefined || value === "mono") return null;
+  if (value === undefined || value === null || value === "mono") return null;
   try {
     const color = parseColor(value);
     if (color) return color;
@@ -191,7 +191,7 @@ export function resolveTheme(input?: unknown): ResolvedTheme {
   const report: ThemeReport = { clamped: [], adjusted: [], warnings: [], notes: [] };
   const schemeInput = inputField(input, "scheme");
   const scheme = schemeInput === "light" ? "light" : "dark";
-  if (schemeInput !== "light" && schemeInput !== "dark") {
+  if (schemeInput !== undefined && schemeInput !== null && schemeInput !== "light" && schemeInput !== "dark") {
     report.clamped.push({ input: "scheme", from: describeInput(schemeInput), to: "dark", why: "not light or dark" });
   }
   const sc = SCHEME[scheme];
@@ -203,7 +203,7 @@ export function resolveTheme(input?: unknown): ResolvedTheme {
   const accent = colorInput(inputField(input, "accent"), "accent", report);
   const evenInput = inputField(input, "evenTint");
   const even = typeof evenInput === "boolean" ? evenInput : true;
-  if (evenInput !== undefined && typeof evenInput !== "boolean") {
+  if (evenInput !== undefined && evenInput !== null && typeof evenInput !== "boolean") {
     report.clamped.push({ input: "evenTint", from: describeInput(evenInput), to: "true", why: "not true or false" });
   }
 
