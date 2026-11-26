@@ -1,7 +1,7 @@
 # AgentQuestionRecord
 
 Status: detailed contract
-Updated: 2026-07-30
+Updated: 2026-11-26
 
 ## 1. Purpose
 
@@ -117,13 +117,14 @@ They are dimmed rather than dropped, so the chosen one still reads first.
 
 | Property | Token |
 |----------|-------|
-| card fill | `--poodle-color-background-surface` |
-| card border | `--poodle-color-border-subtle` |
+| card fill | `var(--poodle-style-surface-fill, var(--poodle-color-background-surface))` |
+| card border | `var(--poodle-style-surface-border, var(--poodle-color-border-subtle))` |
+| card shadow | `var(--poodle-style-surface-shadow, none)` |
 | card radius | `--poodle-radius-control` |
 | prompt colour | `--poodle-color-text-secondary` |
-| chosen option | `--poodle-color-text-primary` |
+| chosen option | `var(--poodle-style-selection-text, var(--poodle-color-text-primary))` |
 | unchosen option | `--poodle-color-text-tertiary` |
-| tick | `--poodle-color-accent-base` |
+| tick | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |
 | answer colour | `--poodle-color-text-primary` |
 
 ### Data Attributes

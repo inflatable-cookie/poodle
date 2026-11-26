@@ -30,18 +30,19 @@
     min-width: 0;
     padding: var(--poodle-agent-chat-input-pad-y) var(--poodle-agent-chat-input-pad-x);
     box-sizing: border-box;
-    border: 0.0625rem solid var(--poodle-color-border-default);
+    border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
     border-radius: calc(var(--poodle-radius-surface) * 1.5);
     /* Two steps up the background ladder (canvas → surface → panel): one step is
        too close to the page to read as a distinct block. */
-    background: var(--poodle-recipe-agent-chat-input-field-fill, var(--poodle-color-background-panel));
+    background: var(--poodle-recipe-agent-chat-input-field-fill, var(--poodle-style-control-fill, var(--poodle-color-background-panel)));
+    box-shadow: var(--poodle-style-control-shadow, none);
     transition:
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .poodle-agent-chat-input__field:hover {
-    border-color: color-mix(in srgb, var(--poodle-color-border-default) 78%, var(--poodle-color-text-primary));
+    border-color: var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-default) 78%, var(--poodle-color-text-primary)));
   }
 
   :root[data-poodle-input-modality="keyboard"] .poodle-agent-chat-input__field:focus-within {
@@ -66,9 +67,10 @@
     gap: 0.25rem;
     max-width: 14rem;
     padding: 0.125rem 0.125rem 0.125rem 0.5rem;
-    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-elevated);
+    background: var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, var(--poodle-color-background-elevated)));
+    box-shadow: var(--poodle-style-surface-shadow, none);
   }
 
   /* Image attachments are tiles, not chips: the picture says more than the
@@ -146,8 +148,8 @@
      composer's placeholder is a standing hint, not a value, and sits on a panel
      that is already close to the text colour. */
   .poodle-agent-chat-input__editor::placeholder {
-    color: var(--poodle-recipe-agent-chat-input-placeholder-text, var(--poodle-color-text-secondary));
-    opacity: calc(var(--poodle-state-opacity-muted) * 0.62);
+    color: var(--poodle-recipe-agent-chat-input-placeholder-text, var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary)));
+    opacity: var(--poodle-style-control-secondaryOpacity, calc(var(--poodle-state-opacity-muted) * 0.62));
   }
 
   .poodle-agent-chat-input__editor:disabled {
@@ -238,10 +240,11 @@
     margin: calc(var(--poodle-radius-surface) * -1) 1.5rem 0;
     padding: calc(var(--poodle-agent-chat-input-pad-y) + var(--poodle-radius-surface)) var(--poodle-agent-chat-input-pad-x) var(--poodle-agent-chat-input-pad-y);
     box-sizing: border-box;
-    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
     border-top: 0;
     border-radius: 0 0 var(--poodle-radius-surface) var(--poodle-radius-surface);
     background: var(--poodle-color-background-surface);
+    box-shadow: var(--poodle-style-surface-shadow, none);
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
   }

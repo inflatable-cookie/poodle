@@ -13,9 +13,10 @@
   --poodle-changed-files-font-size: 0.8125rem;
   --poodle-changed-files-icon-size: 0.875rem;
 
-  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
   border-radius: var(--poodle-radius-surface);
-  background: var(--poodle-color-background-elevated);
+  background: var(--poodle-style-surface-fill, var(--poodle-color-background-elevated));
+  box-shadow: var(--poodle-style-surface-shadow, none);
   font-size: var(--poodle-changed-files-font-size);
 }
 
@@ -144,16 +145,18 @@
   align-items: center;
   gap: 0.375rem;
   padding: 0.1875rem 0.5rem;
-  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-subtle));
   border-radius: var(--poodle-radius-control);
-  background: var(--poodle-color-background-surface);
-  color: var(--poodle-color-text-secondary);
+  background: var(--poodle-style-control-fill, var(--poodle-color-background-surface));
+  box-shadow: var(--poodle-style-control-shadow, none);
+  color: var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary));
   font: inherit;
   font-family: var(--poodle-typography-code-family);
   cursor: pointer;
 }
 
 .poodle-changed-files__chip:hover {
+  background: var(--poodle-style-control-fillHover, var(--poodle-color-background-surface));
   color: var(--poodle-color-text-primary);
 }
 

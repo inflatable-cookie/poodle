@@ -1,7 +1,7 @@
 # AgentChatInput
 
 Status: detailed contract
-Updated: 2026-09-07
+Updated: 2026-11-26
 
 ## 1. Purpose
 
@@ -380,20 +380,21 @@ what was decided without keeping a second decision surface on screen.
 | Part | Token | Purpose |
 |------|-------|---------|
 | Field | `--poodle-radius-surface` | composer corner radius |
-| Field | `--poodle-color-background-panel` | composer fill — two steps up the ladder (`canvas` → `surface` → `panel`); one step is too close to the page to read as a distinct block |
-| Field | `--poodle-color-border-default` | composer border |
+| Field | `var(--poodle-recipe-agent-chat-input-field-fill, var(--poodle-style-control-fill, var(--poodle-color-background-panel)))` | composer fill — routes through `fill` roles above `canvas` → `surface` → `panel` |
+| Field | `var(--poodle-style-control-border, var(--poodle-color-border-default))` | composer border (hover also reads `--poodle-style-control-border`) |
+| Field | `var(--poodle-style-control-shadow, none)` | composer shadow |
 | Field | `--poodle-space-panel-x`, `--poodle-space-panel-y` | composer padding |
 | Field keyboard focus | `--poodle-color-accent-focusRing`, `--poodle-border-width-focus`, `:root[data-poodle-input-modality="keyboard"]` | focus ring |
 | Editor | `--poodle-typography-body-family`, `--poodle-typography-body-size` | editor typography |
 | Editor | `--poodle-color-text-primary` | text colour |
-| Editor placeholder | `--poodle-color-text-secondary` at `calc(--poodle-state-opacity-muted * 0.62)` | placeholder colour — dimmer than the shared input convention, since the composer's placeholder is a standing hint rather than a value |
-| Attachment | `--poodle-color-background-elevated`, `--poodle-color-border-subtle`, `--poodle-radius-control` | chip treatment — a step above the field, so chips read as raised on the panel |
+| Editor placeholder | `var(--poodle-recipe-agent-chat-input-placeholder-text, var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary)))` at `var(--poodle-style-control-secondaryOpacity, calc(var(--poodle-state-opacity-muted) * 0.62))` | placeholder colour and opacity |
+| Attachment | `var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, var(--poodle-color-background-elevated)))`, `var(--poodle-style-surface-border, var(--poodle-color-border-subtle))`, `var(--poodle-style-surface-shadow, none)`, `--poodle-radius-control` | chip treatment — a step above the field, dropping border under tonal `surface` |
 | Leading dividers | `--poodle-color-border-subtle` | hairline between toolbar children |
 | Action | `--poodle-color-accent-base` | filled circle |
 | Action | `--poodle-color-text-inverse` | glyph colour |
 | Action hover | `color-mix(accent 88%, white)` | hover fill |
 | Action (stop) | `--poodle-color-status-danger` | stop-state fill |
-| Footer | `--poodle-color-background-surface`, `--poodle-color-border-subtle` | secondary bar — below the field on the ladder, so it tucks under the composer rather than sitting on top of it |
+| Footer | `--poodle-color-background-surface`, `var(--poodle-style-surface-border, var(--poodle-color-border-subtle))`, `var(--poodle-style-surface-shadow, none)` | secondary bar — below the field on the ladder, border follows `surface` |
 | Disabled | `--poodle-state-opacity-disabled` | disabled opacity |
 | Motion | `--poodle-motion-duration-interaction`, `--poodle-motion-easing-standard` | hover/height transitions |
 

@@ -95,7 +95,7 @@
 }
 
 .poodle-tool-call[data-interactive="true"] .poodle-tool-call__trigger:hover {
-  background: var(--poodle-color-background-elevated);
+  background: var(--poodle-style-control-fillHover, var(--poodle-color-background-elevated));
 }
 
 .poodle-tool-call__trigger:focus-visible {

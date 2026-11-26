@@ -1,7 +1,7 @@
 # AgentSubagent
 
 Status: detailed contract
-Updated: 2026-09-02
+Updated: 2026-11-26
 
 ## 1. Purpose
 
@@ -221,8 +221,9 @@ status and lines update, and terminal statuses settle it in place.
 
 | Property | Token |
 |----------|-------|
-| card fill | `--poodle-color-background-surface` |
-| card border | `--poodle-color-border-subtle` |
+| card fill | `var(--poodle-style-surface-fill, var(--poodle-color-background-surface))` |
+| card border | `var(--poodle-style-surface-border, var(--poodle-color-border-subtle))` |
+| card shadow | `var(--poodle-style-surface-shadow, none)` |
 | card radius | `--poodle-radius-control` |
 | label | `--poodle-color-text-primary` |
 | badge, running | `--poodle-color-accent-base` |

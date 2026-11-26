@@ -1,7 +1,7 @@
 # ModelConnectionSetup
 
 Status: approved
-Updated: 2026-08-14
+Updated: 2026-11-26
 Governing spec: `../../knowledge/specs/067-model-connection-management.md`
 
 ## 1. Purpose
@@ -145,7 +145,7 @@ machinery, id wiring, and polite status announcement.
 |------|-------|---------|
 | Root | `space.stack.*` | workflow rhythm |
 | Header | `color.text.primary`, `color.text.secondary` | hierarchy |
-| Configuration | `color.background.surface`, `color.border.subtle` | inset body |
+| Configuration | `var(--poodle-style-surface-fill, var(--poodle-color-background-surface))`, `var(--poodle-style-surface-border, var(--poodle-color-border-subtle))`, `var(--poodle-style-surface-shadow, none)` | inset body and selected summary |
 | Actions | `color.border.subtle`, `space.inline.*` | separation |
 | Feedback | semantic status tokens | safe outcome posture |
 

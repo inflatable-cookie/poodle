@@ -1,7 +1,7 @@
 # ToolCallGroup
 
 Status: detailed contract
-Updated: 2026-07-29
+Updated: 2026-11-26
 
 ## 1. Purpose
 
@@ -146,10 +146,12 @@ new rows appear above it, focus does not move on screen either.
 
 | Property | Token |
 |----------|-------|
-| container fill | `--poodle-color-background-surface` |
-| container border | `--poodle-color-border-subtle` |
+| container fill | `var(--poodle-style-surface-fill, var(--poodle-color-background-surface))` |
+| container border | `var(--poodle-style-surface-border, var(--poodle-color-border-subtle))` |
+| container shadow | `var(--poodle-style-surface-shadow, none)` |
 | container radius | `--poodle-radius-control` |
 | toggle colour | `--poodle-color-text-secondary` |
+| toggle hover fill | `var(--poodle-style-control-fillHover, var(--poodle-color-background-elevated))` |
 | toggle colour, failed run | `--poodle-color-status-danger` |
 | toggle font size | `--poodle-typography-label-size` |
 | focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, offset outline |

@@ -1,7 +1,7 @@
 # ModelConnectionCard
 
 Status: approved
-Updated: 2026-08-14
+Updated: 2026-11-26
 Governing spec: `../../knowledge/specs/067-model-connection-management.md`
 
 ## 1. Purpose
@@ -143,7 +143,7 @@ or derive one state from the other.
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Root | `color.background.panel`, `color.border.subtle`, `radius.surface` | card |
+| Root | `var(--poodle-style-surface-fill, var(--poodle-color-background-panel))`, `var(--poodle-style-surface-border, var(--poodle-color-border-subtle))`, `var(--poodle-style-surface-shadow, none)`, `radius.surface` | card (`data-enabled="false"` keeps `color.background.surface` tonal step) |
 | Identity | `color.text.primary`, `color.text.secondary`, `color.text.muted` | hierarchy |
 | Details | `color.border.subtle`, `space.panel.*`, `space.stack.*` | open region |
 | Controls | semantic control-size and focus tokens | compact actions |

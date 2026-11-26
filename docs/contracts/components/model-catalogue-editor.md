@@ -1,7 +1,7 @@
 # ModelCatalogueEditor
 
 Status: approved
-Updated: 2026-08-14
+Updated: 2026-11-26
 Governing spec: `../../knowledge/specs/067-model-connection-management.md`
 
 ## 1. Purpose
@@ -162,9 +162,9 @@ and disclosure transition for the hidden section.
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Row | `color.background.surface`, `color.border.subtle`, `radius.control` | compact item |
+| Row | `var(--poodle-style-control-fill, var(--poodle-color-background-surface))`, `var(--poodle-style-control-border, var(--poodle-color-border-subtle))`, `var(--poodle-style-control-shadow, none)`, `radius.control` | compact item |
 | Grabbed/drop | `color.accent.base`, `color.accent.focusRing` | movement |
-| Hidden | `color.text.muted`, `color.background.panel` | secondary posture |
+| Hidden | `color.text.muted`, `var(--poodle-style-surface-fill, var(--poodle-color-background-panel))`, `var(--poodle-style-surface-shadow, none)` | secondary posture |
 | Utilities | semantic chrome size/focus tokens | actions |
 | Layout | `space.stack.*`, `space.inline.*` | rhythm |
 

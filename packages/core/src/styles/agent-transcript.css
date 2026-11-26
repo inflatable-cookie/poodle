@@ -102,10 +102,10 @@
   align-items: center;
   gap: 0.375rem;
   padding: 0.3125rem 0.75rem;
-  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
   border-radius: var(--poodle-radius-pill);
-  background: var(--poodle-color-background-elevated);
-  box-shadow: var(--poodle-elevation-overlay);
+  background: var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, var(--poodle-color-background-elevated)));
+  box-shadow: var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay));
   color: var(--poodle-color-text-primary);
   font: inherit;
   font-size: var(--poodle-agent-transcript-font-size);

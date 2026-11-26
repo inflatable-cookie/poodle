@@ -18,9 +18,10 @@
   flex-direction: column;
   gap: var(--poodle-agent-plan-record-gap);
   padding: var(--poodle-agent-plan-record-inset);
-  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
   border-radius: var(--poodle-radius-control);
-  background: var(--poodle-color-background-surface);
+  background: var(--poodle-style-surface-fill, var(--poodle-color-background-surface));
+  box-shadow: var(--poodle-style-surface-shadow, none);
   font-size: var(--poodle-agent-plan-record-font-size);
 }
 

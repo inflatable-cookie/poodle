@@ -24,9 +24,10 @@
      secondary label this is what separates the agent's work from its prose —
      the rows are boxed off and the prose sits outside them. */
   padding: var(--poodle-tool-call-group-pad-block) 0;
-  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
   border-radius: var(--poodle-radius-control);
-  background: var(--poodle-color-background-surface);
+  background: var(--poodle-style-surface-fill, var(--poodle-color-background-surface));
+  box-shadow: var(--poodle-style-surface-shadow, none);
 }
 
 .poodle-tool-call-group[data-size="xs"] { --poodle-tool-call-group-font-size: 0.6875rem; --poodle-tool-call-group-icon-size: 0.75rem; }
@@ -68,7 +69,7 @@
 }
 
 .poodle-tool-call-group__toggle:hover {
-  background: var(--poodle-color-background-elevated);
+  background: var(--poodle-style-control-fillHover, var(--poodle-color-background-elevated));
   color: var(--poodle-color-text-primary);
 }
 

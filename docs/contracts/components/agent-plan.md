@@ -1,7 +1,7 @@
 # AgentPlan
 
 Status: draft
-Updated: 2026-08-07
+Updated: 2026-11-26
 
 ## 1. Purpose
 
@@ -210,8 +210,11 @@ Region.
 | accept fill | `--poodle-color-accent-base` |
 | accept label | `--poodle-color-text-inverse` |
 | accept fill, hovered | `--poodle-color-accent-hover` |
-| secondary label | `--poodle-color-text-secondary` |
-| secondary border | `--poodle-color-border-subtle` |
+| secondary fill | `var(--poodle-style-control-fill, transparent)` (`fillHover`, `fillActive` on interaction) |
+| secondary shadow | `var(--poodle-style-control-shadow, none)` |
+| secondary label | `var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary))` |
+| secondary border | `var(--poodle-style-control-border, var(--poodle-color-border-subtle))` |
+| ghost fill / border | `transparent` (`fillHover`, `fillActive` on interaction) |
 | control radius | `--poodle-radius-control` |
 | badge | `--poodle-color-text-secondary` |
 | focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, offset outline |

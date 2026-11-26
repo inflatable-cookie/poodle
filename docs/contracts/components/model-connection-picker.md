@@ -1,7 +1,7 @@
 # ModelConnectionPicker
 
 Status: approved
-Updated: 2026-08-14
+Updated: 2026-11-26
 Governing spec: `../../knowledge/specs/067-model-connection-management.md`
 
 ## 1. Purpose
@@ -168,10 +168,10 @@ single-select transition, radio roving focus, and id wiring.
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Option | `color.background.surface`, `color.border.subtle` | quiet card |
-| Selected option | `color.accent.base`, `color.accent.focusRing` | selection |
+| Option | `var(--poodle-style-control-fill, var(--poodle-color-background-surface))`, `var(--poodle-style-control-border, var(--poodle-color-border-subtle))`, `var(--poodle-style-control-shadow, none)` (`control.fillHover` on hover) | quiet card |
+| Selected option | `var(--poodle-style-selection-itemFill, var(--poodle-color-background-surface))`, `var(--poodle-style-selection-itemBorder, var(--poodle-color-accent-base))`, `var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base))`, `var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse))`, `color.accent.focusRing` | selection |
 | Copy | `color.text.primary`, `color.text.secondary` | hierarchy |
-| Leading | `size.icon.*`, `radius.control` | provider mark lane |
+| Leading | `size.icon.*`, `radius.control`, `var(--poodle-style-surface-fill, var(--poodle-color-background-panel))` | provider mark lane |
 | Groups | `space.stack.*`, `space.inline.*` | responsive rhythm |
 
 ## 9. Svelte Notes
