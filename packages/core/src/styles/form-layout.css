@@ -18,7 +18,7 @@
     padding: var(--poodle-space-panel-y, 0.75rem) var(--poodle-space-panel-x, 1rem);
     border-radius: var(--poodle-radius-surface, 0.5rem);
     background: var(--poodle-recipe-form-layout-field-errors-fill, color-mix(in srgb, var(--poodle-color-status-danger) 8%, transparent));
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-status-danger) 40%, transparent);
+    border: 0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-danger) 40%, transparent));
     font-size: var(--poodle-typography-label-size, 0.75rem);
   }
 

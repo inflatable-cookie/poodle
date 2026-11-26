@@ -1,0 +1,11 @@
+{
+  "task": "poodle#185",
+  "style": "default",
+  "themes": ["eclipse", "clay"],
+  "specimens": 31,
+  "baselineRuns": { "base": "unedited checkout 037ddb7ba, bootstrap dist", "repeatBase": "second unedited run" },
+  "baselineNoise": { "compared": 62, "identical": 62, "differing": [] },
+  "beforeAfter": { "compared": 62, "identical": 62, "differing": [] },
+  "quietChanged": ["detail-item", "detail-section", "detail-section-group", "detail-shell", "form-layout", "inline-list-section", "nav-card", "relation-picker", "selection-summary", "table"],
+  "visualGate": "bun test/visual/run.ts --tier=sweep --report, 31 slugs, 62 svelte/react pairs, 0 failing"
+}

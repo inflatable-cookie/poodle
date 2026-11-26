@@ -1,7 +1,7 @@
 # 007 Appearance Recipe Contract
 
 Status: active
-Updated: 2026-11-25
+Updated: 2026-11-26
 Depends on: `006-headless-core-and-machine-model.md`
 Supersedes: `005-treatment-system-and-recipe-variables.md` (legacy override layer retired 2026-07-13; Recipes are the single override surface)
 Promoted from: `docs/knowledge/specs/026-appearance-recipes-and-downstream-override-strategy.md` (g11.005)
@@ -93,6 +93,18 @@ the switch moves the boundary and not the meaning. A few values stay literal
 and are listed for the redesign: PickerShell's state block (a nested tone
 below the shell, which no role supplies) and the tinted icon circles in
 Callout and EmptyState, which are markup noise.
+
+The list, detail and form-layout stylesheets follow the same chains. Selection
+summary chips and their overflow pill read the control fill and shadow roles,
+because they are filled, removable controls. Clickable nav cards read the
+surface boundary at rest and the control hover fill on hover. Table shells,
+inline list count pills and rows, detail item surface presentations and the
+detail shell's state panel read the surface fill and border. The form-layout
+error block keeps its danger tone and reads only the surface border. Text links
+stay transparent: they are inline text, not filled controls. Left literal and
+listed for the redesign: table headers and inline-list and table dividers
+(nested tones and hairlines no role supplies), nav-card and count-badge accent
+tints (tone, not treatment), and the tinted info-icon circles (markup noise).
 
 ## Public Surface vs Internal Variables
 
