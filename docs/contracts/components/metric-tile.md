@@ -155,9 +155,9 @@ The `buildSparkline()` function generates an SVG `<path>` from data points:
 | display | `grid` |
 | gap | `var(--poodle-space-inline-sm)` |
 | padding | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
-| border | `0.0625rem solid transparent` |
+| border | `0.0625rem solid var(--poodle-style-surface-border, transparent)` |
 | border-radius | `var(--poodle-radius-surface)` |
-| background | `color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent)` |
+| background | `var(--poodle-recipe-metric-tile-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent)))` |
 
 ### Density Overrides
 

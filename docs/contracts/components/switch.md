@@ -172,7 +172,7 @@ context.
 | `cursor` | `pointer` |
 | `--poodle-switch-off-color` | `var(--poodle-color-text-primary)` |
 | `--poodle-switch-on-color` | `var(--poodle-color-accent-base)` |
-| `--poodle-switch-off-track` | `color-mix(in srgb, var(--poodle-switch-off-color) 18%, var(--poodle-color-background-surface))` |
+| `--poodle-switch-off-track` | `var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-switch-off-color) 18%, var(--poodle-color-background-surface)))` |
 | `--poodle-switch-on-track` | `color-mix(in srgb, var(--poodle-switch-on-color) 24%, var(--poodle-color-background-surface))` |
 | `--poodle-switch-off-thumb` | `var(--poodle-switch-off-color)` |
 | `--poodle-switch-on-thumb` | `var(--poodle-switch-on-color)` |

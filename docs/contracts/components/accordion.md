@@ -184,10 +184,10 @@ does not reconstruct single/multiple membership from the activated item.
 | `gap` | `var(--poodle-accordion-item-gap)` (`0.625rem` default) |
 | `min-width` | `0` |
 | `padding` | `0.625rem var(--poodle-space-panel-x)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 36%, transparent)` |
+| `border` | `0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 36%, transparent))` |
 | `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 40%, var(--poodle-color-background-panel))` |
-| `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, var(--poodle-color-text-inverse) 8%, transparent)` |
+| `background` | `var(--poodle-recipe-accordion-item-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 40%, var(--poodle-color-background-panel))))` |
+| `box-shadow` | `var(--poodle-recipe-accordion-item-shadow, var(--poodle-style-surface-shadow, inset 0 0.0625rem 0 color-mix(in srgb, var(--poodle-color-text-inverse) 8%, transparent)))` |
 
 ### Heading `.accordion__heading`
 

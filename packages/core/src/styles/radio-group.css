@@ -49,9 +49,9 @@
     justify-content: center;
     width: calc(var(--poodle-size-icon-md) + 0.125rem);
     height: calc(var(--poodle-size-icon-md) + 0.125rem);
-    border: 0.0625rem solid var(--poodle-color-border-default);
+    border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
     border-radius: 999px;
-    background: var(--poodle-recipe-radio-group-indicator-fill, var(--poodle-color-background-surface));
+    background: var(--poodle-recipe-radio-group-indicator-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
     transition:
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
