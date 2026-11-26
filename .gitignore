@@ -10,6 +10,9 @@ node_modules/
 
 # Build outputs
 dist/
+.dist-staging-*/
+dist.__previous-*/
+.exchange-probe-*/
 build/
 out/
 *.tsbuildinfo
@@ -111,7 +114,4 @@ test/native-visual/out-jetstream/
 # via --out; the default directory is disposable.
 test/visual/button-comparison/out/
 test/visual/inset-shadow-evidence/out/
-# Per-runtime conformance observation reports (spec 066) — written by the
-# web vitest run and the native cargo runners, consumed by conformance:compare.
-test/conformance/web/out/
 release-artifacts/

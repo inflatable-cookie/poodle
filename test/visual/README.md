@@ -75,14 +75,6 @@ The planted cases live in `session.test.ts` (`effigy test:visual-harness`).
 
 ## Triage
 
-`probe.ts` prints one selector's box and computed styles side by side in
-both previews — the fastest way to turn "16px taller" into a cause:
-
-```sh
-bun test/visual/probe.ts tabs '.poodle-tabs__tab' padding-block gap
-PROBE_LIMIT=40 bun test/visual/probe.ts list-card '.poodle-specimen-group'
-```
-
 Order of suspicion, learned from wave 1:
 
 1. a specimen-harness difference (gallery CSS vs a Svelte scoped style, JSX
@@ -100,7 +92,6 @@ Order of suspicion, learned from wave 1:
 | `session.ts` | shared headless-browser session: recycling, deadlines, chooser/dialog handling, preview restart |
 | `capture.ts` | determinism pinning + specimen capture |
 | `run.ts` | drives the matrix, diffs, writes the summary |
-| `probe.ts` | side-by-side measurement helper for triage |
 | `allowlist.ts` | accepted deltas — each needs a written reason |
 | `debt.ts` | sweep-tier known-failing pairs — the report diffs against it; each entry names its failure class and reason |
 | `fixtures/` | g15.046 Button visual fixture inventory — named cases for the g15.047 comparator, no captures |
@@ -114,7 +105,7 @@ PageLoading, VideoPlayer, AudioPlayer, MediaThumbnail.
 ## Overlay containment probe
 
 ```sh
-bun test/visual/overlay-portal-probe.ts
+effigy test:overlay-portal-browser
 ```
 
 A pixel diff cannot see this class of bug — the markup is identical whether or

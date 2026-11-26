@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync, cpSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -13,8 +13,20 @@ import { assertNoParallelJavascript, packageRelativeViteSources } from "./receip
 import { cleanStaging } from "./staging";
 import { buildViteLibrary, isExternalId } from "./vite-library";
 
+const fixtureRoots: string[] = [];
+
+function fixtureRoot(prefix: string): string {
+  const root = mkdtempSync(join(tmpdir(), prefix));
+  fixtureRoots.push(root);
+  return root;
+}
+
+afterEach(() => {
+  for (const root of fixtureRoots.splice(0)) rmSync(root, { recursive: true, force: true });
+});
+
 function fixtureDist(): string {
-  const root = mkdtempSync(join(tmpdir(), "poodle-web-dist-"));
+  const root = fixtureRoot("poodle-web-dist-");
   const distDir = join(root, "dist");
   mkdirSync(join(distDir, "styles"), { recursive: true });
   writeFileSync(join(distDir, "index.js"), "export const ok = 1;\n");
@@ -32,7 +44,7 @@ function fixtureDist(): string {
       schemaVersion: 1,
       sourceCommit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       sourceMaps: false,
-      tools: { svelte: "5.56.8", typescript: "7.0.2", vite: "8.2.1" },
+      tools: readLockedTools(findRepoRoot()),
       version: "0.0.0",
     }),
   );
@@ -43,24 +55,20 @@ const publicFiles = ["dist/index.js", "dist/styles/button.css", "dist/index.d.ts
 
 describe("web distribution driver", () => {
   test("clean staging removes previous dist", () => {
-    const packageRoot = mkdtempSync(join(tmpdir(), "poodle-staging-"));
+    const packageRoot = fixtureRoot("poodle-staging-");
     mkdirSync(join(packageRoot, "dist"));
     writeFileSync(join(packageRoot, "dist", "stale.js"), "stale");
     const out = cleanStaging(packageRoot);
     expect(out).toBe(join(packageRoot, "dist"));
     expect(() => sha256File(join(packageRoot, "dist", "stale.js"))).toThrow();
-    rmSync(packageRoot, { recursive: true, force: true });
   });
 
   test("lockfile tools are the locked versions, not cwd paths", () => {
     const tools = readLockedTools(findRepoRoot());
-    // svelte stays pinned at the published peer floor (5.56.8) so the shipped
-    // client dist keeps running there; vite 8.3.1 is the in-range refresh.
-    expect(tools).toEqual({
-      svelte: "5.56.8",
-      typescript: "7.0.2",
-      vite: "8.3.1",
-    });
+    const lockfile = readFileSync(join(findRepoRoot(), "bun.lock"), "utf8");
+    for (const name of ["svelte", "typescript", "vite"] as const) {
+      expect(lockfile).toContain(`"${name}": ["${name}@${tools[name]}"`);
+    }
     expect(JSON.stringify(tools)).not.toContain("/Users/");
   });
 
@@ -70,7 +78,6 @@ describe("web distribution driver", () => {
     expect(() =>
       auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
     ).toThrow(/hashed filename|unexpected staged file/);
-    rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
   test("a missing style export fails the staged audit", () => {
@@ -79,7 +86,6 @@ describe("web distribution driver", () => {
     expect(() =>
       auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
     ).toThrow(/missing staged public file/);
-    rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
   test("staged non-declaration TypeScript fails the source audit", () => {
@@ -88,7 +94,6 @@ describe("web distribution driver", () => {
     expect(() =>
       auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
     ).toThrow(/raw source is forbidden/);
-    rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
   test("a timestamp in the receipt fails the audit", () => {
@@ -100,7 +105,6 @@ describe("web distribution driver", () => {
     expect(() =>
       auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
     ).toThrow(/timestamp/);
-    rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
   test("a Svelte import in core output fails the dependency audit", () => {
@@ -113,7 +117,6 @@ describe("web distribution driver", () => {
         forbiddenModules: ["marked", "svelte", "react"],
       }),
     ).toThrow(/svelte|forbidden parser or shell/);
-    rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
   test("a side-effect svelte import fails the dependency audit", () => {
@@ -126,7 +129,6 @@ describe("web distribution driver", () => {
         forbiddenModules: [...CORE_FORBIDDEN_MODULES],
       }),
     ).toThrow(/svelte/);
-    rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
   test("a dynamic react subpath import fails the dependency audit", () => {
@@ -142,7 +144,6 @@ describe("web distribution driver", () => {
         forbiddenModules: [...CORE_FORBIDDEN_MODULES],
       }),
     ).toThrow(/react/);
-    rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
   test("plain and escaped unix workspace paths in compiled JS fail the audit", () => {
@@ -168,7 +169,6 @@ describe("web distribution driver", () => {
         auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
       ).toThrow(/workspace path/);
     }
-    rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
   test("valid protocol, separator, and regex syntax does not look like a workspace path", () => {
@@ -186,7 +186,6 @@ describe("web distribution driver", () => {
     expect(() =>
       auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
     ).not.toThrow();
-    rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
   test("a generic unix path in the receipt input inventory fails the audit", () => {
@@ -198,7 +197,6 @@ describe("web distribution driver", () => {
     expect(() =>
       auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
     ).toThrow(/receipt contains an absolute path/);
-    rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
   test("unix, windows, UNC, and file paths in declarations fail the audit", () => {
@@ -217,7 +215,6 @@ describe("web distribution driver", () => {
         auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
       ).toThrow(/workspace path/);
     }
-    rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
   test("a missing public icon declaration fails the staged audit", () => {
@@ -230,7 +227,6 @@ describe("web distribution driver", () => {
     expect(() =>
       auditStagedDist({ distDir, publicFiles: withIcon, forbiddenModules: ["marked"] }),
     ).toThrow(/missing staged public file\(s\): dist\/icons\/icons\/x\.d\.ts/);
-    rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
   test("marked in core devDependencies fails the manifest audit", () => {
@@ -262,12 +258,11 @@ describe("web distribution driver", () => {
   });
 
   test("a sibling .js next to a compiled .ts fails TypeScript authority", () => {
-    const packageRoot = mkdtempSync(join(tmpdir(), "poodle-parallel-js-"));
+    const packageRoot = fixtureRoot("poodle-parallel-js-");
     mkdirSync(join(packageRoot, "src", "tokens"), { recursive: true });
     writeFileSync(join(packageRoot, "src", "tokens", "units.ts"), "export const x = 1;\n");
     writeFileSync(join(packageRoot, "src", "tokens", "units.js"), "export const x = 1;\n");
     expect(() => assertNoParallelJavascript(packageRoot)).toThrow(/parallel JavaScript source/);
-    rmSync(packageRoot, { recursive: true, force: true });
   });
 
   test("a sibling workspace module cannot bypass receipt input coverage", () => {
@@ -281,7 +276,7 @@ describe("web distribution driver", () => {
   });
 
   test("a bundled forbidden module fails even with no remaining specifier", async () => {
-    const root = mkdtempSync(join(tmpdir(), "poodle-bundled-marked-"));
+    const root = fixtureRoot("poodle-bundled-marked-");
     mkdirSync(join(root, "src"));
     mkdirSync(join(root, "node_modules", "marked"), { recursive: true });
     writeFileSync(
@@ -320,7 +315,7 @@ describe("web distribution driver", () => {
         schemaVersion: 1,
         sourceCommit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         sourceMaps: false,
-        tools: { svelte: "5.56.8", typescript: "7.0.2", vite: "8.2.1" },
+        tools: readLockedTools(findRepoRoot()),
         version: "0.0.0",
       }),
     );
@@ -333,20 +328,17 @@ describe("web distribution driver", () => {
         specifiers: graph.specifiers,
       }),
     ).toThrow(/marked/);
-    rmSync(root, { recursive: true, force: true });
-  }, 30_000);
+  });
 
   test("copying a fixture dist does not invent hashed names", () => {
     const source = fixtureDist();
-    const destRoot = mkdtempSync(join(tmpdir(), "poodle-copy-"));
+    const destRoot = fixtureRoot("poodle-copy-");
     cpSync(join(source, ".."), destRoot, { recursive: true });
     auditStagedDist({
       distDir: join(destRoot, "dist"),
       publicFiles,
       forbiddenModules: ["marked"],
     });
-    rmSync(join(source, ".."), { recursive: true, force: true });
-    rmSync(destRoot, { recursive: true, force: true });
   });
 
   test("external ids match package names and subpaths only", () => {
@@ -376,11 +368,10 @@ describe("web distribution driver", () => {
     expect(() =>
       auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
     ).toThrow(/invalid JavaScript in dist\/index\.js:2:21: Expected "\)" but found "\?"/);
-    rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
   test("a planted Svelte optional parameter packages as valid JavaScript", async () => {
-    const root = mkdtempSync(join(tmpdir(), "poodle-optional-param-"));
+    const root = fixtureRoot("poodle-optional-param-");
     mkdirSync(join(root, "src"));
     writeFileSync(
       join(root, "src", "Plant.svelte"),
@@ -410,6 +401,5 @@ describe("web distribution driver", () => {
     expect(packed).not.toMatch(/\bid\?[,)]/);
     expect(packed).not.toMatch(/\bx\?[,)]/);
     expect(javascriptSyntaxError(packed)).toBeNull();
-    rmSync(root, { recursive: true, force: true });
-  }, 30_000);
+  });
 });

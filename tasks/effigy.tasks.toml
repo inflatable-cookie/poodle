@@ -264,7 +264,7 @@
   { task = "svelte:package" },
   { task = "react:package" },
 ]
-"test:core-build" = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/staging.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts test/package-install/pack-archives.test.ts scripts/gate-tree-guard.test.ts scripts/docs-deps-preflight.test.ts scripts/workspace-lock.test.ts"
+"test:core-build" = "bun test scripts/web-distribution/staging.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts test/package-install/pack-archives.test.ts scripts/gate-tree-guard.test.ts scripts/docs-deps-preflight.test.ts scripts/workspace-lock.test.ts"
 # g18.032: the installed-package scope suite plants dozens of git ranges and
 # exceeds Bun's default per-test timeout when it shares a parallel test-file
 # run with the core-build files. It is the same assertion inventory as its own
@@ -349,6 +349,7 @@
 # ci:web — ci:visual is the gate, mirroring how ci:native handles the crates.
 # Tiers: smoke (15 components, 1 axis), axis (15 x 12 size/density/contrast axes),
 # sweep (every specimen slug x 2 themes).
+"test:overlay-portal-browser" = "bun test/visual/overlay-portal-probe.ts"
 "test:visual" = "bun test/visual/run.ts --tier=axis"
 "test:visual-smoke" = "bun test/visual/run.ts --tier=smoke"
 "test:visual-sweep" = "bun test/visual/run.ts --tier=sweep"
@@ -826,6 +827,7 @@
   { task = "test:core" },
   { task = "test:core-build" },
   { task = "test:web-scope" },
+  { task = "test:release-version" },
   # g16.098: detached worktree without shell dist. Bites if react-preview
   # loses its workspace alias or ci:web tests components before package builds.
   # Workspace node_modules are `cp -a`'d (not dir-symlinked) so relative
@@ -1038,10 +1040,6 @@
   { task = "gate:clean" },
 ]
 
-# Legacy aliases for compatibility
-"parity:check" = [{ task = "docs:check" }]
-"parity:report" = [{ task = "report:parity" }]
-
 # Cheap orientation for `effigy doctor`. Never alias health to the full board.
 health = [
   { task = "core:build" },
@@ -1065,6 +1063,7 @@ health = [
 # and hard-stops at fifteen minutes.
 qa = "bun scripts/validation/run-board.ts qa:board"
 "qa:board" = [
+  { task = "test:shell-build" },
   { task = "check:release-automation" },
   { task = "ci" },
   { task = "ci:native" },

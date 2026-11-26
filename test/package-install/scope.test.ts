@@ -1,9 +1,14 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import {
+  CERTIFICATION_WRITABLE_PATHS,
+  CANDIDATE_WRITABLE_PATHS,
+  G18_006_WRITABLE_PATHS,
+  RELEASE_WRAPPER_PATHS,
+  RELEASE_AUTOMATION_PATHS,
   G16_054_CANDIDATE_SCOPE_MODE,
   G18_006_CANDIDATE_SCOPE_MODE,
   LOCKSTEP_CARGO_LOCK_PATHS,
@@ -71,6 +76,18 @@ async function initPlant(): Promise<string> {
   await runGit(root, ["config", "user.name", "Poodle Certification"]);
   return root;
 }
+
+test("literal allowlisted paths exist in the repository", () => {
+  const root = join(import.meta.dir, "../..");
+  const paths = [
+    ...CERTIFICATION_WRITABLE_PATHS,
+    ...CANDIDATE_WRITABLE_PATHS,
+    ...G18_006_WRITABLE_PATHS,
+    ...RELEASE_WRAPPER_PATHS,
+    ...RELEASE_AUTOMATION_PATHS,
+  ];
+  expect(paths.filter((path) => !path.includes("*") && !existsSync(join(root, path)))).toEqual([]);
+});
 
 describe("internal JS dependency range", () => {
   test("current-minor floor tracks the lockstep version", () => {
@@ -294,11 +311,11 @@ describe("installed-package scope routing", () => {
     const root = await initPlant();
     await writeFiles(root, { "README.md": "base\n" });
     const base = await commitAll(root, "allowlist base");
-    await writeFiles(root, { "PAPERCUTS.md": "friction\n" });
+    await writeFiles(root, { "tasks/effigy.tasks.toml": "task\n" });
     const head = await commitAll(root, "allowlist-shaped ordinary");
     const proof = await assertInstalledScope(root, base, head, "ordinary");
     expect(proof.mode).toBe("ordinary");
-    expect(proof.changedPaths).toEqual(["PAPERCUTS.md"]);
+    expect(proof.changedPaths).toEqual(["tasks/effigy.tasks.toml"]);
     expect(emitsCertificationReceipt(proof.mode)).toBe(false);
   });
 
@@ -687,11 +704,11 @@ describe("installed-package scope routing", () => {
     const root = await initPlant();
     await writeFiles(root, { "README.md": "base\n" });
     const base = await commitAll(root, "strict writable base");
-    await writeFiles(root, { "PAPERCUTS.md": "friction\n" });
+    await writeFiles(root, { "tasks/effigy.tasks.toml": "task\n" });
     const head = await commitAll(root, "strict writable");
     const proof = await assertCertificationScope(root, base, head, "strict");
     expect(proof.mode).toBe("strict");
-    expect(proof.changedPaths).toEqual(["PAPERCUTS.md"]);
+    expect(proof.changedPaths).toEqual(["tasks/effigy.tasks.toml"]);
   });
 
   test("candidate rejects an unauthorized source path", async () => {

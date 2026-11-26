@@ -9,12 +9,9 @@ import {
 } from "../../scripts/release-versioning";
 
 export const CERTIFICATION_WRITABLE_PATHS = [
-  "PAPERCUTS.md",
   "scripts/web-distribution/**",
   "tasks/effigy.tasks.toml",
   "test/package-install/**",
-  "docs/roadmaps/g16/059-installed-web-distribution-certification.md",
-  "docs/logs/2026-09/20260902-g16-059-installed-web-distribution-certification.md",
 ] as const;
 
 export const G16_054_CANDIDATE_SCOPE_MODE = "g16.054-candidate" as const;
@@ -112,8 +109,6 @@ export const CANDIDATE_WRITABLE_PATHS = [
   "docs/release-notes/0.2.3.md",
   "docs/release-notes/0.3.0.md",
   "docs/release-notes/README.md",
-  "docs/roadmaps/g16/054-historycenter-v030-release-candidate.md",
-  "docs/logs/2026-09/20260902-g16-054-v030-release-candidate.md",
   "packages/core/README.md",
   "packages/react/components/README.md",
   "packages/svelte/components/README.md",
@@ -1194,7 +1189,7 @@ async function ordinaryAdmitsNativeVersionAlignment(
  * ordinary branch dry run and tag dry run can certify the wrapper commit
  * without weakening the guard that the release workflow exists to enforce.
  */
-const RELEASE_WRAPPER_PATHS = [
+export const RELEASE_WRAPPER_PATHS = [
   ".github/workflows/release.yml",
   "scripts/check-release-automation.ts",
   "test/package-install/scope.ts",
@@ -1309,7 +1304,7 @@ export function sortedUnique(values: Iterable<string>): string[] {
  * run-ID identity protocol, and the checker keeps the spec 071 invariants.
  * Any aggregate, native, Rust or GPUI selector fails it closed.
  */
-const RELEASE_AUTOMATION_PATHS = [
+export const RELEASE_AUTOMATION_PATHS = [
   ".github/workflows/release.yml",
   "effigy.toml",
   "quality/validation-bounds.json",
@@ -1328,7 +1323,6 @@ const RELEASE_AUTOMATION_PATHS = [
   "test/package-install/web-candidate.ts",
   "test/package-install/web-candidate.test.ts",
   "test/package-install/web-preview.ts",
-  "PAPERCUTS.md",
 ] as const;
 const RELEASE_AUTOMATION_WORKFLOW_REQUIRED = [
   "effigy release:web-certificate",
