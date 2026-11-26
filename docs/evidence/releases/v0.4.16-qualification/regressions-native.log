@@ -1,0 +1,4040 @@
+
+╭─────────────────────────────────────────────────╮
+│ EFFIGY  …/ns-t-8fc18ed3adee19ddd4cb264cee34b08c │
+╰────────────────────────── v0.15.0+local.6b69a5d ╯
+
+oxide: could not sweep Barge trash: cannot sweep the pool trash: cannot open [oxide-pool]/slots/.trash/.barge-claim-effigy-b141b7a2-quick-f8e38d019ce40808/scratch/.tmpyV4yX2/host-checkout/.effigy/state: Permission denied (os error 13); trash remains at [oxide-pool]/slots/.trash/.barge-claim-effigy-b141b7a2-quick-f8e38d019ce40808
+oxide: waiting for earlier unblocked oxide commands (position 2); Ctrl-C cancels
+oxide: waiting for a build slot (4 of 4 host-wide in use); Ctrl-C cancels
+oxide: seeding skipped: recipient not fresh
+oxide: waited 82.8s (queue 27.9s, host limit 54.9s); slot ready
+oxide: could not sweep Barge trash: cannot sweep the pool trash: cannot open [oxide-pool]/slots/.trash/.barge-claim-effigy-b141b7a2-quick-f8e38d019ce40808/scratch/.tmpyV4yX2/host-checkout/.effigy/state: Permission denied (os error 13); trash remains at [oxide-pool]/slots/.trash/.barge-claim-effigy-b141b7a2-quick-f8e38d019ce40808
+warning: variable does not need to be mutable
+   --> [checkout]/packages/gpui/node-backend/src/interaction.rs:944:25
+    |
+944 |                     let mut session = session.borrow_mut();
+    |                         ----^^^^^^^
+    |                         |
+    |                         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `poodle_adapter::ThemeProvider`
+ --> [checkout]/packages/render/src/audio.rs:6:5
+  |
+6 | use poodle_adapter::ThemeProvider as _;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+  --> [checkout]/packages/render/src/debug_dialog.rs:62:9
+   |
+62 |     let mut root = root.child(trigger);
+   |         ----^^^^
+   |         |
+   |         help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `poodle_adapter::ThemeProvider`
+     --> tests/headless_regressions.rs:48858:9
+      |
+48858 |     use poodle_adapter::ThemeProvider;
+      |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `poodle_adapter::ThemeProvider`
+     --> tests/headless_regressions.rs:58104:9
+      |
+58104 |     use poodle_adapter::ThemeProvider;
+      |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `RenderContext`
+  --> src/specimens/audio_controls.rs:19:40
+   |
+19 |     FaderLive, KnobHandlers, KnobLive, RenderContext, XYPadHandlers, XYP...
+   |                                        ^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `RenderContext`
+  --> src/specimens/history_center_specimen.rs:21:24
+   |
+21 |     HistoryCenterView, RenderContext,
+   |                        ^^^^^^^^^^^^^
+
+warning: unused import: `poodle_adapter::ThemeProvider`
+    --> tests/headless_regressions.rs:8899:9
+     |
+8899 |     use poodle_adapter::ThemeProvider;
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `poodle_adapter::ThemeProvider`
+    --> tests/headless_regressions.rs:9078:9
+     |
+9078 |     use poodle_adapter::ThemeProvider;
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `poodle_adapter::ThemeProvider`
+    --> tests/headless_regressions.rs:9643:9
+     |
+9643 |     use poodle_adapter::ThemeProvider;
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused variable: `observation`
+   --> tests/../src/nucleus_receipts.rs:702:5
+    |
+702 |     observation: MountedObservation,
+    |     ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_observation`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+    --> tests/headless_regressions.rs:8131:17
+     |
+8131 |             let mut driver = mount_block_slider_host(cx, spec, 240.0);
+     |                 ----^^^^^^
+     |                 |
+     |                 help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `driver`
+    --> tests/headless_regressions.rs:8131:17
+     |
+8131 |             let mut driver = mount_block_slider_host(cx, spec, 240.0);
+     |                 ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_driver`
+
+warning: variable does not need to be mutable
+    --> tests/headless_regressions.rs:8193:13
+     |
+8193 |         let mut driver = mount_block_slider_host(cx, spec, 240.0);
+     |             ----^^^^^^
+     |             |
+     |             help: remove this `mut`
+
+warning: unused variable: `driver`
+    --> tests/headless_regressions.rs:8193:13
+     |
+8193 |         let mut driver = mount_block_slider_host(cx, spec, 240.0);
+     |             ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_driver`
+
+warning: function `all_components` is never used
+  --> src/component_registry.rs:40:8
+   |
+40 | pub fn all_components() -> Vec<&'static CanonicalComponent> {
+   |        ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: associated function `from_spec` is never used
+   --> src/node_compat.rs:172:19
+    |
+171 | impl Skeleton {
+    | ------------- associated function in this implementation
+172 |     pub(crate) fn from_spec(spec: SkeletonSpec, theme: &GpuiThemeProvid...
+    |                   ^^^^^^^^^
+
+warning: method `with_instance_id` is never used
+   --> src/node_compat.rs:224:19
+    |
+215 | impl StatusIndicator {
+    | -------------------- method in this implementation
+...
+224 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<Str...
+    |                   ^^^^^^^^^^^^^^^^
+
+warning: methods `with_actions`, `size`, and `with_density` are never used
+   --> src/node_compat.rs:501:19
+    |
+482 | impl Callout {
+    | ------------ methods in this implementation
+...
+501 |     pub(crate) fn with_actions(
+    |                   ^^^^^^^^^^^^
+...
+509 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+    |                   ^^^^
+...
+514 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> Se...
+    |                   ^^^^^^^^^^^^
+
+warning: struct `MessageCenter` is never constructed
+   --> src/node_compat.rs:962:19
+    |
+962 | pub(crate) struct MessageCenter {
+    |                   ^^^^^^^^^^^^^
+
+warning: methods `on_dismiss` and `with_instance_id` are never used
+    --> src/node_compat.rs:1236:19
+     |
+1222 | impl AgentQuestion {
+     | ------------------ methods in this implementation
+...
+1236 |     pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn(&str) + Sen...
+     |                   ^^^^^^^^^^
+...
+1241 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<St...
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: method `on_file_select` is never used
+    --> src/node_compat.rs:1556:19
+     |
+1528 | impl AgentTranscript {
+     | -------------------- method in this implementation
+...
+1556 |     pub(crate) fn on_file_select(mut self, handler: Arc<dyn Fn(&str) +...
+     |                   ^^^^^^^^^^^^^^
+
+warning: methods `with_instance_id`, `on_dismiss`, and `on_action` are never used
+    --> src/node_compat.rs:1709:19
+     |
+1676 | impl ToastStack {
+     | --------------- methods in this implementation
+...
+1709 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<St...
+     |                   ^^^^^^^^^^^^^^^^
+...
+1714 |     pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn(&str) + Sen...
+     |                   ^^^^^^^^^^
+...
+1719 |     pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+
+warning: methods `with_instance_id`, `on_dismiss`, and `on_action` are never used
+    --> src/node_compat.rs:1771:19
+     |
+1742 | impl ToastHost {
+     | -------------- methods in this implementation
+...
+1771 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<St...
+     |                   ^^^^^^^^^^^^^^^^
+...
+1776 |     pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn(&str) + Sen...
+     |                   ^^^^^^^^^^
+...
+1781 |     pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> src/node_compat.rs:1806:19
+     |
+1805 | impl MessageCenter {
+     | ------------------ associated items in this implementation
+1806 |     pub(crate) fn from_spec(spec: MessageCenterSpec, theme: &GpuiTheme...
+     |                   ^^^^^^^^^
+...
+1814 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<St...
+     |                   ^^^^^^^^^^^^^^^^
+...
+1819 |     pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) +...
+     |                   ^^^^^^^^^^^^^^
+...
+1824 |     pub(crate) fn on_item_select(mut self, handler: Arc<dyn Fn(&str) +...
+     |                   ^^^^^^^^^^^^^^
+...
+1829 |     pub(crate) fn on_read_change(mut self, handler: Arc<dyn Fn(&str, b...
+     |                   ^^^^^^^^^^^^^^
+...
+1834 |     pub(crate) fn on_remove(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+1839 |     pub(crate) fn on_mark_all_read(mut self, handler: Arc<dyn Fn() + S...
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: method `on_open_change` is never used
+    --> src/node_compat.rs:1931:19
+     |
+1916 | impl DebugDialog {
+     | ---------------- method in this implementation
+...
+1931 |     pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) +...
+     |                   ^^^^^^^^^^^^^^
+
+warning: methods `on_action`, `on_clear`, and `on_select_all` are never used
+    --> src/node_compat.rs:2001:19
+     |
+1992 | impl BulkActionBar {
+     | ------------------ methods in this implementation
+...
+2001 |     pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+2006 |     pub(crate) fn on_clear(mut self, handler: Arc<dyn Fn() + Send + Sy...
+     |                   ^^^^^^^^
+...
+2011 |     pub(crate) fn on_select_all(mut self, handler: Arc<dyn Fn() + Send...
+     |                   ^^^^^^^^^^^^^
+
+warning: multiple methods are never used
+    --> src/node_compat.rs:2056:19
+     |
+2035 | impl AgentChatInput {
+     | ------------------- methods in this implementation
+...
+2056 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+2061 |     pub(crate) fn with_selection(mut self, start: usize, end: usize) -...
+     |                   ^^^^^^^^^^^^^^
+...
+2066 |     pub(crate) fn with_is_focused(mut self, focused: bool) -> Self {
+     |                   ^^^^^^^^^^^^^^^
+...
+2071 |     pub(crate) fn on_value_change(
+     |                   ^^^^^^^^^^^^^^^
+...
+2079 |     pub(crate) fn on_selection_change(
+     |                   ^^^^^^^^^^^^^^^^^^^
+...
+2087 |     pub(crate) fn on_focus_change(mut self, handler: Arc<dyn Fn(bool) ...
+     |                   ^^^^^^^^^^^^^^^
+...
+2092 |     pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+2097 |     pub(crate) fn on_stop(mut self, handler: Arc<dyn Fn() + Send + Syn...
+     |                   ^^^^^^^
+
+warning: method `on_select` is never used
+    --> src/node_compat.rs:2600:19
+     |
+2587 | impl RelationPicker {
+     | ------------------- method in this implementation
+...
+2600 |     pub(crate) fn on_select(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+
+warning: method `on_request_close` is never used
+    --> src/node_compat.rs:2726:19
+     |
+2713 | impl Dialog {
+     | ----------- method in this implementation
+...
+2726 |     pub(crate) fn on_request_close(mut self, handler: Arc<dyn Fn() + S...
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: methods `on_submit` and `on_cancel` are never used
+    --> src/node_compat.rs:2977:19
+     |
+2907 | impl FormDialog {
+     | --------------- methods in this implementation
+...
+2977 |     pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn() + Send + S...
+     |                   ^^^^^^^^^
+...
+2982 |     pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + S...
+     |                   ^^^^^^^^^
+
+warning: methods `on_change` and `on_open_change` are never used
+    --> src/node_compat.rs:3100:19
+     |
+3075 | impl ModelPicker {
+     | ---------------- methods in this implementation
+...
+3100 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+3105 |     pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) +...
+     |                   ^^^^^^^^^^^^^^
+
+warning: methods `with_instance_id` and `on_dismiss` are never used
+    --> src/node_compat.rs:3171:19
+     |
+3158 | impl ThemeSelect {
+     | ---------------- methods in this implementation
+...
+3171 |     pub(crate) fn with_instance_id(mut self, id: impl Into<String>) ->...
+     |                   ^^^^^^^^^^^^^^^^
+...
+3176 |     pub(crate) fn on_dismiss(
+     |                   ^^^^^^^^^^
+
+warning: methods `with_instance_id`, `on_change`, `on_search_change`, `on_open_change`, and `on_dismiss` are never used
+    --> src/node_compat.rs:3635:19
+     |
+3615 | impl RefSelect {
+     | -------------- methods in this implementation
+...
+3635 |     pub(crate) fn with_instance_id(mut self, id: impl Into<String>) ->...
+     |                   ^^^^^^^^^^^^^^^^
+...
+3640 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+3645 |     pub(crate) fn on_search_change(mut self, handler: Arc<dyn Fn(&str)...
+     |                   ^^^^^^^^^^^^^^^^
+...
+3652 |     pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) +...
+     |                   ^^^^^^^^^^^^^^
+...
+3657 |     pub(crate) fn on_dismiss(
+     |                   ^^^^^^^^^^
+
+warning: method `on_click` is never used
+    --> src/node_compat.rs:3757:19
+     |
+3747 | impl NavCard {
+     | ------------ method in this implementation
+...
+3757 |     pub(crate) fn on_click(mut self, handler: impl Fn() + Send + Sync ...
+     |                   ^^^^^^^^
+
+warning: methods `on_remove` and `on_dismiss` are never used
+    --> src/node_compat.rs:4273:19
+     |
+4262 | impl Pill {
+     | --------- methods in this implementation
+...
+4273 |     pub(crate) fn on_remove(mut self, handler: impl Fn() + Send + Sync...
+     |                   ^^^^^^^^^
+...
+4278 |     pub(crate) fn on_dismiss(mut self, handler: impl Fn() + Send + Syn...
+     |                   ^^^^^^^^^^
+
+warning: method `with_copied` is never used
+    --> src/node_compat.rs:4510:19
+     |
+4465 | impl Code {
+     | --------- method in this implementation
+...
+4510 |     pub(crate) fn with_copied(mut self, copied: bool) -> Self {
+     |                   ^^^^^^^^^^^
+
+warning: method `on_page_change` is never used
+    --> src/node_compat.rs:4663:19
+     |
+4643 | impl ListContainer {
+     | ------------------ method in this implementation
+...
+4663 |     pub(crate) fn on_page_change(mut self, handler: Arc<dyn Fn(usize) ...
+     |                   ^^^^^^^^^^^^^^
+
+warning: methods `on_submit`, `on_cancel`, and `on_clear` are never used
+    --> src/node_compat.rs:4923:19
+     |
+4875 | impl TextInput {
+     | -------------- methods in this implementation
+...
+4923 |     pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn() + Send + S...
+     |                   ^^^^^^^^^
+...
+4928 |     pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + S...
+     |                   ^^^^^^^^^
+...
+4933 |     pub(crate) fn on_clear(mut self, handler: Arc<dyn Fn() + Send + Sy...
+     |                   ^^^^^^^^
+
+warning: method `on_transition` is never used
+    --> src/node_compat.rs:5011:19
+     |
+4991 | impl Select {
+     | ----------- method in this implementation
+...
+5011 |     pub(crate) fn on_transition(
+     |                   ^^^^^^^^^^^^^
+
+warning: methods `with_id`, `on_remove`, and `on_browse` are never used
+    --> src/node_compat.rs:5257:19
+     |
+5246 | impl FileUpload {
+     | --------------- methods in this implementation
+...
+5257 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+5262 |     pub(crate) fn on_remove(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+5270 |     pub(crate) fn on_browse(
+     |                   ^^^^^^^^^
+
+warning: methods `with_size` and `with_density` are never used
+    --> src/node_compat.rs:5329:19
+     |
+5321 | impl LicenceStatus {
+     | ------------------ methods in this implementation
+...
+5329 |     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^^^^^^
+...
+5334 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: method `on_activate` is never used
+    --> src/node_compat.rs:6027:19
+     |
+6000 | impl SelectionSummary {
+     | --------------------- method in this implementation
+...
+6027 |     pub(crate) fn on_activate(mut self, handler: Arc<dyn Fn(&str) + Se...
+     |                   ^^^^^^^^^^^
+
+warning: method `with_focused_value` is never used
+    --> src/node_compat.rs:6162:19
+     |
+6107 | impl Tabs {
+     | --------- method in this implementation
+...
+6162 |     pub(crate) fn with_focused_value(mut self, value: impl Into<String...
+     |                   ^^^^^^^^^^^^^^^^^^
+
+warning: methods `on_change` and `on_query` are never used
+    --> src/node_compat.rs:6815:19
+     |
+6784 | impl TimeZoneSelect {
+     | ------------------- methods in this implementation
+...
+6815 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+6820 |     pub(crate) fn on_query(mut self, handler: Arc<dyn Fn(&str) + Send ...
+     |                   ^^^^^^^^
+
+warning: methods `size` and `with_density` are never used
+    --> src/node_compat.rs:7052:19
+     |
+7020 | impl Accordion {
+     | -------------- methods in this implementation
+...
+7052 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+7057 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: methods `on_confirm` and `on_cancel` are never used
+    --> src/node_compat.rs:7289:19
+     |
+7253 | impl AlertDialog {
+     | ---------------- methods in this implementation
+...
+7289 |     pub(crate) fn on_confirm(mut self, handler: Arc<dyn Fn() + Send + ...
+     |                   ^^^^^^^^^^
+...
+7294 |     pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + S...
+     |                   ^^^^^^^^^
+
+warning: methods `with_id`, `working`, `working_label`, and `on_trigger` are never used
+    --> src/node_compat.rs:7359:19
+     |
+7343 | impl ConfirmAction {
+     | ------------------ methods in this implementation
+...
+7359 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+7374 |     pub(crate) fn working(mut self, working: bool) -> Self {
+     |                   ^^^^^^^
+...
+7379 |     pub(crate) fn working_label(mut self, label: impl Into<String>) ->...
+     |                   ^^^^^^^^^^^^^
+...
+7384 |     pub(crate) fn on_trigger(mut self, handler: Arc<dyn Fn() + Send + ...
+     |                   ^^^^^^^^^^
+
+warning: method `on_active_change` is never used
+    --> src/node_compat.rs:7666:19
+     |
+7638 | impl CommandPalette {
+     | ------------------- method in this implementation
+...
+7666 |     pub(crate) fn on_active_change(
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: method `with_instance_id` is never used
+    --> src/node_compat.rs:8194:19
+     |
+8183 | impl DetailItem {
+     | --------------- method in this implementation
+...
+8194 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<St...
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: methods `cross_window_drag_source`, `on_panel_drop`, `on_reorder`, and `accept_panel` are never used
+    --> src/node_compat.rs:9211:19
+     |
+9175 | impl DockRegion {
+     | --------------- methods in this implementation
+...
+9211 |     pub(crate) fn cross_window_drag_source(
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^
+...
+9219 |     pub(crate) fn on_panel_drop(
+     |                   ^^^^^^^^^^^^^
+...
+9227 |     pub(crate) fn on_reorder(mut self, handler: Arc<dyn Fn(&[String]) ...
+     |                   ^^^^^^^^^^
+...
+9232 |     pub(crate) fn accept_panel(
+     |                   ^^^^^^^^^^^^
+
+warning: methods `on_clear_filters` and `on_navigate` are never used
+    --> src/node_compat.rs:9353:19
+     |
+9339 | impl LogList {
+     | ------------ methods in this implementation
+...
+9353 |     pub(crate) fn on_clear_filters(mut self, handler: Arc<dyn Fn() + S...
+     |                   ^^^^^^^^^^^^^^^^
+...
+9358 |     pub(crate) fn on_navigate(mut self, handler: Arc<dyn Fn(&str) + Se...
+     |                   ^^^^^^^^^^^
+
+warning: unused variable: `outside`
+     --> tests/headless_regressions.rs:46685:13
+      |
+46685 |         let outside = gpui::point(
+      |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_outside`
+
+warning: unused variable: `outside`
+     --> tests/headless_regressions.rs:47871:13
+      |
+47871 |         let outside = gpui::point(
+      |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_outside`
+
+warning: unused variable: `outside`
+     --> tests/headless_regressions.rs:48333:13
+      |
+48333 |         let outside = gpui::point(
+      |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_outside`
+
+warning: struct `PreviewRoot` is never constructed
+  --> tests/headless_regressions.rs:90:8
+   |
+90 | struct PreviewRoot {
+   |        ^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `payload_paint_box` is never used
+    --> tests/headless_regressions.rs:3986:4
+     |
+3986 | fn payload_paint_box(id: &str) -> Node {
+     |    ^^^^^^^^^^^^^^^^^
+
+warning: methods `draw_if_invalidated`, `settle`, and `wait_until_element_gone` are never used
+   --> tests/../src/headless_driver.rs:430:12
+    |
+284 | impl<'a> HeadlessDriver<'a> {
+    | --------------------------- methods in this implementation
+...
+430 |     pub fn draw_if_invalidated(&mut self) {
+    |            ^^^^^^^^^^^^^^^^^^^
+...
+472 |     pub fn settle(&mut self) {
+    |            ^^^^^^
+...
+507 |     pub fn wait_until_element_gone(&mut self, element_id: &str) {
+    |            ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: field `surface_width` is never read
+    --> tests/headless/nucleus_a11y.rs:1350:5
+     |
+1346 | struct PopoverProps {
+     |        ------------ field in this struct
+...
+1350 |     surface_width: Option<String>,
+     |     ^^^^^^^^^^^^^
+     |
+     = note: `PopoverProps` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+
+warning: variant `Tokens` is never constructed
+   --> tests/../src/app_state.rs:140:5
+    |
+138 | pub enum Section {
+    |          ------- variant in this enum
+139 |     Components,
+140 |     Tokens,
+    |     ^^^^^^
+    |
+    = note: `Section` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: method `label` is never used
+   --> tests/../src/app_state.rs:144:12
+    |
+143 | impl Section {
+    | ------------ method in this implementation
+144 |     pub fn label(self) -> &'static str {
+    |            ^^^^^
+
+warning: variants `Default` and `Comfortable` are never constructed
+   --> tests/../src/app_state.rs:193:5
+    |
+191 | pub enum Density {
+    |          ------- variants in this enum
+192 |     Compact,
+193 |     Default,
+    |     ^^^^^^^
+194 |     Comfortable,
+    |     ^^^^^^^^^^^
+    |
+    = note: `Density` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: associated items `ALL` and `label` are never used
+   --> tests/../src/app_state.rs:199:15
+    |
+197 | impl Density {
+    | ------------ associated items in this implementation
+198 |     /// Order matches Svelte preview: compact, default, comfortable.
+199 |     pub const ALL: &[Density] = &[Density::Compact, Density::Default, D...
+    |               ^^^
+200 |
+201 |     pub fn label(self) -> &'static str {
+    |            ^^^^^
+
+warning: variant `Inspector` is never constructed
+   --> tests/../src/app_state.rs:237:5
+    |
+235 | pub enum TokenPanel {
+    |          ---------- variant in this enum
+236 |     Summary,
+237 |     Inspector,
+    |     ^^^^^^^^^
+    |
+    = note: `TokenPanel` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: methods `label` and `value` are never used
+   --> tests/../src/app_state.rs:241:12
+    |
+240 | impl TokenPanel {
+    | --------------- methods in this implementation
+241 |     pub fn label(self) -> &'static str {
+    |            ^^^^^
+...
+248 |     pub fn value(self) -> &'static str {
+    |            ^^^^^
+
+warning: method `selected` is never used
+   --> tests/../src/app_state.rs:312:12
+    |
+273 | impl SpecimenState {
+    | ------------------ method in this implementation
+...
+312 |     pub fn selected(&self, key: &str) -> usize {
+    |            ^^^^^^^^
+
+warning: multiple variants are never constructed
+   --> tests/../src/app_state.rs:424:5
+    |
+422 | pub enum NodeSpecimenEvent {
+    |          ----------------- variants in this enum
+423 |     /// Toggle a boolean specimen key (e.g. `select-native-open`).
+424 |     Toggle(String),
+    |     ^^^^^^
+...
+427 |     SetToggle { key: String, value: bool },
+    |     ^^^^^^^^^
+...
+433 |     Change {
+    |     ^^^^^^
+...
+440 |     SetText { key: String, value: String },
+    |     ^^^^^^^
+441 |     /// Write a DurationInput's three segment values directly.
+442 |     SetDuration {
+    |     ^^^^^^^^^^^
+...
+450 |     SetOptionalText { key: String, value: Option<String> },
+    |     ^^^^^^^^^^^^^^^
+451 |     /// Move a field's caret or selection, as character ...
+452 |     SetCaret {
+    |     ^^^^^^^^
+...
+458 |     Select { key: String, index: usize },
+    |     ^^^^^^
+459 |     /// Apply a context-menu action to the mutable tree ...
+460 |     TreeContextAction {
+    |     ^^^^^^^^^^^^^^^^^
+...
+468 |     Chrome(ChromeEvent),
+    |     ^^^^^^
+...
+472 |     Tree(TreeEvent),
+    |     ^^^^
+473 |     /// A Listbox machine transition, including the host-applied effects.
+474 |     Listbox(poodle_headless::listbox::ListboxResult),
+    |     ^^^^^^^
+...
+495 |     LicenceSeats(LicenceSeatsEvent),
+    |     ^^^^^^^^^^^^
+496 |     /// A model-connection family interaction (picker, s...
+497 |     ModelConnection(ModelConnectionEvent),
+    |     ^^^^^^^^^^^^^^^
+
+warning: multiple variants are never constructed
+   --> tests/../src/app_state.rs:532:5
+    |
+531 | pub enum ModelConnectionEvent {
+    |          -------------------- variants in this enum
+532 |     PickerValue(String),
+    |     ^^^^^^^^^^^
+533 |     PickerQuery(String),
+    |     ^^^^^^^^^^^
+534 |     SetupStage(ModelConnectionSetupStage),
+    |     ^^^^^^^^^^
+535 |     SetupValue(String),
+    |     ^^^^^^^^^^
+536 |     SetupQuery(String),
+    |     ^^^^^^^^^^
+537 |     SetupSubmit(String),
+    |     ^^^^^^^^^^^
+538 |     SetupCancel,
+    |     ^^^^^^^^^^^
+539 |     CardOpen {
+    |     ^^^^^^^^
+...
+543 |     CardEnabled {
+    |     ^^^^^^^^^^^
+...
+548 |     CatalogueOrder(Vec<String>),
+    |     ^^^^^^^^^^^^^^
+549 |     CatalogueVisibility {
+    |     ^^^^^^^^^^^^^^^^^^^
+...
+553 |     CatalogueGrab(Option<String>),
+    |     ^^^^^^^^^^^^^
+554 |     CatalogueDropTarget(Option<String>),
+    |     ^^^^^^^^^^^^^^^^^^^
+555 |     CatalogueHiddenOpen(bool),
+    |     ^^^^^^^^^^^^^^^^^^^
+556 |     CatalogueAnnounce(String),
+    |     ^^^^^^^^^^^^^^^^^
+557 |     CatalogueInfo(String),
+    |     ^^^^^^^^^^^^^
+...
+560 |     FocusRequest(String),
+    |     ^^^^^^^^^^^^
+    |
+    = note: `ModelConnectionEvent` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: associated items `options`, `card_is_open`, and `card_is_enabled` are never used
+   --> tests/../src/app_state.rs:606:12
+    |
+586 | impl ModelConnectionPreviewState {
+    | -------------------------------- associated items in this implementation
+...
+606 |     pub fn options() -> Vec<poodle_headless::model_connection::ModelCon...
+    |            ^^^^^^^
+...
+613 |     pub fn card_is_open(&self, id: &str, default: bool) -> bool {
+    |            ^^^^^^^^^^^^
+...
+617 |     pub fn card_is_enabled(&self, id: &str, default: bool) -> bool {
+    |            ^^^^^^^^^^^^^^^
+
+warning: fields `key`, `spec`, and `failed_message` are never read
+   --> tests/../src/app_state.rs:660:9
+    |
+657 | pub struct FilePickRequest {
+    |            --------------- fields in this struct
+...
+660 |     pub key: String,
+    |         ^^^
+661 |     pub spec: SingleFilePickSpec,
+    |         ^^^^
+662 |     /// Polite copy for a read failu...
+663 |     pub failed_message: Option<String>,
+    |         ^^^^^^^^^^^^^^
+    |
+    = note: `FilePickRequest` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+
+warning: multiple variants are never constructed
+   --> tests/../src/app_state.rs:669:5
+    |
+668 | pub enum TreeEvent {
+    |          --------- variants in this enum
+669 |     Focus(String),
+    |     ^^^^^
+670 |     ToggleExpand(String),
+    |     ^^^^^^^^^^^^
+...
+673 |     Select {
+    |     ^^^^^^
+...
+679 |     Check(Vec<String>),
+    |     ^^^^^
+680 |     RenameStart {
+    |     ^^^^^^^^^^^
+...
+684 |     OpenMenu {
+    |     ^^^^^^^^
+...
+689 |     SetDrop {
+    |     ^^^^^^^
+...
+693 |     Reorder {
+    |     ^^^^^^^
+    |
+    = note: `TreeEvent` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: multiple variants are never constructed
+   --> tests/../src/app_state.rs:776:5
+    |
+775 | pub enum LicenceSeatsEvent {
+    |          ----------------- variants in this enum
+776 |     Rename {
+    |     ^^^^^^
+...
+780 |     Edit {
+    |     ^^^^
+...
+783 |     Draft {
+    |     ^^^^^
+...
+787 |     Selection {
+    |     ^^^^^^^^^
+...
+792 |     CancelEdit,
+    |     ^^^^^^^^^^
+793 |     RestoreFocus {
+    |     ^^^^^^^^^^^^
+...
+796 |     ClearRestoreFocus,
+    |     ^^^^^^^^^^^^^^^^^
+797 |     ReleaseTrigger {
+    |     ^^^^^^^^^^^^^^
+...
+800 |     ReleaseConfirm {
+    |     ^^^^^^^^^^^^^^
+...
+804 |     ReleaseCancel,
+    |     ^^^^^^^^^^^^^
+    |
+    = note: `LicenceSeatsEvent` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: multiple variants are never constructed
+   --> tests/../src/app_state.rs:810:5
+    |
+809 | pub enum ChromeEvent {
+    |          ----------- variants in this enum
+810 |     Section(Section),
+    |     ^^^^^^^
+811 |     /// The theme picker's trig...
+812 |     ThemeSelectOpen(bool),
+    |     ^^^^^^^^^^^^^^^
+813 |     /// Neutral-contrast slider moved; clamped and applied to the theme.
+814 |     Contrast(f32),
+    |     ^^^^^^^^
+815 |     /// A theme swatch was chosen; rebuilds the theme provider and closes.
+816 |     Theme(ThemePreset),
+    |     ^^^^^
+817 |     ComponentSearch(String),
+    |     ^^^^^^^^^^^^^^^
+818 |     /// Caret/selection moved in the header search box.
+819 |     SearchSelection(usize, usize),
+    |     ^^^^^^^^^^^^^^^
+820 |     SearchFocused(bool),
+    |     ^^^^^^^^^^^^^
+821 |     ActiveComponent(String),
+    |     ^^^^^^^^^^^^^^^
+822 |     TokenPanel(TokenPanel),
+    |     ^^^^^^^^^^
+823 |     TokenInspectorQuery(String),
+    |     ^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `ChromeEvent` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: fields `specimen_capture`, `motion_policy`, `first_frame_committed`, `theme_options`, `time_input_live`, and `agent_transcript_scroll` are never read
+   --> tests/../src/app_state.rs:830:9
+    |
+827 | pub struct AppState {
+    |            -------- fields in this struct
+...
+830 |     pub specimen_capture: bool,
+    |         ^^^^^^^^^^^^^^^^
+...
+833 |     pub motion_policy: MotionPolicy,
+    |         ^^^^^^^^^^^^^
+834 |     pub first_frame_committed: bool,
+    |         ^^^^^^^^^^^^^^^^^^^^^
+...
+852 |     pub theme_options: Vec<poodle_specs::ThemeOption>,
+    |         ^^^^^^^^^^^^^
+...
+862 |     pub time_input_live: std::sync::Arc<
+    |         ^^^^^^^^^^^^^^^
+...
+878 |     pub agent_transcript_scroll: poodle_gpui_node_backend::TrackedScrol...
+    |         ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: methods `motion_context` and `start_file_picks` are never used
+    --> tests/../src/app_state.rs:947:12
+     |
+ 900 | impl AppState {
+     | ------------- methods in this implementation
+...
+ 947 |     pub fn motion_context(&self) -> poodle_render::RenderContext<'_> {
+     |            ^^^^^^^^^^^^^^
+...
+1286 |     pub fn start_file_picks(
+     |            ^^^^^^^^^^^^^^^^
+
+warning: function `deliver_os_pick` is never used
+    --> tests/../src/app_state.rs:1371:14
+     |
+1371 | pub async fn deliver_os_pick(
+     |              ^^^^^^^^^^^^^^^
+
+warning: struct `Eyebrow` is never constructed
+   --> tests/../src/node_compat.rs:146:19
+    |
+146 | pub(crate) struct Eyebrow;
+    |                   ^^^^^^^
+
+warning: associated function `from_spec` is never used
+   --> tests/../src/node_compat.rs:149:19
+    |
+148 | impl Eyebrow {
+    | ------------ associated function in this implementation
+149 |     pub(crate) fn from_spec(spec: EyebrowSpec, theme: &GpuiThemeProvide...
+    |                   ^^^^^^^^^
+
+warning: struct `Text` is never constructed
+   --> tests/../src/node_compat.rs:157:19
+    |
+157 | pub(crate) struct Text;
+    |                   ^^^^
+
+warning: associated functions `from_spec` and `node_from_spec` are never used
+   --> tests/../src/node_compat.rs:160:19
+    |
+159 | impl Text {
+    | --------- associated functions in this implementation
+160 |     pub(crate) fn from_spec(spec: TextSpec, theme: &GpuiThemeProvider) ...
+    |                   ^^^^^^^^^
+...
+164 |     pub(crate) fn node_from_spec(spec: TextSpec, theme: &GpuiThemeProvi...
+    |                   ^^^^^^^^^^^^^^
+
+warning: struct `Skeleton` is never constructed
+   --> tests/../src/node_compat.rs:169:19
+    |
+169 | pub(crate) struct Skeleton;
+    |                   ^^^^^^^^
+
+warning: associated functions `from_spec` and `from_spec_with_context` are never used
+   --> tests/../src/node_compat.rs:172:19
+    |
+171 | impl Skeleton {
+    | ------------- associated functions in this implementation
+172 |     pub(crate) fn from_spec(spec: SkeletonSpec, theme: &GpuiThemeProvid...
+    |                   ^^^^^^^^^
+...
+177 |     pub(crate) fn from_spec_with_context(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `Spinner` is never constructed
+   --> tests/../src/node_compat.rs:185:19
+    |
+185 | pub(crate) struct Spinner;
+    |                   ^^^^^^^
+
+warning: associated functions `from_spec` and `from_spec_with_context` are never used
+   --> tests/../src/node_compat.rs:188:19
+    |
+187 | impl Spinner {
+    | ------------ associated functions in this implementation
+188 |     pub(crate) fn from_spec(spec: SpinnerSpec, theme: &GpuiThemeProvide...
+    |                   ^^^^^^^^^
+...
+193 |     pub(crate) fn from_spec_with_context(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `Avatar` is never constructed
+   --> tests/../src/node_compat.rs:201:19
+    |
+201 | pub(crate) struct Avatar;
+    |                   ^^^^^^
+
+warning: associated function `from_spec` is never used
+   --> tests/../src/node_compat.rs:204:19
+    |
+203 | impl Avatar {
+    | ----------- associated function in this implementation
+204 |     pub(crate) fn from_spec(spec: AvatarSpec, theme: &GpuiThemeProvider...
+    |                   ^^^^^^^^^
+
+warning: associated function `node_from_spec` is never used
+   --> tests/../src/node_compat.rs:250:19
+    |
+215 | impl StatusIndicator {
+    | -------------------- associated function in this implementation
+...
+250 |     pub(crate) fn node_from_spec(
+    |                   ^^^^^^^^^^^^^^
+
+warning: struct `Meter` is never constructed
+   --> tests/../src/node_compat.rs:266:19
+    |
+266 | pub(crate) struct Meter;
+    |                   ^^^^^
+
+warning: associated function `from_spec` is never used
+   --> tests/../src/node_compat.rs:269:19
+    |
+268 | impl Meter {
+    | ---------- associated function in this implementation
+269 |     pub(crate) fn from_spec(spec: MeterSpec, theme: &GpuiThemeProvider)...
+    |                   ^^^^^^^^^
+
+warning: struct `Table` is never constructed
+   --> tests/../src/node_compat.rs:274:19
+    |
+274 | pub(crate) struct Table;
+    |                   ^^^^^
+
+warning: associated function `from_spec` is never used
+   --> tests/../src/node_compat.rs:277:19
+    |
+276 | impl Table {
+    | ---------- associated function in this implementation
+277 |     pub(crate) fn from_spec(spec: TableSpec, theme: &GpuiThemeProvider)...
+    |                   ^^^^^^^^^
+
+warning: struct `Rating` is never constructed
+   --> tests/../src/node_compat.rs:282:19
+    |
+282 | pub(crate) struct Rating {
+    |                   ^^^^^^
+
+warning: struct `CollapseToggle` is never constructed
+   --> tests/../src/node_compat.rs:289:19
+    |
+289 | pub(crate) struct CollapseToggle {
+    |                   ^^^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `with_id`, `on_toggle`, `size`, `with_density`, and `into_node` are never used
+   --> tests/../src/node_compat.rs:297:19
+    |
+296 | impl CollapseToggle {
+    | ------------------- associated items in this implementation
+297 |     pub(crate) fn from_spec(spec: CollapseToggleSpec, theme: &GpuiTheme...
+    |                   ^^^^^^^^^
+...
+306 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+    |                   ^^^^^^^
+...
+311 |     pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(bool) + Send ...
+    |                   ^^^^^^^^^
+...
+316 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+    |                   ^^^^
+...
+321 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> Se...
+    |                   ^^^^^^^^^^^^
+...
+326 |     fn into_node(self) -> poodle_node::Node {
+    |        ^^^^^^^^^
+
+warning: associated items `from_spec` and `on_change` are never used
+   --> tests/../src/node_compat.rs:348:19
+    |
+347 | impl Rating {
+    | ----------- associated items in this implementation
+348 |     pub(crate) fn from_spec(
+    |                   ^^^^^^^^^
+...
+361 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(Option<f64>) ...
+    |                   ^^^^^^^^^
+
+warning: struct `MetaBar` is never constructed
+   --> tests/../src/node_compat.rs:382:19
+    |
+382 | pub(crate) struct MetaBar {
+    |                   ^^^^^^^
+
+warning: associated items `from_spec`, `with_child`, `with_child_sep`, and `into_node` are never used
+   --> tests/../src/node_compat.rs:389:19
+    |
+388 | impl MetaBar {
+    | ------------ associated items in this implementation
+389 |     pub(crate) fn from_spec(spec: MetaBarSpec, theme: &GpuiThemeProvide...
+    |                   ^^^^^^^^^
+...
+397 |     pub(crate) fn with_child(mut self, child: impl IntoCompatNode) -> S...
+    |                   ^^^^^^^^^^
+...
+402 |     pub(crate) fn with_child_sep(mut self, child: impl IntoCompatNode, ...
+    |                   ^^^^^^^^^^^^^^
+...
+407 |     fn into_node(self) -> poodle_node::Node {
+    |        ^^^^^^^^^
+
+warning: struct `MetaItem` is never constructed
+   --> tests/../src/node_compat.rs:426:19
+    |
+426 | pub(crate) struct MetaItem {
+    |                   ^^^^^^^^
+
+warning: associated items `new`, `from_spec`, `with_value`, and `into_node` are never used
+   --> tests/../src/node_compat.rs:433:19
+    |
+432 | impl MetaItem {
+    | ------------- associated items in this implementation
+433 |     pub(crate) fn new(theme: &GpuiThemeProvider) -> Self {
+    |                   ^^^
+...
+437 |     pub(crate) fn from_spec(spec: MetaItemSpec, theme: &GpuiThemeProvid...
+    |                   ^^^^^^^^^
+...
+445 |     pub(crate) fn with_value(mut self, value: impl IntoCompatNode) -> S...
+    |                   ^^^^^^^^^^
+...
+450 |     fn into_node(self) -> poodle_node::Node {
+    |        ^^^^^^^^^
+
+warning: methods `size` and `with_density` are never used
+   --> tests/../src/node_compat.rs:509:19
+    |
+482 | impl Callout {
+    | ------------ methods in this implementation
+...
+509 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+    |                   ^^^^
+...
+514 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> Se...
+    |                   ^^^^^^^^^^^^
+
+warning: struct `RemediationBanner` is never constructed
+   --> tests/../src/node_compat.rs:538:19
+    |
+538 | pub(crate) struct RemediationBanner {
+    |                   ^^^^^^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `on_action`, `on_dismiss`, `with_instance_id`, and `into_node` are never used
+   --> tests/../src/node_compat.rs:545:19
+    |
+544 | impl RemediationBanner {
+    | ---------------------- associated items in this implementation
+545 |     pub(crate) fn from_spec(spec: RemediationBannerSpec, theme: &GpuiTh...
+    |                   ^^^^^^^^^
+...
+553 |     pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send ...
+    |                   ^^^^^^^^^
+...
+558 |     pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn() + Send + S...
+    |                   ^^^^^^^^^^
+...
+563 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<Str...
+    |                   ^^^^^^^^^^^^^^^^
+...
+568 |     fn into_node(self) -> poodle_node::Node {
+    |        ^^^^^^^^^
+
+warning: struct `StatusBar` is never constructed
+   --> tests/../src/node_compat.rs:585:19
+    |
+585 | pub(crate) struct StatusBar {
+    |                   ^^^^^^^^^
+
+warning: struct `PageHeader` is never constructed
+   --> tests/../src/node_compat.rs:592:19
+    |
+592 | pub(crate) struct PageHeader {
+    |                   ^^^^^^^^^^
+
+warning: struct `AppHeader` is never constructed
+   --> tests/../src/node_compat.rs:600:19
+    |
+600 | pub(crate) struct AppHeader {
+    |                   ^^^^^^^^^
+
+warning: multiple associated items are never used
+   --> tests/../src/node_compat.rs:610:19
+    |
+609 | impl AppHeader {
+    | -------------- associated items in this implementation
+610 |     pub(crate) fn from_spec(spec: AppHeaderSpec, theme: &GpuiThemeProvi...
+    |                   ^^^^^^^^^
+...
+621 |     pub(crate) fn with_primary_actions(
+    |                   ^^^^^^^^^^^^^^^^^^^^
+...
+629 |     pub(crate) fn with_utility_items(
+    |                   ^^^^^^^^^^^^^^^^^^
+...
+637 |     pub(crate) fn with_center(
+    |                   ^^^^^^^^^^^
+...
+645 |     pub(crate) fn with_identity(
+    |                   ^^^^^^^^^^^^^
+...
+653 |     pub(crate) fn with_leading(
+    |                   ^^^^^^^^^^^^
+...
+660 |     fn into_node(self) -> poodle_node::Node {
+    |        ^^^^^^^^^
+
+warning: struct `FilterToolbar` is never constructed
+   --> tests/../src/node_compat.rs:686:19
+    |
+686 | pub(crate) struct FilterToolbar {
+    |                   ^^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `with_child`, `with_actions`, `with_secondary`, and `into_node` are never used
+   --> tests/../src/node_compat.rs:696:19
+    |
+695 | impl FilterToolbar {
+    | ------------------ associated items in this implementation
+696 |     pub(crate) fn from_spec(spec: FilterToolbarSpec, theme: &GpuiThemeP...
+    |                   ^^^^^^^^^
+...
+707 |     pub(crate) fn with_child(
+    |                   ^^^^^^^^^^
+...
+715 |     pub(crate) fn with_actions(
+    |                   ^^^^^^^^^^^^
+...
+723 |     pub(crate) fn with_secondary(
+    |                   ^^^^^^^^^^^^^^
+...
+731 |     fn into_node(self) -> poodle_node::Node {
+    |        ^^^^^^^^^
+
+warning: struct `FormShell` is never constructed
+   --> tests/../src/node_compat.rs:757:19
+    |
+757 | pub(crate) struct FormShell {
+    |                   ^^^^^^^^^
+
+warning: struct `FieldSet` is never constructed
+   --> tests/../src/node_compat.rs:771:19
+    |
+771 | pub(crate) struct FieldSet {
+    |                   ^^^^^^^^
+
+warning: struct `ScrollShell` is never constructed
+   --> tests/../src/node_compat.rs:812:19
+    |
+812 | pub(crate) struct ScrollShell {
+    |                   ^^^^^^^^^^^
+
+warning: struct `Region` is never constructed
+   --> tests/../src/node_compat.rs:818:19
+    |
+818 | pub(crate) struct Region {
+    |                   ^^^^^^
+
+warning: struct `MediaThumbnail` is never constructed
+   --> tests/../src/node_compat.rs:828:19
+    |
+828 | pub(crate) struct MediaThumbnail {
+    |                   ^^^^^^^^^^^^^^
+
+warning: struct `MediaPreview` is never constructed
+   --> tests/../src/node_compat.rs:833:19
+    |
+833 | pub(crate) struct MediaPreview {
+    |                   ^^^^^^^^^^^^
+
+warning: struct `CardRadioGroup` is never constructed
+   --> tests/../src/node_compat.rs:839:19
+    |
+839 | pub(crate) struct CardRadioGroup {
+    |                   ^^^^^^^^^^^^^^
+
+warning: struct `PageLoading` is never constructed
+   --> tests/../src/node_compat.rs:845:19
+    |
+845 | pub(crate) struct PageLoading {
+    |                   ^^^^^^^^^^^
+
+warning: struct `MediaPicker` is never constructed
+   --> tests/../src/node_compat.rs:850:19
+    |
+850 | pub(crate) struct MediaPicker {
+    |                   ^^^^^^^^^^^
+
+warning: struct `AgentMessage` is never constructed
+   --> tests/../src/node_compat.rs:862:19
+    |
+862 | pub(crate) struct AgentMessage {
+    |                   ^^^^^^^^^^^^
+
+warning: struct `AgentPlanRecord` is never constructed
+   --> tests/../src/node_compat.rs:873:19
+    |
+873 | pub(crate) struct AgentPlanRecord {
+    |                   ^^^^^^^^^^^^^^^
+
+warning: struct `AgentQuestionRecord` is never constructed
+   --> tests/../src/node_compat.rs:879:19
+    |
+879 | pub(crate) struct AgentQuestionRecord {
+    |                   ^^^^^^^^^^^^^^^^^^^
+
+warning: struct `AgentSubagent` is never constructed
+   --> tests/../src/node_compat.rs:884:19
+    |
+884 | pub(crate) struct AgentSubagent {
+    |                   ^^^^^^^^^^^^^
+
+warning: struct `ChangedFiles` is never constructed
+   --> tests/../src/node_compat.rs:890:19
+    |
+890 | pub(crate) struct ChangedFiles {
+    |                   ^^^^^^^^^^^^
+
+warning: struct `ToolCall` is never constructed
+   --> tests/../src/node_compat.rs:896:19
+    |
+896 | pub(crate) struct ToolCall {
+    |                   ^^^^^^^^
+
+warning: struct `ToolCallGroup` is never constructed
+   --> tests/../src/node_compat.rs:902:19
+    |
+902 | pub(crate) struct ToolCallGroup {
+    |                   ^^^^^^^^^^^^^
+
+warning: struct `MediaBrowsePanel` is never constructed
+   --> tests/../src/node_compat.rs:915:19
+    |
+915 | pub(crate) struct MediaBrowsePanel {
+    |                   ^^^^^^^^^^^^^^^^
+
+warning: struct `SidebarNav` is never constructed
+   --> tests/../src/node_compat.rs:921:19
+    |
+921 | pub(crate) struct SidebarNav {
+    |                   ^^^^^^^^^^
+
+warning: struct `ActionDiscoveryPanel` is never constructed
+   --> tests/../src/node_compat.rs:975:19
+    |
+975 | pub(crate) struct ActionDiscoveryPanel {
+    |                   ^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `FilterBuilder` is never constructed
+    --> tests/../src/node_compat.rs:1005:19
+     |
+1005 | pub(crate) struct FilterBuilder {
+     |                   ^^^^^^^^^^^^^
+
+warning: struct `MarkdownEditor` is never constructed
+    --> tests/../src/node_compat.rs:1012:19
+     |
+1012 | pub(crate) struct MarkdownEditor {
+     |                   ^^^^^^^^^^^^^^
+
+warning: struct `EditableList` is never constructed
+    --> tests/../src/node_compat.rs:1018:19
+     |
+1018 | pub(crate) struct EditableList {
+     |                   ^^^^^^^^^^^^
+
+warning: associated items `from_spec` and `into_node` are never used
+    --> tests/../src/node_compat.rs:1070:19
+     |
+1069 | impl MediaThumbnail {
+     | ------------------- associated items in this implementation
+1070 |     pub(crate) fn from_spec(spec: MediaThumbnailSpec, theme: &GpuiThem...
+     |                   ^^^^^^^^^
+...
+1077 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: associated items `from_spec`, `with_media_content`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:1097:19
+     |
+1096 | impl MediaPreview {
+     | ----------------- associated items in this implementation
+1097 |     pub(crate) fn from_spec(spec: MediaPreviewSpec, theme: &GpuiThemeP...
+     |                   ^^^^^^^^^
+...
+1105 |     pub(crate) fn with_media_content(
+     |                   ^^^^^^^^^^^^^^^^^^
+...
+1113 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: associated items `from_spec`, `on_change`, `with_size`, `with_density`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:1137:19
+     |
+1136 | impl CardRadioGroup {
+     | ------------------- associated items in this implementation
+1137 |     pub(crate) fn from_spec(spec: CardRadioGroupSpec, theme: &GpuiThem...
+     |                   ^^^^^^^^^
+...
+1145 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+1150 |     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^^^^^^
+...
+1155 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+...
+1160 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: associated items `from_spec` and `into_node` are never used
+    --> tests/../src/node_compat.rs:1178:19
+     |
+1177 | impl PageLoading {
+     | ---------------- associated items in this implementation
+1178 |     pub(crate) fn from_spec(spec: PageLoadingSpec, theme: &GpuiThemePr...
+     |                   ^^^^^^^^^
+...
+1185 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: associated items `from_spec`, `with_items`, `on_open_change`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:1199:19
+     |
+1198 | impl MediaPicker {
+     | ---------------- associated items in this implementation
+1199 |     pub(crate) fn from_spec(spec: MediaPickerSpec, theme: &GpuiThemePr...
+     |                   ^^^^^^^^^
+...
+1207 |     pub(crate) fn with_items(mut self, items: Vec<poodle_specs::MediaP...
+     |                   ^^^^^^^^^^
+...
+1212 |     pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) +...
+     |                   ^^^^^^^^^^^^^^
+...
+1217 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: associated function `from_spec` is never used
+    --> tests/../src/node_compat.rs:1266:19
+     |
+1265 | impl AgentMessage {
+     | ----------------- associated function in this implementation
+1266 |     pub(crate) fn from_spec(spec: AgentMessageSpec, theme: &GpuiThemeP...
+     |                   ^^^^^^^^^
+
+warning: associated items `from_spec`, `on_toggle`, and `with_instance_id` are never used
+    --> tests/../src/node_compat.rs:1334:19
+     |
+1333 | impl AgentPlanRecord {
+     | -------------------- associated items in this implementation
+1334 |     pub(crate) fn from_spec(spec: AgentPlanRecordSpec, theme: &GpuiThe...
+     |                   ^^^^^^^^^
+...
+1342 |     pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(bool) + Send...
+     |                   ^^^^^^^^^
+...
+1347 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<St...
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: associated function `from_spec` is never used
+    --> tests/../src/node_compat.rs:1366:19
+     |
+1365 | impl AgentQuestionRecord {
+     | ------------------------ associated function in this implementation
+1366 |     pub(crate) fn from_spec(spec: AgentQuestionRecordSpec, theme: &Gpu...
+     |                   ^^^^^^^^^
+
+warning: associated items `from_spec`, `on_toggle`, `on_open_child`, and `with_instance_id` are never used
+    --> tests/../src/node_compat.rs:1386:19
+     |
+1385 | impl AgentSubagent {
+     | ------------------ associated items in this implementation
+1386 |     pub(crate) fn from_spec(spec: AgentSubagentSpec, theme: &GpuiTheme...
+     |                   ^^^^^^^^^
+...
+1394 |     pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(bool) + Send...
+     |                   ^^^^^^^^^
+...
+1399 |     pub(crate) fn on_open_child(mut self, handler: Arc<dyn Fn() + Send...
+     |                   ^^^^^^^^^^^^^
+...
+1404 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<St...
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `on_toggle`, `on_file_select`, and `with_instance_id` are never used
+    --> tests/../src/node_compat.rs:1423:19
+     |
+1422 | impl ChangedFiles {
+     | ----------------- associated items in this implementation
+1423 |     pub(crate) fn from_spec(spec: ChangedFilesSpec, theme: &GpuiThemeP...
+     |                   ^^^^^^^^^
+...
+1431 |     pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+1436 |     pub(crate) fn on_file_select(mut self, handler: Arc<dyn Fn(&str) +...
+     |                   ^^^^^^^^^^^^^^
+...
+1441 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<St...
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `on_toggle`, and `with_instance_id` are never used
+    --> tests/../src/node_compat.rs:1460:19
+     |
+1459 | impl ToolCall {
+     | ------------- associated items in this implementation
+1460 |     pub(crate) fn from_spec(spec: ToolCallSpec, theme: &GpuiThemeProvi...
+     |                   ^^^^^^^^^
+...
+1468 |     pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+1473 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<St...
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `on_toggle`, `on_call_toggle`, and `with_instance_id` are never used
+    --> tests/../src/node_compat.rs:1492:19
+     |
+1491 | impl ToolCallGroup {
+     | ------------------ associated items in this implementation
+1492 |     pub(crate) fn from_spec(spec: ToolCallGroupSpec, theme: &GpuiTheme...
+     |                   ^^^^^^^^^
+...
+1500 |     pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+1505 |     pub(crate) fn on_call_toggle(mut self, handler: Arc<dyn Fn(&str) +...
+     |                   ^^^^^^^^^^^^^^
+...
+1510 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<St...
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: methods `on_tool_call_toggle`, `on_changed_files_toggle`, and `on_file_select` are never used
+    --> tests/../src/node_compat.rs:1543:19
+     |
+1528 | impl AgentTranscript {
+     | -------------------- methods in this implementation
+...
+1543 |     pub(crate) fn on_tool_call_toggle(mut self, handler: Arc<dyn Fn(&s...
+     |                   ^^^^^^^^^^^^^^^^^^^
+...
+1548 |     pub(crate) fn on_changed_files_toggle(
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^
+...
+1556 |     pub(crate) fn on_file_select(mut self, handler: Arc<dyn Fn(&str) +...
+     |                   ^^^^^^^^^^^^^^
+
+warning: associated function `from_spec` is never used
+    --> tests/../src/node_compat.rs:1628:19
+     |
+1627 | impl MediaBrowsePanel {
+     | --------------------- associated function in this implementation
+1628 |     pub(crate) fn from_spec(spec: MediaBrowsePanelSpec, theme: &GpuiTh...
+     |                   ^^^^^^^^^
+
+warning: associated items `from_spec` and `on_change` are never used
+    --> tests/../src/node_compat.rs:1650:19
+     |
+1649 | impl SidebarNav {
+     | --------------- associated items in this implementation
+1650 |     pub(crate) fn from_spec(spec: SidebarNavSpec, theme: &GpuiThemePro...
+     |                   ^^^^^^^^^
+...
+1658 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+
+warning: associated items `from_spec_with_context`, `with_size`, and `with_density` are never used
+    --> tests/../src/node_compat.rs:1688:19
+     |
+1676 | impl ToastStack {
+     | --------------- associated items in this implementation
+...
+1688 |     pub(crate) fn from_spec_with_context(
+     |                   ^^^^^^^^^^^^^^^^^^^^^^
+...
+1699 |     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^^^^^^
+...
+1704 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: associated function `from_spec_with_context` is never used
+    --> tests/../src/node_compat.rs:1755:19
+     |
+1742 | impl ToastHost {
+     | -------------- associated function in this implementation
+...
+1755 |     pub(crate) fn from_spec_with_context(
+     |                   ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `with_instance_id`, and `on_select` are never used
+    --> tests/../src/node_compat.rs:1961:19
+     |
+1960 | impl ActionDiscoveryPanel {
+     | ------------------------- associated items in this implementation
+1961 |     pub(crate) fn from_spec(spec: ActionDiscoveryPanelSpec, theme: &Gp...
+     |                   ^^^^^^^^^
+...
+1969 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<St...
+     |                   ^^^^^^^^^^^^^^^^
+...
+1974 |     pub(crate) fn on_select(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+
+warning: methods `question_child`, `plan_child`, `size`, and `with_density` are never used
+    --> tests/../src/node_compat.rs:2102:19
+     |
+2035 | impl AgentChatInput {
+     | ------------------- methods in this implementation
+...
+2102 |     pub(crate) fn question_child(mut self, child: impl IntoCompatNode)...
+     |                   ^^^^^^^^^^^^^^
+...
+2107 |     pub(crate) fn plan_child(mut self, child: impl IntoCompatNode) -> ...
+     |                   ^^^^^^^^^^
+...
+2122 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+2127 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `size`, and `with_density` are never used
+    --> tests/../src/node_compat.rs:2406:19
+     |
+2405 | impl FilterBuilder {
+     | ------------------ associated items in this implementation
+2406 |     pub(crate) fn from_spec(
+     |                   ^^^^^^^^^
+...
+2419 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+2424 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `on_change`, and `on_mode_change` are never used
+    --> tests/../src/node_compat.rs:2444:19
+     |
+2443 | impl MarkdownEditor {
+     | ------------------- associated items in this implementation
+2444 |     pub(crate) fn from_spec(spec: MarkdownEditorSpec, theme: &GpuiThem...
+     |                   ^^^^^^^^^
+...
+2452 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+2457 |     pub(crate) fn on_mode_change(mut self, handler: Arc<dyn Fn(&str) +...
+     |                   ^^^^^^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:2476:19
+     |
+2475 | impl EditableList {
+     | ----------------- associated items in this implementation
+2476 |     pub(crate) fn new(theme: &GpuiThemeProvider, instance_id: impl Int...
+     |                   ^^^
+...
+2480 |     pub(crate) fn from_spec(
+     |                   ^^^^^^^^^
+...
+2492 |     pub(crate) fn aria_label(mut self, label: impl Into<String>) -> Se...
+     |                   ^^^^^^^^^^
+...
+2497 |     pub(crate) fn add_label(mut self, label: impl Into<String>) -> Self {
+     |                   ^^^^^^^^^
+...
+2502 |     pub(crate) fn placeholder(mut self, value: impl Into<String>) -> S...
+     |                   ^^^^^^^^^^^
+...
+2507 |     pub(crate) fn items(mut self, values: Vec<String>) -> Self {
+     |                   ^^^^^
+...
+2519 |     pub(crate) fn editable(mut self, value: bool) -> Self {
+     |                   ^^^^^^^^
+...
+2524 |     pub(crate) fn removable(mut self, value: bool) -> Self {
+     |                   ^^^^^^^^^
+...
+2529 |     pub(crate) fn reorderable(mut self, value: bool) -> Self {
+     |                   ^^^^^^^^^^^
+...
+2534 |     pub(crate) fn max_items(mut self, value: usize) -> Self {
+     |                   ^^^^^^^^^
+...
+2539 |     pub(crate) fn dirty(mut self, value: bool) -> Self {
+     |                   ^^^^^
+...
+2544 |     pub(crate) fn submitting(mut self, value: bool) -> Self {
+     |                   ^^^^^^^^^^
+...
+2549 |     pub(crate) fn error_message(mut self, value: impl Into<String>) ->...
+     |                   ^^^^^^^^^^^^^
+...
+2554 |     pub(crate) fn info_message(mut self, value: impl Into<String>) -> ...
+     |                   ^^^^^^^^^^^^
+...
+2559 |     pub(crate) fn disabled(mut self, value: bool) -> Self {
+     |                   ^^^^^^^^
+...
+2564 |     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^^^^^^
+...
+2569 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: methods `on_drill_enter` and `on_breadcrumb_click` are never used
+    --> tests/../src/node_compat.rs:2605:19
+     |
+2587 | impl RelationPicker {
+     | ------------------- methods in this implementation
+...
+2605 |     pub(crate) fn on_drill_enter(mut self, handler: Arc<dyn Fn(&str) +...
+     |                   ^^^^^^^^^^^^^^
+...
+2610 |     pub(crate) fn on_breadcrumb_click(mut self, handler: Arc<dyn Fn(us...
+     |                   ^^^^^^^^^^^^^^^^^^^
+
+warning: methods `size` and `density` are never used
+    --> tests/../src/node_compat.rs:2676:19
+     |
+2628 | impl EditableLabel {
+     | ------------------ methods in this implementation
+...
+2676 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+2681 |     pub(crate) fn density(mut self, density: ControlDensity) -> Self {
+     |                   ^^^^^^^
+
+warning: methods `on_open_change`, `with_header`, and `with_footer` are never used
+    --> tests/../src/node_compat.rs:2731:19
+     |
+2713 | impl Dialog {
+     | ----------- methods in this implementation
+...
+2731 |     pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) +...
+     |                   ^^^^^^^^^^^^^^
+...
+2746 |     pub(crate) fn with_header(mut self, header: impl IntoCompatNode) -...
+     |                   ^^^^^^^^^^^
+...
+2751 |     pub(crate) fn with_footer(mut self, footer: impl IntoCompatNode) -...
+     |                   ^^^^^^^^^^^
+
+warning: method `with_actions` is never used
+    --> tests/../src/node_compat.rs:2799:19
+     |
+2783 | impl Drawer {
+     | ----------- method in this implementation
+...
+2799 |     pub(crate) fn with_actions(mut self, actions: impl IntoCompatNode)...
+     |                   ^^^^^^^^^^^^
+
+warning: associated items `from_spec` and `into_node` are never used
+    --> tests/../src/node_compat.rs:2843:19
+     |
+2842 | impl Region {
+     | ----------- associated items in this implementation
+2843 |     pub(crate) fn from_spec(spec: RegionSpec, theme: &GpuiThemeProvide...
+     |                   ^^^^^^^^^
+...
+2850 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: associated items `from_spec`, `with_child`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:2870:19
+     |
+2869 | impl ScrollShell {
+     | ---------------- associated items in this implementation
+2870 |     pub(crate) fn from_spec(spec: ScrollShellSpec, theme: &GpuiThemePr...
+     |                   ^^^^^^^^^
+...
+2878 |     pub(crate) fn with_child(mut self, child: impl IntoCompatNode) -> ...
+     |                   ^^^^^^^^^^
+...
+2883 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:2908:19
+     |
+2907 | impl FormDialog {
+     | --------------- associated items in this implementation
+2908 |     pub(crate) fn new(theme: &GpuiThemeProvider) -> Self {
+     |                   ^^^
+...
+2922 |     pub(crate) fn title(mut self, value: impl Into<String>) -> Self {
+     |                   ^^^^^
+...
+2927 |     pub(crate) fn description(mut self, value: impl Into<String>) -> S...
+     |                   ^^^^^^^^^^^
+...
+2932 |     pub(crate) fn subtitle(mut self, value: impl Into<String>) -> Self {
+     |                   ^^^^^^^^
+...
+2937 |     pub(crate) fn submit_label(mut self, value: impl Into<String>) -> ...
+     |                   ^^^^^^^^^^^^
+...
+2942 |     pub(crate) fn cancel_label(mut self, value: impl Into<String>) -> ...
+     |                   ^^^^^^^^^^^^
+...
+2947 |     pub(crate) fn submitting(mut self, value: bool) -> Self {
+     |                   ^^^^^^^^^^
+...
+2952 |     pub(crate) fn error_message(mut self, value: impl Into<String>) ->...
+     |                   ^^^^^^^^^^^^^
+...
+2957 |     pub(crate) fn bare(mut self, value: bool) -> Self {
+     |                   ^^^^
+...
+2962 |     pub(crate) fn show_default_actions(mut self, value: bool) -> Self {
+     |                   ^^^^^^^^^^^^^^^^^^^^
+...
+2972 |     pub(crate) fn with_actions(mut self, actions: impl IntoCompatNode)...
+     |                   ^^^^^^^^^^^^
+
+warning: methods `with_search` and `with_results` are never used
+    --> tests/../src/node_compat.rs:3030:19
+     |
+3012 | impl PickerShell {
+     | ---------------- methods in this implementation
+...
+3030 |     pub(crate) fn with_search(self, search: impl IntoCompatNode) -> Se...
+     |                   ^^^^^^^^^^^
+...
+3039 |     pub(crate) fn with_results(self, results: impl IntoCompatNode) -> ...
+     |                   ^^^^^^^^^^^^
+
+warning: methods `size` and `with_density` are never used
+    --> tests/../src/node_compat.rs:3090:19
+     |
+3075 | impl ModelPicker {
+     | ---------------- methods in this implementation
+...
+3090 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+3095 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: methods `size` and `with_density` are never used
+    --> tests/../src/node_compat.rs:3184:19
+     |
+3158 | impl ThemeSelect {
+     | ---------------- methods in this implementation
+...
+3184 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+3189 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `with_child`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:3235:19
+     |
+3234 | impl FieldSet {
+     | ------------- associated items in this implementation
+3235 |     pub(crate) fn from_spec(spec: FieldSetSpec, theme: &GpuiThemeProvi...
+     |                   ^^^^^^^^^
+...
+3243 |     pub(crate) fn with_child(mut self, child: impl IntoCompatNode) -> ...
+     |                   ^^^^^^^^^^
+...
+3248 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: associated items `from_spec`, `with_section_slot`, `with_action`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:3345:19
+     |
+3344 | impl FormShell {
+     | -------------- associated items in this implementation
+3345 |     pub(crate) fn from_spec(spec: FormShellSpec, theme: &GpuiThemeProv...
+     |                   ^^^^^^^^^
+...
+3354 |     pub(crate) fn with_section_slot(mut self, slot: impl IntoCompatNod...
+     |                   ^^^^^^^^^^^^^^^^^
+...
+3359 |     pub(crate) fn with_action(mut self, action: impl IntoCompatNode) -...
+     |                   ^^^^^^^^^^^
+...
+3364 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: associated items `from_spec`, `with_breadcrumbs`, `with_actions`, `with_meta`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:3400:19
+     |
+3399 | impl PageHeader {
+     | --------------- associated items in this implementation
+3400 |     pub(crate) fn from_spec(spec: PageHeaderSpec, theme: &GpuiThemePro...
+     |                   ^^^^^^^^^
+...
+3410 |     pub(crate) fn with_breadcrumbs(
+     |                   ^^^^^^^^^^^^^^^^
+...
+3418 |     pub(crate) fn with_actions(
+     |                   ^^^^^^^^^^^^
+...
+3426 |     pub(crate) fn with_meta(
+     |                   ^^^^^^^^^
+...
+3434 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `Toolbar` is never constructed
+    --> tests/../src/node_compat.rs:3459:19
+     |
+3459 | pub(crate) struct Toolbar {
+     |                   ^^^^^^^
+
+warning: associated items `from_spec`, `child`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:3466:19
+     |
+3465 | impl Toolbar {
+     | ------------ associated items in this implementation
+3466 |     pub(crate) fn from_spec(spec: ToolbarSpec, theme: &GpuiThemeProvid...
+     |                   ^^^^^^^^^
+...
+3474 |     pub(crate) fn child(mut self, child: impl IntoCompatNode) -> Self {
+     |                   ^^^^^
+...
+3479 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `OrderBy` is never constructed
+    --> tests/../src/node_compat.rs:3498:19
+     |
+3498 | pub(crate) struct OrderBy {
+     |                   ^^^^^^^
+
+warning: associated items `from_spec`, `size`, `with_density`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:3507:19
+     |
+3506 | impl OrderBy {
+     | ------------ associated items in this implementation
+3507 |     pub(crate) fn from_spec(
+     |                   ^^^^^^^^^
+...
+3521 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+3526 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+...
+3531 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: method `with_danger_action` is never used
+    --> tests/../src/node_compat.rs:3586:19
+     |
+3571 | impl FormActions {
+     | ---------------- method in this implementation
+...
+3586 |     pub(crate) fn with_danger_action(mut self, action: impl IntoCompat...
+     |                   ^^^^^^^^^^^^^^^^^^
+
+warning: methods `size` and `with_density` are never used
+    --> tests/../src/node_compat.rs:3624:19
+     |
+3615 | impl RefSelect {
+     | -------------- methods in this implementation
+...
+3624 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+3629 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:3689:19
+     |
+3688 | impl StatusBar {
+     | -------------- associated items in this implementation
+3689 |     pub(crate) fn from_spec(spec: ShellStatusBarSpec, theme: &GpuiThem...
+     |                   ^^^^^^^^^
+...
+3698 |     pub(crate) fn chrome(mut self, value: bool) -> Self {
+     |                   ^^^^^^
+...
+3703 |     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^^^^^^
+...
+3708 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+...
+3713 |     pub(crate) fn with_leading_items(mut self, items: impl IntoCompatN...
+     |                   ^^^^^^^^^^^^^^^^^^
+...
+3718 |     pub(crate) fn with_trailing_items(mut self, items: impl IntoCompat...
+     |                   ^^^^^^^^^^^^^^^^^^^
+...
+3723 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: method `with_icon` is never used
+    --> tests/../src/node_compat.rs:3762:19
+     |
+3747 | impl NavCard {
+     | ------------ method in this implementation
+...
+3762 |     pub(crate) fn with_icon(mut self, icon: impl IntoCompatNode) -> Se...
+     |                   ^^^^^^^^^
+
+warning: struct `ValidationSummary` is never constructed
+    --> tests/../src/node_compat.rs:3823:19
+     |
+3823 | pub(crate) struct ValidationSummary {
+     |                   ^^^^^^^^^^^^^^^^^
+
+warning: associated function `from_spec` is never used
+    --> tests/../src/node_compat.rs:3829:19
+     |
+3828 | impl ValidationSummary {
+     | ---------------------- associated function in this implementation
+3829 |     pub(crate) fn from_spec(spec: ValidationSummarySpec, theme: &GpuiT...
+     |                   ^^^^^^^^^
+
+warning: struct `Progress` is never constructed
+    --> tests/../src/node_compat.rs:3848:19
+     |
+3848 | pub(crate) struct Progress {
+     |                   ^^^^^^^^
+
+warning: associated items `from_spec`, `from_spec_with_context`, and `size` are never used
+    --> tests/../src/node_compat.rs:3854:19
+     |
+3853 | impl Progress {
+     | ------------- associated items in this implementation
+3854 |     pub(crate) fn from_spec(spec: ProgressSpec, theme: &GpuiThemeProvi...
+     |                   ^^^^^^^^^
+...
+3861 |     pub(crate) fn from_spec_with_context(
+     |                   ^^^^^^^^^^^^^^^^^^^^^^
+...
+3868 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+
+warning: struct `EmptyState` is never constructed
+    --> tests/../src/node_compat.rs:3885:19
+     |
+3885 | pub(crate) struct EmptyState {
+     |                   ^^^^^^^^^^
+
+warning: struct `ErrorBoundary` is never constructed
+    --> tests/../src/node_compat.rs:3890:19
+     |
+3890 | pub(crate) struct ErrorBoundary {
+     |                   ^^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `with_child`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:3897:19
+     |
+3896 | impl ErrorBoundary {
+     | ------------------ associated items in this implementation
+3897 |     pub(crate) fn from_spec(spec: ErrorBoundarySpec, theme: &GpuiTheme...
+     |                   ^^^^^^^^^
+...
+3905 |     pub(crate) fn with_child(mut self, child: impl IntoCompatNode) -> ...
+     |                   ^^^^^^^^^^
+...
+3910 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `PasswordRequirements` is never constructed
+    --> tests/../src/node_compat.rs:3934:19
+     |
+3934 | pub(crate) struct PasswordRequirements {
+     |                   ^^^^^^^^^^^^^^^^^^^^
+
+warning: associated function `from_spec` is never used
+    --> tests/../src/node_compat.rs:3940:19
+     |
+3939 | impl PasswordRequirements {
+     | ------------------------- associated function in this implementation
+3940 |     pub(crate) fn from_spec(spec: PasswordRequirementsSpec, theme: &Gp...
+     |                   ^^^^^^^^^
+
+warning: associated function `from_spec` is never used
+    --> tests/../src/node_compat.rs:3960:19
+     |
+3959 | impl EmptyState {
+     | --------------- associated function in this implementation
+3960 |     pub(crate) fn from_spec(spec: EmptyStateSpec, theme: &GpuiThemePro...
+     |                   ^^^^^^^^^
+
+warning: struct `ResizeHandle` is never constructed
+    --> tests/../src/node_compat.rs:3980:19
+     |
+3980 | pub(crate) struct ResizeHandle {
+     |                   ^^^^^^^^^^^^
+
+warning: associated items `from_spec` and `on_resize` are never used
+    --> tests/../src/node_compat.rs:3987:19
+     |
+3986 | impl ResizeHandle {
+     | ----------------- associated items in this implementation
+3987 |     pub(crate) fn from_spec(spec: ResizeHandleSpec, theme: &GpuiThemeP...
+     |                   ^^^^^^^^^
+...
+3995 |     pub(crate) fn on_resize(
+     |                   ^^^^^^^^^
+
+warning: struct `CompatRow` is never constructed
+    --> tests/../src/node_compat.rs:4038:19
+     |
+4038 | pub(crate) struct CompatRow {
+     |                   ^^^^^^^^^
+
+warning: associated items `new`, `gap`, `justify_end`, and `child` are never used
+    --> tests/../src/node_compat.rs:4045:19
+     |
+4044 | impl CompatRow {
+     | -------------- associated items in this implementation
+4045 |     pub(crate) fn new() -> Self {
+     |                   ^^^
+...
+4053 |     pub(crate) fn gap(mut self, gap: f32) -> Self {
+     |                   ^^^
+...
+4058 |     pub(crate) fn justify_end(mut self) -> Self {
+     |                   ^^^^^^^^^^^
+...
+4063 |     pub(crate) fn child(mut self, child: impl IntoCompatNode) -> Self {
+     |                   ^^^^^
+
+warning: struct `Box` is never constructed
+    --> tests/../src/node_compat.rs:4083:19
+     |
+4083 | pub(crate) struct Box {
+     |                   ^^^
+
+warning: associated items `from_spec`, `with_child`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:4090:19
+     |
+4089 | impl Box {
+     | -------- associated items in this implementation
+4090 |     pub(crate) fn from_spec(spec: BoxSpec, theme: &GpuiThemeProvider) ...
+     |                   ^^^^^^^^^
+...
+4098 |     pub(crate) fn with_child(mut self, child: impl IntoCompatNode) -> ...
+     |                   ^^^^^^^^^^
+...
+4103 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `Grid` is never constructed
+    --> tests/../src/node_compat.rs:4122:19
+     |
+4122 | pub(crate) struct Grid {
+     |                   ^^^^
+
+warning: associated items `from_spec`, `with_child`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:4129:19
+     |
+4128 | impl Grid {
+     | --------- associated items in this implementation
+4129 |     pub(crate) fn from_spec(spec: GridSpec, theme: &GpuiThemeProvider)...
+     |                   ^^^^^^^^^
+...
+4137 |     pub(crate) fn with_child(mut self, child: impl IntoCompatNode) -> ...
+     |                   ^^^^^^^^^^
+...
+4142 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `Stack` is never constructed
+    --> tests/../src/node_compat.rs:4161:19
+     |
+4161 | pub(crate) struct Stack {
+     |                   ^^^^^
+
+warning: associated items `from_spec`, `with_child`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:4168:19
+     |
+4167 | impl Stack {
+     | ---------- associated items in this implementation
+4168 |     pub(crate) fn from_spec(spec: StackSpec, theme: &GpuiThemeProvider...
+     |                   ^^^^^^^^^
+...
+4176 |     pub(crate) fn with_child(mut self, child: impl IntoCompatNode) -> ...
+     |                   ^^^^^^^^^^
+...
+4181 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `Spacer` is never constructed
+    --> tests/../src/node_compat.rs:4200:19
+     |
+4200 | pub(crate) struct Spacer {
+     |                   ^^^^^^
+
+warning: associated function `new` is never used
+    --> tests/../src/node_compat.rs:4205:19
+     |
+4204 | impl Spacer {
+     | ----------- associated function in this implementation
+4205 |     pub(crate) fn new(theme: &GpuiThemeProvider) -> Self {
+     |                   ^^^
+
+warning: struct `Separator` is never constructed
+    --> tests/../src/node_compat.rs:4226:19
+     |
+4226 | pub(crate) struct Separator {
+     |                   ^^^^^^^^^
+
+warning: associated function `from_spec` is never used
+    --> tests/../src/node_compat.rs:4232:19
+     |
+4231 | impl Separator {
+     | -------------- associated function in this implementation
+4232 |     pub(crate) fn from_spec(spec: SeparatorSpec, theme: &GpuiThemeProv...
+     |                   ^^^^^^^^^
+
+warning: method `on_remove` is never used
+    --> tests/../src/node_compat.rs:4273:19
+     |
+4262 | impl Pill {
+     | --------- method in this implementation
+...
+4273 |     pub(crate) fn on_remove(mut self, handler: impl Fn() + Send + Sync...
+     |                   ^^^^^^^^^
+
+warning: struct `Icon` is never constructed
+    --> tests/../src/node_compat.rs:4326:19
+     |
+4326 | pub(crate) struct Icon {
+     |                   ^^^^
+
+warning: associated items `from_spec`, `with_color`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:4333:19
+     |
+4332 | impl Icon {
+     | --------- associated items in this implementation
+4333 |     pub(crate) fn from_spec(spec: IconSpec, theme: &GpuiThemeProvider)...
+     |                   ^^^^^^^^^
+...
+4341 |     pub(crate) fn with_color(mut self, color: Hsla) -> Self {
+     |                   ^^^^^^^^^^
+...
+4346 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `MetricTile` is never constructed
+    --> tests/../src/node_compat.rs:4409:19
+     |
+4409 | pub(crate) struct MetricTile {
+     |                   ^^^^^^^^^^
+
+warning: associated function `from_spec` is never used
+    --> tests/../src/node_compat.rs:4415:19
+     |
+4414 | impl MetricTile {
+     | --------------- associated function in this implementation
+4415 |     pub(crate) fn from_spec(spec: MetricTileSpec, theme: &GpuiThemePro...
+     |                   ^^^^^^^^^
+
+warning: struct `StateTile` is never constructed
+    --> tests/../src/node_compat.rs:4434:19
+     |
+4434 | pub(crate) struct StateTile {
+     |                   ^^^^^^^^^
+
+warning: associated function `from_spec` is never used
+    --> tests/../src/node_compat.rs:4440:19
+     |
+4439 | impl StateTile {
+     | -------------- associated function in this implementation
+4440 |     pub(crate) fn from_spec(spec: StateTileSpec, theme: &GpuiThemeProv...
+     |                   ^^^^^^^^^
+
+warning: methods `size`, `with_density`, and `with_copied` are never used
+    --> tests/../src/node_compat.rs:4500:19
+     |
+4465 | impl Code {
+     | --------- methods in this implementation
+...
+4500 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+4505 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+...
+4510 |     pub(crate) fn with_copied(mut self, copied: bool) -> Self {
+     |                   ^^^^^^^^^^^
+
+warning: struct `Surface` is never constructed
+    --> tests/../src/node_compat.rs:4540:19
+     |
+4540 | pub(crate) struct Surface {
+     |                   ^^^^^^^
+
+warning: associated items `from_spec`, `with_content`, `into_node_with`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:4547:19
+     |
+4546 | impl Surface {
+     | ------------ associated items in this implementation
+4547 |     pub(crate) fn from_spec(spec: SurfaceSpec, theme: &GpuiThemeProvid...
+     |                   ^^^^^^^^^
+...
+4555 |     pub(crate) fn with_content(mut self, content: impl IntoCompatNode)...
+     |                   ^^^^^^^^^^^^
+...
+4560 |     pub(crate) fn into_node_with(self, ctx: &SharedRenderContext<'_>) ...
+     |                   ^^^^^^^^^^^^^^
+...
+4564 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `ListGrid` is never constructed
+    --> tests/../src/node_compat.rs:4584:19
+     |
+4584 | pub(crate) struct ListGrid {
+     |                   ^^^^^^^^
+
+warning: associated items `from_spec`, `with_header`, `with_child`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:4592:19
+     |
+4591 | impl ListGrid {
+     | ------------- associated items in this implementation
+4592 |     pub(crate) fn from_spec(spec: ListGridSpec, theme: &GpuiThemeProvi...
+     |                   ^^^^^^^^^
+...
+4601 |     pub(crate) fn with_header(mut self, header: impl IntoCompatNode) -...
+     |                   ^^^^^^^^^^^
+...
+4606 |     pub(crate) fn with_child(mut self, child: impl IntoCompatNode) -> ...
+     |                   ^^^^^^^^^^
+...
+4611 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `InlineListSection` is never constructed
+    --> tests/../src/node_compat.rs:4697:19
+     |
+4697 | pub(crate) struct InlineListSection {
+     |                   ^^^^^^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `with_action`, `item`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:4705:19
+     |
+4704 | impl InlineListSection {
+     | ---------------------- associated items in this implementation
+4705 |     pub(crate) fn from_spec(spec: InlineListSectionSpec, theme: &GpuiT...
+     |                   ^^^^^^^^^
+...
+4714 |     pub(crate) fn with_action(mut self, action: impl IntoCompatNode) -...
+     |                   ^^^^^^^^^^^
+...
+4719 |     pub(crate) fn item(mut self, item: impl IntoCompatNode) -> Self {
+     |                   ^^^^
+...
+4724 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `ListCard` is never constructed
+    --> tests/../src/node_compat.rs:4748:19
+     |
+4748 | pub(crate) struct ListCard {
+     |                   ^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:4759:19
+     |
+4758 | impl ListCard {
+     | ------------- associated items in this implementation
+4759 |     pub(crate) fn from_spec(spec: ListCardSpec, theme: &GpuiThemeProvi...
+     |                   ^^^^^^^^^
+...
+4771 |     pub(crate) fn with_leading(mut self, element: impl IntoCompatNode)...
+     |                   ^^^^^^^^^^^^
+...
+4776 |     pub(crate) fn with_corner(mut self, element: impl IntoCompatNode) ...
+     |                   ^^^^^^^^^^^
+...
+4781 |     pub(crate) fn with_footer(mut self, element: impl IntoCompatNode) ...
+     |                   ^^^^^^^^^^^
+...
+4786 |     pub(crate) fn with_trailing(mut self, element: impl IntoCompatNode...
+     |                   ^^^^^^^^^^^^^
+...
+4791 |     pub(crate) fn on_click(mut self, handler: Arc<dyn Fn() + Send + Sy...
+     |                   ^^^^^^^^
+...
+4796 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: methods `size` and `density` are never used
+    --> tests/../src/node_compat.rs:4895:19
+     |
+4875 | impl TextInput {
+     | -------------- methods in this implementation
+...
+4895 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+4900 |     pub(crate) fn density(mut self, density: ControlDensity) -> Self {
+     |                   ^^^^^^^
+
+warning: methods `with_id` and `into_slot` are never used
+    --> tests/../src/node_compat.rs:5006:19
+     |
+4991 | impl Select {
+     | ----------- methods in this implementation
+...
+5006 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+5038 |     pub(crate) fn into_slot(self) -> SlotBuilder<'static> {
+     |                   ^^^^^^^^^
+
+warning: methods `size` and `with_density` are never used
+    --> tests/../src/node_compat.rs:5087:19
+     |
+5066 | impl ColorPicker {
+     | ---------------- methods in this implementation
+...
+5087 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+5092 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: struct `CodeInput` is never constructed
+    --> tests/../src/node_compat.rs:5132:19
+     |
+5132 | pub(crate) struct CodeInput {
+     |                   ^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:5142:19
+     |
+5141 | impl CodeInput {
+     | -------------- associated items in this implementation
+5142 |     pub(crate) fn from_spec(spec: CodeInputSpec, theme: &GpuiThemeProv...
+     |                   ^^^^^^^^^
+...
+5153 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+5158 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+...
+5163 |     pub(crate) fn density(self, density: ControlDensity) -> Self {
+     |                   ^^^^^^^
+...
+5167 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+5172 |     pub(crate) fn on_complete(mut self, handler: Arc<dyn Fn(&str) + Se...
+     |                   ^^^^^^^^^^^
+...
+5177 |     pub(crate) fn on_selection_change(
+     |                   ^^^^^^^^^^^^^^^^^^^
+...
+5185 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `TokenInput` is never constructed
+    --> tests/../src/node_compat.rs:5210:19
+     |
+5210 | pub(crate) struct TokenInput {
+     |                   ^^^^^^^^^^
+
+warning: associated items `from_spec` and `into_node` are never used
+    --> tests/../src/node_compat.rs:5217:19
+     |
+5216 | impl TokenInput {
+     | --------------- associated items in this implementation
+5217 |     pub(crate) fn from_spec(spec: TokenInputSpec, theme: &GpuiThemePro...
+     |                   ^^^^^^^^^
+...
+5225 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `FileUpload` is never constructed
+    --> tests/../src/node_compat.rs:5238:19
+     |
+5238 | pub(crate) struct FileUpload {
+     |                   ^^^^^^^^^^
+
+warning: associated items `from_spec`, `with_id`, `on_remove`, `on_browse`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:5247:19
+     |
+5246 | impl FileUpload {
+     | --------------- associated items in this implementation
+5247 |     pub(crate) fn from_spec(spec: FileUploadSpec, theme: &GpuiThemePro...
+     |                   ^^^^^^^^^
+...
+5257 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+5262 |     pub(crate) fn on_remove(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+5270 |     pub(crate) fn on_browse(
+     |                   ^^^^^^^^^
+...
+5292 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `LicenceStatus` is never constructed
+    --> tests/../src/node_compat.rs:5316:19
+     |
+5316 | pub(crate) struct LicenceStatus {
+     |                   ^^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `with_size`, and `with_density` are never used
+    --> tests/../src/node_compat.rs:5322:19
+     |
+5321 | impl LicenceStatus {
+     | ------------------ associated items in this implementation
+5322 |     pub(crate) fn from_spec(spec: LicenceStatusSpec, theme: &GpuiTheme...
+     |                   ^^^^^^^^^
+...
+5329 |     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^^^^^^
+...
+5334 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: struct `LicenceSeats` is never constructed
+    --> tests/../src/node_compat.rs:5351:19
+     |
+5351 | pub(crate) struct LicenceSeats {
+     |                   ^^^^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:5358:19
+     |
+5357 | impl LicenceSeats {
+     | ----------------- associated items in this implementation
+5358 |     pub(crate) fn from_spec(spec: LicenceSeatsSpec, theme: &GpuiThemeP...
+     |                   ^^^^^^^^^
+...
+5366 |     pub(crate) fn on_rename(
+     |                   ^^^^^^^^^
+...
+5374 |     pub(crate) fn on_rename_edit(mut self, handler: Arc<dyn Fn(&str) +...
+     |                   ^^^^^^^^^^^^^^
+...
+5379 |     pub(crate) fn on_rename_change(
+     |                   ^^^^^^^^^^^^^^^^
+...
+5387 |     pub(crate) fn on_rename_selection_change(
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+5395 |     pub(crate) fn on_rename_cancel(mut self, handler: Arc<dyn Fn(&str)...
+     |                   ^^^^^^^^^^^^^^^^
+...
+5400 |     pub(crate) fn on_rename_restore_display_focus(
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+5408 |     pub(crate) fn on_release(mut self, handler: Arc<dyn Fn(&str) + Sen...
+     |                   ^^^^^^^^^^
+...
+5413 |     pub(crate) fn on_release_trigger(mut self, handler: Arc<dyn Fn(&st...
+     |                   ^^^^^^^^^^^^^^^^^^
+...
+5418 |     pub(crate) fn on_release_cancel(mut self, handler: Arc<dyn Fn(&str...
+     |                   ^^^^^^^^^^^^^^^^^
+
+warning: struct `LicenceActivation` is never constructed
+    --> tests/../src/node_compat.rs:5436:19
+     |
+5436 | pub(crate) struct LicenceActivation {
+     |                   ^^^^^^^^^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:5444:19
+     |
+5443 | impl LicenceActivation {
+     | ---------------------- associated items in this implementation
+5444 |     pub(crate) fn from_spec(spec: LicenceActivationSpec, theme: &GpuiT...
+     |                   ^^^^^^^^^
+...
+5453 |     pub(crate) fn with_account_content(mut self, content: poodle_node:...
+     |                   ^^^^^^^^^^^^^^^^^^^^
+...
+5458 |     pub(crate) fn on_key_change(mut self, handler: poodle_node::TextCh...
+     |                   ^^^^^^^^^^^^^
+...
+5463 |     pub(crate) fn on_key_selection_change(
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^
+...
+5471 |     pub(crate) fn on_machine_label_change(
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^
+...
+5479 |     pub(crate) fn on_machine_label_commit(
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^
+...
+5487 |     pub(crate) fn on_machine_label_cancel(mut self, handler: Arc<dyn F...
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^
+...
+5492 |     pub(crate) fn on_machine_label_edit(mut self, handler: Arc<dyn Fn(...
+     |                   ^^^^^^^^^^^^^^^^^^^^^
+...
+5497 |     pub(crate) fn on_machine_label_selection_change(
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+5505 |     pub(crate) fn on_machine_label_restore_display_focus(
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+5513 |     pub(crate) fn on_view_change(
+     |                   ^^^^^^^^^^^^^^
+...
+5521 |     pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn() + Send + S...
+     |                   ^^^^^^^^^
+...
+5526 |     pub(crate) fn on_file_browse(mut self, handler: Arc<dyn Fn() + Sen...
+     |                   ^^^^^^^^^^^^^^
+...
+5531 |     pub(crate) fn on_file_remove(mut self, handler: Arc<dyn Fn() + Sen...
+     |                   ^^^^^^^^^^^^^^
+...
+5536 |     pub(crate) fn on_key_check(
+     |                   ^^^^^^^^^^^^
+...
+5544 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `ModelConnectionPicker` is never constructed
+    --> tests/../src/node_compat.rs:5568:19
+     |
+5568 | pub(crate) struct ModelConnectionPicker {
+     |                   ^^^^^^^^^^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `with_instance_id`, `with_leading`, `with_footer`, `on_value_change`, and `on_query_change` are never used
+    --> tests/../src/node_compat.rs:5576:19
+     |
+5575 | impl ModelConnectionPicker {
+     | -------------------------- associated items in this implementation
+5576 |     pub(crate) fn from_spec(
+     |                   ^^^^^^^^^
+...
+5590 |     pub(crate) fn with_instance_id(mut self, instance_id: &str) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+5595 |     pub(crate) fn with_leading(mut self, option_id: &str, mark: poodle...
+     |                   ^^^^^^^^^^^^
+...
+5600 |     pub(crate) fn with_footer(mut self, footer: poodle_node::Node) -> ...
+     |                   ^^^^^^^^^^^
+...
+5605 |     pub(crate) fn on_value_change(mut self, handler: Arc<dyn Fn(&str) ...
+     |                   ^^^^^^^^^^^^^^^
+...
+5610 |     pub(crate) fn on_query_change(mut self, handler: poodle_node::Text...
+     |                   ^^^^^^^^^^^^^^^
+
+warning: struct `ModelConnectionSetup` is never constructed
+    --> tests/../src/node_compat.rs:5629:19
+     |
+5629 | pub(crate) struct ModelConnectionSetup {
+     |                   ^^^^^^^^^^^^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:5637:19
+     |
+5636 | impl ModelConnectionSetup {
+     | ------------------------- associated items in this implementation
+5637 |     pub(crate) fn from_spec(
+     |                   ^^^^^^^^^
+...
+5650 |     pub(crate) fn with_instance_id(mut self, instance_id: &str) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+5655 |     pub(crate) fn with_leading(mut self, option_id: &str, mark: poodle...
+     |                   ^^^^^^^^^^^^
+...
+5664 |     pub(crate) fn with_configuration(mut self, content: poodle_node::N...
+     |                   ^^^^^^^^^^^^^^^^^^
+...
+5669 |     pub(crate) fn with_configure_aside(mut self, content: poodle_node:...
+     |                   ^^^^^^^^^^^^^^^^^^^^
+...
+5674 |     pub(crate) fn on_stage_change(
+     |                   ^^^^^^^^^^^^^^^
+...
+5684 |     pub(crate) fn on_value_change(mut self, handler: Arc<dyn Fn(&str) ...
+     |                   ^^^^^^^^^^^^^^^
+...
+5689 |     pub(crate) fn on_query_change(mut self, handler: poodle_node::Text...
+     |                   ^^^^^^^^^^^^^^^
+...
+5694 |     pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+5699 |     pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + S...
+     |                   ^^^^^^^^^
+...
+5704 |     pub(crate) fn on_focus_request(mut self, handler: Arc<dyn Fn(&str)...
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: struct `ModelConnectionCard` is never constructed
+    --> tests/../src/node_compat.rs:5723:19
+     |
+5723 | pub(crate) struct ModelConnectionCard {
+     |                   ^^^^^^^^^^^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:5731:19
+     |
+5730 | impl ModelConnectionCard {
+     | ------------------------ associated items in this implementation
+5731 |     pub(crate) fn from_spec(
+     |                   ^^^^^^^^^
+...
+5744 |     pub(crate) fn with_instance_id(mut self, instance_id: &str) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+5749 |     pub(crate) fn with_leading(mut self, mark: poodle_node::Node) -> S...
+     |                   ^^^^^^^^^^^^
+...
+5754 |     pub(crate) fn with_badges(mut self, badges: poodle_node::Node) -> ...
+     |                   ^^^^^^^^^^^
+...
+5759 |     pub(crate) fn with_closed_accessory(mut self, accessory: poodle_no...
+     |                   ^^^^^^^^^^^^^^^^^^^^^
+...
+5764 |     pub(crate) fn with_actions(mut self, actions: poodle_node::Node) -...
+     |                   ^^^^^^^^^^^^
+...
+5769 |     pub(crate) fn with_details(mut self, details: poodle_node::Node) -...
+     |                   ^^^^^^^^^^^^
+...
+5774 |     pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) +...
+     |                   ^^^^^^^^^^^^^^
+...
+5779 |     pub(crate) fn on_enabled_change(mut self, handler: Arc<dyn Fn(bool...
+     |                   ^^^^^^^^^^^^^^^^^
+...
+5784 |     pub(crate) fn on_focus_request(mut self, handler: Arc<dyn Fn(&str)...
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: struct `ModelCatalogueEditor` is never constructed
+    --> tests/../src/node_compat.rs:5803:19
+     |
+5803 | pub(crate) struct ModelCatalogueEditor {
+     |                   ^^^^^^^^^^^^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:5811:19
+     |
+5810 | impl ModelCatalogueEditor {
+     | ------------------------- associated items in this implementation
+5811 |     pub(crate) fn from_spec(
+     |                   ^^^^^^^^^
+...
+5825 |     pub(crate) fn with_instance_id(mut self, instance_id: &str) -> Self {
+     |                   ^^^^^^^^^^^^^^^^
+...
+5830 |     pub(crate) fn with_leading(mut self, item_id: &str, mark: poodle_n...
+     |                   ^^^^^^^^^^^^
+...
+5835 |     pub(crate) fn with_row_meta(mut self, item_id: &str, meta: poodle_...
+     |                   ^^^^^^^^^^^^^
+...
+5840 |     pub(crate) fn with_custom_action(mut self, action: poodle_node::No...
+     |                   ^^^^^^^^^^^^^^^^^^
+...
+5845 |     pub(crate) fn on_order_change(mut self, handler: Arc<dyn Fn(&[Stri...
+     |                   ^^^^^^^^^^^^^^^
+...
+5850 |     pub(crate) fn on_visibility_change(
+     |                   ^^^^^^^^^^^^^^^^^^^^
+...
+5862 |     pub(crate) fn on_info(mut self, handler: Arc<dyn Fn(&str) + Send +...
+     |                   ^^^^^^^
+...
+5867 |     pub(crate) fn on_grab_change(
+     |                   ^^^^^^^^^^^^^^
+...
+5875 |     pub(crate) fn on_drop_target_change(
+     |                   ^^^^^^^^^^^^^^^^^^^^^
+...
+5883 |     pub(crate) fn on_hidden_open_change(
+     |                   ^^^^^^^^^^^^^^^^^^^^^
+...
+5891 |     pub(crate) fn on_announce(mut self, handler: Arc<dyn Fn(&str) + Se...
+     |                   ^^^^^^^^^^^
+...
+5896 |     pub(crate) fn on_focus_request(mut self, handler: Arc<dyn Fn(&str)...
+     |                   ^^^^^^^^^^^^^^^^
+
+warning: struct `Breadcrumbs` is never constructed
+    --> tests/../src/node_compat.rs:5915:19
+     |
+5915 | pub(crate) struct Breadcrumbs {
+     |                   ^^^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:5922:19
+     |
+5921 | impl Breadcrumbs {
+     | ---------------- associated items in this implementation
+5922 |     pub(crate) fn from_spec(spec: BreadcrumbsSpec, theme: &GpuiThemePr...
+     |                   ^^^^^^^^^
+...
+5930 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+5935 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+...
+5940 |     pub(crate) fn on_navigate(mut self, handler: Arc<dyn Fn(&str) + Se...
+     |                   ^^^^^^^^^^^
+...
+5945 |     pub(crate) fn into_node_with(self, ctx: &SharedRenderContext<'_>) ...
+     |                   ^^^^^^^^^^^^^^
+...
+5949 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+...
+5956 |     pub(crate) fn into_slot(self) -> SlotBuilder<'static> {
+     |                   ^^^^^^^^^
+
+warning: struct `TextLink` is never constructed
+    --> tests/../src/node_compat.rs:5975:19
+     |
+5975 | pub(crate) struct TextLink {
+     |                   ^^^^^^^^
+
+warning: associated function `from_spec` is never used
+    --> tests/../src/node_compat.rs:5982:19
+     |
+5981 | impl TextLink {
+     | ------------- associated function in this implementation
+5982 |     pub(crate) fn from_spec(spec: TextLinkSpec, theme: &GpuiThemeProvi...
+     |                   ^^^^^^^^^
+
+warning: methods `with_size` and `with_density` are never used
+    --> tests/../src/node_compat.rs:6012:19
+     |
+6000 | impl SelectionSummary {
+     | --------------------- methods in this implementation
+...
+6012 |     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^^^^^^
+...
+6017 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: struct `Tabs` is never constructed
+    --> tests/../src/node_compat.rs:6093:19
+     |
+6093 | pub(crate) struct Tabs {
+     |                   ^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:6108:19
+     |
+6107 | impl Tabs {
+     | --------- associated items in this implementation
+6108 |     pub(crate) fn from_spec(spec: TabsSpec, theme: &GpuiThemeProvider)...
+     |                   ^^^^^^^^^
+...
+6124 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+6129 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+6134 |     pub(crate) fn on_close(mut self, handler: Arc<dyn Fn(&str) + Send ...
+     |                   ^^^^^^^^
+...
+6139 |     pub(crate) fn on_reorder(mut self, handler: Arc<dyn Fn(Vec<String>...
+     |                   ^^^^^^^^^^
+...
+6144 |     pub(crate) fn on_drag_start(mut self, handler: Arc<dyn Fn(&str) + ...
+     |                   ^^^^^^^^^^^^^
+...
+6149 |     pub(crate) fn on_drag_end(mut self, handler: Arc<dyn Fn(&str) + Se...
+     |                   ^^^^^^^^^^^
+...
+6154 |     pub(crate) fn on_drop_target_change(
+     |                   ^^^^^^^^^^^^^^^^^^^^^
+...
+6162 |     pub(crate) fn with_focused_value(mut self, value: impl Into<String...
+     |                   ^^^^^^^^^^^^^^^^^^
+...
+6167 |     pub(crate) fn with_content(
+     |                   ^^^^^^^^^^^^
+...
+6177 |     fn into_node(
+     |        ^^^^^^^^^
+
+warning: struct `TabStrip` is never constructed
+    --> tests/../src/node_compat.rs:6242:19
+     |
+6242 | pub(crate) struct TabStrip {
+     |                   ^^^^^^^^
+
+warning: associated items `from_spec`, `with_id`, `on_change`, `on_close`, `size`, and `density` are never used
+    --> tests/../src/node_compat.rs:6250:19
+     |
+6249 | impl TabStrip {
+     | ------------- associated items in this implementation
+6250 |     pub(crate) fn from_spec(spec: TabStripSpec, theme: &GpuiThemeProvi...
+     |                   ^^^^^^^^^
+...
+6259 |     pub(crate) fn with_id(self, _id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+6263 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+6268 |     pub(crate) fn on_close(mut self, handler: Arc<dyn Fn(&str) + Send ...
+     |                   ^^^^^^^^
+...
+6273 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+6278 |     pub(crate) fn density(mut self, density: ControlDensity) -> Self {
+     |                   ^^^^^^^
+
+warning: struct `DurationInput` is never constructed
+    --> tests/../src/node_compat.rs:6299:19
+     |
+6299 | pub(crate) struct DurationInput {
+     |                   ^^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `with_id`, `size`, `with_density`, `on_change`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:6307:19
+     |
+6306 | impl DurationInput {
+     | ------------------ associated items in this implementation
+6307 |     pub(crate) fn from_spec(spec: DurationInputSpec, theme: &GpuiTheme...
+     |                   ^^^^^^^^^
+...
+6316 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+6321 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+6326 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+...
+6331 |     pub(crate) fn on_change(
+     |                   ^^^^^^^^^
+...
+6339 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `NumberInput` is never constructed
+    --> tests/../src/node_compat.rs:6362:19
+     |
+6362 | pub(crate) struct NumberInput {
+     |                   ^^^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:6370:19
+     |
+6369 | impl NumberInput {
+     | ---------------- associated items in this implementation
+6370 |     pub(crate) fn from_spec(spec: NumberInputSpec, theme: &GpuiThemePr...
+     |                   ^^^^^^^^^
+...
+6379 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+6384 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+6389 |     pub(crate) fn density(mut self, density: ControlDensity) -> Self {
+     |                   ^^^^^^^
+...
+6394 |     pub(crate) fn on_value_change(
+     |                   ^^^^^^^^^^^^^^^
+...
+6402 |     pub(crate) fn on_draft_value_change(
+     |                   ^^^^^^^^^^^^^^^^^^^^^
+...
+6410 |     pub(crate) fn on_commit(mut self, handler: Arc<dyn Fn(Option<f64>)...
+     |                   ^^^^^^^^^
+...
+6415 |     pub(crate) fn on_selection_change(
+     |                   ^^^^^^^^^^^^^^^^^^^
+...
+6423 |     pub(crate) fn on_focus_change(mut self, handler: Arc<dyn Fn(bool) ...
+     |                   ^^^^^^^^^^^^^^^
+...
+6428 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `DatePicker` is never constructed
+    --> tests/../src/node_compat.rs:6517:5
+     |
+6517 |     DatePicker,
+     |     ^^^^^^^^^^
+     |
+     = note: this warning originates in the macro `define_date_picker_compat` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: associated items `from_spec`, `with_id`, `size`, `with_density`, `on_toggle`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:6462:27
+     |
+6461 |           impl $name {
+     |           ---------- associated items in this implementation
+6462 |               pub(crate) fn from_spec(spec: $spec, theme: &GpuiThemePr...
+     |                             ^^^^^^^^^
+...
+6472 |               pub(crate) fn with_id(mut self, id: impl Into<String>) -...
+     |                             ^^^^^^^
+...
+6477 |               pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                             ^^^^
+...
+6482 |               pub(crate) fn with_density(mut self, density: ControlDen...
+     |                             ^^^^^^^^^^^^
+...
+6487 |               pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn() ...
+     |                             ^^^^^^^^^
+...
+6492 |               fn into_node(self) -> poodle_node::Node {
+     |                  ^^^^^^^^^
+...
+6516 | / define_date_picker_compat!(
+6517 | |     DatePicker,
+6518 | |     DatePickerSpec,
+6519 | |     poodle_render::date_picker,
+6520 | |     "poodle-date-picker-"
+6521 | | );
+     | |_- in this macro invocation
+     |
+     = note: this warning originates in the macro `define_date_picker_compat` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: method `on_select` is never used
+    --> tests/../src/node_compat.rs:6524:19
+     |
+6523 | impl DatePicker {
+     | --------------- method in this implementation
+6524 |     pub(crate) fn on_select(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+
+warning: struct `DateRangePicker` is never constructed
+    --> tests/../src/node_compat.rs:6531:5
+     |
+6531 |     DateRangePicker,
+     |     ^^^^^^^^^^^^^^^
+     |
+     = note: this warning originates in the macro `define_date_picker_compat` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: associated items `from_spec`, `with_id`, `size`, `with_density`, `on_toggle`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:6462:27
+     |
+6461 |           impl $name {
+     |           ---------- associated items in this implementation
+6462 |               pub(crate) fn from_spec(spec: $spec, theme: &GpuiThemePr...
+     |                             ^^^^^^^^^
+...
+6472 |               pub(crate) fn with_id(mut self, id: impl Into<String>) -...
+     |                             ^^^^^^^
+...
+6477 |               pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                             ^^^^
+...
+6482 |               pub(crate) fn with_density(mut self, density: ControlDen...
+     |                             ^^^^^^^^^^^^
+...
+6487 |               pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn() ...
+     |                             ^^^^^^^^^
+...
+6492 |               fn into_node(self) -> poodle_node::Node {
+     |                  ^^^^^^^^^
+...
+6530 | / define_date_picker_compat!(
+6531 | |     DateRangePicker,
+6532 | |     DateRangePickerSpec,
+6533 | |     poodle_render::date_range_picker,
+6534 | |     "poodle-date-range-picker-"
+6535 | | );
+     | |_- in this macro invocation
+     |
+     = note: this warning originates in the macro `define_date_picker_compat` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: struct `DateTimePicker` is never constructed
+    --> tests/../src/node_compat.rs:6537:5
+     |
+6537 |     DateTimePicker,
+     |     ^^^^^^^^^^^^^^
+     |
+     = note: this warning originates in the macro `define_date_picker_compat` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: associated items `from_spec`, `with_id`, `size`, `with_density`, `on_toggle`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:6462:27
+     |
+6461 |           impl $name {
+     |           ---------- associated items in this implementation
+6462 |               pub(crate) fn from_spec(spec: $spec, theme: &GpuiThemePr...
+     |                             ^^^^^^^^^
+...
+6472 |               pub(crate) fn with_id(mut self, id: impl Into<String>) -...
+     |                             ^^^^^^^
+...
+6477 |               pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                             ^^^^
+...
+6482 |               pub(crate) fn with_density(mut self, density: ControlDen...
+     |                             ^^^^^^^^^^^^
+...
+6487 |               pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn() ...
+     |                             ^^^^^^^^^
+...
+6492 |               fn into_node(self) -> poodle_node::Node {
+     |                  ^^^^^^^^^
+...
+6536 | / define_date_picker_compat!(
+6537 | |     DateTimePicker,
+6538 | |     DateTimePickerSpec,
+6539 | |     poodle_render::date_time_picker,
+6540 | |     "poodle-datetime-picker-"
+6541 | | );
+     | |_- in this macro invocation
+     |
+     = note: this warning originates in the macro `define_date_picker_compat` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: struct `DateTimeRangePicker` is never constructed
+    --> tests/../src/node_compat.rs:6543:5
+     |
+6543 |     DateTimeRangePicker,
+     |     ^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this warning originates in the macro `define_date_picker_compat` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: associated items `from_spec`, `with_id`, `size`, `with_density`, `on_toggle`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:6462:27
+     |
+6461 |           impl $name {
+     |           ---------- associated items in this implementation
+6462 |               pub(crate) fn from_spec(spec: $spec, theme: &GpuiThemePr...
+     |                             ^^^^^^^^^
+...
+6472 |               pub(crate) fn with_id(mut self, id: impl Into<String>) -...
+     |                             ^^^^^^^
+...
+6477 |               pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                             ^^^^
+...
+6482 |               pub(crate) fn with_density(mut self, density: ControlDen...
+     |                             ^^^^^^^^^^^^
+...
+6487 |               pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn() ...
+     |                             ^^^^^^^^^
+...
+6492 |               fn into_node(self) -> poodle_node::Node {
+     |                  ^^^^^^^^^
+...
+6542 | / define_date_picker_compat!(
+6543 | |     DateTimeRangePicker,
+6544 | |     DateTimeRangePickerSpec,
+6545 | |     poodle_render::date_time_range_picker,
+6546 | |     "poodle-datetime-range-picker-"
+6547 | | );
+     | |_- in this macro invocation
+     |
+     = note: this warning originates in the macro `define_date_picker_compat` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: methods `with_id`, `size`, `with_density`, and `on_range_select` are never used
+    --> tests/../src/node_compat.rs:6570:19
+     |
+6558 | impl Calendar {
+     | ------------- methods in this implementation
+...
+6570 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+6575 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+6580 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+...
+6595 |     pub(crate) fn on_range_select(
+     |                   ^^^^^^^^^^^^^^^
+
+warning: struct `DateTimeZonePicker` is never constructed
+    --> tests/../src/node_compat.rs:6628:19
+     |
+6628 | pub(crate) struct DateTimeZonePicker {
+     |                   ^^^^^^^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `size`, `with_density`, `on_toggle`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:6636:19
+     |
+6635 | impl DateTimeZonePicker {
+     | ----------------------- associated items in this implementation
+6636 |     pub(crate) fn from_spec(
+     |                   ^^^^^^^^^
+...
+6649 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+6654 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+...
+6659 |     pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn() + Send + S...
+     |                   ^^^^^^^^^
+...
+6664 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `TimeInput` is never constructed
+    --> tests/../src/node_compat.rs:6684:19
+     |
+6684 | pub(crate) struct TimeInput {
+     |                   ^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:6694:19
+     |
+6693 | impl TimeInput {
+     | -------------- associated items in this implementation
+6694 |     pub(crate) fn from_spec(spec: TimeInputSpec, theme: &GpuiThemeProv...
+     |                   ^^^^^^^^^
+...
+6705 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+6710 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+6715 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+...
+6720 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+6725 |     pub(crate) fn with_context(
+     |                   ^^^^^^^^^^^^
+...
+6733 |     pub(crate) fn on_context(
+     |                   ^^^^^^^^^^
+...
+6741 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: methods `size` and `with_density` are never used
+    --> tests/../src/node_compat.rs:6800:19
+     |
+6784 | impl TimeZoneSelect {
+     | ------------------- methods in this implementation
+...
+6800 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+6805 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: struct `EmbedInput` is never constructed
+    --> tests/../src/node_compat.rs:6847:19
+     |
+6847 | pub(crate) struct EmbedInput {
+     |                   ^^^^^^^^^^
+
+warning: associated items `from_spec`, `into_node_with`, `into_node`, and `into_slot` are never used
+    --> tests/../src/node_compat.rs:6853:19
+     |
+6852 | impl EmbedInput {
+     | --------------- associated items in this implementation
+6853 |     pub(crate) fn from_spec(spec: EmbedInputSpec, theme: &GpuiThemePro...
+     |                   ^^^^^^^^^
+...
+6860 |     pub(crate) fn into_node_with(self, ctx: &SharedRenderContext<'_>) ...
+     |                   ^^^^^^^^^^^^^^
+...
+6864 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+...
+6871 |     pub(crate) fn into_slot(self) -> SlotBuilder<'static> {
+     |                   ^^^^^^^^^
+
+warning: methods `with_embed_control`, `validation_state`, and `error` are never used
+    --> tests/../src/node_compat.rs:6915:19
+     |
+6890 | impl Field {
+     | ---------- methods in this implementation
+...
+6915 |     pub(crate) fn with_embed_control(
+     |                   ^^^^^^^^^^^^^^^^^^
+...
+6922 |     pub(crate) fn validation_state(mut self, state: poodle_specs::Vali...
+     |                   ^^^^^^^^^^^^^^^^
+...
+6927 |     pub(crate) fn error(mut self, error: impl Into<String>) -> Self {
+     |                   ^^^^^
+
+warning: method `into_slot` is never used
+    --> tests/../src/node_compat.rs:6994:19
+     |
+6958 | impl Button {
+     | ----------- method in this implementation
+...
+6994 |     pub(crate) fn into_slot(self) -> SlotBuilder<'static> {
+     |                   ^^^^^^^^^
+
+warning: struct `Accordion` is never constructed
+    --> tests/../src/node_compat.rs:7013:19
+     |
+7013 | pub(crate) struct Accordion {
+     |                   ^^^^^^^^^
+
+warning: associated items `from_spec`, `on_value_change`, `with_content`, `size`, and `with_density` are never used
+    --> tests/../src/node_compat.rs:7021:19
+     |
+7020 | impl Accordion {
+     | -------------- associated items in this implementation
+7021 |     pub(crate) fn from_spec(
+     |                   ^^^^^^^^^
+...
+7034 |     pub(crate) fn on_value_change(
+     |                   ^^^^^^^^^^^^^^^
+...
+7042 |     pub(crate) fn with_content(
+     |                   ^^^^^^^^^^^^
+...
+7052 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+7057 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: struct `Collapsible` is never constructed
+    --> tests/../src/node_compat.rs:7076:19
+     |
+7076 | pub(crate) struct Collapsible {
+     |                   ^^^^^^^^^^^
+
+warning: associated items `from_spec`, `with_id`, `on_toggle`, `with_content`, `size`, and `with_density` are never used
+    --> tests/../src/node_compat.rs:7085:19
+     |
+7084 | impl Collapsible {
+     | ---------------- associated items in this implementation
+7085 |     pub(crate) fn from_spec(spec: CollapsibleSpec, theme: &GpuiThemePr...
+     |                   ^^^^^^^^^
+...
+7095 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+7100 |     pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(bool) + Send...
+     |                   ^^^^^^^^^
+...
+7105 |     pub(crate) fn with_content(mut self, content: impl IntoCompatNode)...
+     |                   ^^^^^^^^^^^^
+...
+7110 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+7115 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: struct `Menubar` is never constructed
+    --> tests/../src/node_compat.rs:7137:19
+     |
+7137 | pub(crate) struct Menubar {
+     |                   ^^^^^^^
+
+warning: associated items `from_spec`, `with_id`, `on_trigger`, `on_select`, `size`, and `with_density` are never used
+    --> tests/../src/node_compat.rs:7145:19
+     |
+7144 | impl Menubar {
+     | ------------ associated items in this implementation
+7145 |     pub(crate) fn from_spec(spec: MenubarSpec, theme: &GpuiThemeProvid...
+     |                   ^^^^^^^^^
+...
+7154 |     pub(crate) fn with_id(self, _id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+7158 |     pub(crate) fn on_trigger(mut self, handler: Arc<dyn Fn(&str) + Sen...
+     |                   ^^^^^^^^^^
+...
+7163 |     pub(crate) fn on_select(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+7168 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+7173 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: struct `NavigationMenu` is never constructed
+    --> tests/../src/node_compat.rs:7195:19
+     |
+7195 | pub(crate) struct NavigationMenu {
+     |                   ^^^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `with_id`, `on_change`, `size`, and `with_density` are never used
+    --> tests/../src/node_compat.rs:7202:19
+     |
+7201 | impl NavigationMenu {
+     | ------------------- associated items in this implementation
+7202 |     pub(crate) fn from_spec(spec: NavigationMenuSpec, theme: &GpuiThem...
+     |                   ^^^^^^^^^
+...
+7210 |     pub(crate) fn with_id(self, _id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+7214 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+7219 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+7224 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: methods `open`, `working_label`, and `item_detail` are never used
+    --> tests/../src/node_compat.rs:7264:19
+     |
+7253 | impl AlertDialog {
+     | ---------------- methods in this implementation
+...
+7264 |     pub(crate) fn open(mut self, open: bool) -> Self {
+     |                   ^^^^
+...
+7274 |     pub(crate) fn working_label(mut self, label: impl Into<String>) ->...
+     |                   ^^^^^^^^^^^^^
+...
+7279 |     pub(crate) fn item_detail(
+     |                   ^^^^^^^^^^^
+
+warning: method `with_trigger` is never used
+    --> tests/../src/node_compat.rs:7364:19
+     |
+7343 | impl ConfirmAction {
+     | ------------------ method in this implementation
+...
+7364 |     pub(crate) fn with_trigger(mut self, trigger: impl IntoCompatNode)...
+     |                   ^^^^^^^^^^^^
+
+warning: struct `Menu` is never constructed
+    --> tests/../src/node_compat.rs:7560:19
+     |
+7560 | pub(crate) struct Menu {
+     |                   ^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:7568:19
+     |
+7567 | impl Menu {
+     | --------- associated items in this implementation
+7568 |     pub(crate) fn from_spec(spec: MenuSpec, theme: &GpuiThemeProvider)...
+     |                   ^^^^^^^^^
+...
+7577 |     pub(crate) fn with_id(self, _id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+7581 |     pub(crate) fn with_trigger(mut self, trigger: impl IntoCompatNode)...
+     |                   ^^^^^^^^^^^^
+...
+7586 |     pub(crate) fn on_select(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+7591 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+7596 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+...
+7601 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `ContextMenu` is never constructed
+    --> tests/../src/node_compat.rs:7708:19
+     |
+7708 | pub(crate) struct ContextMenu {
+     |                   ^^^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:7716:19
+     |
+7715 | impl ContextMenu {
+     | ---------------- associated items in this implementation
+7716 |     pub(crate) fn from_spec(spec: ContextMenuSpec, theme: &GpuiThemePr...
+     |                   ^^^^^^^^^
+...
+7725 |     pub(crate) fn with_id(self, _id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+7729 |     pub(crate) fn with_trigger(mut self, trigger: impl IntoElement) ->...
+     |                   ^^^^^^^^^^^^
+...
+7734 |     pub(crate) fn anchor_point(mut self, point: (i32, i32)) -> Self {
+     |                   ^^^^^^^^^^^^
+...
+7739 |     pub(crate) fn on_select(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+7744 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+7749 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: struct `Tooltip` is never constructed
+    --> tests/../src/node_compat.rs:7856:19
+     |
+7856 | pub(crate) struct Tooltip {
+     |                   ^^^^^^^
+
+warning: associated items `from_spec`, `with_trigger`, and `on_open_change` are never used
+    --> tests/../src/node_compat.rs:7864:19
+     |
+7863 | impl Tooltip {
+     | ------------ associated items in this implementation
+7864 |     pub(crate) fn from_spec(spec: TooltipSpec, theme: &GpuiThemeProvid...
+     |                   ^^^^^^^^^
+...
+7873 |     pub(crate) fn with_trigger(mut self, trigger: impl IntoElement) ->...
+     |                   ^^^^^^^^^^^^
+...
+7878 |     pub(crate) fn on_open_change(
+     |                   ^^^^^^^^^^^^^^
+
+warning: method `with_value_content` is never used
+    --> tests/../src/node_compat.rs:8199:19
+     |
+8183 | impl DetailItem {
+     | --------------- method in this implementation
+...
+8199 |     pub(crate) fn with_value_content(mut self, content: impl IntoCompa...
+     |                   ^^^^^^^^^^^^^^^^^^
+
+warning: struct `DetailSection` is never constructed
+    --> tests/../src/node_compat.rs:8257:19
+     |
+8257 | pub(crate) struct DetailSection {
+     |                   ^^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `with_body`, `with_actions`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:8265:19
+     |
+8264 | impl DetailSection {
+     | ------------------ associated items in this implementation
+8265 |     pub(crate) fn from_spec(spec: DetailSectionSpec, theme: &GpuiTheme...
+     |                   ^^^^^^^^^
+...
+8274 |     pub(crate) fn with_body(mut self, body: impl IntoCompatNode) -> Se...
+     |                   ^^^^^^^^^
+...
+8279 |     pub(crate) fn with_actions(mut self, actions: impl IntoCompatNode)...
+     |                   ^^^^^^^^^^^^
+...
+8284 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `DetailSectionGroup` is never constructed
+    --> tests/../src/node_compat.rs:8308:19
+     |
+8308 | pub(crate) struct DetailSectionGroup {
+     |                   ^^^^^^^^^^^^^^^^^^
+
+warning: associated items `from_spec`, `child`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:8315:19
+     |
+8314 | impl DetailSectionGroup {
+     | ----------------------- associated items in this implementation
+8315 |     pub(crate) fn from_spec(spec: DetailSectionGroupSpec, theme: &Gpui...
+     |                   ^^^^^^^^^
+...
+8323 |     pub(crate) fn child(mut self, child: impl IntoCompatNode) -> Self {
+     |                   ^^^^^
+...
+8328 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: associated items `from_spec`, `with_header`, and `with_content` are never used
+    --> tests/../src/node_compat.rs:8354:19
+     |
+8353 | impl DetailShell {
+     | ---------------- associated items in this implementation
+8354 |     pub(crate) fn from_spec(spec: DetailShellSpec, theme: &GpuiThemePr...
+     |                   ^^^^^^^^^
+...
+8364 |     pub(crate) fn with_header(mut self, header: impl IntoCompatNode) -...
+     |                   ^^^^^^^^^^^
+...
+8369 |     pub(crate) fn with_content(mut self, content: impl IntoCompatNode)...
+     |                   ^^^^^^^^^^^^
+
+warning: struct `Checkbox` is never constructed
+    --> tests/../src/node_compat.rs:8412:19
+     |
+8412 | pub(crate) struct Checkbox {
+     |                   ^^^^^^^^
+
+warning: associated items `from_spec`, `with_id`, `on_change`, `size`, `density`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:8420:19
+     |
+8419 | impl Checkbox {
+     | ------------- associated items in this implementation
+8420 |     pub(crate) fn from_spec(spec: CheckboxSpec, theme: &GpuiThemeProvi...
+     |                   ^^^^^^^^^
+...
+8429 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+8434 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(bool) + Send...
+     |                   ^^^^^^^^^
+...
+8439 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+8444 |     pub(crate) fn density(mut self, density: ControlDensity) -> Self {
+     |                   ^^^^^^^
+...
+8449 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `TriStateSwitch` is never constructed
+    --> tests/../src/node_compat.rs:8522:19
+     |
+8522 | pub(crate) struct TriStateSwitch {
+     |                   ^^^^^^^^^^^^^^
+
+warning: associated items `from_spec` and `on_change` are never used
+    --> tests/../src/node_compat.rs:8530:19
+     |
+8529 | impl TriStateSwitch {
+     | ------------------- associated items in this implementation
+8530 |     pub(crate) fn from_spec(
+     |                   ^^^^^^^^^
+...
+8544 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(TriStateValu...
+     |                   ^^^^^^^^^
+
+warning: struct `Slider` is never constructed
+    --> tests/../src/node_compat.rs:8566:19
+     |
+8566 | pub(crate) struct Slider {
+     |                   ^^^^^^
+
+warning: associated items `from_spec`, `with_id`, `on_change`, and `aria_label` are never used
+    --> tests/../src/node_compat.rs:8574:19
+     |
+8573 | impl Slider {
+     | ----------- associated items in this implementation
+8574 |     pub(crate) fn from_spec(spec: SliderSpec, theme: &GpuiThemeProvide...
+     |                   ^^^^^^^^^
+...
+8583 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+8588 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(f64) + Send ...
+     |                   ^^^^^^^^^
+...
+8593 |     pub(crate) fn aria_label(mut self, label: impl Into<String>) -> Se...
+     |                   ^^^^^^^^^^
+
+warning: struct `RangeSlider` is never constructed
+    --> tests/../src/node_compat.rs:8630:19
+     |
+8630 | pub(crate) struct RangeSlider {
+     |                   ^^^^^^^^^^^
+
+warning: associated items `from_spec`, `on_change`, `size`, and `density` are never used
+    --> tests/../src/node_compat.rs:8638:19
+     |
+8637 | impl RangeSlider {
+     | ---------------- associated items in this implementation
+8638 |     pub(crate) fn from_spec(spec: RangeSliderSpec, theme: &GpuiThemePr...
+     |                   ^^^^^^^^^
+...
+8647 |     pub(crate) fn on_change(
+     |                   ^^^^^^^^^
+...
+8657 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+8662 |     pub(crate) fn density(mut self, density: ControlDensity) -> Self {
+     |                   ^^^^^^^
+
+warning: struct `Radio` is never constructed
+    --> tests/../src/node_compat.rs:8731:19
+     |
+8731 | pub(crate) struct Radio {
+     |                   ^^^^^
+
+warning: associated items `from_spec`, `with_id`, and `on_checked_change` are never used
+    --> tests/../src/node_compat.rs:8739:19
+     |
+8738 | impl Radio {
+     | ---------- associated items in this implementation
+8739 |     pub(crate) fn from_spec(spec: RadioSpec, theme: &GpuiThemeProvider...
+     |                   ^^^^^^^^^
+...
+8748 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+8753 |     pub(crate) fn on_checked_change(mut self, handler: Arc<dyn Fn(bool...
+     |                   ^^^^^^^^^^^^^^^^^
+
+warning: struct `Pagination` is never constructed
+    --> tests/../src/node_compat.rs:8775:19
+     |
+8775 | pub(crate) struct Pagination {
+     |                   ^^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:8786:19
+     |
+8785 | impl Pagination {
+     | --------------- associated items in this implementation
+8786 |     pub(crate) fn from_spec(
+     |                   ^^^^^^^^^
+...
+8802 |     pub(crate) fn on_page_change(mut self, handler: Arc<dyn Fn(usize) ...
+     |                   ^^^^^^^^^^^^^^
+...
+8807 |     pub(crate) fn limit_selector_open(mut self, open: bool) -> Self {
+     |                   ^^^^^^^^^^^^^^^^^^^
+...
+8812 |     pub(crate) fn on_limit_open_change(mut self, handler: Arc<dyn Fn(b...
+     |                   ^^^^^^^^^^^^^^^^^^^^
+...
+8817 |     pub(crate) fn on_page_size_change(mut self, handler: Arc<dyn Fn(us...
+     |                   ^^^^^^^^^^^^^^^^^^^
+...
+8822 |     pub(crate) fn size(mut self, size: ControlSize) -> Self {
+     |                   ^^^^
+...
+8827 |     pub(crate) fn with_density(mut self, density: ControlDensity) -> S...
+     |                   ^^^^^^^^^^^^
+
+warning: struct `Stepper` is never constructed
+    --> tests/../src/node_compat.rs:8852:19
+     |
+8852 | pub(crate) struct Stepper {
+     |                   ^^^^^^^
+
+warning: associated items `from_spec`, `on_change`, `on_rerun`, and `on_collapsed_change` are never used
+    --> tests/../src/node_compat.rs:8859:19
+     |
+8858 | impl Stepper {
+     | ------------ associated items in this implementation
+8859 |     pub(crate) fn from_spec(spec: StepperSpec, theme: &GpuiThemeProvid...
+     |                   ^^^^^^^^^
+...
+8869 |     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send...
+     |                   ^^^^^^^^^
+...
+8876 |     pub(crate) fn on_rerun(mut self, handler: Arc<dyn Fn(&str) + Send ...
+     |                   ^^^^^^^^
+...
+8881 |     pub(crate) fn on_collapsed_change(mut self, handler: Arc<dyn Fn(bo...
+     |                   ^^^^^^^^^^^^^^^^^^^
+
+warning: struct `IconButton` is never constructed
+    --> tests/../src/node_compat.rs:8899:19
+     |
+8899 | pub(crate) struct IconButton {
+     |                   ^^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:8910:19
+     |
+8909 | impl IconButton {
+     | --------------- associated items in this implementation
+8910 |     pub(crate) fn from_spec(spec: IconButtonSpec, theme: &GpuiThemePro...
+     |                   ^^^^^^^^^
+...
+8923 |     pub(crate) fn from_spec_with_context(
+     |                   ^^^^^^^^^^^^^^^^^^^^^^
+...
+8934 |     pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+     |                   ^^^^^^^
+...
+8939 |     pub(crate) fn on_click(mut self, handler: Arc<dyn Fn() + Send + Sy...
+     |                   ^^^^^^^^
+...
+8944 |     pub(crate) fn on_pressed_change(mut self, handler: Arc<dyn Fn(bool...
+     |                   ^^^^^^^^^^^^^^^^^
+...
+8949 |     pub(crate) fn into_node_with(self, ctx: &SharedRenderContext<'_>) ...
+     |                   ^^^^^^^^^^^^^^
+...
+8965 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+...
+8977 |     pub(crate) fn into_slot(self) -> SlotBuilder<'static> {
+     |                   ^^^^^^^^^
+
+warning: associated function `from_spec` is never used
+    --> tests/../src/node_compat.rs:9007:19
+     |
+9006 | impl AudioPlayer {
+     | ---------------- associated function in this implementation
+9007 |     pub(crate) fn from_spec(spec: AudioPlayerSpec, theme: &GpuiThemePr...
+     |                   ^^^^^^^^^
+
+warning: struct `VideoPlayer` is never constructed
+    --> tests/../src/node_compat.rs:9024:19
+     |
+9024 | pub(crate) struct VideoPlayer;
+     |                   ^^^^^^^^^^^
+
+warning: associated function `from_spec` is never used
+    --> tests/../src/node_compat.rs:9027:19
+     |
+9026 | impl VideoPlayer {
+     | ---------------- associated function in this implementation
+9027 |     pub(crate) fn from_spec(spec: VideoPlayerSpec, theme: &GpuiThemePr...
+     |                   ^^^^^^^^^
+
+warning: struct `TimeAgo` is never constructed
+    --> tests/../src/node_compat.rs:9035:19
+     |
+9035 | pub(crate) struct TimeAgo;
+     |                   ^^^^^^^
+
+warning: associated function `from_spec` is never used
+    --> tests/../src/node_compat.rs:9038:19
+     |
+9037 | impl TimeAgo {
+     | ------------ associated function in this implementation
+9038 |     pub(crate) fn from_spec(spec: TimeAgoSpec, theme: &GpuiThemeProvid...
+     |                   ^^^^^^^^^
+
+warning: struct `SplitView` is never constructed
+    --> tests/../src/node_compat.rs:9048:19
+     |
+9048 | pub(crate) struct SplitView {
+     |                   ^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:9060:11
+     |
+9057 | impl SplitView {
+     | -------------- associated items in this implementation
+...
+9060 |     const DEFAULT_EXTENT_PX: f32 = 640.0;
+     |           ^^^^^^^^^^^^^^^^^
+9061 |
+9062 |     pub(crate) fn from_spec(spec: SplitViewSpec, theme: &GpuiThemeProv...
+     |                   ^^^^^^^^^
+...
+9073 |     pub(crate) fn with_primary(mut self, child: impl IntoCompatNode) -...
+     |                   ^^^^^^^^^^^^
+...
+9078 |     pub(crate) fn with_secondary(mut self, child: impl IntoCompatNode)...
+     |                   ^^^^^^^^^^^^^^
+...
+9091 |     pub(crate) fn with_extent_px(mut self, extent: f32) -> Self {
+     |                   ^^^^^^^^^^^^^^
+...
+9096 |     pub(crate) fn on_ratio_change(mut self, handler: Arc<dyn Fn(f32) +...
+     |                   ^^^^^^^^^^^^^^^
+...
+9101 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `DockRegion` is never constructed
+    --> tests/../src/node_compat.rs:9162:19
+     |
+9162 | pub(crate) struct DockRegion {
+     |                   ^^^^^^^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:9176:19
+     |
+9175 | impl DockRegion {
+     | --------------- associated items in this implementation
+9176 |     pub(crate) fn from_spec(spec: DockRegionSpec, theme: &GpuiThemePro...
+     |                   ^^^^^^^^^
+...
+9191 |     pub(crate) fn with_content(mut self, content: impl IntoCompatNode)...
+     |                   ^^^^^^^^^^^^
+...
+9196 |     pub(crate) fn on_tab_change(mut self, handler: Arc<dyn Fn(&str) + ...
+     |                   ^^^^^^^^^^^^^
+...
+9201 |     pub(crate) fn on_collapse_toggle(mut self, handler: Arc<dyn Fn(boo...
+     |                   ^^^^^^^^^^^^^^^^^^
+...
+9206 |     pub(crate) fn with_instance_id(mut self, instance_id: impl Into<St...
+     |                   ^^^^^^^^^^^^^^^^
+...
+9211 |     pub(crate) fn cross_window_drag_source(
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^
+...
+9219 |     pub(crate) fn on_panel_drop(
+     |                   ^^^^^^^^^^^^^
+...
+9227 |     pub(crate) fn on_reorder(mut self, handler: Arc<dyn Fn(&[String]) ...
+     |                   ^^^^^^^^^^
+...
+9232 |     pub(crate) fn accept_panel(
+     |                   ^^^^^^^^^^^^
+...
+9240 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `BlockEditor` is never constructed
+    --> tests/../src/node_compat.rs:9275:19
+     |
+9275 | pub(crate) struct BlockEditor {
+     |                   ^^^^^^^^^^^
+
+warning: associated items `from_spec`, `with_child`, and `into_node` are never used
+    --> tests/../src/node_compat.rs:9283:19
+     |
+9282 | impl BlockEditor {
+     | ---------------- associated items in this implementation
+9283 |     pub(crate) fn from_spec(
+     |                   ^^^^^^^^^
+...
+9298 |     pub(crate) fn with_child(
+     |                   ^^^^^^^^^^
+...
+9306 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: struct `Tree` is never constructed
+    --> tests/../src/node_compat.rs:9394:19
+     |
+9394 | pub(crate) struct Tree {
+     |                   ^^^^
+
+warning: multiple associated items are never used
+    --> tests/../src/node_compat.rs:9401:19
+     |
+9400 | impl Tree {
+     | --------- associated items in this implementation
+9401 |     pub(crate) fn from_spec(spec: TreeSpec, theme: &GpuiThemeProvider)...
+     |                   ^^^^^^^^^
+...
+9409 |     pub(crate) fn focused_value(mut self, value: impl Into<String>) ->...
+     |                   ^^^^^^^^^^^^^
+...
+9414 |     pub(crate) fn on_toggle_expand(mut self, handler: Arc<dyn Fn(&str)...
+     |                   ^^^^^^^^^^^^^^^^
+...
+9419 |     pub(crate) fn on_check(mut self, handler: Arc<dyn Fn(&str) + Send ...
+     |                   ^^^^^^^^
+...
+9424 |     pub(crate) fn on_select_modified(
+     |                   ^^^^^^^^^^^^^^^^^^
+...
+9432 |     pub(crate) fn on_context_menu(
+     |                   ^^^^^^^^^^^^^^^
+...
+9440 |     pub(crate) fn on_key(
+     |                   ^^^^^^
+...
+9448 |     pub(crate) fn on_drag_over(
+     |                   ^^^^^^^^^^^^
+...
+9456 |     pub(crate) fn on_reorder(
+     |                   ^^^^^^^^^^
+...
+9464 |     fn into_node(self) -> poodle_node::Node {
+     |        ^^^^^^^^^
+
+warning: constant `ALL_SIZES` is never used
+  --> tests/../src/specimens/specimen_axes.rs:25:11
+   |
+25 | pub const ALL_SIZES: &[(ControlSize, &str)] = &[
+   |           ^^^^^^^^^
+
+warning: constant `ALL_DENSITIES` is never used
+  --> tests/../src/specimens/specimen_axes.rs:34:11
+   |
+34 | pub const ALL_DENSITIES: &[(ControlDensity, &str)] = &[
+   |           ^^^^^^^^^^^^^
+
+
+running 389 tests
+....................................................................................... 87/389
+....................................................................................... 174/389
+....................................................................................... 261/389
+....................................................................................... 348/389
+.........................................
+test result: ok. 389 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.29s
+
+oxide: waiting for the admission lock (holder unknown)
+oxide: quick profile, build+execute strategy, slot 5747 warm, 228.4s, slot size unknown, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-3c76ce6e through profile member links (debug), temp: inherited [scratch], waited 82.8s, pool lock 1473.3 ms (accounting 1472.8 ms, byte walks 0, inventory entries 0, Barge listing count unavailable)
+oxide: flushed the removable volume before releasing slot 5747 in 3560.1 ms
