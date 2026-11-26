@@ -290,8 +290,8 @@ mod tests {
 
     struct TestTheme;
     impl ThemeProvider for TestTheme {
-        fn resolve_color(&self, _: &str) -> ColorValue {
-            ColorValue(0.1, 0.2, 0.3, 1.0)
+        fn try_resolve_color(&self, _: &str) -> Option<ColorValue> {
+            Some(ColorValue(0.1, 0.2, 0.3, 1.0))
         }
         fn resolve_space(&self, _: &str) -> f32 {
             8.0
@@ -302,8 +302,8 @@ mod tests {
         fn resolve_radius(&self, _: &str) -> f32 {
             6.0
         }
-        fn resolve_opacity(&self, _: &str) -> f32 {
-            1.0
+        fn try_resolve_opacity(&self, _: &str) -> Option<f32> {
+            None
         }
     }
 

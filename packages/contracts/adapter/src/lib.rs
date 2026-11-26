@@ -11,22 +11,17 @@ use poodle_tokens::typed::ColorValue;
 /// The shared renderer uses this to resolve semantic tokens into concrete
 /// values in a node tree. Each backend can supply its own theme provider.
 pub trait ThemeProvider {
-    /// Resolve a color token path to an RGBA color value.
-    fn resolve_color(&self, token: &str) -> ColorValue;
+    /// Resolve a color token path to an RGBA color value, falling back to opaque black.
+    fn resolve_color(&self, token: &str) -> ColorValue {
+        self.try_resolve_color(token)
+            .unwrap_or(ColorValue(0.0, 0.0, 0.0, 1.0))
+    }
 
     /// Resolve a color token when the theme defines it.
     ///
     /// `None` means the token is missing. A defined black is
     /// `Some(ColorValue(0.0, 0.0, 0.0, 1.0))`, distinct from a missing token.
-    /// The default treats the `resolve_color` black fallback as missing.
-    fn try_resolve_color(&self, token: &str) -> Option<ColorValue> {
-        let resolved = self.resolve_color(token);
-        if resolved == ColorValue(0.0, 0.0, 0.0, 1.0) {
-            None
-        } else {
-            Some(resolved)
-        }
-    }
+    fn try_resolve_color(&self, token: &str) -> Option<ColorValue>;
 
     /// Resolve a space/size token path to a pixel value.
     fn resolve_space(&self, token: &str) -> f32;
@@ -37,22 +32,16 @@ pub trait ThemeProvider {
     /// Resolve a radius token path to a pixel value.
     fn resolve_radius(&self, token: &str) -> f32;
 
-    /// Resolve an opacity token path to a 0.0–1.0 value.
-    fn resolve_opacity(&self, token: &str) -> f32;
+    /// Resolve an opacity token path to a 0.0–1.0 value, falling back to 1.0.
+    fn resolve_opacity(&self, token: &str) -> f32 {
+        self.try_resolve_opacity(token).unwrap_or(1.0)
+    }
 
     /// Resolve an opacity token when the theme defines it.
     ///
     /// `None` means the token is missing. A defined fully-opaque value is
-    /// `Some(1.0)`, distinct from a missing token. The default treats the
-    /// `resolve_opacity` 1.0 fallback as missing.
-    fn try_resolve_opacity(&self, token: &str) -> Option<f32> {
-        let resolved = self.resolve_opacity(token);
-        if (resolved - 1.0).abs() < f32::EPSILON {
-            None
-        } else {
-            Some(resolved)
-        }
-    }
+    /// `Some(1.0)`, distinct from a missing token.
+    fn try_resolve_opacity(&self, token: &str) -> Option<f32>;
 }
 
 /// Receives semantic events emitted by rendered components.
@@ -137,8 +126,12 @@ mod tests {
     struct MockTheme;
 
     impl ThemeProvider for MockTheme {
-        fn resolve_color(&self, _token: &str) -> ColorValue {
-            ColorValue(0.5, 0.5, 0.5, 1.0)
+        fn try_resolve_color(&self, token: &str) -> Option<ColorValue> {
+            match token {
+                "color.accent.base" => Some(ColorValue(0.5, 0.5, 0.5, 1.0)),
+                "color.black" => Some(ColorValue(0.0, 0.0, 0.0, 1.0)),
+                _ => None,
+            }
         }
         fn resolve_space(&self, _token: &str) -> f32 {
             8.0
@@ -149,8 +142,12 @@ mod tests {
         fn resolve_radius(&self, _token: &str) -> f32 {
             4.0
         }
-        fn resolve_opacity(&self, _token: &str) -> f32 {
-            1.0
+        fn try_resolve_opacity(&self, token: &str) -> Option<f32> {
+            match token {
+                "opacity.full" => Some(1.0),
+                "opacity.half" => Some(0.5),
+                _ => None,
+            }
         }
     }
 
@@ -170,6 +167,22 @@ mod tests {
         let color = theme.resolve_color("color.accent.base");
         assert_eq!(color, ColorValue(0.5, 0.5, 0.5, 1.0));
         assert_eq!(theme.resolve_space("space.stack.md"), 8.0);
+    }
+
+    #[test]
+    fn theme_provider_distinguishes_defined_fallback_values_from_missing_tokens() {
+        let theme = MockTheme;
+        let black = ColorValue(0.0, 0.0, 0.0, 1.0);
+        assert_eq!(theme.try_resolve_color("color.black"), Some(black));
+        assert_eq!(theme.try_resolve_color("color.missing"), None);
+        assert_eq!(theme.resolve_color("color.black"), black);
+        assert_eq!(theme.resolve_color("color.missing"), black);
+
+        assert_eq!(theme.try_resolve_opacity("opacity.full"), Some(1.0));
+        assert_eq!(theme.try_resolve_opacity("opacity.missing"), None);
+        assert_eq!(theme.resolve_opacity("opacity.full"), 1.0);
+        assert_eq!(theme.resolve_opacity("opacity.missing"), 1.0);
+        assert_eq!(theme.resolve_opacity("opacity.half"), 0.5);
     }
 
     #[test]

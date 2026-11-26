@@ -320,18 +320,24 @@ pub struct TreeVirtualWindow {
     pub total_height: f64,
 }
 
+/// Return a half-open row range, extended to include a valid pinned row.
 pub fn tree_virtual_window(
     row_count: usize,
     row_height_px: f64,
     scroll_top: f64,
     viewport_height_px: f64,
     overscan: usize,
+    pin_index: Option<usize>,
 ) -> TreeVirtualWindow {
-    let start_index =
-        ((scroll_top / row_height_px).floor() as i64 - overscan as i64).max(0) as usize;
-    let end_index = (((scroll_top + viewport_height_px) / row_height_px).ceil() as usize
-        + overscan)
-        .min(row_count);
+    let first_row = (scroll_top / row_height_px).floor();
+    let after_last_row = ((scroll_top + viewport_height_px) / row_height_px).ceil();
+    let mut end_index = ((after_last_row + overscan as f64) as usize).min(row_count);
+    let mut start_index = ((first_row - overscan as f64) as usize).min(end_index);
+
+    if let Some(pin_index) = pin_index.filter(|&index| index < row_count) {
+        start_index = start_index.min(pin_index);
+        end_index = end_index.max(pin_index + 1);
+    }
 
     TreeVirtualWindow {
         start_index,

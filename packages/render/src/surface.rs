@@ -314,8 +314,8 @@ mod tests {
 
     struct MockBorderWidthResolverTheme;
     impl poodle_adapter::ThemeProvider for MockBorderWidthResolverTheme {
-        fn resolve_color(&self, _: &str) -> poodle_node::ColorValue {
-            poodle_node::ColorValue(0.0, 0.0, 0.0, 1.0)
+        fn try_resolve_color(&self, _: &str) -> Option<poodle_node::ColorValue> {
+            None
         }
         fn resolve_space(&self, token: &str) -> f32 {
             // Space resolver returns 0.0 for border width tokens, matching GpuiThemeProvider
@@ -335,8 +335,8 @@ mod tests {
                 0.0
             }
         }
-        fn resolve_opacity(&self, _: &str) -> f32 {
-            1.0
+        fn try_resolve_opacity(&self, _: &str) -> Option<f32> {
+            None
         }
     }
 

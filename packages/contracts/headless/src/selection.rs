@@ -2,20 +2,20 @@
 
 use std::collections::HashSet;
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum SelectionMode {
     #[default]
     Single,
     Multiple,
 }
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct SelectionOptions {
     pub mode: SelectionMode,
     pub max: Option<usize>,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SelectionEvent<'a, T> {
     Select { item: &'a T, disabled: bool },
     Toggle { item: &'a T, disabled: bool },

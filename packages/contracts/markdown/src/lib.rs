@@ -94,6 +94,11 @@ impl Walker {
     }
 
     fn push_inline(&mut self, inline: MdInline) {
+        // Tight list items omit paragraph events. Open the paragraph frame
+        // on the first inline, including when a formatting span just closed.
+        if matches!(self.stack.last(), Some(Frame::Blocks(_))) {
+            self.open_inlines();
+        }
         if let Some(Frame::Inlines(inlines)) = self.stack.last_mut() {
             // Contiguous text merges into one node. `pulldown-cmark` splits text
             // on entity and escape boundaries where `marked` does not, and an
@@ -290,22 +295,8 @@ pub fn parse_markdown(source: &str) -> Vec<MdBlock> {
                 }
                 _ => {}
             },
-            Event::Text(text) => {
-                if matches!(walker.stack.last(), Some(Frame::Inlines(_))) {
-                    walker.push_inline(MdInline::Text(text.to_string()));
-                } else {
-                    // Text outside any paragraph — a tight list item. Open an
-                    // inline frame so `TagEnd::Item` can wrap it.
-                    walker.open_inlines();
-                    walker.push_inline(MdInline::Text(text.to_string()));
-                }
-            }
-            Event::Code(code) => {
-                if !matches!(walker.stack.last(), Some(Frame::Inlines(_))) {
-                    walker.open_inlines();
-                }
-                walker.push_inline(MdInline::Code(code.to_string()));
-            }
+            Event::Text(text) => walker.push_inline(MdInline::Text(text.to_string())),
+            Event::Code(code) => walker.push_inline(MdInline::Code(code.to_string())),
             // A soft break is a source line wrap, which `marked` keeps as a
             // newline inside the text rather than as a node.
             Event::SoftBreak => walker.push_inline(MdInline::Text("\n".to_string())),

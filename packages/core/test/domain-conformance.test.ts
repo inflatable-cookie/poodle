@@ -165,6 +165,7 @@ interface TreeCase {
   scrollTop?: number;
   viewport?: number;
   overscan?: number;
+  pinIndex?: number;
   expect: unknown;
 }
 
@@ -473,6 +474,7 @@ describe("domain conformance: tree", () => {
               case_.scrollTop ?? 0,
               case_.viewport ?? 0,
               case_.overscan ?? 0,
+              case_.pinIndex,
             ),
           ).toEqual(case_.expect as never);
           return;

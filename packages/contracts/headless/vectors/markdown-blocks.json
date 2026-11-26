@@ -495,5 +495,102 @@
     "name": "empty document",
     "markdown": "",
     "blocks": []
+  },
+  {
+    "name": "tight list with leading strong, emphasis and links",
+    "markdown": "- **bold** rest\n  - nested\n- *emphasis* rest\n- [**link**](https://example.com) rest",
+    "blocks": [
+      {
+        "type": "list",
+        "ordered": false,
+        "start": 1,
+        "items": [
+          [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "strong",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "bold"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "value": " rest"
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "ordered": false,
+              "start": 1,
+              "items": [
+                [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "nested"
+                      }
+                    ]
+                  }
+                ]
+              ]
+            }
+          ],
+          [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "em",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "emphasis"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "value": " rest"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "link",
+                  "href": "https://example.com",
+                  "children": [
+                    {
+                      "type": "strong",
+                      "children": [
+                        {
+                          "type": "text",
+                          "value": "link"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "value": " rest"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ]
   }
 ]

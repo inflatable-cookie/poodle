@@ -520,18 +520,6 @@ fn push_disclosed(
         });
     }
 
-    if is_stale {
-        let shown = shown.expect("staleness implies a shown fork");
-        rows.push(HistoryCenterRow::NotYetLoaded {
-            anchor_entry_id: entry.id.clone(),
-            depth: child_depth,
-            parent_entry_id: Some(entry.id.clone()),
-            fork_id: Some(shown.entry_id.clone()),
-            branch_id: Some(shown.branch_id.clone()),
-        });
-        return;
-    }
-
     let Some(shown) = shown else {
         if fork_count <= 1 {
             // A single fork, or its continuations still in flight: the run is
@@ -547,7 +535,7 @@ fn push_disclosed(
         return;
     };
 
-    if level.run_pages.is_empty() {
+    if is_stale || level.run_pages.is_empty() {
         rows.push(HistoryCenterRow::NotYetLoaded {
             anchor_entry_id: entry.id.clone(),
             depth: child_depth,
