@@ -6,30 +6,18 @@
  *   bun test/focus-ring-modality/probe.ts --browser=webkit
  */
 
-import { chromium, webkit, type Browser, type BrowserType, type Page } from "playwright";
-import { fileURLToPath } from "node:url";
+import type { Page } from "playwright";
 
-const browserFlag = process.argv.find((arg) => arg.startsWith("--browser="))?.slice("--browser=".length);
-const engines: Array<[string, BrowserType]> = (
-  [
-    ["chromium", chromium],
-    ["webkit", webkit],
-  ] as Array<[string, BrowserType]>
-).filter(([name]) => !browserFlag || browserFlag === name);
+import {
+  check,
+  finish,
+  selectedEngines,
+  settle,
+  withBrowser,
+  withFixture,
+} from "../browser-probe";
 
-if (engines.length === 0) {
-  throw new Error(`Unknown --browser=${browserFlag}`);
-}
-
-const fixtureRoot = fileURLToPath(new URL(".", import.meta.url));
-const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
-const viteBin = fileURLToPath(
-  new URL("../../packages/svelte/preview/node_modules/vite/bin/vite.js", import.meta.url),
-);
-const port = 4192;
-const url = `http://127.0.0.1:${port}/`;
-
-let failures = 0;
+const engines = selectedEngines();
 
 type Chrome = {
   boxShadow: string;
@@ -38,62 +26,12 @@ type Chrome = {
   modality: string;
 };
 
-function check(label: string, ok: boolean, detail = ""): void {
-  if (!ok) failures += 1;
-  console.log(`${ok ? "  ok  " : "  FAIL"}  ${label}${detail ? `  — ${detail}` : ""}`);
-}
-
 function formatChrome(chrome: Chrome): string {
   return `modality=${chrome.modality} box-shadow=${JSON.stringify(chrome.boxShadow)} border-color=${JSON.stringify(chrome.borderColor)} background=${JSON.stringify(chrome.backgroundColor)}`;
 }
 
 function chromeEqual(a: Chrome, b: Chrome): boolean {
   return a.boxShadow === b.boxShadow && a.borderColor === b.borderColor && a.backgroundColor === b.backgroundColor;
-}
-
-async function waitForServer(timeoutMs = 30_000): Promise<void> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(1000) });
-      if (res.ok) return;
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 150));
-    }
-  }
-  throw new Error(`focus-ring modality fixture on :${port} did not start`);
-}
-
-const child = Bun.spawn(
-  [
-    "bun",
-    viteBin,
-    "--config",
-    `${fixtureRoot}/vite.config.ts`,
-    "--port",
-    String(port),
-    "--strictPort",
-    "--host",
-    "127.0.0.1",
-  ],
-  {
-    cwd: repoRoot,
-    stdout: "inherit",
-    stderr: "inherit",
-  },
-);
-
-await waitForServer();
-
-async function settle(page: Page): Promise<void> {
-  await page.evaluate(
-    () =>
-      new Promise<void>((resolve) => {
-        requestAnimationFrame(() => {
-          window.setTimeout(resolve, 200);
-        });
-      }),
-  );
 }
 
 async function readChrome(page: Page, framework: "svelte" | "react"): Promise<Chrome> {
@@ -119,12 +57,12 @@ async function runFramework(page: Page, framework: "svelte" | "react", browserNa
   await input.waitFor();
 
   await before.click();
-  await settle(page);
+  await settle(page, 200);
   const resting = await readChrome(page, framework);
   console.log(`  evidence  ${browserName} ${framework} resting  ${formatChrome(resting)}`);
 
   await input.click();
-  await settle(page);
+  await settle(page, 200);
   const pointer = await readChrome(page, framework);
   console.log(`  evidence  ${browserName} ${framework} pointer  ${formatChrome(pointer)}`);
   check(
@@ -134,9 +72,9 @@ async function runFramework(page: Page, framework: "svelte" | "react", browserNa
   );
 
   await before.click();
-  await settle(page);
+  await settle(page, 200);
   await page.keyboard.press("Tab");
-  await settle(page);
+  await settle(page, 200);
   const keyboard = await readChrome(page, framework);
   console.log(`  evidence  ${browserName} ${framework} keyboard  ${formatChrome(keyboard)}`);
   const focused = await page.evaluate((fw) => {
@@ -154,29 +92,17 @@ async function runFramework(page: Page, framework: "svelte" | "react", browserNa
   );
 }
 
-try {
+await withFixture(import.meta.url, async (origin) => {
   for (const [browserName, browserType] of engines) {
-    let browser: Browser | undefined;
-    try {
-      browser = await browserType.launch({ headless: true });
+    await withBrowser(browserType, async (browser) => {
       const page = await browser.newPage({ viewport: { width: 960, height: 720 } });
-      await page.goto(url, { waitUntil: "networkidle" });
+      await page.goto(`${origin}/`, { waitUntil: "networkidle" });
       await page.waitForSelector('[data-framework="svelte"] .poodle-token-input');
       await page.waitForSelector('[data-framework="react"] .poodle-token-input');
       await runFramework(page, "svelte", browserName);
       await runFramework(page, "react", browserName);
-    } finally {
-      await browser?.close();
-    }
+    });
   }
-} finally {
-  child.kill();
-  await child.exited;
-}
+});
 
-if (failures > 0) {
-  console.error(`\n${failures} check(s) failed`);
-  process.exit(1);
-}
-
-console.log("\nall focus-ring input-modality checks passed");
+finish("focus-ring input-modality");

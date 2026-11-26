@@ -13,67 +13,18 @@
  *   bun test/drag-drop/probe.ts --browser=webkit
  */
 
-import { chromium, webkit, type Browser, type BrowserType, type CDPSession, type Page } from "playwright";
-import { fileURLToPath } from "node:url";
+import type { Browser, CDPSession, Page } from "playwright";
 
-const browserFlag = process.argv.find((arg) => arg.startsWith("--browser="))?.slice("--browser=".length);
-const engines: Array<[string, BrowserType]> = ([["chromium", chromium], ["webkit", webkit]] as Array<[string, BrowserType]>)
-  .filter(([name]) => !browserFlag || browserFlag === name);
+import {
+  check,
+  finish,
+  frames,
+  selectedEngines,
+  withBrowser,
+  withFixture,
+} from "../browser-probe";
 
-if (engines.length === 0) {
-  throw new Error(`Unknown --browser=${browserFlag}`);
-}
-
-const fixtureRoot = fileURLToPath(new URL(".", import.meta.url));
-const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
-const viteBin = fileURLToPath(new URL("../../packages/svelte/preview/node_modules/vite/bin/vite.js", import.meta.url));
-const port = 4179;
-const url = `http://127.0.0.1:${port}/`;
-
-let failures = 0;
-
-function check(label: string, ok: boolean, detail = ""): void {
-  if (!ok) failures += 1;
-  console.log(`${ok ? "  ok  " : "  FAIL"}  ${label}${detail ? `  — ${detail}` : ""}`);
-}
-
-async function waitForServer(timeoutMs = 30_000): Promise<void> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(1000) });
-      if (res.ok) return;
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 150));
-    }
-  }
-  throw new Error(`drag-drop fixture on :${port} did not start`);
-}
-
-const child = Bun.spawn(
-  ["bun", viteBin, "--config", `${fixtureRoot}/vite.config.ts`, "--port", String(port), "--strictPort", "--host", "127.0.0.1"],
-  {
-    cwd: repoRoot,
-    stdout: "inherit",
-    stderr: "inherit",
-  },
-);
-await waitForServer();
-
-async function frames(page: Page, count = 2): Promise<void> {
-  await page.evaluate((n) => {
-    return new Promise<void>((resolve) => {
-      const tick = (left: number) => {
-        if (left <= 0) {
-          resolve();
-          return;
-        }
-        requestAnimationFrame(() => tick(left - 1));
-      };
-      tick(n);
-    });
-  }, count);
-}
+const engines = selectedEngines();
 
 async function box(page: Page, selector: string): Promise<{ x: number; y: number; width: number; height: number }> {
   const handle = await page.locator(selector).boundingBox();
@@ -154,8 +105,8 @@ async function touchAt(
   else await dispatchAtPoint(page, "pointerup", x, y, pointerType, pointerId);
 }
 
-async function run(page: Page, name: string, cdp: CDPSession | null): Promise<void> {
-  await page.goto(url, { waitUntil: "load" });
+async function run(page: Page, name: string, cdp: CDPSession | null, base: string): Promise<void> {
+  await page.goto(`${base}/`, { waitUntil: "load" });
   await page.locator("#source").waitFor();
 
   const source = center(await box(page, "#source"));
@@ -173,7 +124,7 @@ async function run(page: Page, name: string, cdp: CDPSession | null): Promise<vo
   );
 
   await page.mouse.move(target.x, target.y, { steps: 10 });
-  await frames(page);
+  await frames(page, 2);
   const preview = await page.locator(".poodle-drag-preview").count();
   const posture = await probeAttr(page, "posture");
   const hoverTarget = await probeAttr(page, "target");
@@ -217,7 +168,7 @@ async function run(page: Page, name: string, cdp: CDPSession | null): Promise<vo
   await page.mouse.move(origin.x + 28, origin.y, { steps: 6 });
   await waitProbe(page, "phase", "dragging");
   await page.mouse.move(miss.x, miss.y, { steps: 8 });
-  await frames(page);
+  await frames(page, 2);
   const missed = await probeAttr(page, "posture");
   await page.evaluate((width) => {
     const node = document.getElementById("target");
@@ -227,7 +178,7 @@ async function run(page: Page, name: string, cdp: CDPSession | null): Promise<vo
   const afterResize = await probeAttr(page, "posture");
   const targetCenter = center(await box(page, "#target"));
   await page.mouse.move(targetCenter.x, targetCenter.y, { steps: 6 });
-  await frames(page);
+  await frames(page, 2);
   await waitProbe(page, "posture", "accepted");
   await page.evaluate(() => {
     const scroller = document.getElementById("scroller");
@@ -283,8 +234,7 @@ async function run(page: Page, name: string, cdp: CDPSession | null): Promise<vo
   const hold = center(await box(page, "#source"));
   const drop = center(await box(page, "#target"));
   await touchAt(page, cdp, "touchStart", hold.x, hold.y);
-  await page.waitForTimeout(350);
-  const heldPhase = await waitProbe(page, "phase", "dragging", 1_000);
+  const heldPhase = await waitProbe(page, "phase", "dragging");
   const steps = 8;
   for (let i = 1; i <= steps; i++) {
     await touchAt(
@@ -295,9 +245,8 @@ async function run(page: Page, name: string, cdp: CDPSession | null): Promise<vo
       hold.y + ((drop.y - hold.y) * i) / steps,
     );
   }
-  await frames(page);
-  const heldPosture = await probeAttr(page, "posture");
-  const heldTarget = await probeAttr(page, "target");
+  const heldPosture = await waitProbe(page, "posture", "accepted");
+  const heldTarget = await waitProbe(page, "target", "list");
   await touchAt(page, cdp, "touchEnd", drop.x, drop.y);
   check(
     cdp
@@ -333,7 +282,7 @@ async function run(page: Page, name: string, cdp: CDPSession | null): Promise<vo
   await waitProbe(page, "phase", "dragging");
   await page.mouse.move(linkDrop.x, linkDrop.y, { steps: 8 });
   await page.mouse.up();
-  await frames(page);
+  await frames(page, 2);
   const hashAfterDrag = await page.evaluate(() => location.hash);
   check(
     `${name}: activated drag of a link source does not follow the compatibility click href`,
@@ -344,7 +293,7 @@ async function run(page: Page, name: string, cdp: CDPSession | null): Promise<vo
   await page.reload({ waitUntil: "load" });
   await page.locator("#link-source").waitFor();
   await page.locator("#link-source").click();
-  await frames(page);
+  await frames(page, 2);
   const hashAfterTap = await page.evaluate(() => location.hash);
   check(
     `${name}: tap on a registered link source still follows href`,
@@ -352,7 +301,7 @@ async function run(page: Page, name: string, cdp: CDPSession | null): Promise<vo
     `hash=${hashAfterTap || "(empty)"}`,
   );
 
-  await page.goto(url, { waitUntil: "load" });
+  await page.goto(`${base}/`, { waitUntil: "load" });
   await page.locator("#nested-source").waitFor();
   await page.locator("#inner-scroll").evaluate((node) => {
     (node as HTMLElement).scrollTop = 80;
@@ -437,7 +386,7 @@ function envelope(token: string, version = 1): string {
   return JSON.stringify({ protocolVersion: version, token });
 }
 
-async function runCrossWindow(name: string, browser: Browser): Promise<void> {
+async function runCrossWindow(name: string, browser: Browser, base: string): Promise<void> {
   // Two contexts, not two pages: isolated storage, no shared BroadcastChannel,
   // no window handle between them. If anything here worked by accident through
   // a same-page shortcut, it would stop working now.
@@ -447,8 +396,8 @@ async function runCrossWindow(name: string, browser: Browser): Promise<void> {
   const b = await receiving.newPage();
 
   try {
-    await a.goto(`${url}cross-window.html?role=source`, { waitUntil: "load" });
-    await b.goto(`${url}cross-window.html?role=target`, { waitUntil: "load" });
+    await a.goto(`${base}/cross-window.html?role=source`, { waitUntil: "load" });
+    await b.goto(`${base}/cross-window.html?role=target`, { waitUntil: "load" });
     await a.locator("#source").waitFor();
     await b.locator("#target").waitFor();
 
@@ -707,12 +656,12 @@ declare global {
 
 const WAV = { name: "take-01.wav", type: "audio/wav", bytes: 512 };
 
-async function runExternalFiles(name: string, browser: Browser): Promise<void> {
+async function runExternalFiles(name: string, browser: Browser, base: string): Promise<void> {
   const context = await browser.newContext({ viewport: { width: 640, height: 480 } });
   const page = await context.newPage();
 
   try {
-    await page.goto(`${url}files.html`, { waitUntil: "load" });
+    await page.goto(`${base}/files.html`, { waitUntil: "load" });
     await page.locator("#zone").waitFor();
 
     // ── inbound: hover discloses types, the drop discloses everything ────
@@ -884,10 +833,10 @@ async function runExternalFiles(name: string, browser: Browser): Promise<void> {
  * including two ModelCatalogueEditors that deliberately hold the same model
  * ids under one provider — and asserts the authored callback result.
  */
-async function runComponents(name: string, browser: Browser): Promise<void> {
+async function runComponents(name: string, browser: Browser, base: string): Promise<void> {
   const context = await browser.newContext({ viewport: { width: 1000, height: 900 } });
   const page = await context.newPage();
-  const componentsUrl = `${url}components.html`;
+  const componentsUrl = `${base}/components.html`;
 
   const attr = async (fw: string, key: string): Promise<string> =>
     (await page.locator(`#${fw}-probe`).getAttribute(`data-${key}`)) ?? "";
@@ -915,7 +864,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
     const rect = await locator.boundingBox();
     if (!rect) throw new Error(`no box for ${selector}`);
     await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height * yFraction, { steps: 8 });
-    await frames(page);
+    await frames(page, 2);
   };
 
   const selectionState = async (): Promise<{ text: string; collapsed: boolean }> =>
@@ -937,10 +886,10 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
     await page.mouse.move(start.x + 12, start.y + start.height / 2);
     await page.mouse.down();
     await page.mouse.move(start.x + 13, start.y + start.height / 2 + 2);
-    await frames(page);
+    await frames(page, 2);
     const pre = await selectionState();
     await page.mouse.move(end.x + Math.min(24, end.width - 4), end.y + end.height / 2, { steps: 24 });
-    await frames(page);
+    await frames(page, 2);
     const crossed = await selectionState();
     await page.mouse.up();
     return { pre, crossed };
@@ -958,7 +907,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
         .locator(`#${fw}-mce-b [data-drop-target="true"]`)
         .count();
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} ModelCatalogueEditor instances cannot cross-drop colliding ids`,
         foreignPosture === 0 &&
@@ -971,7 +920,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
       await press(`#${fw}-mce-a [data-model-catalogue-id="alpha"] [data-reorder-handle]`);
       await hover(`#${fw}-mce-a [data-model-catalogue-id="gamma"]`);
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} ModelCatalogueEditor drop emits one complete shown order`,
         (await attr(fw, "order-a")) === "beta,gamma,alpha" &&
@@ -981,7 +930,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
 
       // ── A row's own controls still work, and never start a drag ──
       await page.locator(`#${fw}-mce-a [data-model-catalogue-id="beta"] [aria-label="Hide Beta"]`).click();
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} ModelCatalogueEditor row controls survive the reorder sensor`,
         (await attr(fw, "hides")) === "beta:false" && (await attr(fw, "order-a-count")) === "1",
@@ -999,9 +948,9 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
         ];
         fixture.removeCatalogueItem("gamma");
       }, fw);
-      await frames(page);
+      await frames(page, 2);
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} ModelCatalogueEditor rejects a drop whose target left`,
         (await attr(fw, "order-a-count")) === "0" && (await attr(fw, "order-a")) === "",
@@ -1024,10 +973,10 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
         ];
         fixture.replaceCatalogue(["gamma", "beta", "alpha"]);
       }, fw);
-      await frames(page);
+      await frames(page, 2);
       await hover(`#${fw}-mce-a [data-model-catalogue-id="beta"]`);
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} ModelCatalogueEditor never commits against a replaced order`,
         (await attr(fw, "order-a-count")) === "0" && (await attr(fw, "order-a")) === "",
@@ -1048,9 +997,9 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
         ];
         fixture.lockCatalogue();
       }, fw);
-      await frames(page);
+      await frames(page, 2);
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} ModelCatalogueEditor refuses a drop into a locked catalogue`,
         (await attr(fw, "order-a-count")) === "0" && (await attr(fw, "order-a")) === "",
@@ -1061,7 +1010,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
       await press(`#${fw}-mce-a [data-model-catalogue-id="alpha"] [data-reorder-handle]`);
       await hover(`#${fw}-mce-a [data-model-catalogue-id="beta"]`);
       await page.keyboard.press("Escape");
-      await frames(page);
+      await frames(page, 2);
       const latched = await page.locator(`#${fw}-mce-a [data-drop-target="true"]`).count();
       await page.mouse.up();
       check(
@@ -1076,7 +1025,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
       await press(`#${fw}-blocks .poodle-block-editor__block:nth-of-type(1) .poodle-block-editor__drag-grip`);
       await hover(`#${fw}-blocks .poodle-block-editor__block:nth-of-type(3)`, 0.9);
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} BlockEditor grip drag emits one complete block order`,
         (await attr(fw, "blocks")) === "b2,b3,b1" && (await attr(fw, "blocks-count")) === "1",
@@ -1107,7 +1056,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
       await hover(`#${fw}-blocks .poodle-block-editor__block:nth-of-type(3)`, 0.9);
       const draggingFromChrome = await page.locator(`#${fw}-blocks .poodle-dragging`).count();
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} BlockEditor toolbar chrome is not a drag handle`,
         draggingFromChrome === 0 && (await attr(fw, "blocks-count")) === "1",
@@ -1119,7 +1068,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
       await hover(`#${fw}-blocks .poodle-block-editor__block:nth-of-type(3)`, 0.9);
       const draggingFromContent = await page.locator(`#${fw}-blocks .poodle-dragging`).count();
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} BlockEditor content press never starts a drag`,
         draggingFromContent === 0 && (await attr(fw, "blocks-count")) === "1",
@@ -1134,7 +1083,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
       // about — nothing is left on `body`. Returning focus to the control
       // itself is a BlockEditor focus decision this card did not take.
       await page.locator(`#${fw}-blocks .poodle-block-editor__block:nth-of-type(2) button[aria-label="Move up"]`).click();
-      await frames(page);
+      await frames(page, 2);
       const blockFocusInside = await page.evaluate((framework) => {
         const active = document.activeElement;
         if (!active || active === document.body) return "body";
@@ -1160,7 +1109,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
       await press(`#${fw}-mce-a [data-model-catalogue-id="alpha"] [data-reorder-handle]`);
       await hover(`#${fw}-mce-a [data-model-catalogue-id="gamma"]`);
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       const ownRegion = (
         await page.locator(`#${fw}-mce-a .poodle-model-catalogue-editor__live`).textContent()
       )?.trim();
@@ -1200,9 +1149,9 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
         ];
         fixture.removeCatalogueItem("alpha");
       }, fw);
-      await frames(page);
+      await frames(page, 2);
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       const strandedSource = await page.locator(`#${fw}-mce-a [data-poodle-drag-source]`).count();
       const strandedTarget = await page.locator(`#${fw}-mce-a [data-drop-target="true"]`).count();
       check(
@@ -1223,7 +1172,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
       await page.keyboard.press("Space");
       await page.keyboard.press("ArrowDown");
       await page.keyboard.press("Space");
-      await frames(page);
+      await frames(page, 2);
       const listGrabbed = await page.locator(`#${fw}-list .poodle-editable-list__item--grabbed`).count();
       check(
         `${name}: ${fw} EditableList keyboard pickup commits and leaves no posture`,
@@ -1241,13 +1190,13 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
       await hover(`#${fw}-mce-c [data-model-catalogue-id="gamma"]`);
       const disabledPickup = await page.locator(`#${fw}-mce-c [data-poodle-drag-source]`).count();
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       const afterDisabledPickup = await attr(fw, "order-c-count");
 
       await press(`#${fw}-mce-c [data-model-catalogue-id="alpha"] [data-reorder-handle]`);
       await hover(`#${fw}-mce-c [data-model-catalogue-id="beta"]`);
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} ModelCatalogueEditor disabled model is unpickable but droppable-onto`,
         disabledPickup === 0 &&
@@ -1269,18 +1218,18 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
         ];
         fixture.disableDragC();
       }, fw);
-      await frames(page);
+      await frames(page, 2);
       await press(`#${fw}-mce-c [data-model-catalogue-id="alpha"] [data-reorder-handle]`);
       await hover(`#${fw}-mce-c [data-model-catalogue-id="gamma"]`);
       const inertSources = await page.locator(`#${fw}-mce-c [data-poodle-drag-source]`).count();
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       const afterInertDrag = await attr(fw, "order-c-count");
 
       await page.locator(`#${fw}-mce-c [data-model-catalogue-id="alpha"] [data-reorder-handle]`).focus();
       await page.keyboard.press("Space");
       await page.keyboard.press("ArrowDown");
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} ModelCatalogueEditor isDragEnabled=false stops pointer drag only`,
         inertSources === 0 &&
@@ -1296,7 +1245,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
       await press(".poodle-order-by__item:nth-of-type(1) .poodle-order-by__drag-handle");
       await hover(".poodle-order-by__item:nth-of-type(3)", 0.9);
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} OrderBy reorders inside an ambient provider it cannot join`,
         (await attr(fw, "sort")) === "updated,size,title" && (await attr(fw, "sort-count")) === "1",
@@ -1319,7 +1268,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
 
       await page.locator(".poodle-order-by__item:nth-of-type(2) .poodle-order-by__drag-handle").focus();
       await page.keyboard.press("Alt+ArrowUp");
-      await frames(page);
+      await frames(page, 2);
       const orderFocus = await page.evaluate(
         () => (document.activeElement as HTMLElement | null)?.getAttribute("aria-label") ?? "",
       );
@@ -1343,11 +1292,11 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
         ];
         fixture.selectTree(["a.ts", "b.ts"]);
       }, fw);
-      await frames(page);
+      await frames(page, 2);
       await press(`#${fw}-tree-auth [data-value="a.ts"] .poodle-tree__row`);
       await hover(`#${fw}-tree-auth [data-value="c.ts"]`);
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} Tree authority drop commits the latched moving set`,
         (await attr(fw, "tree-drops")) === "1" &&
@@ -1365,14 +1314,14 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
         ];
         fixture.refuseTree();
       }, fw);
-      await frames(page);
+      await frames(page, 2);
       await press(`#${fw}-tree-auth [data-value="a.ts"] .poodle-tree__row`);
       await hover(`#${fw}-tree-auth [data-value="c.ts"]`);
       const treeAccepted = await page
         .locator(`#${fw}-tree-auth [data-poodle-drop-target="accepted"]`)
         .count();
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} Tree authority canDrop refusal never paints accepted or commits`,
         treeAccepted === 0 && (await attr(fw, "tree-drops")) === "0",
@@ -1384,7 +1333,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
       await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
       await page.locator(`#${fw}-tree-auth [data-value="a.ts"]`).focus();
       await page.keyboard.press("Alt+ArrowDown");
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} Tree Alt+Arrow commits through reorderAuthority`,
         (await attr(fw, "tree-drops")) === "1" &&
@@ -1405,7 +1354,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
           reorderableSelection.crossed.collapsed,
         `pre="${reorderableSelection.pre.text}" collapsed=${reorderableSelection.pre.collapsed} crossed="${reorderableSelection.crossed.text}" collapsed=${reorderableSelection.crossed.collapsed}`,
       );
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} reorderable Tree drag does not deliver a trailing row selection`,
         (await attr(fw, "tree-select")) === "",
@@ -1415,7 +1364,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
       await page.reload({ waitUntil: "load" });
       await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
       await page.locator(`#${fw}-tree-select [data-value="beta"] .poodle-tree__label`).click();
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} reorderable Tree tap still selects the row`,
         (await attr(fw, "tree-select")) === "beta",
@@ -1443,7 +1392,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
         return list ? { scrollWidth: list.scrollWidth, clientWidth: list.clientWidth } : null;
       }, dock);
       await press(`${dock} [role="tab"]`);
-      await frames(page);
+      await frames(page, 2);
       const chrome = await page.evaluate(
         ({ root, before }) => {
           const host = document.querySelector(root);
@@ -1466,7 +1415,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
       );
       await page.keyboard.press("Escape");
       await page.mouse.up();
-      await frames(page);
+      await frames(page, 2);
       check(
         `${name}: ${fw} DockRegion chip radius follows the host and the inset ring does not scroll the strip`,
         chrome !== null &&
@@ -1484,34 +1433,27 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
   }
 }
 
-for (const [name, type] of engines) {
-  console.log(`\n=== ${name} ===`);
-  const browser = await type.launch();
-  const context = await browser.newContext({
-    viewport: { width: 800, height: 600 },
-    hasTouch: true,
-  });
-  const page = await context.newPage();
-  let cdp: CDPSession | null = null;
-  try {
-    if (name === "chromium") cdp = await context.newCDPSession(page);
-    await run(page, name, cdp);
-    await runCrossWindow(name, browser);
-    await runExternalFiles(name, browser);
-    await runComponents(name, browser);
-  } catch (error) {
-    failures += 1;
-    console.log(`  FAIL  ${name}: ${error instanceof Error ? error.message : String(error)}`);
+await withFixture(import.meta.url, async (base) => {
+  for (const [name, type] of engines) {
+    console.log(`\n=== ${name} ===`);
+    try {
+      await withBrowser(type, async (browser) => {
+        const context = await browser.newContext({
+          viewport: { width: 800, height: 600 },
+          hasTouch: true,
+        });
+        const page = await context.newPage();
+        let cdp: CDPSession | null = null;
+        if (name === "chromium") cdp = await context.newCDPSession(page);
+        await run(page, name, cdp, base);
+        await runCrossWindow(name, browser, base);
+        await runExternalFiles(name, browser, base);
+        await runComponents(name, browser, base);
+      });
+    } catch (error) {
+      check(name, false, error instanceof Error ? error.message : String(error));
+    }
   }
-  await browser.close();
-}
+});
 
-child.kill();
-await child.exited;
-
-if (failures > 0) {
-  console.error(`\n${failures} drag-drop browser check(s) failed`);
-  process.exit(1);
-}
-
-console.log("\nall drag-drop browser checks passed");
+finish("drag-drop browser");

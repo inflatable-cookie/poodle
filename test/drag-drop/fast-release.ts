@@ -14,76 +14,25 @@
  *   bun test/drag-drop/fast-release.ts --browser=chromium
  */
 
-import { chromium, webkit, type Browser, type BrowserType, type Page } from "playwright";
-import { fileURLToPath } from "node:url";
+import type { Browser } from "playwright";
 
-const browserFlag = process.argv.find((arg) => arg.startsWith("--browser="))?.slice("--browser=".length);
-const engines: Array<[string, BrowserType]> = (
-  [
-    ["chromium", chromium],
-    ["webkit", webkit],
-  ] as Array<[string, BrowserType]>
-).filter(([name]) => !browserFlag || browserFlag === name);
+import {
+  check,
+  finish,
+  frames,
+  selectedEngines,
+  withBrowser,
+  withFixture,
+} from "../browser-probe";
 
-if (engines.length === 0) {
-  throw new Error(`Unknown --browser=${browserFlag}`);
-}
-
-const fixtureRoot = fileURLToPath(new URL(".", import.meta.url));
-const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
-const viteBin = fileURLToPath(
-  new URL("../../packages/svelte/preview/node_modules/vite/bin/vite.js", import.meta.url),
-);
-const port = 4181;
-const url = `http://127.0.0.1:${port}/`;
-
-let failures = 0;
-
-function check(label: string, ok: boolean, detail = ""): void {
-  if (!ok) failures += 1;
-  console.log(`${ok ? "  ok  " : "  FAIL"}  ${label}${detail ? `  — ${detail}` : ""}`);
-}
-
-async function waitForServer(timeoutMs = 30_000): Promise<void> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(1000) });
-      if (res.ok) return;
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 150));
-    }
-  }
-  throw new Error(`drag-drop fixture on :${port} did not start`);
-}
-
-const child = Bun.spawn(
-  ["bun", viteBin, "--config", `${fixtureRoot}/vite.config.ts`, "--port", String(port), "--strictPort", "--host", "127.0.0.1"],
-  { cwd: repoRoot, stdout: "inherit", stderr: "inherit" },
-);
-await waitForServer();
-
-async function frames(page: Page, count = 2): Promise<void> {
-  await page.evaluate((n) => {
-    return new Promise<void>((resolve) => {
-      const tick = (left: number) => {
-        if (left <= 0) {
-          resolve();
-          return;
-        }
-        requestAnimationFrame(() => tick(left - 1));
-      };
-      tick(n);
-    });
-  }, count);
-}
+const engines = selectedEngines();
 
 type Box = { x: number; y: number; width: number; height: number };
 
-async function runFastReleases(name: string, browser: Browser): Promise<void> {
+async function runFastReleases(name: string, browser: Browser, origin: string): Promise<void> {
   const context = await browser.newContext({ viewport: { width: 1000, height: 900 } });
   const page = await context.newPage();
-  await page.goto(`${url}components.html`, { waitUntil: "load" });
+  await page.goto(`${origin}/components.html`, { waitUntil: "load" });
   await page.locator("#svelte-probe").waitFor({ state: "attached" });
 
   const order = async (): Promise<string[]> =>
@@ -112,7 +61,7 @@ async function runFastReleases(name: string, browser: Browser): Promise<void> {
     // A fast move: two steps, then release immediately away from the handle.
     await page.mouse.move(destination.x, destination.y, { steps: 2 });
     await page.mouse.up();
-    await frames(page);
+    await frames(page, 2);
 
     const after = await order();
     const moved =
@@ -171,7 +120,7 @@ async function runFastReleases(name: string, browser: Browser): Promise<void> {
     { x: destination.x, y: destination.y },
   );
   await page.mouse.up();
-  await frames(page);
+  await frames(page, 2);
   check(
     `${name}: svelte ModelCatalogueEditor commits when lostpointercapture precedes pointerup`,
     (await count()) === 1 && (await order()).join(",") === "beta,gamma,alpha",
@@ -181,24 +130,14 @@ async function runFastReleases(name: string, browser: Browser): Promise<void> {
   await context.close();
 }
 
-for (const [name, engine] of engines) {
-  const browser = await engine.launch();
-  try {
-    await runFastReleases(name, browser);
-  } catch (error) {
-    failures += 1;
-    console.error(`  FAIL  ${name}: probe threw — ${error instanceof Error ? error.message : String(error)}`);
-  } finally {
-    await browser.close();
+await withFixture(import.meta.url, async (origin) => {
+  for (const [name, engine] of engines) {
+    try {
+      await withBrowser(engine, (browser) => runFastReleases(name, browser, origin));
+    } catch (error) {
+      check(`${name}: probe threw`, false, error instanceof Error ? error.message : String(error));
+    }
   }
-}
+});
 
-child.kill();
-await child.exited;
-
-if (failures > 0) {
-  console.error(`\n${failures} drag-drop fast-release check(s) failed`);
-  process.exit(1);
-}
-
-console.log("\nall drag-drop fast-release checks passed");
+finish("drag-drop fast-release");

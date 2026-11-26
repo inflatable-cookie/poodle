@@ -378,9 +378,14 @@
 ]
 # poodle#131 fast off-handle release: a ModelCatalogueEditor row released away
 # from its handle must commit even when the browser drops pointer capture
-# before `pointerup`. Chromium only; stays out of ci:web like the substrate
-# probe it shares a fixture with.
+# before `pointerup`. Stays out of ci:web like the substrate probe it shares a
+# fixture with.
 "test:drag-drop-fast-release-chromium" = "bun test/drag-drop/fast-release.ts --browser=chromium"
+"test:drag-drop-fast-release-webkit" = "bun test/drag-drop/fast-release.ts --browser=webkit"
+"test:drag-drop-fast-release" = [
+  { task = "test:drag-drop-fast-release-chromium" },
+  { task = "test:drag-drop-fast-release-webkit" },
+]
 # g16.035 MarkdownEditor bounded preview scroll: headless Chromium + WebKit
 # geometry/scroll proof over paired Svelte and React fixtures. Needs playwright
 # browsers; stays out of ci:web like the other real-browser probes.
@@ -427,17 +432,22 @@
 ]
 # poodle#145: focused option rings stay clear of stacked sibling rows, and an
 # empty Listbox root ring remains visible inside the Svelte specimen frame.
-"test:listbox-focus-ring-chromium" = "bun test/listbox-focus-ring/probe.ts"
-# g18.025 preview header control sizing. Paired live-preview journeys prove
+"test:listbox-focus-ring-chromium" = "bun test/listbox-focus-ring/probe.ts --browser=chromium"
+"test:listbox-focus-ring-webkit" = "bun test/listbox-focus-ring/probe.ts --browser=webkit"
+"test:listbox-focus-ring" = [
+  { task = "test:listbox-focus-ring-chromium" },
+  { task = "test:listbox-focus-ring-webkit" },
+]
+# Preview header control sizing. Paired live-preview journeys prove
 # the DisplayControls chrome resolves fixed md at every specimen Size stop,
 # stays stable through Size/Density/Theme/Contrast/Search/wrapping journeys,
 # and paints identically across Svelte and React in Chromium and WebKit.
 # One engine per run; not in ci:web.
-"test:g18-025-preview-header-sizing-chromium" = "bun test/g18-025-preview-header-sizing/probe.ts --browser=chromium"
-"test:g18-025-preview-header-sizing-webkit" = "bun test/g18-025-preview-header-sizing/probe.ts --browser=webkit"
-"test:g18-025-preview-header-sizing" = [
-  { task = "test:g18-025-preview-header-sizing-chromium" },
-  { task = "test:g18-025-preview-header-sizing-webkit" },
+"test:preview-header-sizing-chromium" = "bun test/preview-header-sizing/probe.ts --browser=chromium"
+"test:preview-header-sizing-webkit" = "bun test/preview-header-sizing/probe.ts --browser=webkit"
+"test:preview-header-sizing" = [
+  { task = "test:preview-header-sizing-chromium" },
+  { task = "test:preview-header-sizing-webkit" },
 ]
 # g18.010 CodeEditor editing focus treatment. Paired Svelte + React mounted
 # specimens prove the outer treatment arms on keyboard entry, dismisses on the
@@ -507,7 +517,7 @@
   { task = "test:rich-text-heading-mode-chromium" },
   { task = "test:rich-text-heading-mode-webkit" },
 ]
-# g18.011 web editor UX acceptance sweep. Paired Svelte + React journeys over
+# Web editor UX acceptance sweep. Paired Svelte + React journeys over
 # the real preview specimen routes for all four web editor surfaces:
 # CodeEditor (editing echo, syntax visibility, language switching, lazy
 # grammar loads, line numbers, diagnostics, read-only, Tab escape, find,
@@ -518,21 +528,21 @@
 # Drives the public `#components/<slug>` routes through both preview apps;
 # evidence screenshots/reports land in the disposable out/ directory.
 # Headless Chromium and WebKit, one engine per run; not in ci:web.
-"test:g18-011-ux-sweep-code-editor-chromium" = "bun test/g18-011-ux-sweep/probe.ts --browser=chromium"
-"test:g18-011-ux-sweep-code-editor-webkit" = "bun test/g18-011-ux-sweep/probe.ts --browser=webkit"
-"test:g18-011-ux-sweep-code-editor" = [
-  { task = "test:g18-011-ux-sweep-code-editor-chromium" },
-  { task = "test:g18-011-ux-sweep-code-editor-webkit" },
+"test:web-editor-ux-sweep-code-editor-chromium" = "bun test/web-editor-ux-sweep/probe.ts --browser=chromium"
+"test:web-editor-ux-sweep-code-editor-webkit" = "bun test/web-editor-ux-sweep/probe.ts --browser=webkit"
+"test:web-editor-ux-sweep-code-editor" = [
+  { task = "test:web-editor-ux-sweep-code-editor-chromium" },
+  { task = "test:web-editor-ux-sweep-code-editor-webkit" },
 ]
-"test:g18-011-ux-sweep-editors-chromium" = "bun test/g18-011-ux-sweep/probe-editors.ts --browser=chromium"
-"test:g18-011-ux-sweep-editors-webkit" = "bun test/g18-011-ux-sweep/probe-editors.ts --browser=webkit"
-"test:g18-011-ux-sweep-editors" = [
-  { task = "test:g18-011-ux-sweep-editors-chromium" },
-  { task = "test:g18-011-ux-sweep-editors-webkit" },
+"test:web-editor-ux-sweep-editors-chromium" = "bun test/web-editor-ux-sweep/probe-editors.ts --browser=chromium"
+"test:web-editor-ux-sweep-editors-webkit" = "bun test/web-editor-ux-sweep/probe-editors.ts --browser=webkit"
+"test:web-editor-ux-sweep-editors" = [
+  { task = "test:web-editor-ux-sweep-editors-chromium" },
+  { task = "test:web-editor-ux-sweep-editors-webkit" },
 ]
-"test:g18-011-ux-sweep" = [
-  { task = "test:g18-011-ux-sweep-code-editor" },
-  { task = "test:g18-011-ux-sweep-editors" },
+"test:web-editor-ux-sweep" = [
+  { task = "test:web-editor-ux-sweep-code-editor" },
+  { task = "test:web-editor-ux-sweep-editors" },
 ]
 # Reference performance evidence for g14.024 (recorded in the implementation
 # log, not a CI threshold).
@@ -1068,6 +1078,35 @@ qa = "bun scripts/validation/run-board.ts qa:board"
 ]
 
 # Cascading Menu viewport fit, focus, movement and nested dismissal in both web adapters.
-"test:menu-cascade-geometry" = "bun test/menu-cascade-geometry/probe.ts"
+"test:menu-cascade-geometry-chromium" = "bun test/menu-cascade-geometry/probe.ts --browser=chromium"
+"test:menu-cascade-geometry-webkit" = "bun test/menu-cascade-geometry/probe.ts --browser=webkit"
+"test:menu-cascade-geometry" = [
+  { task = "test:menu-cascade-geometry-chromium" },
+  { task = "test:menu-cascade-geometry-webkit" },
+]
 "test:menu-components" = "bunx vitest run packages/svelte/components/test/Menu.test.ts packages/svelte/components/test/ContextMenu.test.ts packages/react/components/test/Menu.test.tsx packages/react/components/test/ContextMenu.test.tsx --testTimeout 15000 --teardownTimeout 5000"
 "test:menu-react-components" = "bunx vitest run packages/react/components/test/Menu.test.tsx packages/react/components/test/ContextMenu.test.tsx --testTimeout 15000 --teardownTimeout 5000"
+
+# Milestone QA: every one-off browser probe under test/, one at a time. Needs
+# playwright browsers and built web dists (`effigy web:dist`); stays out of
+# ci:web. The shared boot is test/browser-probe. The first failure stops the
+# run, so the probes that fail on main (the last three) come last.
+"probes:browser" = [
+  { task = "test:markdown-editor-preview-scroll" },
+  { task = "test:motion-policy-browser" },
+  { task = "test:block-slider-hit" },
+  { task = "test:focus-ring-modality" },
+  { task = "test:listbox-focus-ring" },
+  { task = "test:preview-header-sizing" },
+  { task = "test:code-editor-focus-entry" },
+  { task = "test:code-editor-line-numbers" },
+  { task = "test:code-editor-language-registry" },
+  { task = "test:rich-text-controlled-echo" },
+  { task = "test:rich-text-heading-mode" },
+  { task = "test:web-editor-ux-sweep" },
+  { task = "test:menu-cascade-geometry" },
+  { task = "test:drag-drop-fast-release" },
+  { task = "test:drag-drop-browser" },
+  { task = "test:block-slider-inline" },
+  { task = "test:rich-text-image-policy" },
+]

@@ -1,23 +1,20 @@
 /**
- * g18.011 CodeEditor UX acceptance sweep — focused real-browser journey.
+ * CodeEditor UX acceptance sweep — focused real-browser journey.
  *
  * Drives the real public `#/components/code-editor` specimen route on both
- * preview applications (Svelte :4173, React :4180) through ordinary editing,
+ * preview applications (Svelte and React) through ordinary editing,
  * configuration, keyboard, focus, theme and layout journeys, capturing
  * screenshots and a JSON report. Evidence-only: this sweep never repairs
  * product code.
  *
  * Run from the repository root:
- *   effigy test:g18-011-ux-sweep-code-editor
+ *   effigy test:web-editor-ux-sweep-code-editor
  */
-import { chromium, webkit, type Browser, type BrowserType, type Page } from "playwright";
+import type { Browser, Page } from "playwright";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-import { startPreviews } from "../visual/server";
-
-const browserFlag =
-  process.argv.find((a) => a.startsWith("--browser="))?.slice("--browser=".length) ?? "";
+import { selectedEngines, settle, withBrowser, withPreviews } from "../browser-probe";
 
 const OUT_BASE = fileURLToPath(new URL("./out", import.meta.url));
 
@@ -110,16 +107,6 @@ async function readEditor(page: Page, part: string): Promise<Summary> {
       baseColor: base,
     };
   }, part);
-}
-
-async function settle(page: Page, ms = 400): Promise<void> {
-  await page.evaluate(
-    (ms) =>
-      new Promise<void>((resolve) => {
-        requestAnimationFrame(() => window.setTimeout(resolve, ms));
-      }),
-    ms,
-  );
 }
 
 async function focusedIn(page: Page, part: string): Promise<boolean> {
@@ -548,44 +535,21 @@ async function densityJourney(browser: Browser, framework: "svelte" | "react", b
   await context.close();
 }
 
-const BASES: Record<"svelte" | "react", string> = {
-  svelte: "",
-  react: "",
-};
+const ENGINES = selectedEngines();
 
-/** Launch exactly the engine(s) named by --browser (sibling-probe convention). */
-const ENGINES: Array<[string, BrowserType]> = (
-  [
-    ["chromium", chromium],
-    ["webkit", webkit],
-  ] as Array<[string, BrowserType]>
-).filter(([name]) => !browserFlag || browserFlag === name);
-
-if (ENGINES.length === 0) {
-  console.error(`unknown --browser=${browserFlag}`);
-  process.exit(2);
-}
-
-const servers = await startPreviews();
-BASES.svelte = servers.urls.svelte;
-BASES.react = servers.urls.react;
-
-try {
+await withPreviews(async (urls) => {
   for (const [engineName, engine] of ENGINES) {
     const outDir = `${OUT_BASE}/${engineName}`;
     mkdirSync(outDir, { recursive: true });
     const passesBefore = passes;
     const findingsBefore = findings.length;
-    const browser = await engine.launch();
-    try {
+    await withBrowser(engine, async (browser) => {
       for (const fw of ["svelte", "react"] as const) {
-        await runFramework(browser, fw, BASES[fw], outDir);
-        await themeJourney(browser, fw, BASES[fw], outDir);
-        await densityJourney(browser, fw, BASES[fw], outDir);
+        await runFramework(browser, fw, urls[fw], outDir);
+        await themeJourney(browser, fw, urls[fw], outDir);
+        await densityJourney(browser, fw, urls[fw], outDir);
       }
-    } finally {
-      await browser.close();
-    }
+    });
     const engineFindings = findings.slice(findingsBefore);
     const engineBlocking = engineFindings.filter((f) => f.severity === "blocking").length;
     writeFileSync(
@@ -606,9 +570,7 @@ try {
       console.log(`  observed: ${f.observed}`);
     }
   }
-} finally {
-  await servers.stop();
-}
+});
 
 const blocking = findings.filter((f) => f.severity === "blocking");
 if (blocking.length > 0) {

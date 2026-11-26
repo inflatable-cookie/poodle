@@ -1,18 +1,21 @@
 import { resolve } from "node:path";
 
-import { chromium, type Page } from "playwright";
+import type { BrowserType, Page } from "playwright";
 
-import { startPreviews, type PreviewServers } from "../visual/server";
+import {
+  check,
+  deadline,
+  finish,
+  selectedEngines,
+  withBrowser,
+  withPreviews,
+  type PreviewUrls,
+} from "../browser-probe";
 
 type Point = { edge: string; x: number; y: number };
 type Pixel = { edge: string; rgba: number[] };
 
-let failures = 0;
-
-function check(label: string, ok: boolean, detail = ""): void {
-  if (!ok) failures += 1;
-  console.log(`${ok ? "  ok  " : "  FAIL"}  ${label}${detail ? ` — ${detail}` : ""}`);
-}
+const engines = selectedEngines();
 
 async function screenshotPixels(page: Page, points: Point[]): Promise<Pixel[]> {
   const screenshot = await page.screenshot({ timeout: 15_000 });
@@ -43,12 +46,11 @@ function rgbChannels(color: string): number[] {
   return channels;
 }
 
-async function run(servers: PreviewServers): Promise<void> {
-  const browser = await chromium.launch({ headless: true, timeout: 30_000 });
-  try {
+async function run(engine: BrowserType, urls: PreviewUrls): Promise<void> {
+  await withBrowser(engine, async (browser) => {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     await page.goto(
-      `${servers.urls.svelte}/?theme=eclipse&density=comfortable&controlSize=md#components/listbox`,
+      `${urls.svelte}/?theme=eclipse&density=comfortable&controlSize=md#components/listbox`,
       { waitUntil: "domcontentloaded", timeout: 60_000 },
     );
     // The preview's workspace package export points at core/dist, which can
@@ -187,35 +189,23 @@ async function run(servers: PreviewServers): Promise<void> {
       const visible = expected.every((channel, index) => Math.abs(pixel.rgba[index]! - channel) <= 28);
       check(`${pixel.edge} edge of the empty root ring is visibly painted`, visible, `pixel ${pixel.rgba.slice(0, 3).join(",")}`);
     }
-  } finally {
-    await browser.close();
+  }, { timeout: 30_000 });
+}
+
+async function runEngines(urls: PreviewUrls): Promise<void> {
+  for (const [name, engine] of engines) {
+    console.log(`\n[listbox-focus-ring] ${name}`);
+    await run(engine, urls);
   }
 }
 
-let previews: PreviewServers | undefined;
-let deadline: ReturnType<typeof setTimeout> | undefined;
 try {
-  const timedOut = new Promise<never>((_, reject) => {
-    deadline = setTimeout(() => reject(new Error("Listbox focus-ring probe exceeded 180 seconds")), 180_000);
-  });
-  await Promise.race([
-    (async () => {
-      previews = await startPreviews();
-      await run(previews);
-    })(),
-    timedOut,
-  ]);
+  await withPreviews((urls) =>
+    deadline(180_000, "Listbox focus-ring probe exceeded 180 seconds", runEngines(urls)),
+  );
 } catch (error) {
-  failures += 1;
+  check("Listbox focus-ring probe ran to completion", false, String(error));
   console.error(error);
-} finally {
-  if (deadline !== undefined) clearTimeout(deadline);
-  await previews?.stop();
 }
 
-if (failures > 0) {
-  console.error(`Listbox focus-ring probe failed ${failures} check(s).`);
-  process.exitCode = 1;
-} else {
-  console.log("Listbox focus-ring browser checks passed.");
-}
+finish("Listbox focus-ring");

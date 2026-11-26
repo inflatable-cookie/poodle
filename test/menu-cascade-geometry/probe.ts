@@ -2,35 +2,29 @@
  * --baseline records the original bottom-edge overflow without requiring the fix.
  * Captures and viewport-coordinate receipts go to a fresh run-scratch directory.
  */
-import { chromium, type Page, type Locator } from "playwright";
+import type { Locator, Page } from "playwright";
 import { fileURLToPath } from "node:url";
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { check, failureCount, finish, selectedEngines, withBrowser, withFixture } from "../browser-probe";
+
 const root = fileURLToPath(new URL("../..", import.meta.url));
-const fixture = fileURLToPath(new URL(".", import.meta.url));
-const output = await mkdtemp(join(tmpdir(), "menu-cascade-"));
 const head = (await Bun.$`git rev-parse HEAD`.cwd(root).text()).trim();
 const baseline = process.argv.includes("--baseline");
-const port = 4198;
-const origin = `http://127.0.0.1:${port}`;
-const child = Bun.spawn(["bun", `${root}/packages/svelte/preview/node_modules/vite/bin/vite.js`, "--config", `${fixture}/vite.config.ts`, "--port", String(port), "--strictPort", "--host", "127.0.0.1"], { cwd: root, stdout: "inherit", stderr: "inherit" });
-const receipts: unknown[] = [];
-let failures = 0;
-function check(label: string, ok: boolean, details?: unknown) {
-  console.log(`${ok ? "ok" : "FAIL"} ${label} ${details ? JSON.stringify(details) : ""}`);
-  if (!ok) failures++;
-}
+const engines = selectedEngines();
+type Evidence = { output: string; receipts: unknown[] };
+
 async function settle(page: Page) { await page.waitForTimeout(160); }
-async function capture(page: Page, menu: Locator, name: string) {
+async function capture(evidence: Evidence, page: Page, menu: Locator, name: string) {
   const bounds = await menu.boundingBox();
   const viewport = page.viewportSize()!;
   const extra = await menu.evaluate((node) => ({ scrollTop: node.scrollTop, scrollHeight: node.scrollHeight, clientHeight: node.clientHeight, placement: node.getAttribute("data-placement"), hidden: node.getAttribute("data-anchor-hidden") }));
   const rect = bounds ? { left: bounds.x, top: bounds.y, right: bounds.x + bounds.width, bottom: bounds.y + bounds.height } : null;
   const receipt = { head, name, viewport, bounds, rect, ...extra };
-  receipts.push(receipt);
-  await page.screenshot({ path: join(output, `${name}.png`) });
+  evidence.receipts.push(receipt);
+  await page.screenshot({ path: join(evidence.output, `${name}.png`) });
   console.log(`capture ${JSON.stringify(receipt)}`);
   return bounds;
 }
@@ -38,7 +32,7 @@ function fits(box: Awaited<ReturnType<Locator["boundingBox"]>>, page: Page) {
   const vp = page.viewportSize()!;
   return !!box && box.x >= 7 && box.y >= 7 && box.x + box.width <= vp.width - 7 && box.y + box.height <= vp.height - 7;
 }
-async function open(page: Page, fw: string, right = false, tall = false) {
+async function open(page: Page, origin: string, fw: string, right = false, tall = false) {
   await page.goto(`${origin}/?framework=${fw}${right ? "&right" : ""}${tall ? "&tall" : ""}`, { waitUntil: "networkidle" });
   await page.getByRole("button", { name: `Options ${fw}`, exact: true }).click();
   const parent = page.getByRole("menuitem", { name: "Go to frame", exact: true });
@@ -49,27 +43,18 @@ async function open(page: Page, fw: string, right = false, tall = false) {
   await settle(page);
   return { menu, parent };
 }
-const browser = await chromium.launch({ headless: true });
-const page = await browser.newPage({ viewport: { width: 720, height: 420 } });
-page.setDefaultTimeout(5000);
-try {
-  const deadline = Date.now() + 30000;
-  while (true) {
-    try { if ((await fetch(origin)).ok) break; } catch {}
-    if (Date.now() > deadline) throw new Error("Menu fixture failed to start");
-    await Bun.sleep(150);
-  }
+async function run(page: Page, origin: string, evidence: Evidence): Promise<void> {
   if (baseline) {
-    const { menu } = await open(page, "svelte");
-    const b = await capture(page, menu, "baseline-bottom-overflow");
-    check("original flyout exceeds viewport bottom", !!b && b.y + b.height > 420, b);
+    const { menu } = await open(page, origin, "svelte");
+    const b = await capture(evidence, page, menu, "baseline-bottom-overflow");
+    check("original flyout exceeds viewport bottom", !!b && b.y + b.height > 420, JSON.stringify(b));
   } else for (const fw of ["svelte", "react"]) {
     for (const right of [false, true]) {
-      const { menu, parent } = await open(page, fw, right);
-      const b = await capture(page, menu, `${fw}-${right ? "flipped-right-edge" : "bottom-edge"}`);
+      const { menu, parent } = await open(page, origin, fw, right);
+      const b = await capture(evidence, page, menu, `${fw}-${right ? "flipped-right-edge" : "bottom-edge"}`);
       check(`${fw} viewport fit ${right ? "right" : "left"}`, fits(b, page));
       const p = await parent.boundingBox();
-      check(`${fw} horizontal row anchor`, !!b && !!p && (right ? Math.abs(b.x + b.width - p.x) < 6 : Math.abs(b.x - p.x - p.width) < 6), { b, p });
+      check(`${fw} horizontal row anchor`, !!b && !!p && (right ? Math.abs(b.x + b.width - p.x) < 6 : Math.abs(b.x - p.x - p.width) < 6), JSON.stringify({ b, p }));
       await page.keyboard.press("ArrowRight");
       const deep = page.getByRole("menu", { name: "More frames", exact: true });
       await deep.waitFor();
@@ -88,13 +73,13 @@ try {
       await settle(page);
       check(`${fw} nested selection emits leaf and closes root`, await page.locator("body").getAttribute("data-action") === "frame-7" && await page.getByRole("menu").count() === 0);
     }
-    const { menu } = await open(page, fw, false, true);
+    const { menu } = await open(page, origin, fw, false, true);
     await page.keyboard.press("End");
     await settle(page);
-    const tall = await capture(page, menu, `${fw}-tall-scrolled-list`);
+    const tall = await capture(evidence, page, menu, `${fw}-tall-scrolled-list`);
     check(`${fw} tall flyout fits and scrolls`, fits(tall, page) && await menu.evaluate(n => n.scrollTop > 0 && n.scrollHeight > n.clientHeight));
     const last = page.getByRole("menuitemradio", { name: "Frame 40", exact: true });
-    const lastBox = await capture(page, last, `${fw}-keyboard-focused-last-item`);
+    const lastBox = await capture(evidence, page, last, `${fw}-keyboard-focused-last-item`);
     check(`${fw} focused last item visible`, fits(lastBox, page) && await last.evaluate(n => n === document.activeElement));
     await page.setViewportSize({ width: 620, height: 340 });
     await settle(page);
@@ -117,7 +102,7 @@ try {
     await settle(page);
     check(`${fw} outside dismisses all surfaces`, await page.getByRole("menu").count() === 0);
     check(`${fw} geometry teardown removes surfaces`, await page.evaluate(() => (window as any).geometry.some((e: any) => e.type === "remove")));
-    await open(page, fw);
+    await open(page, origin, fw);
     await page.keyboard.press("ArrowLeft");
     check(`${fw} ArrowLeft restores root row focus`, await page.getByRole("menuitem", { name: "Go to frame", exact: true }).evaluate(n => n === document.activeElement));
     await page.getByRole("menuitem", { name: "Action", exact: true }).hover();
@@ -130,11 +115,24 @@ try {
     check(`${fw} Escape dismisses root`, await page.getByRole("menu").count() === 0);
     await page.setViewportSize({ width: 720, height: 420 });
   }
-} finally {
-  await writeFile(join(output, "receipt.json"), JSON.stringify({ head, baseline, receipts, failures }, null, 2));
-  console.log(`Menu geometry evidence: ${output}`);
-  await browser.close();
-  child.kill();
-  await child.exited;
 }
-if (failures) process.exit(1);
+
+await withFixture(import.meta.url, async (origin) => {
+  for (const [engine, browserType] of engines) {
+    const evidence: Evidence = { output: await mkdtemp(join(tmpdir(), `menu-cascade-${engine}-`)), receipts: [] };
+    const failuresBefore = failureCount();
+    try {
+      await withBrowser(browserType, async (browser) => {
+        const page = await browser.newPage({ viewport: { width: 720, height: 420 } });
+        page.setDefaultTimeout(5000);
+        await run(page, origin, evidence);
+      });
+    } finally {
+      const failures = failureCount() - failuresBefore;
+      await writeFile(join(evidence.output, "receipt.json"), JSON.stringify({ head, engine, baseline, receipts: evidence.receipts, failures }, null, 2));
+      console.log(`Menu geometry evidence: ${evidence.output}`);
+    }
+  }
+});
+
+finish("menu cascade geometry");

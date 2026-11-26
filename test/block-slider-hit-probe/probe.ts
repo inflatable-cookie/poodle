@@ -11,63 +11,11 @@
  * - density never inflates the block axis;
  * - the ≥44×44 hit rectangle stays measurable, interactive, and out of layout.
  */
-import { chromium, webkit, type BrowserType, type Page } from "playwright";
-import { fileURLToPath } from "node:url";
+import type { Page } from "playwright";
 
-const browserFlag = process.argv.find((arg) => arg.startsWith("--browser="))?.slice("--browser=".length);
-const engines: Array<[string, BrowserType]> = (
-  [
-    ["chromium", chromium],
-    ["webkit", webkit],
-  ] as Array<[string, BrowserType]>
-).filter(([name]) => !browserFlag || browserFlag === name);
+import { check, finish, selectedEngines, withBrowser, withFixture } from "../browser-probe";
 
-if (engines.length === 0) {
-  throw new Error(`Unknown --browser=${browserFlag}`);
-}
-
-const fixtureRoot = fileURLToPath(new URL(".", import.meta.url));
-const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
-const viteBin = fileURLToPath(
-  new URL("../../packages/svelte/preview/node_modules/vite/bin/vite.js", import.meta.url),
-);
-const port = 4191;
-const url = `http://127.0.0.1:${port}/`;
-
-let failures = 0;
-
-function check(label: string, ok: boolean, detail = ""): void {
-  if (!ok) failures += 1;
-  console.log(`${ok ? "  ok  " : "  FAIL"}  ${label}${detail ? `  — ${detail}` : ""}`);
-}
-
-async function waitForServer(timeoutMs = 30_000): Promise<void> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(1000) });
-      if (res.ok) return;
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 150));
-    }
-  }
-  throw new Error(`block-slider-hit fixture on :${port} did not start`);
-}
-
-const child = Bun.spawn(
-  [
-    "bun",
-    viteBin,
-    "--config",
-    `${fixtureRoot}/vite.config.ts`,
-    "--port",
-    String(port),
-    "--strictPort",
-    "--host",
-    "127.0.0.1",
-  ],
-  { cwd: repoRoot, stdout: "inherit", stderr: "inherit" },
-);
+const engines = selectedEngines();
 
 // The shared control-size ladder, in px.
 const LADDER: Record<string, number> = { xs: 24, sm: 28, md: 36, lg: 44, xl: 52 };
@@ -208,8 +156,8 @@ async function probeSimpleCase(
   );
 }
 
-async function probe(page: Page, engine: string): Promise<void> {
-  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60_000 });
+async function probe(page: Page, engine: string, origin: string): Promise<void> {
+  await page.goto(`${origin}/`, { waitUntil: "domcontentloaded", timeout: 60_000 });
   await page.locator('[data-framework="svelte"] [data-case="slider-xs"]').waitFor();
   for (const framework of ["svelte", "react"]) {
     const base = `[data-framework="${framework}"]`;
@@ -230,17 +178,14 @@ async function probe(page: Page, engine: string): Promise<void> {
   }
 }
 
-try {
-  await waitForServer();
+await withFixture(import.meta.url, async (origin) => {
   for (const [name, engine] of engines) {
     console.log(`\n[block-slider-hit] ${name}`);
-    const browser = await engine.launch({ headless: true });
-    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-    await probe(page, name);
-    await browser.close();
+    await withBrowser(engine, async (browser) => {
+      const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+      await probe(page, name, origin);
+    });
   }
-} finally {
-  child.kill();
-}
+});
 
-process.exit(failures === 0 ? 0 : 1);
+finish("block-slider-hit");
