@@ -25,7 +25,7 @@ and performs any effects.
 | `disclosureTransition` | `DisclosureContext` takes `open` and `disabled`. `DisclosureEvent` is `TOGGLE` or `SET_OPEN(open)`. No defaults. | An enabled toggle flips `open` and emits `emitOpenChange`. `SET_OPEN` synchronizes the boolean silently, including when disabled. |
 | `hoverTransition` | `HoverState` is `closed`, `opening`, `open` or `closing`. `HoverContext` requires `openDelayMs` and `closeDelayMs`. `HoverEvent` is `ENTER`, `LEAVE`, `TIMER_FIRE`, `DISMISS` or `SET_OPEN(open)`. No defaults. | Returns timer intents (`clearTimer`, `startTimer(ms)`) and `emitOpenChange`. Run timer effects in order and dispatch `TIMER_FIRE` when the current timer fires. A nonpositive close delay closes immediately. `SET_OPEN` clears pending timing without announcing a change. Cancel the caller's timer on teardown. |
 | `popoverTransition` | `PopoverState` is `closed` or `open`. `PopoverContext` requires `disabled`, `dismissOnOutsideInteract` and `initialFocus` (`first-focusable`, `content` or `none`). `PopoverEvent` is `TOGGLE`, `OPEN`, `CLOSE`, `ESCAPE` or `OUTSIDE_INTERACT`. No defaults. | Disabled controls stay put. An open emits `emitOpenChange(true)` then `focusOnOpen` with the supplied strategy. A close emits `emitOpenChange(false)` then `restoreTriggerFocus`. Outside interaction closes only when enabled by the context. The caller performs focus and dismissal wiring. |
-| `resolveOverlayPosition` | Anchor rect, overlay rect, preferred `OverlayPlacement`, viewport width and height, and a gap in pixels (default `6`). | Returns `top`, `left` and the actual `placement` in viewport coordinates after collision resolution. Caller measures and applies the result. |
+| `resolveOverlayPosition` | Anchor rect, overlay rect, preferred `OverlayPlacement`, a `ViewportSize` (`{ width, height }`), and a gap in pixels (default `6`). | Returns `top`, `left` and the actual `placement` in viewport coordinates after collision resolution. Caller measures and applies the result. |
 
 ## Preview option and selection policies
 
@@ -96,7 +96,7 @@ registering a dismissable surface that the action has portalled.
 
 ## Drag and drop
 
-The [drag-and-drop substrate contract](../knowledge/specs/069-dependable-drag-and-drop-substrate.md)
+The [drag-and-drop substrate contract](../knowledge/specs/archive/069-dependable-drag-and-drop-substrate.md)
 owns the drag API, including host and file bridges. For a custom web surface,
 `createDragDropController(options?)` takes a `DragDropControllerOptions` object
 (default `{}`). The DOM controller binds pointer, keyboard and drag events

@@ -1,7 +1,6 @@
 # RefSelect
 
 Status: detailed contract
-Updated: 2026-07-25
 
 ## 1. Purpose
 
@@ -253,7 +252,7 @@ hidden), so a keyboard user can type immediately.
 - the render is a faithful function of the full spec state: `RefSelectSpec`
   carries `is_open` and `search_value`, so the native targets render the filtered
   list, the current marker, and the empty or loading footer
-- no ARIA API, and the preview does not drive clicks — the shared render-only
+- no live platform-tree assertion (003), and the preview does not drive clicks — the shared render-only
   posture
 
 ## 10a. Jetstream Notes

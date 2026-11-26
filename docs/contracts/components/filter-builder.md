@@ -1,7 +1,6 @@
 # FilterBuilder
 
 Status: detailed contract
-Updated: 2026-09-07
 
 ## 1. Purpose
 
@@ -284,8 +283,9 @@ roving tabindex.
 - no nested interactive elements — pills use separate activation and remove
   controls (see SelectionSummary extension)
 - invalid draft: the Add/Update button is disabled rather than announcing an error
-- GPUI-native accessibility mapping: no ARIA API — accessible names map to native
-  exposure where available; documented as an accepted delta
+- GPUI-native accessibility mapping: no ARIA API. The accessible name is carried on
+  the node for the GPUI backend to project through AccessKit; no live platform-tree
+  assertion covers this component yet (003). Documented as an accepted delta
 
 ## 7. Layout
 
@@ -372,7 +372,7 @@ References semantic roles; reuses `OrderBy` trigger/surface treatment and
   components) is that the preview does not itself drive clicks — live open / select
   / add / edit / remove is host-event-loop work; anchored positioning is
   platform-owned (surface renders inline)
-- no ARIA API — accessible-name intent documented as an accepted delta
+- no ARIA API. The accessible-name intent is carried on the node and reaches AccessKit (003); no live platform-tree assertion covers it yet. Documented as an accepted delta
 
 ## 10a. Jetstream Notes
 

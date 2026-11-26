@@ -1,7 +1,6 @@
 # 003 - Native Accessibility
 
 Status: active
-Updated: 2026-10-06
 Owner: Poodle core
 Applies to: every contract with ARIA requirements, on the GPUI and Jetstream targets
 
@@ -40,7 +39,7 @@ foreground activation; it clears A2 only for the component rows it asserts.
 The earlier version of this document said neither runtime had an API and
 recommended not scheduling the work at all. That was right about GPUI 0.2.2
 and wrong about Jetstream, where the blocker was a decision no one had taken
-rather than anything upstream. The `g12` roll-up preserves the original
+rather than anything upstream. The earlier roll-up preserves the original
 options study; this records what shipped.
 
 ## What This Means For `aria_label`
@@ -86,8 +85,8 @@ unmodified at every Zed release tag (Apache-2.0; the previously GPL
 `ztracing`/`zlog` crates were relicensed Apache upstream on 2026-09-01 and are
 clean from republish 1.19.0-pre). The operator chose to evaluate that route
 instead of building a fork-free adapter. The feasibility spike succeeded at
-the API boundary; the `g16` roll-up and current
-`gpui-unofficial` adoption gates (Queue lead)
+the API boundary; the roll-up and current
+`gpui-unofficial` adoption gates (Nucleus lead)
 preserve the result. "No API to build against" is no longer true of upstream,
 only of the crates.io 0.2.2 pin. At that time adoption still waited on a
 buildable published `gpui-apple` crate and live platform-tree proof.
@@ -96,9 +95,8 @@ buildable published `gpui-apple` crate and live platform-tree proof.
 
 Operator ruling (Tom, 2026-10-06): switch Poodle's GPUI dependency from
 crates.io `gpui` 0.2.2 to `gpui-unofficial`, pinned to an exact stable release
-(1.22.0 at the time of the ruling), then adopt its AccessKit path. Tasks #126
-and #127 switched the dependency and wired Poodle's node metadata into
-AccessKit. Task #127 added a bounded live, non-activating platform-tree
+(1.22.0 at the time of the ruling), then adopt its AccessKit path. The dependency switch and the node-metadata wiring into AccessKit both landed.
+A bounded live, non-activating platform-tree
 selector. After macOS Accessibility trust was granted to Paseo, the selector
 read clean and planted-control trees while proving neither window became
 frontmost. The live proof clears A2 for Button, Checkbox, Slider, and Tabs;

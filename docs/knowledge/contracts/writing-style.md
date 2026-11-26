@@ -5,14 +5,16 @@ Audience: agents and operators
 
 ## Rule
 
-Use glue-light writing for internal work and normal thread replies.
+Use clear, natural prose for internal work and normal thread replies. Keep it
+concise and high-signal, but keep the connective language that makes reasoning
+easy to follow.
 
 Meaning:
 
 - short
 - blunt
 - high signal
-- minimal glue words
+- enough connective prose to explain a recommendation or trade-off
 - no ceremonial phrasing
 - no long prose if bullets or fragments work
 - no big protocol recap unless it adds real value
@@ -42,8 +44,8 @@ reply, not for every message:
 
 ## Guardrails
 
-- compression should remove glue, not meaning
-- do not perform caveman theatre; stay clear
+- trim filler, not the connective language that carries the reasoning
+- no caveman theatre or status-report theatre; stay clear
 - use file refs only where they help
 - mention validation only when it failed or materially changes confidence,
   risk, or next action

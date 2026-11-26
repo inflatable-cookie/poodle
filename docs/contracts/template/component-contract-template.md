@@ -1,7 +1,6 @@
 # Component Contract Template
 
 Status: active
-Updated: 2026-07-10
 
 Use this template for every new Poodle component before implementation begins.
 
@@ -106,7 +105,7 @@ is the source of truth for the headless core (`@inflatable-cookie/poodle-core` T
 and the Rust mirror). Rules: transitions are pure; side effects appear only in
 the Effects table as named intents; every ARIA/data attribute the machine owns
 appears in the Part Attribute Output table as a function of machine state and
-context. See `docs/knowledge/specs/062-headless-core-and-dual-layer-strategy.md`.
+context. See `docs/knowledge/specs/archive/062-headless-core-and-dual-layer-strategy.md`.
 
 Behavior classification: `machine-backed | styled-only`
 
@@ -223,14 +222,28 @@ only appear when they are the semantic source for a documented rule.
 - implementation-only details:
 - known browser-specific deltas:
 
-## 10. GPUI Notes
+## 10. React Notes
+
+- expected package surface:
+- wrapper strategy:
+- implementation-only details:
+- known React-specific deltas:
+
+## 11. GPUI Notes
 
 - expected crate/module surface:
 - theme access strategy:
 - implementation-only details:
 - known GPUI-native deltas:
 
-## 11. Parity Checklist
+## 12. Jetstream Notes
+
+- expected module surface:
+- projection into the Jetstream tree and AccessKit:
+- implementation-only details:
+- known Jetstream-specific deltas:
+
+## 13. Parity Checklist
 
 ### Tier 1: Strict Parity
 
@@ -252,13 +265,13 @@ only appear when they are the semantic source for a documented rule.
 - [ ] implementation-only differences are documented
 - [ ] no implementation detail leaks into the public contract
 
-## 12. Known Deltas
+## 14. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | none | | | |
 
-## 13. Approval And Adoption Notes
+## 15. Approval And Adoption Notes
 
 - contract status: `draft | approved | implemented | parity-reviewed`
 - approvers:

@@ -1,7 +1,6 @@
 # AgentQuestion
 
 Status: detailed contract
-Updated: 2026-11-25
 
 ## 1. Purpose
 
@@ -360,4 +359,4 @@ density variants.
 
 ### Rendering style roles
 
-Rendering style roles (poodle#186): option cards read `--poodle-style-control-border` and `--poodle-style-control-fill` at rest, and the dismiss control reads `--poodle-style-control-fill`. The option hover border stays literal, because no hover-fill role exists for it yet.
+Rendering style roles: option cards read `--poodle-style-control-border` and `--poodle-style-control-fill` at rest, and the dismiss control reads `--poodle-style-control-fill`. The option hover border stays literal, because no hover-fill role exists for it yet.

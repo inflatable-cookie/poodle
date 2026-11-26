@@ -1,7 +1,6 @@
 # LicenceStatus
 
-Status: approved web reference; active native/conformance pending g14.017
-Updated: 2026-08-14
+Status: approved web reference; native/conformance work pending
 
 ## 1. Purpose
 
@@ -140,9 +139,9 @@ pure core view data. It owns no entitlement or licence transition.
 ## 8. Framework And Runtime Parity
 
 Svelte and React share types, view derivation, copy, CSS, and tests. The web
-reference is incomplete until g14.017 adds the Rust spec, the shared renderer
-composition, specimens, and GPUI evidence. `g14.008` rejected the conformance
-mechanism that card was originally written against; g14.017 is replanned and
+reference is incomplete until it adds the Rust spec, the shared renderer
+composition, specimens, and GPUI evidence. an earlier pilot rejected the conformance
+mechanism that card was originally written against; the follow-up is replanned and
 its execution method is undecided. Jetstream remains a separate deferred
 backend admission and is not claimed by that milestone.
 
@@ -161,11 +160,11 @@ backend admission and is not claimed by that milestone.
 
 | Delta | Status | Follow-up |
 | --- | --- | --- |
-| no native implementation in web-reference PR | incomplete, not accepted parity | g14.017 |
+| no native implementation in web-reference PR | incomplete, not accepted parity | — |
 
-## 11. Rust Binding Notes (g15.007)
+## 11. Rust Binding Notes
 
-Status: **bound** — native implementation lands with `g15.007` (specs,
+Status: **bound** — native implementation lands with the Rust binding work (specs,
 `poodle-render`, GPUI specimen, headless evidence).
 
 - `LicenceStatusSpec` is cloneable data: the authority projection, trust

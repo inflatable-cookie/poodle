@@ -1,7 +1,6 @@
 # AgentPlanRecord
 
 Status: draft
-Updated: 2026-11-26
 
 ## 1. Purpose
 
@@ -172,7 +171,7 @@ renders what it is given.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| GPUI/Jetstream variants deferred — Svelte is the reference and the React mirror landed in `g15.006` | the consumer integrating plan mode (nucleus) is Svelte-only today; the spec structs and the shared `poodle-render` function already landed | pending review | build the native variants when a second target needs them |
+| GPUI/Jetstream variants deferred — Svelte is the reference and the React mirror landed | the consumer integrating plan mode (nucleus) is Svelte-only today; the spec structs and the shared `poodle-render` function already landed | pending review | build the native variants when a second target needs them |
 | No re-decide affordance on any target | a second decision surface would let the reader change a decision the agent has already acted on | accepted (by design) | none |
 
 ## 11. Approval And Adoption Notes

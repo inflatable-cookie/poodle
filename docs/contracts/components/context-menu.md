@@ -1,7 +1,6 @@
 # ContextMenu
 
 Status: detailed contract
-Updated: 2026-10-04
 
 ## 1. Purpose
 
@@ -378,8 +377,8 @@ leaf-only activation.
 
 ## 12. Known Deltas
 
-History: PR #348 aligned this contract to the previous Svelte behavior, which
-left focus in place on close. Queue decision b92d0aff (2026-10-04) reverses
+History: an earlier change aligned this contract to the previous Svelte behavior, which
+left focus in place on close. This decision (2026-10-04) reverses
 that behavior; focus restoration is now required across runtimes.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |

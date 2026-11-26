@@ -1,7 +1,6 @@
 # Menubar
 
 Status: detailed contract
-Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -204,7 +203,7 @@ trigger focus.
 
 ## 8. Token Usage — Exact Values
 
-Rendering style roles (poodle#186): the bar reads the surface border and fill, and the overlay reads the floating surface roles. Triggers and items read the control fill, with `--poodle-style-control-fillHover` on hover.
+Rendering style roles: the bar reads the surface border and fill, and the overlay reads the floating surface roles. Triggers and items read the control fill, with `--poodle-style-control-fillHover` on hover.
 
 ### Root `.menubar`
 

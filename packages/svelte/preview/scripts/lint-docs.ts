@@ -58,34 +58,6 @@ function collectMarkdownFiles(directory: string): string[] {
     .sort();
 }
 
-function parseBulletList(markdown: string, heading: string): string[] {
-  const lines = markdown.split(/\r?\n/);
-  const items: string[] = [];
-  let inSection = false;
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-
-    if (!inSection) {
-      if (trimmed === heading) {
-        inSection = true;
-      }
-      continue;
-    }
-
-    if (trimmed.startsWith("## ")) {
-      break;
-    }
-
-    const match = trimmed.match(/^- `([^`]+)`$/);
-    if (match) {
-      items.push(match[1]);
-    }
-  }
-
-  return items;
-}
-
 function parseLooseBulletList(markdown: string, heading: string): string[] {
   const lines = markdown.split(/\r?\n/);
   const items: string[] = [];
@@ -212,7 +184,6 @@ function validateComponentContracts(errors: string[]): number {
 
     expect(/^# .+/m.test(markdown), `${relativePath} is missing a title heading.`, errors);
     expect(/^Status: .+/m.test(markdown), `${relativePath} is missing Status metadata.`, errors);
-    expect(/^Updated: .+/m.test(markdown), `${relativePath} is missing Updated metadata.`, errors);
     expect(/^- Component name: /m.test(markdown), `${relativePath} is missing component-name metadata.`, errors);
     expect(/^- Layer: /m.test(markdown), `${relativePath} is missing layer metadata.`, errors);
     expect(
@@ -269,30 +240,57 @@ function validateCurrentArchitectureReferences(errors: string[]): void {
   }
 }
 
+function parseIndexLinks(markdown: string, heading: string): string[] {
+  const lines = markdown.split(/\r?\n/);
+  const links: string[] = [];
+  let inSection = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (!inSection) {
+      if (trimmed === heading) {
+        inSection = true;
+      }
+      continue;
+    }
+
+    if (trimmed.startsWith("## ")) {
+      break;
+    }
+
+    for (const match of trimmed.matchAll(/\]\(([a-z0-9-]+\.md)\)/g)) {
+      links.push(match[1]);
+    }
+  }
+
+  return links;
+}
+
 function validateContractIndexes(errors: string[]): void {
   const componentContracts = collectMarkdownFiles(path.join(contractsDir, "components"))
-    .map((file) => path.basename(file));
+    .map((file) => path.basename(file))
+    .filter((file) => file !== "README.md");
 
+  const componentIndexLinks = parseIndexLinks(
+    fs.readFileSync(path.join(contractsDir, "components", "README.md"), "utf8"),
+    "## Current Contracts",
+  );
+  expect(
+    new Set(componentIndexLinks).size === componentIndexLinks.length,
+    "docs/contracts/components/README.md lists a contract more than once.",
+    errors,
+  );
   compareLists(
-    "docs/contracts/components/README.md current contracts",
-    parseBulletList(
-      fs.readFileSync(path.join(contractsDir, "components", "README.md"), "utf8"),
-      "## Current Contracts",
-    ),
-    componentContracts.filter((file) => file !== "README.md"),
+    "docs/contracts/components/README.md index",
+    componentIndexLinks,
+    componentContracts,
     errors,
   );
 
-  compareLists(
-    "docs/contracts/README.md current contracts",
-    parseBulletList(
-      fs.readFileSync(path.join(contractsDir, "README.md"), "utf8"),
-      "## Current Contracts",
-    ),
-    [
-      "template/component-contract-template.md",
-      ...componentContracts.map((file) => `components/${file}`),
-    ],
+  expect(
+    fs.readFileSync(path.join(contractsDir, "README.md"), "utf8").includes("(components/README.md)"),
+    "docs/contracts/README.md must link the component index.",
     errors,
   );
 }

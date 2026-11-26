@@ -1,7 +1,6 @@
 # DataTable
 
 Status: contract
-Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -159,7 +158,7 @@ Behavior classification: styled-only (no machine)
 
 Rendering and composition only, or interaction fully delegated to composed
 Poodle primitives / native elements; no component-owned behavioral state
-beyond plain props. Classified in the g11.004 long-tail sweep.
+beyond plain props. Classified in the long-tail sweep.
 
 ## 5. Callbacks
 
@@ -523,9 +522,9 @@ density), so density owns `th`/`td` `padding-block` here by design.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream raises no toolbar, filter or pagination events | `onExportCsv`, `onFilterChange`, `onColumnVisibilityChange`, `onPageChange` and `onLimitChange` belong to controls the table composes rather than draws itself; those components carry their own events as they convert | accepted, tracked | g12.017 |
-| Jetstream has no `onRowAction` / `onRowActionSelect` | the row-action menu lives in a popover the component does not model | accepted, tracked | g12.017 |
-| Jetstream has no `onRowToggle` | row expansion renders from the spec; no disclosure control is drawn to click | accepted, tracked | g12.017 |
+| Jetstream raises no toolbar, filter or pagination events | `onExportCsv`, `onFilterChange`, `onColumnVisibilityChange`, `onPageChange` and `onLimitChange` belong to controls the table composes rather than draws itself; those components carry their own events as they convert | accepted, tracked | — |
+| Jetstream has no `onRowAction` / `onRowActionSelect` | the row-action menu lives in a popover the component does not model | accepted, tracked | — |
+| Jetstream has no `onRowToggle` | row expansion renders from the spec; no disclosure control is drawn to click | accepted, tracked | — |
 
 ## 12. Specimen Definitions
 
@@ -543,4 +542,4 @@ density), so density owns `th`/`td` `padding-block` here by design.
 
 ### Rendering style roles
 
-Rendering style roles (poodle#186): the table frame reads `--poodle-style-surface-border` and `--poodle-style-surface-fill`. The toolbar button and actions trigger read the control roles, and the toolbar button, column-menu item and row hovers read `--poodle-style-control-fillHover`. Toolbar, footer, header and filter-row bands keep their own mixes.
+Rendering style roles: the table frame reads `--poodle-style-surface-border` and `--poodle-style-surface-fill`. The toolbar button and actions trigger read the control roles, and the toolbar button, column-menu item and row hovers read `--poodle-style-control-fillHover`. Toolbar, footer, header and filter-row bands keep their own mixes.

@@ -1,7 +1,6 @@
 # LogList
 
 Status: active contract
-Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -156,7 +155,7 @@ Behavior classification: styled-only (no machine)
 
 Rendering and composition only, or interaction fully delegated to composed
 Poodle primitives / native elements; no component-owned behavioral state
-beyond plain props. Classified in the g11.004 long-tail sweep.
+beyond plain props. Classified in the long-tail sweep.
 
 ## 5. Slots
 
@@ -244,4 +243,4 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ### Rendering style roles
 
-Rendering style roles (poodle#186): the frame reads `--poodle-style-surface-border` and `--poodle-style-surface-fill`. The filter button and search input read the control border and fill.
+Rendering style roles: the frame reads `--poodle-style-surface-border` and `--poodle-style-surface-fill`. The filter button and search input read the control border and fill.

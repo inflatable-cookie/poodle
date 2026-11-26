@@ -1,7 +1,6 @@
 # CardToggleGroup
 
 Status: detailed contract
-Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -240,7 +239,7 @@ padding.
 
 | Delta | Svelte behavior | GPUI behavior | Cause | Approval Status | Follow-Up |
 |-------|-----------------|---------------|-------|-----------------|-----------|
-| narrow container narrower than the group width floor | Width is `min(100%, max(floor, track width))`, so it never overflows its container | The floor wins and the group overflows the container | GPUI 0.2.2 `Length` allows only auto or a definite px/rem/parent-percent value; Taffy 0.9 resolves `base.min(max).max(min)`; `Element::request_layout` has no parent-constraint hook | accepted by planner ruling (2026-10-06, #124 stop condition) | upstream GPUI/Taffy parent-capped clamp |
+| narrow container narrower than the group width floor | Width is `min(100%, max(floor, track width))`, so it never overflows its container | The floor wins and the group overflows the container | GPUI 0.2.2 `Length` allows only auto or a definite px/rem/parent-percent value; Taffy 0.9 resolves `base.min(max).max(min)`; `Element::request_layout` has no parent-constraint hook | accepted by planner ruling (2026-10-06, stop condition) | upstream GPUI/Taffy parent-capped clamp |
 
 ## 7a. Jetstream Notes
 

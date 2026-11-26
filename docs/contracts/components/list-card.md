@@ -6,7 +6,6 @@ composite](./listbox.md) to own option semantics and keyboard selection.
 > **Surface elevation**: ListCard is a surface consumer (50% strong contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-09-29
 
 ## 1. Purpose
 
@@ -259,7 +258,7 @@ props.
 
 ## 8. Token Usage — Exact Values
 
-Rendering style roles (poodle#186): the card's resting fill, hover fill and border read the control roles through its local fill variables. The selection box reads the control border and fill at rest, the context menu reads the floating surface roles, and context items read the control fill, with `--poodle-style-control-fillHover` on hover.
+Rendering style roles: the card's resting fill, hover fill and border read the control roles through its local fill variables. The selection box reads the control border and fill at rest, the context menu reads the floating surface roles, and context items read the control fill, with `--poodle-style-control-fillHover` on hover.
 
 ### Root
 

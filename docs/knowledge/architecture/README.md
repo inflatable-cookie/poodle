@@ -1,11 +1,10 @@
 # Architecture
 
 Status: active
-Updated: 2026-09-02
 
 Architecture documents define Poodle's stable ownership and runtime boundaries.
 They explain the current system; what comes next belongs in
-the Queue plan.
+the Nucleus plan.
 
 ## Start Here
 
@@ -15,7 +14,13 @@ the Queue plan.
    canonical token sources, generated artifacts, and consumer packages
 3. [Component docs and implementation substrates](003-component-docs-ia-and-implementation-substrates.md)
    — documentation authority and implementation evidence
-4. [Audio control family](008-audio-control-family.md) — audio-domain machines,
+4. [Treatment system and recipe variables](005-treatment-system-and-recipe-variables.md)
+   — treatment and recipe-variable rules
+5. [Headless core and machine model](006-headless-core-and-machine-model.md)
+   — the renderer-neutral behaviour layer
+6. [Appearance recipe contract](007-appearance-recipe-contract.md)
+   — appearance recipes for components
+7. [Audio control family](008-audio-control-family.md) — audio-domain machines,
    renderer-neutral VisualState, value laws, formatting, and meter feeds
 
 ## Additional Decisions

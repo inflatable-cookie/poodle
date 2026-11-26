@@ -1,7 +1,6 @@
 # Audio Meter
 
 Status: detailed contract
-Updated: 2026-08-14
 
 ## 1. Purpose
 
@@ -165,5 +164,5 @@ The specimen page includes the full five-size and three-density matrices.
 
 Phase 1 review must exercise a real Loophole telemetry feed.
 
-The batched web tier is governed by spec 068 and g14.024. WebGL2 remains
+The batched web tier is governed by spec 068 and the batched-meter work. WebGL2 remains
 outside that card until the Canvas2D budget is measured.

@@ -1,8 +1,11 @@
 # Theming model study
 
-Status: research, 2026-11-25. Adopted by the operator as the direction for
-Poodle's themes; see [vision](../../vision.md#direction). Not yet
-implemented in the packages.
+Status: implemented. Adopted by the operator as the direction for Poodle's
+themes; see [vision](../../vision.md#direction). The function is implemented in
+core (`packages/core/src/theme-resolver.ts`) and headless
+(`packages/contracts/headless/src/theme_resolver.rs`); see
+[architecture 015](../../architecture/015-theme-resolution.md). The study record
+below stays as the decision history.
 
 A theme is six settings: scheme, base colour, base blend, accent colour,
 accent blend and contrast. One pure function derives every colour role and
@@ -20,14 +23,12 @@ holds text contrast. Every named theme is a preset of those settings.
 - `tools/`: the scripts that tested the prototype's function: the blend
   invariants, the random contrast sweep, the accent rules and the preset
   solver. They read `index.html` beside them and run under Node, for
-  example `node tools/invariant.cjs`. `model.md` names them with a `.js`
-  ending; they are `.cjs` here because the repository's packages are ES
-  modules. `unchanged.cjs` compares against the round-five copy and does
-  not run here. The study's screenshot scripts are not kept.
+  example `node tools/invariant.cjs`. `unchanged.cjs` compares against the
+  round-five copy, which is not kept here, so it does not run in this
+  repository. The study's screenshot scripts are not kept.
 
-`model.md` names result files and screenshot folders from the study's
-scratch folder. They are not in the repository; the numbers it quotes from
-them are in the text.
+The figures in `model.md` come from result files in the study's scratch folder.
+Those files are not kept; the figures are quoted in the text.
 
 ## Operator rulings on the model (2026-11-25)
 
@@ -55,6 +56,7 @@ colours keep. The port into the packages implements the ruling.
 
 ## What the study did not verify
 
-The Rust port is not written. Only Chromium was checked. Hover was checked
+The Rust port has since landed (architecture 015). The study checked only
+Chromium. Hover was checked
 on a states sheet, not live. The tolerances (how far a fill may move, when
 the edge appears) are judgement calls.

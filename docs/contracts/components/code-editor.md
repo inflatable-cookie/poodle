@@ -1,7 +1,6 @@
 # CodeEditor
 
 Status: detailed contract
-Updated: 2026-10-06
 
 ## 1. Purpose
 
@@ -229,7 +228,7 @@ transaction.
 
 ## 8. Token Usage
 
-The g18.023 dual syntax palettes are the shipped token revision; the mapping
+The dual syntax palettes are the shipped token revision; the mapping
 described below is the implemented contract, not a pending target. On
 2026-09-12, Tom chose distinct dark and light base palettes with selective
 Poodle-theme overrides after the shipped samples read as accent and white

@@ -1,7 +1,6 @@
 # Audio Switch
 
 Status: detailed contract
-Updated: 2026-08-10
 
 ## 1. Purpose
 

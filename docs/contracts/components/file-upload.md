@@ -1,7 +1,6 @@
 # FileUpload
 
 Status: detailed contract
-Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -523,7 +522,7 @@ interface ImageCompressionOptions {
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| native file dialog appearance varies by platform | OS-native dialog | allowed | accept filter applied post-selection with honest rejection (g15.007) |
+| native file dialog appearance varies by platform | OS-native dialog | allowed | accept filter applied post-selection with honest rejection |
 | image preview mechanism differs (blob URL vs native image loading) | platform API differences | allowed | preview must display and be revocable |
 | drag-and-drop visual feedback may differ slightly in GPUI | platform DnD API differences | allowed | must indicate active drop target state |
 
@@ -556,17 +555,16 @@ interface ImageCompressionOptions {
 - future follow-up: chunked upload support, drag reordering of file list,
   camera capture integration
 
-## 15. Rust Binding Notes (g15.007)
+## 15. Rust Binding Notes
 
-Status: **bound** — generic single-file selection/read lands with `g15.007`
-Batch A.
+Status: **bound** — generic single-file selection/read lands with the Rust binding work.
 
 - The dropzone/browse affordance wires a generic browse intent:
   `FileUploadHandlers.on_browse` fires on dropzone activation; the OS dialog,
   the file read, and the accept rule are runtime-owned, never component
   logic. LicenceActivation composes this capability; it contains no
   OS-dialog code itself.
-- GPUI 0.2.2's `PathPromptOptions` has no accept-filter field. The configured
+- On the crates.io GPUI 0.2.2 pin, `PathPromptOptions` has no accept-filter field. The configured
   `accept` rule (and the web default 10 MB size rule) is therefore enforced
   *after* selection and a rejection is reported honestly
   (`poodle_gpui_node_backend::file_capability::finish_file_pick`), never

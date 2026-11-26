@@ -1,14 +1,6 @@
 # Theme model: scheme, base, accent, two blends, contrast
 
-Proposal, round six, 2026-11-25. The prototype `index.html` runs the function described here, and
-the scripts in `tools/` test that same code. Raw output is in `invariant-results.txt`,
-`unchanged-results.txt`, `sweep-results.txt`, `sweep-contrast-results.txt`,
-`test-engine-results.txt`, `accent-results.txt`, `slope-results.txt`, `capture-results.txt` and
-`preset-pixel-diff.txt`. Captures are in `shots/`: full pages at the top level, the app alone in
-`shots/app/`, the chooser readouts in `shots/readout/`, round five's preset pages in `shots/v5/`,
-and contact sheets in `shots/sheets/`. Round five is unchanged in `../theming-prototype-v5/`.
-`fidelity.md`, `solve-results.txt`, `rules-results.txt` and `balance-results.txt` are carried over:
-at accent blend 0 nothing they measure has changed.
+Proposal, round six, 2026-11-25. The prototype `index.html` runs the function described here, and the scripts in `tools/` test that same code. The raw result files and captures from the study's scratch folder are not kept; the figures quoted in the text are the record. `fidelity.md` is carried over: at accent blend 0 nothing it measures has changed.
 
 ## What changed from round five, and why
 
@@ -39,8 +31,7 @@ needs distance from black or white to carry a tint, which is why base blend move
 four.
 
 - **The pairs are symmetric.** Swap (base, base blend) with (accent, accent blend) and the neutrals
-  are byte-identical. Only the accent roles differ, because they still come from the accent colour
-  (`shots/sheets/swap.png`). *Opinion:* symmetry is right. "Independent" means each pair works on
+  are byte-identical. Only the accent roles differ, because they still come from the accent colour. *Opinion:* symmetry is right. "Independent" means each pair works on
   its own the same way. The alternative, where accent blend never moves depth, leaves the dark
   canvas black and the light cards white at base blend 0. Its tint is 45–75% as strong, and light
   Blue stops growing after 0.5 (table below).
@@ -60,8 +51,7 @@ sees exactly what that colour gives as the base at 0.5:
 | Round five, any accent | `#000000 #0c0c0c #161616 #1f1f1f` | `#efefef #f7f7f7 #ffffff #ffffff` |
 | If accent blend didn't move depth, Blue | `#000000 #060c19 #0c1629 #131f36` | `#e7efff #f3f7ff #ffffff #ffffff` |
 
-That is navy or olive-brown in dark and pale blue or cream in light: an accent-toned theme
-(`shots/sheets/owner-*.png`).
+That is navy or olive-brown in dark and pale blue or cream in light: an accent-toned theme.
 
 **Both blends above 0.** Same hues add up: Blue 0.5 with Blue 0.5 gives surface `#122447`
 (chroma 0.070), against `#17253f` (0.052) for either alone, at the same depth. Neighbouring hues
@@ -72,7 +62,7 @@ stronger one, which means hues about 150° or more apart. Orange and Blue are 14
 and keep 68% of their tint (`#31202e`), so they no longer get the note they got in round five.
 Stacking two colours can reach the full cap where neither can alone. Teal with Green at 0.5 in
 light gives a mint canvas, `#a3f6dc`. *Opinion:* fine. That is what two greens at half strength
-ask for, and it stays inside the cap (`shots/sheets/both-*.png`).
+ask for, and it stays inside the cap.
 
 **The edge sees more of it.** Accent blend now tints the ground toward the accent's own hue, so a
 muted fill can sit closer to the layers. At accent blend 1 the edge appears for Muted blue and
@@ -85,8 +75,7 @@ The derived red is a mid-tone, so it always takes the darker exit with white tex
 `#b1101d` on a neutral ground, 7.05:1 or more in all 20,000 test themes. With no duty to the layers,
 it came within ΔE 10 of a layer in 58 of them (0.3%: strongly brown or red dark grounds at high
 blend). So it also gets the accent's edge, as one new role, `status.danger.edge`, in the danger
-text colour (4.5:1 on every layer), transparent otherwise. That makes **44 roles**
-(`shots/danger-edge-dark.png`). Hover and pressed are computed by the same fit but not emitted,
+text colour (4.5:1 on every layer), transparent otherwise. That makes **44 roles**. Hover and pressed are computed by the same fit but not emitted,
 as in round five.
 
 **Cost.** On warm or green grounds the danger red turns brick: `#a23100` at Yellow accent blend 1,
@@ -109,14 +98,14 @@ anti-aliasing noise elsewhere, 5 levels at most; Graphite has none.
 | R3: swap the pairs | 10,000 | 0 failures |
 | R4: one cap with both blends above 0 | 10,000 | slope never above the cap; largest layer chroma 0.118, same as round five |
 | R4: no jump as a slider leaves 0 | 2,400 sweeps | largest change in any neutral 0.66 ΔE (disabled text, one 8-bit step) |
-| R4: no dip while the hues are within 90° | 2,400 + 2,400 sweeps | the slope the rule asks for never falls (`tools/slope-monotone.js`). The visible tint falls over 0.6 ΔE in 45 sweeps (largest 2.44): 44 at the sRGB edge, one at exactly 0.60 |
+| R4: no dip while the hues are within 90° | 2,400 + 2,400 sweeps | the slope the rule asks for never falls (`tools/slope-monotone.cjs`). The visible tint falls over 0.6 ΔE in 45 sweeps (largest 2.44): 44 at the sRGB edge, one at exactly 0.60 |
 | R5: depth is the larger blend | 10,000 | 0 failures |
 | Round four: base blend 0 equals `mono`; mono base at accent blend 0 is grey | 10,000 each | 0 failures |
-| Unchanged from round five at accent blend 0 (`tools/unchanged.js`) | 10,000 + 26 presets | 0 outside the danger pair |
+| Unchanged from round five at accent blend 0 (`tools/unchanged.cjs`) | 10,000 + 26 presets | 0 outside the danger pair |
 | Random themes, contrast 1 | 6,000 | no failures |
 | Random themes, contrast 0.9 to 2 | 4,000 | 2: the known light ΔL floor at contrast 0.90 and 0.91 (the new one fails in round five too at accent blend 0) |
 | Garbage inputs | 5,000 | none threw, all 44 roles valid |
-| Accent guarantees, plus danger (`tools/accent.js`) | 20,000 | 0 failures; fill shares as round five; edge on 13.7% / 5.2% (round five 11.7% / 4.3%) |
+| Accent guarantees, plus danger (`tools/accent.cjs`) | 20,000 | 0 failures; fill shares as round five; edge on 13.7% / 5.2% (round five 11.7% / 4.3%) |
 
 The R cases run 2,500 per scheme and tint mode, so 5,000 per scheme. "Neutral" means the
 tint-carrying roles: layers, ink fills, neutral selection, both borders, disabled text, scrim and
@@ -164,7 +153,7 @@ text on the picked yellow gets 13.1:1.
 
 **The accent now does three jobs, fitted separately.** Everything else stays as round four had it:
 the six inputs, `w = b(2 − b)`, the invariants, even tint (on by default), the presets and the
-preview's look. No role outside the accent fill family changed (`tools/unchanged.js`: 10,000
+preview's look. No role outside the accent fill family changed (`tools/unchanged.cjs`: 10,000
 random inputs, every shared role byte-identical).
 
 | Role | Used for | Rule |
@@ -200,7 +189,7 @@ That makes 43 roles (round four had 42).
    13.1, 11.5, 10.0). A fill that can't darken by 0.04 (one fitted to exactly 7:1, or black)
    lightens instead. I read "keep or improve that contrast" as "stay at or above 7:1". The literal
    reading, never lower it, makes a light fill lighten: pressed yellow turned cream (`#fff2c5`),
-   ΔE 6 from the layer (`shots/fill-states.png`). That reading is one line to restore.
+   ΔE 6 from the layer. That reading is one line to restore.
 
 **The edge.** It appears when the resting fill is within **ΔE 10 of any layer**, measured in OKLab
 with flare lightness in place of L. Flare lightness is the lightness the layer ramp already uses,
@@ -230,12 +219,12 @@ exact in `accent.line` for every one of them.
 
 | Test | Cases | Result |
 |---|---:|---|
-| Round four invariants (`tools/invariant.js`, role count 42 → 43) | 30,000 + growth | 0 failures |
-| Random themes, contrast 1 (`tools/sweep.js`) | 6,000 | no failures |
+| Round four invariants (`tools/invariant.cjs`, role count 42 → 43) | 30,000 + growth | 0 failures |
+| Random themes, contrast 1 (`tools/sweep.cjs`) | 6,000 | no failures |
 | Random themes, contrast 0.9 to 2 | 4,000 | 1: the known light ΔL floor at contrast 0.91 (as round four) |
-| Garbage inputs (`tools/test-engine.js`) | 5,000 | none threw, all 43 roles valid |
-| Accent guarantees (`tools/accent.js`) | 20,000 | 0 failures, details below |
-| Nothing else changed (`tools/unchanged.js`) | 10,000 | 0 roles outside the accent fill family differ |
+| Garbage inputs (`tools/test-engine.cjs`) | 5,000 | none threw, all 43 roles valid |
+| Accent guarantees (`tools/accent.cjs`) | 20,000 | 0 failures, details below |
+| Nothing else changed (`tools/unchanged.cjs`) | 10,000 | 0 roles outside the accent fill family differ |
 
 Accent guarantees, over every input (both schemes, both tint modes, random base, both blends,
 contrast 0.5 to 2). The shares are for sweep-generator accents, then uniform-RGB picks:
@@ -331,7 +320,7 @@ The pink base in the owner's report, accent mono, surface by base blend:
 | Dark | `#0c0c0c` | `#161112` | `#251619` | `#3c1b24` | `#511e2e` | `#632338` |
 | Light (even) | `#f7f7f7` | `#f9f4f5` | `#fdeff2` | `#ffe8ed` | `#ffe2e8` | `#ffdce3` |
 
-**Candidates compared** (`tools/rules.js`, the shipped engine with only the tint step changed):
+**Candidates compared** (`tools/rules.cjs`, the shipped engine with only the tint step changed):
 
 | | Round three | A: ground on the line, layers carry its chroma | B: slope × b | **B: slope × b(2 − b)** |
 |---|---|---|---|---|
@@ -394,7 +383,7 @@ and a rule that's a little less literal ("light reads the slope from black").
 
 ## Exactness
 
-`tools/solve.js` keeps each preset's depth-implied blend (two decimals). It builds the base at
+`tools/solve.cjs` keeps each preset's depth-implied blend (two decimals). It builds the base at
 OKLab L 0.6, or the nearest lightness inside sRGB, on the line the rule needs at that blend, and
 searches the 26 neighbours. When nothing hits, it finds the closest surface.
 
@@ -478,13 +467,13 @@ round five's is at the top.
 
 | Test | Cases | Result |
 |---|---:|---|
-| Base blend 0 equals `mono`, all 42 roles byte-identical (`tools/invariant.js`) | 10,000 (2,500 per scheme × tint mode; random base, accent, accent blend, contrast) | 0 failures |
+| Base blend 0 equals `mono`, all 42 roles byte-identical (`tools/invariant.cjs`) | 10,000 (2,500 per scheme × tint mode; random base, accent, accent blend, contrast) | 0 failures |
 | Accent blend 0, mono base: every neutral role is pure grey | 10,000 | 0 failures |
 | Accent blend 0: the neutral tint ignores the accent | 10,000 | 0 failures |
 | Growth along base blend, 0 to 1 in 0.01 steps | 1,200 bases × 101 blends | never falls beyond rounding (largest dip 0.42 ΔE); tint at 0.01 at most 0.14 ΔE (one 8-bit step) |
-| Random themes, contrast 1 (`tools/sweep.js`) | 6,000 | no failures; smallest margin 0.050, hierarchy 0.060 |
+| Random themes, contrast 1 (`tools/sweep.cjs`) | 6,000 | no failures; smallest margin 0.050, hierarchy 0.060 |
 | Random themes, contrast 0.9 to 2 | 4,000 | 1 failure: light ΔL floor at contrast 0.91 (round three had 4) |
-| Garbage inputs (`tools/test-engine.js`) | 5,000 | none threw, all returned 42 valid roles |
+| Garbage inputs (`tools/test-engine.cjs`) | 5,000 | none threw, all returned 42 valid roles |
 
 The sweeps draw scheme, tint mode, base, accent and both blends at random, as in round three. The
 contrast miss is the known rounding limit near white below contrast 0.98, and the readout flags
@@ -508,8 +497,6 @@ Solarized Light (even) from 7.5 to 9.2, because the fill now aims for 7:1. Nord 
 The per-preset accent fill against today's themes is in "What changed from round four".
 
 ## Awkward inputs
-
-Captures are in `shots/`.
 
 - **The owner's case** (`sheet-owner-case.png`): dark, Pink base, blend 0, Blue accent. The
   preview is pixel-identical to the `mono` base beside it. The readout says the base has no effect
@@ -638,4 +625,4 @@ through saturated violets can flip the ink.
 - **Round five.** The ΔE 12 reach, the ΔE 10 edge threshold and the dark ink's lightness were
   chosen from the numbers and the captures, not a user test. Whether a yellow button on white
   needs an edge is a judgement. The radio rule isn't captured (the preview has no radio). Hover
-  and active were checked on a states sheet (`shots/fill-states.png`), not by hovering in the page.
+  and active were checked on a states sheet, not by hovering in the page.

@@ -1,199 +1,28 @@
 # Component Contracts
 
 Status: active
-Updated: 2026-09-01
 
 Component contracts define every reusable surface in Poodle, from low-level
 primitives and layout surfaces through higher-order application components.
 
 ## Current Contracts
 
-- `accordion.md`
-- `action-discovery-panel.md`
-- `agent-chat-input.md`
-- `agent-message.md`
-- `agent-plan-record.md`
-- `agent-plan.md`
-- `agent-question-record.md`
-- `agent-question.md`
-- `agent-subagent.md`
-- `agent-transcript.md`
-- `alert-dialog.md`
-- `app-header.md`
-- `audio-player.md`
-- `audio-meter.md`
-- `audio-switch.md`
-- `avatar.md`
-- `block-editor.md`
-- `box.md`
-- `breadcrumbs.md`
-- `bulk-action-bar.md`
-- `button.md`
-- `calendar.md`
-- `callout.md`
-- `card-radio-group.md`
-- `card-toggle-group.md`
-- `card.md`
-- `changed-files.md`
-- `checkbox.md`
-- `code-editor.md`
-- `code-input.md`
-- `code.md`
-- `collapse-toggle.md`
-- `collapsible.md`
-- `color-picker.md`
-- `command-palette.md`
-- `confirm-action.md`
-- `context-menu.md`
-- `data-table.md`
-- `date-picker.md`
-- `date-range-picker.md`
-- `date-time-picker.md`
-- `date-time-range-picker.md`
-- `date-time-zone-picker.md`
-- `debug-dialog.md`
-- `detail-item.md`
-- `detail-section.md`
-- `detail-section-group.md`
-- `detail-shell.md`
-- `dialog.md`
-- `dock-region.md`
-- `drawer.md`
-- `drag-number-field.md`
-- `envelope-editor.md`
-- `duration-input.md`
-- `editable-label.md`
-- `editable-list.md`
-- `embed-input.md`
-- `embed-preview.md`
-- `empty-state.md`
-- `error-boundary.md`
-- `eyebrow.md`
-- `field-set.md`
-- `field.md`
-- `file-upload.md`
-- `filter-builder.md`
-- `filter-toolbar.md`
-- `form-actions.md`
-- `form-dialog.md`
-- `form-layout.md`
-- `form-shell.md`
-- `format-display-date.md`
-- `format-file-size.md`
-- `grid.md`
-- `hover-card.md`
-- `history-center.md`
-- `icon-button.md`
-- `icon-provider.md`
-- `icon.md`
-- `inline-list-section.md`
-- `inline-remediation.md`
-- `list-card-counter.md`
-- `list-card.md`
-- `list-container.md`
-- `listbox.md`
-- `message-center.md`
-- `list-grid.md`
-- `log-list.md`
-- `markdown-editor.md`
-- `media-browse-panel.md`
-- `media-picker.md`
-- `media-preview.md`
-- `media-thumbnail.md`
-- `menu.md`
-- `menubar.md`
-- `meta-bar.md`
-- `meta-item.md`
-- `meter.md`
-- `meter-surface.md`
-- `knob.md`
-- `keyboard.md`
-- `licence-activation.md`
-- `licence-seats.md`
-- `licence-status.md`
-- `fader.md`
-- `gain-reduction-meter.md`
-- `metric-tile.md`
-- `model-catalogue-editor.md`
-- `model-connection-card.md`
-- `model-connection-picker.md`
-- `model-connection-setup.md`
-- `model-picker.md`
-- `motion-policy-provider.md`
-- `mod-matrix-grid.md`
-- `nav-card.md`
-- `navigation-menu.md`
-- `number-input.md`
-- `order-by.md`
-- `page-header.md`
-- `page-loading.md`
-- `pagination-summary.md`
-- `pagination.md`
-- `password-requirements.md`
-- `picker-shell.md`
-- `pill.md`
-- `popover.md`
-- `progress.md`
-- `radio.md`
-- `radio-group.md`
-- `range-slider.md`
-- `rating.md`
-- `ref-select.md`
-- `rich-text-editor.md`
-- `region.md`
-- `relation-picker.md`
-- `remediation-banner.md`
-- `resize-handle.md`
-- `scroll-shell.md`
-- `segmented-control.md`
-- `select.md`
-- `selection-summary.md`
-- `separator.md`
-- `settings-shell.md`
-- `sidebar-nav.md`
-- `size-and-density.md`
-- `skeleton.md`
-- `slider.md`
-- `spacer.md`
-- `spinner.md`
-- `split-button.md`
-- `split-view.md`
-- `stack.md`
-- `state-tile.md`
-- `status-bar.md`
-- `status-indicator.md`
-- `stepper.md`
-- `surface-elevation.md`
-- `surface.md`
-- `switch.md`
-- `tab-strip.md`
-- `table.md`
-- `text.md`
-- `text-link.md`
-- `tabs.md`
-- `text-input.md`
-- `theme-select.md`
-- `token-input.md`
-- `time-ago.md`
-- `time-input.md`
-- `time-zone-select.md`
-- `toast-host.md`
-- `toast-stack.md`
-- `toggle-group.md`
-- `tool-call-group.md`
-- `tool-call.md`
-- `toolbar.md`
-- `tooltip.md`
-- `tree.md`
-- `tri-state-switch.md`
-- `ui-presentation-provider.md`
-- `update-center.md`
-- `update-status.md`
-- `validation-summary.md`
-- `value-readout.md`
-- `video-player.md`
-- `waveform-display.md`
-- `xy-pad.md`
+Every component contract, grouped by family. Hand-kept: `docs:lint` fails when a contract file is missing from this table.
+
+| Family | Contracts |
+| --- | --- |
+| Foundations | [avatar](avatar.md) · [box](box.md) · [code](code.md) · [dock-region](dock-region.md) · [error-boundary](error-boundary.md) · [eyebrow](eyebrow.md) · [format-display-date](format-display-date.md) · [format-file-size](format-file-size.md) · [grid](grid.md) · [icon](icon.md) · [icon-button](icon-button.md) · [icon-provider](icon-provider.md) · [keyboard](keyboard.md) · [motion-policy-provider](motion-policy-provider.md) · [pill](pill.md) · [progress](progress.md) · [region](region.md) · [resize-handle](resize-handle.md) · [scroll-shell](scroll-shell.md) · [separator](separator.md) · [size-and-density](size-and-density.md) · [skeleton](skeleton.md) · [spacer](spacer.md) · [spinner](spinner.md) · [split-view](split-view.md) · [stack](stack.md) · [status-indicator](status-indicator.md) · [surface](surface.md) · [surface-elevation](surface-elevation.md) · [text](text.md) · [text-link](text-link.md) · [time-ago](time-ago.md) · [ui-presentation-provider](ui-presentation-provider.md) · [value-readout](value-readout.md) |
+| Actions | [bulk-action-bar](bulk-action-bar.md) · [button](button.md) · [collapse-toggle](collapse-toggle.md) · [confirm-action](confirm-action.md) · [form-actions](form-actions.md) · [segmented-control](segmented-control.md) · [split-button](split-button.md) · [toggle-group](toggle-group.md) · [toolbar](toolbar.md) |
+| Inputs and selection | [block-editor](block-editor.md) · [card-radio-group](card-radio-group.md) · [card-toggle-group](card-toggle-group.md) · [checkbox](checkbox.md) · [code-editor](code-editor.md) · [code-input](code-input.md) · [color-picker](color-picker.md) · [drag-number-field](drag-number-field.md) · [duration-input](duration-input.md) · [editable-label](editable-label.md) · [editable-list](editable-list.md) · [embed-input](embed-input.md) · [envelope-editor](envelope-editor.md) · [field](field.md) · [field-set](field-set.md) · [file-upload](file-upload.md) · [filter-builder](filter-builder.md) · [filter-toolbar](filter-toolbar.md) · [listbox](listbox.md) · [markdown-editor](markdown-editor.md) · [number-input](number-input.md) · [order-by](order-by.md) · [password-requirements](password-requirements.md) · [picker-shell](picker-shell.md) · [radio](radio.md) · [radio-group](radio-group.md) · [range-slider](range-slider.md) · [rating](rating.md) · [ref-select](ref-select.md) · [relation-picker](relation-picker.md) · [rich-text-editor](rich-text-editor.md) · [select](select.md) · [slider](slider.md) · [stepper](stepper.md) · [switch](switch.md) · [text-input](text-input.md) · [theme-select](theme-select.md) · [time-input](time-input.md) · [time-zone-select](time-zone-select.md) · [token-input](token-input.md) · [tri-state-switch](tri-state-switch.md) · [validation-summary](validation-summary.md) |
+| Dates | [calendar](calendar.md) · [date-picker](date-picker.md) · [date-range-picker](date-range-picker.md) · [date-time-picker](date-time-picker.md) · [date-time-range-picker](date-time-range-picker.md) · [date-time-zone-picker](date-time-zone-picker.md) |
+| Forms | [form-dialog](form-dialog.md) · [form-layout](form-layout.md) · [form-shell](form-shell.md) |
+| Overlays and menus | [alert-dialog](alert-dialog.md) · [command-palette](command-palette.md) · [context-menu](context-menu.md) · [debug-dialog](debug-dialog.md) · [dialog](dialog.md) · [drawer](drawer.md) · [hover-card](hover-card.md) · [menu](menu.md) · [menubar](menubar.md) · [navigation-menu](navigation-menu.md) · [popover](popover.md) · [toast-host](toast-host.md) · [toast-stack](toast-stack.md) · [tooltip](tooltip.md) |
+| Navigation and shells | [accordion](accordion.md) · [action-discovery-panel](action-discovery-panel.md) · [app-header](app-header.md) · [breadcrumbs](breadcrumbs.md) · [collapsible](collapsible.md) · [detail-shell](detail-shell.md) · [history-center](history-center.md) · [nav-card](nav-card.md) · [page-header](page-header.md) · [pagination](pagination.md) · [pagination-summary](pagination-summary.md) · [settings-shell](settings-shell.md) · [sidebar-nav](sidebar-nav.md) · [tab-strip](tab-strip.md) · [tabs](tabs.md) · [tree](tree.md) |
+| Data and lists | [card](card.md) · [changed-files](changed-files.md) · [data-table](data-table.md) · [detail-item](detail-item.md) · [detail-section](detail-section.md) · [detail-section-group](detail-section-group.md) · [empty-state](empty-state.md) · [inline-list-section](inline-list-section.md) · [list-card](list-card.md) · [list-card-counter](list-card-counter.md) · [list-container](list-container.md) · [list-grid](list-grid.md) · [log-list](log-list.md) · [meta-bar](meta-bar.md) · [meta-item](meta-item.md) · [metric-tile](metric-tile.md) · [mod-matrix-grid](mod-matrix-grid.md) · [page-loading](page-loading.md) · [selection-summary](selection-summary.md) · [state-tile](state-tile.md) · [table](table.md) |
+| Feedback and status | [callout](callout.md) · [inline-remediation](inline-remediation.md) · [message-center](message-center.md) · [remediation-banner](remediation-banner.md) · [status-bar](status-bar.md) · [update-center](update-center.md) · [update-status](update-status.md) |
+| Media and audio | [audio-meter](audio-meter.md) · [audio-player](audio-player.md) · [audio-switch](audio-switch.md) · [embed-preview](embed-preview.md) · [fader](fader.md) · [gain-reduction-meter](gain-reduction-meter.md) · [knob](knob.md) · [media-browse-panel](media-browse-panel.md) · [media-picker](media-picker.md) · [media-preview](media-preview.md) · [media-thumbnail](media-thumbnail.md) · [meter](meter.md) · [meter-surface](meter-surface.md) · [video-player](video-player.md) · [waveform-display](waveform-display.md) · [xy-pad](xy-pad.md) |
+| Agents | [agent-chat-input](agent-chat-input.md) · [agent-message](agent-message.md) · [agent-plan](agent-plan.md) · [agent-plan-record](agent-plan-record.md) · [agent-question](agent-question.md) · [agent-question-record](agent-question-record.md) · [agent-subagent](agent-subagent.md) · [agent-transcript](agent-transcript.md) · [tool-call](tool-call.md) · [tool-call-group](tool-call-group.md) |
+| Models and licences | [licence-activation](licence-activation.md) · [licence-seats](licence-seats.md) · [licence-status](licence-status.md) · [model-catalogue-editor](model-catalogue-editor.md) · [model-connection-card](model-connection-card.md) · [model-connection-picker](model-connection-picker.md) · [model-connection-setup](model-connection-setup.md) · [model-picker](model-picker.md) |
 
 ## Accessibility Rule
 

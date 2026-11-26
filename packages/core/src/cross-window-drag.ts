@@ -3,7 +3,7 @@
  * Poodle surface and a host that owns windows.
  *
  * Architecture: docs/knowledge/architecture/011-drag-and-drop-substrate.md.
- * Spec: docs/knowledge/specs/069-dependable-drag-and-drop-substrate.md.
+ * Spec: docs/knowledge/specs/archive/069-dependable-drag-and-drop-substrate.md.
  * Rust mirror: packages/contracts/headless/src/cross_window_drag.rs.
  *
  * The bridge is split by ownership, and the split is the whole point. A

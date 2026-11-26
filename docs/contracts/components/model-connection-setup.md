@@ -1,7 +1,6 @@
 # ModelConnectionSetup
 
 Status: approved
-Updated: 2026-11-26
 Governing spec: `../../knowledge/specs/067-model-connection-management.md`
 
 ## 1. Purpose
@@ -210,11 +209,11 @@ machinery, id wiring, and polite status announcement.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| — | — | no open deltas; native completion landed in `g15.008` | — |
+| — | — | no open deltas; native completion landed | — |
 
 ## 13. Approval And Adoption Notes
 
 - contract status: `approved`
 - approver: operator, 2026-08-14
 - downstream adopter: Nucleus
-- native completion: landed in `g15.008` (Rust declaration, `poodle-headless` behaviour mirror, `poodle-render` composition, GPUI specimen and mounted evidence)
+- native completion: landed (Rust declaration, `poodle-headless` behaviour mirror, `poodle-render` composition, GPUI specimen and mounted evidence)

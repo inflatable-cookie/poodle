@@ -1,7 +1,6 @@
 # Tooltip
 
 Status: detailed contract
-Updated: 2026-09-03
 
 ## 1. Purpose
 
@@ -252,7 +251,7 @@ and exposes the resolved value via `data-placement`.
   pending or visible tooltip per mounted window. Frame begin, end, and
   overlay paint are keyed to that window's handle. Window close tears the
   runtime down; `reset_focus_registry` is not the production teardown path.
-  GPUI 0.2.2 `.tooltip()` is not used.
+  The GPUI backend does not use `.tooltip()`.
 - bubble sizing: max-width 16rem, padding 0.375rem 0.5rem
 - border-radius must use the reduced calculation:
   control-radius minus 0.125rem

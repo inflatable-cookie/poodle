@@ -1,7 +1,6 @@
 # MediaPicker
 
 Status: detailed contract
-Updated: 2026-08-10
 
 ## 1. Purpose
 
@@ -107,7 +106,7 @@ Behavior classification: styled-only (no machine)
 
 Rendering and composition only, or interaction fully delegated to composed
 Poodle primitives / native elements; no component-owned behavioral state
-beyond plain props. Classified in the g11.004 long-tail sweep.
+beyond plain props. Classified in the long-tail sweep.
 
 ## 5. Callbacks
 

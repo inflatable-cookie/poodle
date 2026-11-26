@@ -1,7 +1,6 @@
 # Meter Surface
 
 Status: detailed contract
-Updated: 2026-08-14
 
 ## 1. Purpose
 
@@ -106,7 +105,7 @@ not missing native behavior.
 
 Native runtimes have no `MeterSurface`; their renderers already batch meter
 nodes. Canvas2D is the only shipped painter; WebGL2 waits on measured
-evidence per g14.024.
+evidence per the batched-meter gate.
 
 ## 13. Specimen Definitions
 
@@ -119,5 +118,5 @@ performance readout. The page links to the standalone AudioMeter specimen.
 
 ## 14. Approval And Adoption Notes
 
-Governed by spec 068 and roadmap g14.024. The 128-meter Canvas2D performance
+Governed by spec 068 and the batched-meter work. The 128-meter Canvas2D performance
 evidence decides whether a WebGL2 painter card ever exists.

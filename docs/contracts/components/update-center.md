@@ -1,7 +1,6 @@
 # UpdateCenter
 
 Status: active contract
-Updated: 2026-11-25
 
 ## 1. Purpose
 

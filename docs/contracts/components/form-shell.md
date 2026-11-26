@@ -3,7 +3,6 @@
 > **Implementation note**: no standalone Svelte component. This contract exists as a shared spec for GPUI/Jetstream composite renderers so they don't reinvent field grouping, validation exposure, or submission-blocking logic. In Svelte, form orchestration is handled compositionally by the caller.
 
 Status: detailed contract
-Updated: 2026-04-11
 
 ## 1. Purpose
 
@@ -149,4 +148,4 @@ Defined on `FormShellSpec`:
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Svelte equivalent may be `FormLayout` composite | Svelte's form composite landed under a different name; field-groupings and validation tracking overlap but the two are not literally identical | allowed | consolidate names in a future pass |
-| GPUI does not render per-field messages via aria-describedby | GPUI 0.2 has no ARIA surface | allowed | revisit when GPUI accessibility lands |
+| GPUI does not render per-field messages via aria-describedby | ID-based relationships are not projected into AccessKit yet (003) | allowed | revisit when the GPUI backend projects ID relationships (003) |

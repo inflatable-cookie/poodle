@@ -1,7 +1,6 @@
 # Keyboard
 
 Status: detailed contract
-Updated: 2026-09-28
 
 ## 1. Purpose
 

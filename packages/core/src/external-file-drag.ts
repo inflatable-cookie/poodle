@@ -2,7 +2,7 @@
  * External-file boundaries — inbound files and native file drag-out.
  *
  * Architecture: docs/knowledge/architecture/011-drag-and-drop-substrate.md.
- * Spec: docs/knowledge/specs/069-dependable-drag-and-drop-substrate.md.
+ * Spec: docs/knowledge/specs/archive/069-dependable-drag-and-drop-substrate.md.
  * Rust mirror: packages/contracts/headless/src/external_file_drag.rs.
  *
  * Two directions, one rule: the artifact never crosses into Poodle. Going

@@ -1,7 +1,6 @@
 # EmbedInput
 
 Status: detailed contract
-Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -142,7 +141,7 @@ None.
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: adapter-owned interaction (long-tail sweep)
 
 Debounced parse of pasted embeds; parse stays adapter-side (async). No machine required beyond debounce.
 

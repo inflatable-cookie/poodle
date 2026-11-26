@@ -3,7 +3,6 @@
 > **Surface elevation**: ToggleGroup is a surface consumer (93% surface / text-primary mix) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-09-12
 
 ## 1. Purpose
 
@@ -167,7 +166,7 @@ In single mode with `allowDeactivation=true`, `onValueChange` may receive
 
 ## 8. Token Usage — Exact Values
 
-Rendering style roles (poodle#186): items read the control border, fill and shadow. Selection keeps its own roles.
+Rendering style roles: items read the control border, fill and shadow. Selection keeps its own roles.
 
 ### Root `.toggle-group`
 

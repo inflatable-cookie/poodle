@@ -22,4 +22,4 @@ Status: answered 2026-09-29 — no. See [vision](vision.md#direction).
 Status: answered 2026-09-29 — finish `lane:native-admission`, then a small
 GPUI repair tranche on Button, Checkbox, Radio, ToggleGroup and Accordion from
 the [GPUI functionality census](../evidence/gpui/gpui-functionality-census.md)
-(`lane:gpui-selection-repair`). The Queue plan holds the order.
+(`lane:gpui-selection-repair`). The Nucleus plan holds the order.

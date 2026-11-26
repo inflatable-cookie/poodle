@@ -1,7 +1,6 @@
 # VideoPlayer
 
 Status: detailed contract
-Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -114,7 +113,7 @@ configuration only.
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: adapter-owned interaction (long-tail sweep)
 
 Media-element control surface; listeners are media events (adapter effects by nature). Math-free.
 

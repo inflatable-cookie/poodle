@@ -1,7 +1,6 @@
 # Code
 
 Status: detailed contract
-Updated: 2026-09-30
 
 ## 1. Purpose
 
@@ -106,7 +105,7 @@ Updated: 2026-09-30
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: adapter-owned interaction (long-tail sweep)
 
 Copy-feedback timer only; otherwise presentational. Timer stays adapter-side.
 

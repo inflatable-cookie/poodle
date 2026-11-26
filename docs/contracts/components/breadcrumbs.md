@@ -1,7 +1,6 @@
 # Breadcrumbs
 
 Status: detailed contract
-Updated: 2026-08-27
 
 ## 1. Purpose
 
@@ -120,7 +119,7 @@ Behavior classification: styled-only (no machine)
 
 Rendering and composition only, or interaction fully delegated to composed
 Poodle primitives / native elements; no component-owned behavioral state
-beyond plain props. Classified in the g11.004 long-tail sweep.
+beyond plain props. Classified in the long-tail sweep.
 
 ## 5. Callbacks
 
@@ -179,7 +178,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 8. Token Usage -- Exact Values
 
-Rendering style roles (poodle#186): link and button crumbs read `--poodle-style-control-fill` at rest.
+Rendering style roles: link and button crumbs read `--poodle-style-control-fill` at rest.
 
 ### Root `.breadcrumbs`
 

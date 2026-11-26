@@ -1,7 +1,6 @@
 # MotionPolicyProvider
 
 Status: detailed contract
-Updated: 2026-09-01
 Governing architecture: `../../knowledge/architecture/012-semantic-motion-policy.md`
 
 ## 1. Purpose
@@ -167,7 +166,7 @@ loading components and shows the effective value plus scheduled-clock receipt.
 
 ## 14. Approval And Adoption Notes
 
-- contract status: promoted from the operator-approved PR #121 packet
-- first adopter: `g16.034` five-family motion pilot
+- contract status: promoted from an operator-approved packet
+- first adopter: five-family motion pilot
 - downstream icon morphing and shimmer decisions consume this policy only after
   the pilot lands

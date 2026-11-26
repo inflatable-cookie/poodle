@@ -3,7 +3,6 @@
 > **Surface elevation**: Stepper is a surface consumer (72% moderate contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-07-28
 
 ## 1. Purpose
 
@@ -266,7 +265,7 @@ expensive to open, so arrow keys must not commit to one.
 
 ## 8. Token Usage — Exact Values
 
-Rendering style roles (poodle#186): the frame reads the surface border and fill. Triggers, the summary and the rerun control read `--poodle-style-control-fill` at rest, and their hovers read `--poodle-style-control-fillHover`.
+Rendering style roles: the frame reads the surface border and fill. Triggers, the summary and the rerun control read `--poodle-style-control-fill` at rest, and their hovers read `--poodle-style-control-fillHover`.
 
 ### Root `.poodle-stepper`
 
@@ -424,8 +423,12 @@ siblings, so it is density.
 
 - Status colours resolve through the `StepperSpec` token methods; no literal
   colours in the component
-- GPUI has no accessibility API — see `003-native-accessibility.md`. The status
-  suffix in the accessible name is carried on the spec and is inert there.
+- The shared renderer gives each trigger the button role and an accessible name
+  of the step label plus its status word (`, running`, `, complete`,
+  `, failed`). GPUI projects that role and name through AccessKit, but no live
+  platform-tree assertion covers the stepper yet, so it keeps its A2 hold (see
+  `003-native-accessibility.md`). The renderer sets no `aria-current` or
+  `aria-invalid` state on the trigger.
 - Orientation maps to the flex axis: vertical flows the same steps as a column
   with bottom dividers.
 - Keyboard navigation between triggers does not exist on the natives (no key
@@ -441,7 +444,7 @@ siblings, so it is density.
 
 - `Stepper::from_spec(spec, theme).on_change(...).on_rerun(...)`, each carrying
   the step's value. This is the component whose GPUI handlers were stored and
-  never attached — the defect that started g12.017 — so these tests are the
+  never attached — the defect that started this work — so these tests are the
   reference for what "actually wired" means.
 - The rerun sits inside a clickable step, so it takes its own handler, inert
   when unwired: rerunning a step must not also select it.
@@ -476,7 +479,7 @@ component accepts a handler it never reads.
 
 | Target | Delta | Reason |
 |--------|-------|--------|
-| GPUI | no accessibility surface | runtime limit — `003-native-accessibility.md` |
+| GPUI | no live platform-tree assertion yet | A2 hold — `003-native-accessibility.md` |
 | GPUI, Jetstream | selection, rerun and collapse wiring live in the preview event loop | components render from spec state |
 | GPUI, Jetstream | the collapsed chevron is the shared `chevron-right` / `chevron-down` icon; the rail is a row of rounded boxes | no CSS, so both are drawn as nodes |
 | GPUI | marker glyphs are text characters (`✓ ✕ ◌ ⟳`) rather than icon assets | matches the surrounding GPUI components, which draw glyphs the same way |

@@ -1,7 +1,6 @@
 # OrderBy
 
 Status: detailed contract
-Updated: 2026-09-07
 
 ## 1. Purpose
 
@@ -174,7 +173,7 @@ When `value` is empty but `activeSort` is provided, the component treats it as a
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: adapter-owned interaction (long-tail sweep)
 
 Dropdown open/dismiss (now on the dismissable-layer stack, outside dismissal
 guarded by `dismissOnOutsideInteract` with default `true`) plus direction

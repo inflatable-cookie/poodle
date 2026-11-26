@@ -3,7 +3,6 @@
 > **Surface elevation**: SegmentedControl is a surface consumer (72% moderate contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-11-25
 
 ## 1. Purpose
 
@@ -158,7 +157,7 @@ Native radio inputs provide keyboard and focus behavior.
 
 ## 8. Token Usage — Exact Values
 
-Rendering style roles (poodle#186): the track reads the control border, fill and shadow. Segments keep no resting paint of their own, so the track carries the fill.
+Rendering style roles: the track reads the control border, fill and shadow. Segments keep no resting paint of their own, so the track carries the fill.
 
 ### Root `.segmented-control`
 

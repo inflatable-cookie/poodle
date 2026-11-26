@@ -1,12 +1,12 @@
 # 063 Rust-authored Component And Scene IR
 
-Status: retired — g13 pilot record; architecture 009/spec 066 successor also rejected
+Status: retired — pilot record; its successor, spec 066, was rejected, and architecture 009 is active
 Updated: 2026-08-14
 Owner: Poodle core
 Depends on: `062-headless-core-and-dual-layer-strategy.md`,
-`../architecture/001-poodle-system-shape.md`,
-`../architecture/006-headless-core-and-machine-model.md`,
-`../architecture/007-appearance-recipe-contract.md`
+`../../architecture/001-poodle-system-shape.md`,
+`../../architecture/006-headless-core-and-machine-model.md`,
+`../../architecture/007-appearance-recipe-contract.md`
 
 ## Retirement (g14.001, 2026-08-13)
 

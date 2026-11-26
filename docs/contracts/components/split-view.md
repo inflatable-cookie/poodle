@@ -1,7 +1,6 @@
 # SplitView
 
 Status: detailed contract
-Updated: 2026-09-28
 
 ## 1. Purpose
 
@@ -136,7 +135,7 @@ Behavior classification: styled-only (no machine)
 
 Rendering and composition only, or interaction fully delegated to composed
 Poodle primitives / native elements; no component-owned behavioral state
-beyond plain props. Classified in the g11.004 long-tail sweep.
+beyond plain props. Classified in the long-tail sweep.
 
 ## 5. Callbacks
 
@@ -504,7 +503,7 @@ None.
 | The zero-footprint seam (default off) is shared by the web targets; the natives still paint the divider line | the seam behavior was proven in the Svelte host first and React now matches the opt-in, `--poodle-split-seam` anchoring, and collapsed-pane seam tracking | pending review | port the default-off seam to the natives when one is next touched |
 | The both-collapsed expand-toggle rule is web parity | the trap was proven against the Svelte host and the React mirror now matches; the natives hide both toggles when both panes are collapsed | pending review | port to the natives with the seam work |
 | The natives' hover-reveal zone is the toggle cluster's own bounds, not the divider's grab strip — the pointer must reach the pill rather than the seam around it | the shared render tier has no absolute positioning for the cluster, so it sits inline beside the handle rather than overlaying it; there is no "hovering a sibling reveals me" primitive in the node vocabulary | pending review | widen when the node vocabulary gains group-hover |
-| The natives have no `:focus-within` equivalent, so a keyboard-focused toggle is not revealed | GPUI has no accessibility/focus routing for the split, and Jetstream's focus does not feed the hover patch | pending review | revisit with native keyboard resize |
+| The natives have no `:focus-within` equivalent, so a keyboard-focused toggle is not revealed | GPUI has no focus routing for the split, and Jetstream's focus does not feed the hover patch | pending review | revisit with native keyboard resize |
 
 ## 12. Specimen Definitions
 

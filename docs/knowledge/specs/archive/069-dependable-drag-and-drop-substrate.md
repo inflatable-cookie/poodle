@@ -4,12 +4,12 @@ Status: complete — compiled as g16.021–g16.028; g16.021–g16.027 merged and
 g16.028 closes the migration and certification; g16.055 moves web selection
 suppression to accepted pointerdown
 Updated: 2026-09-02
-Depends on: `../architecture/011-drag-and-drop-substrate.md`,
-`../contracts/working-rules.md`,
-`../../contracts/components/tabs.md`,
-`../../contracts/components/tree.md`,
-`../../contracts/components/editable-list.md`,
-`../../contracts/components/dock-region.md`
+Depends on: `../../architecture/011-drag-and-drop-substrate.md`,
+`../../contracts/working-rules.md`,
+`../../../contracts/components/tabs.md`,
+`../../../contracts/components/tree.md`,
+`../../../contracts/components/editable-list.md`,
+`../../../contracts/components/dock-region.md`
 
 ## Purpose
 

@@ -1,7 +1,6 @@
 # DockRegion
 
 Status: active contract
-Updated: 2026-09-04
 
 ## 1. Purpose
 
@@ -138,7 +137,7 @@ These props are deliberately not in the §Public Props table, matching the
 treatment of `tabVariant`: they are `svelteOnly` entries in
 `packages/svelte/preview/scripts/contract-prop-drift.ts`'s `BASELINE`, which
 keeps them off the table until the shared spec surface carries them. This is a
-tranche, not a permanent carve-out — when `g13.014` gives `DockRegionSpec` its
+tranche, not a permanent carve-out — when the Rust spec gives `DockRegionSpec` its
 tab fields, the whole entry moves into the table together and the baseline
 line is deleted.
 
@@ -211,7 +210,7 @@ Behavior classification: styled-only (no machine)
 
 Rendering and composition only, or interaction fully delegated to composed
 Poodle primitives / native elements; no component-owned behavioral state
-beyond plain props. Classified in the g11.004 long-tail sweep.
+beyond plain props. Classified in the long-tail sweep.
 
 ## 5. Callbacks
 
@@ -768,4 +767,4 @@ Left/right edges use the vertical strip's own `border-right` (or `border-left` f
 
 ### Rendering style roles
 
-Rendering style roles (poodle#186): the region frame reads `--poodle-style-surface-fill`. Its quiet emphasis still sets a transparent fill, and drop-zone and divider paint stay literal.
+Rendering style roles: the region frame reads `--poodle-style-surface-fill`. Its quiet emphasis still sets a transparent fill, and drop-zone and divider paint stay literal.

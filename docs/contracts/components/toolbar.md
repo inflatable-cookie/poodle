@@ -1,7 +1,6 @@
 # Toolbar
 
 Status: detailed contract
-Updated: 2026-07-10
 
 ## 1. Purpose
 
@@ -65,7 +64,7 @@ Updated: 2026-07-10
 
 ### Behavior Machine
 
-Behavior classification: adapter-owned interaction (g11.004 sweep)
+Behavior classification: adapter-owned interaction (long-tail sweep)
 
 Keyboard handling delegated to focused children; no owned machine state.
 

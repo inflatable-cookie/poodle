@@ -1,7 +1,6 @@
 # ChangedFiles
 
 Status: detailed contract
-Updated: 2026-11-26
 
 ## 1. Purpose
 
@@ -240,7 +239,7 @@ the header and chip gaps. Density never changes the header's height.
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | `countLabel` is an optional resolved string on the native spec, not a formatter | a Rust spec holds data, not closures; `None` uses the default phrasing | accepted | none |
-| Neither native renders the "Open diff" action | the action hands off to the host, and no native host asks for it yet; `onOpenDiff` exists on the web target only | accepted, tracked | g12.017 |
+| Neither native renders the "Open diff" action | the action hands off to the host, and no native host asks for it yet; `onOpenDiff` exists on the web target only | accepted, tracked | — |
 | No diff rendering on any target | a diff viewer is a component in its own right, not a card detail | accepted (by design) | `onOpenDiff` hands off |
 
 ## 13. Approval And Adoption Notes

@@ -25,6 +25,7 @@ readable history and are never current authority.
 - 021-public-package-api-stability-and-parity-debt-baseline.md — Public Package API Stability And Parity Debt Baseline
 - 023-svelte-visual-hierarchy-and-contrast-baseline.md — Svelte Visual Hierarchy And Contrast Baseline
 - 024-token-evolution-migration-and-compatibility-policy.md — Token Evolution, Migration, And Compatibility Policy
+- 026-appearance-recipes-and-downstream-override-strategy.md — Appearance Recipes And Downstream Override Strategy (promoted into architecture 007)
 - 027-docs-completeness-contract-linting-and-publish-pipeline.md — Docs Completeness, Contract Linting, And Publish Pipeline
 - 028-primitive-baseline-and-bits-aligned-surface.md — Primitive Baseline And Bits-Aligned Surface
 - 029-advanced-primitive-promotion-and-substrate-mapping.md — Advanced Primitive Promotion And Substrate Mapping
@@ -51,5 +52,9 @@ readable history and are never current authority.
 - 059-shared-demo-app-audit-and-target-freeze-baseline.md — Shared Demo-App Audit And Target Freeze Baseline
 - 060-shared-demo-app-contract-section-model-and-parity-checklist.md — Shared Demo-App Contract, Section Model, And Parity Checklist
 - 061-svelte-demo-app-rebuild-and-coverage-upgrade-baseline.md — Svelte Demo-App Rebuild And Coverage Upgrade Baseline
+- 062-headless-core-and-dual-layer-strategy.md — Headless Core And Dual-Layer Strategy (promoted into architecture 006)
+- 063-rust-authored-component-and-scene-ir.md — Rust-authored Component And Scene IR (retired pilot record; successor spec 066 rejected)
 - 064-cross-runtime-machine-pinning.md — Cross-Runtime Machine Pinning
 - 065-scene-authoring-and-specimen-fixtures.md — Scene Authoring And Specimen Fixtures
+- 066-executable-component-conformance.md — Executable Component Conformance (rejected; retained as measured evidence)
+- 069-dependable-drag-and-drop-substrate.md — Dependable Drag And Drop Substrate (complete)

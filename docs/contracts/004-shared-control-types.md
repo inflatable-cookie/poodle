@@ -2,7 +2,6 @@
 
 Status: active
 Owner: Poodle core
-Updated: 2026-08-11
 
 Canonical definitions for control types that more than one component contract
 uses. Per `README.md` "Cross-Cutting Rules", a component contract **references**

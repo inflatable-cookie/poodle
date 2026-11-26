@@ -1,7 +1,6 @@
 # Radio Group
 
 Status: detailed contract
-Updated: 2026-08-26
 
 ## 1. Purpose
 
