@@ -359,7 +359,7 @@
     width: var(--poodle-slider-family-marker-thickness);
     height: calc(var(--poodle-slider-family-block-height) - var(--poodle-slider-family-marker-inset) - var(--poodle-slider-family-marker-inset));
     border-radius: calc(var(--poodle-slider-family-marker-thickness) / 2);
-    background: var(--poodle-recipe-slider-block-handle-fill, var(--poodle-style-control-fillHover, var(--poodle-color-background-elevated)));
+    background: var(--poodle-recipe-slider-block-handle-fill, var(--poodle-style-control-fill, var(--poodle-color-background-elevated)));
     box-shadow: 0 0 0 0.0625rem var(--poodle-recipe-slider-block-handle-border, var(--poodle-style-control-border, var(--poodle-color-border-default)));
     pointer-events: none;
   }
