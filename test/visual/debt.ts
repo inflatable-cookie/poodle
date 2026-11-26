@@ -118,6 +118,13 @@ export const DEBT: VisualDebtEntry[] = [
       "0.05% of pixels differ — just above the 0.02% default floor, glyph/canvas-edge antialiasing scale; untriaged.",
   },
   {
+    slug: "listbox",
+    axes: ["eclipse-compact-md", "iceberg-compact-md"],
+    kind: "size",
+    reason:
+      "Svelte renders the specimen 6px taller than React (992x692 vs 992x686) at compact md on both themes. Measured with the base commit's stylesheets (037ddb7) and unchanged with the poodle#186 stylesheets: listbox.css is not in that change, so the divergence predates it.",
+  },
+  {
     slug: "markdown-renderer",
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "size",
