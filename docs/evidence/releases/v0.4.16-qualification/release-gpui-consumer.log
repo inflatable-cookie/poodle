@@ -1,0 +1,15 @@
+
+╭─────────────────────────────────────────────────╮
+│ EFFIGY  …/ns-t-8fc18ed3adee19ddd4cb264cee34b08c │
+╰────────────────────────── v0.15.0+local.6b69a5d ╯
+
+oxide: incremental setting unknown (external command chooses its Cargo configuration); using an unknown-setting slot
+oxide: could not sweep Barge trash: cannot sweep the pool trash: cannot open [oxide-pool]/slots/.trash/.barge-claim-effigy-b141b7a2-quick-f8e38d019ce40808/scratch/.tmpyV4yX2/host-checkout/.effigy/state: Permission denied (os error 13); trash remains at [oxide-pool]/slots/.trash/.barge-claim-effigy-b141b7a2-quick-f8e38d019ce40808
+oxide: waiting for earlier unblocked oxide commands (position 2); Ctrl-C cancels
+oxide: waiting for a build slot (4 of 4 host-wide in use); Ctrl-C cancels
+oxide: seeding skipped: unsupported command
+oxide: waited 3.9s (queue 1.8s, host limit 2.0s); slot ready
+oxide: could not sweep Barge trash: cannot sweep the pool trash: cannot open [oxide-pool]/slots/.trash/.barge-claim-effigy-b141b7a2-quick-f8e38d019ce40808/scratch/.tmpyV4yX2/host-checkout/.effigy/state: Permission denied (os error 13); trash remains at [oxide-pool]/slots/.trash/.barge-claim-effigy-b141b7a2-quick-f8e38d019ce40808
+Built a clean GPUI consumer against 7042276456e9951370b4003208a2b1a666c04538 via local tag v0.4.16; gpui-unofficial =1.22.0 identity compiled.
+oxide: quick profile, build+execute strategy, slot 5755 cold, 111.9s, new slot, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-1c755057 through profile member links (debug, release), temp: inherited [scratch], waited 3.9s, pool lock 2171.8 ms (accounting 2140.6 ms, byte walks 0, inventory entries 0, Barge listing count unavailable; eviction 31.1 ms, byte walks 0, inventory entries 256; reserve 0.1 ms, byte walks 0, inventory entries 0)
+oxide: flushed the removable volume before releasing slot 5755 in 112.7 ms
