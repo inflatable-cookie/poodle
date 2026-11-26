@@ -1052,10 +1052,6 @@ health = [
 # and paired Jetstream sweeps stay separate (`test:native-visual`,
 # `qa:jetstream`). Was previously misnamed `health`, which made every
 # `effigy doctor` run the whole suite.
-# Full self-contained local release board (headless / CPU-only). Visual GPUI
-# and paired Jetstream sweeps stay separate (`test:native-visual`,
-# `qa:jetstream`). Was previously misnamed `health`, which made every
-# `effigy doctor` run the whole suite.
 #
 # g18.032 / spec 071: `qa:board` is the complete assertion inventory. `qa`
 # executes it through the bounded, observable validation runner, which emits a
