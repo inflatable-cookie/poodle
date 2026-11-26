@@ -118,8 +118,8 @@ pub fn message_center(
             .with_placement(spec.placement)
             .with_initial_focus(PopoverInitialFocus::Content)
             .with_aria_label(spec.effective_aria_label())
-            .with_surface_min_width_rem(24.0)
-            .with_surface_max_width_rem(30.0);
+            .with_surface_min_width_rem(poodle_specs::Rem::try_new(24.0).expect("valid rem"))
+            .with_surface_max_width_rem(poodle_specs::Rem::try_new(30.0).expect("valid rem"));
         let mut node = popover_surface(&popover_spec, ctx, Some(content));
         node.id = Some(surface_id.clone());
         node.runtime_id = Some(surface_id.clone());

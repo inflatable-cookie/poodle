@@ -376,7 +376,7 @@ impl LogListSpec {
             .filter(|stream| self.filter_level.is_none_or(|level| stream.level == level))
             .filter(|stream| needle.is_empty() || stream.message.to_lowercase().contains(&needle))
             .collect();
-        if filtered.len() > self.max_entries {
+        if self.max_entries > 0 && filtered.len() > self.max_entries {
             filtered.drain(..filtered.len() - self.max_entries);
         }
         filtered
@@ -674,8 +674,9 @@ mod tests {
             .collect();
         assert_eq!(messages, vec!["middle", "newest"]);
 
-        let empty = spec.with_max_entries(0);
-        assert!(empty.stream_entries().is_empty());
+        // Matches Svelte's `.slice(-maxEntries)`: `0` yields `.slice(-0)` and retains all rows.
+        let unbounded = spec.with_max_entries(0);
+        assert_eq!(unbounded.stream_entries().len(), 3);
     }
 
     #[test]

@@ -11554,8 +11554,8 @@ fn nucleus_popover_element(
     }
     if let Some(rem) = fixed_width_rem {
         spec = spec
-            .with_surface_min_width_rem(rem)
-            .with_surface_max_width_rem(rem);
+            .with_surface_min_width_rem(poodle_specs::Rem::try_new(rem).expect("valid rem"))
+            .with_surface_max_width_rem(poodle_specs::Rem::try_new(rem).expect("valid rem"));
     }
     let scope_tag = scope;
     let content = nucleus_popover_content(scope, &theme, Arc::clone(&clicks));

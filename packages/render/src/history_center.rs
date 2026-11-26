@@ -242,8 +242,8 @@ pub fn history_center(
             .with_open(true)
             .with_placement(spec.placement)
             .with_aria_label(spec.surface_label())
-            .with_surface_min_width_rem(28.0)
-            .with_surface_max_width_rem(38.0);
+            .with_surface_min_width_rem(poodle_specs::Rem::try_new(28.0).expect("valid rem"))
+            .with_surface_max_width_rem(poodle_specs::Rem::try_new(38.0).expect("valid rem"));
         let mut node = popover_surface(
             &popover_spec,
             ctx,

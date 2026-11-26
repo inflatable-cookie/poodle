@@ -8,7 +8,7 @@ use poodle_jetstream::JetstreamThemeProvider;
 
 use crate::compat::js_skeleton;
 
-use poodle_specs::{SkeletonPreset, SkeletonSpec};
+use poodle_specs::{SkeletonPreset, SkeletonShape, SkeletonSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -25,19 +25,21 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .gap(rem_to_px(0.75))
                 .items_center()
                 .child(js_skeleton(
-                    &SkeletonSpec::new().with_shape("line").with_width("12rem"),
+                    &SkeletonSpec::new()
+                        .with_shape(SkeletonShape::Line)
+                        .with_width("12rem"),
                     theme,
                 ))
                 .child(js_skeleton(
                     &SkeletonSpec::new()
-                        .with_shape("circle")
+                        .with_shape(SkeletonShape::Circle)
                         .with_width("2.5rem")
                         .with_height("2.5rem"),
                     theme,
                 ))
                 .child(js_skeleton(
                     &SkeletonSpec::new()
-                        .with_shape("block")
+                        .with_shape(SkeletonShape::Block)
                         .with_width("8rem")
                         .with_height("3rem"),
                     theme,
@@ -52,15 +54,21 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .gap(rem_to_px(0.375))
                 .w(rem_to_px(18.0))
                 .child(js_skeleton(
-                    &SkeletonSpec::new().with_shape("line").with_width("18rem"),
+                    &SkeletonSpec::new()
+                        .with_shape(SkeletonShape::Line)
+                        .with_width("18rem"),
                     theme,
                 ))
                 .child(js_skeleton(
-                    &SkeletonSpec::new().with_shape("line").with_width("13.5rem"),
+                    &SkeletonSpec::new()
+                        .with_shape(SkeletonShape::Line)
+                        .with_width("13.5rem"),
                     theme,
                 ))
                 .child(js_skeleton(
-                    &SkeletonSpec::new().with_shape("line").with_width("9rem"),
+                    &SkeletonSpec::new()
+                        .with_shape(SkeletonShape::Line)
+                        .with_width("9rem"),
                     theme,
                 )),
         ))
@@ -164,7 +172,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .w(rem_to_px(18.0))
                 .child(js_skeleton(
                     &SkeletonSpec::new()
-                        .with_shape("line")
+                        .with_shape(SkeletonShape::Line)
                         .with_width("10rem")
                         .with_animated(false),
                     theme,

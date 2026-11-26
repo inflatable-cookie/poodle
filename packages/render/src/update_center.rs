@@ -132,8 +132,8 @@ pub fn update_center(
             .with_open(true)
             .with_placement(spec.placement)
             .with_aria_label(spec.effective_aria_label())
-            .with_surface_min_width_rem(16.0)
-            .with_surface_max_width_rem(24.0);
+            .with_surface_min_width_rem(poodle_specs::Rem::try_new(16.0).expect("valid rem"))
+            .with_surface_max_width_rem(poodle_specs::Rem::try_new(24.0).expect("valid rem"));
         popover_surface(&popover_spec, ctx, Some(content))
     });
 

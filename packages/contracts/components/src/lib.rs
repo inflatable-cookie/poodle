@@ -277,7 +277,7 @@ pub use pagination::{PageItem, PaginationSpec, PaginationVariant};
 pub use password_requirements::{PasswordRequirementsPolicy, PasswordRequirementsSpec};
 pub use pill::{PillAppearance, PillFont, PillSize, PillSpec, PillTone};
 pub use poodle_headless::motion_policy::MotionPolicy;
-pub use popover::PopoverSpec;
+pub use popover::{InvalidRemError, PopoverSpec, Rem};
 pub use progress::ProgressSpec;
 pub use r#box::BoxSpec;
 pub use radio::RadioSpec;

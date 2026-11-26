@@ -49,7 +49,7 @@ fn search(
     density: Option<ControlDensity>,
 ) -> El {
     let mut spec = TextInputSpec::new()
-        .with_input_type("search")
+        .with_type(poodle_specs::TextInputType::Search)
         .with_placeholder("Search…")
         .with_aria_label("Search items");
     if let Some(size) = size {

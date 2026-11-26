@@ -137,7 +137,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 &PaginationSpec::new()
                     .with_current_page(3)
                     .with_total_pages(8)
-                    .with_standalone(true)
+                    .with_chrome(false)
                     .with_aria_label("Standalone pagination"),
                 theme,
                 "pagination-9",
@@ -152,7 +152,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_current_page(3)
                     .with_total_pages(10)
                     .with_compact(true)
-                    .with_standalone(true),
+                    .with_chrome(false),
                 theme,
                 "pagination-10",
             ),
@@ -166,7 +166,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_current_page(3)
                     .with_total_pages(10)
                     .with_loading(true)
-                    .with_standalone(true),
+                    .with_chrome(false),
                 theme,
                 "pagination-11",
             ),
@@ -202,7 +202,7 @@ fn sized(size: ControlSize, theme: &JetstreamThemeProvider) -> El {
         &PaginationSpec::new()
             .with_current_page(3)
             .with_total_pages(10)
-            .with_standalone(true)
+            .with_chrome(false)
             .with_size(size),
         theme,
         "pagination-12",
@@ -214,7 +214,7 @@ fn densified(density: ControlDensity, theme: &JetstreamThemeProvider) -> El {
         &PaginationSpec::new()
             .with_current_page(3)
             .with_total_pages(10)
-            .with_standalone(true)
+            .with_chrome(false)
             .with_density(density),
         theme,
         "pagination-13",
