@@ -19,10 +19,10 @@
   will-change: transform;
   padding: 0.25rem 0.5rem;
   border-radius: var(--poodle-radius-control, 0.25rem);
-  background: var(--poodle-color-background-elevated, Canvas);
+  background: var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, var(--poodle-color-background-elevated, Canvas)));
   color: var(--poodle-color-text-primary, CanvasText);
-  border: 0.0625rem solid var(--poodle-color-border-subtle, GrayText);
-  box-shadow: var(--poodle-elevation-overlay, 0 0.5rem 1rem color-mix(in srgb, CanvasText 16%, transparent));
+  border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle, GrayText));
+  box-shadow: var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay, 0 0.5rem 1rem color-mix(in srgb, CanvasText 16%, transparent)));
   font-family: var(--poodle-typography-label-family, inherit);
   font-size: var(--poodle-typography-font-size-sm, 0.8125rem);
   white-space: nowrap;

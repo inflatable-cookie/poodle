@@ -29,16 +29,16 @@
     min-height: var(--poodle-size-control-height);
     padding: 0.25rem var(--poodle-space-control-x);
     box-sizing: border-box;
-    border: 0.0625rem solid var(--poodle-color-border-default);
+    border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
+    background: var(--poodle-style-control-fill, var(--poodle-color-background-surface));
     transition:
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .poodle-filter-builder:hover:not([data-disabled="true"]) {
-    border-color: color-mix(in srgb, var(--poodle-color-border-default) 78%, var(--poodle-color-text-primary));
+    border-color: var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-default) 78%, var(--poodle-color-text-primary)));
   }
 
   :root[data-poodle-input-modality="keyboard"] .poodle-filter-builder:focus-within {
@@ -155,10 +155,10 @@
     min-width: 16rem;
     max-width: min(24rem, 90vw);
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent);
+    border: 0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent));
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-color-background-elevated);
-    box-shadow: var(--poodle-elevation-overlay);
+    background: var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, var(--poodle-color-background-elevated)));
+    box-shadow: var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay));
   }
 
   .poodle-filter-builder__panel {
@@ -177,9 +177,9 @@
     flex-direction: column;
     gap: 0.5rem;
     padding: 0.5rem;
-    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
     border-radius: calc(var(--poodle-radius-control) - 0.0625rem);
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 90%, var(--poodle-color-background-elevated));
+    background: var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-surface) 90%, var(--poodle-color-background-elevated)));
   }
 
   .poodle-filter-builder__draft-field {

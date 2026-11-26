@@ -18,8 +18,8 @@
   flex-direction: column;
   inline-size: 100%;
   block-size: 100%;
-  background: var(--poodle-color-background-panel);
-  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  background: var(--poodle-style-surface-fill, var(--poodle-color-background-panel));
+  border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
   border-radius: var(--poodle-radius-surface);
   color: var(--poodle-color-text-primary);
   font-family: var(--poodle-typography-code-family);
@@ -52,8 +52,8 @@
 }
 
 .poodle-code-editor__viewport .cm-gutters {
-  background: var(--poodle-color-background-panel);
-  border-inline-end: 0.0625rem solid var(--poodle-color-border-subtle);
+  background: var(--poodle-style-surface-fill, var(--poodle-color-background-panel));
+  border-inline-end: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
   color: var(--poodle-color-text-secondary);
 }
 
@@ -73,7 +73,7 @@
 
 .poodle-code-editor__viewport .cm-activeLineGutter,
 .poodle-code-editor__viewport .cm-activeLine {
-  background: var(--poodle-color-surface-hover);
+  background: var(--poodle-style-selection-itemFill, var(--poodle-color-surface-hover));
 }
 
 .poodle-code-editor__viewport .cm-selectionBackground,
