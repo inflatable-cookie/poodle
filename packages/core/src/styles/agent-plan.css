@@ -86,9 +86,7 @@
 
 .poodle-agent-plan__action[data-variant="ghost"] {
   border-color: transparent;
-  background: transparent;
   box-shadow: none;
-  color: var(--poodle-color-text-secondary);
 }
 
 /* ── Settled badge ───────────────────────────────────────────────────────── */
