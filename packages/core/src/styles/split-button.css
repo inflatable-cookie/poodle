@@ -3,20 +3,28 @@
    previously-scoped block is safe as global CSS. */
 
   .poodle-split-button {
-    --poodle-split-fill: var(--poodle-color-background-surface);
-    --poodle-split-fill-hover: color-mix(
+    --poodle-split-fill: var(--poodle-style-control-fill, var(--poodle-color-background-surface));
+    --poodle-split-fill-hover: var(--poodle-style-control-fillHover, color-mix(
       in srgb,
       var(--poodle-split-fill) 84%,
       var(--poodle-color-background-elevated)
-    );
-    --poodle-split-border: var(--poodle-color-border-default);
-    --poodle-split-shadow: none;
+    ));
+    --poodle-split-border: var(--poodle-style-control-border, var(--poodle-color-border-default));
+    --poodle-split-shadow: var(--poodle-style-control-shadow, none);
     --poodle-split-text: var(--poodle-color-text-primary);
     position: relative;
     display: inline-flex;
     align-items: stretch;
     width: fit-content;
     border-radius: var(--poodle-radius-control);
+  }
+
+  /* Accent and semantic variants keep their own hover colour. */
+  .poodle-split-button[data-variant="primary"],
+  .poodle-split-button[data-tone="danger"],
+  .poodle-split-button[data-tone="success"],
+  .poodle-split-button[data-tone="warning"] {
+    --poodle-split-fill-hover: color-mix(in srgb, var(--poodle-split-fill) 84%, var(--poodle-color-background-elevated));
   }
 
   .poodle-split-button[data-variant="primary"] {
@@ -27,8 +35,8 @@
   }
 
   .poodle-split-button[data-variant="ghost"] {
-    --poodle-split-fill: color-mix(in srgb, var(--poodle-color-background-surface) 42%, transparent);
-    --poodle-split-border: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
+    --poodle-split-fill: var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-surface) 42%, transparent));
+    --poodle-split-border: var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent));
   }
 
   .poodle-split-button[data-tone="danger"] {
@@ -250,10 +258,10 @@
     z-index: var(--poodle-overlay-z-menu);
     min-width: 12rem;
     padding: 0.25rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
+    border: 0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent));
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-split-button-menu-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)));
-    box-shadow: var(--poodle-recipe-split-button-menu-shadow, var(--poodle-elevation-overlay));
+    background: var(--poodle-recipe-split-button-menu-fill, var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))));
+    box-shadow: var(--poodle-recipe-split-button-menu-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay)));
     overflow-y: auto;
   }
 
@@ -265,7 +273,7 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: var(--poodle-recipe-split-button-item-fill, transparent);
+    background: var(--poodle-recipe-split-button-item-fill, var(--poodle-style-control-fill, transparent));
     color: var(--poodle-recipe-split-button-item-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font: inherit;
@@ -275,7 +283,7 @@
 
   .poodle-split-button__item:hover:not(:disabled),
   .poodle-split-button__item:focus-visible {
-    background: var(--poodle-recipe-split-button-hover-focus-item-fill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
+    background: var(--poodle-recipe-split-button-hover-focus-item-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)));
     outline: none;
   }
 

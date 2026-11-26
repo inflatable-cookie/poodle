@@ -11,7 +11,7 @@
     display: inline;
     padding: 0.125rem 0.375rem;
     border-radius: 0.25rem;
-    background: var(--poodle-recipe-code-fill, color-mix(in srgb, var(--poodle-color-background-panel) 72%, var(--poodle-color-background-elevated)));
+    background: var(--poodle-recipe-code-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 72%, var(--poodle-color-background-elevated))));
     color: var(--poodle-recipe-code-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-code-family);
     font-size: calc(0.8125em * var(--poodle-typography-code-adjustmentRatio));
@@ -32,7 +32,7 @@
   .poodle-code--block {
     display: flex;
     flex-direction: column;
-    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
     border-radius: var(--poodle-radius-surface);
     overflow: hidden;
   }
@@ -42,8 +42,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.375rem 0.625rem;
-    background: var(--poodle-recipe-code-toolbar-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 60%, var(--poodle-color-background-panel)));
-    border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+    background: var(--poodle-recipe-code-toolbar-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 60%, var(--poodle-color-background-panel))));
+    border-bottom: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
   }
 
   .poodle-code__language {
@@ -70,7 +70,7 @@
     padding: 0;
     border: 0;
     border-radius: 0.25rem;
-    background: var(--poodle-recipe-code-copy-fill, transparent);
+    background: var(--poodle-recipe-code-copy-fill, var(--poodle-style-control-fill, transparent));
     color: var(--poodle-recipe-code-copy-text, var(--poodle-color-text-secondary));
     cursor: pointer;
     transition: color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
@@ -133,7 +133,7 @@
   }
 
   .poodle-code__line--highlighted {
-    background: var(--poodle-recipe-code-line--highlighted-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
+    background: var(--poodle-recipe-code-line--highlighted-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
     margin: 0 -1rem;
     padding: 0 1rem;
   }

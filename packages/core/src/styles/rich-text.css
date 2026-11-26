@@ -16,8 +16,8 @@
   flex-direction: column;
   inline-size: 100%;
   block-size: 100%;
-  background: var(--poodle-color-background-panel);
-  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  background: var(--poodle-style-surface-fill, var(--poodle-color-background-panel));
+  border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
   border-radius: var(--poodle-radius-surface);
   color: var(--poodle-color-text-primary);
   overflow: hidden;
@@ -44,8 +44,8 @@
   /* Row gap keeps wrapped clusters intact; column gap separates them. */
   gap: var(--poodle-rich-text-toolbar-y) var(--poodle-space-inline-sm);
   padding: var(--poodle-rich-text-toolbar-y) var(--poodle-rich-text-toolbar-x);
-  background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
-  border-block-end: 0.0625rem solid var(--poodle-color-border-subtle);
+  background: var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent));
+  border-block-end: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
 }
 
 .poodle-rich-text-editor[data-density="compact"] {
@@ -164,8 +164,8 @@
   font: inherit;
   font-size: 0.875rem;
   color: var(--poodle-color-text-primary);
-  background: var(--poodle-color-background-panel);
-  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  background: var(--poodle-style-control-fill, var(--poodle-color-background-panel));
+  border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-subtle));
   border-radius: var(--poodle-radius-control);
   padding: var(--poodle-space-stack-2xs) var(--poodle-space-inline-sm);
 }
@@ -294,7 +294,7 @@
 }
 
 .poodle-rich-text-editor__viewport .ProseMirror .selectedCell {
-  background: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+  background: var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent));
 }
 
 .poodle-rich-text-editor__viewport .ProseMirror .selectedCell:after {

@@ -17,9 +17,9 @@
     flex-direction: column;
     min-height: 0;
     max-height: 100%;
-    border: 0.0625rem solid var(--poodle-color-border-default);
+    border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-markdown-editor-fill, var(--poodle-color-background-surface));
+    background: var(--poodle-recipe-markdown-editor-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-surface)));
     overflow: hidden;
   }
 
@@ -80,8 +80,8 @@
     justify-content: space-between;
     gap: 0.5rem;
     padding: var(--poodle-md-editor-toolbar-y) var(--poodle-md-editor-toolbar-x);
-    border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
-    background: var(--poodle-recipe-markdown-editor-toolbar-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent));
+    border-bottom: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
+    background: var(--poodle-recipe-markdown-editor-toolbar-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent)));
     flex-wrap: wrap;
     flex-shrink: 0;
   }
@@ -100,7 +100,7 @@
     padding: 0;
     border: 0;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-markdown-editor-tool-btn-fill, transparent);
+    background: var(--poodle-recipe-markdown-editor-tool-btn-fill, var(--poodle-style-control-fill, transparent));
     color: var(--poodle-recipe-markdown-editor-tool-btn-text, var(--poodle-color-text-secondary));
     cursor: pointer;
     font-family: var(--poodle-typography-code-family);
@@ -111,7 +111,7 @@
   }
 
   .poodle-md-editor__tool-btn:hover:not(:disabled) {
-    background: var(--poodle-recipe-markdown-editor-hover-tool-btn-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
+    background: var(--poodle-recipe-markdown-editor-hover-tool-btn-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
     color: var(--poodle-recipe-markdown-editor-hover-tool-btn-text, var(--poodle-color-text-primary));
   }
 
