@@ -194,9 +194,9 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | display | `grid` |
 | gap | `0.375rem` (default) |
 | padding | `0.75rem` (default) |
-| border | `0.0625rem solid var(--poodle-color-border-subtle)` |
+| border | `0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-subtle))` |
 | border-radius | `var(--poodle-radius-surface)` |
-| background | `color-mix(in srgb, var(--poodle-color-background-panel) 92%, transparent)` |
+| background | `var(--poodle-recipe-media-browse-panel-item-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-panel) 92%, transparent)))` |
 | color | `inherit` |
 | text-align | `left` |
 | cursor | `pointer` |
@@ -205,11 +205,11 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 | State | Property | Value |
 |-------|----------|-------|
-| `:hover` | border-color | `var(--poodle-color-border-focus)` |
-| `:hover` | background | `color-mix(in srgb, var(--poodle-color-background-elevated) 90%, transparent)` |
+| `:hover` | border-color | `var(--poodle-recipe-media-browse-panel-hover-focus-item-border, var(--poodle-color-border-focus))` |
+| `:hover` | background | `var(--poodle-recipe-media-browse-panel-hover-focus-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 90%, transparent)))` |
 | `:hover` | outline | `none` |
-| `:focus-visible` | border-color | `var(--poodle-color-border-focus)` |
-| `:focus-visible` | background | `color-mix(in srgb, var(--poodle-color-background-elevated) 90%, transparent)` |
+| `:focus-visible` | border-color | `var(--poodle-recipe-media-browse-panel-hover-focus-item-border, var(--poodle-color-border-focus))` |
+| `:focus-visible` | background | `var(--poodle-recipe-media-browse-panel-hover-focus-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 90%, transparent)))` |
 | `:focus-visible` | outline | `none` |
 
 ### Image `.media-browse-panel__image`

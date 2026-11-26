@@ -161,7 +161,7 @@ Standalone component. Does not compose other Poodle primitives. Uses
 
 ## 8. Token Usage
 
-Note: The video player renders against a black background regardless of theme.
+Note: The video player renders against a black stage under the default style, regardless of theme. Under `data-style="quiet"` the stage takes the tonal surface fill; the picture and the control scrim are unchanged.
 Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 
 ### Data Attributes
@@ -178,7 +178,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 | `position` | `relative` |
 | `overflow` | `hidden` |
 | `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `#000` |
+| `background` | `var(--poodle-recipe-video-player-fill, var(--poodle-style-surface-fill, #000))` |
 | `cursor` | `pointer` |
 | `aspect-ratio` | set via inline style from `aspectRatio` prop |
 
@@ -203,7 +203,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 | `height` | `4rem` |
 | `padding` | `0` |
 | `border` | `0` |
-| `background` | `transparent` |
+| `background` | `var(--poodle-recipe-video-player-big-play-fill, var(--poodle-style-control-fill, transparent))` |
 | `color` | `rgba(255, 255, 255, 0.9)` |
 | `cursor` | `pointer` |
 | `transition` | `transform 0.2s ease` |
@@ -244,7 +244,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 | Property | Value |
 |----------|-------|
 | `height` | `100%` |
-| `background` | `var(--poodle-color-accent-base, #6366f1)` |
+| `background` | `var(--poodle-recipe-video-player-progress-fill-fill, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base, #6366f1)))` |
 | `border-radius` | `999rem` |
 | `transition` | `width 0.1s linear` |
 
@@ -289,7 +289,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 | `padding` | `0` |
 | `border` | `0` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `transparent` |
+| `background` | `var(--poodle-recipe-video-player-btn-fill, var(--poodle-style-control-fill, transparent))` |
 | `color` | `rgba(255, 255, 255, 0.9)` |
 | `cursor` | `pointer` |
 | `transition` | `background 0.15s ease` |
@@ -298,7 +298,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 
 | Property | Value |
 |----------|-------|
-| `background` | `rgba(255, 255, 255, 0.15)` |
+| `background` | `var(--poodle-recipe-video-player-hover-btn-fill, var(--poodle-style-control-fillHover, rgba(255, 255, 255, 0.15)))` |
 
 ### `.video-player__btn svg`
 
