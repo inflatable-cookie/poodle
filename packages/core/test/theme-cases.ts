@@ -77,6 +77,7 @@ export function themeCases(): ThemeCase[] {
       }
     }
   }
+  cases.push({ id: "omitted-settings", settings: {} });
   for (let i = 0; i < 512; i++) {
     cases.push({ id: `seeded/${i}`, settings: randomTheme(random) });
   }

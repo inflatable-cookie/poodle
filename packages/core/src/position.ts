@@ -1,6 +1,6 @@
 /**
- * Anchor-positioning machinery (Tooltip, Menu, IconButton tooltips;
- * HoverCard pending; Popover keeps CSS anchoring by contract delta).
+ * Anchor-positioning machinery (Tooltip, Menu, Popover, IconButton tooltips;
+ * HoverCard pending).
  *
  * Pure collision-aware placement resolver promoted from the Svelte
  * implementation's overlay-position module. Candidate placements are scored

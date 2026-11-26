@@ -129,10 +129,12 @@ describe("token machinery", () => {
   });
 
   test("split commits completed parts and keeps the remainder", () => {
-    expect(splitTokenInput("one,two,thr", /[,;]/, ",;")).toEqual({ committed: ["one", "two"], remainder: "thr" });
-    expect(splitTokenInput("one,", /[,;]/, ",;")).toEqual({ committed: ["one", ""], remainder: "" });
-    expect(splitTokenInput("plain", /[,;]/, ",;")).toBeNull();
-    expect(splitTokenInput("plain", null, ",;")).toBeNull();
+    expect(splitTokenInput("one,two;thr", [",", ";"])).toEqual({ committed: ["one", "two"], remainder: "thr" });
+    expect(splitTokenInput("one,", [",", ";"])).toEqual({ committed: ["one", ""], remainder: "" });
+    expect(splitTokenInput("a.b[c", [".", "["])).toEqual({ committed: ["a", "b"], remainder: "c" });
+    expect(splitTokenInput("plain", [",", ";"])).toBeNull();
+    expect(splitTokenInput("plain", [])).toBeNull();
+    expect(splitTokenInput("plain", [""])).toBeNull();
   });
 
   test("backspace removes the last chip only on empty input", () => {

@@ -160,9 +160,11 @@ export function updateRejectionRetry(code: UpdateRejectionCode): UpdateStatusAct
 
 /** Accessible name for the update-centre trigger while a download runs. */
 export function updateDownloadLabel(fraction: number | null): string {
-  return fraction === null
-    ? "Downloading update"
-    : `Downloading update, ${Math.round(fraction * 100)}%`;
+  if (fraction === null || !Number.isFinite(fraction)) {
+    return "Downloading update";
+  }
+  const clamped = Math.min(1, Math.max(0, fraction));
+  return `Downloading update, ${Math.round(clamped * 100)}%`;
 }
 
 export function updateErrorMessage(error: unknown): string {

@@ -1,4 +1,5 @@
-import { describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, test } from "bun:test";
+import { Window } from "happy-dom";
 
 import { registerDismissLayer, resolveDismiss, type DismissLayer } from "../src/dom/dismiss.ts";
 
@@ -133,5 +134,81 @@ describe("resolveDismiss", () => {
       middle,
       outer,
     ]);
+  });
+});
+
+describe("registerDismissLayer keydown guards (happy-dom)", () => {
+  const originalDocument = globalThis.document;
+  let win: Window | null = null;
+  let unregister: (() => void) | null = null;
+
+  afterEach(() => {
+    unregister?.();
+    unregister = null;
+    win?.close();
+    win = null;
+    if (originalDocument === undefined) {
+      delete (globalThis as { document?: Document }).document;
+    } else {
+      globalThis.document = originalDocument;
+    }
+  });
+
+  function setupDom(): Window {
+    win = new Window();
+    globalThis.document = win.document as unknown as Document;
+    return win;
+  }
+
+  test("ignores Escape during IME composition (isComposing and keyCode 229)", () => {
+    const w = setupDom();
+    let dismissed = 0;
+    unregister = registerDismissLayer(layer({ onDismiss: () => { dismissed += 1; } }));
+
+    const composingEvent = new w.KeyboardEvent("keydown", {
+      key: "Escape",
+      isComposing: true,
+      cancelable: true,
+    });
+    w.document.dispatchEvent(composingEvent);
+    expect(dismissed).toBe(0);
+    expect(composingEvent.defaultPrevented).toBe(false);
+
+    const legacyImeEvent = new w.KeyboardEvent("keydown", {
+      key: "Escape",
+      keyCode: 229,
+      cancelable: true,
+    });
+    w.document.dispatchEvent(legacyImeEvent);
+    expect(dismissed).toBe(0);
+    expect(legacyImeEvent.defaultPrevented).toBe(false);
+  });
+
+  test("ignores Escape that is already defaultPrevented", () => {
+    const w = setupDom();
+    let dismissed = 0;
+    unregister = registerDismissLayer(layer({ onDismiss: () => { dismissed += 1; } }));
+
+    const preventedEvent = new w.KeyboardEvent("keydown", {
+      key: "Escape",
+      cancelable: true,
+    });
+    preventedEvent.preventDefault();
+    w.document.dispatchEvent(preventedEvent);
+    expect(dismissed).toBe(0);
+  });
+
+  test("dismisses the top layer on a normal Escape", () => {
+    const w = setupDom();
+    const calls: string[] = [];
+    unregister = registerDismissLayer(layer({ onDismiss: (reason) => { calls.push(reason); } }));
+
+    const event = new w.KeyboardEvent("keydown", {
+      key: "Escape",
+      cancelable: true,
+    });
+    w.document.dispatchEvent(event);
+    expect(calls).toEqual(["escape"]);
+    expect(event.defaultPrevented).toBe(true);
   });
 });

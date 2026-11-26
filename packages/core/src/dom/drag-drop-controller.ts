@@ -1338,11 +1338,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
           // The host still allocated something for a session that no longer
           // exists. Hand it back rather than leaking it.
           if (receipt && isCrossWindowDragReceipt(receipt)) {
-            try {
-              void bridge.cancel(receipt, "superseded");
-            } catch {
-              // A host that throws on cleanup cannot break the local session.
-            }
+            safeCancel(() => bridge.cancel(receipt, "superseded"));
           }
           return;
         }
@@ -1433,11 +1429,8 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     }
 
     if (transaction.receipt && !transaction.settled) {
-      try {
-        void transaction.bridge.cancel(transaction.receipt, reason);
-      } catch {
-        // Same: the local session is already ending either way.
-      }
+      const receipt = transaction.receipt;
+      safeCancel(() => transaction.bridge.cancel(receipt, reason));
     }
   }
 
@@ -1586,17 +1579,24 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     );
   }
 
+  /** Cancel a host receipt without letting sync throws or async rejections escape. */
+  function safeCancel(invoke: () => void | Promise<void>): void {
+    try {
+      void Promise.resolve(invoke()).catch(() => {
+        // A host that rejects on cleanup cannot break the local session.
+      });
+    } catch {
+      // A host that throws on cleanup cannot break the local session.
+    }
+  }
+
   /** Give a receipt back to the host that issued it. Never a delete order. */
   function returnPreparedExport(
     bridge: DragExportBridge,
     prepared: PreparedFileExport,
     reason: DragCancelReason,
   ): void {
-    try {
-      void bridge.cancel(prepared, reason);
-    } catch {
-      // A host that throws on cleanup cannot break the local session.
-    }
+    safeCancel(() => bridge.cancel(prepared, reason));
   }
 
   /**

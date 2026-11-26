@@ -22,9 +22,10 @@ fn color_input(value: &Value) -> ThemeColorInput<'_> {
 fn theme_settings(settings: &Value) -> ThemeSettings<'_> {
     let defaults = ThemeSettings::default();
     ThemeSettings {
-        scheme: match settings["scheme"].as_str() {
-            Some("light") => ThemeScheme::Light,
-            Some("dark") => ThemeScheme::Dark,
+        scheme: match settings.get("scheme") {
+            None | Some(Value::Null) => defaults.scheme,
+            Some(Value::String(s)) if s == "light" => ThemeScheme::Light,
+            Some(Value::String(s)) if s == "dark" => ThemeScheme::Dark,
             scheme => panic!("invalid vector scheme {scheme:?}"),
         },
         base: color_input(&settings["base"]),
@@ -36,7 +37,11 @@ fn theme_settings(settings: &Value) -> ThemeSettings<'_> {
             .as_f64()
             .unwrap_or(defaults.accent_blend),
         contrast: settings["contrast"].as_f64().unwrap_or(defaults.contrast),
-        even_tint: settings["evenTint"].as_bool().expect("vector tint mode"),
+        even_tint: match settings.get("evenTint") {
+            None | Some(Value::Null) => defaults.even_tint,
+            Some(Value::Bool(even)) => *even,
+            even => panic!("invalid vector tint mode {even:?}"),
+        },
     }
 }
 

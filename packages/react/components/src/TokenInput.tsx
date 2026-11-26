@@ -34,10 +34,6 @@ export interface TokenInputProps {
   onTokenReject?: (value: string) => void;
 }
 
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
 export function TokenInput({
   id = "",
   values,
@@ -79,8 +75,6 @@ export function TokenInput({
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
   const canEdit = !disabled && !readOnly;
-  const separatorChars = Array.from(new Set(separators.filter((separator) => separator.length > 0))).join("");
-  const splitPattern = separatorChars.length > 0 ? new RegExp(`[${escapeRegExp(separatorChars)}]+`) : null;
 
   function normalizeToken(value: string, current: string[]): string | null {
     const trimmed = value.trim();
@@ -130,7 +124,7 @@ export function TokenInput({
   }
 
   function handleInput(nextValue: string): void {
-    const split = splitTokenInput(nextValue, splitPattern, separatorChars);
+    const split = splitTokenInput(nextValue, separators);
     if (!split) {
       setInputValue(nextValue);
       return;

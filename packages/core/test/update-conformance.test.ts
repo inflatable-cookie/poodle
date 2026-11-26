@@ -13,6 +13,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import {
+  updateDownloadLabel,
   updateRejectionMessage,
   updateRejectionRetry,
   updateStatusView,
@@ -95,5 +96,18 @@ describe("update rejections (shared vectors)", () => {
       "installFailed",
     ].sort();
     expect(codes).toEqual(expected);
+  });
+});
+
+describe("updateDownloadLabel", () => {
+  test("clamps finite fractions to 0-1 and treats null or non-finite as indeterminate", () => {
+    expect(updateDownloadLabel(null)).toBe("Downloading update");
+    expect(updateDownloadLabel(Number.NaN)).toBe("Downloading update");
+    expect(updateDownloadLabel(Number.POSITIVE_INFINITY)).toBe("Downloading update");
+    expect(updateDownloadLabel(-0.5)).toBe("Downloading update, 0%");
+    expect(updateDownloadLabel(0)).toBe("Downloading update, 0%");
+    expect(updateDownloadLabel(0.42)).toBe("Downloading update, 42%");
+    expect(updateDownloadLabel(1)).toBe("Downloading update, 100%");
+    expect(updateDownloadLabel(1.5)).toBe("Downloading update, 100%");
   });
 });
