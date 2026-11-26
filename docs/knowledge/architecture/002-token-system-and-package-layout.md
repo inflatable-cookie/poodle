@@ -129,9 +129,13 @@ The `scale` treatment supplies system sans and mono stacks. The generated
 CSS gives legacy per-role family tokens zero-specificity defaults at the
 document root and each rendering-style scope. The aliases read
 `--poodle-font-sans` or `--poodle-font-mono`, then the style's family and
-the original stack. The cohort also reads the shared inputs directly so
-that overrides on inner elements reach it. The shared inputs are unset in
-the generated CSS. Theme writes stay independent of type roles, including
+the original stack. A low-priority layer binds those aliases to a shared
+override within the scope. Without a shared input its declarations roll
+back, preserving inherited and explicit per-role values. The cohort reads
+the shared inputs directly ahead of its per-role fallbacks. The inputs are
+unset in the generated CSS. For parts that inherited a face before this
+treatment, the default still inherits and Quiet assigns a per-role family
+inside its scope. Theme writes stay independent of type roles, including
 the group and table-header text roles that reference the theme's neutral ink.
 
 Themes define `color.fill.{rest,hover,active}` for filled controls and

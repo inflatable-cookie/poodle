@@ -368,3 +368,12 @@
   --poodle-typography-heading-family: var(--poodle-font-sans, var(--poodle-style-typography-family-sans, "Inter", "SF Pro Display", system-ui, sans-serif));
   --poodle-typography-code-family: var(--poodle-font-mono, var(--poodle-style-typography-family-mono, "IBM Plex Mono", "SFMono-Regular", monospace));
 }
+@layer poodle-font-aliases {
+  :where(*) {
+    --poodle-typography-body-family: var(--poodle-font-sans, revert-layer);
+    --poodle-typography-label-family: var(--poodle-font-sans, revert-layer);
+    --poodle-typography-caption-family: var(--poodle-font-sans, revert-layer);
+    --poodle-typography-heading-family: var(--poodle-font-sans, revert-layer);
+    --poodle-typography-code-family: var(--poodle-font-mono, revert-layer);
+  }
+}

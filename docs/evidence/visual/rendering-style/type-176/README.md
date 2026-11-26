@@ -17,10 +17,12 @@ those that the six components do not use yet. The [capture receipt](receipt.json
 records exact RGBA comparisons against base `837260b15`, Button and TextInput
 heights in every density, and the root font-family override on every component.
 The capture also checks a subtree override on each component and a default
-scope nested under quiet. The font-cascade rows cover style defaults and
-shared and per-role overrides on the root and inner scopes in Chromium and
-WebKit. SidebarNav’s library specimen receives the same `data-size`
-attribute that an explicit size prop sets.
+scope nested under quiet. In Chromium and WebKit, the font-cascade rows
+cover all six specimens, the 15 parts that inherit their family in Default,
+and all five legacy aliases. They cover style defaults and shared and
+per-role overrides on the document and inner scopes. SidebarNav’s library
+specimen receives the same `data-size` attribute that an explicit size prop
+sets.
 
 ## Migration decisions
 

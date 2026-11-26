@@ -271,17 +271,18 @@ the family tokens at their own rendering location, so the same override
 works on a containing subtree. For a portaled dialog, put it on the
 portal host or an ancestor.
 
-After any component font-family recipe, these components use the shared
-override first, then the existing per-role family token for that part,
-such as `--poodle-typography-label-family`. The style supplies the per-role
-default. The default style keeps the original stacks, and Quiet uses system
-sans and mono. A per-role rule on the style scope or within it can override
-that default in either style.
+After any component font-family recipe, these parts use the shared
+override first, then their per-role family token, such as
+`--poodle-typography-label-family`. The style supplies the per-role
+default. The default style keeps the original stacks and keeps inheritance
+on parts that previously inherited. Quiet uses system sans and mono and
+assigns per-role family tokens to those inherited parts. An app can
+override a per-role token on the style scope or within it.
 
-Existing CSS can keep reading the per-role tokens. To let your own CSS
-respond to a shared override on an inner element, use the same fallback
-chain, for example
-`font-family: var(--poodle-font-sans, var(--poodle-typography-body-family))`.
+Existing CSS can keep reading the per-role tokens. Those aliases inherit
+from the document or style scope and pick up a shared override inside that
+scope. An explicit app declaration of a per-role token on an element still
+wins the cascade for that alias on that element.
 
 ### Themes
 

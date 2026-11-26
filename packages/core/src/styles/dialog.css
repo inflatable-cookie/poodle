@@ -85,7 +85,7 @@
     color: var(--poodle-recipe-dialog-header-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-recipe-dialog-description-font-size, var(--poodle-style-typography-secondary-size, 0.8125rem));
     line-height: var(--poodle-recipe-dialog-description-line-height, var(--poodle-style-typography-secondary-lineHeight, 1.5));
-    font-family: var(--poodle-recipe-dialog-description-font-family, var(--poodle-font-sans, var(--poodle-style-typography-family-sans, inherit)));
+    font-family: var(--poodle-recipe-dialog-description-font-family, var(--poodle-font-sans, inherit));
     font-weight: var(--poodle-recipe-dialog-description-font-weight, var(--poodle-style-typography-secondary-weight, inherit));
   }
 
@@ -150,4 +150,12 @@
   .poodle-dialog[data-density="comfortable"] .poodle-dialog__close--overlay {
     top: 1rem;
     right: 1.25rem;
+  }
+
+  /* Quiet gives formerly inherited text its own role. A nested style
+     starts a new typography scope. */
+  @scope ([data-style="quiet"]) to ([data-style]) {
+    .poodle-dialog__header p {
+      font-family: var(--poodle-recipe-dialog-description-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
+    }
   }

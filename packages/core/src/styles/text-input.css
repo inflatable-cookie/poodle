@@ -242,14 +242,18 @@
     color: var(--poodle-color-status-danger);
   }
 
-  /* Let either shorthand override the caption longhands without requiring
-     consumers to define the legacy token. */
   @layer poodle-text-input-count {
     .poodle-text-input__char-count {
-      font-family: var(--poodle-font-sans, var(--poodle-style-typography-family-sans, inherit));
+      font-family: var(--poodle-font-sans, inherit);
       font-size: var(--poodle-style-typography-caption-size, inherit);
       line-height: var(--poodle-style-typography-caption-lineHeight, inherit);
       font-weight: var(--poodle-style-typography-caption-weight, inherit);
+    }
+
+    @scope ([data-style="quiet"]) to ([data-style]) {
+      .poodle-text-input__char-count {
+        font-family: var(--poodle-font-sans, var(--poodle-typography-caption-family));
+      }
     }
   }
 
@@ -257,6 +261,8 @@
     position: absolute;
     inset-inline-end: 0.5rem;
     inset-block-end: 0.375rem;
+    /* The legacy shorthand is app-supplied. With neither shorthand set,
+       revert-layer reveals the count longhands above. */
     font: var(--poodle-recipe-text-input-char-count-font, var(--poodle-typography-code-xs, revert-layer));
     color: var(--poodle-color-text-muted);
     pointer-events: none;

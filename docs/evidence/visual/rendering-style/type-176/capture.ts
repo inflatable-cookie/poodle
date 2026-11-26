@@ -191,46 +191,167 @@ async function render(dist: string, slug: Slug, theme: Theme, style: Style, size
   }
 }
 
+const componentFamilyRoles = {
+  "page-header": "heading",
+  "sidebar-nav": "label",
+  dialog: "heading",
+  "data-table": "body",
+  button: "label",
+  "text-input": "body",
+} as const;
+
+const legacyFamilies = {
+  body: "Cambria, serif",
+  label: "Georgia, serif",
+  caption: "Arial, sans-serif",
+  heading: "Palatino, serif",
+  code: "Courier New, monospace",
+} as const;
+
+type FamilyRole = keyof typeof legacyFamilies;
+const familyRoles = Object.keys(legacyFamilies) as FamilyRole[];
+const legacyToken = (role: FamilyRole) => `--poodle-typography-${role}-family`;
+
+const previouslyInheritedParts = `
+  <div class="poodle-page-header" data-has-title="true">
+    <a class="poodle-page-header__back" data-font-role="label">Back</a>
+    <p class="poodle-page-header__section" data-font-role="label">Section</p>
+    <p class="poodle-page-header__eyebrow" data-font-role="caption">Eyebrow</p>
+    <p class="poodle-page-header__subtitle" data-font-role="body">Subtitle</p>
+    <p class="poodle-page-header__body" data-font-role="body">Body</p>
+  </div>
+  <div class="poodle-dialog__header">
+    <p data-font-role="body">Dialog description</p>
+  </div>
+  <div class="poodle-data-table">
+    <button class="poodle-data-table__toolbar-btn" data-font-role="label">Toolbar</button>
+    <label class="poodle-data-table__col-menu-item" data-font-role="label">Column</label>
+    <table>
+      <thead><tr class="poodle-data-table__filters-row"><td data-font-role="body">Filter</td></tr></thead>
+      <tbody><tr><td data-font-role="body">Primary cell</td></tr></tbody>
+    </table>
+    <div class="poodle-data-table__footer" data-font-role="caption">
+      <span class="poodle-data-table__pagination-summary" data-font-role="caption">Summary</span>
+      <label class="poodle-data-table__limit" data-font-role="body">Limit</label>
+      <span class="poodle-data-table__pagination-page" data-font-role="label">Page</span>
+    </div>
+  </div>
+  <span class="poodle-text-input__char-count" data-font-role="caption">Character count</span>
+`;
+
+const legacyDeclarations = familyRoles.map((role) => `${legacyToken(role)}: ${legacyFamilies[role]};`).join(" ");
+const sharedDeclarations = "--poodle-font-sans: Verdana, sans-serif; --poodle-font-mono: Menlo, monospace;";
+
+const cascadeCases = [
+  { name: "style-default", selector: ":root", declarations: "", shared: false, legacy: false, boundary: false },
+  { name: "shared-root", selector: ":root", declarations: sharedDeclarations, shared: true, legacy: false, boundary: false },
+  { name: "shared-inner", selector: "#font-probe", declarations: sharedDeclarations, shared: true, legacy: false, boundary: false },
+  { name: "legacy-inner", selector: "#font-probe", declarations: legacyDeclarations, shared: false, legacy: true, boundary: false },
+  { name: "legacy-root", selector: ":root", declarations: legacyDeclarations, shared: false, legacy: true, boundary: false },
+  { name: "shared-inner-style-boundary", selector: "#font-probe", declarations: sharedDeclarations, shared: true, legacy: false, boundary: true },
+] as const;
+
+function expectedFamily(role: FamilyRole, style: Style, useShared: boolean, useLegacy: boolean) {
+  if (useShared) return role === "code" ? "Menlo" : "Verdana";
+  if (useLegacy) return legacyFamilies[role].split(",")[0];
+  if (style === "quiet") return role === "code" ? "ui-monospace" : "system-ui";
+  return role === "code" ? "IBM Plex Mono" : "Inter";
+}
+
 async function checkFontCascade() {
   const results = [];
   for (const engine of [chromium, webkit]) {
     const browser = await engine.launch();
     try {
       for (const style of ["default", "quiet"] as const) {
-        const page = await browser.newPage();
-        const button = await openSpecimen(page, afterDist, "button", "eclipse", style, "md", "default");
-        // Model an app with its rendering style on html and a local font
-        // scope. Put the app rule before the package CSS to test specificity.
-        await button.evaluate((button) => {
-          const scope = document.createElement("div");
-          scope.id = "font-probe";
-          scope.append(button.cloneNode(true));
-          const legacy = document.createElement("span");
-          legacy.style.fontFamily = "var(--poodle-typography-label-family)";
-          scope.append(legacy);
-          document.body.append(scope);
-          const rules = document.createElement("style");
-          rules.id = "font-probe-rules";
-          document.head.prepend(rules);
-        });
-        assert.equal(await page.locator("html").getAttribute("data-style"), style);
-        const defaultFamily = style === "default" ? /Inter/ : /^system-ui/;
-        const cases = [
-          { name: "style-default", css: "", expected: defaultFamily, alias: defaultFamily },
-          { name: "shared-root", css: ":root { --poodle-font-sans: Georgia, serif; }", expected: /Georgia/, alias: /Georgia/ },
-          { name: "shared-inner", css: "#font-probe { --poodle-font-sans: Verdana, sans-serif; }", expected: /Verdana/, alias: defaultFamily },
-          { name: "legacy-inner", css: "#font-probe { --poodle-typography-label-family: Georgia, serif; }", expected: /Georgia/, alias: /Georgia/ },
-          { name: "legacy-root", css: ":root { --poodle-typography-label-family: Georgia, serif; }", expected: /Georgia/, alias: /Georgia/ },
-        ];
-        for (const { name, css, expected, alias } of cases) {
-          await page.locator("#font-probe-rules").evaluate((rules, css) => { rules.textContent = css; }, css);
-          const font = await page.locator("#font-probe button").evaluate((node) => getComputedStyle(node).fontFamily);
-          const legacy = await page.locator("#font-probe > span").evaluate((node) => getComputedStyle(node).fontFamily);
-          assert.match(font, expected, `${engine.name()} ${style} ${name}`);
-          assert.match(legacy, alias, `${engine.name()} ${style} ${name} legacy reader`);
-          results.push({ engine: engine.name(), style, case: name, font, legacy });
+        const cases = cascadeCases.map((config) => ({
+          config,
+          components: {} as Partial<Record<Slug, string>>,
+          inheritedParts: {} as Record<string, string>,
+          aliases: {} as Partial<Record<FamilyRole, string>>,
+        }));
+        for (const slug of slugs) {
+          const page = await browser.newPage();
+          try {
+            const target = await openSpecimen(page, afterDist, slug, "eclipse", style, "md", "default");
+            const includeParts = slug === "data-table";
+            await target.evaluate((target, { slug, selector, markup, aliases }) => {
+              const scope = document.createElement("div");
+              scope.id = "font-probe";
+              scope.style.fontFamily = "Tahoma, sans-serif";
+              const component = target.cloneNode(true) as HTMLElement;
+              const text = slug === "button" ? component : component.querySelector(selector);
+              if (!text) throw new Error(`Missing specimen text for ${slug}`);
+              text.setAttribute("data-component-font", "");
+              scope.append(component);
+              scope.insertAdjacentHTML("beforeend", markup);
+              for (const { role, token } of aliases) {
+                const reader = document.createElement("span");
+                reader.dataset.fontAlias = role;
+                reader.style.fontFamily = `var(${token})`;
+                scope.append(reader);
+              }
+              document.body.append(scope);
+              // Put app CSS before the package stylesheets to test specificity.
+              const rules = document.createElement("style");
+              rules.id = "font-probe-rules";
+              document.head.prepend(rules);
+            }, {
+              slug,
+              selector: specimens[slug].text,
+              markup: includeParts ? previouslyInheritedParts : "",
+              aliases: includeParts ? familyRoles.map((role) => ({ role, token: legacyToken(role) })) : [],
+            });
+            assert.equal(await page.locator("html").getAttribute("data-style"), style);
+
+            for (const { config, components, inheritedParts, aliases } of cases) {
+              const { name, selector, declarations, shared, legacy, boundary } = config;
+              await page.locator("#font-probe-rules").evaluate((rules, css) => { rules.textContent = css; }, `${selector} { ${declarations} }`);
+              await page.locator("#font-probe").evaluate((scope, mode) => {
+                if (mode) scope.setAttribute("data-style", mode);
+                else scope.removeAttribute("data-style");
+              }, boundary ? style : null);
+
+              const inheritedDefault = style === "default" && !shared;
+              const context = `${engine.name()} ${style} ${name}`;
+              const face = (node: Element) => getComputedStyle(node).fontFamily;
+              const font = await page.locator("[data-component-font]").evaluate(face);
+              const expected = inheritedDefault && slug === "data-table"
+                ? "Tahoma" : expectedFamily(componentFamilyRoles[slug], style, shared, legacy);
+              assert(font.includes(expected), `${context} ${slug}: ${font}`);
+              components[slug] = font;
+
+              if (!includeParts) continue;
+              for (const part of await page.locator("[data-font-role]").evaluateAll((nodes) =>
+                nodes.map((node) => ({
+                  name: node.textContent?.trim() ?? "",
+                  role: node.getAttribute("data-font-role"),
+                  font: getComputedStyle(node).fontFamily,
+                })),
+              )) {
+                const expected = inheritedDefault ? "Tahoma" : expectedFamily(part.role as FamilyRole, style, shared, legacy);
+                assert(part.font.includes(expected), `${context} ${part.name}: ${part.font}`);
+                inheritedParts[part.name] = part.font;
+              }
+              for (const role of familyRoles) {
+                const alias = await page.locator(`[data-font-alias="${role}"]`).evaluate(face);
+                const scopedAlias = await page.locator("#font-probe").evaluate((scope, token) =>
+                  getComputedStyle(scope).getPropertyValue(token),
+                  legacyToken(role),
+                );
+                const expected = expectedFamily(role, style, shared, legacy);
+                assert(alias.includes(expected), `${context} legacy ${role}: ${alias}`);
+                assert(scopedAlias.includes(expected), `${context} scope legacy ${role}: ${scopedAlias}`);
+                aliases[role] = alias;
+              }
+            }
+          } finally {
+            await page.close();
+          }
         }
-        await page.close();
+        for (const { config, components, inheritedParts, aliases } of cases) {
+          results.push({ engine: engine.name(), style, case: config.name, components, inheritedParts, aliases });
+        }
       }
     } finally {
       await browser.close();
