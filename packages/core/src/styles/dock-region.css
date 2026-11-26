@@ -8,7 +8,7 @@
     min-height: 0;
     height: 100%;
     border: 0;
-    background: var(--poodle-recipe-dock-region-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent));
+    background: var(--poodle-recipe-dock-region-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)));
   }
 
   .poodle-dock-region[data-emphasis="quiet"] {

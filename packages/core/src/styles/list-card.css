@@ -3,8 +3,8 @@
    previously-scoped block is safe as global CSS. */
 
   .poodle-list-card {
-    --poodle-list-card-fill: var(--poodle-recipe-list-card-fill, color-mix( in srgb, var(--poodle-color-background-canvas) 88%, var(--poodle-color-text-primary) ));
-    --poodle-list-card-hover-fill: var(--poodle-recipe-list-card-hover-fill, color-mix( in srgb, var(--poodle-color-background-canvas) 82%, var(--poodle-color-text-primary) ));
+    --poodle-list-card-fill: var(--poodle-recipe-list-card-fill, var(--poodle-style-control-fill, color-mix( in srgb, var(--poodle-color-background-canvas) 88%, var(--poodle-color-text-primary) )));
+    --poodle-list-card-hover-fill: var(--poodle-recipe-list-card-hover-fill, var(--poodle-style-control-fillHover, color-mix( in srgb, var(--poodle-color-background-canvas) 82%, var(--poodle-color-text-primary) )));
     --poodle-list-card-gap: var(--poodle-space-inline-md);
     --poodle-list-card-padding-block: 0.625rem;
     --poodle-list-card-padding-inline: var(--poodle-space-panel-x);
@@ -24,7 +24,7 @@
     padding:
       calc(var(--poodle-list-card-padding-block) + var(--poodle-list-card-density-padding-block-adjust))
       calc(var(--poodle-list-card-padding-inline) + var(--poodle-list-card-density-padding-inline-adjust));
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 18%, transparent);
+    border: 0.0625rem solid var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-subtle) 18%, transparent));
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-list-card-fill);
     text-decoration: none;
@@ -422,9 +422,9 @@
     justify-content: center;
     width: 1rem;
     height: 1rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 88%, transparent);
+    border: 0.0625rem solid var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-default) 88%, transparent));
     border-radius: 0.25rem;
-    background: var(--poodle-recipe-list-card-selection-box-fill, var(--poodle-color-background-surface));
+    background: var(--poodle-recipe-list-card-selection-box-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
     color: var(--poodle-recipe-list-card-selection-box-text, var(--poodle-color-text-inverse));
     transition:
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
@@ -716,10 +716,10 @@
     z-index: var(--poodle-overlay-z-menu);
     min-width: 14rem;
     padding: 0.25rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
+    border: 0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent));
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-list-card-context-menu-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)));
-    box-shadow: var(--poodle-recipe-list-card-context-menu-shadow, var(--poodle-elevation-overlay));
+    background: var(--poodle-recipe-list-card-context-menu-fill, var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))));
+    box-shadow: var(--poodle-recipe-list-card-context-menu-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay)));
   }
 
   .poodle-list-card__context-item {
@@ -731,7 +731,7 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: var(--poodle-recipe-list-card-context-item-fill, transparent);
+    background: var(--poodle-recipe-list-card-context-item-fill, var(--poodle-style-control-fill, transparent));
     color: var(--poodle-recipe-list-card-context-item-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font: inherit;
@@ -741,7 +741,7 @@
 
   .poodle-list-card__context-item:hover:not(:disabled),
   .poodle-list-card__context-item:focus-visible {
-    background: var(--poodle-recipe-list-card-hover-focus-context-item-fill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
+    background: var(--poodle-recipe-list-card-hover-focus-context-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)));
     outline: none;
   }
 

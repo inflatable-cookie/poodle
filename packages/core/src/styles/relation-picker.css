@@ -90,13 +90,13 @@
     padding: 0;
     border: none;
     border-radius: var(--poodle-radius-sm, 0.25rem);
-    background: var(--poodle-recipe-relation-picker-back-fill, transparent);
+    background: var(--poodle-recipe-relation-picker-back-fill, var(--poodle-style-control-fill, transparent));
     color: var(--poodle-recipe-relation-picker-back-text, var(--poodle-color-text-secondary));
     cursor: pointer;
   }
 
   .poodle-drill-breadcrumbs__back:hover {
-    background: var(--poodle-recipe-relation-picker-hover-back-fill, var(--poodle-color-surface-hover, rgba(148, 163, 184, 0.12)));
+    background: var(--poodle-recipe-relation-picker-hover-back-fill, var(--poodle-style-control-fillHover, var(--poodle-color-surface-hover, rgba(148, 163, 184, 0.12))));
     color: var(--poodle-recipe-relation-picker-hover-back-text, var(--poodle-color-text-primary));
   }
 
@@ -111,7 +111,7 @@
     padding: 0.125rem var(--poodle-relation-picker-breadcrumb-x);
     border: none;
     border-radius: var(--poodle-radius-sm, 0.25rem);
-    background: var(--poodle-recipe-relation-picker-item-fill, transparent);
+    background: var(--poodle-recipe-relation-picker-item-fill, var(--poodle-style-control-fill, transparent));
     color: var(--poodle-recipe-relation-picker-item-text, var(--poodle-color-accent-base));
     font-size: var(--poodle-typography-label-size);
     font-weight: 500;
@@ -123,7 +123,7 @@
   }
 
   .poodle-drill-breadcrumbs__item:hover {
-    background: var(--poodle-recipe-relation-picker-hover-item-fill, var(--poodle-color-surface-hover, rgba(148, 163, 184, 0.12)));
+    background: var(--poodle-recipe-relation-picker-hover-item-fill, var(--poodle-style-control-fillHover, var(--poodle-color-surface-hover, rgba(148, 163, 184, 0.12))));
   }
 
   .poodle-drill-level-label {
@@ -157,7 +157,7 @@
     padding: var(--poodle-relation-picker-list-y) var(--poodle-relation-picker-list-x);
     border: none;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-relation-picker-button-fill, transparent);
+    background: var(--poodle-recipe-relation-picker-button-fill, var(--poodle-style-control-fill, transparent));
     color: var(--poodle-recipe-relation-picker-button-text, var(--poodle-color-text-primary));
     cursor: pointer;
     text-align: left;
@@ -166,7 +166,7 @@
   }
 
   .poodle-drill-list__button:hover {
-    background: var(--poodle-recipe-relation-picker-hover-button-fill, color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent));
+    background: var(--poodle-recipe-relation-picker-hover-button-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent)));
   }
 
   .poodle-drill-list__button:focus-visible {
@@ -230,9 +230,9 @@
     align-items: center;
     gap: var(--poodle-relation-picker-item-gap);
     padding: var(--poodle-relation-picker-item-y) var(--poodle-relation-picker-item-x);
-    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-subtle));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-relation-picker-item-fill, color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent));
+    background: var(--poodle-recipe-relation-picker-item-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent)));
     color: var(--poodle-recipe-relation-picker-item-text, var(--poodle-color-text-primary));
   }
 

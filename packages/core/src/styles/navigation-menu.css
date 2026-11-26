@@ -22,7 +22,7 @@
     padding: 0 var(--poodle-space-control-x);
     border: 0;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-navigation-menu-trigger-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent));
+    background: var(--poodle-recipe-navigation-menu-trigger-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent)));
     color: var(--poodle-recipe-navigation-menu-trigger-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
@@ -44,7 +44,7 @@
 
   .poodle-navigation-menu__trigger:hover:not(:disabled),
   .poodle-navigation-menu__trigger:focus-visible {
-    background: var(--poodle-recipe-navigation-menu-hover-focus-trigger-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
+    background: var(--poodle-recipe-navigation-menu-hover-focus-trigger-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
     outline: none;
   }
 
@@ -100,7 +100,7 @@
      hover/focus accent-12% rule still applies, exactly as for an idle
      trigger — only the selection fill is gone. */
   .poodle-navigation-menu[data-active-fill="none"] .poodle-navigation-menu__trigger[data-open="true"] {
-    background: var(--poodle-recipe-navigation-menu-trigger-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent));
+    background: var(--poodle-recipe-navigation-menu-trigger-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent)));
   }
 
   .poodle-navigation-menu__trigger:disabled {
@@ -111,10 +111,10 @@
   .poodle-navigation-menu__viewport {
     min-width: 0;
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent);
+    border: 0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent));
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-navigation-menu-viewport-fill, color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent));
-    box-shadow: var(--poodle-recipe-navigation-menu-viewport-shadow, var(--poodle-elevation-overlay));
+    background: var(--poodle-recipe-navigation-menu-viewport-fill, var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent))));
+    box-shadow: var(--poodle-recipe-navigation-menu-viewport-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay)));
   }
 
   /* Size variants */

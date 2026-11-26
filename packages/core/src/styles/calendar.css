@@ -42,7 +42,7 @@
     padding: 0;
     border: 0;
     border-bottom: 0.0625rem dashed color-mix(in srgb, var(--poodle-color-text-secondary) 72%, transparent);
-    background: var(--poodle-recipe-calendar-year-button-fill, transparent);
+    background: var(--poodle-recipe-calendar-year-button-fill, var(--poodle-style-control-fill, transparent));
     color: inherit;
     font: inherit;
     letter-spacing: inherit;
@@ -65,9 +65,9 @@
     min-width: 4.5ch;
     min-height: 1.75em;
     padding: 0.125rem 0.25rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+    border: 0.0625rem solid var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default)));
     border-radius: 0.25rem;
-    background: var(--poodle-recipe-calendar-year-input-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, var(--poodle-color-background-elevated)));
+    background: var(--poodle-recipe-calendar-year-input-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, var(--poodle-color-background-elevated))));
     color: inherit;
     font: inherit;
     letter-spacing: inherit;
@@ -102,16 +102,16 @@
     justify-content: center;
     width: 2rem;
     height: 2rem;
-    border: 0.0625rem solid var(--poodle-color-border-default);
+    border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-calendar-nav-fill, var(--poodle-color-background-surface));
+    background: var(--poodle-recipe-calendar-nav-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
     color: var(--poodle-recipe-calendar-nav-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font: inherit;
   }
 
   .poodle-calendar__nav:hover:not(:disabled) {
-    background: var(--poodle-recipe-calendar-hover-nav-fill, color-mix(in srgb, var(--poodle-color-background-surface) 82%, var(--poodle-color-background-elevated)));
+    background: var(--poodle-recipe-calendar-hover-nav-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 82%, var(--poodle-color-background-elevated))));
   }
 
   .poodle-calendar__weekdays {

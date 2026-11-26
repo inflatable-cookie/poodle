@@ -540,3 +540,7 @@ density), so density owns `th`/`td` `padding-block` here by design.
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
 | Empty state | same columns, `rows=[]`, `emptyMessage="No team members match the current filters."` | table header visible with empty-state message in body |
+
+### Rendering style roles
+
+Rendering style roles (poodle#186): the table frame reads `--poodle-style-surface-border` and `--poodle-style-surface-fill`. The toolbar button and actions trigger read the control roles, and the toolbar button, column-menu item and row hovers read `--poodle-style-control-fillHover`. Toolbar, footer, header and filter-row bands keep their own mixes.

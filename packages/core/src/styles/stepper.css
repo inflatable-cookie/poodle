@@ -25,9 +25,9 @@
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
-  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
   border-radius: var(--poodle-radius-surface);
-  background: color-mix(in srgb, var(--poodle-color-background-panel) 92%, transparent);
+  background: var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 92%, transparent));
   overflow: hidden;
 }
 
@@ -144,7 +144,7 @@
   min-height: var(--poodle-stepper-row-height);
   padding: var(--poodle-stepper-pad-y) var(--poodle-stepper-pad-x);
   border: 0;
-  background: transparent;
+  background: var(--poodle-style-control-fill, transparent);
   color: var(--poodle-color-text-secondary);
   font: inherit;
   font-size: var(--poodle-stepper-font-size);
@@ -182,7 +182,7 @@
    Hovering the rerun itself does not — that control has its own hover, and it
    does something different from selecting the step. */
 .poodle-stepper__step:has(.poodle-stepper__trigger:not(:disabled):hover) {
-  background: color-mix(in srgb, var(--poodle-color-text-primary) 6%, transparent);
+  background: var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-text-primary) 6%, transparent));
 }
 
 /* Declared after hover so the current step keeps its accent rather than
@@ -276,7 +276,7 @@
   padding: 0.25rem;
   border: 0;
   border-radius: var(--poodle-radius-control);
-  background: transparent;
+  background: var(--poodle-style-control-fill, transparent);
   color: var(--poodle-color-text-secondary);
 }
 
@@ -285,7 +285,7 @@
 }
 
 .poodle-stepper__rerun:not(:disabled):hover {
-  background: color-mix(in srgb, var(--poodle-color-text-primary) 8%, transparent);
+  background: var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-text-primary) 8%, transparent));
   color: var(--poodle-color-text-primary);
 }
 
@@ -321,7 +321,7 @@
   /* Expanded, the summary is a row above the list and needs the same divider
      the steps draw between themselves. Collapsed it is the last row. */
   border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
-  background: transparent;
+  background: var(--poodle-style-control-fill, transparent);
   color: var(--poodle-color-text-primary);
   font: inherit;
   font-size: var(--poodle-stepper-font-size);
@@ -337,7 +337,7 @@
 }
 
 .poodle-stepper__summary:not(:disabled):hover {
-  background: color-mix(in srgb, var(--poodle-color-text-primary) 6%, transparent);
+  background: var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-text-primary) 6%, transparent));
 }
 
 .poodle-stepper__summary:disabled {

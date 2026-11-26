@@ -42,7 +42,7 @@
   border-radius: var(--poodle-radius-surface);
   /* One step lighter than the canvas so the operator's own words read as
      theirs at a glance; right-aligned to keep the two voices apart. */
-  background: var(--poodle-color-background-elevated);
+  background: var(--poodle-style-surface-fill, var(--poodle-color-background-elevated));
 }
 
 .poodle-agent-message__body {

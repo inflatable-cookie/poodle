@@ -48,10 +48,10 @@
   .poodle-toggle-group__item {
     min-height: var(--poodle-toggle-group-height);
     padding: 0 var(--poodle-toggle-group-x);
-    border: var(--poodle-border-width-default) solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
+    border: var(--poodle-border-width-default) solid var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-toggle-group-item-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)));
-    box-shadow: var(--poodle-recipe-toggle-group-item-shadow, none);
+    background: var(--poodle-recipe-toggle-group-item-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))));
+    box-shadow: var(--poodle-recipe-toggle-group-item-shadow, var(--poodle-style-control-shadow, none));
     color: var(--poodle-recipe-toggle-group-item-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);

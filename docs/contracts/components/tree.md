@@ -360,6 +360,8 @@ is to guess.
 
 ## 8. Token Usage
 
+Rendering style roles (poodle#186): rows read `--poodle-style-control-fill` at rest and `--poodle-style-control-fillHover` on hover, and the rename input reads the control fill.
+
 ### Data Attributes
 
 | Attribute | Element | Values |

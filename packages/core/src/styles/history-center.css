@@ -36,7 +36,7 @@
   padding: 0 0.0625rem;
   border: 0;
   border-radius: var(--poodle-radius-control);
-  background: none;
+  background: var(--poodle-style-control-fill, none);
   color: var(--poodle-color-text-secondary);
   cursor: pointer;
 }
@@ -136,7 +136,7 @@
 .poodle-history-center__row:last-child { border-bottom: 0; }
 
 .poodle-history-center__row[data-part="entry"] {
-  background: var(--poodle-recipe-history-center-item-fill, transparent);
+  background: var(--poodle-recipe-history-center-item-fill, var(--poodle-style-control-fill, transparent));
 }
 
 .poodle-history-center__row[data-part="entry"][data-position="current"] {
@@ -171,7 +171,7 @@
 .poodle-history-center__entry-content:hover {
   background: var(
     --poodle-recipe-history-center-item-hover-fill,
-    color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)
+    var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent))
   );
 }
 
@@ -238,7 +238,7 @@
   padding: 0 0.3rem;
   border: 0;
   border-radius: var(--poodle-radius-control);
-  background: transparent;
+  background: var(--poodle-style-control-fill, transparent);
   color: var(--poodle-recipe-history-center-fork-color, var(--poodle-color-text-secondary));
   cursor: pointer;
 }
@@ -246,7 +246,7 @@
 .poodle-history-center__fork:hover {
   background: var(
     --poodle-recipe-history-center-item-hover-fill,
-    color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)
+    var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent))
   );
   color: var(--poodle-color-text-primary);
 }
@@ -404,9 +404,9 @@
   align-self: center;
   margin: calc(var(--poodle-space-panel-y) * 0.4) var(--poodle-space-stack-sm);
   padding: 0.2rem 0.4rem;
-  border: 0.0625rem solid var(--poodle-color-border-default);
+  border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
   border-radius: var(--poodle-radius-control);
-  background: var(--poodle-color-background-surface);
+  background: var(--poodle-style-control-fill, var(--poodle-color-background-surface));
   color: var(--poodle-color-text-primary);
   font: inherit;
   font-size: var(--poodle-typography-label-size);

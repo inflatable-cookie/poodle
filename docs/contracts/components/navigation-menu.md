@@ -174,6 +174,8 @@ a panel is open; the outside-interaction path is guarded by
 
 ## 8. Token Usage — Exact Values
 
+Rendering style roles (poodle#186): triggers read the control fill at rest and `--poodle-style-control-fillHover` on hover. The viewport reads the floating surface roles.
+
 ### Root `.navigation-menu`
 
 | Property | Value |

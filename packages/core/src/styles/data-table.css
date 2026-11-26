@@ -4,9 +4,9 @@
 
   .poodle-data-table {
     overflow: auto;
-    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-data-table-fill, var(--poodle-color-background-panel));
+    background: var(--poodle-recipe-data-table-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-panel)));
     --poodle-data-table-toolbar-label-size: var(--poodle-typography-label-size);
     --poodle-data-table-cell-size: var(--poodle-typography-label-size);
     --poodle-data-table-auxiliary-size: initial;
@@ -34,9 +34,9 @@
     align-items: center;
     gap: var(--poodle-space-inline-sm);
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
-    border: 0.0625rem solid var(--poodle-color-border-default);
+    border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-data-table-toolbar-btn-fill, var(--poodle-color-background-surface));
+    background: var(--poodle-recipe-data-table-toolbar-btn-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
     color: var(--poodle-recipe-data-table-toolbar-btn-text, var(--poodle-color-text-secondary));
     cursor: pointer;
     font: inherit;
@@ -49,7 +49,7 @@
   }
 
   .poodle-data-table__toolbar-btn:hover {
-    background: var(--poodle-recipe-data-table-hover-toolbar-btn-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent));
+    background: var(--poodle-recipe-data-table-hover-toolbar-btn-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent)));
   }
 
   .poodle-data-table__toolbar-btn:focus-visible {
@@ -83,7 +83,7 @@
   }
 
   .poodle-data-table__col-menu-item:hover {
-    background: var(--poodle-recipe-data-table-hover-col-menu-item-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
+    background: var(--poodle-recipe-data-table-hover-col-menu-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
   }
 
   .poodle-data-table table {
@@ -162,7 +162,7 @@
   }
 
   .poodle-data-table tbody tr:hover {
-    background: var(--poodle-recipe-data-table-hover-tr-fill, color-mix(in srgb, var(--poodle-color-accent-base) 5%, transparent));
+    background: var(--poodle-recipe-data-table-hover-tr-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 5%, transparent)));
   }
 
   .poodle-data-table__selection {
@@ -179,7 +179,7 @@
     min-height: var(--poodle-size-control-height);
     padding: 0;
     border: 0;
-    background: var(--poodle-recipe-data-table-actions-trigger-fill, transparent);
+    background: var(--poodle-recipe-data-table-actions-trigger-fill, var(--poodle-style-control-fill, transparent));
     color: inherit;
     cursor: pointer;
     font: inherit;

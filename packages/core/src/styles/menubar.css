@@ -10,9 +10,9 @@
     display: inline-flex;
     gap: 0.125rem;
     padding: 0.1875rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
+    border: 0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent));
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-menubar-list-fill, color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent));
+    background: var(--poodle-recipe-menubar-list-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent)));
   }
 
   .poodle-menubar__group {
@@ -27,7 +27,7 @@
     padding: 0 var(--poodle-space-control-x);
     border: 0;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-menubar-trigger-fill, transparent);
+    background: var(--poodle-recipe-menubar-trigger-fill, var(--poodle-style-control-fill, transparent));
     color: var(--poodle-recipe-menubar-trigger-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
@@ -38,7 +38,7 @@
 
   .poodle-menubar__trigger:hover:not(:disabled),
   .poodle-menubar__trigger:focus-visible {
-    background: var(--poodle-recipe-menubar-open-hover-focus-trigger-fill, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent));
+    background: var(--poodle-recipe-menubar-open-hover-focus-trigger-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)));
     outline: none;
   }
 
@@ -61,10 +61,10 @@
     z-index: var(--poodle-overlay-z-menu);
     min-width: 12rem;
     padding: 0.25rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
+    border: 0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent));
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-menubar-overlay-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)));
-    box-shadow: var(--poodle-recipe-menubar-overlay-shadow, var(--poodle-elevation-overlay));
+    background: var(--poodle-recipe-menubar-overlay-fill, var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))));
+    box-shadow: var(--poodle-recipe-menubar-overlay-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay)));
   }
 
   .poodle-menubar__item {
@@ -76,7 +76,7 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: var(--poodle-recipe-menubar-item-fill, transparent);
+    background: var(--poodle-recipe-menubar-item-fill, var(--poodle-style-control-fill, transparent));
     color: var(--poodle-recipe-menubar-item-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font: inherit;
@@ -86,7 +86,7 @@
 
   .poodle-menubar__item:hover:not(:disabled),
   .poodle-menubar__item:focus-visible {
-    background: var(--poodle-recipe-menubar-hover-focus-item-fill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
+    background: var(--poodle-recipe-menubar-hover-focus-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)));
     outline: none;
   }
 
