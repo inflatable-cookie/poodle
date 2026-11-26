@@ -410,8 +410,8 @@ default. Container chrome is opt-in via the `chrome` prop (the deprecated
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-style-selection-fill, var(--poodle-color-select-accent))` — the 18% accent mix under `accent-outline` |
-| `border-color` | `var(--poodle-style-selection-borderStrong, var(--poodle-color-select-accentBorderStrong))` — the 42% accent mix on `border-default` under `accent-outline`; transparent under `neutral` |
+| `background` | `var(--poodle-style-selection-fill, var(--poodle-color-select-accent))` — neutral selection fill by default |
+| `border-color` | `var(--poodle-style-selection-borderStrong, var(--poodle-color-select-accentBorderStrong))` — transparent by default |
 
 ### Button — hover / focus-visible (not disabled)
 

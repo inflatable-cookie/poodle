@@ -66,7 +66,7 @@ independent inherited axes.
 | Axis | Values |
 | --- | --- |
 | Theme | `iceberg`, `eclipse`, `graphite`, `midnight`, `nord`, `rose`, `forest`, `solarized`, `hornet`, `cobalt`, `clay`, `meadow` |
-| Rendering style | `default`, `quiet` (experimental) |
+| Rendering style | `default` |
 | Density | `compact`, `default`, `comfortable` |
 | Control size | `xs`, `sm`, `md`, `lg`, `xl` |
 
@@ -87,65 +87,41 @@ A style mode declares a `treatment` group alongside any direct semantic token
 overrides. The build expands the choices from `schema/style-treatments/` before
 applying direct overrides.
 
-| Switch | Choices | Applies to |
+| Switch | Current value | Applies to |
 | --- | --- | --- |
-| `fill` | `outlined`, `filled`, `ghost` | Controls at rest, including hover and press fills where used |
-| `surface` | `border`, `elevation`, `tonal` | Containers |
-| `selection` | `accent-outline`, `accent-tint`, `neutral` | Selected items in Select, Tabs, ToggleGroup, the list and data components (ListCard, Tree, LogList, DataTable, Calendar, RelationPicker, ActionDiscoveryPanel, ModelPicker, HistoryCenter), and choice controls (SegmentedControl, Card, CardRadioGroup, CardToggleGroup, ThemeSelect, AgentQuestion, Rating) |
-| `typography` | `component`, `scale` | Type size, leading, weight, tracking, case, and associated family and neutral text roles |
+| `fill` | `filled` | Neutral control fills at rest, on hover and on press |
+| `surface` | `tonal` | Container and floating surface separation |
+| `selection` | `neutral` | Selected items and indicators |
+| `typography` | `scale` | Size, leading, weight, tracking, case, and family and neutral text roles |
 
-The default uses `outlined`, `border` and `accent-outline` to reproduce
-the prior paint. `accent-tint` keeps tint and suppresses selection borders.
-`neutral` uses a neutral fill, stronger text and an accent only for an
-existing small indicator. Each component retains its selection anatomy.
+The base token stylesheet applies the default with or without
+`data-style="default"`. To add a style, define its choices in
+`schema/style-treatments/` and compose them in `schema/modes/style/`.
+The shared stylesheets read the resulting tokens.
 
-`style.selection.itemBorder` is the selected item's border colour. It is
-`initial` under `accent-outline`, so the component's own accent border applies.
-It is `transparent` under `accent-tint` and `neutral`. Components route their
-selected border through the recipe hook, then `itemBorder`, then the current
-literal. A sibling component that needs a selected border can use the same
-role (used by Card, ThemeSelect selected tiles, and AgentQuestion selected
-options alongside ListCard, Tree, LogList, RelationPicker, and
-ActionDiscoveryPanel).
+Selected items take a neutral fill and stronger text. Edges that read
+`style.selection.itemBorder` resolve to transparent. The default sets
+`style.selection.indicator` to `color.text.primary` for indicators such as
+Rating's filled glyphs and AgentQuestion's progress dots.
 
-Rating's filled glyphs and AgentQuestion's progress dots bind
-`style.selection.indicator`, so they keep `{color.accent.base}` under plain
-`selection: neutral` (with no style override) and become neutral under `quiet`.
+The type scale covers PageHeader, SidebarNav, Dialog, DataTable, Button, and
+TextInput. Buttons and inputs take `controlLabel` and `inputText` for their
+resolved control size (`xs`–`xl`). Density controls spacing.
 
-`quiet` is an experimental style (`status: "experimental"` in style metadata)
-that combines `filled`, `tonal`, and `neutral` with a neutral selection
-indicator (`style.selection.indicator` mapped to `color.text.primary`), leaving
-only primary buttons and focus rings using the accent colour.
-
-The `component` typography treatment leaves `style.typography.*` at
-`initial`. Each consumer of a role supplies its own legacy fallback.
-`scale` fills those roles, and `quiet` selects it. Buttons and inputs
-take the `controlLabel` and `inputText` entries for their resolved control
-size (`xs`–`xl`). The stylesheet reads the matching token for its
-`data-size`. The build expands the sized paths like any other treatment
-entry. Density continues to control spacing.
-
-The `scale` treatment supplies system sans and mono stacks. The generated
-CSS gives legacy per-role family tokens zero-specificity defaults at the
-document root and each rendering-style scope. The aliases read
-`--poodle-font-sans` or `--poodle-font-mono`, then the style's family and
-the original stack. A low-priority layer binds those aliases to a shared
-override within the scope. Without a shared input its declarations roll
-back, preserving inherited and explicit per-role values. The cohort reads
-the shared inputs directly ahead of its per-role fallbacks. The inputs are
-unset in the generated CSS. For parts that inherited a face before this
-treatment, the default still inherits and Quiet assigns a per-role family
-inside its scope. Theme writes stay independent of type roles, including
-the group and table-header text roles that reference the theme's neutral ink.
+The style supplies system sans and mono for the legacy per-role family tokens.
+The generated CSS gives those aliases zero-specificity defaults at the
+document root and each style scope. The six components read a shared override
+(`--poodle-font-sans` or `--poodle-font-mono`) ahead of their per-role token.
+A low-priority layer lets legacy-only CSS readers pick up a shared override in
+a subtree while preserving explicit per-role declarations on the same element.
+The shared inputs are unset until an app supplies them.
 
 Themes define `color.fill.{rest,hover,active}` for filled controls and
 `color.select.{accent,neutral}` for selected items. Neutral fills use the
 theme's primary-text ink at a fixed alpha over the current layer. Light
 themes use 0.045, 0.07, 0.10 and 0.10 for those four neutral fills. Dark
-themes use 0.055, 0.085, 0.12 and 0.13. The additional accent fill and
-border roles preserve the previous component weights and backdrops. The
-selection switch reuses the primary text and accent indicator roles.
-Default solid Tabs keep their existing accent and inverse text tokens.
+themes use 0.055, 0.085, 0.12 and 0.13. Themes also supply accent roles for
+semantic emphasis. Solid Tabs keep their accent and inverse text tokens.
 
 Tonal goes from canvas to `color.background.panel` for a container and from
 panel to `color.background.elevated` for one that floats. Both use the
@@ -194,20 +170,19 @@ The core package publishes the framework-free web surface:
 - the `poodle-icons` command — application-owned icon module generation
 - the root export — component state machines and prop helpers
 
-Applications import base tokens plus the mode styles they can select:
+Applications import base tokens plus the theme, density, and control-size
+stylesheets they use:
 
 ```ts
 import "@inflatable-cookie/poodle-core/tokens/styles.css";
 import "@inflatable-cookie/poodle-core/tokens/themes.css";
-import "@inflatable-cookie/poodle-core/tokens/css/poodle-styles.css";
 import "@inflatable-cookie/poodle-core/tokens/density-default.css";
 import "@inflatable-cookie/poodle-core/tokens/control-size-md.css";
 ```
 
-Individual theme, style, density, and control-size stylesheets are available
-for consumers that need a narrower CSS payload. For example,
-`/tokens/style-default.css` loads just the default style and
-`/tokens/style-quiet.css` loads the experimental quiet style.
+Individual mode stylesheets remain available. `/tokens/style-default.css`
+scopes the default to `data-style="default"`, and
+`/tokens/css/poodle-styles.css` includes all explicit style scopes.
 
 ### Framework packages
 

@@ -152,10 +152,6 @@
     right: 1.25rem;
   }
 
-  /* Quiet gives formerly inherited text its own role. A nested style
-     starts a new typography scope. */
-  @scope ([data-style="quiet"]) to ([data-style]) {
-    .poodle-dialog__header p {
-      font-family: var(--poodle-recipe-dialog-description-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
-    }
+  .poodle-dialog__header p {
+    font-family: var(--poodle-recipe-dialog-description-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
   }

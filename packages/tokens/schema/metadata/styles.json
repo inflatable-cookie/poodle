@@ -2,12 +2,7 @@
   "styles": {
     "default": {
       "selector": "[data-style=\"default\"]",
-      "description": "Poodle\u2019s standard control and surface treatments."
-    },
-    "quiet": {
-      "selector": "[data-style=\"quiet\"]",
-      "status": "experimental",
-      "description": "Experimental low-noise rendering style with filled controls, tonal surfaces, and neutral selection."
+      "description": "Poodle’s filled controls, tonal surfaces, neutral selection, and type scale."
     }
   }
 }

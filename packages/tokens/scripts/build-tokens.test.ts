@@ -121,7 +121,7 @@ function withStyleFixture(run: (fixture: {
 
 test("the style builder rejects a theme token written by a style mode or treatment", () => {
   withStyleFixture(({ writeJson, build }) => {
-    const treatment = { fill: "outlined", surface: "border", selection: "accent-outline", typography: "component" };
+    const treatment = { fill: "filled", surface: "tonal", selection: "neutral", typography: "scale" };
     const color = { background: { canvas: { $value: "{color.background.surface}" } } };
     writeJson("modes/style/default.json", { treatment, color });
     const direct = build();
@@ -130,10 +130,10 @@ test("the style builder rejects a theme token written by a style mode or treatme
     expect(direct.output).toContain("both override color.background.canvas");
 
     writeJson("modes/style/default.json", { treatment });
-    writeJson("style-treatments/fill.json", { outlined: { color } });
+    writeJson("style-treatments/fill.json", { filled: { color } });
     const expanded = build();
     expect(expanded.status).not.toBe(0);
-    expect(expanded.output).toContain('Treatment "fill=outlined" and theme');
+    expect(expanded.output).toContain('Treatment "fill=filled" and theme');
     expect(expanded.output).toContain("both override color.background.canvas");
   });
 });
@@ -165,7 +165,7 @@ test("a treatment added in schema expands into CSS and a typed Rust mode", () =>
     expect(css).toContain("--poodle-style-selection-fillStrongUnderlay: transparent;");
     expect(css).toContain("--poodle-style-selection-border: transparent;");
     expect(nestedTheme).toContain("--poodle-style-selection-text: var(--poodle-color-text-primary);");
-    expect(nestedTheme).toContain("--poodle-style-selection-indicator: var(--poodle-color-accent-base);");
+    expect(nestedTheme).toContain("--poodle-style-selection-indicator: var(--poodle-color-text-primary);");
     const rust = read("contracts/tokens/src/generated/styles.rs");
     expect(rust).toContain("shape: ShapeTreatment::Flat");
     expect(rust).toContain("selection: SelectionTreatment::Neutral");
@@ -184,13 +184,19 @@ test("shared component CSS cannot select on a colour theme", () => {
   });
 });
 
-test("the live quiet style builds as experimental with filled, tonal, neutral and a neutral indicator", () => {
-  const css = fs.readFileSync(path.join(tokensDir, "artifacts/css/poodle-style-quiet.css"), "utf8");
-  expect(css).toContain('[data-style="quiet"]');
-  expect(css).toContain("--poodle-style-control-fill: var(--poodle-color-fill-rest);");
-  expect(css).toContain("--poodle-style-surface-fill: var(--poodle-color-background-panel);");
-  expect(css).toContain("--poodle-style-selection-fill: var(--poodle-color-select-neutral);");
-  expect(css).toContain("--poodle-style-selection-indicator: var(--poodle-color-text-primary);");
-  const themesTs = fs.readFileSync(path.join(tokensDir, "artifacts/ts/themes.ts"), "utf8");
-  expect(themesTs).toContain('"status": "experimental"');
+test("the base and explicit style imports both apply the default treatments", () => {
+  const readCss = (name: string) => fs.readFileSync(path.join(tokensDir, `artifacts/css/${name}.css`), "utf8");
+  const base = readCss("poodle-tokens");
+  const explicit = readCss("poodle-style-default");
+  expect(base).toContain(':where(:root, [data-style="default"]) {');
+  expect(base).toContain('@scope (:root, [data-style="default"]) to ([data-style])');
+  expect(explicit).toContain('[data-style="default"] {');
+  expect(readCss("poodle-styles")).toBe(explicit);
+  for (const css of [base, explicit]) {
+    expect(css).toContain("--poodle-style-control-fill: var(--poodle-color-fill-rest);");
+    expect(css).toContain("--poodle-style-surface-fill: var(--poodle-color-background-panel);");
+    expect(css).toContain("--poodle-style-selection-fill: var(--poodle-color-select-neutral);");
+    expect(css).toContain("--poodle-style-selection-indicator: var(--poodle-color-text-primary);");
+    expect(css).toContain("--poodle-style-typography-family-sans: var(--poodle-typography-font-systemFamily-sans);");
+  }
 });

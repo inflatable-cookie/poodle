@@ -541,7 +541,6 @@
 # failing pair is a new regression and fails the process. Artifacts land in
 # test/visual/out.
 "visual:report" = "bun test/visual/run.ts --tier=sweep --report"
-"visual:typography" = "bun docs/evidence/visual/rendering-style/type-176/capture.ts {args}"
 "ci:visual" = [
   { task = "test:visual-harness" },
   { task = "test:visual" },

@@ -591,13 +591,13 @@ export const tokens = {
     },
     "typography": {
       "body": {
-        "family": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
+        "family": "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
         "size": "0.875rem",
         "lineHeight": "1.25rem",
         "weight": "400"
       },
       "label": {
-        "family": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
+        "family": "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
         "size": "0.8125rem",
         "lineHeight": "1rem",
         "weight": "500",
@@ -608,7 +608,7 @@ export const tokens = {
         "size": "0.75rem"
       },
       "caption": {
-        "family": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
+        "family": "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
         "size": "0.6875rem",
         "lineHeight": "1rem",
         "weight": "500",
@@ -618,13 +618,13 @@ export const tokens = {
         "letterSpacing": "0.04em"
       },
       "heading": {
-        "family": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
+        "family": "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
         "size": "1rem",
         "lineHeight": "1.5rem",
         "weight": "600"
       },
       "code": {
-        "family": "\"IBM Plex Mono\", \"SFMono-Regular\", monospace",
+        "family": "ui-monospace, \"SFMono-Regular\", Menlo, Consolas, monospace",
         "adjustmentRatio": 0.8125,
         "size": "0.8125rem",
         "lineHeight": "1rem",

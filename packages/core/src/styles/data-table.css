@@ -567,38 +567,34 @@
     }
   }
 
-  /* Quiet gives formerly inherited text its own role. A nested style
-     starts a new typography scope. */
-  @scope ([data-style="quiet"]) to ([data-style]) {
-    .poodle-data-table__toolbar-btn {
-      font-family: var(--poodle-recipe-data-table-toolbar-btn-font-family, var(--poodle-font-sans, var(--poodle-typography-label-family)));
-    }
+  .poodle-data-table__toolbar-btn {
+    font-family: var(--poodle-recipe-data-table-toolbar-btn-font-family, var(--poodle-font-sans, var(--poodle-typography-label-family)));
+  }
 
-    .poodle-data-table__col-menu-item {
-      font-family: var(--poodle-recipe-data-table-col-menu-item-font-family, var(--poodle-font-sans, var(--poodle-typography-label-family)));
-    }
+  .poodle-data-table__col-menu-item {
+    font-family: var(--poodle-recipe-data-table-col-menu-item-font-family, var(--poodle-font-sans, var(--poodle-typography-label-family)));
+  }
 
-    .poodle-data-table tbody :where(td, th) {
-      font-family: var(--poodle-recipe-data-table-cell-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
-    }
+  .poodle-data-table tbody :where(td, th) {
+    font-family: var(--poodle-recipe-data-table-cell-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
+  }
 
-    .poodle-data-table__filters-row td {
-      font-family: var(--poodle-recipe-data-table-filters-row-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
-    }
+  .poodle-data-table__filters-row td {
+    font-family: var(--poodle-recipe-data-table-filters-row-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
+  }
 
-    .poodle-data-table__footer {
-      font-family: var(--poodle-recipe-data-table-footer-font-family, var(--poodle-font-sans, var(--poodle-typography-caption-family)));
-    }
+  .poodle-data-table__footer {
+    font-family: var(--poodle-recipe-data-table-footer-font-family, var(--poodle-font-sans, var(--poodle-typography-caption-family)));
+  }
 
-    .poodle-data-table__pagination-summary {
-      font-family: var(--poodle-recipe-data-table-pagination-summary-font-family, var(--poodle-font-sans, var(--poodle-typography-caption-family)));
-    }
+  .poodle-data-table__pagination-summary {
+    font-family: var(--poodle-recipe-data-table-pagination-summary-font-family, var(--poodle-font-sans, var(--poodle-typography-caption-family)));
+  }
 
-    .poodle-data-table__limit {
-      font-family: var(--poodle-recipe-data-table-limit-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
-    }
+  .poodle-data-table__limit {
+    font-family: var(--poodle-recipe-data-table-limit-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
+  }
 
-    .poodle-data-table__pagination-page {
-      font-family: var(--poodle-recipe-data-table-pagination-page-font-family, var(--poodle-font-sans, var(--poodle-typography-label-family)));
-    }
+  .poodle-data-table__pagination-page {
+    font-family: var(--poodle-recipe-data-table-pagination-page-font-family, var(--poodle-font-sans, var(--poodle-typography-label-family)));
   }

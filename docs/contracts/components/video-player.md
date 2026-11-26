@@ -161,7 +161,7 @@ Standalone component. Does not compose other Poodle primitives. Uses
 
 ## 8. Token Usage
 
-Note: The video player renders against a black stage under the default style, regardless of theme. Under `data-style="quiet"` the stage takes the tonal surface fill; the picture and the control scrim are unchanged.
+The video stage uses the tonal surface fill. The picture and the control scrim sit above the stage.
 Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 
 ### Data Attributes

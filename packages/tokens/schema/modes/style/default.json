@@ -1,8 +1,16 @@
 {
   "treatment": {
-    "fill": "outlined",
-    "surface": "border",
-    "selection": "accent-outline",
-    "typography": "component"
+    "fill": "filled",
+    "surface": "tonal",
+    "selection": "neutral",
+    "typography": "scale"
+  },
+  "style": {
+    "selection": {
+      "indicator": {
+        "$type": "color",
+        "$value": "{color.text.primary}"
+      }
+    }
   }
 }
