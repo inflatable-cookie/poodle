@@ -49,29 +49,44 @@ function repositoryRoot(): string {
   return toplevel;
 }
 
-function snapshotPath(): string {
-  return snapshotPathForRoot(repositoryRoot());
-}
+type TreeState = Record<string, { status: string; digest: string | null }>;
 
-function treeState(): Record<string, string> {
-  const result = spawnSync("git", ["status", "--porcelain"], { encoding: "utf8" });
+function treeState(root: string): TreeState {
+  const result = spawnSync("git", ["status", "--porcelain=v1", "-z", "--untracked-files=all"], {
+    cwd: root,
+    encoding: "utf8",
+  });
   if (result.status !== 0) {
     console.error(`gate-tree-guard: git status failed\n${result.stderr}`);
     process.exit(1);
   }
-  const state: Record<string, string> = {};
-  for (const line of result.stdout.split("\n")) {
-    if (line.trim() === "") continue;
-    state[line.slice(3)] = line.slice(0, 2);
+  const records = result.stdout.split("\0");
+  const entries: [string, TreeState[string]][] = [];
+  for (let index = 0; index < records.length - 1; index += 1) {
+    const record = records[index];
+    const status = record.slice(0, 2);
+    const file = record.slice(3);
+    // In NUL-delimited porcelain the rename destination comes first.
+    if (/[RC]/.test(status)) index += 1;
+    const absolute = path.join(root, file);
+    const stat = fs.lstatSync(absolute, { throwIfNoEntry: false });
+    let digest: string | null = null;
+    if (stat?.isSymbolicLink()) {
+      digest = createHash("sha256").update("link\0").update(fs.readlinkSync(absolute, { encoding: "buffer" })).digest("hex");
+    } else if (stat?.isFile()) {
+      digest = createHash("sha256").update("file\0").update(fs.readFileSync(absolute)).digest("hex");
+    }
+    entries.push([file, { status, digest }]);
   }
-  return state;
+  return Object.fromEntries(entries);
 }
 
 function run(argv: string[]): void {
-  const snapshot = snapshotPath();
+  const root = repositoryRoot();
+  const snapshot = snapshotPathForRoot(root);
 
   if (argv.includes("--snapshot")) {
-    fs.writeFileSync(snapshot, JSON.stringify(treeState()));
+    fs.writeFileSync(snapshot, JSON.stringify(treeState(root)));
     process.exit(0);
   }
 
@@ -80,9 +95,9 @@ function run(argv: string[]): void {
     process.exit(1);
   }
 
-  let before: Record<string, string>;
+  let before: TreeState;
   try {
-    before = JSON.parse(fs.readFileSync(snapshot, "utf8")) as Record<string, string>;
+    before = JSON.parse(fs.readFileSync(snapshot, "utf8"));
   } catch {
     console.error(
       "gate-tree-guard: no snapshot found. The gate must run `--snapshot` as its first step;\n" +
@@ -92,9 +107,11 @@ function run(argv: string[]): void {
   }
   fs.rmSync(snapshot, { force: true });
 
-  const after = treeState();
-  const changed = Object.keys(after)
-    .filter((file) => after[file] !== before[file])
+  const after = treeState(root);
+  const changed = [...new Set([...Object.keys(before), ...Object.keys(after)])]
+    .filter((file) =>
+      after[file]?.status !== before[file]?.status || after[file]?.digest !== before[file]?.digest,
+    )
     .sort();
 
   if (changed.length === 0) process.exit(0);
@@ -103,7 +120,7 @@ function run(argv: string[]): void {
     "gate-tree-guard: the gate changed files it did not commit.\n" +
       "A generated artifact disagrees with its generator — run the writer and commit the result.\n",
   );
-  for (const file of changed) console.error(`  ${after[file]} ${file}`);
+  for (const file of changed) console.error(`  ${after[file]?.status ?? "  "} ${JSON.stringify(file)}`);
   process.exit(1);
 }
 

@@ -41,12 +41,23 @@ function withoutComments(source: string): string {
     .join("\n");
 }
 
+function isMapping(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
 function runCommands(source: string): string[] {
-  return withoutComments(source)
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.startsWith("run:"))
-    .map((line) => line.slice("run:".length).trim());
+  const workflow: unknown = Bun.YAML.parse(source);
+  if (!isMapping(workflow) || !isMapping(workflow.jobs)) return [];
+  const commands: string[] = [];
+  for (const job of Object.values(workflow.jobs)) {
+    if (!isMapping(job) || !Array.isArray(job.steps)) continue;
+    for (const step of job.steps) {
+      if (isMapping(step) && typeof step.run === "string") {
+        commands.push(...withoutComments(step.run).split("\n").map((line) => line.trim()).filter(Boolean));
+      }
+    }
+  }
+  return commands;
 }
 
 function requireRun(source: string, command: string, file: string): void {
@@ -114,15 +125,14 @@ export function collectReleaseWorkflowFailures(
 ): string[] {
   const found: string[] = [];
   const active = withoutComments(source);
-  const commands = runCommands(source).join("\n");
+  const commands = runCommands(source);
 
-  const effigyInvocations = [...active.matchAll(/\beffigy\s+([A-Za-z0-9:_-]+)/g)].map(
-    (match) => match[0],
+  const effigyInvocations = commands.flatMap((command) =>
+    [...command.matchAll(/\beffigy[ \t]+([A-Za-z0-9:_-]+)/g)].map((match) => `effigy ${match[1]}`),
   );
-  const uniqueEffigy = [...new Set(effigyInvocations)];
-  if (uniqueEffigy.length !== 1 || uniqueEffigy[0] !== RELEASE_CERTIFICATE_SELECTOR) {
+  if (effigyInvocations.length !== 1 || effigyInvocations[0] !== RELEASE_CERTIFICATE_SELECTOR) {
     found.push(
-      `release.yml must invoke exactly one Effigy certificate entry (${RELEASE_CERTIFICATE_SELECTOR}); found ${uniqueEffigy.join(", ") || "none"}`,
+      `release.yml must invoke exactly one Effigy certificate entry (${RELEASE_CERTIFICATE_SELECTOR}); found ${effigyInvocations.join(", ") || "none"}`,
     );
   }
   for (const { label, pattern } of RELEASE_FORBIDDEN) {
@@ -262,354 +272,359 @@ export function collectGenericCandidateFailures(
 
 const actionRefPattern = /^\s*(?:-\s+)?uses:\s*([^\s#]+)(?:\s+#\s*(.*))?$/gm;
 
-for (const file of retainedWorkflows) {
-  const relativePath = `.github/workflows/${file}`;
-  const source = read(relativePath);
+function checkReleaseAutomation(): void {
+  for (const file of retainedWorkflows) {
+    const relativePath = `.github/workflows/${file}`;
+    const source = read(relativePath);
 
-  for (const match of source.matchAll(actionRefPattern)) {
-    const reference = match[1];
-    const comment = match[2]?.trim() ?? "";
-    const at = reference.lastIndexOf("@");
-    const action = at === -1 ? reference : reference.slice(0, at);
-    const revision = at === -1 ? "" : reference.slice(at + 1);
+    for (const match of source.matchAll(actionRefPattern)) {
+      const reference = match[1];
+      const comment = match[2]?.trim() ?? "";
+      const at = reference.lastIndexOf("@");
+      const action = at === -1 ? reference : reference.slice(0, at);
+      const revision = at === -1 ? "" : reference.slice(at + 1);
+      assert(
+        /^[0-9a-f]{40}$/.test(revision),
+        `${relativePath} has a non-immutable action reference: ${reference}`,
+      );
+      assert(comment.length > 0, `${relativePath} must record each action tag`);
+      assert(action.includes("/"), `${relativePath} has an invalid action: ${action}`);
+    }
+
     assert(
-      /^[0-9a-f]{40}$/.test(revision),
-      `${relativePath} has a non-immutable action reference: ${reference}`,
+      !source.includes("NPM_TOKEN") && !source.includes("npm@latest"),
+      `${relativePath} must not use a registry token or mutable npm version`,
     );
-    assert(comment.length > 0, `${relativePath} must record each action tag`);
-    assert(action.includes("/"), `${relativePath} has an invalid action: ${action}`);
-  }
-
-  assert(
-    !source.includes("NPM_TOKEN") && !source.includes("npm@latest"),
-    `${relativePath} must not use a registry token or mutable npm version`,
-  );
-  assert(
-    !source.includes("bun-version: latest") && !source.includes("0.9.1"),
-    `${relativePath} must pin Bun and Effigy versions`,
-  );
-}
-
-const web = read(".github/workflows/ci-web.yml");
-const rust = read(".github/workflows/ci-rust.yml");
-const native = read(".github/workflows/ci-native.yml");
-const visual = read(".github/workflows/ci-visual.yml");
-const release = read(".github/workflows/release.yml");
-
-const manualOnlyWorkflows = [
-  [native, ".github/workflows/ci-native.yml"],
-  [visual, ".github/workflows/ci-visual.yml"],
-  [release, ".github/workflows/release.yml"],
-] as const;
-
-for (const [source, relativePath] of manualOnlyWorkflows) {
-  const active = withoutComments(source);
-  assert(/^\s*workflow_dispatch:/m.test(active), `${relativePath} must remain manually dispatched`);
-  assert(
-    !/^\s*(?:push|pull_request|schedule):/m.test(active),
-    `${relativePath} must not add an automatic trigger`,
-  );
-}
-
-const automaticWorkflows = [
-  [web, ".github/workflows/ci-web.yml"],
-  [rust, ".github/workflows/ci-rust.yml"],
-] as const;
-
-for (const [source, relativePath] of automaticWorkflows) {
-  const active = withoutComments(source);
-  const keys = triggerKeys(active);
-  const expected = ["pull_request", "push", "workflow_dispatch"];
-  assert(
-    keys.length === expected.length && expected.every((key) => keys.includes(key)),
-    `${relativePath} must trigger on pull_request and push to main plus workflow_dispatch and nothing else`,
-  );
-  for (const event of ["push", "pull_request"]) {
-    const targets = eventBranchTargets(active, event);
     assert(
-      targets.length === 1 && targets[0] === "main",
-      `${relativePath} ${event} trigger must target main only`,
+      !source.includes("bun-version: latest") && !source.includes("0.9.1"),
+      `${relativePath} must pin Bun and Effigy versions`,
     );
   }
-}
 
-requireRun(web, "effigy ci:web", ".github/workflows/ci-web.yml");
-requireRun(rust, "effigy ci:rust", ".github/workflows/ci-rust.yml");
-requireRun(native, "effigy ci:native", ".github/workflows/ci-native.yml");
+  const web = read(".github/workflows/ci-web.yml");
+  const rust = read(".github/workflows/ci-rust.yml");
+  const native = read(".github/workflows/ci-native.yml");
+  const visual = read(".github/workflows/ci-visual.yml");
+  const release = read(".github/workflows/release.yml");
 
-const rustSetup = "uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c";
-for (const [source, file] of [
-  [rust, ".github/workflows/ci-rust.yml"],
-  [native, ".github/workflows/ci-native.yml"],
-] as const) {
-  assert(source.includes(rustSetup), `${file} must use the reviewed Rust action`);
-  assert(source.includes('toolchain: "1.95"'), `${file} must select Rust 1.95 explicitly`);
-}
-assert(
-  !release.includes(rustSetup) && !release.includes('toolchain: "1.95"'),
-  "release.yml must not install a Rust toolchain",
-);
+  const manualOnlyWorkflows = [
+    [native, ".github/workflows/ci-native.yml"],
+    [visual, ".github/workflows/ci-visual.yml"],
+    [release, ".github/workflows/release.yml"],
+  ] as const;
 
-assert(
-  native.includes("uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6") &&
-    native.includes('bun-version-file: "package.json"'),
-  "ci-native.yml must install the Bun pinned by package.json packageManager",
-);
-for (const [file, source] of [
-  ["ci-web.yml", web],
-  ["ci-native.yml", native],
-  ["ci-visual.yml", visual],
-  ["release.yml", release],
-] as const) {
+  for (const [source, relativePath] of manualOnlyWorkflows) {
+    const active = withoutComments(source);
+    assert(/^\s*workflow_dispatch:/m.test(active), `${relativePath} must remain manually dispatched`);
+    assert(
+      !/^\s*(?:push|pull_request|schedule):/m.test(active),
+      `${relativePath} must not add an automatic trigger`,
+    );
+  }
+
+  const automaticWorkflows = [
+    [web, ".github/workflows/ci-web.yml"],
+    [rust, ".github/workflows/ci-rust.yml"],
+  ] as const;
+
+  for (const [source, relativePath] of automaticWorkflows) {
+    const active = withoutComments(source);
+    const keys = triggerKeys(active);
+    const expected = ["pull_request", "push", "workflow_dispatch"];
+    assert(
+      keys.length === expected.length && expected.every((key) => keys.includes(key)),
+      `${relativePath} must trigger on pull_request and push to main plus workflow_dispatch and nothing else`,
+    );
+    for (const event of ["push", "pull_request"]) {
+      const targets = eventBranchTargets(active, event);
+      assert(
+        targets.length === 1 && targets[0] === "main",
+        `${relativePath} ${event} trigger must target main only`,
+      );
+    }
+  }
+
+  requireRun(web, "effigy ci:web", ".github/workflows/ci-web.yml");
+  requireRun(rust, "effigy ci:rust", ".github/workflows/ci-rust.yml");
+  requireRun(native, "effigy ci:native", ".github/workflows/ci-native.yml");
+
+  const rustSetup = "uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c";
+  for (const [source, file] of [
+    [rust, ".github/workflows/ci-rust.yml"],
+    [native, ".github/workflows/ci-native.yml"],
+  ] as const) {
+    assert(source.includes(rustSetup), `${file} must use the reviewed Rust action`);
+    assert(source.includes('toolchain: "1.95"'), `${file} must select Rust 1.95 explicitly`);
+  }
   assert(
-    source.includes('bun-version-file: "package.json"') && !/^\s*bun-version:/m.test(source),
-    `${file} must read the Bun version from package.json packageManager`,
+    !release.includes(rustSetup) && !release.includes('toolchain: "1.95"'),
+    "release.yml must not install a Rust toolchain",
   );
-}
-assert(
-  native.indexOf("uses: oven-sh/setup-bun@") < native.indexOf("run: effigy ci:native"),
-  "ci-native.yml must install Bun before the native selector",
-);
 
-const visualActive = withoutComments(visual);
-for (const selector of ["effigy test:visual-smoke", "effigy ci:visual", "effigy test:visual-sweep"]) {
-  assert(visualActive.includes(selector), `ci-visual.yml must map an input to ${selector}`);
-}
-assert(visualActive.includes('case "$TIER"'), "ci-visual.yml must select from the tier input");
-assert(
-  visualActive.includes("*)") && visualActive.includes("exit 1"),
-  "ci-visual.yml must reject unknown tiers",
-);
-
-for (const source of [web, rust, native, visual]) {
-  assert(!source.includes("ci:conformance"), "retained workflows must not use ci:conformance");
   assert(
-    !source.includes("packages/gpui/components/Cargo.toml"),
-    "retained workflows must not name the deleted GPUI components crate",
+    native.includes("uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6") &&
+      native.includes('bun-version-file: "package.json"'),
+    "ci-native.yml must install the Bun pinned by package.json packageManager",
   );
-}
+  for (const [file, source] of [
+    ["ci-web.yml", web],
+    ["ci-native.yml", native],
+    ["ci-visual.yml", visual],
+    ["release.yml", release],
+  ] as const) {
+    assert(
+      source.includes('bun-version-file: "package.json"') && !/^\s*bun-version:/m.test(source),
+      `${file} must read the Bun version from package.json packageManager`,
+    );
+  }
+  const nativeActive = withoutComments(native);
+  assert(
+    nativeActive.indexOf("uses: oven-sh/setup-bun@") < nativeActive.indexOf("effigy ci:native"),
+    "ci-native.yml must install Bun before the native selector",
+  );
 
-const publication = readNpmPublicationAuthority(root);
+  const visualActive = withoutComments(visual);
+  for (const selector of ["effigy test:visual-smoke", "effigy ci:visual", "effigy test:visual-sweep"]) {
+    assert(visualActive.includes(selector), `ci-visual.yml must map an input to ${selector}`);
+  }
+  assert(visualActive.includes('case "$TIER"'), "ci-visual.yml must select from the tier input");
+  assert(
+    visualActive.includes("*)") && visualActive.includes("exit 1"),
+    "ci-visual.yml must reject unknown tiers",
+  );
 
-const manifest = read("effigy.toml");
-assert(
-  manifest.includes('minimum_effigy_version = "0.11.0"'),
-  "effigy.toml must require Effigy 0.11.0",
-);
-assert(manifest.includes("[release.gates.headless]"), "headless release gate must be configured");
-assert(
-  manifest.includes(`command = "${RELEASE_CERTIFICATE_SELECTOR}"`),
-  `headless release gate must run ${RELEASE_CERTIFICATE_SELECTOR}`,
-);
-assert(
-  !/command = "effigy qa"/.test(manifest),
-  "aggregate qa must not be release authority",
-);
+  for (const source of [web, rust, native, visual]) {
+    assert(!source.includes("ci:conformance"), "retained workflows must not use ci:conformance");
+    assert(
+      !source.includes("packages/gpui/components/Cargo.toml"),
+      "retained workflows must not name the deleted GPUI components crate",
+    );
+  }
 
-const taskManifest = read("tasks/effigy.tasks.toml");
-assert(!taskManifest.includes("ci:conformance"), "the stale ci:conformance alias must be removed");
-const ciRustBoard = /"ci:rust"\s*=\s*\[([\s\S]*?)\]/.exec(taskManifest)?.[1] ?? "";
-assert(ciRustBoard.includes("ir:check"), "ci:rust must run ir:check so generator-stamp drift fails on the Queue board");
-assert(
-  ciRustBoard.includes("catalogue:check"),
-  "ci:rust must run catalogue:check so catalogue stamp drift fails on the Queue board",
-);
-assert(
-  fs.existsSync(path.join(root, ".github/workflows/ci-conformance.yml")) === false,
-  "stale conformance workflow must be deleted",
-);
+  const publication = readNpmPublicationAuthority(root);
 
-// The npm certificate is one selector that separates admission from archive
-// certification, and `qa` stays the aggregate board through the bounded runner.
-assert(
-  taskManifest.includes('"release:web-admission"') &&
-    taskManifest.includes('"release:web-archive"') &&
-    taskManifest.includes('"release:web-certificate"'),
-  "the npm certificate selectors must exist and stay separate from archive certification",
-);
-assert(
-  taskManifest.includes('qa = "bun scripts/validation/run-board.ts qa:board"'),
-  "qa must execute the bounded, observable validation runner",
-);
-assert(
-  taskManifest.includes('"qa:board" = ['),
-  "the complete aggregate inventory must stay declared as qa:board",
-);
+  const manifest = read("effigy.toml");
+  assert(
+    manifest.includes('minimum_effigy_version = "0.11.0"'),
+    "effigy.toml must require Effigy 0.11.0",
+  );
+  assert(manifest.includes("[release.gates.headless]"), "headless release gate must be configured");
+  assert(
+    manifest.includes(`command = "${RELEASE_CERTIFICATE_SELECTOR}"`),
+    `headless release gate must run ${RELEASE_CERTIFICATE_SELECTOR}`,
+  );
+  assert(
+    !/command = "effigy qa"/.test(manifest),
+    "aggregate qa must not be release authority",
+  );
 
-const bounds = JSON.parse(read("quality/validation-bounds.json")) as {
-  boardTimeoutMs: number;
-  childTimeoutMs: number;
-  tasks: Record<string, number>;
-};
-assert(
-  bounds.boardTimeoutMs <= 15 * 60 * 1000,
-  "the full board must hard-stop at fifteen minutes",
-);
-assert(
-  bounds.childTimeoutMs <= 5 * 60 * 1000,
-  "no child may run silently for more than five minutes",
-);
-assert(
-  typeof bounds.tasks["probe:gpui-specimens"] === "number" &&
-    bounds.tasks["probe:gpui-specimens"] <= 5 * 60 * 1000,
-  "the named specimen probe must carry an explicit bound at or below the five-minute ceiling",
-);
+  const taskManifest = read("tasks/effigy.tasks.toml");
+  assert(!taskManifest.includes("ci:conformance"), "the stale ci:conformance alias must be removed");
+  const ciRustBoard = /"ci:rust"\s*=\s*\[([\s\S]*?)\]/.exec(taskManifest)?.[1] ?? "";
+  assert(ciRustBoard.includes("ir:check"), "ci:rust must run ir:check so generator-stamp drift fails on the Queue board");
+  assert(
+    ciRustBoard.includes("catalogue:check"),
+    "ci:rust must run catalogue:check so catalogue stamp drift fails on the Queue board",
+  );
+  assert(
+    fs.existsSync(path.join(root, ".github/workflows/ci-conformance.yml")) === false,
+    "stale conformance workflow must be deleted",
+  );
 
-for (const failure of collectReleaseWorkflowFailures(release, publication)) {
-  failures.push(failure);
-}
-for (const failure of collectGenericCandidateFailures({
-  ".github/workflows/release.yml": release,
-  "effigy.toml": manifest,
-})) {
-  failures.push(failure);
-}
+  // The npm certificate is one selector that separates admission from archive
+  // certification, and `qa` stays the aggregate board through the bounded runner.
+  assert(
+    taskManifest.includes('"release:web-admission"') &&
+      taskManifest.includes('"release:web-archive"') &&
+      taskManifest.includes('"release:web-certificate"'),
+    "the npm certificate selectors must exist and stay separate from archive certification",
+  );
+  assert(
+    taskManifest.includes('qa = "bun scripts/validation/run-board.ts qa:board"'),
+    "qa must execute the bounded, observable validation runner",
+  );
+  assert(
+    taskManifest.includes('"qa:board" = ['),
+    "the complete aggregate inventory must stay declared as qa:board",
+  );
 
-// ---------------------------------------------------------------------------
-// Planted negatives: each mutation of the retained surfaces must fail the law.
-// ---------------------------------------------------------------------------
+  const bounds = JSON.parse(read("quality/validation-bounds.json")) as {
+    boardTimeoutMs: number;
+    childTimeoutMs: number;
+    tasks: Record<string, number>;
+  };
+  assert(
+    bounds.boardTimeoutMs <= 15 * 60 * 1000,
+    "the full board must hard-stop at fifteen minutes",
+  );
+  assert(
+    bounds.childTimeoutMs <= 5 * 60 * 1000,
+    "no child may run silently for more than five minutes",
+  );
+  assert(
+    typeof bounds.tasks["probe:gpui-specimens"] === "number" &&
+      bounds.tasks["probe:gpui-specimens"] <= 5 * 60 * 1000,
+    "the named specimen probe must carry an explicit bound at or below the five-minute ceiling",
+  );
 
-type Plant = { name: string; source: string; expect: RegExp };
+  for (const failure of collectReleaseWorkflowFailures(release, publication)) {
+    failures.push(failure);
+  }
+  for (const failure of collectGenericCandidateFailures({
+    ".github/workflows/release.yml": release,
+    "effigy.toml": manifest,
+  })) {
+    failures.push(failure);
+  }
 
-const releasePlants: Plant[] = [
-  {
-    name: "restore the aggregate qa board",
-    source: release.replace(
-      "run: effigy release:web-certificate",
-      "run: effigy qa",
-    ),
-    expect: /exactly one Effigy certificate entry|must not carry aggregate qa/,
-  },
-  {
-    name: "install the Rust toolchain",
-    source: release.replace(
-      "      - uses: oven-sh/setup-bun@",
-      "      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # Rust 1.95\n      - uses: oven-sh/setup-bun@",
-    ),
-    expect: /must not carry Rust toolchain setup/,
-  },
-  {
-    name: "move back to a macOS runner",
-    source: release.replace("runs-on: ubuntu-latest", "runs-on: macos-latest"),
-    expect: /must run on ubuntu-latest|must not carry macOS runner/,
-  },
-  {
-    name: "drop the hard timeout",
-    source: release.replace("    timeout-minutes: 10\n", ""),
-    expect: /ten-minute hard job timeout/,
-  },
-  {
-    name: "publish a package directory instead of archives",
-    source: release.replace(
-      '          for tarball in "${tarballs[@]}"; do\n            npm publish "./$tarball" --access public\n          done',
-      '          for dir in packages/core packages/svelte/components; do\n            (cd "$dir" && npm publish --access public)\n          done',
-    ),
-    expect: /publish archives|package directories/,
-  },
-  {
-    name: "drop the explicit local archive path",
-    source: release.replace('npm publish "./$tarball"', 'npm publish "$tarball"'),
-    expect: /explicit local path/,
-  },
-  {
-    name: "drop the certified-tag recovery checkout",
-    source: release.replace(
-      "          ref: ${{ inputs.mode == 'publish' && inputs.release-tag || github.ref }}\n",
-      "",
-    ),
-    expect: /certified-tag recovery checkout/,
-  },
-  {
-    name: "drop the bounded registry processing retry",
-    source: release.replace("            for attempt in {1..36}; do\n", ""),
-    expect: /cache-revalidating processing-delay retry/,
-  },
-  {
-    name: "read the registry through the local packument cache",
-    source: release.replace("npm view --prefer-online", "npm view"),
-    expect: /cache-revalidating processing-delay retry/,
-  },
-  {
-    name: "add a second Effigy entry",
-    source: release.replace(
-      "run: effigy release:web-certificate",
-      "run: effigy release:web-certificate\n      - run: effigy docs:lint",
-    ),
-    expect: /exactly one Effigy certificate entry/,
-  },
-  {
-    name: "reintroduce a tag dry run",
-    source: release.replace(
-      "      candidate-run-id:",
-      "      dry-run:\n        description: pack without publishing\n        type: boolean\n        default: true\n      candidate-run-id:",
-    ),
-    expect: /dry-run/,
-  },
-  {
-    name: "drop publish source-commit binding",
-    source: release.replace(/ --source-commit "\$\(git rev-parse HEAD\)"/, ""),
-    expect: /bind the candidate source commit/,
-  },
-  {
-    name: "drop the candidate artifact upload",
-    source: release.replace("          path: release-artifacts/**\n", ""),
-    expect: /upload the archive set|archive set and its identity manifest/,
-  },
-  {
-    name: "drop the Effigy setup action",
-    source: release.replace(
-      "      - uses: inflatable-cookie/setup-effigy@987fd556617ea2c3e0ab5cef6b47b250817f50c8 # v1.0.0\n        with:\n          version: \"0.11.0\"\n\n",
-      "",
-    ),
-    expect: /install the reviewed Effigy action/,
-  },
-];
+  // ---------------------------------------------------------------------------
+  // Planted negatives: each mutation of the retained surfaces must fail the law.
+  // ---------------------------------------------------------------------------
 
-for (const plant of releasePlants) {
-  const planted = collectReleaseWorkflowFailures(plant.source, publication);
-  const caught = planted.some((failure) => plant.expect.test(failure));
-  assert(caught, `plant "${plant.name}" must fail the checker; got: ${planted.join("; ") || "no failures"}`);
-  console.log(caught ? `plant ${plant.name}: failed as required` : `plant ${plant.name}: did not fail`);
-}
+  type Plant = { name: string; source: string; expect: RegExp };
 
-const reactPublication = {
-  ...publication,
-  packages: [
-    ...publication.packages,
-    { name: "@inflatable-cookie/poodle-react", path: "packages/react/components" },
-  ],
-};
-const reactFailure = collectReleaseWorkflowFailures(release, reactPublication).some((failure) =>
-  failure.includes("exactly core and Svelte"),
-);
-assert(
-  reactFailure,
-  "adding React to the release authority must fail the checker",
-);
-console.log(
-  reactFailure
-    ? "plant React publication authority: failed as required"
-    : "plant React publication authority: did not fail",
-);
+  const releasePlants: Plant[] = [
+    {
+      name: "restore the aggregate qa board",
+      source: release.replace(
+        "run: effigy release:web-certificate",
+        "run: effigy qa",
+      ),
+      expect: /exactly one Effigy certificate entry|must not carry aggregate qa/,
+    },
+    {
+      name: "install the Rust toolchain",
+      source: release.replace(
+        "      - uses: oven-sh/setup-bun@",
+        "      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # Rust 1.95\n      - uses: oven-sh/setup-bun@",
+      ),
+      expect: /must not carry Rust toolchain setup/,
+    },
+    {
+      name: "move back to a macOS runner",
+      source: release.replace("runs-on: ubuntu-latest", "runs-on: macos-latest"),
+      expect: /must run on ubuntu-latest|must not carry macOS runner/,
+    },
+    {
+      name: "drop the hard timeout",
+      source: release.replace("    timeout-minutes: 10\n", ""),
+      expect: /ten-minute hard job timeout/,
+    },
+    {
+      name: "publish a package directory instead of archives",
+      source: release.replace(
+        '          for tarball in "${tarballs[@]}"; do\n            npm publish "./$tarball" --access public\n          done',
+        '          for dir in packages/core packages/svelte/components; do\n            (cd "$dir" && npm publish --access public)\n          done',
+      ),
+      expect: /publish archives|package directories/,
+    },
+    {
+      name: "drop the explicit local archive path",
+      source: release.replace('npm publish "./$tarball"', 'npm publish "$tarball"'),
+      expect: /explicit local path/,
+    },
+    {
+      name: "drop the certified-tag recovery checkout",
+      source: release.replace(
+        "          ref: ${{ inputs.mode == 'publish' && inputs.release-tag || github.ref }}\n",
+        "",
+      ),
+      expect: /certified-tag recovery checkout/,
+    },
+    {
+      name: "drop the bounded registry processing retry",
+      source: release.replace("            for attempt in {1..36}; do\n", ""),
+      expect: /cache-revalidating processing-delay retry/,
+    },
+    {
+      name: "read the registry through the local packument cache",
+      source: release.replace("npm view --prefer-online", "npm view"),
+      expect: /cache-revalidating processing-delay retry/,
+    },
+    {
+      name: "add a second Effigy entry",
+      source: release.replace(
+        "run: effigy release:web-certificate",
+        "run: effigy release:web-certificate\n      - run: effigy docs:lint",
+      ),
+      expect: /exactly one Effigy certificate entry/,
+    },
+    {
+      name: "reintroduce a tag dry run",
+      source: release.replace(
+        "      candidate-run-id:",
+        "      dry-run:\n        description: pack without publishing\n        type: boolean\n        default: true\n      candidate-run-id:",
+      ),
+      expect: /dry-run/,
+    },
+    {
+      name: "drop publish source-commit binding",
+      source: release.replace(/ --source-commit "\$\(git rev-parse HEAD\)"/, ""),
+      expect: /bind the candidate source commit/,
+    },
+    {
+      name: "drop the candidate artifact upload",
+      source: release.replace("          path: release-artifacts/**\n", ""),
+      expect: /upload the archive set|archive set and its identity manifest/,
+    },
+    {
+      name: "drop the Effigy setup action",
+      source: release.replace(
+        "      - uses: inflatable-cookie/setup-effigy@987fd556617ea2c3e0ab5cef6b47b250817f50c8 # v1.0.0\n        with:\n          version: \"0.11.0\"\n\n",
+        "",
+      ),
+      expect: /install the reviewed Effigy action/,
+    },
+  ];
 
-const frozenFailure = collectGenericCandidateFailures({
-  "release.yml": `${release}\n# g18.006 frozen candidate\n`,
-  "tasks": 'x = "0.4.0"',
-}).length;
-assert(frozenFailure >= 1, "a frozen generation or version in active release policy must fail");
-console.log(
-  frozenFailure >= 1
-    ? "plant frozen release policy: failed as required"
-    : "plant frozen release policy: did not fail",
-);
+  for (const plant of releasePlants) {
+    const planted = collectReleaseWorkflowFailures(plant.source, publication);
+    const caught = planted.some((failure) => plant.expect.test(failure));
+    assert(caught, `plant "${plant.name}" must fail the checker; got: ${planted.join("; ") || "no failures"}`);
+    console.log(caught ? `plant ${plant.name}: failed as required` : `plant ${plant.name}: did not fail`);
+  }
 
-if (failures.length > 0) {
-  console.error("release automation static check: FAIL");
-  for (const failure of failures) console.error(`- ${failure}`);
-  process.exitCode = 1;
-} else {
-  console.log("release automation static check: pass");
+  const reactPublication = {
+    ...publication,
+    packages: [
+      ...publication.packages,
+      { name: "@inflatable-cookie/poodle-react", path: "packages/react/components" },
+    ],
+  };
+  const reactFailure = collectReleaseWorkflowFailures(release, reactPublication).some((failure) =>
+    failure.includes("exactly core and Svelte"),
+  );
+  assert(
+    reactFailure,
+    "adding React to the release authority must fail the checker",
+  );
   console.log(
-    `checked ${retainedWorkflows.length} retained workflows, the npm certificate authority, generic candidate admission, validation bounds, archive/identity protocol, publication set and planted failures`,
+    reactFailure
+      ? "plant React publication authority: failed as required"
+      : "plant React publication authority: did not fail",
   );
+
+  const frozenFailure = collectGenericCandidateFailures({
+    "release.yml": `${release}\n# g18.006 frozen candidate\n`,
+    "tasks": 'x = "0.4.0"',
+  }).length;
+  assert(frozenFailure >= 1, "a frozen generation or version in active release policy must fail");
+  console.log(
+    frozenFailure >= 1
+      ? "plant frozen release policy: failed as required"
+      : "plant frozen release policy: did not fail",
+  );
+
+  if (failures.length > 0) {
+    console.error("release automation static check: FAIL");
+    for (const failure of failures) console.error(`- ${failure}`);
+    process.exitCode = 1;
+  } else {
+    console.log("release automation static check: pass");
+    console.log(
+      `checked ${retainedWorkflows.length} retained workflows, the npm certificate authority, generic candidate admission, validation bounds, archive/identity protocol, publication set and planted failures`,
+    );
+  }
 }
+
+if (import.meta.main) checkReleaseAutomation();
