@@ -163,8 +163,8 @@ The `aria-label` on the `<footer>` is resolved as:
 
 | Property | Value |
 |----------|-------|
-| `border-top` | `0.0625rem solid var(--poodle-color-border-subtle)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
+| `border-top` | `0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle))` |
+| `background` | `var(--poodle-recipe-status-bar-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)))` |
 
 ### Size modifiers
 

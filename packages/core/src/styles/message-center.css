@@ -119,7 +119,7 @@ button.poodle-message-center__content {
 }
 
 .poodle-message-center__content--interactive:hover {
-  background: var(--poodle-recipe-message-center-item-hover-fill, color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent));
+  background: var(--poodle-recipe-message-center-item-hover-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)));
 }
 
 .poodle-message-center__content--interactive:focus-visible {

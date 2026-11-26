@@ -2,9 +2,9 @@
    shared-styles move). Unique poodle-* selectors; safe as global CSS. */
 
   .poodle-pill {
-    --poodle-pill-tint-fill: var(--poodle-recipe-pill-fill, color-mix(in srgb, var(--poodle-color-background-surface) 90%, transparent));
+    --poodle-pill-tint-fill: var(--poodle-recipe-pill-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-surface) 90%, transparent)));
     --poodle-pill-fill: var(--poodle-pill-tint-fill);
-    --poodle-pill-border: var(--poodle-recipe-pill-border, color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent));
+    --poodle-pill-border: var(--poodle-recipe-pill-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)));
     --poodle-pill-text: var(--poodle-recipe-pill-text, var(--poodle-color-text-secondary));
     --poodle-pill-tone-base: var(--poodle-color-text-secondary);
     --poodle-pill-min-height: 1.25rem;
@@ -172,7 +172,7 @@
   }
 
   .poodle-pill[data-appearance="badge"][data-tone="neutral"] {
-    --poodle-pill-fill: var(--poodle-recipe-pill-neutral-fill, color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary)));
+    --poodle-pill-fill: var(--poodle-recipe-pill-neutral-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary))));
     --poodle-pill-text: var(--poodle-recipe-pill-neutral-text, var(--poodle-color-text-secondary));
   }
 

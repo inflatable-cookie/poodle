@@ -205,7 +205,7 @@ i=3 `20%`.
 |----------|-------|
 | `gap` | `0.75rem` |
 | `padding` | `1rem` |
-| `border` | `1px solid color-mix(in srgb, var(--poodle-color-border-default) 42%, transparent)` |
+| `border` | `1px solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-default) 42%, transparent))` |
 | `border-radius` | `var(--poodle-radius-surface)` |
 
 #### Block header `.skeleton--block-header`

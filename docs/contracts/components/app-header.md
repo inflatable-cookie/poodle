@@ -267,8 +267,8 @@ does **not** require `dragRegion` to be set: `data-size` is always rendered.
 | `align-items` | `center` |
 | `min-height` | `var(--poodle-app-header-min-height)` |
 | `padding` | `var(--poodle-app-header-padding-block) var(--poodle-app-header-padding-inline)` |
-| `border-bottom` | `0.0625rem solid var(--poodle-color-border-subtle)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
+| `border-bottom` | `0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle))` |
+| `background` | `var(--poodle-recipe-app-header-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)))` |
 | `overflow` | `visible` |
 | `--poodle-app-header-side-min` | `0` (collapse guard for the centred side columns) |
 

@@ -1,0 +1,28 @@
+{
+  "task": "poodle#184",
+  "lane": "style-axis",
+  "baseline": "037ddb7ba (checkout head before this change)",
+  "zeroPixel": {
+    "scope": "every catalogue specimen page (181 slugs) under the default style, in eclipse and clay, at density default and size md",
+    "captures": 360,
+    "identical": 356,
+    "rerunnedUnchanged": {
+      "radio-group (clay)": "baseline bytes on recheck of unchanged code",
+      "time-ago (eclipse)": "baseline bytes on recheck of unchanged code",
+      "dock-region (clay)": "baseline bytes on recheck of unchanged code",
+      "code (eclipse)": "unstable: before, after and recheck all differ; not a changed stylesheet"
+    },
+    "capture": "specimen element, Svelte preview, theme and style via URL parameters, animations disabled, fonts awaited, two stable captures required"
+  },
+  "unsettledInBothRuns": ["log-list (clay)", "agent-transcript (clay)"],
+  "quiet": {
+    "scope": "the eleven changed specimens under data-style=quiet, eclipse and clay",
+    "captures": 22,
+    "composites": "quiet-beside-default/<slug>.png, left default, right quiet, eclipse"
+  },
+  "checks": {
+    "docsLint": "pass",
+    "diffCheck": "pass",
+    "recipeInventory": "regenerated, unchanged"
+  }
+}

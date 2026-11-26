@@ -151,7 +151,7 @@ not introduce an Underlay-facing dependency.
 
 | Property | Token |
 |----------|-------|
-| interactive row fill | `--poodle-recipe-message-center-item-hover-fill` |
+| interactive row fill | `--poodle-recipe-message-center-item-hover-fill`, then `--poodle-style-control-fillHover` |
 | interactive row radius | `--poodle-radius-control` — the row is full-width inside the rounded surface; the inset focus ring and the hover fill round with it |
 | focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, `-0.125rem` inset offset |
 | progress track + indicator | per the `Progress` contract §8; the row renders `Progress` at size `xs` |

@@ -183,10 +183,10 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | `min-width` | `14rem` |
 | `max-width` | `20rem` |
 | `padding` | `2rem 2.5rem` |
-| `border` | `1px solid color-mix(in srgb, var(--poodle-color-border-default) 42%, transparent)` |
+| `border` | `1px solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-default) 42%, transparent))` |
 | `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `var(--poodle-color-background-elevated)` |
-| `box-shadow` | `var(--poodle-elevation-overlay)` |
+| `background` | `var(--poodle-recipe-page-loading-card-fill, var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, var(--poodle-color-background-elevated))))` |
+| `box-shadow` | `var(--poodle-recipe-page-loading-card-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay)))` |
 
 #### `.page-loading[data-presentation="inline"] .page-loading__card`
 
@@ -220,9 +220,9 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | Property | Value |
 |----------|-------|
 | `padding` | `0.375rem 0.875rem` |
-| `border` | `1px solid var(--poodle-color-border-default)` |
+| `border` | `1px solid var(--poodle-style-control-border, var(--poodle-color-border-default))` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `transparent` |
+| `background` | `var(--poodle-recipe-page-loading-cancel-fill, var(--poodle-style-control-fill, transparent))` |
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font` | `inherit` |
 | `font-size` | `var(--poodle-typography-label-size, 0.8125rem)` |
@@ -233,7 +233,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)` |
+| `background` | `var(--poodle-recipe-page-loading-hover-cancel-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)))` |
 
 #### `.page-loading__cancel:focus-visible`
 
