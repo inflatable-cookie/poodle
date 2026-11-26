@@ -241,3 +241,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 <LogList {entries} variant="stream" autoScroll />
 ```
+
+### Rendering style roles
+
+Rendering style roles (poodle#186): the frame reads `--poodle-style-surface-border` and `--poodle-style-surface-fill`. The filter button and search input read the control border and fill.

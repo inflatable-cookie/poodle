@@ -214,6 +214,8 @@ behavior (the Svelte implementation is the parity authority).
 
 ## 8. Token Usage — Exact Values
 
+Rendering style roles (poodle#186): the menu surface reads the floating surface roles. Items read `--poodle-style-control-fill` at rest and `--poodle-style-control-fillHover` on hover, and the submenu-open and selected states keep the selection roles.
+
 ### Root `.menu`
 
 | Property | Value |

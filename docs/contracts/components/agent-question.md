@@ -357,3 +357,7 @@ selection cleared; a batch of four showing progress at the second; the last
 question of a batch; dismissible; not dismissible; a question with more than
 nine options, showing shortcuts on the first nine only; full size ladder;
 density variants.
+
+### Rendering style roles
+
+Rendering style roles (poodle#186): option cards read `--poodle-style-control-border` and `--poodle-style-control-fill` at rest, and the dismiss control reads `--poodle-style-control-fill`. The option hover border stays literal, because no hover-fill role exists for it yet.

@@ -23,7 +23,7 @@
   .poodle-breadcrumbs button {
     border: 0;
     padding: 0;
-    background: var(--poodle-recipe-breadcrumbs-fill, transparent);
+    background: var(--poodle-recipe-breadcrumbs-fill, var(--poodle-style-control-fill, transparent));
     color: inherit;
     cursor: pointer;
     font: inherit;

@@ -22,7 +22,7 @@
     padding: 0;
     border: 0;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-rating-item-fill, transparent);
+    background: var(--poodle-recipe-rating-item-fill, var(--poodle-style-control-fill, transparent));
     color: var(--poodle-recipe-rating-item-text, color-mix(in srgb, var(--poodle-color-text-secondary) 48%, transparent));
     cursor: pointer;
     font: inherit;

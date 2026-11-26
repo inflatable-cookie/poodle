@@ -151,6 +151,8 @@ dismissable-layer stack; selection is plain state.
 
 ## 8. Token Usage
 
+Rendering style roles (poodle#186): the trigger reads the control border and fill, and the popover reads the floating surface roles. Tiles read `--poodle-style-control-fill` at rest and `--poodle-style-control-fillHover` on hover.
+
 Chrome (trigger, surface, tile selection) resolves from semantic tokens; swatch
 colors are the theme's literal values (the whole point of a preview). See the
 Anatomy token-target column. Selected tiles (`.poodle-theme-select__tile[data-selected="true"]`)

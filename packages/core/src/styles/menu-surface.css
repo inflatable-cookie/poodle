@@ -12,10 +12,10 @@
     z-index: var(--poodle-overlay-z-menu);
     min-width: 14rem;
     padding: var(--poodle-menu-overlay-padding);
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
+    border: 0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent));
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-menu-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)));
-    box-shadow: var(--poodle-recipe-menu-surface-shadow, var(--poodle-elevation-overlay));
+    background: var(--poodle-recipe-menu-surface-fill, var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))));
+    box-shadow: var(--poodle-recipe-menu-surface-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay)));
   }
 
   .poodle-menu-surface__item {
@@ -29,7 +29,7 @@
       calc(var(--poodle-menu-item-padding-x-base) + var(--poodle-menu-item-padding-x-adjust));
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: var(--poodle-recipe-menu-surface-item-fill, transparent);
+    background: var(--poodle-recipe-menu-surface-item-fill, var(--poodle-style-control-fill, transparent));
     color: var(--poodle-recipe-menu-surface-item-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font: inherit;
@@ -39,7 +39,7 @@
 
   .poodle-menu-surface__item:hover:not(:disabled),
   .poodle-menu-surface__item:focus-visible {
-    background: var(--poodle-recipe-menu-surface-hover-focus-item-fill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
+    background: var(--poodle-recipe-menu-surface-hover-focus-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)));
     outline: none;
   }
 

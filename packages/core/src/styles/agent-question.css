@@ -96,9 +96,9 @@
   align-items: flex-start;
   gap: 0.5rem;
   padding: var(--poodle-agent-question-option-pad-block) var(--poodle-agent-question-option-pad-inline);
-  border: 0.0625rem solid transparent;
+  border: 0.0625rem solid var(--poodle-style-control-border, transparent);
   border-radius: var(--poodle-radius-control);
-  background: var(--poodle-color-background-elevated);
+  background: var(--poodle-style-control-fill, var(--poodle-color-background-elevated));
   color: inherit;
   font: inherit;
   text-align: left;
@@ -162,7 +162,7 @@
   align-self: flex-start;
   padding: 0;
   border: 0;
-  background: transparent;
+  background: var(--poodle-style-control-fill, transparent);
   color: var(--poodle-color-text-secondary);
   font: inherit;
   font-size: var(--poodle-agent-question-font-size);

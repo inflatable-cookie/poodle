@@ -123,6 +123,15 @@ which are dividers. No selected, current or checked state sits in this
 cohort. The SettingsShell group-title accent is in `sidebar-nav.css`, outside
 this cohort, and needs a text role there.
 
+The fill and surface roles also reach the controls and containers that
+only took the selection switch (poodle#186). A control or item reads
+`--poodle-style-control-fill`, `-fillHover`, `-border` and `-shadow` at rest
+and on hover, through the same recipe, role, literal chain. A container reads
+the surface roles, and a floating one reads `-floatingFill` before `-fill`.
+Bands inside a container (toolbars, headers, footers, filter rows), tone and
+status paint, chips, badges, dividers, the calendar's day cells and the
+scroll button keep their own values, listed for the redesign.
+
 ## Public Surface vs Internal Variables
 
 Two classes, machine-classified by

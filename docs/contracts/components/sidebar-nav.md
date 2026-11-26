@@ -172,6 +172,8 @@ overlay and the anchor point.
 
 ## 8. Token Usage
 
+Rendering style roles (poodle#186): items read `--poodle-style-control-fill` at rest and `--poodle-style-control-fillHover` on hover.
+
 ### Data Attributes
 
 | Attribute | Element | Values |

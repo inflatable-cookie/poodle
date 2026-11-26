@@ -179,6 +179,8 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 8. Token Usage -- Exact Values
 
+Rendering style roles (poodle#186): link and button crumbs read `--poodle-style-control-fill` at rest.
+
 ### Root `.breadcrumbs`
 
 The `<nav>` root carries `data-size` and `data-density` attributes but has no

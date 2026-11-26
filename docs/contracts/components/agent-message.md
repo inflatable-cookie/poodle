@@ -211,6 +211,8 @@ surface that shows agent prose.
 
 ## 8. Token Usage
 
+Rendering style roles (poodle#186): the user message bubble reads `--poodle-style-surface-fill` after its literal chain. The code span and quote keep their own paint.
+
 | Property | Token |
 |----------|-------|
 | body text | `--poodle-color-text-primary` |
