@@ -1,7 +1,6 @@
 # ModelCatalogueEditor
 
 Status: approved
-Updated: 2026-11-26
 Governing spec: `../../knowledge/specs/067-model-connection-management.md`
 
 ## 1. Purpose

@@ -3,7 +3,6 @@
 > **Surface elevation**: Table header is a surface consumer (91% surface / text-primary mix) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-07-10
 
 ## 1. Purpose
 

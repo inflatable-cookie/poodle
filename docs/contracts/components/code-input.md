@@ -1,7 +1,6 @@
 # CodeInput
 
 Status: detailed contract
-Updated: 2026-08-14
 
 > **Note:** This component replaces both `PinInput` and `TotpInput`. Use
 > `mask: true` for PIN-style masked entry. Use `mask: false` (default) for

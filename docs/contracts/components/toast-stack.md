@@ -1,7 +1,6 @@
 # ToastStack
 
 Status: detailed contract
-Updated: 2026-09-02
 
 ## 1. Purpose
 

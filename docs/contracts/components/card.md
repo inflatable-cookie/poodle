@@ -1,7 +1,6 @@
 # Card
 
 Status: detailed contract
-Updated: 2026-11-25
 
 ## 1. Purpose
 

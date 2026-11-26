@@ -1,7 +1,6 @@
 # Pill
 
 Status: detailed contract
-Updated: 2026-09-29
 
 ## 1. Purpose
 

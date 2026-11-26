@@ -1,7 +1,6 @@
 # XY Pad
 
 Status: detailed contract
-Updated: 2026-08-29
 
 ## 1. Purpose
 

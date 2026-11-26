@@ -1,7 +1,6 @@
 # Date Time Zone Picker
 
 Status: detailed contract
-Updated: 2026-08-20
 
 ## 1. Purpose
 

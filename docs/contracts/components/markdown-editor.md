@@ -1,7 +1,6 @@
 # MarkdownEditor and MarkdownRenderer
 
 Status: detailed contract
-Updated: 2026-10-06
 
 ## 1. Purpose
 

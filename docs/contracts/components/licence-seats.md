@@ -1,7 +1,6 @@
 # LicenceSeats
 
 Status: approved web reference; native/conformance work pending
-Updated: 2026-08-14
 
 ## 1. Purpose
 

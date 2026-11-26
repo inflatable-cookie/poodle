@@ -1,7 +1,6 @@
 # HistoryCenter
 
 Status: active contract
-Updated: 2026-09-01
 
 ## 1. Purpose
 

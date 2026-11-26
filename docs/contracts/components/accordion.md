@@ -3,7 +3,6 @@
 > **Surface elevation**: Accordion is a surface consumer (50% strong contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-08-27
 
 ## 1. Purpose
 

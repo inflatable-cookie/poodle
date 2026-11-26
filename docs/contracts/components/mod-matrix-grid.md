@@ -1,7 +1,6 @@
 # Mod Matrix Grid
 
 Status: detailed contract
-Updated: 2026-08-11
 
 ## 1. Purpose
 

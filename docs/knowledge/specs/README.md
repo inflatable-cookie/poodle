@@ -37,18 +37,11 @@ Current cross-cutting references:
   harness boundary
 - `044-deprecation-change-control-and-release-channel-operations.md` —
   deprecation, change control, and release-channel operations
-- `062-headless-core-and-dual-layer-strategy.md` — headless core and dual
-  layer strategy (promoted into architecture 006)
-- `063-rust-authored-component-and-scene-ir.md` — retired pilot record; its
-  successor, spec 066, was rejected, and architecture 009 is active
 - `067-model-connection-management.md` — shaping contract for reusable model
   route setup, configured connection rows, and model catalogue curation
 - `068-batched-audio-meter-surface.md` — approved contract for the web
   MeterBus, AudioMeter surface mode, one-canvas MeterSurface, browser evidence,
   and the Canvas2D performance gate
-- `069-dependable-drag-and-drop-substrate.md` — approved cross-runtime
-  lifecycle, pointer/touch/keyboard sensors, host cross-window bridge, inbound
-  files, native drag-out, migration, and certification contract
 - `070-compiled-web-distribution-contract.md` — exact compiled `dist`
   inventories, Svelte client/server and React export maps, receipt schemas,
   source-free archive law, and the root-to-`./markdown` break

@@ -1,7 +1,6 @@
 # Surface Elevation
 
 Status: active
-Updated: 2026-03-23
 
 - Component name: `SurfaceElevation`
 - Layer: `foundation`

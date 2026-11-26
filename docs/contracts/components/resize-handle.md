@@ -1,7 +1,6 @@
 # ResizeHandle
 
 Status: detailed contract
-Updated: 2026-08-21
 
 ## 1. Purpose
 

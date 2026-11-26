@@ -1,7 +1,6 @@
 # Code
 
 Status: detailed contract
-Updated: 2026-09-30
 
 ## 1. Purpose
 

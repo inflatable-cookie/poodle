@@ -1,7 +1,6 @@
 # Breadcrumbs
 
 Status: detailed contract
-Updated: 2026-08-27
 
 ## 1. Purpose
 

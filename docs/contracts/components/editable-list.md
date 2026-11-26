@@ -1,7 +1,6 @@
 # EditableList
 
 Status: detailed contract
-Updated: 2026-08-30
 
 ## 1. Purpose
 

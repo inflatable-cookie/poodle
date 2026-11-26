@@ -1,7 +1,6 @@
 # DockRegion
 
 Status: active contract
-Updated: 2026-09-04
 
 ## 1. Purpose
 

@@ -1,7 +1,6 @@
 # FilterToolbar
 
 Status: detailed contract
-Updated: 2026-07-10
 
 ## 1. Purpose
 

@@ -1,7 +1,6 @@
 # DebugDialog
 
 Status: active
-Updated: 2026-07-10
 
 ## 1. Purpose
 

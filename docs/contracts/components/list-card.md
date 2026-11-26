@@ -6,7 +6,6 @@ composite](./listbox.md) to own option semantics and keyboard selection.
 > **Surface elevation**: ListCard is a surface consumer (50% strong contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-09-29
 
 ## 1. Purpose
 

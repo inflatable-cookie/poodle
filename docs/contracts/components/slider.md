@@ -1,7 +1,6 @@
 # Slider
 
 Status: approved contract — shared-family implementation queued
-Updated: 2026-10-06
 
 
 ## 1. Purpose

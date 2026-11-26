@@ -1,7 +1,6 @@
 # Text
 
 Status: contract
-Updated: 2026-09-30
 
 ## 1. Purpose
 

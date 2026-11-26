@@ -1,7 +1,6 @@
 # Size and Density
 
 Status: stable contract
-Updated: 2026-04-01
 
 ## 1. Purpose
 

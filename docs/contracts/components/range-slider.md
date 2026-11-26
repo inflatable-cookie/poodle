@@ -1,7 +1,6 @@
 # Range Slider
 
 Status: approved contract — shared-family implementation queued
-Updated: 2026-09-12
 
 
 ## 1. Purpose

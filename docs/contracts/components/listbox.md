@@ -1,7 +1,6 @@
 # Listbox
 
 Status: detailed contract
-Updated: 2026-10-08
 
 ## 1. Purpose
 

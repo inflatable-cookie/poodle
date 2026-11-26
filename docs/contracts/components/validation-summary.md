@@ -3,7 +3,6 @@
 > **Implementation note**: Implemented in the shared Rust renderer, Svelte, and React.
 
 Status: detailed contract
-Updated: 2026-08-10
 
 ## 1. Purpose
 

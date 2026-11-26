@@ -1,7 +1,6 @@
 # NumberInput
 
 Status: active — value/draft/mounted parity
-Updated: 2026-09-28
 
 ## 1. Purpose
 

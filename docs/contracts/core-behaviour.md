@@ -96,7 +96,7 @@ registering a dismissable surface that the action has portalled.
 
 ## Drag and drop
 
-The [drag-and-drop substrate contract](../knowledge/specs/069-dependable-drag-and-drop-substrate.md)
+The [drag-and-drop substrate contract](../knowledge/specs/archive/069-dependable-drag-and-drop-substrate.md)
 owns the drag API, including host and file bridges. For a custom web surface,
 `createDragDropController(options?)` takes a `DragDropControllerOptions` object
 (default `{}`). The DOM controller binds pointer, keyboard and drag events

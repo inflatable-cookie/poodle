@@ -1,7 +1,6 @@
 # IconButton
 
 Status: detailed contract
-Updated: 2026-09-27
 
 ## 1. Purpose
 

@@ -1,7 +1,6 @@
 # AgentSubagent
 
 Status: detailed contract
-Updated: 2026-11-26
 
 ## 1. Purpose
 

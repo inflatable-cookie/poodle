@@ -1,7 +1,6 @@
 # ContextMenu
 
 Status: detailed contract
-Updated: 2026-10-04
 
 ## 1. Purpose
 

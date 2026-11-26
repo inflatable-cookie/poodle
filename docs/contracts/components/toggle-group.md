@@ -3,7 +3,6 @@
 > **Surface elevation**: ToggleGroup is a surface consumer (93% surface / text-primary mix) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-09-12
 
 ## 1. Purpose
 

@@ -1,7 +1,6 @@
 # DurationInput
 
 Status: detailed contract
-Updated: 2026-09-07
 
 ## 1. Purpose
 

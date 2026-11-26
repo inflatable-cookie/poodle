@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-08-15
-Promoted from: `docs/knowledge/specs/062-headless-core-and-dual-layer-strategy.md` (g11.004)
+Promoted from: `docs/knowledge/specs/archive/062-headless-core-and-dual-layer-strategy.md` (g11.004)
 
 ## Shape
 

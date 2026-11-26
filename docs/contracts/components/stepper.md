@@ -3,7 +3,6 @@
 > **Surface elevation**: Stepper is a surface consumer (72% moderate contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-07-28
 
 ## 1. Purpose
 

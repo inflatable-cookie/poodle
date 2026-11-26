@@ -1,7 +1,6 @@
 # RichTextEditor
 
 Status: implemented web-admitted — not parity-complete
-Updated: 2026-10-06
 
 ## 1. Purpose
 

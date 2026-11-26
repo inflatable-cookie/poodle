@@ -1,7 +1,6 @@
 # Tooltip
 
 Status: detailed contract
-Updated: 2026-09-03
 
 ## 1. Purpose
 

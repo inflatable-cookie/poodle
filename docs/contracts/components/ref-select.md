@@ -1,7 +1,6 @@
 # RefSelect
 
 Status: detailed contract
-Updated: 2026-07-25
 
 ## 1. Purpose
 

@@ -1,7 +1,6 @@
 # SidebarNav
 
 Status: detailed contract
-Updated: 2026-09-29 (endLabel and per-item context menu admitted portable)
 
 ## 1. Purpose
 

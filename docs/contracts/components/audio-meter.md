@@ -1,7 +1,6 @@
 # Audio Meter
 
 Status: detailed contract
-Updated: 2026-08-14
 
 ## 1. Purpose
 

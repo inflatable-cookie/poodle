@@ -52,6 +52,9 @@ readable history and are never current authority.
 - 059-shared-demo-app-audit-and-target-freeze-baseline.md — Shared Demo-App Audit And Target Freeze Baseline
 - 060-shared-demo-app-contract-section-model-and-parity-checklist.md — Shared Demo-App Contract, Section Model, And Parity Checklist
 - 061-svelte-demo-app-rebuild-and-coverage-upgrade-baseline.md — Svelte Demo-App Rebuild And Coverage Upgrade Baseline
+- 062-headless-core-and-dual-layer-strategy.md — Headless Core And Dual-Layer Strategy (promoted into architecture 006)
+- 063-rust-authored-component-and-scene-ir.md — Rust-authored Component And Scene IR (retired pilot record; successor spec 066 rejected)
 - 064-cross-runtime-machine-pinning.md — Cross-Runtime Machine Pinning
 - 065-scene-authoring-and-specimen-fixtures.md — Scene Authoring And Specimen Fixtures
 - 066-executable-component-conformance.md — Executable Component Conformance (rejected; retained as measured evidence)
+- 069-dependable-drag-and-drop-substrate.md — Dependable Drag And Drop Substrate (complete)

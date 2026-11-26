@@ -1,7 +1,6 @@
 # Region
 
 Status: active
-Updated: 2026-07-10
 
 - Component name: `Region`
 - Layer: `foundation`

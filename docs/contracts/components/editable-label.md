@@ -3,7 +3,6 @@
 > **Surface elevation**: EditableLabel is a surface consumer (72% moderate contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-09-02
 
 ## 1. Purpose
 

@@ -1,7 +1,6 @@
 # SettingsShell
 
 Status: contract
-Updated: 2026-08-12
 
 ## 1. Purpose
 

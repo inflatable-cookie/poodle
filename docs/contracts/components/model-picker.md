@@ -1,7 +1,6 @@
 # ModelPicker
 
 Status: detailed contract
-Updated: 2026-07-24
 
 ## 1. Purpose
 

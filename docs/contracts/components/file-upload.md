@@ -1,7 +1,6 @@
 # FileUpload
 
 Status: detailed contract
-Updated: 2026-03-30
 
 ## 1. Purpose
 

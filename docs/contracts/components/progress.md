@@ -3,7 +3,6 @@
 > **Surface elevation**: Progress is a surface consumer (80% subtle contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-07-10
 
 ## 1. Purpose
 

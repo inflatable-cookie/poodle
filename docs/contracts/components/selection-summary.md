@@ -1,7 +1,6 @@
 # SelectionSummary
 
 Status: detailed contract
-Updated: 2026-07-15
 
 ## 1. Purpose
 
