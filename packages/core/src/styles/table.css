@@ -4,9 +4,9 @@
   .poodle-table-shell {
     min-width: 0;
     overflow-x: auto;
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 78%, transparent);
+    border: 0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 78%, transparent));
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-table-fill, color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent));
+    background: var(--poodle-recipe-table-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent)));
   }
 
   .poodle-table {
