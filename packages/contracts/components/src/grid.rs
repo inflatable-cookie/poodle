@@ -135,6 +135,10 @@ impl GridSpec {
     }
 }
 
+/// Upper bound on track counts expanded from `repeat(n, ...)` so malformed or
+/// huge counts cannot trigger unbounded allocation.
+pub const MAX_GRID_REPEAT_TRACKS: usize = 64;
+
 fn parse_columns(raw: &str) -> GridColumns {
     let s = raw.trim();
 
@@ -151,8 +155,9 @@ fn parse_columns(raw: &str) -> GridColumns {
             }
             if let Ok(n) = head.parse::<usize>() {
                 if n > 0 {
+                    let count = n.min(MAX_GRID_REPEAT_TRACKS);
                     let track = parse_track(tail).unwrap_or(GridTrack::Fr(1.0));
-                    return GridColumns::Tracks(vec![track; n]);
+                    return GridColumns::Tracks(vec![track; count]);
                 }
             }
         }
@@ -301,6 +306,17 @@ mod tests {
     fn unrecognised_columns_fall_back_to_single_fr() {
         let cols = GridSpec::new().with_columns("auto").parsed_columns();
         assert_eq!(cols, GridColumns::Tracks(vec![GridTrack::Fr(1.0)]));
+    }
+
+    #[test]
+    fn huge_repeat_count_is_capped() {
+        let cols = GridSpec::new()
+            .with_columns("repeat(1000000000, 1fr)")
+            .parsed_columns();
+        assert_eq!(
+            cols,
+            GridColumns::Tracks(vec![GridTrack::Fr(1.0); MAX_GRID_REPEAT_TRACKS])
+        );
     }
 
     #[test]

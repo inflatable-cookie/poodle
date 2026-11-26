@@ -108,7 +108,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(LogList::from_spec(
                     LogListSpec::new()
                         .with_entries(sample_entries())
-                        .with_filter_level("error")
+                        .with_filter_level(poodle_specs::LogLevel::Error)
                         .with_auto_scroll(true),
                     theme,
                     "log-list-2",

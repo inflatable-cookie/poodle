@@ -198,7 +198,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             TextInput::from_spec(
                                 TextInputSpec::new()
                                     .with_placeholder("Search components, pages, docs\u{2026}")
-                                    .with_input_type("search"),
+                                    .with_type(poodle_specs::TextInputType::Search),
                                 theme,
                             )
                             .with_id("fd-bare-search"),

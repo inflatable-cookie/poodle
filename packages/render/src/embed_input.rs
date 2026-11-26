@@ -12,7 +12,9 @@
 //! resolved.
 
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node};
-use poodle_specs::{EmbedInputSpec, PillSpec, PillTone, SemanticControlSizeRole, TextInputSpec};
+use poodle_specs::{
+    EmbedInputSpec, PillSpec, PillTone, SemanticControlSizeRole, TextInputSpec, TextInputType,
+};
 
 use crate::context::RenderContext;
 use crate::pill::pill;
@@ -58,7 +60,7 @@ pub fn embed_input_with_handlers(
     let field = text_input_with_change(
         &TextInputSpec::new()
             .with_id(spec.id.clone())
-            .with_input_type("multiline")
+            .with_type(TextInputType::Multiline)
             .with_rows(3)
             .with_value(spec.value.clone())
             .with_placeholder(placeholder.clone())

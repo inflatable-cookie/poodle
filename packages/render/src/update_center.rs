@@ -13,8 +13,8 @@ use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodePosition,
 };
 use poodle_specs::{
-    ButtonVariant, Dimension, IconButtonSpec, PopoverSpec, SemanticControlSizeRole, SpinnerSize,
-    SpinnerSpec, SpinnerTone, SpinnerVariant, UpdateCenterSpec,
+    ButtonVariant, IconButtonSpec, PopoverSpec, SemanticControlSizeRole, SpinnerSize, SpinnerSpec,
+    SpinnerTone, SpinnerVariant, UpdateCenterSpec,
 };
 
 use crate::context::RenderContext;
@@ -132,8 +132,8 @@ pub fn update_center(
             .with_open(true)
             .with_placement(spec.placement)
             .with_aria_label(spec.effective_aria_label())
-            .with_surface_min_width(Dimension::new("16rem"))
-            .with_surface_max_width(Dimension::new("24rem"));
+            .with_surface_min_width_rem(16.0)
+            .with_surface_max_width_rem(24.0);
         popover_surface(&popover_spec, ctx, Some(content))
     });
 

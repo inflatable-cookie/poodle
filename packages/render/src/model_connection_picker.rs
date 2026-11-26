@@ -133,7 +133,7 @@ pub fn model_connection_picker_with_slots(
     // ── Toolbar: the search field ──
     let mut search_spec = TextInputSpec::new()
         .with_value(spec.query.clone())
-        .with_type("search")
+        .with_type(poodle_specs::TextInputType::Search)
         .with_placeholder(spec.search_placeholder.clone())
         .with_aria_label(spec.search_placeholder.clone())
         .with_disabled(spec.is_disabled)

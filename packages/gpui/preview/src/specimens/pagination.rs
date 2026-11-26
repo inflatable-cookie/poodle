@@ -235,7 +235,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     PaginationSpec::new()
                         .with_current_page(3)
                         .with_total_pages(8)
-                        .with_standalone(true)
                         .with_aria_label("Standalone pagination"),
                             theme,
                             "pagination-6",
@@ -274,7 +273,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     PaginationSpec::new()
                         .with_current_page(8)
                         .with_total_pages(8)
-                        .with_standalone(true)
                         .with_aria_label("Last page pagination"),
                             theme,
                             "pagination-8",

@@ -586,8 +586,8 @@ mod tests {
         let ctx = RenderContext::new(&theme);
         let spec = PopoverSpec::new()
             .with_open(true)
-            .with_surface_min_width(poodle_specs::Dimension::new("20rem"))
-            .with_surface_max_width(poodle_specs::Dimension::new("20rem"));
+            .with_surface_min_width_rem(20.0)
+            .with_surface_max_width_rem(20.0);
         let surface = popover_surface(&spec, &ctx, Some(Node::text("Panel")));
         assert_eq!(surface.style.min_width, Some(rem_to_px(20.0)));
         assert_eq!(surface.style.max_width, Some(rem_to_px(20.0)));

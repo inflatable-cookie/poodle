@@ -16,7 +16,7 @@ use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeRole, StylePatch, TextChangeHandler,
 };
-use poodle_specs::{NumberInputSpec, ValidationState};
+use poodle_specs::{NumberInputSpec, NumberStepDirection, ValidationState};
 
 use crate::color::with_alpha;
 use crate::context::RenderContext;
@@ -420,14 +420,14 @@ pub fn number_input(
                 "plus",
                 "Increment",
                 &format!("{field_id}-inc"),
-                !spec.can_step(1),
+                !spec.can_step(NumberStepDirection::Increment),
                 1,
             ))
             .child(stepper(
                 "minus",
                 "Decrement",
                 &format!("{field_id}-dec"),
-                !spec.can_step(-1),
+                !spec.can_step(NumberStepDirection::Decrement),
                 -1,
             ));
         el = el.child(steppers);

@@ -102,7 +102,7 @@ fn header_bar(
         .with_value(&spec.search_query)
         .with_placeholder("Search settings")
         .with_aria_label("Search settings")
-        .with_input_type("search")
+        .with_type(poodle_specs::TextInputType::Search)
         .with_show_clear_button(true);
     let on_search = handlers.on_search_query_change.clone();
     let mut search = text_input_with_change(

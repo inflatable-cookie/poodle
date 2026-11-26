@@ -113,28 +113,34 @@ impl RangeSliderSpec {
         self
     }
 
+    pub fn clamped_range(&self) -> (f64, f64) {
+        poodle_headless::slider::normalize_range_value(
+            poodle_headless::slider::RangeSliderContext {
+                value: (self.low, self.high),
+                min: self.min,
+                max: self.max,
+                step: self.step,
+                disabled: self.is_disabled,
+            },
+        )
+    }
+
     pub fn clamped_low(&self) -> f64 {
-        self.low.max(self.min).min(self.high)
+        self.clamped_range().0
     }
 
     pub fn clamped_high(&self) -> f64 {
-        self.high.max(self.low).min(self.max)
+        self.clamped_range().1
     }
 
     pub fn normalized_low(&self) -> f64 {
-        if self.max <= self.min {
-            0.0
-        } else {
-            (self.clamped_low() - self.min) / (self.max - self.min)
-        }
+        let max = poodle_headless::slider::safe_slider_max(self.min, self.max);
+        (self.clamped_low() - self.min) / (max - self.min)
     }
 
     pub fn normalized_high(&self) -> f64 {
-        if self.max <= self.min {
-            0.0
-        } else {
-            (self.clamped_high() - self.min) / (self.max - self.min)
-        }
+        let max = poodle_headless::slider::safe_slider_max(self.min, self.max);
+        (self.clamped_high() - self.min) / (max - self.min)
     }
 
     pub fn range_fill_token(&self) -> &'static str {
@@ -191,5 +197,34 @@ impl RangeSliderSpec {
     pub fn with_visible_upper_text(mut self, text: impl Into<String>) -> Self {
         self.visible_upper_text = Some(text.into());
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn clamped_range_orders_swapped_thumbs_and_clamps_to_max() {
+        // Previously clamped_low was capped by raw high (not max) and swapped
+        // thumbs stayed inverted.
+        let swapped = RangeSliderSpec::new(80.0, 20.0).with_bounds(0.0, 100.0);
+        assert_eq!(swapped.clamped_range(), (20.0, 80.0));
+        assert_eq!(swapped.clamped_low(), 20.0);
+        assert_eq!(swapped.clamped_high(), 80.0);
+        assert_eq!(swapped.normalized_low(), 0.2);
+        assert_eq!(swapped.normalized_high(), 0.8);
+
+        let above_max = RangeSliderSpec::new(150.0, 200.0).with_bounds(0.0, 100.0);
+        assert_eq!(above_max.clamped_range(), (100.0, 100.0));
+        assert_eq!(above_max.clamped_low(), 100.0);
+        assert_eq!(above_max.clamped_high(), 100.0);
+        assert_eq!(above_max.normalized_low(), 1.0);
+        assert_eq!(above_max.normalized_high(), 1.0);
+
+        let degenerate = RangeSliderSpec::new(15.0, 5.0).with_bounds(10.0, 10.0);
+        assert_eq!(degenerate.clamped_range(), (10.0, 11.0));
+        assert_eq!(degenerate.normalized_low(), 0.0);
+        assert_eq!(degenerate.normalized_high(), 1.0);
     }
 }

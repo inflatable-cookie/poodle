@@ -144,11 +144,6 @@ impl MetricTileSpec {
         semantic::SPACE_PANEL_Y
     }
 
-    /// Back-compat alias — historically returned SPACE_PANEL_X.
-    pub fn padding_token(&self) -> &'static str {
-        semantic::SPACE_PANEL_X
-    }
-
     /// Root gap token. Contract §8 root gap is `space.inline.sm`
     /// (the default-density root gap); density variants override it via
     /// [`Self::root_gap_rem`].

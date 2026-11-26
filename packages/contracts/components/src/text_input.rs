@@ -13,6 +13,91 @@ use poodle_tokens::semantic;
 
 use crate::types::ValidationState;
 
+/// Input kind for `TextInputSpec`. Matches the contract `type` prop.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum TextInputType {
+    #[default]
+    Text,
+    Multiline,
+    Search,
+    Slug,
+    Password,
+    Email,
+    Url,
+    Tel,
+    Number,
+}
+
+impl TextInputType {
+    /// Contract wire string for this input type.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Text => "text",
+            Self::Multiline => "multiline",
+            Self::Search => "search",
+            Self::Slug => "slug",
+            Self::Password => "password",
+            Self::Email => "email",
+            Self::Url => "url",
+            Self::Tel => "tel",
+            Self::Number => "number",
+        }
+    }
+}
+
+/// Resize handle direction for multiline `TextInputSpec`. Matches the contract
+/// `resize` prop (`"vertical" | "horizontal" | "both" | "none"`).
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum TextInputResize {
+    #[default]
+    Vertical,
+    Horizontal,
+    Both,
+    None,
+}
+
+impl TextInputResize {
+    /// Contract wire string for this resize mode.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Vertical => "vertical",
+            Self::Horizontal => "horizontal",
+            Self::Both => "both",
+            Self::None => "none",
+        }
+    }
+}
+
+/// Virtual keyboard hint for `TextInputSpec`. Matches the contract `inputMode`
+/// prop (`"none" | "search" | "text" | "tel" | "url" | "email" | "numeric" | "decimal"`).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TextInputMode {
+    None,
+    Search,
+    Text,
+    Tel,
+    Url,
+    Email,
+    Numeric,
+    Decimal,
+}
+
+impl TextInputMode {
+    /// Contract wire string for this input mode.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::None => "none",
+            Self::Search => "search",
+            Self::Text => "text",
+            Self::Tel => "tel",
+            Self::Url => "url",
+            Self::Email => "email",
+            Self::Numeric => "numeric",
+            Self::Decimal => "decimal",
+        }
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TextInputSpec {
     pub value: Option<String>,
@@ -31,9 +116,9 @@ pub struct TextInputSpec {
     pub size: Option<crate::types::ControlSize>,
     pub size_role: crate::types::SemanticControlSizeRole,
     pub density: Option<crate::types::ControlDensity>,
-    pub input_type: String,
+    pub input_type: TextInputType,
     pub rows: Option<u16>,
-    pub resize: String,
+    pub resize: TextInputResize,
     pub source: Option<String>,
     pub show_clear_button: bool,
     pub leading_icon: Option<String>,
@@ -45,7 +130,7 @@ pub struct TextInputSpec {
     pub name: Option<String>,
     pub autocomplete: Option<String>,
     pub pattern: Option<String>,
-    pub input_mode: Option<String>,
+    pub input_mode: Option<TextInputMode>,
     pub debounce_ms: u32,
     pub description_id: Option<String>,
     pub error_message_id: Option<String>,
@@ -72,9 +157,9 @@ impl Default for TextInputSpec {
             size: None,
             size_role: crate::types::SemanticControlSizeRole::Control,
             density: None,
-            input_type: "text".to_owned(),
+            input_type: TextInputType::Text,
             rows: None,
-            resize: "vertical".to_owned(),
+            resize: TextInputResize::Vertical,
             source: None,
             show_clear_button: true,
             leading_icon: None,
@@ -165,16 +250,16 @@ impl TextInputSpec {
         self.density = Some(value);
         self
     }
-    pub fn with_type(mut self, value: impl Into<String>) -> Self {
-        self.input_type = value.into();
+    pub fn with_type(mut self, value: TextInputType) -> Self {
+        self.input_type = value;
         self
     }
     pub fn with_rows(mut self, value: u16) -> Self {
         self.rows = Some(value);
         self
     }
-    pub fn with_resize(mut self, value: impl Into<String>) -> Self {
-        self.resize = value.into();
+    pub fn with_resize(mut self, value: TextInputResize) -> Self {
+        self.resize = value;
         self
     }
     pub fn with_source(mut self, value: impl Into<String>) -> Self {
@@ -221,8 +306,8 @@ impl TextInputSpec {
         self.pattern = Some(value.into());
         self
     }
-    pub fn with_input_mode(mut self, value: impl Into<String>) -> Self {
-        self.input_mode = Some(value.into());
+    pub fn with_input_mode(mut self, value: TextInputMode) -> Self {
+        self.input_mode = Some(value);
         self
     }
     pub fn with_debounce_ms(mut self, value: u32) -> Self {
@@ -255,16 +340,6 @@ impl TextInputSpec {
         self
     }
 
-    /// Alias for the `with_is_focused` builder.
-    pub fn with_focused(self, is_focused: bool) -> Self {
-        self.with_is_focused(is_focused)
-    }
-
-    /// Alias for the `with_type` builder (`input_type` field).
-    pub fn with_input_type(self, value: impl Into<String>) -> Self {
-        self.with_type(value)
-    }
-
     /// The selection as an ordered `(start, end)` pair, clamped to the value.
     pub fn selection_range(&self) -> (usize, usize) {
         let len = self.current_value().chars().count();
@@ -273,9 +348,9 @@ impl TextInputSpec {
         (a.min(b), a.max(b))
     }
 
-    /// Whether this spec operates in multiline mode (rows > 1 or input_type is "multiline").
+    /// Whether this spec operates in multiline mode (`rows > 1` or `TextInputType::Multiline`).
     pub fn is_multiline(&self) -> bool {
-        self.input_type == "multiline" || self.rows.unwrap_or(1) > 1
+        self.input_type == TextInputType::Multiline || self.rows.unwrap_or(1) > 1
     }
 
     pub fn is_controlled(&self) -> bool {
@@ -432,5 +507,32 @@ impl TextInputSpec {
 
     pub fn focus_fill_token(&self) -> &'static str {
         semantic::COLOR_BACKGROUND_SURFACE
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn closed_set_enums_default_and_serialize_to_contract_values() {
+        let spec = TextInputSpec::new();
+        assert_eq!(spec.input_type, TextInputType::Text);
+        assert_eq!(spec.input_type.as_str(), "text");
+        assert_eq!(spec.resize, TextInputResize::Vertical);
+        assert_eq!(spec.resize.as_str(), "vertical");
+        assert_eq!(spec.input_mode, None);
+
+        let configured = TextInputSpec::new()
+            .with_type(TextInputType::Multiline)
+            .with_resize(TextInputResize::None)
+            .with_input_mode(TextInputMode::Decimal);
+        assert!(configured.is_multiline());
+        assert_eq!(configured.input_type.as_str(), "multiline");
+        assert_eq!(configured.resize.as_str(), "none");
+        assert_eq!(
+            configured.input_mode.map(TextInputMode::as_str),
+            Some("decimal")
+        );
     }
 }

@@ -1,12 +1,33 @@
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
+/// View mode for [`MarkdownEditorSpec`]. Matches the contract `mode` prop
+/// (`"edit" | "preview" | "split"`).
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum MarkdownEditorMode {
+    #[default]
+    Edit,
+    Preview,
+    Split,
+}
+
+impl MarkdownEditorMode {
+    /// Contract wire string for this view mode.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Edit => "edit",
+            Self::Preview => "preview",
+            Self::Split => "split",
+        }
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MarkdownEditorSpec {
     pub value: String,
     pub name: Option<String>,
     pub placeholder: Option<String>,
-    pub mode: String,
+    pub mode: MarkdownEditorMode,
     pub is_disabled: bool,
     pub is_required: bool,
     pub aria_label: String,
@@ -23,7 +44,7 @@ impl MarkdownEditorSpec {
             value: String::new(),
             name: None,
             placeholder: None,
-            mode: String::from("edit"),
+            mode: MarkdownEditorMode::Edit,
             is_disabled: false,
             is_required: false,
             aria_label: String::from("Markdown editor"),
@@ -50,8 +71,8 @@ impl MarkdownEditorSpec {
         self
     }
 
-    pub fn with_mode(mut self, mode: impl Into<String>) -> Self {
-        self.mode = mode.into();
+    pub fn with_mode(mut self, mode: MarkdownEditorMode) -> Self {
+        self.mode = mode;
         self
     }
 
@@ -224,17 +245,23 @@ impl MarkdownEditorSpec {
 
     /// Whether the textarea/edit pane is shown for the current mode.
     pub fn shows_editor(&self) -> bool {
-        self.mode == "edit" || self.mode == "split"
+        matches!(
+            self.mode,
+            MarkdownEditorMode::Edit | MarkdownEditorMode::Split
+        )
     }
 
     /// Whether the preview pane is shown for the current mode.
     pub fn shows_preview(&self) -> bool {
-        self.mode == "preview" || self.mode == "split"
+        matches!(
+            self.mode,
+            MarkdownEditorMode::Preview | MarkdownEditorMode::Split
+        )
     }
 
     /// Whether toolbar formatting tools are disabled (disabled prop or preview mode).
     pub fn tools_disabled(&self) -> bool {
-        self.is_disabled || self.mode == "preview"
+        self.is_disabled || self.mode == MarkdownEditorMode::Preview
     }
 
     /// Character count of the current value (specimen status copy).
@@ -277,7 +304,7 @@ mod tests {
     #[test]
     fn defaults_match_contract() {
         let s = MarkdownEditorSpec::new();
-        assert_eq!(s.mode, "edit");
+        assert_eq!(s.mode, MarkdownEditorMode::Edit);
         assert_eq!(s.aria_label, "Markdown editor");
         assert!(!s.is_disabled);
         // Presentation omission: the render context resolves these.
@@ -311,27 +338,42 @@ mod tests {
 
     #[test]
     fn mode_visibility_flags() {
-        assert!(MarkdownEditorSpec::new().with_mode("edit").shows_editor());
-        assert!(!MarkdownEditorSpec::new().with_mode("edit").shows_preview());
         assert!(MarkdownEditorSpec::new()
-            .with_mode("preview")
+            .with_mode(MarkdownEditorMode::Edit)
+            .shows_editor());
+        assert!(!MarkdownEditorSpec::new()
+            .with_mode(MarkdownEditorMode::Edit)
+            .shows_preview());
+        assert!(MarkdownEditorSpec::new()
+            .with_mode(MarkdownEditorMode::Preview)
             .shows_preview());
         assert!(!MarkdownEditorSpec::new()
-            .with_mode("preview")
+            .with_mode(MarkdownEditorMode::Preview)
             .shows_editor());
-        let split = MarkdownEditorSpec::new().with_mode("split");
+        let split = MarkdownEditorSpec::new().with_mode(MarkdownEditorMode::Split);
         assert!(split.shows_editor() && split.shows_preview());
+        // Every mode renders at least one pane; unknown modes cannot be constructed.
+        for mode in [
+            MarkdownEditorMode::Edit,
+            MarkdownEditorMode::Preview,
+            MarkdownEditorMode::Split,
+        ] {
+            let spec = MarkdownEditorSpec::new().with_mode(mode);
+            assert!(spec.shows_editor() || spec.shows_preview());
+        }
     }
 
     #[test]
     fn tools_disabled_in_preview_or_when_disabled() {
         assert!(MarkdownEditorSpec::new()
-            .with_mode("preview")
+            .with_mode(MarkdownEditorMode::Preview)
             .tools_disabled());
         assert!(MarkdownEditorSpec::new()
             .with_disabled(true)
             .tools_disabled());
-        assert!(!MarkdownEditorSpec::new().with_mode("edit").tools_disabled());
+        assert!(!MarkdownEditorSpec::new()
+            .with_mode(MarkdownEditorMode::Edit)
+            .tools_disabled());
     }
 
     #[test]
