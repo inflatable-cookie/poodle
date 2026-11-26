@@ -168,11 +168,15 @@
     outline: none;
   }
 
-  .poodle-editable-list__item--drop-target,
-  .poodle-editable-list__item--grabbed,
   .poodle-editable-list__item--last-moved {
     border-color: var(--poodle-recipe-editable-list-item--last-moved-border, var(--poodle-style-selection-itemBorder, color-mix(in srgb, var(--poodle-color-accent-base) 56%, transparent)));
     background: var(--poodle-recipe-editable-list-item--last-moved-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)));
+  }
+
+  .poodle-editable-list__item--drop-target,
+  .poodle-editable-list__item--grabbed {
+    border-color: var(--poodle-recipe-editable-list-item--last-moved-border, color-mix(in srgb, var(--poodle-color-accent-base) 56%, transparent));
+    background: var(--poodle-recipe-editable-list-item--last-moved-fill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent));
   }
 
   .poodle-editable-list__item--embedded-handle {
