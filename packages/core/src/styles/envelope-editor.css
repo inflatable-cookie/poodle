@@ -41,14 +41,14 @@
 
 .poodle-envelope-editor-visual__point {
   fill: var(--poodle-recipe-envelope-editor-point-fill, var(--poodle-style-control-fill, var(--poodle-color-background-elevated)));
-  stroke: var(--poodle-recipe-envelope-editor-point-border, var(--poodle-style-control-border, var(--poodle-color-accent-base)));
+  stroke: var(--poodle-recipe-envelope-editor-point-border, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)));
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
 
 .poodle-envelope-editor-visual__point[data-selected="true"],
 .poodle-envelope-editor-visual__point[data-dragging="true"] {
-  fill: var(--poodle-recipe-envelope-editor-point-selected, var(--poodle-style-selection-itemFill, var(--poodle-color-accent-base)));
+  fill: var(--poodle-recipe-envelope-editor-point-selected, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)));
 }
 
 .poodle-envelope-editor__point-control {

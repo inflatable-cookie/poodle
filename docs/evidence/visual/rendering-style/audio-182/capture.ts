@@ -61,6 +61,12 @@ async function capture(page: Page, root: string, slug: string, theme: string, st
     style,
   );
   const target = specimen;
+  // Exercise the real focus/selection path when capturing the selected point evidence.
+  if (slug === "envelope-editor" && process.env.SELECT_ENVELOPE === "1") {
+    const editor = specimen.locator(".poodle-envelope-editor").nth(2);
+    await editor.locator(".poodle-envelope-editor__point-control").nth(2).focus();
+    await editor.locator('.poodle-envelope-editor-visual__point[data-selected="true"]').waitFor();
+  }
   await page.evaluate(() => document.fonts.ready);
   await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
   return await target.screenshot();
@@ -111,7 +117,7 @@ function compare(before: string, after: string) {
 function compose(source: string, output: string) {
   mkdirSync(output, { recursive: true });
   const gap = 24;
-  for (const slug of slugs) {
+  for (const slug of selectedSlugs()) {
     const def = PNG.sync.read(readFileSync(resolve(source, "default", `eclipse-${slug}.png`)));
     const quiet = PNG.sync.read(readFileSync(resolve(source, "quiet", `eclipse-${slug}.png`)));
     const width = def.width + gap + quiet.width;
