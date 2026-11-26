@@ -12,9 +12,9 @@
     align-items: center;
     gap: var(--poodle-nav-card-gap);
     padding: var(--poodle-nav-card-padding-y) var(--poodle-nav-card-padding-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent);
+    border: 0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent));
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-nav-card-fill, var(--poodle-color-background-surface));
+    background: var(--poodle-recipe-nav-card-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-surface)));
     color: inherit;
     cursor: pointer;
     text-decoration: none;
@@ -28,8 +28,8 @@
   }
 
   .poodle-nav-card:hover:not(:disabled):not([data-disabled="true"]) {
-    border-color: var(--poodle-recipe-nav-card-hover-border, color-mix(in srgb, var(--poodle-color-accent-base) 28%, var(--poodle-color-border-subtle)));
-    background: var(--poodle-recipe-nav-card-hover-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 52%, var(--poodle-color-background-surface)));
+    border-color: var(--poodle-recipe-nav-card-hover-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-accent-base) 28%, var(--poodle-color-border-subtle))));
+    background: var(--poodle-recipe-nav-card-hover-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 52%, var(--poodle-color-background-surface))));
   }
 
   .poodle-nav-card:focus-visible {

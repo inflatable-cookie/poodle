@@ -14,9 +14,9 @@
 
   .poodle-detail-shell__state {
     padding: calc(var(--poodle-space-panel-y) * 2) calc(var(--poodle-space-panel-x) * 1.5);
-    border: 0.0625rem solid transparent;
+    border: 0.0625rem solid var(--poodle-style-surface-border, transparent);
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-detail-shell-state-fill, color-mix(in srgb, var(--poodle-color-background-panel) 96%, var(--poodle-color-background-elevated)));
+    background: var(--poodle-recipe-detail-shell-state-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 96%, var(--poodle-color-background-elevated))));
   }
 
   .poodle-detail-shell__spinner {

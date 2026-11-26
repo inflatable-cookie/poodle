@@ -141,7 +141,7 @@
 
   .poodle-detail-item[data-presentation="surface"] {
     border-radius: calc(var(--poodle-radius-surface) - 0.0625rem);
-    background: var(--poodle-recipe-detail-item-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)));
+    background: var(--poodle-recipe-detail-item-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))));
   }
 
   .poodle-detail-item[data-presentation="surface"] .poodle-detail-item__grid {
