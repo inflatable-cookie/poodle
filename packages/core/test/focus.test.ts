@@ -94,9 +94,56 @@ describe("getFocusableElements (happy-dom)", () => {
       summary,
     ]);
   });
+
+  test("excludes candidates removed from sequential tab order via negative tabindex, type=hidden, or inert", () => {
+    const { document } = createDom();
+    const root = document.createElement("div");
+
+    const button = document.createElement("button");
+    const editableNegative = document.createElement("div");
+    editableNegative.setAttribute("contenteditable", "true");
+    editableNegative.setAttribute("tabindex", "-1");
+    const buttonNegative = document.createElement("button");
+    buttonNegative.setAttribute("tabindex", "-1");
+    const linkNegative = document.createElement("a");
+    linkNegative.setAttribute("href", "#skip");
+    linkNegative.setAttribute("tabindex", "-2");
+    const hiddenInput = document.createElement("input");
+    hiddenInput.type = "hidden";
+    const inertWrapper = document.createElement("div");
+    inertWrapper.setAttribute("inert", "");
+    const inertButton = document.createElement("button");
+    inertWrapper.appendChild(inertButton);
+
+    root.append(button, editableNegative, buttonNegative, linkNegative, hiddenInput, inertWrapper);
+    document.body.appendChild(root);
+
+    expect(getFocusableElements(root)).toEqual([button]);
+  });
 });
 
 describe("trapFocusKeydown (happy-dom)", () => {
+  test("wraps Tab and Shift+Tab around a button followed by a contenteditable[tabindex=-1] element", () => {
+    const { window, document } = createDom();
+    const surface = document.createElement("div");
+    surface.tabIndex = -1;
+    const button = document.createElement("button");
+    const editableNegative = document.createElement("div");
+    editableNegative.setAttribute("contenteditable", "true");
+    editableNegative.setAttribute("tabindex", "-1");
+    surface.append(button, editableNegative);
+    document.body.appendChild(surface);
+
+    button.focus();
+    const forward = pressTab(window, surface, false);
+    expect(forward.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(button);
+
+    surface.focus();
+    const backward = pressTab(window, surface, true);
+    expect(backward.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(button);
+  });
   test("wraps Shift+Tab to last when focus is on the surface itself", () => {
     const { window, document } = createDom();
     const surface = document.createElement("div");

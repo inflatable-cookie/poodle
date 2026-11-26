@@ -54,12 +54,30 @@ export function trapFocusKeydown(surface: HTMLElement | null, event: KeyboardEve
   }
 }
 
+function isTabbable(element: HTMLElement): boolean {
+  if (element.hasAttribute("hidden") || element.getClientRects().length === 0) {
+    return false;
+  }
+
+  if (element.tagName === "INPUT" && (element as HTMLInputElement).type === "hidden") {
+    return false;
+  }
+
+  const tabindex = element.getAttribute("tabindex");
+  if (tabindex !== null) {
+    const parsed = Number.parseInt(tabindex, 10);
+    if (!Number.isNaN(parsed) && parsed < 0) {
+      return false;
+    }
+  }
+
+  return element.closest("[inert]") === null;
+}
+
 export function getFocusableElements(root: HTMLElement | null): HTMLElement[] {
   if (!root) {
     return [];
   }
 
-  return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
-    (element) => !element.hasAttribute("hidden") && element.getClientRects().length > 0,
-  );
+  return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(isTabbable);
 }
