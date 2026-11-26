@@ -3,17 +3,18 @@
  * packages/svelte/components/src/internal.ts — behavior unchanged.
  */
 
-const FOCUSABLE_SELECTOR = [
+const NON_EDITABLE_FOCUSABLE_SELECTOR = [
   "button:not([disabled])",
   "a[href]",
   "area[href]",
   "input:not([disabled])",
   "select:not([disabled])",
   "textarea:not([disabled])",
-  '[contenteditable]:not([contenteditable="false"])',
   "summary",
   '[tabindex]:not([tabindex="-1"])',
 ].join(", ");
+
+const FOCUSABLE_SELECTOR = `${NON_EDITABLE_FOCUSABLE_SELECTOR}, [contenteditable]:not([contenteditable="false" i])`;
 
 /**
  * Tab-key focus trap for modal surfaces: wraps focus from last→first and
@@ -54,6 +55,21 @@ export function trapFocusKeydown(surface: HTMLElement | null, event: KeyboardEve
   }
 }
 
+function isNestedContentEditable(element: HTMLElement): boolean {
+  const value = element.getAttribute("contenteditable");
+  if (value === null || value.toLowerCase() === "false") {
+    return false;
+  }
+
+  const ancestor = element.parentElement?.closest("[contenteditable]");
+  if (!ancestor) {
+    return false;
+  }
+
+  const ancestorValue = ancestor.getAttribute("contenteditable");
+  return ancestorValue !== null && ancestorValue.toLowerCase() !== "false";
+}
+
 function isTabbable(element: HTMLElement): boolean {
   if (element.hasAttribute("hidden") || element.getClientRects().length === 0) {
     return false;
@@ -69,6 +85,10 @@ function isTabbable(element: HTMLElement): boolean {
     if (!Number.isNaN(parsed) && parsed < 0) {
       return false;
     }
+  }
+
+  if (isNestedContentEditable(element) && !element.matches(NON_EDITABLE_FOCUSABLE_SELECTOR)) {
+    return false;
   }
 
   return element.closest("[inert]") === null;

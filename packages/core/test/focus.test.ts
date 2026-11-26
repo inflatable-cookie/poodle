@@ -120,9 +120,56 @@ describe("getFocusableElements (happy-dom)", () => {
 
     expect(getFocusableElements(root)).toEqual([button]);
   });
+
+  test("excludes nested contenteditable elements unless they have an explicit non-negative tabindex or sit inside contenteditable=false", () => {
+    const { document } = createDom();
+    const root = document.createElement("div");
+
+    const outer = document.createElement("div");
+    outer.setAttribute("contenteditable", "");
+    const nestedPlain = document.createElement("span");
+    nestedPlain.setAttribute("contenteditable", "");
+    const nestedTabbable = document.createElement("span");
+    nestedTabbable.setAttribute("contenteditable", "");
+    nestedTabbable.setAttribute("tabindex", "0");
+    const nonEditableIsland = document.createElement("div");
+    nonEditableIsland.setAttribute("contenteditable", "false");
+    const nestedHost = document.createElement("span");
+    nestedHost.setAttribute("contenteditable", "");
+    nonEditableIsland.appendChild(nestedHost);
+
+    outer.append(nestedPlain, nestedTabbable, nonEditableIsland);
+    root.appendChild(outer);
+    document.body.appendChild(root);
+
+    expect(getFocusableElements(root)).toEqual([outer, nestedTabbable, nestedHost]);
+  });
 });
 
 describe("trapFocusKeydown (happy-dom)", () => {
+  test("wraps Tab on an outer contenteditable containing a nested contenteditable without tabindex", () => {
+    const { window, document } = createDom();
+    const surface = document.createElement("div");
+    surface.tabIndex = -1;
+    const outer = document.createElement("div");
+    outer.setAttribute("contenteditable", "");
+    const inner = document.createElement("span");
+    inner.setAttribute("contenteditable", "");
+    inner.textContent = "text";
+    outer.appendChild(inner);
+    surface.appendChild(outer);
+    document.body.appendChild(surface);
+
+    outer.focus();
+    const forward = pressTab(window, surface, false);
+    expect(forward.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(outer);
+
+    surface.focus();
+    const backward = pressTab(window, surface, true);
+    expect(backward.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(outer);
+  });
   test("wraps Tab and Shift+Tab around a button followed by a contenteditable[tabindex=-1] element", () => {
     const { window, document } = createDom();
     const surface = document.createElement("div");
