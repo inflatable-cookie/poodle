@@ -1854,6 +1854,94 @@
         "offsetY": 112,
         "totalHeight": 28000
       }
+    },
+    {
+      "op": "virtualWindow",
+      "rowCount": 10,
+      "rowHeight": 25,
+      "scrollTop": 400,
+      "viewport": 75,
+      "overscan": 1,
+      "expect": {
+        "startIndex": 10,
+        "endIndex": 10,
+        "offsetY": 250,
+        "totalHeight": 250
+      }
+    },
+    {
+      "op": "virtualWindow",
+      "rowCount": 0,
+      "rowHeight": 25,
+      "scrollTop": 400,
+      "viewport": 75,
+      "overscan": 1,
+      "expect": {
+        "startIndex": 0,
+        "endIndex": 0,
+        "offsetY": 0,
+        "totalHeight": 0
+      }
+    },
+    {
+      "op": "virtualWindow",
+      "rowCount": 10,
+      "rowHeight": 25,
+      "scrollTop": 400,
+      "viewport": 75,
+      "overscan": 1,
+      "pinIndex": 7,
+      "expect": {
+        "startIndex": 7,
+        "endIndex": 10,
+        "offsetY": 175,
+        "totalHeight": 250
+      }
+    },
+    {
+      "op": "virtualWindow",
+      "rowCount": 20,
+      "rowHeight": 25,
+      "scrollTop": 200,
+      "viewport": 75,
+      "overscan": 1,
+      "pinIndex": 2,
+      "expect": {
+        "startIndex": 2,
+        "endIndex": 12,
+        "offsetY": 50,
+        "totalHeight": 500
+      }
+    },
+    {
+      "op": "virtualWindow",
+      "rowCount": 20,
+      "rowHeight": 25,
+      "scrollTop": 200,
+      "viewport": 75,
+      "overscan": 1,
+      "pinIndex": 14,
+      "expect": {
+        "startIndex": 7,
+        "endIndex": 15,
+        "offsetY": 175,
+        "totalHeight": 500
+      }
+    },
+    {
+      "op": "virtualWindow",
+      "rowCount": 20,
+      "rowHeight": 25,
+      "scrollTop": 200,
+      "viewport": 75,
+      "overscan": 1,
+      "pinIndex": 20,
+      "expect": {
+        "startIndex": 7,
+        "endIndex": 12,
+        "offsetY": 175,
+        "totalHeight": 500
+      }
     }
   ],
   "duration": [

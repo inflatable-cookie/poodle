@@ -500,9 +500,11 @@ pub fn range_slider_control_transition(
             )
         }
         RangeSliderControlEvent::PointerMove { value_norm }
-            if !context.disabled && context.pointer_active && context.active_thumb.is_some() =>
+            if !context.disabled && context.pointer_active =>
         {
-            let thumb = context.active_thumb.expect("guarded active thumb");
+            let Some(thumb) = context.active_thumb else {
+                return (context, Vec::new());
+            };
             let raw = range_control_value_at(context, value_norm);
             let (next, effects) = range_slider_transition(
                 RangeSliderContext {

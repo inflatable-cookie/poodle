@@ -1009,6 +1009,29 @@ fn push_rms(window: &[RmsSlice], frame: MeterFeedFrame) -> Vec<RmsSlice> {
     next
 }
 
+fn meter_peak_hold(
+    context: &AudioMeterContext,
+    at_ms: f64,
+    input_db: f64,
+) -> (Option<f64>, Option<f64>) {
+    let new_hold = (Some(input_db), Some(at_ms + PEAK_HOLD_MS));
+    let Some(held_peak) = context.peak_hold_db else {
+        return new_hold;
+    };
+    if input_db >= held_peak {
+        return new_hold;
+    }
+
+    let hold = context.peak_hold_until_ms.unwrap_or(at_ms);
+    if at_ms <= hold {
+        return (Some(held_peak), context.peak_hold_until_ms);
+    }
+
+    let start = context.last_at_ms.unwrap_or(hold).max(hold);
+    let decayed = held_peak - (at_ms - start) / 1000.0 * PEAK_DECAY_DB_PER_SECOND;
+    (Some(decayed.max(context.min_db)), Some(hold))
+}
+
 pub fn push_meter_frame(context: &AudioMeterContext, frame: MeterFeedFrame) -> AudioMeterContext {
     if !context.enabled
         || !frame.at_ms.is_finite()
@@ -1067,24 +1090,7 @@ pub fn push_meter_frame(context: &AudioMeterContext, frame: MeterFeedFrame) -> A
             }
         }
     };
-    let (peak_hold_db, peak_hold_until_ms) = if context.peak_hold_db.is_none()
-        || input_db >= context.peak_hold_db.unwrap_or(context.min_db)
-    {
-        (Some(input_db), Some(frame.at_ms + PEAK_HOLD_MS))
-    } else if frame.at_ms <= context.peak_hold_until_ms.unwrap_or(frame.at_ms) {
-        (context.peak_hold_db, context.peak_hold_until_ms)
-    } else {
-        let hold = context.peak_hold_until_ms.unwrap_or(frame.at_ms);
-        let start = context.last_at_ms.unwrap_or(hold).max(hold);
-        (
-            Some(
-                (context.peak_hold_db.unwrap()
-                    - (frame.at_ms - start) / 1000.0 * PEAK_DECAY_DB_PER_SECOND)
-                    .max(context.min_db),
-            ),
-            Some(hold),
-        )
-    };
+    let (peak_hold_db, peak_hold_until_ms) = meter_peak_hold(context, frame.at_ms, input_db);
     AudioMeterContext {
         last_at_ms: Some(frame.at_ms),
         input_db,

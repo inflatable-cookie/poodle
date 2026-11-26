@@ -1164,8 +1164,8 @@ mod tests {
 
     struct Theme;
     impl poodle_adapter::ThemeProvider for Theme {
-        fn resolve_color(&self, _: &str) -> poodle_node::ColorValue {
-            poodle_node::ColorValue(0.5, 0.5, 0.5, 1.0)
+        fn try_resolve_color(&self, _: &str) -> Option<poodle_node::ColorValue> {
+            Some(poodle_node::ColorValue(0.5, 0.5, 0.5, 1.0))
         }
         fn resolve_space(&self, _: &str) -> f32 {
             8.0
@@ -1176,8 +1176,8 @@ mod tests {
         fn resolve_radius(&self, _: &str) -> f32 {
             4.0
         }
-        fn resolve_opacity(&self, _: &str) -> f32 {
-            1.0
+        fn try_resolve_opacity(&self, _: &str) -> Option<f32> {
+            None
         }
     }
 

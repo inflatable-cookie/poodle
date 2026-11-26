@@ -8,7 +8,7 @@ pub struct ActiveOption<'a> {
     pub disabled: bool,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ActiveOptionMove {
     Next,
     Previous,

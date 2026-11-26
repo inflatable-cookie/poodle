@@ -257,8 +257,10 @@ export function treeVirtualWindow(
   overscan = 6,
   pinIndex: number | null = null,
 ): TreeVirtualWindow {
-  let startIndex = Math.max(0, Math.floor(scrollTop / rowHeightPx) - overscan);
-  let endIndex = Math.min(rowCount, Math.ceil((scrollTop + viewportHeightPx) / rowHeightPx) + overscan);
+  const firstRow = Math.floor(scrollTop / rowHeightPx);
+  const afterLastRow = Math.ceil((scrollTop + viewportHeightPx) / rowHeightPx);
+  let endIndex = Math.max(0, Math.min(rowCount, afterLastRow + overscan));
+  let startIndex = Math.min(endIndex, Math.max(0, firstRow - overscan));
 
   if (pinIndex !== null && pinIndex >= 0 && pinIndex < rowCount) {
     if (pinIndex < startIndex) startIndex = pinIndex;

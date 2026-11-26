@@ -437,6 +437,7 @@ fn tree_conformance() {
                     case["scrollTop"].as_f64().unwrap(),
                     case["viewport"].as_f64().unwrap(),
                     case["overscan"].as_u64().unwrap() as usize,
+                    case["pinIndex"].as_u64().map(|index| index as usize),
                 );
                 let actual = json!({
                     "startIndex": window.start_index,

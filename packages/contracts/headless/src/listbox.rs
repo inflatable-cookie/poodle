@@ -380,40 +380,33 @@ fn focus_typeahead(context: &ListboxContext, character: &str, now: u64) -> Listb
     }
 
     let start = enabled_index(context, context.focused_value.as_deref());
-    let focused_item = start.and_then(|index| enabled.get(index).copied());
-    if continuing
-        && !repeated
-        && !context.typeahead.is_empty()
-        && focused_item
-            .is_some_and(|item| item.label.trim().to_lowercase().starts_with(query.as_str()))
-    {
-        let item = focused_item.unwrap();
-        let mut result = focus_result(&typed, &item.value, Some(item.value.clone()));
-        if context.selection_mode == ListboxSelectionMode::Single {
-            let mut selected = with_selection(&result.context, &[item.value.clone()]);
-            selected.effects.splice(0..0, result.effects);
-            result = selected;
-        }
-        return result;
-    }
+    let matches_query =
+        |item: &&ListboxItem| item.label.trim().to_lowercase().starts_with(query.as_str());
+    let current_match = start
+        .and_then(|index| enabled.get(index).copied())
+        .filter(|item| {
+            continuing && !repeated && !context.typeahead.is_empty() && matches_query(item)
+        });
 
-    let start = start.unwrap_or(enabled.len() - 1);
-    for offset in 1..=enabled.len() {
-        let item = enabled[(start + offset) % enabled.len()];
-        if item.label.trim().to_lowercase().starts_with(query.as_str()) {
-            let mut result = focus_result(&typed, &item.value, Some(item.value.clone()));
-            if context.selection_mode == ListboxSelectionMode::Single {
-                let mut selected = with_selection(&result.context, &[item.value.clone()]);
-                selected.effects.splice(0..0, result.effects);
-                result = selected;
-            }
-            return result;
-        }
+    let Some(item) = current_match.or_else(|| {
+        let start = start.unwrap_or(enabled.len() - 1);
+        (1..=enabled.len())
+            .map(|offset| enabled[(start + offset) % enabled.len()])
+            .find(matches_query)
+    }) else {
+        return ListboxResult {
+            context: typed,
+            effects: Vec::new(),
+        };
+    };
+
+    let mut result = focus_result(&typed, &item.value, Some(item.value.clone()));
+    if context.selection_mode == ListboxSelectionMode::Single {
+        let mut selected = with_selection(&result.context, &[item.value.clone()]);
+        selected.effects.splice(0..0, result.effects);
+        result = selected;
     }
-    ListboxResult {
-        context: typed,
-        effects: Vec::new(),
-    }
+    result
 }
 
 fn select_range(context: &ListboxContext, value: &str, additive: bool) -> ListboxResult {

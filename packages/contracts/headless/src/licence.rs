@@ -102,9 +102,16 @@ pub struct LicenceTimedText {
     pub timestamp_ms: Option<i64>,
 }
 
+/// Identifies the window shown by a licence coverage row.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum LicenceCoverageId {
+    Use,
+    Update,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LicenceCoverageRow {
-    pub id: &'static str,
+    pub id: LicenceCoverageId,
     pub term: String,
     /// Value text when there is no window; `None` when `timestamp_ms`
     /// renders.
@@ -179,8 +186,8 @@ pub fn licence_status_view(input: LicenceStatusInput) -> LicenceStatusView {
         body,
         detail,
         coverage: vec![
-            coverage_row("use", input.use_until),
-            coverage_row("update", input.update_until),
+            coverage_row(LicenceCoverageId::Use, input.use_until),
+            coverage_row(LicenceCoverageId::Update, input.update_until),
         ],
         trust: trust_row(&input.trust_basis),
         attention: input.attention,
@@ -284,9 +291,9 @@ fn status_tone(state: &LicenceUsability, attention: LicenceAttention) -> Licence
     }
 }
 
-fn coverage_row(id: &'static str, until: Option<i64>) -> LicenceCoverageRow {
+fn coverage_row(id: LicenceCoverageId, until: Option<i64>) -> LicenceCoverageRow {
     match (id, until) {
-        ("use", None) => LicenceCoverageRow {
+        (LicenceCoverageId::Use, None) => LicenceCoverageRow {
             id,
             term: "Use coverage".to_string(),
             text: Some("No end date".to_string()),
@@ -294,7 +301,7 @@ fn coverage_row(id: &'static str, until: Option<i64>) -> LicenceCoverageRow {
             future_prefix: None,
             past_prefix: None,
         },
-        ("use", Some(until)) => LicenceCoverageRow {
+        (LicenceCoverageId::Use, Some(until)) => LicenceCoverageRow {
             id,
             term: "Use coverage".to_string(),
             text: None,
@@ -302,7 +309,7 @@ fn coverage_row(id: &'static str, until: Option<i64>) -> LicenceCoverageRow {
             future_prefix: Some("ends".to_string()),
             past_prefix: Some("ended".to_string()),
         },
-        ("update", None) => LicenceCoverageRow {
+        (LicenceCoverageId::Update, None) => LicenceCoverageRow {
             id,
             term: "Update coverage".to_string(),
             text: Some("No end date".to_string()),
@@ -310,13 +317,11 @@ fn coverage_row(id: &'static str, until: Option<i64>) -> LicenceCoverageRow {
             future_prefix: None,
             past_prefix: None,
         },
-        _ => LicenceCoverageRow {
+        (LicenceCoverageId::Update, Some(until)) => LicenceCoverageRow {
             id,
             term: "Updates".to_string(),
             text: None,
-            timestamp_ms: Some(licence_timestamp_milliseconds(
-                until.expect("checked above"),
-            )),
+            timestamp_ms: Some(licence_timestamp_milliseconds(until)),
             future_prefix: Some("end".to_string()),
             past_prefix: Some("ended".to_string()),
         },
@@ -433,6 +438,7 @@ pub enum LicenceSubmitResolution {
 /// The single submit decision, shared by every renderer — the port of
 /// `resolveLicenceSubmit`. The accepted key emitted is the raw one; Poodle
 /// never re-normalizes a credential the authority's parser accepted.
+/// A key submission without a configured parser returns a local rejection.
 pub fn resolve_licence_submit(
     draft: &LicenceSubmitDraft,
     key_format: Option<&dyn LicenceKeyFormat>,
@@ -442,7 +448,9 @@ pub fn resolve_licence_submit(
     match draft.route {
         LicenceActivationRoute::Key => {
             let Some(key_format) = key_format else {
-                panic!("A key-format adapter is required for key activation.");
+                return LicenceSubmitResolution::Reject {
+                    message: "Key activation is unavailable.".to_string(),
+                };
             };
             match key_format.parse(&draft.key) {
                 LicenceKeyResult::Err(problem) => LicenceSubmitResolution::Reject {
@@ -523,15 +531,12 @@ pub fn licence_seat_rows(
     seats
         .iter()
         .map(|seat| {
-            let named = seat
+            let label = seat
                 .label
                 .as_deref()
-                .is_some_and(|label| !label.trim().is_empty());
-            let display_label = if named {
-                seat.label.clone().expect("named above")
-            } else {
-                LICENCE_UNNAMED_MACHINE.to_string()
-            };
+                .filter(|label| !label.trim().is_empty());
+            let named = label.is_some();
+            let display_label = label.unwrap_or(LICENCE_UNNAMED_MACHINE).to_string();
             LicenceSeatRow {
                 machine_id: seat.machine_id.clone(),
                 display_label: display_label.clone(),
@@ -627,6 +632,8 @@ mod tests {
         assert_eq!(active.title, "Licence active");
         assert_eq!(active.indicator, LicenceStatusIndicator::Success);
         assert_eq!(active.coverage.len(), 2);
+        assert_eq!(active.coverage[0].id, LicenceCoverageId::Use);
+        assert_eq!(active.coverage[1].id, LicenceCoverageId::Update);
         assert_eq!(active.coverage[0].text.as_deref(), Some("No end date"));
 
         let grace = licence_status_view(LicenceStatusInput {
@@ -768,6 +775,27 @@ mod tests {
                     contents_base64: "c3R1ZmY=".to_string()
                 },
                 label: None,
+            }
+        );
+    }
+
+    #[test]
+    fn key_submission_rejects_a_missing_format() {
+        let resolved = resolve_licence_submit(
+            &LicenceSubmitDraft {
+                route: LicenceActivationRoute::Key,
+                key: "raw-key".to_string(),
+                token: None,
+                file_contents_base64: None,
+                label: String::new(),
+            },
+            None,
+        );
+
+        assert_eq!(
+            resolved,
+            LicenceSubmitResolution::Reject {
+                message: "Key activation is unavailable.".to_string(),
             }
         );
     }

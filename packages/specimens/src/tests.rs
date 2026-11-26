@@ -9,11 +9,11 @@ use super::*;
 struct FixtureTheme;
 
 impl ThemeProvider for FixtureTheme {
-    fn resolve_color(&self, token: &str) -> ColorValue {
+    fn try_resolve_color(&self, token: &str) -> Option<ColorValue> {
         match token {
-            "color.status.danger" => ColorValue(0.9, 0.2, 0.1, 1.0),
-            "color.status.success" => ColorValue(0.1, 0.7, 0.4, 1.0),
-            _ => ColorValue(0.1, 0.2, 0.3, 1.0),
+            "color.status.danger" => Some(ColorValue(0.9, 0.2, 0.1, 1.0)),
+            "color.status.success" => Some(ColorValue(0.1, 0.7, 0.4, 1.0)),
+            _ => Some(ColorValue(0.1, 0.2, 0.3, 1.0)),
         }
     }
 
@@ -33,8 +33,8 @@ impl ThemeProvider for FixtureTheme {
         4.0
     }
 
-    fn resolve_opacity(&self, _: &str) -> f32 {
-        1.0
+    fn try_resolve_opacity(&self, _: &str) -> Option<f32> {
+        None
     }
 }
 

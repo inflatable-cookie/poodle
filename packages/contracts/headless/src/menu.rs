@@ -1,6 +1,8 @@
 //! Menu machine (Menu, ContextMenu) and menu-list navigation machinery.
 //! Mirror of core `menu.ts`.
 
+use crate::nav::find_next_enabled_index;
+
 #[path = "generated/machines/menu.rs"]
 mod menu_interface;
 pub use menu_interface::*;
@@ -77,17 +79,6 @@ pub fn menu_list_navigate(disabled: &[bool], highlight_index: usize, mv: MenuLis
     }
 }
 
-fn wrap_navigate(disabled: &[bool], start_index: usize, direction: i64) -> usize {
-    let count = disabled.len() as i64;
-    let mut index = start_index as i64;
-
-    for _ in 0..count {
-        index = (index + direction).rem_euclid(count);
-
-        if !disabled[index as usize] {
-            return index as usize;
-        }
-    }
-
-    start_index
+fn wrap_navigate(disabled: &[bool], start_index: usize, direction: i32) -> usize {
+    find_next_enabled_index(disabled, start_index, direction).unwrap_or(0)
 }
