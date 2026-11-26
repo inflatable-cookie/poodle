@@ -106,6 +106,23 @@ listed for the redesign: table headers and inline-list and table dividers
 (nested tones and hairlines no role supplies), nav-card and count-badge accent
 tints (tone, not treatment), and the tinted info-icon circles (markup noise).
 
+The shell, overlay and status cohort follows the same chain. Bars read
+`-fill` alone: AppHeader, StatusBar's chrome, Toolbar and the SplitView
+toggles. The floating BulkActionBar and PageLoading's card read
+`-floatingFill`, then `-fill`, and take their border and shadow from the
+surface role. Pill's neutral tag and SkeletonCard read the surface role for
+their boundary, and UpdateCenter's notice reads the surface fill and border.
+Controls read the fill roles instead: PageLoading's cancel button, the
+interactive MessageCenter rows and RemediationBanner's solid-fill buttons.
+Status tones keep their colour in every style (Pill tones, the banner's tint,
+the update rejection notice and status indicators). Left literal for the
+redesign: MessageCenter's unread tint, which marks state and does not select;
+the Progress track; the Skeleton shimmer; Avatar's identity tints; Region's
+dashed outline, whose boundary is its content; and ResizeHandle's lines,
+which are dividers. No selected, current or checked state sits in this
+cohort. The SettingsShell group-title accent is in `sidebar-nav.css`, outside
+this cohort, and needs a text role there.
+
 ## Public Surface vs Internal Variables
 
 Two classes, machine-classified by

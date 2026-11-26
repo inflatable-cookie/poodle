@@ -130,9 +130,9 @@ Keyboard handling delegated to focused children; no owned machine state.
 | `align-items` | `center` |
 | `gap` | `0.375rem` |
 | `padding` | `0.25rem 0.375rem` (block 0.25, inline 0.375) |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 78%, transparent)` |
+| `border` | `0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 78%, transparent))` |
 | `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
+| `background` | `var(--poodle-recipe-toolbar-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)))` |
 
 ### Size Variants
 

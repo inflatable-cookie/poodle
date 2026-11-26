@@ -44,10 +44,10 @@
 }
 .poodle-remediation-banner[data-fill="solid"] .poodle-button[data-variant="secondary"],
 .poodle-remediation-banner[data-fill="solid"] .poodle-button[data-variant="ghost"] {
-  --poodle-button-fill: color-mix(in srgb, var(--poodle-color-text-primary) 16%, transparent);
-  --poodle-button-fill-hover: color-mix(in srgb, var(--poodle-color-text-primary) 24%, transparent);
-  --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-text-primary) 30%, transparent);
-  --poodle-button-border: color-mix(in srgb, var(--poodle-color-text-primary) 56%, transparent);
+  --poodle-button-fill: var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-text-primary) 16%, transparent));
+  --poodle-button-fill-hover: var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-text-primary) 24%, transparent));
+  --poodle-button-fill-active: var(--poodle-style-control-fillActive, color-mix(in srgb, var(--poodle-color-text-primary) 30%, transparent));
+  --poodle-button-border: var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-text-primary) 56%, transparent));
   --poodle-button-border-hover: var(--poodle-color-text-primary);
   --poodle-button-text: var(--poodle-color-text-primary);
   --poodle-button-shadow: none;

@@ -296,8 +296,8 @@ Pane `flex` and `overflow` are applied via inline style:
 | gap | `0.125rem` |
 | padding | `0.125rem` |
 | border-radius | `var(--poodle-radius-pill)` |
-| background | `color-mix(in srgb, var(--poodle-color-background-panel) 92%, var(--poodle-color-background-elevated))` |
-| box-shadow | `0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 70%, transparent)` |
+| background | `var(--poodle-recipe-split-view-toggles-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 92%, var(--poodle-color-background-elevated))))` |
+| box-shadow | `var(--poodle-recipe-split-view-toggles-shadow, var(--poodle-style-surface-shadow, 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 70%, transparent)))` |
 
 #### Toggles Horizontal
 

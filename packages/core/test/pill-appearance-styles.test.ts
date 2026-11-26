@@ -191,9 +191,9 @@ describe("pill.css appearance recipes", () => {
     expect(explicitTint).toEqual(implicit);
 
     expect(resolved("root", { "data-tone": "neutral", "data-appearance": "tint" }, "--poodle-pill-fill"))
-      .toBe("color-mix(in srgb, var(--poodle-color-background-surface) 90%, transparent)");
+      .toBe("var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-surface) 90%, transparent))");
     expect(resolved("root", { "data-tone": "neutral", "data-appearance": "tint" }, "--poodle-pill-border"))
-      .toBe("color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)");
+      .toBe("var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent))");
     expect(resolved("root", { "data-tone": "neutral", "data-appearance": "tint" }, "--poodle-pill-text"))
       .toBe("var(--poodle-color-text-secondary)");
 
@@ -266,7 +266,7 @@ describe("pill.css appearance recipes", () => {
 
     const neutralBadge = { "data-tone": "neutral", "data-appearance": "badge" };
     expect(resolved("root", neutralBadge, "--poodle-pill-fill"))
-      .toBe("color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary))");
+      .toBe("var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary)))");
     expect(resolved("root", neutralBadge, "--poodle-pill-text")).toBe("var(--poodle-color-text-secondary)");
   });
 });

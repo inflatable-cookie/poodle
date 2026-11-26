@@ -15,13 +15,13 @@
     justify-content: space-between;
     gap: var(--poodle-space-inline-md);
     padding: 0.5rem var(--poodle-space-panel-x);
-    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
     border-radius: var(--poodle-radius-surface);
-    --poodle-bulk-fill: var(--poodle-recipe-bulk-fill, color-mix(in srgb, var(--poodle-color-background-panel) 93%, var(--poodle-color-text-primary)));
+    --poodle-bulk-fill: var(--poodle-recipe-bulk-fill, var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 93%, var(--poodle-color-text-primary)))));
     background: var(--poodle-bulk-fill);
     --poodle-surface: var(--poodle-bulk-fill);
-    box-shadow: var(--poodle-recipe-bulk-action-bar-shadow, 0 1rem 2.5rem color-mix(in srgb, black 36%, transparent),
-      0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 28%, transparent));
+    box-shadow: var(--poodle-recipe-bulk-action-bar-shadow, var(--poodle-style-surface-shadow, 0 1rem 2.5rem color-mix(in srgb, black 36%, transparent),
+      0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 28%, transparent)));
   }
 
   .poodle-bulk-action-bar__summary {

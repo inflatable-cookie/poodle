@@ -143,8 +143,8 @@
   gap: var(--poodle-space-stack-sm);
   padding: var(--poodle-space-panel-y) var(--poodle-space-stack-sm);
   border-radius: var(--poodle-radius-control);
-  border: 0.0625rem solid var(--poodle-color-border-subtle);
-  background: var(--poodle-color-background-subtle);
+  border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
+  background: var(--poodle-style-surface-fill, var(--poodle-color-background-subtle));
   color: var(--poodle-color-text-secondary);
   font-size: var(--poodle-typography-label-size);
   line-height: var(--poodle-typography-label-lineHeight);
