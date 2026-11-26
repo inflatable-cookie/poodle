@@ -254,6 +254,36 @@ Component Recipe hooks (app-scoped appearance overrides)
 --poodle-state-opacity-disabled: 0.48
 ```
 
+### Font families
+
+Set `--poodle-font-sans` or `--poodle-font-mono` on `:root` for app-wide
+branding. Load the family's font files in your app if it needs a face
+beyond the system stack.
+
+```css
+:root {
+  --poodle-font-sans: "My App Sans", system-ui, sans-serif;
+}
+```
+
+PageHeader, SidebarNav, Dialog, DataTable, Button, and TextInput also read
+the family tokens at their own rendering location, so the same override
+works on a containing subtree. For a portaled dialog, put it on the
+portal host or an ancestor.
+
+After any component font-family recipe, these parts use the shared
+override first, then their per-role family token, such as
+`--poodle-typography-label-family`. The style supplies the per-role
+default. The default style keeps the original stacks and keeps inheritance
+on parts that previously inherited. Quiet uses system sans and mono and
+assigns per-role family tokens to those inherited parts. An app can
+override a per-role token on the style scope or within it.
+
+Existing CSS can keep reading the per-role tokens. Those aliases inherit
+from the document or style scope and pick up a shared override inside that
+scope. An explicit app declaration of a per-role token on an element still
+wins the cascade for that alias on that element.
+
 ### Themes
 
 Twelve generated themes are activated via `data-theme`:

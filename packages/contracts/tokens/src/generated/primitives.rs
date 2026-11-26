@@ -107,3 +107,5 @@ pub const TYPOGRAPHY_FONT_SIZE_XL: &str = "1.25rem";
 pub const TYPOGRAPHY_FONT_LINE_HEIGHT_SM: &str = "1rem";
 pub const TYPOGRAPHY_FONT_LINE_HEIGHT_MD: &str = "1.25rem";
 pub const TYPOGRAPHY_FONT_LINE_HEIGHT_LG: &str = "1.5rem";
+pub const TYPOGRAPHY_FONT_SYSTEM_FAMILY_SANS: &str = "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif";
+pub const TYPOGRAPHY_FONT_SYSTEM_FAMILY_MONO: &str = "ui-monospace, \"SFMono-Regular\", Menlo, Consolas, monospace";

@@ -243,6 +243,12 @@ overlay and the anchor point.
 
 ### `.poodle-sidebar-nav__group-title`
 
+Quiet typography renders group titles at 13/18 and weight 600 in the
+theme's secondary text colour. It removes tracking and forced uppercase.
+Item labels follow the control-label scale. Active items keep their
+semibold emphasis. End labels use the 12/16 caption role with tabular
+figures.
+
 | Property | Value |
 |----------|-------|
 | `margin` | `0` |
@@ -331,7 +337,7 @@ item's colour and weight changes apply to the label only.
 | Property | Value |
 |----------|-------|
 | `color` | `var(--poodle-color-text-primary)` |
-| `font-weight` | `600` |
+| `font-weight` | `var(--poodle-recipe-sidebar-nav-item--active-font-weight, 600)` |
 | `background` | `var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent))` |
 | `box-shadow` | `inset 0 0 0 0.0625rem var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent))` |
 | `border-left-color` | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |

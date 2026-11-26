@@ -1,0 +1,2067 @@
+{
+  "compared": 60,
+  "differences": [
+    {
+      "slug": "page-header",
+      "theme": "eclipse",
+      "size": "xs",
+      "pixels": 0
+    },
+    {
+      "slug": "page-header",
+      "theme": "eclipse",
+      "size": "sm",
+      "pixels": 0
+    },
+    {
+      "slug": "page-header",
+      "theme": "eclipse",
+      "size": "md",
+      "pixels": 0
+    },
+    {
+      "slug": "page-header",
+      "theme": "eclipse",
+      "size": "lg",
+      "pixels": 0
+    },
+    {
+      "slug": "page-header",
+      "theme": "eclipse",
+      "size": "xl",
+      "pixels": 0
+    },
+    {
+      "slug": "sidebar-nav",
+      "theme": "eclipse",
+      "size": "xs",
+      "pixels": 0
+    },
+    {
+      "slug": "sidebar-nav",
+      "theme": "eclipse",
+      "size": "sm",
+      "pixels": 0
+    },
+    {
+      "slug": "sidebar-nav",
+      "theme": "eclipse",
+      "size": "md",
+      "pixels": 0
+    },
+    {
+      "slug": "sidebar-nav",
+      "theme": "eclipse",
+      "size": "lg",
+      "pixels": 0
+    },
+    {
+      "slug": "sidebar-nav",
+      "theme": "eclipse",
+      "size": "xl",
+      "pixels": 0
+    },
+    {
+      "slug": "dialog",
+      "theme": "eclipse",
+      "size": "xs",
+      "pixels": 0
+    },
+    {
+      "slug": "dialog",
+      "theme": "eclipse",
+      "size": "sm",
+      "pixels": 0
+    },
+    {
+      "slug": "dialog",
+      "theme": "eclipse",
+      "size": "md",
+      "pixels": 0
+    },
+    {
+      "slug": "dialog",
+      "theme": "eclipse",
+      "size": "lg",
+      "pixels": 0
+    },
+    {
+      "slug": "dialog",
+      "theme": "eclipse",
+      "size": "xl",
+      "pixels": 0
+    },
+    {
+      "slug": "data-table",
+      "theme": "eclipse",
+      "size": "xs",
+      "pixels": 0
+    },
+    {
+      "slug": "data-table",
+      "theme": "eclipse",
+      "size": "sm",
+      "pixels": 0
+    },
+    {
+      "slug": "data-table",
+      "theme": "eclipse",
+      "size": "md",
+      "pixels": 0
+    },
+    {
+      "slug": "data-table",
+      "theme": "eclipse",
+      "size": "lg",
+      "pixels": 0
+    },
+    {
+      "slug": "data-table",
+      "theme": "eclipse",
+      "size": "xl",
+      "pixels": 0
+    },
+    {
+      "slug": "button",
+      "theme": "eclipse",
+      "size": "xs",
+      "pixels": 0
+    },
+    {
+      "slug": "button",
+      "theme": "eclipse",
+      "size": "sm",
+      "pixels": 0
+    },
+    {
+      "slug": "button",
+      "theme": "eclipse",
+      "size": "md",
+      "pixels": 0
+    },
+    {
+      "slug": "button",
+      "theme": "eclipse",
+      "size": "lg",
+      "pixels": 0
+    },
+    {
+      "slug": "button",
+      "theme": "eclipse",
+      "size": "xl",
+      "pixels": 0
+    },
+    {
+      "slug": "text-input",
+      "theme": "eclipse",
+      "size": "xs",
+      "pixels": 0
+    },
+    {
+      "slug": "text-input",
+      "theme": "eclipse",
+      "size": "sm",
+      "pixels": 0
+    },
+    {
+      "slug": "text-input",
+      "theme": "eclipse",
+      "size": "md",
+      "pixels": 0
+    },
+    {
+      "slug": "text-input",
+      "theme": "eclipse",
+      "size": "lg",
+      "pixels": 0
+    },
+    {
+      "slug": "text-input",
+      "theme": "eclipse",
+      "size": "xl",
+      "pixels": 0
+    },
+    {
+      "slug": "page-header",
+      "theme": "iceberg",
+      "size": "xs",
+      "pixels": 0
+    },
+    {
+      "slug": "page-header",
+      "theme": "iceberg",
+      "size": "sm",
+      "pixels": 0
+    },
+    {
+      "slug": "page-header",
+      "theme": "iceberg",
+      "size": "md",
+      "pixels": 0
+    },
+    {
+      "slug": "page-header",
+      "theme": "iceberg",
+      "size": "lg",
+      "pixels": 0
+    },
+    {
+      "slug": "page-header",
+      "theme": "iceberg",
+      "size": "xl",
+      "pixels": 0
+    },
+    {
+      "slug": "sidebar-nav",
+      "theme": "iceberg",
+      "size": "xs",
+      "pixels": 0
+    },
+    {
+      "slug": "sidebar-nav",
+      "theme": "iceberg",
+      "size": "sm",
+      "pixels": 0
+    },
+    {
+      "slug": "sidebar-nav",
+      "theme": "iceberg",
+      "size": "md",
+      "pixels": 0
+    },
+    {
+      "slug": "sidebar-nav",
+      "theme": "iceberg",
+      "size": "lg",
+      "pixels": 0
+    },
+    {
+      "slug": "sidebar-nav",
+      "theme": "iceberg",
+      "size": "xl",
+      "pixels": 0
+    },
+    {
+      "slug": "dialog",
+      "theme": "iceberg",
+      "size": "xs",
+      "pixels": 0
+    },
+    {
+      "slug": "dialog",
+      "theme": "iceberg",
+      "size": "sm",
+      "pixels": 0
+    },
+    {
+      "slug": "dialog",
+      "theme": "iceberg",
+      "size": "md",
+      "pixels": 0
+    },
+    {
+      "slug": "dialog",
+      "theme": "iceberg",
+      "size": "lg",
+      "pixels": 0
+    },
+    {
+      "slug": "dialog",
+      "theme": "iceberg",
+      "size": "xl",
+      "pixels": 0
+    },
+    {
+      "slug": "data-table",
+      "theme": "iceberg",
+      "size": "xs",
+      "pixels": 0
+    },
+    {
+      "slug": "data-table",
+      "theme": "iceberg",
+      "size": "sm",
+      "pixels": 0
+    },
+    {
+      "slug": "data-table",
+      "theme": "iceberg",
+      "size": "md",
+      "pixels": 0
+    },
+    {
+      "slug": "data-table",
+      "theme": "iceberg",
+      "size": "lg",
+      "pixels": 0
+    },
+    {
+      "slug": "data-table",
+      "theme": "iceberg",
+      "size": "xl",
+      "pixels": 0
+    },
+    {
+      "slug": "button",
+      "theme": "iceberg",
+      "size": "xs",
+      "pixels": 0
+    },
+    {
+      "slug": "button",
+      "theme": "iceberg",
+      "size": "sm",
+      "pixels": 0
+    },
+    {
+      "slug": "button",
+      "theme": "iceberg",
+      "size": "md",
+      "pixels": 0
+    },
+    {
+      "slug": "button",
+      "theme": "iceberg",
+      "size": "lg",
+      "pixels": 0
+    },
+    {
+      "slug": "button",
+      "theme": "iceberg",
+      "size": "xl",
+      "pixels": 0
+    },
+    {
+      "slug": "text-input",
+      "theme": "iceberg",
+      "size": "xs",
+      "pixels": 0
+    },
+    {
+      "slug": "text-input",
+      "theme": "iceberg",
+      "size": "sm",
+      "pixels": 0
+    },
+    {
+      "slug": "text-input",
+      "theme": "iceberg",
+      "size": "md",
+      "pixels": 0
+    },
+    {
+      "slug": "text-input",
+      "theme": "iceberg",
+      "size": "lg",
+      "pixels": 0
+    },
+    {
+      "slug": "text-input",
+      "theme": "iceberg",
+      "size": "xl",
+      "pixels": 0
+    }
+  ],
+  "quietSpecimens": [
+    {
+      "slug": "page-header",
+      "fontSize": "30px",
+      "lineHeight": "36px",
+      "fontWeight": "600",
+      "fontFamily": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "textTransform": "none",
+      "color": "rgb(238, 242, 246)"
+    },
+    {
+      "slug": "sidebar-nav",
+      "fontSize": "13px",
+      "lineHeight": "18px",
+      "fontWeight": "600",
+      "fontFamily": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "textTransform": "none",
+      "color": "rgb(153, 164, 176)"
+    },
+    {
+      "slug": "dialog",
+      "fontSize": "22px",
+      "lineHeight": "28px",
+      "fontWeight": "600",
+      "fontFamily": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "textTransform": "none",
+      "color": "rgb(238, 242, 246)"
+    },
+    {
+      "slug": "data-table",
+      "fontSize": "15px",
+      "lineHeight": "20px",
+      "fontWeight": "600",
+      "fontFamily": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "textTransform": "none",
+      "color": "rgb(238, 242, 246)"
+    },
+    {
+      "slug": "button",
+      "fontSize": "15px",
+      "lineHeight": "20px",
+      "fontWeight": "500",
+      "fontFamily": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "textTransform": "none",
+      "color": "rgb(22, 26, 31)"
+    },
+    {
+      "slug": "text-input",
+      "fontSize": "15px",
+      "lineHeight": "20px",
+      "fontWeight": "400",
+      "fontFamily": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "textTransform": "none",
+      "color": "rgb(238, 242, 246)"
+    }
+  ],
+  "controlGeometry": [
+    {
+      "slug": "button",
+      "size": "xs",
+      "style": "default",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 24,
+          "type": [
+            11,
+            11,
+            500
+          ]
+        },
+        {
+          "density": "default",
+          "height": 24,
+          "type": [
+            11,
+            11,
+            500
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 24,
+          "type": [
+            11,
+            11,
+            500
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "button",
+      "size": "xs",
+      "style": "quiet",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 24,
+          "type": [
+            13,
+            16,
+            500
+          ]
+        },
+        {
+          "density": "default",
+          "height": 24,
+          "type": [
+            13,
+            16,
+            500
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 24,
+          "type": [
+            13,
+            16,
+            500
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "button",
+      "size": "sm",
+      "style": "default",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 28,
+          "type": [
+            12,
+            12,
+            500
+          ]
+        },
+        {
+          "density": "default",
+          "height": 28,
+          "type": [
+            12,
+            12,
+            500
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 28,
+          "type": [
+            12,
+            12,
+            500
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "button",
+      "size": "sm",
+      "style": "quiet",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 28,
+          "type": [
+            14,
+            18,
+            500
+          ]
+        },
+        {
+          "density": "default",
+          "height": 28,
+          "type": [
+            14,
+            18,
+            500
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 28,
+          "type": [
+            14,
+            18,
+            500
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "button",
+      "size": "md",
+      "style": "default",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 36,
+          "type": [
+            13,
+            13,
+            500
+          ]
+        },
+        {
+          "density": "default",
+          "height": 36,
+          "type": [
+            13,
+            13,
+            500
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 36,
+          "type": [
+            13,
+            13,
+            500
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "button",
+      "size": "md",
+      "style": "quiet",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 36,
+          "type": [
+            15,
+            20,
+            500
+          ]
+        },
+        {
+          "density": "default",
+          "height": 36,
+          "type": [
+            15,
+            20,
+            500
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 36,
+          "type": [
+            15,
+            20,
+            500
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "button",
+      "size": "lg",
+      "style": "default",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 44,
+          "type": [
+            14,
+            14,
+            500
+          ]
+        },
+        {
+          "density": "default",
+          "height": 44,
+          "type": [
+            14,
+            14,
+            500
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 44,
+          "type": [
+            14,
+            14,
+            500
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "button",
+      "size": "lg",
+      "style": "quiet",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 44,
+          "type": [
+            16,
+            22,
+            500
+          ]
+        },
+        {
+          "density": "default",
+          "height": 44,
+          "type": [
+            16,
+            22,
+            500
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 44,
+          "type": [
+            16,
+            22,
+            500
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "button",
+      "size": "xl",
+      "style": "default",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 52,
+          "type": [
+            15,
+            15,
+            500
+          ]
+        },
+        {
+          "density": "default",
+          "height": 52,
+          "type": [
+            15,
+            15,
+            500
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 52,
+          "type": [
+            15,
+            15,
+            500
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "button",
+      "size": "xl",
+      "style": "quiet",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 52,
+          "type": [
+            17,
+            24,
+            500
+          ]
+        },
+        {
+          "density": "default",
+          "height": 52,
+          "type": [
+            17,
+            24,
+            500
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 52,
+          "type": [
+            17,
+            24,
+            500
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "text-input",
+      "size": "xs",
+      "style": "default",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 24,
+          "type": [
+            12,
+            20,
+            400
+          ]
+        },
+        {
+          "density": "default",
+          "height": 24,
+          "type": [
+            12,
+            20,
+            400
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 24,
+          "type": [
+            12,
+            20,
+            400
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "text-input",
+      "size": "xs",
+      "style": "quiet",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 24,
+          "type": [
+            13,
+            16,
+            400
+          ]
+        },
+        {
+          "density": "default",
+          "height": 24,
+          "type": [
+            13,
+            16,
+            400
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 24,
+          "type": [
+            13,
+            16,
+            400
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "text-input",
+      "size": "sm",
+      "style": "default",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 28,
+          "type": [
+            13,
+            20,
+            400
+          ]
+        },
+        {
+          "density": "default",
+          "height": 28,
+          "type": [
+            13,
+            20,
+            400
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 28,
+          "type": [
+            13,
+            20,
+            400
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "text-input",
+      "size": "sm",
+      "style": "quiet",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 28,
+          "type": [
+            14,
+            18,
+            400
+          ]
+        },
+        {
+          "density": "default",
+          "height": 28,
+          "type": [
+            14,
+            18,
+            400
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 28,
+          "type": [
+            14,
+            18,
+            400
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "text-input",
+      "size": "md",
+      "style": "default",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 36,
+          "type": [
+            14,
+            20,
+            400
+          ]
+        },
+        {
+          "density": "default",
+          "height": 36,
+          "type": [
+            14,
+            20,
+            400
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 36,
+          "type": [
+            14,
+            20,
+            400
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "text-input",
+      "size": "md",
+      "style": "quiet",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 36,
+          "type": [
+            15,
+            20,
+            400
+          ]
+        },
+        {
+          "density": "default",
+          "height": 36,
+          "type": [
+            15,
+            20,
+            400
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 36,
+          "type": [
+            15,
+            20,
+            400
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "text-input",
+      "size": "lg",
+      "style": "default",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 44,
+          "type": [
+            15,
+            20,
+            400
+          ]
+        },
+        {
+          "density": "default",
+          "height": 44,
+          "type": [
+            15,
+            20,
+            400
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 44,
+          "type": [
+            15,
+            20,
+            400
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "text-input",
+      "size": "lg",
+      "style": "quiet",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 44,
+          "type": [
+            16,
+            22,
+            400
+          ]
+        },
+        {
+          "density": "default",
+          "height": 44,
+          "type": [
+            16,
+            22,
+            400
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 44,
+          "type": [
+            16,
+            22,
+            400
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "text-input",
+      "size": "xl",
+      "style": "default",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 52,
+          "type": [
+            16,
+            20,
+            400
+          ]
+        },
+        {
+          "density": "default",
+          "height": 52,
+          "type": [
+            16,
+            20,
+            400
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 52,
+          "type": [
+            16,
+            20,
+            400
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "text-input",
+      "size": "xl",
+      "style": "quiet",
+      "byDensity": [
+        {
+          "density": "compact",
+          "height": 52,
+          "type": [
+            17,
+            24,
+            400
+          ]
+        },
+        {
+          "density": "default",
+          "height": 52,
+          "type": [
+            17,
+            24,
+            400
+          ]
+        },
+        {
+          "density": "comfortable",
+          "height": 52,
+          "type": [
+            17,
+            24,
+            400
+          ]
+        }
+      ]
+    }
+  ],
+  "familyOverrides": [
+    {
+      "slug": "page-header",
+      "style": "default",
+      "before": "Inter, \"SF Pro Display\", system-ui, sans-serif",
+      "root": "Georgia, serif"
+    },
+    {
+      "slug": "page-header",
+      "style": "quiet",
+      "before": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "root": "Georgia, serif"
+    },
+    {
+      "slug": "sidebar-nav",
+      "style": "default",
+      "before": "Inter, \"SF Pro Display\", system-ui, sans-serif",
+      "root": "Georgia, serif"
+    },
+    {
+      "slug": "sidebar-nav",
+      "style": "quiet",
+      "before": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "root": "Georgia, serif"
+    },
+    {
+      "slug": "dialog",
+      "style": "default",
+      "before": "Inter, \"SF Pro Display\", system-ui, sans-serif",
+      "root": "Georgia, serif"
+    },
+    {
+      "slug": "dialog",
+      "style": "quiet",
+      "before": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "root": "Georgia, serif"
+    },
+    {
+      "slug": "data-table",
+      "style": "default",
+      "before": "Inter, \"SF Pro Display\", system-ui, sans-serif",
+      "root": "Georgia, serif"
+    },
+    {
+      "slug": "data-table",
+      "style": "quiet",
+      "before": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "root": "Georgia, serif"
+    },
+    {
+      "slug": "button",
+      "style": "default",
+      "before": "Inter, \"SF Pro Display\", system-ui, sans-serif",
+      "root": "Georgia, serif"
+    },
+    {
+      "slug": "button",
+      "style": "quiet",
+      "before": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "root": "Georgia, serif"
+    },
+    {
+      "slug": "text-input",
+      "style": "default",
+      "before": "Inter, \"SF Pro Display\", system-ui, sans-serif",
+      "root": "Georgia, serif"
+    },
+    {
+      "slug": "text-input",
+      "style": "quiet",
+      "before": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+      "root": "Georgia, serif"
+    }
+  ],
+  "fontCascade": [
+    {
+      "engine": "chromium",
+      "style": "default",
+      "case": "style-default",
+      "components": {
+        "page-header": "Inter, \"SF Pro Display\", system-ui, sans-serif",
+        "sidebar-nav": "Inter, \"SF Pro Display\", system-ui, sans-serif",
+        "dialog": "Inter, \"SF Pro Display\", system-ui, sans-serif",
+        "data-table": "Tahoma, sans-serif",
+        "button": "Inter, \"SF Pro Display\", system-ui, sans-serif",
+        "text-input": "Inter, \"SF Pro Display\", system-ui, sans-serif"
+      },
+      "inheritedParts": {
+        "Back": "Tahoma, sans-serif",
+        "Section": "Tahoma, sans-serif",
+        "Eyebrow": "Tahoma, sans-serif",
+        "Subtitle": "Tahoma, sans-serif",
+        "Body": "Tahoma, sans-serif",
+        "Dialog description": "Tahoma, sans-serif",
+        "Toolbar": "Tahoma, sans-serif",
+        "Column": "Tahoma, sans-serif",
+        "Filter": "Tahoma, sans-serif",
+        "Primary cell": "Tahoma, sans-serif",
+        "Summary\n      Limit\n      Page": "Tahoma, sans-serif",
+        "Summary": "Tahoma, sans-serif",
+        "Limit": "Tahoma, sans-serif",
+        "Page": "Tahoma, sans-serif",
+        "Character count": "Tahoma, sans-serif"
+      },
+      "aliases": {
+        "body": "Inter, \"SF Pro Display\", system-ui, sans-serif",
+        "label": "Inter, \"SF Pro Display\", system-ui, sans-serif",
+        "caption": "Inter, \"SF Pro Display\", system-ui, sans-serif",
+        "heading": "Inter, \"SF Pro Display\", system-ui, sans-serif",
+        "code": "\"IBM Plex Mono\", SFMono-Regular, monospace"
+      }
+    },
+    {
+      "engine": "chromium",
+      "style": "default",
+      "case": "shared-root",
+      "components": {
+        "page-header": "Verdana, sans-serif",
+        "sidebar-nav": "Verdana, sans-serif",
+        "dialog": "Verdana, sans-serif",
+        "data-table": "Verdana, sans-serif",
+        "button": "Verdana, sans-serif",
+        "text-input": "Verdana, sans-serif"
+      },
+      "inheritedParts": {
+        "Back": "Verdana, sans-serif",
+        "Section": "Verdana, sans-serif",
+        "Eyebrow": "Verdana, sans-serif",
+        "Subtitle": "Verdana, sans-serif",
+        "Body": "Verdana, sans-serif",
+        "Dialog description": "Verdana, sans-serif",
+        "Toolbar": "Verdana, sans-serif",
+        "Column": "Verdana, sans-serif",
+        "Filter": "Verdana, sans-serif",
+        "Primary cell": "Verdana, sans-serif",
+        "Summary\n      Limit\n      Page": "Verdana, sans-serif",
+        "Summary": "Verdana, sans-serif",
+        "Limit": "Verdana, sans-serif",
+        "Page": "Verdana, sans-serif",
+        "Character count": "Verdana, sans-serif"
+      },
+      "aliases": {
+        "body": "Verdana, sans-serif",
+        "label": "Verdana, sans-serif",
+        "caption": "Verdana, sans-serif",
+        "heading": "Verdana, sans-serif",
+        "code": "Menlo, monospace"
+      }
+    },
+    {
+      "engine": "chromium",
+      "style": "default",
+      "case": "shared-inner",
+      "components": {
+        "page-header": "Verdana, sans-serif",
+        "sidebar-nav": "Verdana, sans-serif",
+        "dialog": "Verdana, sans-serif",
+        "data-table": "Verdana, sans-serif",
+        "button": "Verdana, sans-serif",
+        "text-input": "Verdana, sans-serif"
+      },
+      "inheritedParts": {
+        "Back": "Verdana, sans-serif",
+        "Section": "Verdana, sans-serif",
+        "Eyebrow": "Verdana, sans-serif",
+        "Subtitle": "Verdana, sans-serif",
+        "Body": "Verdana, sans-serif",
+        "Dialog description": "Verdana, sans-serif",
+        "Toolbar": "Verdana, sans-serif",
+        "Column": "Verdana, sans-serif",
+        "Filter": "Verdana, sans-serif",
+        "Primary cell": "Verdana, sans-serif",
+        "Summary\n      Limit\n      Page": "Verdana, sans-serif",
+        "Summary": "Verdana, sans-serif",
+        "Limit": "Verdana, sans-serif",
+        "Page": "Verdana, sans-serif",
+        "Character count": "Verdana, sans-serif"
+      },
+      "aliases": {
+        "body": "Verdana, sans-serif",
+        "label": "Verdana, sans-serif",
+        "caption": "Verdana, sans-serif",
+        "heading": "Verdana, sans-serif",
+        "code": "Menlo, monospace"
+      }
+    },
+    {
+      "engine": "chromium",
+      "style": "default",
+      "case": "legacy-inner",
+      "components": {
+        "page-header": "Palatino, serif",
+        "sidebar-nav": "Georgia, serif",
+        "dialog": "Palatino, serif",
+        "data-table": "Tahoma, sans-serif",
+        "button": "Georgia, serif",
+        "text-input": "Cambria, serif"
+      },
+      "inheritedParts": {
+        "Back": "Tahoma, sans-serif",
+        "Section": "Tahoma, sans-serif",
+        "Eyebrow": "Tahoma, sans-serif",
+        "Subtitle": "Tahoma, sans-serif",
+        "Body": "Tahoma, sans-serif",
+        "Dialog description": "Tahoma, sans-serif",
+        "Toolbar": "Tahoma, sans-serif",
+        "Column": "Tahoma, sans-serif",
+        "Filter": "Tahoma, sans-serif",
+        "Primary cell": "Tahoma, sans-serif",
+        "Summary\n      Limit\n      Page": "Tahoma, sans-serif",
+        "Summary": "Tahoma, sans-serif",
+        "Limit": "Tahoma, sans-serif",
+        "Page": "Tahoma, sans-serif",
+        "Character count": "Tahoma, sans-serif"
+      },
+      "aliases": {
+        "body": "Cambria, serif",
+        "label": "Georgia, serif",
+        "caption": "Arial, sans-serif",
+        "heading": "Palatino, serif",
+        "code": "\"Courier New\", monospace"
+      }
+    },
+    {
+      "engine": "chromium",
+      "style": "default",
+      "case": "legacy-root",
+      "components": {
+        "page-header": "Palatino, serif",
+        "sidebar-nav": "Georgia, serif",
+        "dialog": "Palatino, serif",
+        "data-table": "Tahoma, sans-serif",
+        "button": "Georgia, serif",
+        "text-input": "Cambria, serif"
+      },
+      "inheritedParts": {
+        "Back": "Tahoma, sans-serif",
+        "Section": "Tahoma, sans-serif",
+        "Eyebrow": "Tahoma, sans-serif",
+        "Subtitle": "Tahoma, sans-serif",
+        "Body": "Tahoma, sans-serif",
+        "Dialog description": "Tahoma, sans-serif",
+        "Toolbar": "Tahoma, sans-serif",
+        "Column": "Tahoma, sans-serif",
+        "Filter": "Tahoma, sans-serif",
+        "Primary cell": "Tahoma, sans-serif",
+        "Summary\n      Limit\n      Page": "Tahoma, sans-serif",
+        "Summary": "Tahoma, sans-serif",
+        "Limit": "Tahoma, sans-serif",
+        "Page": "Tahoma, sans-serif",
+        "Character count": "Tahoma, sans-serif"
+      },
+      "aliases": {
+        "body": "Cambria, serif",
+        "label": "Georgia, serif",
+        "caption": "Arial, sans-serif",
+        "heading": "Palatino, serif",
+        "code": "\"Courier New\", monospace"
+      }
+    },
+    {
+      "engine": "chromium",
+      "style": "default",
+      "case": "shared-inner-style-boundary",
+      "components": {
+        "page-header": "Verdana, sans-serif",
+        "sidebar-nav": "Verdana, sans-serif",
+        "dialog": "Verdana, sans-serif",
+        "data-table": "Verdana, sans-serif",
+        "button": "Verdana, sans-serif",
+        "text-input": "Verdana, sans-serif"
+      },
+      "inheritedParts": {
+        "Back": "Verdana, sans-serif",
+        "Section": "Verdana, sans-serif",
+        "Eyebrow": "Verdana, sans-serif",
+        "Subtitle": "Verdana, sans-serif",
+        "Body": "Verdana, sans-serif",
+        "Dialog description": "Verdana, sans-serif",
+        "Toolbar": "Verdana, sans-serif",
+        "Column": "Verdana, sans-serif",
+        "Filter": "Verdana, sans-serif",
+        "Primary cell": "Verdana, sans-serif",
+        "Summary\n      Limit\n      Page": "Verdana, sans-serif",
+        "Summary": "Verdana, sans-serif",
+        "Limit": "Verdana, sans-serif",
+        "Page": "Verdana, sans-serif",
+        "Character count": "Verdana, sans-serif"
+      },
+      "aliases": {
+        "body": "Verdana, sans-serif",
+        "label": "Verdana, sans-serif",
+        "caption": "Verdana, sans-serif",
+        "heading": "Verdana, sans-serif",
+        "code": "Menlo, monospace"
+      }
+    },
+    {
+      "engine": "chromium",
+      "style": "quiet",
+      "case": "style-default",
+      "components": {
+        "page-header": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "sidebar-nav": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "dialog": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "data-table": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "button": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "text-input": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif"
+      },
+      "inheritedParts": {
+        "Back": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "Section": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "Eyebrow": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "Subtitle": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "Body": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "Dialog description": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "Toolbar": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "Column": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "Filter": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "Primary cell": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "Summary\n      Limit\n      Page": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "Summary": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "Limit": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "Page": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "Character count": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif"
+      },
+      "aliases": {
+        "body": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "label": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "caption": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "heading": "system-ui, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+        "code": "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+      }
+    },
+    {
+      "engine": "chromium",
+      "style": "quiet",
+      "case": "shared-root",
+      "components": {
+        "page-header": "Verdana, sans-serif",
+        "sidebar-nav": "Verdana, sans-serif",
+        "dialog": "Verdana, sans-serif",
+        "data-table": "Verdana, sans-serif",
+        "button": "Verdana, sans-serif",
+        "text-input": "Verdana, sans-serif"
+      },
+      "inheritedParts": {
+        "Back": "Verdana, sans-serif",
+        "Section": "Verdana, sans-serif",
+        "Eyebrow": "Verdana, sans-serif",
+        "Subtitle": "Verdana, sans-serif",
+        "Body": "Verdana, sans-serif",
+        "Dialog description": "Verdana, sans-serif",
+        "Toolbar": "Verdana, sans-serif",
+        "Column": "Verdana, sans-serif",
+        "Filter": "Verdana, sans-serif",
+        "Primary cell": "Verdana, sans-serif",
+        "Summary\n      Limit\n      Page": "Verdana, sans-serif",
+        "Summary": "Verdana, sans-serif",
+        "Limit": "Verdana, sans-serif",
+        "Page": "Verdana, sans-serif",
+        "Character count": "Verdana, sans-serif"
+      },
+      "aliases": {
+        "body": "Verdana, sans-serif",
+        "label": "Verdana, sans-serif",
+        "caption": "Verdana, sans-serif",
+        "heading": "Verdana, sans-serif",
+        "code": "Menlo, monospace"
+      }
+    },
+    {
+      "engine": "chromium",
+      "style": "quiet",
+      "case": "shared-inner",
+      "components": {
+        "page-header": "Verdana, sans-serif",
+        "sidebar-nav": "Verdana, sans-serif",
+        "dialog": "Verdana, sans-serif",
+        "data-table": "Verdana, sans-serif",
+        "button": "Verdana, sans-serif",
+        "text-input": "Verdana, sans-serif"
+      },
+      "inheritedParts": {
+        "Back": "Verdana, sans-serif",
+        "Section": "Verdana, sans-serif",
+        "Eyebrow": "Verdana, sans-serif",
+        "Subtitle": "Verdana, sans-serif",
+        "Body": "Verdana, sans-serif",
+        "Dialog description": "Verdana, sans-serif",
+        "Toolbar": "Verdana, sans-serif",
+        "Column": "Verdana, sans-serif",
+        "Filter": "Verdana, sans-serif",
+        "Primary cell": "Verdana, sans-serif",
+        "Summary\n      Limit\n      Page": "Verdana, sans-serif",
+        "Summary": "Verdana, sans-serif",
+        "Limit": "Verdana, sans-serif",
+        "Page": "Verdana, sans-serif",
+        "Character count": "Verdana, sans-serif"
+      },
+      "aliases": {
+        "body": "Verdana, sans-serif",
+        "label": "Verdana, sans-serif",
+        "caption": "Verdana, sans-serif",
+        "heading": "Verdana, sans-serif",
+        "code": "Menlo, monospace"
+      }
+    },
+    {
+      "engine": "chromium",
+      "style": "quiet",
+      "case": "legacy-inner",
+      "components": {
+        "page-header": "Palatino, serif",
+        "sidebar-nav": "Georgia, serif",
+        "dialog": "Palatino, serif",
+        "data-table": "Cambria, serif",
+        "button": "Georgia, serif",
+        "text-input": "Cambria, serif"
+      },
+      "inheritedParts": {
+        "Back": "Georgia, serif",
+        "Section": "Georgia, serif",
+        "Eyebrow": "Arial, sans-serif",
+        "Subtitle": "Cambria, serif",
+        "Body": "Cambria, serif",
+        "Dialog description": "Cambria, serif",
+        "Toolbar": "Georgia, serif",
+        "Column": "Georgia, serif",
+        "Filter": "Cambria, serif",
+        "Primary cell": "Cambria, serif",
+        "Summary\n      Limit\n      Page": "Arial, sans-serif",
+        "Summary": "Arial, sans-serif",
+        "Limit": "Cambria, serif",
+        "Page": "Georgia, serif",
+        "Character count": "Arial, sans-serif"
+      },
+      "aliases": {
+        "body": "Cambria, serif",
+        "label": "Georgia, serif",
+        "caption": "Arial, sans-serif",
+        "heading": "Palatino, serif",
+        "code": "\"Courier New\", monospace"
+      }
+    },
+    {
+      "engine": "chromium",
+      "style": "quiet",
+      "case": "legacy-root",
+      "components": {
+        "page-header": "Palatino, serif",
+        "sidebar-nav": "Georgia, serif",
+        "dialog": "Palatino, serif",
+        "data-table": "Cambria, serif",
+        "button": "Georgia, serif",
+        "text-input": "Cambria, serif"
+      },
+      "inheritedParts": {
+        "Back": "Georgia, serif",
+        "Section": "Georgia, serif",
+        "Eyebrow": "Arial, sans-serif",
+        "Subtitle": "Cambria, serif",
+        "Body": "Cambria, serif",
+        "Dialog description": "Cambria, serif",
+        "Toolbar": "Georgia, serif",
+        "Column": "Georgia, serif",
+        "Filter": "Cambria, serif",
+        "Primary cell": "Cambria, serif",
+        "Summary\n      Limit\n      Page": "Arial, sans-serif",
+        "Summary": "Arial, sans-serif",
+        "Limit": "Cambria, serif",
+        "Page": "Georgia, serif",
+        "Character count": "Arial, sans-serif"
+      },
+      "aliases": {
+        "body": "Cambria, serif",
+        "label": "Georgia, serif",
+        "caption": "Arial, sans-serif",
+        "heading": "Palatino, serif",
+        "code": "\"Courier New\", monospace"
+      }
+    },
+    {
+      "engine": "chromium",
+      "style": "quiet",
+      "case": "shared-inner-style-boundary",
+      "components": {
+        "page-header": "Verdana, sans-serif",
+        "sidebar-nav": "Verdana, sans-serif",
+        "dialog": "Verdana, sans-serif",
+        "data-table": "Verdana, sans-serif",
+        "button": "Verdana, sans-serif",
+        "text-input": "Verdana, sans-serif"
+      },
+      "inheritedParts": {
+        "Back": "Verdana, sans-serif",
+        "Section": "Verdana, sans-serif",
+        "Eyebrow": "Verdana, sans-serif",
+        "Subtitle": "Verdana, sans-serif",
+        "Body": "Verdana, sans-serif",
+        "Dialog description": "Verdana, sans-serif",
+        "Toolbar": "Verdana, sans-serif",
+        "Column": "Verdana, sans-serif",
+        "Filter": "Verdana, sans-serif",
+        "Primary cell": "Verdana, sans-serif",
+        "Summary\n      Limit\n      Page": "Verdana, sans-serif",
+        "Summary": "Verdana, sans-serif",
+        "Limit": "Verdana, sans-serif",
+        "Page": "Verdana, sans-serif",
+        "Character count": "Verdana, sans-serif"
+      },
+      "aliases": {
+        "body": "Verdana, sans-serif",
+        "label": "Verdana, sans-serif",
+        "caption": "Verdana, sans-serif",
+        "heading": "Verdana, sans-serif",
+        "code": "Menlo, monospace"
+      }
+    },
+    {
+      "engine": "webkit",
+      "style": "default",
+      "case": "style-default",
+      "components": {
+        "page-header": "Inter, SF Pro Display, system-ui, sans-serif",
+        "sidebar-nav": "Inter, SF Pro Display, system-ui, sans-serif",
+        "dialog": "Inter, SF Pro Display, system-ui, sans-serif",
+        "data-table": "Tahoma, sans-serif",
+        "button": "Inter, SF Pro Display, system-ui, sans-serif",
+        "text-input": "Inter, SF Pro Display, system-ui, sans-serif"
+      },
+      "inheritedParts": {
+        "Back": "Tahoma, sans-serif",
+        "Section": "Tahoma, sans-serif",
+        "Eyebrow": "Tahoma, sans-serif",
+        "Subtitle": "Tahoma, sans-serif",
+        "Body": "Tahoma, sans-serif",
+        "Dialog description": "Tahoma, sans-serif",
+        "Toolbar": "Tahoma, sans-serif",
+        "Column": "Tahoma, sans-serif",
+        "Filter": "Tahoma, sans-serif",
+        "Primary cell": "Tahoma, sans-serif",
+        "Summary\n      Limit\n      Page": "Tahoma, sans-serif",
+        "Summary": "Tahoma, sans-serif",
+        "Limit": "Tahoma, sans-serif",
+        "Page": "Tahoma, sans-serif",
+        "Character count": "Tahoma, sans-serif"
+      },
+      "aliases": {
+        "body": "Inter, SF Pro Display, system-ui, sans-serif",
+        "label": "Inter, SF Pro Display, system-ui, sans-serif",
+        "caption": "Inter, SF Pro Display, system-ui, sans-serif",
+        "heading": "Inter, SF Pro Display, system-ui, sans-serif",
+        "code": "IBM Plex Mono, SFMono-Regular, monospace"
+      }
+    },
+    {
+      "engine": "webkit",
+      "style": "default",
+      "case": "shared-root",
+      "components": {
+        "page-header": "Verdana, sans-serif",
+        "sidebar-nav": "Verdana, sans-serif",
+        "dialog": "Verdana, sans-serif",
+        "data-table": "Verdana, sans-serif",
+        "button": "Verdana, sans-serif",
+        "text-input": "Verdana, sans-serif"
+      },
+      "inheritedParts": {
+        "Back": "Verdana, sans-serif",
+        "Section": "Verdana, sans-serif",
+        "Eyebrow": "Verdana, sans-serif",
+        "Subtitle": "Verdana, sans-serif",
+        "Body": "Verdana, sans-serif",
+        "Dialog description": "Verdana, sans-serif",
+        "Toolbar": "Verdana, sans-serif",
+        "Column": "Verdana, sans-serif",
+        "Filter": "Verdana, sans-serif",
+        "Primary cell": "Verdana, sans-serif",
+        "Summary\n      Limit\n      Page": "Verdana, sans-serif",
+        "Summary": "Verdana, sans-serif",
+        "Limit": "Verdana, sans-serif",
+        "Page": "Verdana, sans-serif",
+        "Character count": "Verdana, sans-serif"
+      },
+      "aliases": {
+        "body": "Verdana, sans-serif",
+        "label": "Verdana, sans-serif",
+        "caption": "Verdana, sans-serif",
+        "heading": "Verdana, sans-serif",
+        "code": "Menlo, monospace"
+      }
+    },
+    {
+      "engine": "webkit",
+      "style": "default",
+      "case": "shared-inner",
+      "components": {
+        "page-header": "Verdana, sans-serif",
+        "sidebar-nav": "Verdana, sans-serif",
+        "dialog": "Verdana, sans-serif",
+        "data-table": "Verdana, sans-serif",
+        "button": "Verdana, sans-serif",
+        "text-input": "Verdana, sans-serif"
+      },
+      "inheritedParts": {
+        "Back": "Verdana, sans-serif",
+        "Section": "Verdana, sans-serif",
+        "Eyebrow": "Verdana, sans-serif",
+        "Subtitle": "Verdana, sans-serif",
+        "Body": "Verdana, sans-serif",
+        "Dialog description": "Verdana, sans-serif",
+        "Toolbar": "Verdana, sans-serif",
+        "Column": "Verdana, sans-serif",
+        "Filter": "Verdana, sans-serif",
+        "Primary cell": "Verdana, sans-serif",
+        "Summary\n      Limit\n      Page": "Verdana, sans-serif",
+        "Summary": "Verdana, sans-serif",
+        "Limit": "Verdana, sans-serif",
+        "Page": "Verdana, sans-serif",
+        "Character count": "Verdana, sans-serif"
+      },
+      "aliases": {
+        "body": "Verdana, sans-serif",
+        "label": "Verdana, sans-serif",
+        "caption": "Verdana, sans-serif",
+        "heading": "Verdana, sans-serif",
+        "code": "Menlo, monospace"
+      }
+    },
+    {
+      "engine": "webkit",
+      "style": "default",
+      "case": "legacy-inner",
+      "components": {
+        "page-header": "Palatino, serif",
+        "sidebar-nav": "Georgia, serif",
+        "dialog": "Palatino, serif",
+        "data-table": "Tahoma, sans-serif",
+        "button": "Georgia, serif",
+        "text-input": "Cambria, serif"
+      },
+      "inheritedParts": {
+        "Back": "Tahoma, sans-serif",
+        "Section": "Tahoma, sans-serif",
+        "Eyebrow": "Tahoma, sans-serif",
+        "Subtitle": "Tahoma, sans-serif",
+        "Body": "Tahoma, sans-serif",
+        "Dialog description": "Tahoma, sans-serif",
+        "Toolbar": "Tahoma, sans-serif",
+        "Column": "Tahoma, sans-serif",
+        "Filter": "Tahoma, sans-serif",
+        "Primary cell": "Tahoma, sans-serif",
+        "Summary\n      Limit\n      Page": "Tahoma, sans-serif",
+        "Summary": "Tahoma, sans-serif",
+        "Limit": "Tahoma, sans-serif",
+        "Page": "Tahoma, sans-serif",
+        "Character count": "Tahoma, sans-serif"
+      },
+      "aliases": {
+        "body": "Cambria, serif",
+        "label": "Georgia, serif",
+        "caption": "Arial, sans-serif",
+        "heading": "Palatino, serif",
+        "code": "Courier New, monospace"
+      }
+    },
+    {
+      "engine": "webkit",
+      "style": "default",
+      "case": "legacy-root",
+      "components": {
+        "page-header": "Palatino, serif",
+        "sidebar-nav": "Georgia, serif",
+        "dialog": "Palatino, serif",
+        "data-table": "Tahoma, sans-serif",
+        "button": "Georgia, serif",
+        "text-input": "Cambria, serif"
+      },
+      "inheritedParts": {
+        "Back": "Tahoma, sans-serif",
+        "Section": "Tahoma, sans-serif",
+        "Eyebrow": "Tahoma, sans-serif",
+        "Subtitle": "Tahoma, sans-serif",
+        "Body": "Tahoma, sans-serif",
+        "Dialog description": "Tahoma, sans-serif",
+        "Toolbar": "Tahoma, sans-serif",
+        "Column": "Tahoma, sans-serif",
+        "Filter": "Tahoma, sans-serif",
+        "Primary cell": "Tahoma, sans-serif",
+        "Summary\n      Limit\n      Page": "Tahoma, sans-serif",
+        "Summary": "Tahoma, sans-serif",
+        "Limit": "Tahoma, sans-serif",
+        "Page": "Tahoma, sans-serif",
+        "Character count": "Tahoma, sans-serif"
+      },
+      "aliases": {
+        "body": "Cambria, serif",
+        "label": "Georgia, serif",
+        "caption": "Arial, sans-serif",
+        "heading": "Palatino, serif",
+        "code": "Courier New, monospace"
+      }
+    },
+    {
+      "engine": "webkit",
+      "style": "default",
+      "case": "shared-inner-style-boundary",
+      "components": {
+        "page-header": "Verdana, sans-serif",
+        "sidebar-nav": "Verdana, sans-serif",
+        "dialog": "Verdana, sans-serif",
+        "data-table": "Verdana, sans-serif",
+        "button": "Verdana, sans-serif",
+        "text-input": "Verdana, sans-serif"
+      },
+      "inheritedParts": {
+        "Back": "Verdana, sans-serif",
+        "Section": "Verdana, sans-serif",
+        "Eyebrow": "Verdana, sans-serif",
+        "Subtitle": "Verdana, sans-serif",
+        "Body": "Verdana, sans-serif",
+        "Dialog description": "Verdana, sans-serif",
+        "Toolbar": "Verdana, sans-serif",
+        "Column": "Verdana, sans-serif",
+        "Filter": "Verdana, sans-serif",
+        "Primary cell": "Verdana, sans-serif",
+        "Summary\n      Limit\n      Page": "Verdana, sans-serif",
+        "Summary": "Verdana, sans-serif",
+        "Limit": "Verdana, sans-serif",
+        "Page": "Verdana, sans-serif",
+        "Character count": "Verdana, sans-serif"
+      },
+      "aliases": {
+        "body": "Verdana, sans-serif",
+        "label": "Verdana, sans-serif",
+        "caption": "Verdana, sans-serif",
+        "heading": "Verdana, sans-serif",
+        "code": "Menlo, monospace"
+      }
+    },
+    {
+      "engine": "webkit",
+      "style": "quiet",
+      "case": "style-default",
+      "components": {
+        "page-header": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "sidebar-nav": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "dialog": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "data-table": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "button": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "text-input": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+      },
+      "inheritedParts": {
+        "Back": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "Section": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "Eyebrow": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "Subtitle": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "Body": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "Dialog description": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "Toolbar": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "Column": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "Filter": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "Primary cell": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "Summary\n      Limit\n      Page": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "Summary": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "Limit": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "Page": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "Character count": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+      },
+      "aliases": {
+        "body": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "label": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "caption": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "heading": "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        "code": "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+      }
+    },
+    {
+      "engine": "webkit",
+      "style": "quiet",
+      "case": "shared-root",
+      "components": {
+        "page-header": "Verdana, sans-serif",
+        "sidebar-nav": "Verdana, sans-serif",
+        "dialog": "Verdana, sans-serif",
+        "data-table": "Verdana, sans-serif",
+        "button": "Verdana, sans-serif",
+        "text-input": "Verdana, sans-serif"
+      },
+      "inheritedParts": {
+        "Back": "Verdana, sans-serif",
+        "Section": "Verdana, sans-serif",
+        "Eyebrow": "Verdana, sans-serif",
+        "Subtitle": "Verdana, sans-serif",
+        "Body": "Verdana, sans-serif",
+        "Dialog description": "Verdana, sans-serif",
+        "Toolbar": "Verdana, sans-serif",
+        "Column": "Verdana, sans-serif",
+        "Filter": "Verdana, sans-serif",
+        "Primary cell": "Verdana, sans-serif",
+        "Summary\n      Limit\n      Page": "Verdana, sans-serif",
+        "Summary": "Verdana, sans-serif",
+        "Limit": "Verdana, sans-serif",
+        "Page": "Verdana, sans-serif",
+        "Character count": "Verdana, sans-serif"
+      },
+      "aliases": {
+        "body": "Verdana, sans-serif",
+        "label": "Verdana, sans-serif",
+        "caption": "Verdana, sans-serif",
+        "heading": "Verdana, sans-serif",
+        "code": "Menlo, monospace"
+      }
+    },
+    {
+      "engine": "webkit",
+      "style": "quiet",
+      "case": "shared-inner",
+      "components": {
+        "page-header": "Verdana, sans-serif",
+        "sidebar-nav": "Verdana, sans-serif",
+        "dialog": "Verdana, sans-serif",
+        "data-table": "Verdana, sans-serif",
+        "button": "Verdana, sans-serif",
+        "text-input": "Verdana, sans-serif"
+      },
+      "inheritedParts": {
+        "Back": "Verdana, sans-serif",
+        "Section": "Verdana, sans-serif",
+        "Eyebrow": "Verdana, sans-serif",
+        "Subtitle": "Verdana, sans-serif",
+        "Body": "Verdana, sans-serif",
+        "Dialog description": "Verdana, sans-serif",
+        "Toolbar": "Verdana, sans-serif",
+        "Column": "Verdana, sans-serif",
+        "Filter": "Verdana, sans-serif",
+        "Primary cell": "Verdana, sans-serif",
+        "Summary\n      Limit\n      Page": "Verdana, sans-serif",
+        "Summary": "Verdana, sans-serif",
+        "Limit": "Verdana, sans-serif",
+        "Page": "Verdana, sans-serif",
+        "Character count": "Verdana, sans-serif"
+      },
+      "aliases": {
+        "body": "Verdana, sans-serif",
+        "label": "Verdana, sans-serif",
+        "caption": "Verdana, sans-serif",
+        "heading": "Verdana, sans-serif",
+        "code": "Menlo, monospace"
+      }
+    },
+    {
+      "engine": "webkit",
+      "style": "quiet",
+      "case": "legacy-inner",
+      "components": {
+        "page-header": "Palatino, serif",
+        "sidebar-nav": "Georgia, serif",
+        "dialog": "Palatino, serif",
+        "data-table": "Cambria, serif",
+        "button": "Georgia, serif",
+        "text-input": "Cambria, serif"
+      },
+      "inheritedParts": {
+        "Back": "Georgia, serif",
+        "Section": "Georgia, serif",
+        "Eyebrow": "Arial, sans-serif",
+        "Subtitle": "Cambria, serif",
+        "Body": "Cambria, serif",
+        "Dialog description": "Cambria, serif",
+        "Toolbar": "Georgia, serif",
+        "Column": "Georgia, serif",
+        "Filter": "Cambria, serif",
+        "Primary cell": "Cambria, serif",
+        "Summary\n      Limit\n      Page": "Arial, sans-serif",
+        "Summary": "Arial, sans-serif",
+        "Limit": "Cambria, serif",
+        "Page": "Georgia, serif",
+        "Character count": "Arial, sans-serif"
+      },
+      "aliases": {
+        "body": "Cambria, serif",
+        "label": "Georgia, serif",
+        "caption": "Arial, sans-serif",
+        "heading": "Palatino, serif",
+        "code": "Courier New, monospace"
+      }
+    },
+    {
+      "engine": "webkit",
+      "style": "quiet",
+      "case": "legacy-root",
+      "components": {
+        "page-header": "Palatino, serif",
+        "sidebar-nav": "Georgia, serif",
+        "dialog": "Palatino, serif",
+        "data-table": "Cambria, serif",
+        "button": "Georgia, serif",
+        "text-input": "Cambria, serif"
+      },
+      "inheritedParts": {
+        "Back": "Georgia, serif",
+        "Section": "Georgia, serif",
+        "Eyebrow": "Arial, sans-serif",
+        "Subtitle": "Cambria, serif",
+        "Body": "Cambria, serif",
+        "Dialog description": "Cambria, serif",
+        "Toolbar": "Georgia, serif",
+        "Column": "Georgia, serif",
+        "Filter": "Cambria, serif",
+        "Primary cell": "Cambria, serif",
+        "Summary\n      Limit\n      Page": "Arial, sans-serif",
+        "Summary": "Arial, sans-serif",
+        "Limit": "Cambria, serif",
+        "Page": "Georgia, serif",
+        "Character count": "Arial, sans-serif"
+      },
+      "aliases": {
+        "body": "Cambria, serif",
+        "label": "Georgia, serif",
+        "caption": "Arial, sans-serif",
+        "heading": "Palatino, serif",
+        "code": "Courier New, monospace"
+      }
+    },
+    {
+      "engine": "webkit",
+      "style": "quiet",
+      "case": "shared-inner-style-boundary",
+      "components": {
+        "page-header": "Verdana, sans-serif",
+        "sidebar-nav": "Verdana, sans-serif",
+        "dialog": "Verdana, sans-serif",
+        "data-table": "Verdana, sans-serif",
+        "button": "Verdana, sans-serif",
+        "text-input": "Verdana, sans-serif"
+      },
+      "inheritedParts": {
+        "Back": "Verdana, sans-serif",
+        "Section": "Verdana, sans-serif",
+        "Eyebrow": "Verdana, sans-serif",
+        "Subtitle": "Verdana, sans-serif",
+        "Body": "Verdana, sans-serif",
+        "Dialog description": "Verdana, sans-serif",
+        "Toolbar": "Verdana, sans-serif",
+        "Column": "Verdana, sans-serif",
+        "Filter": "Verdana, sans-serif",
+        "Primary cell": "Verdana, sans-serif",
+        "Summary\n      Limit\n      Page": "Verdana, sans-serif",
+        "Summary": "Verdana, sans-serif",
+        "Limit": "Verdana, sans-serif",
+        "Page": "Verdana, sans-serif",
+        "Character count": "Verdana, sans-serif"
+      },
+      "aliases": {
+        "body": "Verdana, sans-serif",
+        "label": "Verdana, sans-serif",
+        "caption": "Verdana, sans-serif",
+        "heading": "Verdana, sans-serif",
+        "code": "Menlo, monospace"
+      }
+    }
+  ]
+}

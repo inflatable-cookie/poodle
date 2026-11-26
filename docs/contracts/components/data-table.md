@@ -470,6 +470,13 @@ the table:
 
 ### Size Variants (`[data-size]`)
 
+Quiet typography uses untracked, authored-case headers at 13/18, the
+primary row label at 15/20 with weight 600, and row summaries at 13/18.
+Right-aligned cells and pagination numbers use tabular figures. Control
+labels and the limit control follow their size-dependent type roles.
+The following table records the component treatment and the geometry
+shared by both treatments.
+
 Size scales cell typography, horizontal cell padding, the selection column
 width, the toolbar button typography/padding, and the interactive control
 `min-height`. The `md` base resolves from the default tokens.

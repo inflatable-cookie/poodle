@@ -72,17 +72,21 @@
   }
 
   .poodle-dialog__title {
-    font-family: var(--poodle-typography-heading-family);
-    font-size: 1rem;
-    line-height: 1.2;
+    font-family: var(--poodle-recipe-dialog-title-font-family, var(--poodle-font-sans, var(--poodle-typography-heading-family)));
+    font-size: var(--poodle-recipe-dialog-title-font-size, var(--poodle-style-typography-dialogTitle-size, 1rem));
+    line-height: var(--poodle-recipe-dialog-title-line-height, var(--poodle-style-typography-dialogTitle-lineHeight, 1.2));
+    font-weight: var(--poodle-recipe-dialog-title-font-weight, var(--poodle-style-typography-dialogTitle-weight, bolder));
+    letter-spacing: var(--poodle-recipe-dialog-title-letter-spacing, var(--poodle-style-typography-dialogTitle-letterSpacing, inherit));
   }
 
   .poodle-dialog__header p {
     margin: 0;
     padding-top: 0.375rem;
     color: var(--poodle-recipe-dialog-header-text, var(--poodle-color-text-secondary));
-    font-size: 0.8125rem;
-    line-height: 1.5;
+    font-size: var(--poodle-recipe-dialog-description-font-size, var(--poodle-style-typography-secondary-size, 0.8125rem));
+    line-height: var(--poodle-recipe-dialog-description-line-height, var(--poodle-style-typography-secondary-lineHeight, 1.5));
+    font-family: var(--poodle-recipe-dialog-description-font-family, var(--poodle-font-sans, inherit));
+    font-weight: var(--poodle-recipe-dialog-description-font-weight, var(--poodle-style-typography-secondary-weight, inherit));
   }
 
   .poodle-dialog__body {
@@ -103,35 +107,35 @@
 
   /* Size variants */
   .poodle-dialog[data-size="xs"] .poodle-dialog__header strong {
-    font-size: 0.8125rem;
+    font-size: var(--poodle-recipe-dialog-title-font-size, var(--poodle-style-typography-dialogTitle-size, 0.8125rem));
   }
 
   .poodle-dialog[data-size="xs"] .poodle-dialog__header p {
-    font-size: 0.6875rem;
+    font-size: var(--poodle-recipe-dialog-description-font-size, var(--poodle-style-typography-secondary-size, 0.6875rem));
   }
 
   .poodle-dialog[data-size="sm"] .poodle-dialog__header strong {
-    font-size: 0.875rem;
+    font-size: var(--poodle-recipe-dialog-title-font-size, var(--poodle-style-typography-dialogTitle-size, 0.875rem));
   }
 
   .poodle-dialog[data-size="sm"] .poodle-dialog__header p {
-    font-size: 0.75rem;
+    font-size: var(--poodle-recipe-dialog-description-font-size, var(--poodle-style-typography-secondary-size, 0.75rem));
   }
 
   .poodle-dialog[data-size="lg"] .poodle-dialog__header strong {
-    font-size: 1.0625rem;
+    font-size: var(--poodle-recipe-dialog-title-font-size, var(--poodle-style-typography-dialogTitle-size, 1.0625rem));
   }
 
   .poodle-dialog[data-size="lg"] .poodle-dialog__header p {
-    font-size: 0.875rem;
+    font-size: var(--poodle-recipe-dialog-description-font-size, var(--poodle-style-typography-secondary-size, 0.875rem));
   }
 
   .poodle-dialog[data-size="xl"] .poodle-dialog__header strong {
-    font-size: 1.125rem;
+    font-size: var(--poodle-recipe-dialog-title-font-size, var(--poodle-style-typography-dialogTitle-size, 1.125rem));
   }
 
   .poodle-dialog[data-size="xl"] .poodle-dialog__header p {
-    font-size: 0.9375rem;
+    font-size: var(--poodle-recipe-dialog-description-font-size, var(--poodle-style-typography-secondary-size, 0.9375rem));
   }
 
   /* Density variants */
@@ -146,4 +150,12 @@
   .poodle-dialog[data-density="comfortable"] .poodle-dialog__close--overlay {
     top: 1rem;
     right: 1.25rem;
+  }
+
+  /* Quiet gives formerly inherited text its own role. A nested style
+     starts a new typography scope. */
+  @scope ([data-style="quiet"]) to ([data-style]) {
+    .poodle-dialog__header p {
+      font-family: var(--poodle-recipe-dialog-description-font-family, var(--poodle-font-sans, var(--poodle-typography-body-family)));
+    }
   }

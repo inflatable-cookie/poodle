@@ -1,0 +1,473 @@
+{
+  "component": {},
+  "scale": {
+    "style": {
+      "typography": {
+        "pageTitle": {
+          "size": {
+            "$type": "dimension",
+            "$value": "1.875rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "2.25rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 600
+          },
+          "letterSpacing": {
+            "$type": "dimension",
+            "$value": "-0.025em"
+          }
+        },
+        "dialogTitle": {
+          "size": {
+            "$type": "dimension",
+            "$value": "1.375rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "1.75rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 600
+          },
+          "letterSpacing": {
+            "$type": "dimension",
+            "$value": "-0.02em"
+          }
+        },
+        "sectionTitle": {
+          "size": {
+            "$type": "dimension",
+            "$value": "1.1875rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "1.5rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 600
+          },
+          "letterSpacing": {
+            "$type": "dimension",
+            "$value": "-0.012em"
+          }
+        },
+        "cardTitle": {
+          "size": {
+            "$type": "dimension",
+            "$value": "0.9375rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "1.25rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 600
+          }
+        },
+        "body": {
+          "size": {
+            "$type": "dimension",
+            "$value": "0.9375rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "1.375rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 400
+          }
+        },
+        "secondary": {
+          "size": {
+            "$type": "dimension",
+            "$value": "0.8125rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "1.125rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 400
+          }
+        },
+        "groupLabel": {
+          "size": {
+            "$type": "dimension",
+            "$value": "0.8125rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "1.125rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 600
+          },
+          "letterSpacing": {
+            "$type": "dimension",
+            "$value": "0em"
+          },
+          "textTransform": {
+            "$type": "string",
+            "$value": "none"
+          },
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.secondary}"
+          }
+        },
+        "overline": {
+          "size": {
+            "$type": "dimension",
+            "$value": "0.75rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "1rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 600
+          },
+          "letterSpacing": {
+            "$type": "dimension",
+            "$value": "0.04em"
+          },
+          "textTransform": {
+            "$type": "string",
+            "$value": "uppercase"
+          }
+        },
+        "tableHeader": {
+          "size": {
+            "$type": "dimension",
+            "$value": "0.8125rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "1.125rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 600
+          },
+          "letterSpacing": {
+            "$type": "dimension",
+            "$value": "0em"
+          },
+          "textTransform": {
+            "$type": "string",
+            "$value": "none"
+          },
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.secondary}"
+          }
+        },
+        "tablePrimary": {
+          "size": {
+            "$type": "dimension",
+            "$value": "0.9375rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "1.25rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 600
+          }
+        },
+        "tableSecondary": {
+          "size": {
+            "$type": "dimension",
+            "$value": "0.8125rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "1.125rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 400
+          }
+        },
+        "badge": {
+          "size": {
+            "$type": "dimension",
+            "$value": "0.75rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "1rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 500
+          }
+        },
+        "caption": {
+          "size": {
+            "$type": "dimension",
+            "$value": "0.75rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "1rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 500
+          }
+        },
+        "code": {
+          "size": {
+            "$type": "dimension",
+            "$value": "0.8125rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "1.125rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 400
+          }
+        },
+        "keyCap": {
+          "size": {
+            "$type": "dimension",
+            "$value": "0.75rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "1rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 500
+          }
+        },
+        "metricValue": {
+          "size": {
+            "$type": "dimension",
+            "$value": "1.5rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "1.75rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 600
+          },
+          "letterSpacing": {
+            "$type": "dimension",
+            "$value": "-0.02em"
+          }
+        },
+        "tooltip": {
+          "size": {
+            "$type": "dimension",
+            "$value": "0.8125rem"
+          },
+          "lineHeight": {
+            "$type": "dimension",
+            "$value": "1.125rem"
+          },
+          "weight": {
+            "$type": "fontWeight",
+            "$value": 400
+          }
+        },
+        "controlLabel": {
+          "xs": {
+            "size": {
+              "$type": "dimension",
+              "$value": "0.8125rem"
+            },
+            "lineHeight": {
+              "$type": "dimension",
+              "$value": "1rem"
+            },
+            "weight": {
+              "$type": "fontWeight",
+              "$value": 500
+            },
+            "letterSpacing": {
+              "$type": "dimension",
+              "$value": "0em"
+            }
+          },
+          "sm": {
+            "size": {
+              "$type": "dimension",
+              "$value": "0.875rem"
+            },
+            "lineHeight": {
+              "$type": "dimension",
+              "$value": "1.125rem"
+            },
+            "weight": {
+              "$type": "fontWeight",
+              "$value": 500
+            },
+            "letterSpacing": {
+              "$type": "dimension",
+              "$value": "0em"
+            }
+          },
+          "md": {
+            "size": {
+              "$type": "dimension",
+              "$value": "0.9375rem"
+            },
+            "lineHeight": {
+              "$type": "dimension",
+              "$value": "1.25rem"
+            },
+            "weight": {
+              "$type": "fontWeight",
+              "$value": 500
+            },
+            "letterSpacing": {
+              "$type": "dimension",
+              "$value": "0em"
+            }
+          },
+          "lg": {
+            "size": {
+              "$type": "dimension",
+              "$value": "1rem"
+            },
+            "lineHeight": {
+              "$type": "dimension",
+              "$value": "1.375rem"
+            },
+            "weight": {
+              "$type": "fontWeight",
+              "$value": 500
+            },
+            "letterSpacing": {
+              "$type": "dimension",
+              "$value": "0em"
+            }
+          },
+          "xl": {
+            "size": {
+              "$type": "dimension",
+              "$value": "1.0625rem"
+            },
+            "lineHeight": {
+              "$type": "dimension",
+              "$value": "1.5rem"
+            },
+            "weight": {
+              "$type": "fontWeight",
+              "$value": 500
+            },
+            "letterSpacing": {
+              "$type": "dimension",
+              "$value": "0em"
+            }
+          }
+        },
+        "inputText": {
+          "xs": {
+            "size": {
+              "$type": "dimension",
+              "$value": "0.8125rem"
+            },
+            "lineHeight": {
+              "$type": "dimension",
+              "$value": "1rem"
+            },
+            "weight": {
+              "$type": "fontWeight",
+              "$value": 400
+            }
+          },
+          "sm": {
+            "size": {
+              "$type": "dimension",
+              "$value": "0.875rem"
+            },
+            "lineHeight": {
+              "$type": "dimension",
+              "$value": "1.125rem"
+            },
+            "weight": {
+              "$type": "fontWeight",
+              "$value": 400
+            }
+          },
+          "md": {
+            "size": {
+              "$type": "dimension",
+              "$value": "0.9375rem"
+            },
+            "lineHeight": {
+              "$type": "dimension",
+              "$value": "1.25rem"
+            },
+            "weight": {
+              "$type": "fontWeight",
+              "$value": 400
+            }
+          },
+          "lg": {
+            "size": {
+              "$type": "dimension",
+              "$value": "1rem"
+            },
+            "lineHeight": {
+              "$type": "dimension",
+              "$value": "1.375rem"
+            },
+            "weight": {
+              "$type": "fontWeight",
+              "$value": 400
+            }
+          },
+          "xl": {
+            "size": {
+              "$type": "dimension",
+              "$value": "1.0625rem"
+            },
+            "lineHeight": {
+              "$type": "dimension",
+              "$value": "1.5rem"
+            },
+            "weight": {
+              "$type": "fontWeight",
+              "$value": 400
+            }
+          }
+        },
+        "family": {
+          "sans": {
+            "$type": "fontFamily",
+            "$value": "{primitives.typography.font.systemFamily.sans}"
+          },
+          "mono": {
+            "$type": "fontFamily",
+            "$value": "{primitives.typography.font.systemFamily.mono}"
+          }
+        },
+        "numeric": {
+          "$type": "string",
+          "$value": "tabular-nums"
+        }
+      }
+    }
+  }
+}

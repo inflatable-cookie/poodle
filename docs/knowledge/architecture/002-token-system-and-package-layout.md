@@ -92,6 +92,7 @@ applying direct overrides.
 | `fill` | `outlined`, `filled`, `ghost` | Controls at rest, including hover and press fills where used |
 | `surface` | `border`, `elevation`, `tonal` | Containers |
 | `selection` | `accent-outline`, `accent-tint`, `neutral` | Selected items in Select, Tabs, ToggleGroup, the list and data components (ListCard, Tree, LogList, DataTable, Calendar, RelationPicker, ActionDiscoveryPanel, ModelPicker, HistoryCenter), and choice controls (SegmentedControl, Card, CardRadioGroup, CardToggleGroup, ThemeSelect, AgentQuestion, Rating) |
+| `typography` | `component`, `scale` | Type size, leading, weight, tracking, case, and associated family and neutral text roles |
 
 The default uses `outlined`, `border` and `accent-outline` to reproduce
 the prior paint. `accent-tint` keeps tint and suppresses selection borders.
@@ -115,6 +116,27 @@ Rating's filled glyphs and AgentQuestion's progress dots bind
 that combines `filled`, `tonal`, and `neutral` with a neutral selection
 indicator (`style.selection.indicator` mapped to `color.text.primary`), leaving
 only primary buttons and focus rings using the accent colour.
+
+The `component` typography treatment leaves `style.typography.*` at
+`initial`. Each consumer of a role supplies its own legacy fallback.
+`scale` fills those roles, and `quiet` selects it. Buttons and inputs
+take the `controlLabel` and `inputText` entries for their resolved control
+size (`xs`–`xl`). The stylesheet reads the matching token for its
+`data-size`. The build expands the sized paths like any other treatment
+entry. Density continues to control spacing.
+
+The `scale` treatment supplies system sans and mono stacks. The generated
+CSS gives legacy per-role family tokens zero-specificity defaults at the
+document root and each rendering-style scope. The aliases read
+`--poodle-font-sans` or `--poodle-font-mono`, then the style's family and
+the original stack. A low-priority layer binds those aliases to a shared
+override within the scope. Without a shared input its declarations roll
+back, preserving inherited and explicit per-role values. The cohort reads
+the shared inputs directly ahead of its per-role fallbacks. The inputs are
+unset in the generated CSS. For parts that inherited a face before this
+treatment, the default still inherits and Quiet assigns a per-role family
+inside its scope. Theme writes stay independent of type roles, including
+the group and table-header text roles that reference the theme's neutral ink.
 
 Themes define `color.fill.{rest,hover,active}` for filled controls and
 `color.select.{accent,neutral}` for selected items. Neutral fills use the

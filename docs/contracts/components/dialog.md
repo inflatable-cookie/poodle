@@ -344,6 +344,10 @@ The close button renders an `IconButton` with `icon="x"`, `variant="ghost"`, `si
 
 ### Header title (`.dialog__header strong`)
 
+Quiet typography assigns the built-in title the 22/28 dialog-title role
+and the description the 13/18 secondary role across all five sizes.
+A custom header owns its typography.
+
 | Property | Value |
 |----------|-------|
 | `font-family` | `var(--poodle-typography-heading-family)` |

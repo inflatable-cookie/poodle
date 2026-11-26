@@ -70,6 +70,16 @@
           "$type": "dimension",
           "$value": "1.5rem"
         }
+      },
+      "systemFamily": {
+        "sans": {
+          "$type": "fontFamily",
+          "$value": "system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+        },
+        "mono": {
+          "$type": "fontFamily",
+          "$value": "ui-monospace, \"SFMono-Regular\", Menlo, Consolas, monospace"
+        }
       }
     }
   }

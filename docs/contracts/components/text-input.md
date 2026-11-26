@@ -49,7 +49,7 @@ Updated: 2026-11-25
 | Clear Button | no | search clear action inside editable field trailing edge | icon color, hover state, focus ring |
 | Validation Indicator | no | pending shared spinner or valid/invalid status icon overlaid inside field | status colors, icon size, motion |
 | Suffix | no | non-editable text suffix with separator | text color, border, spacing |
-| Character Count | no | live char count, optionally with max | code typography, status color |
+| Character Count | no | live char count, optionally with max | caption typography in quiet, status color |
 
 ## 3. Props And Inputs
 
@@ -157,6 +157,12 @@ in §6) and have no DOM node to target. Both are web-runtime surface only.
   - `autocapitalize="off"`
   - `spellcheck={false}`
   - `inputmode="text"`
+Quiet typography assigns the input and its affixes the input-text role
+at the resolved size (13/16 through 17/24, weight 400). Slug identifiers
+keep a mono face and follow the same size scale. The character count uses
+the caption role with tabular figures, and validation copy uses secondary.
+The component treatment retains the legacy slug adjustment.
+
 - slug mode uses `var(--poodle-typography-code-family)` for both the editable
   value and any prefix affix so the full slug reads as one code-like unit
 - slug mode sizes editable and affix text through
@@ -552,10 +558,15 @@ Affixes use a single flat `padding-inline: 0.625rem` (no separate margin); horiz
 | Property | Value |
 |----------|-------|
 | `color` | `var(--poodle-color-text-muted)` |
-| `font` | `var(--poodle-typography-code-xs)` (shorthand: family/size/line-height — resolves to `0.6875rem` code) |
+| Typography | Inherited in the component treatment. Quiet uses the caption role at 12/16 with weight 500 and tabular figures. |
 | `pointer-events` | `none` |
 
 In single-line mode the counter sits inline; in multiline mode it is absolutely positioned (`inset-inline-end: 0.5rem`, `inset-block-end: 0.375rem`) over the bottom-right of the textarea.
+
+In either style, the `--poodle-recipe-text-input-char-count-font` shorthand
+overrides the count typography. Apps that already set
+`--poodle-typography-code-xs` can continue to supply that shorthand. Poodle
+leaves it unset.
 
 ### Character Count over limit `.text-input__char-count--over`
 
@@ -650,7 +661,7 @@ The input control reserves inline padding for leading/trailing adornments so tex
 - [ ] built-in validation indicator semantics match (spinner, success icon, danger icon)
 - [ ] focus treatment matches (border, background, box-shadow transitions)
 - [ ] affix separator border uses the same color (`border-default` solid, `border-width-default`)
-- [ ] character count typography matches (`typography-code-xs` shorthand, color `text-muted`)
+- [ ] character count typography matches (legacy shorthand when provided, caption in quiet, color `text-muted`)
 - [ ] character count over-limit color matches (status-danger)
 - [ ] disabled opacity matches (state-opacity-disabled)
 - [ ] all five sizes visually match (height, padding, font-size per size table)

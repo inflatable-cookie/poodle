@@ -89,6 +89,15 @@ Available theme constants are in `poodle_tokens::themes`; density and control
 size constants are in `poodle_tokens::density`. Values are generated from the
 same DTCG source as the web CSS.
 
+### Font families
+
+Register the font bytes with the application's text renderer and use the registered
+family name for the application's sans or mono binding. These categories
+correspond to `--poodle-font-sans` and `--poodle-font-mono` on the web.
+Jetstream currently uses its runtime font
+configuration for these categories. The generated rendering-style data
+does not apply the web typography treatment to native components.
+
 ## Ownership by Layer
 
 | Layer | Owns |

@@ -1,8 +1,8 @@
 # Type scale study
 
 Status: research, 2026-11-25. Adopted by the operator as the type for the
-redesigned look; see the rulings below. Not yet implemented in the
-packages.
+redesigned look. The first six web components use the scale in the quiet
+rendering style. See the [style architecture](../../architecture/002-token-system-and-package-layout.md#modes).
 
 ## What is here
 
