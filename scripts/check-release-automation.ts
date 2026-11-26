@@ -104,6 +104,7 @@ function eventBranchTargets(source: string, event: string): string[] {
 export type NpmPublication = ReturnType<typeof readNpmPublicationAuthority>;
 
 const RELEASE_CERTIFICATE_SELECTOR = "effigy release:web-certificate";
+
 const RELEASE_VERIFY = "scripts/verify-npm-candidate.ts";
 const RELEASE_ARTIFACT_NAME = "poodle-npm-candidate";
 const RELEASE_FORBIDDEN = [
@@ -114,6 +115,20 @@ const RELEASE_FORBIDDEN = [
   { label: "native/GPUI selector", pattern: /\bgpui\b|\bjetstream\b|check:gpui|ci:native/ },
   { label: "macOS runner", pattern: /macos-/ },
 ];
+
+export function releaseCertificateRunBlocks(release: string): { single: string; duplicate: string } {
+  const certificate = RELEASE_CERTIFICATE_SELECTOR;
+  return {
+    single: release.replace(
+      `run: ${certificate}`,
+      `run: |- # certify the candidate\n          # shell comment\n          ${certificate}`,
+    ),
+    duplicate: release.replace(
+      `run: ${certificate}`,
+      `run: |\n          ${certificate}\n          ${certificate}`,
+    ),
+  };
+}
 
 /**
  * The npm lane is a short packaging operation over an already reviewed web
@@ -477,6 +492,13 @@ function checkReleaseAutomation(): void {
     failures.push(failure);
   }
 
+  const certificateBlocks = releaseCertificateRunBlocks(release);
+  const singleBlockFailures = collectReleaseWorkflowFailures(certificateBlocks.single, publication);
+  assert(
+    singleBlockFailures.length === 0,
+    `a single certificate in a run block must pass the checker; got: ${singleBlockFailures.join("; ")}`,
+  );
+
   // ---------------------------------------------------------------------------
   // Planted negatives: each mutation of the retained surfaces must fail the law.
   // ---------------------------------------------------------------------------
@@ -547,6 +569,11 @@ function checkReleaseAutomation(): void {
         "run: effigy release:web-certificate",
         "run: effigy release:web-certificate\n      - run: effigy docs:lint",
       ),
+      expect: /exactly one Effigy certificate entry/,
+    },
+    {
+      name: "repeat the certificate in one run block",
+      source: certificateBlocks.duplicate,
       expect: /exactly one Effigy certificate entry/,
     },
     {
