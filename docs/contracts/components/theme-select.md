@@ -150,7 +150,7 @@ dismissable-layer stack; selection is plain state.
 
 ## 8. Token Usage
 
-Rendering style roles (poodle#186): the trigger reads the control border and fill, and the popover reads the floating surface roles. Tiles read `--poodle-style-control-fill` at rest and `--poodle-style-control-fillHover` on hover.
+Rendering style roles: the trigger reads the control border and fill, and the popover reads the floating surface roles. Tiles read `--poodle-style-control-fill` at rest and `--poodle-style-control-fillHover` on hover.
 
 Chrome (trigger, surface, tile selection) resolves from semantic tokens; swatch
 colors are the theme's literal values (the whole point of a preview). See the
@@ -182,7 +182,7 @@ and `background: var(--poodle-style-selection-itemFill, color-mix(in srgb, var(-
   trigger swatch + label + chevron, and a popover grid of tiles when open. Swatch
   hex parsed via `parse_hex_color`; chrome from tokens. The controller is web-only
   (native apps switch their own `GpuiThemeProvider`); render-only build-verified
-- no ARIA API — accessible-name intent documented only
+- no ARIA API. The accessible-name intent is carried on the node and reaches AccessKit (003); no live platform-tree assertion covers it yet. Documented only.
 
 ## 10a. Jetstream Notes
 

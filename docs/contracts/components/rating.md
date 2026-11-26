@@ -167,7 +167,7 @@ and DOM geometry reads stay adapter-side.
 
 ## 8. Token Usage
 
-Rendering style roles (poodle#186): items read `--poodle-style-control-fill` at rest.
+Rendering style roles: items read `--poodle-style-control-fill` at rest.
 
 ### Root `.rating`
 

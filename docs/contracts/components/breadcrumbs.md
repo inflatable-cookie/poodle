@@ -178,7 +178,7 @@ beyond plain props. Classified in the long-tail sweep.
 
 ## 8. Token Usage -- Exact Values
 
-Rendering style roles (poodle#186): link and button crumbs read `--poodle-style-control-fill` at rest.
+Rendering style roles: link and button crumbs read `--poodle-style-control-fill` at rest.
 
 ### Root `.breadcrumbs`
 

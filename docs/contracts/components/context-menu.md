@@ -377,7 +377,7 @@ leaf-only activation.
 
 ## 12. Known Deltas
 
-History: PR #348 aligned this contract to the previous Svelte behavior, which
+History: an earlier change aligned this contract to the previous Svelte behavior, which
 left focus in place on close. This decision (2026-10-04) reverses
 that behavior; focus restoration is now required across runtimes.
 

@@ -120,4 +120,4 @@ type AnnouncementMode = "none" | "polite" | "assertive";
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Focus jump via href anchor is web-only | GPUI and Jetstream must emulate with imperative focus calls | allowed | document platform-specific focus move |
-| GPUI cannot emit aria-live | GPUI 0.2 has no ARIA surface | allowed | revisit with GPUI accessibility layer |
+| GPUI cannot emit aria-live | live-region behaviour is not among the properties the GPUI backend projects (003) | allowed | revisit when the GPUI backend projects live regions |

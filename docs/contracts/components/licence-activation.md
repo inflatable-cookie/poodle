@@ -352,8 +352,7 @@ Status: **bound** — native implementation lands with the Rust binding work (sp
   beside the spec and emits an account-activation request; tokens never
   enter render state. Offline mode composes the generic FileUpload browse
   seam with the host's `fileAccept`; accept/size rules are enforced after
-  selection and rejections are reported honestly (GPUI 0.2.2 has no dialog
-  filter). File contents are base64 without a data-URL prefix and never
+  selection and rejections are reported honestly (on the 0.2.2 pin, the file prompt has no dialog filter). File contents are base64 without a data-URL prefix and never
   render.
 - `machineLabel` is an opt-in seed on the web; on Rust targets the host seeds
   `spec.machine_label` and drives the draft. `None` hides the control; the

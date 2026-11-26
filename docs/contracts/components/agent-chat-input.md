@@ -272,8 +272,9 @@ while busy is also dropped (stop is deliberate, not accidental).
 - the context ring carries its percentage in the accessible name; the ring
   itself is not focusable
 - the composer does not announce submits — transcript feedback is host-owned
-- GPUI-native accessibility mapping: no ARIA API — accessible names map to native
-  exposure where available; documented as an accepted delta
+- GPUI-native accessibility mapping: no ARIA API. The accessible name is carried on
+  the node for the GPUI backend to project through AccessKit; no live platform-tree
+  assertion covers this component yet (003). Documented as an accepted delta
 
 ## 7. Layout
 
@@ -455,7 +456,7 @@ spacing — never the field's vertical padding or the action box.
 - editor auto-grow is approximated from the value's line count clamped between
   `minRows` and `maxRows`, since neither native runtime measures wrapped text at
   spec-resolution time
-- no ARIA API — accessible-name intent documented as an accepted delta
+- no ARIA API. The accessible-name intent is carried on the node and reaches AccessKit (003); no live platform-tree assertion covers it yet. Documented as an accepted delta
 
 ## 11. Parity Checklist
 

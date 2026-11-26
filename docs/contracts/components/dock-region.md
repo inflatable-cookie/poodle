@@ -767,4 +767,4 @@ Left/right edges use the vertical strip's own `border-right` (or `border-left` f
 
 ### Rendering style roles
 
-Rendering style roles (poodle#186): the region frame reads `--poodle-style-surface-fill`. Its quiet emphasis still sets a transparent fill, and drop-zone and divider paint stay literal.
+Rendering style roles: the region frame reads `--poodle-style-surface-fill`. Its quiet emphasis still sets a transparent fill, and drop-zone and divider paint stay literal.

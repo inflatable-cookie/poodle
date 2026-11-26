@@ -166,7 +166,7 @@ In single mode with `allowDeactivation=true`, `onValueChange` may receive
 
 ## 8. Token Usage — Exact Values
 
-Rendering style roles (poodle#186): items read the control border, fill and shadow. Selection keeps its own roles.
+Rendering style roles: items read the control border, fill and shadow. Selection keeps its own roles.
 
 ### Root `.toggle-group`
 

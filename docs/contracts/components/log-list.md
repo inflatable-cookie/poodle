@@ -243,4 +243,4 @@ beyond plain props. Classified in the long-tail sweep.
 
 ### Rendering style roles
 
-Rendering style roles (poodle#186): the frame reads `--poodle-style-surface-border` and `--poodle-style-surface-fill`. The filter button and search input read the control border and fill.
+Rendering style roles: the frame reads `--poodle-style-surface-border` and `--poodle-style-surface-fill`. The filter button and search input read the control border and fill.

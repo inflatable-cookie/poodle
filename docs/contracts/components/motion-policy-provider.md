@@ -166,7 +166,7 @@ loading components and shows the effective value plus scheduled-clock receipt.
 
 ## 14. Approval And Adoption Notes
 
-- contract status: promoted from the operator-approved PR #121 packet
+- contract status: promoted from an operator-approved packet
 - first adopter: five-family motion pilot
 - downstream icon morphing and shimmer decisions consume this policy only after
   the pilot lands

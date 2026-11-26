@@ -150,4 +150,4 @@ unchanged.
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Overlaps with `Callout` visually | RemediationBanner is distinguished by required actions and announce-default | allowed | both exist as complementary shapes |
-| GPUI does not emit aria-live | GPUI 0.2 has no ARIA surface | allowed | revisit with GPUI accessibility layer |
+| GPUI does not emit aria-live | live-region behaviour is not among the properties the GPUI backend projects (003) | allowed | revisit when the GPUI backend projects live regions |

@@ -564,7 +564,7 @@ Status: **bound** — generic single-file selection/read lands with the Rust bin
   the file read, and the accept rule are runtime-owned, never component
   logic. LicenceActivation composes this capability; it contains no
   OS-dialog code itself.
-- GPUI 0.2.2's `PathPromptOptions` has no accept-filter field. The configured
+- On the crates.io GPUI 0.2.2 pin, `PathPromptOptions` has no accept-filter field. The configured
   `accept` rule (and the web default 10 MB size rule) is therefore enforced
   *after* selection and a rejection is reported honestly
   (`poodle_gpui_node_backend::file_capability::finish_file_pick`), never

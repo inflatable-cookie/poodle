@@ -372,8 +372,9 @@ adjust them. Escape or an outside interaction dismisses.
   another model or Tab can continue into the axes
 - the trigger's accessible name always carries model + axis summary, so the
   current configuration is announced without opening the panel
-- GPUI-native accessibility mapping: no ARIA API — accessible names map to native
-  exposure where available; documented as an accepted delta
+- GPUI-native accessibility mapping: no ARIA API. The accessible name is carried on
+  the node for the GPUI backend to project through AccessKit; no live platform-tree
+  assertion covers this component yet (003). Documented as an accepted delta
 
 ## 7. Layout
 
@@ -418,7 +419,7 @@ adjust them. Escape or an outside interaction dismisses.
 
 ## 8. Token Usage
 
-Rendering style roles (poodle#186): the trigger reads the control border and fill, including the outlined variant. Options and axis options read `--poodle-style-control-fill` at rest and `--poodle-style-control-fillHover` on hover, and the popover reads the floating surface roles.
+Rendering style roles: the trigger reads the control border and fill, including the outlined variant. Options and axis options read `--poodle-style-control-fill` at rest and `--poodle-style-control-fillHover` on hover, and the popover reads the floating surface roles.
 
 | Part | Token | Purpose |
 |------|-------|---------|
@@ -483,7 +484,7 @@ Rendering style roles (poodle#186): the trigger reads the control border and fil
   with selection marks, plus one section per applicable axis). The shared native
   limitation applies — the preview does not drive clicks, and anchored
   positioning is platform-owned, so the surface renders inline below the trigger
-- no ARIA API — accessible-name intent documented as an accepted delta
+- no ARIA API. The accessible-name intent is carried on the node and reaches AccessKit (003); no live platform-tree assertion covers it yet. Documented as an accepted delta
 
 ## 10a. Jetstream Notes
 
