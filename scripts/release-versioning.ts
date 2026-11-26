@@ -11,6 +11,7 @@ export const LOCKSTEP_CARGO_MANIFEST_PATHS = [
   "packages/codegen/Cargo.toml",
   "packages/contracts/adapter/Cargo.toml",
   "packages/contracts/components/Cargo.toml",
+  "packages/contracts/conformance/Cargo.toml",
   "packages/contracts/events/Cargo.toml",
   "packages/contracts/headless/Cargo.toml",
   "packages/contracts/ir/Cargo.toml",
@@ -26,6 +27,7 @@ export const LOCKSTEP_CARGO_MANIFEST_PATHS = [
   "packages/jetstream/adapter/Cargo.toml",
   "packages/jetstream/preview/Cargo.toml",
   "packages/render/Cargo.toml",
+  "packages/specimens/Cargo.toml",
 ] as const;
 
 export const LOCKSTEP_CARGO_LOCK_PATHS = [

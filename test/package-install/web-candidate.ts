@@ -340,6 +340,15 @@ async function assertReleaseNotes(
   }
 }
 
+const CHANGELOG_FRAGMENT_PATH = /^changelog\.d\/[^/]+\.md$/;
+
+async function isFragmentDeletion(checkoutRoot: string, commit: string, path: string): Promise<boolean> {
+  if (!CHANGELOG_FRAGMENT_PATH.test(path)) return false;
+  const before = await gitShowFile(checkoutRoot, `${commit}^1`, path);
+  const after = await gitShowFile(checkoutRoot, commit, path);
+  return before !== null && after === null;
+}
+
 /**
  * Exactly one commit changes the derived release-input set; every later change
  * is a declared evidence surface, and the changed evidence binds its
@@ -362,9 +371,13 @@ async function assertFrozenReleaseInputRange(
     .filter(Boolean);
   const frozen: string[] = [];
   const rangePaths = new Set<string>();
+  const fragmentChanges: { commit: string; path: string }[] = [];
   for (const commit of commits) {
     const paths = await commitChangedPaths(checkoutRoot, commit);
-    for (const path of paths) rangePaths.add(path);
+    for (const path of paths) {
+      rangePaths.add(path);
+      if (CHANGELOG_FRAGMENT_PATH.test(path)) fragmentChanges.push({ commit, path });
+    }
     if (paths.some((path) => releaseInputPaths.includes(path))) frozen.push(commit);
   }
   if (frozen.length !== 1) {
@@ -373,6 +386,11 @@ async function assertFrozenReleaseInputRange(
     );
   }
   const frozenCommit = frozen[0];
+  for (const { commit, path } of fragmentChanges) {
+    if (commit !== frozenCommit || !(await isFragmentDeletion(checkoutRoot, commit, path))) {
+      throw new Error(`web candidate only admits fragment deletions in the frozen release-input commit: ${path}`);
+    }
+  }
   let bound = false;
   for (const path of sortedUnique([...rangePaths].filter(isWebCandidateEvidencePath))) {
     const text = await gitShowFile(checkoutRoot, sourceCommit, path);
@@ -422,7 +440,10 @@ export async function deriveWebCandidateBase(
     const paths = await commitChangedPaths(checkoutRoot, current);
     const candidateOwned =
       paths.length > 0 &&
-      paths.every((path) => releaseInputPaths.includes(path) || isWebCandidateEvidencePath(path));
+      (await Promise.all(paths.map(async (path) =>
+        releaseInputPaths.includes(path) || isWebCandidateEvidencePath(path) ||
+        await isFragmentDeletion(checkoutRoot, current, path),
+      ))).every(Boolean);
     if (!candidateOwned) break;
     const parent = (
       await runCapture(["git", "rev-parse", `${current}^1`], checkoutRoot)
@@ -463,7 +484,7 @@ export async function assertWebCandidateScope(
     throw new Error("web candidate found no changed paths");
   }
   const outside = changedPaths.filter(
-    (path) => !releaseInputPaths.includes(path) && !isWebCandidateEvidencePath(path),
+    (path) => !releaseInputPaths.includes(path) && !isWebCandidateEvidencePath(path) && !CHANGELOG_FRAGMENT_PATH.test(path),
   );
   if (outside.length > 0) {
     throw new Error(
