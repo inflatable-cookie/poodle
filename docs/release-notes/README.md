@@ -20,6 +20,11 @@ exists yet.
 
 ## Versions
 
+- [0.4.16](0.4.16.md) — 2026-11-26 — explicit Longhorn update states
+  (`unavailableForTarget`, `malformedArtifact` / `downloadAgain`), experimental
+  opt-in `quiet` rendering style groundwork (default look unchanged), portable
+  active-option/selection policies, tag combobox recipe, installable Svelte
+  skill, and native conformance/specimen groundwork.
 - [0.4.15](0.4.15.md) — 2026-11-05 — viewport-safe cascading menus, native
   preview bounds/motion fixes, and build/capture tooling.
 - [0.4.14](0.4.14.md) — 2026-10-08 — Listbox composite across Svelte, React,

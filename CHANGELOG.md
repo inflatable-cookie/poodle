@@ -7,6 +7,63 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.4.16] - 2026-11-26
+
+Coordinated npm/web and native maintenance release cut for Longhorn's two
+explicit update states. The experimental `quiet` rendering style is opt-in
+only; the default look does not change.
+
+### Added
+
+- **Explicit update states (`UpdateStatus` and `UpdateCenter`).**
+  `UpdateAvailabilityProjection` gains `unavailableForTarget` (with `version`):
+  the channel has a release but no artifact for this system, rendered as
+  information with no action or notice. `UpdateRejectionCode` gains
+  `malformedArtifact`, paired with `lastRejectionDetail` on `UpdateStatus` and
+  `UpdateCenter`: renders as the warning-toned `invalidArtifact` state with the
+  authority's installer detail as its body and a single `downloadAgain` action,
+  emitted as `onDownloadAgain` (label: `downloadAgainLabel`). Both additions are
+  additive across TypeScript core, Svelte, React, `poodle-headless`,
+  `poodle-specs` and `poodle-render`.
+- **Opt-in rendering style groundwork (`data-style="quiet"`).** Added the
+  `data-style` axis and new CSS token entry points
+  (`./tokens/css/poodle-styles.css`, `./tokens/style-default.css`,
+  `./tokens/style-quiet.css`), fill/surface/selection treatments across the
+  component library, neutral and selection colour roles, and type roles with
+  scoped font override order documented in the Svelte developer guide. `quiet`
+  is experimental and opt-in; the default look is unchanged.
+- **Portable behaviour policies and tag combobox recipe.** Exported
+  `moveActiveOption`, `reconcileActiveOption` and `selectionTransition` from
+  `@inflatable-cookie/poodle-core`, named the supported behaviour subset, and
+  shipped a tag combobox recipe.
+- **Shared theme resolver.** Ported the preview theme resolver (`theme-resolver`,
+  `themePresets`, `previewThemeCssProperties`) to `@inflatable-cookie/poodle-core`
+  and `poodle-headless`.
+- **Installable Svelte implementer skill.** Added the installable `poodle`
+  Svelte implementer skill (`skills/poodle`) and its generated component, helper
+  and shared-rule reference, checked by `docs:lint`.
+- **Native conformance kit pilot and shared specimens.** Added internal crates
+  `poodle-conformance` (headless conformance fixtures, receipts and GPUI runner)
+  and `poodle-specimens` (shared backend-neutral specimens).
+
+### Changed
+
+- Point the Svelte quick-start theme comment at the full generated theme set
+  instead of an outdated three-theme list, and include `llms.txt` in
+  `@inflatable-cookie/poodle-core`.
+- Move root, core, Svelte, private React and all private Rust crates (including
+  `poodle-conformance` and `poodle-specimens`) to `0.4.16`. Svelte and React
+  require core `>=0.4.16 <0.5`.
+
+### Removed
+
+- **Iceberg-specific recipe hooks.** Removed
+  `--poodle-recipe-card-theme-iceberg-elevated-shadow` and
+  `--poodle-recipe-metric-tile-theme-iceberg-fill`. No consumer reads either
+  hook.
+- **Legacy Jetstream direct renderer.** Removed the legacy Jetstream direct
+  renderer (native crates have no external consumer).
+
 ## [0.4.15] - 2026-11-05
 
 Coordinated patch release; no new component API.
@@ -912,3 +969,4 @@ supersedes `0.4.3`, which was never published.
 [0.1.0]: docs/release-notes/0.1.0.md
 
 [0.4.15]: docs/release-notes/0.4.15.md
+[0.4.16]: docs/release-notes/0.4.16.md

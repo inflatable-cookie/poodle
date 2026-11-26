@@ -1,6 +1,6 @@
 [package]
 name = "poodle-jetstream"
-version = "0.4.15"
+version = "0.4.16"
 edition = "2021"
 license = "MIT"
 rust-version = "1.95"
@@ -12,10 +12,10 @@ keywords = ["design-system", "renderer", "ui"]
 publish = false
 
 [dependencies]
-poodle-adapter = { version = "0.4.15", path = "../../contracts/adapter" }
-poodle-headless = { version = "0.4.15", path = "../../contracts/headless" }
-poodle-tokens = { version = "0.4.15", path = "../../contracts/tokens" }
-poodle-node = { version = "0.4.15", path = "../../contracts/node" }
+poodle-adapter = { version = "0.4.16", path = "../../contracts/adapter" }
+poodle-headless = { version = "0.4.16", path = "../../contracts/headless" }
+poodle-tokens = { version = "0.4.16", path = "../../contracts/tokens" }
+poodle-node = { version = "0.4.16", path = "../../contracts/node" }
 # Linear colors cross the preview's Jetstream boundary as Vec4.
 glam = "0.29"
 
