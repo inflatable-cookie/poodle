@@ -93,8 +93,8 @@ type UpdateRejectionCode =
 | `channel` | `Channel \| undefined` | `undefined` | The channel the install follows; shown with the installed version when up to date. |
 | `installedVersion` | `string \| undefined` | `undefined` | The running version; shown when up to date. |
 | `deferral` | `UpdateDeferral \| undefined` | `undefined` | A postponed install and its reason. Not a fault — rendered neutrally. |
-| `lastRejection` | `UpdateRejectionCode \| undefined` | `undefined` | The last rejection code. The only fault; rendered in danger styling. `malformedArtifact` replaces the availability line with the invalid-artifact state. |
-| `lastRejectionDetail` | `string \| null \| undefined` | `undefined` | The installer's detail for `lastRejection`, with common credential shapes already redacted by the authority. Shown as the body of the invalid-artifact state. |
+| `lastRejection` | `UpdateRejectionCode \| undefined` | `undefined` | The last rejection code. The only fault; rendered in danger styling, except `malformedArtifact`, which replaces the availability line with the warning-toned invalid-artifact state. |
+| `lastRejectionDetail` | `string \| null \| undefined` | `undefined` | The installer's detail for `lastRejection`, as supplied by the authority. Poodle passes it through unchanged and does not redact it; a host that redacts secrets must redact before passing it in. Shown as the body of the invalid-artifact state. |
 | `aheadOfChannel` | `UpdateAheadOfChannel \| undefined` | `undefined` | The preferred source for the ahead-of-channel message (both versions). |
 | `pending` | `boolean` | `false` | Disables the actions while a command is in flight. |
 | `observe` | `((observer: () => void) => () => void) \| null` | `null` | **Web targets only** — the authority's subscription; the component re-derives on each notification. A native host rerenders with fresh props (see Native Binding). |

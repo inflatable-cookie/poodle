@@ -82,19 +82,18 @@ describe("update rejections (shared vectors)", () => {
   }
 
   test("every rejection code in the vector is one the core knows", () => {
-    const codes = vectors.rejections.map((vector) => vector.code).sort();
-    expect(codes).toEqual(
-      [
-        "staleAuthority",
-        "noOffer",
-        "unavailable",
-        "channelMismatch",
-        "unreachable",
-        "signatureRejected",
-        "notWritable",
-        "malformedArtifact",
-        "installFailed",
-      ].sort(),
-    );
+    const codes: string[] = vectors.rejections.map((vector) => vector.code).sort();
+    const expected: string[] = [
+      "staleAuthority",
+      "noOffer",
+      "unavailable",
+      "channelMismatch",
+      "unreachable",
+      "signatureRejected",
+      "notWritable",
+      "malformedArtifact",
+      "installFailed",
+    ].sort();
+    expect(codes).toEqual(expected);
   });
 });

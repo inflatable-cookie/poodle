@@ -825,7 +825,10 @@ mod tests {
         assert_eq!(view.title, "The downloaded update was invalid");
         assert_eq!(view.body.as_deref(), Some("invalid archive"));
         assert_eq!(view.actions, vec![UpdateStatusAction::DownloadAgain]);
-        assert!(view.notice.is_none(), "the state is the message, not a notice");
+        assert!(
+            view.notice.is_none(),
+            "the state is the message, not a notice"
+        );
     }
 
     #[test]

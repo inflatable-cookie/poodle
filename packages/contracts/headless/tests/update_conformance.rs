@@ -106,7 +106,10 @@ fn views_match_the_shared_vectors() {
         if expect["notice"].is_null() {
             assert!(view.notice.is_none(), "{id}: notice should be absent");
         } else {
-            let notice = view.notice.as_ref().unwrap_or_else(|| panic!("{id}: notice"));
+            let notice = view
+                .notice
+                .as_ref()
+                .unwrap_or_else(|| panic!("{id}: notice"));
             let tone = match expect["notice"]["tone"].as_str().unwrap() {
                 "neutral" => UpdateStatusNoticeTone::Neutral,
                 "danger" => UpdateStatusNoticeTone::Danger,

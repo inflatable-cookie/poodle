@@ -577,7 +577,9 @@ mod tests {
         );
         assert_eq!(node.roles.get("tone").map(String::as_str), Some("warning"));
         let rendered = texts(&node);
-        assert!(rendered.iter().any(|t| t == "The downloaded update was invalid"));
+        assert!(rendered
+            .iter()
+            .any(|t| t == "The downloaded update was invalid"));
         assert!(rendered.iter().any(|t| t == "invalid archive"));
         assert!(!rendered.iter().any(|t| t == "Install and restart"));
 
