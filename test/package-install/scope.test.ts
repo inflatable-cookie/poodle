@@ -1598,6 +1598,7 @@ describe("native Cargo alignment to the existing 0.4.11 web train", () => {
     "packages/codegen/Cargo.toml": "poodle-codegen",
     "packages/contracts/adapter/Cargo.toml": "poodle-adapter",
     "packages/contracts/components/Cargo.toml": "poodle-specs",
+    "packages/contracts/conformance/Cargo.toml": "poodle-conformance",
     "packages/contracts/events/Cargo.toml": "poodle-events",
     "packages/contracts/headless/Cargo.toml": "poodle-headless",
     "packages/contracts/ir/Cargo.toml": "poodle-ir",
@@ -1612,6 +1613,7 @@ describe("native Cargo alignment to the existing 0.4.11 web train", () => {
     "packages/jetstream/adapter/Cargo.toml": "poodle-jetstream",
     "packages/jetstream/preview/Cargo.toml": "poodle-jetstream-preview",
     "packages/render/Cargo.toml": "poodle-render",
+    "packages/specimens/Cargo.toml": "poodle-specimens",
   };
 
   function nativeManifest(path: string, version: string): string {

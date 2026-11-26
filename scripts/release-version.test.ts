@@ -1,5 +1,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
@@ -7,6 +8,8 @@ import {
   LOCKSTEP_CARGO_LOCK_PATHS,
   LOCKSTEP_CARGO_MANIFEST_PATHS,
   LOCKSTEP_JS_MANIFEST_PATHS,
+  cargoPackageIdentity,
+  updateCargoLockText,
 } from "./release-versioning";
 import { bumpLockstepVersion } from "./release-version";
 import { packagesSectionUnchanged, workspaceLockDrift } from "./workspace-lock";
@@ -30,6 +33,8 @@ function crateName(path: string): string {
         ? "poodle-jetstream"
         : "poodle-gpui",
     components: "poodle-specs",
+    conformance: "poodle-conformance",
+    specimens: "poodle-specimens",
     events: "poodle-events",
     headless: "poodle-headless",
     ir: "poodle-ir",
@@ -188,6 +193,23 @@ describe("lockstep release version bump", () => {
       .map((entry) => `${entry.path}/Cargo.toml`)
       .sort();
     expect([...LOCKSTEP_CARGO_MANIFEST_PATHS].sort()).toEqual(manifests);
+  });
+
+  test("covers every versioned Poodle manifest and local crate in tracked GPUI locks", () => {
+    const repo = join(import.meta.dir, "..");
+    const version = JSON.parse(readFileSync(join(repo, "package.json"), "utf8")).version;
+    const tracked = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z", "packages/**/Cargo.toml"], { cwd: repo })
+      .toString().split("\0").filter(Boolean);
+    const identities = tracked.map((path) => ({
+      path,
+      identity: cargoPackageIdentity(readFileSync(join(repo, path), "utf8"), path),
+    }));
+    const versioned = identities.filter(({ identity }) => identity.name.startsWith("poodle-") && identity.version === version);
+    expect(versioned.map(({ path }) => path).sort()).toEqual([...LOCKSTEP_CARGO_MANIFEST_PATHS].sort());
+    const names = new Set(versioned.map(({ identity }) => identity.name));
+    for (const path of LOCKSTEP_CARGO_LOCK_PATHS) {
+      expect(() => updateCargoLockText(readFileSync(join(repo, path), "utf8"), names, version, "0.999.999", path)).not.toThrow();
+    }
   });
 
   test("release:bump restamps codegen outputs and census updates accept evidence arguments", () => {

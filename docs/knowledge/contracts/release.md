@@ -63,7 +63,8 @@ process failure, not a discovery: stop and return to planning.
    workspace lock slice, and the two tracked GPUI `Cargo.lock` files. It then
    runs `ir:build` and `catalogue:build` to restamp generated outputs with the
    new `poodle-codegen` version. It refuses a non-increasing version and does
-   not refresh third-party lock resolutions. Add the `CHANGELOG.md` entry and one
+   not refresh third-party lock resolutions. Fold the `changelog.d/*.md` fragments
+   into `CHANGELOG.md` and delete them in the freeze commit. Add one
    `docs/release-notes/<version>.md`, and list it in
    `docs/release-notes/README.md`. Nothing else may change except generated
    stamps and evidence that release policy admits. In a second

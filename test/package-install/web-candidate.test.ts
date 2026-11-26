@@ -190,6 +190,7 @@ const CARGO_CRATE_NAMES: Record<string, string> = {
   "packages/codegen/Cargo.toml": "poodle-codegen",
   "packages/contracts/adapter/Cargo.toml": "poodle-adapter",
   "packages/contracts/components/Cargo.toml": "poodle-specs",
+  "packages/contracts/conformance/Cargo.toml": "poodle-conformance",
   "packages/contracts/events/Cargo.toml": "poodle-events",
   "packages/contracts/headless/Cargo.toml": "poodle-headless",
   "packages/contracts/ir/Cargo.toml": "poodle-ir",
@@ -204,6 +205,7 @@ const CARGO_CRATE_NAMES: Record<string, string> = {
   "packages/jetstream/adapter/Cargo.toml": "poodle-jetstream",
   "packages/jetstream/preview/Cargo.toml": "poodle-jetstream-preview",
   "packages/render/Cargo.toml": "poodle-render",
+  "packages/specimens/Cargo.toml": "poodle-specimens",
 };
 
 function cargoManifests(version: string): Record<string, string> {
@@ -263,6 +265,7 @@ function baseFiles(): Record<string, string> {
     ...jsManifests("0.4.0"),
     "bun.lock": bunLock("0.4.0"),
     "CHANGELOG.md": changelog(null),
+    "changelog.d/existing.md": "Existing fragment\n",
     "docs/release-notes/README.md": "# Release notes\n",
     ...cargoManifests("0.4.0"),
     ...cargoLocks("0.4.0"),
@@ -283,9 +286,9 @@ function frozenFiles(target: string): Record<string, string> {
 
 async function plantCandidate(
   target: string,
-  options: { frozenExtra?: Record<string, string>; evidenceExtra?: Record<string, string> } = {},
+  options: { frozenExtra?: Record<string, string>; evidenceExtra?: Record<string, string>; deleteFragment?: boolean } = {},
 ): Promise<{ root: string; base: string; frozen: string; head: string }> {
-  const extras = options.frozenExtra !== undefined || options.evidenceExtra !== undefined;
+  const extras = options.frozenExtra !== undefined || options.evidenceExtra !== undefined || options.deleteFragment === true;
   if (!extras) {
     const cached = plantTemplates.get(target);
     if (cached) return clonePlant(cached);
@@ -295,6 +298,7 @@ async function plantCandidate(
   await writeFiles(root, baseFiles());
   const base = await commitAll(root, "candidate base");
   await writeFiles(root, { ...frozenFiles(target), ...(options.frozenExtra ?? {}) });
+  if (options.deleteFragment) rmSync(join(root, "changelog.d/existing.md"));
   const frozen = await commitAll(root, `frozen ${target} release inputs`);
   await writeFiles(root, {
     "docs/evidence/nucleus/planted.json": `${JSON.stringify({ source_commit: frozen })}\n`,
@@ -324,6 +328,29 @@ describe("web candidate versions", () => {
 });
 
 describe("web candidate admission", () => {
+  test("admits folded fragment deletion and walks back over the freeze commit", async () => {
+    const { root, base, head } = await plantCandidate("0.4.1", { deleteFragment: true });
+    expect((await assertWebCandidateScope(root, base, head)).changedPaths).toContain("changelog.d/existing.md");
+    await runGit(root, ["branch", "-f", "integration", head]);
+    expect(await deriveWebCandidateBase(root, head, "integration")).toBe(base);
+  });
+
+  test.each([
+    ["addition", "changelog.d/new.md"],
+    ["edit", "changelog.d/existing.md"],
+  ])("rejects fragment %s in the freeze commit", async (_change, path) => {
+    const { root, base, head } = await plantCandidate("0.4.1", { frozenExtra: { [path]: "Changed fragment\n" } });
+    await expect(assertWebCandidateScope(root, base, head)).rejects.toThrow(/only admits fragment deletions/);
+  });
+
+  test("rejects fragment deletion after the freeze commit", async () => {
+    const { root, base, head: previous } = await plantCandidate("0.4.1");
+    rmSync(join(root, "changelog.d/existing.md"));
+    const head = await commitAll(root, "late fragment deletion");
+    expect(head).not.toBe(previous);
+    await expect(assertWebCandidateScope(root, base, head)).rejects.toThrow(/only admits fragment deletions/);
+  });
+
   test("ordinary installed-package CI routes a planted 0.4.1 candidate through generic admission", async () => {
     const { root, base, head } = await plantCandidate("0.4.1");
     const proof = await assertWebPreviewScope(root, base, head, "ordinary");
