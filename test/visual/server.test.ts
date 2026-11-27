@@ -2,10 +2,12 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { createServer } from "node:http";
 
 import { listeningPidsOnPort } from "../../scripts/port-listeners";
-import { SERVERS } from "./config";
+import { REPO_ROOT, SERVERS, previewPortsForRoot } from "./config";
 import {
   assertPreviewPortFree,
   formatPreviewSpawnFailure,
+  isPathInsideRoot,
+  preparePreviewPort,
   previewPortOccupant,
   waitForOwnedPreview,
   waitForSpawnedPreview,
@@ -52,6 +54,69 @@ function listen404(port: number): Promise<{ port: number; close: () => Promise<v
   });
 }
 
+function listen200(port: number): Promise<{ port: number; close: () => Promise<void> }> {
+  const server = createServer((_req, res) => {
+    res.statusCode = 200;
+    res.end("ok");
+  });
+  return new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(port, "127.0.0.1", () => {
+      const address = server.address();
+      if (!address || typeof address === "string") {
+        server.close();
+        reject(new Error("failed to listen"));
+        return;
+      }
+      resolve({
+        port: address.port,
+        close: () =>
+          new Promise((done, fail) => {
+            server.close((error) => (error ? fail(error) : done()));
+          }),
+      });
+    });
+  });
+}
+
+async function spawnForeignHttpServer(): Promise<{
+  port: number;
+  pid: number;
+  close: () => Promise<void>;
+}> {
+  const proc = Bun.spawn(
+    [
+      "bun",
+      "-e",
+      'const s = Bun.serve({ hostname: "127.0.0.1", port: 0, fetch: () => new Response("foreign") }); console.log(s.port); await new Promise(() => {});',
+    ],
+    { cwd: "/tmp", stdout: "pipe", stderr: "pipe" },
+  );
+  const reader = (proc.stdout as ReadableStream<Uint8Array>).getReader();
+  const decoder = new TextDecoder();
+  let text = "";
+  while (!text.includes("\n")) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (value) text += decoder.decode(value, { stream: true });
+  }
+  reader.releaseLock();
+  const port = Number.parseInt(text.trim(), 10);
+  if (!Number.isInteger(port) || port <= 0) {
+    proc.kill();
+    await proc.exited;
+    throw new Error(`failed to read foreign server port: ${JSON.stringify(text)}`);
+  }
+  return {
+    port,
+    pid: proc.pid,
+    close: async () => {
+      proc.kill();
+      await proc.exited;
+    },
+  };
+}
+
 describe("visual preview port occupancy", () => {
   test("a null lsof status retries then fails closed with the port", () => {
     const port = 59997;
@@ -83,10 +148,53 @@ describe("visual preview port occupancy", () => {
     expect(pids).toEqual([]);
   });
 
-  test("the gate still uses the baseline ports", () => {
-    expect(SERVERS.svelte.port).toBe(4174);
-    expect(SERVERS.react.port).toBe(4180);
+  test("assigns deterministic per-worktree ports outside restricted ranges", () => {
+    const a = previewPortsForRoot("/tmp/worktree-alpha");
+    const b = previewPortsForRoot("/tmp/worktree-beta");
+    expect(a).toEqual(previewPortsForRoot("/tmp/worktree-alpha"));
+    expect(a).not.toEqual(b);
+    for (const ports of [a, b, { svelte: SERVERS.svelte.port, react: SERVERS.react.port }]) {
+      expect(ports.svelte).toBeGreaterThanOrEqual(20_000);
+      expect(ports.svelte).toBeLessThan(30_000);
+      expect(ports.react).toBe(ports.svelte + 1);
+    }
   });
+
+  test("isPathInsideRoot only accepts paths inside the checkout", () => {
+    expect(isPathInsideRoot(REPO_ROOT, REPO_ROOT)).toBe(true);
+    expect(isPathInsideRoot(`${REPO_ROOT}/packages/svelte/preview`, REPO_ROOT)).toBe(true);
+    expect(isPathInsideRoot(`${REPO_ROOT}-sibling/packages/svelte/preview`, REPO_ROOT)).toBe(false);
+    expect(isPathInsideRoot("/tmp", REPO_ROOT)).toBe(false);
+  });
+
+  test("a planted foreign preview on the port is refused and names the owner", async () => {
+    const foreign = await spawnForeignHttpServer();
+    planted.push(foreign);
+    let thrown: Error | undefined;
+    try {
+      await preparePreviewPort(foreign.port);
+    } catch (error) {
+      thrown = error instanceof Error ? error : new Error(String(error));
+    }
+    expect(thrown, "foreign preview must not be reused").toBeTruthy();
+    expect(thrown!.message).toContain(`port ${foreign.port}`);
+    expect(thrown!.message).toContain(`pid ${foreign.pid}`);
+    expect(thrown!.message).toContain("/tmp");
+    expect(thrown!.message).toContain("foreign preview");
+    expect(thrown!.message).toContain(REPO_ROOT);
+  }, OCCUPANCY_TEST_TIMEOUT_MS);
+
+  test("an owned preview inside this checkout is reused", async () => {
+    const ownedServer = await listen200(0);
+    planted.push(ownedServer);
+    const result = await preparePreviewPort(ownedServer.port);
+    expect(result.action).toBe("reuse");
+    if (result.action === "reuse") {
+      expect(result.occupant.pid).toBe(process.pid);
+      expect(result.occupant.cwd).toBeTruthy();
+      expect(isPathInsideRoot(result.occupant.cwd!, REPO_ROOT)).toBe(true);
+    }
+  }, OCCUPANCY_TEST_TIMEOUT_MS);
 
   test("a squatted port fails at once and names the port and process", async () => {
     const squatter = await listen404(0);

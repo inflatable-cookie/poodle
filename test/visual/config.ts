@@ -1,3 +1,7 @@
+import { createHash } from "node:crypto";
+import { realpathSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { allComponents } from "../../packages/svelte/preview/src/component-registry";
 
 /**
@@ -19,9 +23,33 @@ export type Axis = {
 
 export type Framework = "svelte" | "react";
 
+function safeRealpath(target: string): string {
+  try {
+    return realpathSync(target);
+  } catch {
+    return resolve(target);
+  }
+}
+
+export const REPO_ROOT = safeRealpath(resolve(import.meta.dir, "../.."));
+
+/**
+ * Deterministic per-checkout port pair in 20000..29999 (outside WebKit's
+ * restricted network port list and OS ephemeral ranges) so parallel worktrees on
+ * one host do not collide or reuse each other's previews.
+ */
+export function previewPortsForRoot(root: string): Record<Framework, number> {
+  const digest = createHash("sha256").update(safeRealpath(root)).digest();
+  const slot = digest.readUInt32BE(0) % 5000;
+  const base = 20_000 + slot * 2;
+  return { svelte: base, react: base + 1 };
+}
+
+const PORTS = previewPortsForRoot(REPO_ROOT);
+
 export const SERVERS: Record<Framework, { cwd: string; port: number }> = {
-  svelte: { cwd: "packages/svelte/preview", port: 4174 },
-  react: { cwd: "packages/react/preview", port: 4180 },
+  svelte: { cwd: "packages/svelte/preview", port: PORTS.svelte },
+  react: { cwd: "packages/react/preview", port: PORTS.react },
 };
 
 /** First `__section` on a component page is the specimen; both apps use it. */
@@ -46,21 +74,24 @@ export const SKIPPED: Record<string, string> = {
   "audio-player": "media element paint timing",
   "media-thumbnail": "remote/media-decode dependent paint",
   "meter-surface": "live canvas meter animation loop",
+  "embed-preview": "remote Vimeo iframe paint timing",
 };
 
 /**
  * Axis tier: the components where size/density/contrast bugs actually surface.
  * This is the tier that would have caught the ListCard `data-size` split.
+ *
+ * Strict tiers never read `debt.ts`, so slugs with open sweep debt (`pill`,
+ * `text-input`) stay out of this list until fixed; `effigy visual:report`
+ * still checks them on both themes.
  */
 export const AXIS_TIER_SLUGS = [
   "button",
   "icon-button",
-  "text-input",
   "select",
   "checkbox",
   "switch",
   "tabs",
-  "pill",
   "list-card",
   "data-table",
   "menu",

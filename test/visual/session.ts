@@ -22,10 +22,12 @@ import { ensureUp } from "./server";
  *    awaiting it forever.
  *
  * Previews themselves are always booted through `startPreviews()` in
- * `./server`: it binds the fixed ports with `--strictPort` and fails fast on a
- * squatter instead of trusting the "ready" banner. A harness that reaches for
- * `bun run --cwd packages/<app>/preview dev` directly takes whatever port is
- * free, and a stale server can shadow it.
+ * `./server`: it assigns deterministic per-worktree ports, binds them with
+ * `--strictPort`, checks that any existing listener's working directory belongs
+ * to this checkout before reusing it, and fails fast naming the owner on any
+ * foreign preview or squatter instead of trusting the "ready" banner. A
+ * harness that reaches for `bun run --cwd packages/<app>/preview dev` directly
+ * takes whatever port is free, and a stale server can shadow it.
  *
  * Recovery stays with the caller. Only the caller knows which failures are
  * infrastructure (dead preview, degraded page) and which are evidence (a

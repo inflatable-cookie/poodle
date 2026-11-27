@@ -25,12 +25,19 @@ import { PageDeadlineError, captureSession } from "./session";
 
 const OUT_DIR = "test/visual/out";
 
-type Failure = {
+export type Failure = {
   slug: string;
   axis: string;
   kind: "capture" | "size" | "pixels";
   detail: string;
   diffRatio?: number;
+};
+
+export type StaleDebt = {
+  slug: string;
+  axis: string;
+  kind: VisualDebtEntry["kind"];
+  reason: string;
 };
 
 function arg(name: string, fallback?: string): string | undefined {
@@ -43,10 +50,91 @@ function maxDiffRatio(slug: string): number {
 }
 
 /** The inventory entry that records this failing pair, if any. */
-function debtFor(slug: string, axis: string, kind: Failure["kind"]): VisualDebtEntry | undefined {
-  return DEBT.find(
+export function debtFor(
+  slug: string,
+  axis: string,
+  kind: Failure["kind"],
+  debt: readonly VisualDebtEntry[] = DEBT,
+): VisualDebtEntry | undefined {
+  return debt.find(
     (entry) => entry.slug === slug && entry.kind === kind && entry.axes.includes(axis),
   );
+}
+
+/** Debt entries whose pair ran in this sweep and no longer fails with that kind. */
+export function findStaleDebt(
+  executedPairs: ReadonlySet<string>,
+  failures: readonly Failure[],
+  debt: readonly VisualDebtEntry[] = DEBT,
+  options?: {
+    skipped?: Readonly<Record<string, string>>;
+    knownSlugs?: ReadonlySet<string>;
+  },
+): StaleDebt[] {
+  const stale: StaleDebt[] = [];
+  for (const entry of debt) {
+    if (options?.skipped?.[entry.slug]) {
+      for (const axis of entry.axes) {
+        stale.push({
+          slug: entry.slug,
+          axis,
+          kind: entry.kind,
+          reason: `${entry.reason} (slug is skipped)`,
+        });
+      }
+      continue;
+    }
+    if (options?.knownSlugs && !options.knownSlugs.has(entry.slug)) {
+      for (const axis of entry.axes) {
+        stale.push({
+          slug: entry.slug,
+          axis,
+          kind: entry.kind,
+          reason: `${entry.reason} (slug no longer in sweep)`,
+        });
+      }
+      continue;
+    }
+
+    const executedAxes = entry.axes.filter((axis) =>
+      executedPairs.has(`${entry.slug}::${axis}`),
+    );
+    if (executedAxes.length === 0) continue;
+
+    if (entry.intermittent) {
+      const anyFails = executedAxes.some((axis) =>
+        failures.some(
+          (f) => f.slug === entry.slug && f.axis === axis && f.kind === entry.kind,
+        ),
+      );
+      if (!anyFails) {
+        for (const axis of executedAxes) {
+          stale.push({
+            slug: entry.slug,
+            axis,
+            kind: entry.kind,
+            reason: entry.reason,
+          });
+        }
+      }
+      continue;
+    }
+
+    for (const axis of executedAxes) {
+      const stillFails = failures.some(
+        (f) => f.slug === entry.slug && f.axis === axis && f.kind === entry.kind,
+      );
+      if (!stillFails) {
+        stale.push({
+          slug: entry.slug,
+          axis,
+          kind: entry.kind,
+          reason: entry.reason,
+        });
+      }
+    }
+  }
+  return stale;
 }
 
 async function diffPair(
@@ -96,6 +184,7 @@ async function main(): Promise<void> {
   const servers = await startPreviews();
   let browser: Browser | undefined;
   const failures: Failure[] = [];
+  const executedPairs = new Set<string>();
   let compared = 0;
 
   try {
@@ -143,6 +232,7 @@ async function main(): Promise<void> {
 
     for (const axis of plan.axes) {
       for (const slug of slugs) {
+        executedPairs.add(`${slug}::${axis.id}`);
         // Sequential on purpose: capturing both previews at once starves heavy
         // specimens (ListCard, DataTable) on a loaded machine and produces
         // spurious render timeouts.
@@ -200,10 +290,20 @@ async function main(): Promise<void> {
     await servers.stop();
   }
 
+  const debtFailures = failures.filter((f) => debtFor(f.slug, f.axis, f.kind));
+  const regressions = failures.filter((f) => !debtFor(f.slug, f.axis, f.kind));
+  const staleDebt = reportOnly
+    ? findStaleDebt(executedPairs, failures, DEBT, {
+        skipped: SKIPPED,
+        knownSlugs: !onlySlug && tier === "sweep" ? new Set(slugs) : undefined,
+      })
+    : [];
+
   const summary = {
     tier,
     comparisons: compared,
     failures,
+    staleDebt,
     skipped: skipped.map((slug) => ({ slug, reason: SKIPPED[slug] })),
     allowlisted: Object.entries(ALLOWLIST).map(([slug, entry]) => ({
       slug,
@@ -224,9 +324,6 @@ async function main(): Promise<void> {
     }
   }
 
-  const debtFailures = failures.filter((f) => debtFor(f.slug, f.axis, f.kind));
-  const regressions = failures.filter((f) => !debtFor(f.slug, f.axis, f.kind));
-
   if (reportOnly) {
     if (debtFailures.length > 0) {
       console.log(`known visual debt (${debtFailures.length} pairs, see test/visual/debt.ts):`);
@@ -234,11 +331,21 @@ async function main(): Promise<void> {
         console.log(`  = ${f.slug} [${f.axis}] ${f.kind} — ${debtFor(f.slug, f.axis, f.kind)?.reason}`);
       }
     }
+    if (staleDebt.length > 0) {
+      console.error(
+        `stale visual debt (${staleDebt.length} pairs now pass; remove from test/visual/debt.ts):`,
+      );
+      for (const entry of staleDebt) {
+        console.error(`  ✓ ${entry.slug} [${entry.axis}] ${entry.kind} — ${entry.reason}`);
+      }
+    }
     if (regressions.length > 0) {
       console.error(`new regressions (${regressions.length} pairs, not in the debt inventory):`);
       for (const f of regressions) {
         console.error(`  ✗ ${f.slug} [${f.axis}] ${f.kind} — ${f.detail}`);
       }
+    }
+    if (staleDebt.length > 0 || regressions.length > 0) {
       process.exit(1);
     }
     if (debtFailures.length === 0) console.log("no failures");
@@ -248,4 +355,6 @@ async function main(): Promise<void> {
   if (failures.length > 0) process.exit(1);
 }
 
-await main();
+if (import.meta.main) {
+  await main();
+}

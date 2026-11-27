@@ -30,15 +30,19 @@ bun test/visual/run.ts --tier=axis
 bun test/visual/run.ts --slug=list-card,tabs --report
 ```
 
-The run boots both vite previews itself (Svelte 4174, React 4180), reuses
-them if they are already listening, and restarts one that dies mid-run.
+The run boots both vite previews itself on deterministic per-worktree ports
+(`config.ts`), reuses an existing listener only when its working directory is
+inside this checkout (refusing any foreign preview with its owner named), and
+restarts one that dies mid-run.
 Failures write `test/visual/out/<slug>-<axis>-{svelte,react,diff}.png` plus
 `summary.json` (gitignored).
 
 In `--report` mode every failing pair is classified against the committed
 parity-debt inventory (`debt.ts`): a recorded pair reports as known debt;
-any other failing pair is a new regression and fails the process. The strict
-tiers never read the inventory — a gate failure is always a failure.
+any other failing pair is a new regression and fails the process, and any
+recorded debt entry that now passes fails the report as stale debt. The strict
+tiers never read the inventory — a gate failure is always a failure, and slugs
+with open sweep debt stay out of `AXIS_TIER_SLUGS` until fixed.
 
 ## Shared harness
 
@@ -66,8 +70,9 @@ decision: only infrastructure failures (dead preview, degraded page) may be
 retried — a specimen that cannot settle is evidence, not a flake.
 
 Previews are always booted through `startPreviews()` in `server.ts`: it binds
-the configured ports with `--strictPort`, checks the listen table first, and
-fails fast naming a squatter rather than trusting the "ready" banner. Do not
+deterministic per-worktree ports with `--strictPort`, checks the listen table
+and listener working directory before reusing or spawning, and fails fast naming
+any foreign preview or squatter rather than trusting the "ready" banner. Do not
 reach for `bun run --cwd packages/*/preview dev` from a harness: it takes
 whatever port is free and a stale server can shadow it.
 
@@ -100,7 +105,8 @@ Order of suspicion, learned from wave 1:
 
 Components whose paint is inherently non-deterministic are skipped and
 listed in every run summary: Spinner, Skeleton, indeterminate Progress,
-PageLoading, VideoPlayer, AudioPlayer, MediaThumbnail.
+PageLoading, VideoPlayer, AudioPlayer, MediaThumbnail, MeterSurface, and
+EmbedPreview.
 
 ## Overlay containment probe
 
