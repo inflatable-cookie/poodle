@@ -23,8 +23,6 @@ export function ensurePreviewBuilt(): void {
       "sh",
       path.join(repoRoot, "scripts/rust-driver.sh"),
       "build",
-      "--features",
-      "native-preview",
       "--quiet",
     ],
     {

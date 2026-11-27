@@ -12,19 +12,19 @@ name = "poodle-preview"
 path = "src/main.rs"
 required-features = ["native-preview"]
 
-# g16.005 window capture target. `required-features` keeps it out of every
-# ordinary build: `cargo build --bin poodle-preview` never sees it, and no
-# default, CI, qa, or release path builds or runs it. It opens a real macOS
-# window and needs Screen Recording permission, which is why its Effigy
-# selector carries the `-windowed` suffix.
+# g16.005 window capture target. Headless Rust PR checks disable default
+# features, which keeps this macOS AppKit binary out of their Linux builds. It
+# opens a real macOS window and needs Screen Recording permission, which is why
+# its Effigy selector carries the `-windowed` suffix.
 [[bin]]
 name = "poodle-window-capture"
 path = "src/bin/window_capture.rs"
 required-features = ["window-capture"]
 
 [features]
-# Keep the AppKit preview binary out of headless integration builds. Native
-# app tasks opt in explicitly; Linux Rust PR checks compile only headless tests.
+# Keep native preview callers working by enabling the AppKit app by default.
+# Linux Rust PR checks opt out while compiling headless integration targets.
+default = ["native-preview"]
 native-preview = ["dep:objc2", "dep:objc2-foundation", "dep:objc2-app-kit"]
 # Window capture needs the receipt's content hash and the frontmost-application
 # monitor that proves the run took no focus. It does NOT need `test-support`:

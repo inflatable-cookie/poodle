@@ -117,7 +117,7 @@
 # the fallback) and that every advertised Sizes/Densities tab opens its pane
 # through real pointer input. Construction evidence only — no visual,
 # interaction, or cross-runtime parity claim.
-"probe:gpui-specimens" = "sh scripts/rust-driver.sh test --quiet --features native-preview --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview specimen_probe"
+"probe:gpui-specimens" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview specimen_probe"
 # g16.005 window capture smoke — HEADLESS. Builds the `poodle-window-capture`
 # target, runs its own unit tests (the activation-boundary source check, the
 # device-size policy, the frontmost-application rule, publish atomicity), and
@@ -161,8 +161,8 @@
 "react:reports" = "bun run --cwd packages/react/preview reports"
 
 # GPUI native preview (macOS)
-"gpui:build" = "sh scripts/rust-driver.sh build --features native-preview -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
-"gpui:run" = "sh scripts/rust-driver.sh run --features native-preview -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview -- {args}"
+"gpui:build" = "sh scripts/rust-driver.sh build -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
+"gpui:run" = "sh scripts/rust-driver.sh run -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview -- {args}"
 "gpui:test" = "sh scripts/rust-driver.sh test -p poodle-gpui --manifest-path packages/gpui/adapter/Cargo.toml"
 "gpui:preview" = [{ task = "gpui:run" }]
 
@@ -813,10 +813,10 @@
 # its default binary test target is the macOS AppKit application. GPUI's Linux
 # font-kit build uses dlopen to avoid requiring fontconfig pkg-config metadata.
 "check:gpui-render-test-targets" = [
-  { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
-  { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/preview/Cargo.toml --test catalogue", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
-  { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/preview/Cargo.toml --test icon_geometry_headless", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
-  { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/preview/Cargo.toml --test visual_fixture_inventory", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
+  { run = "sh scripts/rust-driver.sh test --no-default-features --no-run --quiet --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
+  { run = "sh scripts/rust-driver.sh test --no-default-features --no-run --quiet --manifest-path packages/gpui/preview/Cargo.toml --test catalogue", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
+  { run = "sh scripts/rust-driver.sh test --no-default-features --no-run --quiet --manifest-path packages/gpui/preview/Cargo.toml --test icon_geometry_headless", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
+  { run = "sh scripts/rust-driver.sh test --no-default-features --no-run --quiet --manifest-path packages/gpui/preview/Cargo.toml --test visual_fixture_inventory", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
   { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/adapter/Cargo.toml", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
   { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/node-backend/Cargo.toml", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
   { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/render/Cargo.toml" },
@@ -962,7 +962,7 @@
 "test:gpui-node-backend" = "sh scripts/rust-driver.sh test --manifest-path packages/gpui/node-backend/Cargo.toml {args}"
 "check:gpui-node-backend" = "sh scripts/rust-driver.sh check --tests --manifest-path packages/gpui/node-backend/Cargo.toml"
 "check:gpui" = [
-  { run = "sh scripts/rust-driver.sh check --features native-preview -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml" },
+  { run = "sh scripts/rust-driver.sh check -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml" },
   { task = "test:gpui-preview" },
   { task = "test:render" },
   { task = "test:gpui-node-backend" },
@@ -975,7 +975,7 @@
 # keeping every bin unit test on one selector instead of a filter list that
 # new modules would silently escape. Runtime recorded 2026-09-30 (warm
 # checkout): 8s wall, 1.6s of test time.
-"test:gpui-preview" = "sh scripts/rust-driver.sh test --quiet --features native-preview --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview"
+"test:gpui-preview" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview"
 "test:jetstream-preview" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin poodle-jetstream-preview"
 # The native presentation cascade (architecture 010, g15.043): component specs
 # keep size/density omission, public renderers take RenderContext rather than
