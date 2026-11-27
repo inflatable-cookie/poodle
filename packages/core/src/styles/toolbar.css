@@ -6,9 +6,9 @@
     align-items: center;
     gap: 0.375rem;
     padding: 0.25rem 0.375rem;
-    border: 0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 78%, transparent));
+    border: 0.0625rem solid var(--poodle-style-surface-border);
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-toolbar-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)));
+    background: var(--poodle-recipe-toolbar-fill, var(--poodle-style-surface-fill));
   }
 
   .poodle-toolbar:focus-visible {

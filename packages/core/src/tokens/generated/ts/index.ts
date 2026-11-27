@@ -514,6 +514,45 @@ export const tokens = {
             "letterSpacing": "initial"
           }
         },
+        "compactControlLabel": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "controlSummary": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "segmentLabel": {
+          "size": "initial",
+          "weight": "initial"
+        },
+        "glyph": {
+          "size": "initial",
+          "lineHeight": "initial"
+        },
         "inputText": {
           "xs": {
             "size": "initial",
@@ -923,6 +962,19 @@ export const tokenPaths = [
   "style.typography.controlLabel.xl.lineHeight",
   "style.typography.controlLabel.xl.weight",
   "style.typography.controlLabel.xl.letterSpacing",
+  "style.typography.compactControlLabel.xs.size",
+  "style.typography.compactControlLabel.sm.size",
+  "style.typography.compactControlLabel.md.size",
+  "style.typography.compactControlLabel.lg.size",
+  "style.typography.compactControlLabel.xl.size",
+  "style.typography.controlSummary.xs.size",
+  "style.typography.controlSummary.sm.size",
+  "style.typography.controlSummary.lg.size",
+  "style.typography.controlSummary.xl.size",
+  "style.typography.segmentLabel.size",
+  "style.typography.segmentLabel.weight",
+  "style.typography.glyph.size",
+  "style.typography.glyph.lineHeight",
   "style.typography.inputText.xs.size",
   "style.typography.inputText.xs.lineHeight",
   "style.typography.inputText.xs.weight",
@@ -1180,6 +1232,19 @@ export const cssVars = {
   "style.typography.controlLabel.xl.lineHeight": "--poodle-style-typography-controlLabel-xl-lineHeight",
   "style.typography.controlLabel.xl.weight": "--poodle-style-typography-controlLabel-xl-weight",
   "style.typography.controlLabel.xl.letterSpacing": "--poodle-style-typography-controlLabel-xl-letterSpacing",
+  "style.typography.compactControlLabel.xs.size": "--poodle-style-typography-compactControlLabel-xs-size",
+  "style.typography.compactControlLabel.sm.size": "--poodle-style-typography-compactControlLabel-sm-size",
+  "style.typography.compactControlLabel.md.size": "--poodle-style-typography-compactControlLabel-md-size",
+  "style.typography.compactControlLabel.lg.size": "--poodle-style-typography-compactControlLabel-lg-size",
+  "style.typography.compactControlLabel.xl.size": "--poodle-style-typography-compactControlLabel-xl-size",
+  "style.typography.controlSummary.xs.size": "--poodle-style-typography-controlSummary-xs-size",
+  "style.typography.controlSummary.sm.size": "--poodle-style-typography-controlSummary-sm-size",
+  "style.typography.controlSummary.lg.size": "--poodle-style-typography-controlSummary-lg-size",
+  "style.typography.controlSummary.xl.size": "--poodle-style-typography-controlSummary-xl-size",
+  "style.typography.segmentLabel.size": "--poodle-style-typography-segmentLabel-size",
+  "style.typography.segmentLabel.weight": "--poodle-style-typography-segmentLabel-weight",
+  "style.typography.glyph.size": "--poodle-style-typography-glyph-size",
+  "style.typography.glyph.lineHeight": "--poodle-style-typography-glyph-lineHeight",
   "style.typography.inputText.xs.size": "--poodle-style-typography-inputText-xs-size",
   "style.typography.inputText.xs.lineHeight": "--poodle-style-typography-inputText-xs-lineHeight",
   "style.typography.inputText.xs.weight": "--poodle-style-typography-inputText-xs-weight",

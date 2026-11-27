@@ -171,10 +171,10 @@ beyond plain props. Classified in the long-tail sweep.
 | `justify-content` | `space-between` |
 | `gap` | `var(--poodle-space-inline-md)` |
 | `padding` | `0.5rem var(--poodle-space-panel-x)` (vertical pad is intentionally a flat `0.5rem`, not `space-panel-y`) |
-| `border` | `0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle))` |
+| `border` | `0.0625rem solid var(--poodle-style-surface-border)` |
 | `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `--poodle-recipe-bulk-fill: var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 93%, var(--poodle-color-text-primary))))` |
-| `box-shadow` | `var(--poodle-style-surface-shadow, 0 1rem 2.5rem color-mix(in srgb, black 36%, transparent), 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 28%, transparent))` |
+| `background` | `var(--poodle-recipe-bulk-fill, var(--poodle-style-surface-floatingFill))` |
+| `box-shadow` | `var(--poodle-recipe-bulk-action-bar-shadow, var(--poodle-style-surface-shadow))` |
 
 ### Summary
 
@@ -228,7 +228,10 @@ Size affects summary font-size only.
 Action IconButtons, the select-all IconButton, and the clear IconButton inherit
 size via their `size`/`sizeRole` props.
 
-| Size | summary font-size |
+The `controlSummary` roles supply the size variants. At `md` the summary
+uses the body size.
+
+| Size | Default summary font-size |
 |------|-------------------|
 | `xs` | `0.75rem` |
 | `sm` | `0.8125rem` |

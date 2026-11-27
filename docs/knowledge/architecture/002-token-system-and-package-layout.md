@@ -106,7 +106,11 @@ Rating's filled glyphs and AgentQuestion's progress dots.
 
 The type scale covers PageHeader, SidebarNav, Dialog, DataTable, Button, and
 TextInput. Buttons and inputs take `controlLabel` and `inputText` for their
-resolved control size (`xs`–`xl`). Density controls spacing.
+resolved control size (`xs`–`xl`). SplitButton uses `compactControlLabel`
+for its smaller labels, and BulkActionBar uses `controlSummary` for its
+summary size variants. The scale also supplies `segmentLabel` for segmented
+controls and `glyph` metrics for text glyphs in action buttons. Density
+controls spacing.
 
 The style supplies system sans and mono for the legacy per-role family tokens.
 The generated CSS gives those aliases zero-specificity defaults at the

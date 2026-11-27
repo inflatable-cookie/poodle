@@ -166,11 +166,11 @@ The default type scale uses the control-label role, which steps through
 13/16, 14/18, 15/20, 16/22, and 17/24 at weight 500. The height,
 padding, and icon boxes continue to use the control's existing geometry.
 
-- Extra-small: `height: 1.5rem`, `min-width: 3.75rem`, `padding: 0 space-control-x`, `font-size: 0.6875rem`
-- Small: `height: 1.75rem`, `min-width: 4.25rem`, `padding: 0 space-control-x`, `font-size: 0.75rem`
-- Default: `height: 2.25rem`, `min-width: 5rem`, `padding: 0 space-control-x`, `font-size: 0.8125rem`
-- Large: `height: 2.75rem`, `min-width: 5.75rem`, `padding: 0 space-control-x`, `font-size: 0.875rem`
-- Extra-large: `height: 3.25rem`, `min-width: 6.5rem`, `padding: 0 space-control-x`, `font-size: 0.9375rem`
+- Extra-small: `height: 1.5rem`, `min-width: 3.75rem`, `padding: 0 space-control-x`
+- Small: `height: 1.75rem`, `min-width: 4.25rem`, `padding: 0 space-control-x`
+- Default: `height: 2.25rem`, `min-width: 5rem`, `padding: 0 space-control-x`
+- Large: `height: 2.75rem`, `min-width: 5.75rem`, `padding: 0 space-control-x`
+- Extra-large: `height: 3.25rem`, `min-width: 6.5rem`, `padding: 0 space-control-x`
 - Icon-only: `min-width: 0`, `padding: 0`, `width` = the per-size square width
 - `fit="content"`: `min-width: 0`, `padding-inline: 0.375rem` (shrink-wraps content)
 - Icon padding adjustment: when a leading or trailing icon is present, the padding on that icon's side is reduced — by a size-specific amount (see Icon padding adjustments table), not a flat `0.125rem`. Applies independently to each side.
@@ -200,27 +200,27 @@ padding, and icon boxes continue to use the control's existing geometry.
 | `box-shadow` | `var(--poodle-button-shadow)` (see CSS Custom Properties table for per-variant values) |
 | `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
-| `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `var(--poodle-typography-label-size)` |
-| `font-weight` | `var(--poodle-typography-label-weight)` |
-| `letter-spacing` | `var(--poodle-typography-label-letterSpacing)` |
-| `line-height` | `1` |
+| `font-family` | `var(--poodle-recipe-button-label-font-family, var(--poodle-font-sans, var(--poodle-typography-label-family)))` |
+| `font-size` | `var(--poodle-recipe-button-label-font-size, var(--poodle-button-label-type-size))` |
+| `font-weight` | `var(--poodle-recipe-button-label-font-weight, var(--poodle-button-label-type-weight))` |
+| `letter-spacing` | `var(--poodle-recipe-button-label-letter-spacing, var(--poodle-button-label-type-letterSpacing))` |
+| `line-height` | `var(--poodle-recipe-button-label-line-height, var(--poodle-button-label-type-lineHeight))` |
 | `text-decoration` | `none` |
 | `transition` | `background, border-color, color, box-shadow, transform` all at `motion-duration-interaction motion-easing-standard` |
 
 ### CSS Custom Properties (variant system)
 
-The secondary variant uses **elevation stacking** via `color-mix` toward `text-primary` (not toward `background-elevated`). This produces a surface that is slightly elevated relative to its container by mixing a small percentage of the text color into the surface color.
+The secondary variant reads the rendering style’s control roles after the recipe hooks.
 
 | Var | Secondary (default) | Primary | Ghost |
 |-----|---------------------|---------|-------|
-| `--poodle-button-fill` | `var(--poodle-recipe-button-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 88%, var(--poodle-color-text-primary))))` | `accent-base` | `transparent` |
-| `--poodle-button-fill-hover` | `var(--poodle-recipe-button-fill-hover, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-surface, ...) 80%, var(--poodle-color-text-primary))))` | `color-mix(in srgb, white 12%, accent-base)` | inherits generic hover formula |
-| `--poodle-button-fill-active` | `var(--poodle-recipe-button-fill-active, var(--poodle-style-control-fillActive, color-mix(in srgb, var(--poodle-surface, ...) 84%, var(--poodle-color-text-primary))))` | `color-mix(in srgb, accent-base 88%, black)` | inherits generic active formula |
-| `--poodle-button-border` | `var(--poodle-recipe-button-border, var(--poodle-style-control-border, var(--poodle-color-border-default)))` | `color-mix(in srgb, accent-base 84%, black)` | `transparent` |
+| `--poodle-button-fill` | `var(--poodle-recipe-button-fill, var(--poodle-style-control-fill))` | `accent-base` | `transparent` |
+| `--poodle-button-fill-hover` | `var(--poodle-recipe-button-fill-hover, var(--poodle-style-control-fillHover))` | `color-mix(in srgb, white 12%, accent-base)` | inherits generic hover formula |
+| `--poodle-button-fill-active` | `var(--poodle-recipe-button-fill-active, var(--poodle-style-control-fillActive))` | `color-mix(in srgb, accent-base 88%, black)` | inherits generic active formula |
+| `--poodle-button-border` | `var(--poodle-recipe-button-border, var(--poodle-style-control-border))` | `color-mix(in srgb, accent-base 84%, black)` | `transparent` |
 | `--poodle-button-border-hover` | `var(--poodle-recipe-button-border-hover, color-mix(in srgb, var(--poodle-button-border) 78%, var(--poodle-color-text-primary)))` | inherits generic hover formula | `transparent` |
 | `--poodle-button-text` | `text-primary` | `text-inverse` | `text-primary` |
-| `--poodle-button-shadow` | `var(--poodle-recipe-button-shadow, var(--poodle-style-control-shadow, inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)))` | `inset 0 0.0625rem 0 color-mix(white 14%, transparent), 0 0.375rem 1.125rem color-mix(black 18%, transparent)` | `none` |
+| `--poodle-button-shadow` | `var(--poodle-recipe-button-shadow, var(--poodle-style-control-shadow))` | `inset 0 0.0625rem 0 color-mix(white 14%, transparent), 0 0.375rem 1.125rem color-mix(black 18%, transparent)` | `none` |
 
 ### Tone: danger
 
@@ -303,11 +303,11 @@ fixed rem values rather than `calc()` from `control-height`.
 
 | Size | height | min-width | padding | font-size |
 |------|--------|-----------|---------|-----------|
-| `xs` | `1.5rem` | `3.75rem` | `0 space-control-x` | `0.6875rem` |
-| `sm` | `1.75rem` | `4.25rem` | `0 space-control-x` | `0.75rem` |
-| `md` | `2.25rem` | `5rem` | `0 space-control-x` | `0.8125rem` |
-| `lg` | `2.75rem` | `5.75rem` | `0 space-control-x` | `0.875rem` |
-| `xl` | `3.25rem` | `6.5rem` | `0 space-control-x` | `0.9375rem` |
+| `xs` | `1.5rem` | `3.75rem` | `0 space-control-x` | `0.8125rem` |
+| `sm` | `1.75rem` | `4.25rem` | `0 space-control-x` | `0.875rem` |
+| `md` | `2.25rem` | `5rem` | `0 space-control-x` | `0.9375rem` |
+| `lg` | `2.75rem` | `5.75rem` | `0 space-control-x` | `1rem` |
+| `xl` | `3.25rem` | `6.5rem` | `0 space-control-x` | `1.0625rem` |
 
 ### Icon padding adjustments
 
@@ -401,8 +401,8 @@ more, lg does not reduce, xl adds slightly).
 | `width` | `var(--poodle-size-icon-md)` |
 | `height` | `var(--poodle-size-icon-md)` |
 | `font-family` | `var(--poodle-typography-code-family)` |
-| `font-size` | `0.875rem` |
-| `line-height` | `1` |
+| `font-size` | `var(--poodle-style-typography-glyph-size)` |
+| `line-height` | `var(--poodle-style-typography-glyph-lineHeight)` |
 
 ### Chevron
 

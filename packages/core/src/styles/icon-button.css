@@ -66,22 +66,14 @@
   }
 
   .poodle-icon-button[data-variant="secondary"] {
-    --poodle-icon-button-fill: var(--poodle-recipe-icon-button-secondary-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
-    --poodle-icon-button-border: var(--poodle-recipe-icon-button-secondary-border, var(--poodle-style-control-border, var(--poodle-color-border-default)));
-    --poodle-icon-button-shadow: var(--poodle-recipe-icon-button-secondary-shadow, var(--poodle-style-control-shadow, inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)));
+    --poodle-icon-button-fill: var(--poodle-recipe-icon-button-secondary-fill, var(--poodle-style-control-fill));
+    --poodle-icon-button-border: var(--poodle-recipe-icon-button-secondary-border, var(--poodle-style-control-border));
+    --poodle-icon-button-shadow: var(--poodle-recipe-icon-button-secondary-shadow, var(--poodle-style-control-shadow));
   }
 
   .poodle-icon-button[data-variant="secondary"]:not([data-pressed="true"]):not([data-tone]) {
-    --poodle-icon-button-fill-hover: var(--poodle-recipe-icon-button-fill-hover, var(--poodle-style-control-fillHover, color-mix(
-      in srgb,
-      var(--poodle-icon-button-fill) 76%,
-      var(--poodle-color-background-elevated)
-    )));
-    --poodle-icon-button-fill-active: var(--poodle-recipe-icon-button-fill-active, var(--poodle-style-control-fillActive, color-mix(
-      in srgb,
-      var(--poodle-icon-button-fill) 64%,
-      var(--poodle-color-background-elevated)
-    )));
+    --poodle-icon-button-fill-hover: var(--poodle-recipe-icon-button-fill-hover, var(--poodle-style-control-fillHover));
+    --poodle-icon-button-fill-active: var(--poodle-recipe-icon-button-fill-active, var(--poodle-style-control-fillActive));
   }
 
   .poodle-icon-button[data-tone="danger"] {
@@ -187,8 +179,8 @@
     width: 45%;
     height: 45%;
     font-family: var(--poodle-typography-code-family);
-    font-size: 0.875rem;
-    line-height: 1;
+    font-size: var(--poodle-style-typography-glyph-size);
+    line-height: var(--poodle-style-typography-glyph-lineHeight);
   }
 
   .poodle-icon-button__glyph svg {
@@ -243,8 +235,8 @@
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel));
     box-shadow: var(--poodle-elevation-overlay);
     color: var(--poodle-color-text-primary);
-    font-size: 0.6875rem;
-    line-height: 1.35;
+    font-size: var(--poodle-typography-caption-size);
+    line-height: var(--poodle-typography-caption-lineHeightRatio);
     white-space: nowrap;
     pointer-events: none;
   }

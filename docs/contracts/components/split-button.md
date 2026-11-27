@@ -167,9 +167,9 @@ shared menu-list machinery. Outside dismissal is guarded by
 
 | Var | Secondary (default) | Primary | Ghost |
 |-----|---------------------|---------|-------|
-| `--poodle-split-fill` | `var(--poodle-color-background-surface)` | `var(--poodle-color-accent-base)` | `color-mix(in srgb, var(--poodle-color-background-surface) 42%, transparent)` |
-| `--poodle-split-fill-hover` | `color-mix(in srgb, var(--poodle-split-fill) 84%, var(--poodle-color-background-elevated))` | same formula | same formula |
-| `--poodle-split-border` | `var(--poodle-color-border-default)` | `color-mix(in srgb, var(--poodle-color-accent-base) 84%, black)` | `color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent)` |
+| `--poodle-split-fill` | `var(--poodle-style-control-fill)` | `var(--poodle-color-accent-base)` | `transparent` |
+| `--poodle-split-fill-hover` | `var(--poodle-style-control-fillHover)` | `color-mix(in srgb, var(--poodle-split-fill) 84%, var(--poodle-color-background-elevated))` | `var(--poodle-style-control-fillHover)` |
+| `--poodle-split-border` | `var(--poodle-style-control-border)` | `color-mix(in srgb, var(--poodle-color-accent-base) 84%, black)` | `var(--poodle-style-control-border)` |
 | `--poodle-split-text` | `var(--poodle-color-text-primary)` | `var(--poodle-color-text-inverse)` | `var(--poodle-color-text-primary)` |
 
 ### Tone: danger
@@ -210,15 +210,15 @@ See the status-tone derivation rule in `../004-shared-control-types.md`.
 | `color` | `var(--poodle-split-text)` |
 | `cursor` | `pointer` |
 | `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `var(--poodle-typography-label-size)` |
+| `font-size` | `var(--poodle-split-button-font-size)` |
 | `font-weight` | `var(--poodle-typography-label-weight)` |
 | `letter-spacing` | `0.01em` |
-| `line-height` | `1` |
+| `line-height` | `var(--poodle-typography-label-lineHeightTight)` |
 | `transition` | `background, border-color` at `motion-duration-interaction motion-easing-standard` |
 
 ### Size adjustments
 
-Per-size values drive `--poodle-split-button-height`, `--poodle-split-button-font-size`, `--poodle-split-button-toggle-width-base`, and `--poodle-split-button-chevron-size`. The base (unscoped) values equal the `md` row.
+Per-size values drive `--poodle-split-button-height`, `--poodle-split-button-font-size`, `--poodle-split-button-toggle-width-base`, and `--poodle-split-button-chevron-size`. The font-size column gives the default values of the per-size `compactControlLabel` roles.
 
 | Size | height | font-size | toggle-width-base | chevron-size |
 |------|--------|-----------|-------------------|--------------|
@@ -311,10 +311,10 @@ Primary-half loading uses the shared [`Spinner`](./spinner.md) primitive with
 | `z-index` | `var(--poodle-overlay-z-menu)` |
 | `min-width` | `12rem` |
 | `padding` | `0.25rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)` |
+| `border` | `0.0625rem solid var(--poodle-style-surface-border)` |
 | `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
-| `box-shadow` | `var(--poodle-elevation-overlay)` |
+| `background` | `var(--poodle-recipe-split-button-menu-fill, var(--poodle-style-surface-floatingFill))` |
+| `box-shadow` | `var(--poodle-recipe-split-button-menu-shadow, var(--poodle-style-surface-shadow))` |
 | `overflow-y` | `auto` |
 | `max-height` | measured from available space inside the nearest scrollable boundary |
 
@@ -340,20 +340,20 @@ Primary-half loading uses the shared [`Spinner`](./spinner.md) primitive with
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-split-button-item-hover-fill, var(--poodle-style-control-fillHover, transparent))` |
+| `background` | `var(--poodle-recipe-split-button-item-hover-fill, var(--poodle-style-control-fillHover))` |
 
 ### Item focus-visible
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-split-button-hover-focus-item-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)))` |
+| `background` | `var(--poodle-recipe-split-button-hover-focus-item-fill, var(--poodle-style-selection-itemFill))` |
 | `outline` | `none` |
 
 ### Item pressed
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-split-button-item-active-fill, var(--poodle-style-control-fillActive, transparent))` |
+| `background` | `var(--poodle-recipe-split-button-item-active-fill, var(--poodle-style-control-fillActive))` |
 
 ### Separator (menu)
 
@@ -406,7 +406,7 @@ Primary-half loading uses the shared [`Spinner`](./spinner.md) primitive with
 - [ ] all five sizes match (height, font-size)
 - [ ] divider appearance matches (22% text opacity, 60% height)
 - [ ] menu panel appearance matches (border, radius, background, shadow)
-- [ ] item hover matches `--poodle-style-control-fillHover`; focus-visible keeps the 16% accent-base fill
+- [ ] item hover matches `--poodle-style-control-fillHover`; focus-visible reads `--poodle-style-selection-itemFill` after the recipe hook
 - [ ] focus ring matches
 - [ ] shared spinner sizing, tone, and alignment match
 

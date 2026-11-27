@@ -3,14 +3,10 @@
    previously-scoped block is safe as global CSS. */
 
   .poodle-split-button {
-    --poodle-split-fill: var(--poodle-style-control-fill, var(--poodle-color-background-surface));
-    --poodle-split-fill-hover: var(--poodle-style-control-fillHover, color-mix(
-      in srgb,
-      var(--poodle-split-fill) 84%,
-      var(--poodle-color-background-elevated)
-    ));
-    --poodle-split-border: var(--poodle-style-control-border, var(--poodle-color-border-default));
-    --poodle-split-shadow: var(--poodle-style-control-shadow, none);
+    --poodle-split-fill: var(--poodle-style-control-fill);
+    --poodle-split-fill-hover: var(--poodle-style-control-fillHover);
+    --poodle-split-border: var(--poodle-style-control-border);
+    --poodle-split-shadow: var(--poodle-style-control-shadow);
     --poodle-split-text: var(--poodle-color-text-primary);
     position: relative;
     display: inline-flex;
@@ -30,7 +26,7 @@
   /* Ghost tones keep the control hover role. The tone rule above is for filled
      variants and would otherwise replace it. */
   .poodle-split-button[data-variant="ghost"][data-tone] {
-    --poodle-split-fill-hover: var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-split-fill) 84%, var(--poodle-color-background-elevated)));
+    --poodle-split-fill-hover: var(--poodle-style-control-fillHover);
   }
 
   .poodle-split-button[data-variant="primary"] {
@@ -42,7 +38,7 @@
 
   .poodle-split-button[data-variant="ghost"] {
     --poodle-split-fill: transparent;
-    --poodle-split-border: var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent));
+    --poodle-split-border: var(--poodle-style-control-border);
   }
 
   .poodle-split-button[data-tone="danger"] {
@@ -143,7 +139,7 @@
     font-size: var(--poodle-split-button-font-size);
     font-weight: var(--poodle-typography-label-weight);
     letter-spacing: 0.01em;
-    line-height: 1;
+    line-height: var(--poodle-typography-label-lineHeightTight);
     transition:
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
@@ -153,7 +149,7 @@
   .poodle-split-button[data-size="sm"] .poodle-split-button__primary,
   .poodle-split-button[data-size="sm"] .poodle-split-button__toggle {
     --poodle-split-button-height: 1.75rem;
-    --poodle-split-button-font-size: 0.75rem;
+    --poodle-split-button-font-size: var(--poodle-style-typography-compactControlLabel-sm-size);
     --poodle-split-button-toggle-width-base: 1.875rem;
     --poodle-split-button-chevron-size: 0.6875rem;
   }
@@ -161,7 +157,7 @@
   .poodle-split-button[data-size="xs"] .poodle-split-button__primary,
   .poodle-split-button[data-size="xs"] .poodle-split-button__toggle {
     --poodle-split-button-height: 1.5rem;
-    --poodle-split-button-font-size: 0.6875rem;
+    --poodle-split-button-font-size: var(--poodle-style-typography-compactControlLabel-xs-size);
     --poodle-split-button-toggle-width-base: 1.75rem;
     --poodle-split-button-chevron-size: 0.625rem;
   }
@@ -169,7 +165,7 @@
   .poodle-split-button[data-size="md"] .poodle-split-button__primary,
   .poodle-split-button[data-size="md"] .poodle-split-button__toggle {
     --poodle-split-button-height: 2.25rem;
-    --poodle-split-button-font-size: 0.8125rem;
+    --poodle-split-button-font-size: var(--poodle-style-typography-compactControlLabel-md-size);
     --poodle-split-button-toggle-width-base: 2rem;
     --poodle-split-button-chevron-size: 0.75rem;
   }
@@ -177,7 +173,7 @@
   .poodle-split-button[data-size="lg"] .poodle-split-button__primary,
   .poodle-split-button[data-size="lg"] .poodle-split-button__toggle {
     --poodle-split-button-height: 2.75rem;
-    --poodle-split-button-font-size: 0.875rem;
+    --poodle-split-button-font-size: var(--poodle-style-typography-compactControlLabel-lg-size);
     --poodle-split-button-toggle-width-base: 2.25rem;
     --poodle-split-button-chevron-size: 0.8125rem;
   }
@@ -185,7 +181,7 @@
   .poodle-split-button[data-size="xl"] .poodle-split-button__primary,
   .poodle-split-button[data-size="xl"] .poodle-split-button__toggle {
     --poodle-split-button-height: 3.25rem;
-    --poodle-split-button-font-size: 0.9375rem;
+    --poodle-split-button-font-size: var(--poodle-style-typography-compactControlLabel-xl-size);
     --poodle-split-button-toggle-width-base: 2.5rem;
     --poodle-split-button-chevron-size: 0.875rem;
   }
@@ -205,7 +201,7 @@
   /* Ghost halves rest transparent, so a press needs its own fill. Filled
      variants keep their existing pressed behaviour. */
   .poodle-split-button[data-variant="ghost"] .poodle-split-button__primary:active:not(:disabled) {
-    background: var(--poodle-recipe-split-button-active-primary-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-split-button-active-primary-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-split-button__primary:focus-visible {
@@ -231,7 +227,7 @@
   }
 
   .poodle-split-button[data-variant="ghost"] .poodle-split-button__toggle:active:not(:disabled) {
-    background: var(--poodle-recipe-split-button-active-toggle-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-split-button-active-toggle-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-split-button__toggle:focus-visible {
@@ -274,10 +270,10 @@
     z-index: var(--poodle-overlay-z-menu);
     min-width: 12rem;
     padding: 0.25rem;
-    border: 0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent));
+    border: 0.0625rem solid var(--poodle-style-surface-border);
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-split-button-menu-fill, var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))));
-    box-shadow: var(--poodle-recipe-split-button-menu-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay)));
+    background: var(--poodle-recipe-split-button-menu-fill, var(--poodle-style-surface-floatingFill));
+    box-shadow: var(--poodle-recipe-split-button-menu-shadow, var(--poodle-style-surface-shadow));
     overflow-y: auto;
   }
 
@@ -300,16 +296,16 @@
   /* Hover reads the control hover role, so an unselected item never takes the
      selection fill. Focus-visible keeps its existing accent focus fill. */
   .poodle-split-button__item:hover:not(:disabled) {
-    background: var(--poodle-recipe-split-button-item-hover-fill, var(--poodle-style-control-fillHover, transparent));
+    background: var(--poodle-recipe-split-button-item-hover-fill, var(--poodle-style-control-fillHover));
   }
 
   .poodle-split-button__item:focus-visible {
-    background: var(--poodle-recipe-split-button-hover-focus-item-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)));
+    background: var(--poodle-recipe-split-button-hover-focus-item-fill, var(--poodle-style-selection-itemFill));
     outline: none;
   }
 
   .poodle-split-button__item:active:not(:disabled) {
-    background: var(--poodle-recipe-split-button-item-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-split-button-item-active-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-split-button__item:disabled {
