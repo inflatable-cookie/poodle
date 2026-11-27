@@ -14,13 +14,11 @@ the Nucleus plan.
    canonical token sources, generated artifacts, and consumer packages
 3. [Component docs and implementation substrates](003-component-docs-ia-and-implementation-substrates.md)
    — documentation authority and implementation evidence
-4. [Treatment system and recipe variables](005-treatment-system-and-recipe-variables.md)
-   — treatment and recipe-variable rules
-5. [Headless core and machine model](006-headless-core-and-machine-model.md)
+4. [Headless core and machine model](006-headless-core-and-machine-model.md)
    — the renderer-neutral behaviour layer
-6. [Appearance recipe contract](007-appearance-recipe-contract.md)
+5. [Appearance recipe contract](007-appearance-recipe-contract.md)
    — appearance recipes for components
-7. [Audio control family](008-audio-control-family.md) — audio-domain machines,
+6. [Audio control family](008-audio-control-family.md) — audio-domain machines,
    renderer-neutral VisualState, value laws, formatting, and meter feeds
 
 ## Additional Decisions
@@ -31,6 +29,7 @@ them.
 
 - [Underlay bridge and adapter ownership](004-underlay-bridge-and-adapter-ownership.md)
   — superseded; current consumer ownership lives in the system shape
+- 005 (retired) — superseded by the appearance recipe contract (007)
 - [Node backend conformance](009-cross-runtime-component-conformance.md)
   — typed fixtures, headless observations and versioned backend receipts
 - [Native presentation construction context](010-native-presentation-construction-context.md)

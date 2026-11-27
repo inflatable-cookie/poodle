@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Default full-selector source commit (individual mounted receipts carry their own execution identity): `7042276456e9951370b4003208a2b1a666c04538`
+Default full-selector source commit (individual mounted receipts carry their own execution identity): `e0befa9c04a84396e6efaee6ff8275ed37857375`
 Denominator: **177** public / **176** portable; `MeterSurface` is the single contract-approved web-only row; no native-deferred rows.
 
 <!-- g18-census-method -->

@@ -55014,7 +55014,11 @@ fn markdown_editor_mode_toolbar_and_edit_rebuild_the_host_spec() {
         let mut node = poodle_render::markdown_editor_with_handlers(
             &MarkdownEditorSpec::new()
                 .with_value(&current.value)
-                .with_mode(&current.mode)
+                .with_mode(match current.mode.as_str() {
+                    "preview" => poodle_specs::MarkdownEditorMode::Preview,
+                    "split" => poodle_specs::MarkdownEditorMode::Split,
+                    _ => poodle_specs::MarkdownEditorMode::Edit,
+                })
                 .with_aria_label("Notes")
                 .with_size(ControlSize::Md)
                 .with_density(ControlDensity::Default),
