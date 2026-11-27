@@ -1,7 +1,6 @@
 //! VideoPlayer — black surface with transport overlay.
 //!
 //! Contract: `docs/contracts/components/video-player.md`
-//! Ported from: `packages/jetstream/components/src/video_player.rs`.
 //!
 //! Fixed white-on-black chrome regardless of theme (contract §8); the seek
 //! bar is a Progress node relying on the widget's default accent fill.

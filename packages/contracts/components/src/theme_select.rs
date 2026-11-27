@@ -167,7 +167,7 @@ impl ThemeSelectSpec {
         option.value == self.value
     }
 
-    // ── Chrome token accessors (shared by GPUI + Jetstream) ───────────────
+    // ── Chrome token accessors (shared token accessors) ───────────────
 
     pub fn field_fill_token(&self) -> &'static str {
         semantic::COLOR_BACKGROUND_SURFACE

@@ -1,7 +1,6 @@
 //! Pill — chip/badge label across tones, appearances, sizes and typographies.
 //!
 //! Contract: `docs/contracts/components/pill.md`
-//! Ported from: `packages/jetstream/components/src/pill.rs`.
 
 use std::sync::Arc;
 

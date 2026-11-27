@@ -126,8 +126,7 @@ resulting seat refresh.
 
 Svelte and React share types, row derivation, copy, CSS, and cases. The web
 reference is incomplete until it adds native composition and full
-active-cohort conformance. Jetstream remains a separate deferred backend
-admission.
+active-cohort conformance.
 
 ## 9. Acceptance Cases
 

@@ -1,7 +1,6 @@
 //! Region — presentational placeholder block.
 //!
 //! Contract: `docs/contracts/components/region.md`
-//! Ported from: `packages/jetstream/components/src/region.rs`.
 //! Decorative, non-interactive: a dashed border with an optional centred,
 //! uppercase label. Per contract §3 it does NOT accept child content.
 

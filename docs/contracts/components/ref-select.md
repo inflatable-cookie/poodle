@@ -255,13 +255,6 @@ hidden), so a keyboard user can type immediately.
 - no live platform-tree assertion (003), and the preview does not drive clicks — the shared render-only
   posture
 
-## 10a. Jetstream Notes
-
-- `RefSelect::from_spec(spec, theme).on_change(...)`, carrying the chosen ref's
-  value.
-- No `on_search_change`: the filter is a text field and this runtime raises no
-  key events.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -293,7 +286,7 @@ hidden), so a keyboard user can type immediately.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| GPUI/Jetstream render from spec state and don't drive typing or clicks | shared render-only posture across all native components | accepted | host wires interaction |
+| GPUI renders from spec state and doesn't drive typing or clicks | shared render-only posture across all native components | accepted | host wires interaction |
 | Native `subdued` renders at its resting strength only | hover/focus are web states | accepted | matches `ModelPicker` |
 | No pagination or infinite scroll | the host owns fetch policy; `loading` is the only affordance Poodle offers | accepted (by design) | revisit if a consumer needs sentinel-based paging |
 

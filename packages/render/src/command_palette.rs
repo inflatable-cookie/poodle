@@ -1,7 +1,6 @@
 //! CommandPalette — a query box over a list of actions.
 //!
 //! Contract: `docs/contracts/components/command-palette.md`
-//! Ported from: `packages/jetstream/components/src/command_palette.rs`.
 //!
 //! Renders the full modal shell — overlay backdrop scrim, centered modal
 //! surface, header (title/description + invocation-hint pill + close

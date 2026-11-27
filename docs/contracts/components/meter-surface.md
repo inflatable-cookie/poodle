@@ -88,11 +88,6 @@ thin: geometry, palette, painter, and bus policy live in `poodle-core`.
 Not applicable. GPUI already batches AudioMeter nodes at its renderer scene;
 `MeterSurface` has no native counterpart by fixed decision (spec 068).
 
-## 10a. Jetstream Notes
-
-Not applicable, as for GPUI. This is an accepted web-only rendering mechanism,
-not missing native behavior.
-
 ## 11. Parity Checklist
 
 - Svelte and React render identical root/viewport/content/canvas anatomy

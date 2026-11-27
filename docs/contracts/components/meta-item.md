@@ -123,7 +123,6 @@ When `typography="inherit"`:
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream label/value typography details | current Jetstream `JsEl` text surface does not yet expose font-family, letter-spacing, or line-height controls | allowed | add richer text styling support, then apply label and value typography literally |
 
 ## 11. Specimen Definitions
 

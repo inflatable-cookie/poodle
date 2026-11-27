@@ -1,7 +1,7 @@
 //! Menubar — top-level triggers with a flow-placed dropdown for the open menu.
 //!
 //! Contract: `docs/contracts/components/menubar.md`
-//! Ported from: `packages/jetstream/components/src/menubar.rs`. The open
+//! The open
 //! overlay renders in flow below the trigger row, matching both old native
 //! tiers' accepted delta from the web's absolute placement.
 

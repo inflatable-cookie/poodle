@@ -1,7 +1,6 @@
 //! DetailSection — titled grouping of detail rows.
 //!
 //! Contract: `docs/contracts/components/detail-section.md`
-//! Ported from: `packages/jetstream/components/src/detail_section.rs`.
 //!
 //! Optional separator rule, header (title + description + actions), body slot,
 //! density-driven spacing, and a multi-column body (flex-wrap approximation of

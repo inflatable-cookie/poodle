@@ -1,7 +1,6 @@
 //! EmbedPreview — embed display with loading/error/empty/placeholder states.
 //!
 //! Contract: `docs/contracts/components/embed-preview.md`
-//! Ported from: `packages/jetstream/components/src/embed_preview.rs`.
 //!
 //! Composes the real `skeleton` (block) loading primitive and `text_link`
 //! fallback. Live iframes are a host gap; the parsed-media state renders a

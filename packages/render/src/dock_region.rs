@@ -1,7 +1,6 @@
 //! DockRegion — a dockable panel with tabs.
 //!
 //! Contract: `docs/contracts/components/dock-region.md`
-//! Ported from: `packages/jetstream/components/src/dock_region.rs`.
 //!
 //! Panel movement runs on the shared drag substrate: each tab registers a
 //! `poodle.dock-panel` source whose subject id carries the panel, the edge, and

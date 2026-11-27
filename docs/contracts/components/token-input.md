@@ -184,15 +184,6 @@ listener is local focus routing.
 | `background` | `var(--poodle-token-input-fill-focus)` |
 | `box-shadow` | `var(--poodle-token-input-shadow-focus)` |
 
-## 8a. Jetstream Notes
-
-- `TokenInput::from_spec(spec, theme).on_remove(...)`, carrying the token's
-  **text**. A host removing by index would delete the wrong token whenever two
-  removals arrive between renders.
-- A disabled or read-only field draws no remove control at all.
-- Entry is typing, which the runtime does not raise, so removal is the only
-  wired route.
-
 ## 9. Usage Notes
 
 - use `TokenInput` for light multi-string entry only

@@ -291,17 +291,6 @@ A consumer wanting a hairline divider sets `--poodle-resize-handle-thickness:
   (`docs/contracts/003-native-accessibility.md`). The declaration is still the
   component's job; the GPUI platform-tree proof owns the mapping.
 
-## 10a. Jetstream Notes
-
-- `ResizeHandle::from_spec(spec, theme).on_resize(...)`, driven by a real drag:
-  `Start` with `0.0`, `Move` with each frame's axis delta in pixels, `End` with
-  `0.0`.
-- A delta, not a position: the handle cannot know the panes' sizes, so an
-  absolute position would be a guess. The host applies the delta to the ratio it
-  already holds.
-- Drags do not bubble in this runtime, so the grab overlay and the line each
-  carry the handler — the same lesson the sliders taught.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

@@ -1,6 +1,6 @@
 //! Eyebrow — small uppercase section label.
 //!
-//! Ported from: `packages/jetstream/components/src/eyebrow.rs`. Uppercasing
+//! Uppercasing
 //! happens here (no CSS transform channel), matching both old tiers.
 
 use poodle_node::{FontFamily, Node, NodeRole};

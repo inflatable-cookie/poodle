@@ -1,7 +1,6 @@
 //! Toolbar — a grouping chrome for compact action controls.
 //!
 //! Contract: `docs/contracts/components/toolbar.md`
-//! Ported from: `packages/jetstream/components/src/toolbar.rs`.
 
 use std::sync::{Arc, Mutex};
 

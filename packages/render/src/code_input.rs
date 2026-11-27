@@ -1,7 +1,6 @@
 //! CodeInput — segmented code entry with visual digit slots.
 //!
 //! Contract: `docs/contracts/components/code-input.md`
-//! Ported from: `packages/jetstream/components/src/code_input.rs`.
 //!
 //! Runtime gaps (noted): the real/hidden input, paste, autofill, one-time-code
 //! autocomplete, slot-click caret placement and the text caret are host/engine

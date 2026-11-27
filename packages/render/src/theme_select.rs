@@ -1,7 +1,6 @@
 //! ThemeSelect — a grid of theme swatches behind a trigger.
 //!
 //! Contract: `docs/contracts/components/theme-select.md`
-//! Ported from: `packages/jetstream/components/src/theme_select.rs`.
 //!
 //! Swatch hexes land in sRGB and linearise at the adapter edge — the same
 //! endpoint as the reference tier's explicit `to_linear` conversion.
@@ -205,7 +204,7 @@ pub fn theme_select_with_handlers(
 
     let mut trigger = trigger;
     // Contract §6: the trigger is a dialog opener named "{ariaLabel}: {label}".
-    // Without an instance id the legacy trigger id stays (Jetstream routes on it).
+    // Without an instance id the legacy trigger id stays.
     if !instance_id.is_empty() {
         configure_picker_trigger(
             &mut trigger,
@@ -266,9 +265,7 @@ pub fn theme_select_with_handlers(
                 // Contract §6: focus moves to the selected tile, else the first.
                 tile.a11y.initial_focus = true;
             }
-            // Stable per-option id. Backends that dispatch by id (Jetstream
-            // routes on `token_key`) need it to reach the tile at all, and
-            // GPUI needs identity that survives a rebuild between a click's
+            // Stable per-option id. GPUI needs identity that survives a rebuild between a click's
             // press and release.
             tile.id = Some(format!("theme-select-tile-{}", option.value));
             if !instance_id.is_empty() {

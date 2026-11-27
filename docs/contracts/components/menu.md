@@ -367,16 +367,6 @@ Rendering style roles: the menu surface reads the floating surface roles. Items 
 - The two-column grid layout for label + shortcut can be modeled as a fixed
   layout with right-aligned shortcut text
 
-## 10a. Jetstream Notes
-
-- `Menu::from_spec(spec, theme).on_action(...)`, carrying the activated item's
-  value. Separators and disabled items never fire.
-- Checkbox and radio items report through the same event as action items. A host
-  that had to wire them separately would silently drop them.
-- No `on_open_change`: this renders the panel only — the trigger is the
-  consumer's — so nothing here knows the menu opened. Whether activating an item
-  closes the menu is host policy.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

@@ -1,7 +1,6 @@
 //! CardRadioGroup — single-select card group.
 //!
 //! Contract: `docs/contracts/components/card-radio-group.md`
-//! Ported from: `packages/jetstream/components/src/card_radio_group.rs`.
 //!
 //! Each option composes the `card` primitive (interactive, selected when
 //! chosen) so the selected fill/border/focus ring come from Card's own

@@ -275,7 +275,6 @@ When `typography="inherit"`:
 |-------|-------------|-----------------|-----------|
 | pending animation details may differ | motion internals are runtime-specific | allowed | keep semantic labeling strict |
 | CSS custom property pattern is Svelte-specific | GPUI uses direct color values | allowed | ensure same final colors |
-| Jetstream dot glow and label metrics | current Jetstream `JsEl` surface does not yet expose box-shadow, line-height, or full text styling parity | allowed | add shadow and richer text metrics support, then apply glow and label metrics literally |
 
 ## 13. Specimen Definitions
 

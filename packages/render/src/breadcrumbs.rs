@@ -1,7 +1,6 @@
 //! Breadcrumbs — the trail back up: crumbs separated by dim chevrons.
 //!
 //! Contract: `docs/contracts/components/breadcrumbs.md`
-//! Ported from: `packages/jetstream/components/src/breadcrumbs_comp.rs`.
 
 use std::sync::Arc;
 

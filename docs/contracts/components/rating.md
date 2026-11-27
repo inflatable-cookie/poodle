@@ -327,22 +327,8 @@ Rendering style roles: items rest transparent and read `--poodle-style-control-f
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream has no half-star precision by click | a click reports the star it lands on; sub-star precision needs pointer position within the glyph | accepted, tracked | — |
 | glyph style may differ | shape rendering is implementation-specific | allowed | keep ordinal meaning strict |
 | `color-mix` implementation | GPUI may pre-compute blended colors | allowed | ensure visual equivalence across themes |
-
-## 12a. Jetstream Notes
-
-- Jetstream remains program-deferred. In-repo call sites receive only the
-  mechanical compile migration onto the shared `RatingSpec` /
-  `Option<f64>` surface.
-- `Rating::from_spec(spec, theme, instance_id)` is the GPUI construction
-  surface. The deferred Jetstream preview adapter follows the same rule: both
-  require an explicit host-owned instance id.
-- Jetstream's legacy half-star click delta is not authority to weaken GPUI
-  behavior.
-- Disabled ratings ignore interaction. There is no public read-only Rating
-  prop in the active cohort.
 
 ## 13. Specimen Definitions
 

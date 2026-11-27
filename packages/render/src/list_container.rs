@@ -1,7 +1,6 @@
 //! ListContainer — a page-level paginated list shell.
 //!
 //! Contract: `docs/contracts/components/list-container.md`
-//! Ported from: `packages/jetstream/components/src/list_container.rs`.
 //!
 //! Composes the real `page_header`, `callout`, `empty_state`, `pagination`,
 //! and `pagination_summary` rather than hand-rolling header/state/pager

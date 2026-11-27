@@ -1,7 +1,6 @@
 //! NavigationMenu — a horizontal menu bar with an optional viewport panel.
 //!
 //! Contract: `docs/contracts/components/navigation-menu.md`
-//! Ported from: `packages/jetstream/components/src/navigation_menu.rs`.
 
 use std::sync::Arc;
 

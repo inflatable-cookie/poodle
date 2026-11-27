@@ -5,7 +5,7 @@ Status: active
 Contracts are the docs-first source of truth for Poodle components.
 
 Each component contract describes one semantic surface that Svelte, React,
-GPUI, and Jetstream implementations can satisfy against the same review
+and GPUI implementations can satisfy against the same review
 checklist.
 
 ## Structure
@@ -38,8 +38,7 @@ contract references the rule rather than restating it:
 - [working rules](../knowledge/contracts/working-rules.md) — authority, validation and parity rules
 - `002-anchored-overlays.md` — every anchored surface portals to the theme root
   and is positioned in viewport coordinates
-- `003-native-accessibility.md` — both native runtimes project roles, names
-  and states into AccessKit: Jetstream live, GPUI with a bounded live proof
+- `003-native-accessibility.md` — GPUI projects roles, names and states into AccessKit, with a bounded live proof
 - `004-shared-control-types.md` — types shared by more than one component
   contract are defined once and referenced, never restated with fewer members
 

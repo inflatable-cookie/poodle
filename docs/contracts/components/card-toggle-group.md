@@ -241,12 +241,6 @@ padding.
 |-------|-----------------|---------------|-------|-----------------|-----------|
 | narrow container narrower than the group width floor | Width is `min(100%, max(floor, track width))`, so it never overflows its container | The floor wins and the group overflows the container | GPUI 0.2.2 `Length` allows only auto or a definite px/rem/parent-percent value; Taffy 0.9 resolves `base.min(max).max(min)`; `Element::request_layout` has no parent-constraint hook | accepted by planner ruling (2026-10-06, stop condition) | upstream GPUI/Taffy parent-capped clamp |
 
-## 7a. Jetstream Notes
-
-- `CardToggleGroup::from_spec(spec, theme).on_change(...)`.
-- Multi-select, so the event names the option pressed rather than the resulting
-  set: the host owns the set and decides whether a press adds or removes.
-
 ## 8. Use With CardRadioGroup
 
 Use `CardRadioGroup` when the user must make one radio-style choice.

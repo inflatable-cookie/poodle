@@ -1,7 +1,6 @@
 //! CollapseToggle — the chevron that collapses a region.
 //!
 //! Contract: `docs/contracts/components/collapse-toggle.md`
-//! Ported from: `packages/jetstream/components/src/collapse_toggle.rs`.
 
 use std::sync::Arc;
 

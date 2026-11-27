@@ -1,7 +1,6 @@
 //! Checkbox — boolean toggle with indicator and label.
 //!
 //! Contract: `docs/contracts/components/checkbox.md`
-//! Ported from: `packages/jetstream/components/src/checkbox.rs`.
 
 use std::sync::Arc;
 

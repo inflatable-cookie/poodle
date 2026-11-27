@@ -49,7 +49,7 @@ function walk(dir: string): string[] {
 const BASELINE: Record<string, string[]> = {
   // Empty, and staying that way. The original 34 shrank to nothing in three
   // moves: 23 were phantom (handlers wired in sibling module files the gate
-  // did not read), seven wired mirroring their Jetstream siblings, the
+  // did not read), seven wired, the
   // split_view divider drag landed on gpui's drag events, the text trio
   // rode TextInput's existing key editing (command_palette forwards it,
   // editable_label grew the same caret-at-end handling), and pagination's
@@ -66,7 +66,7 @@ const fixed: string[] = [];
  * uses them wherever the render lives — `calendar/` reads all three of its
  * handlers in `render.rs`. Counting reads only in the declaring file reported
  * them dead when they were wired all along, and the baseline preserved that
- * false accusation for weeks. Same blind spot the Jetstream gate had; same fix.
+ * false accusation for weeks.
  */
 function moduleSource(file: string): string {
   if (!file.endsWith("/mod.rs")) return readFileSync(file, "utf8");

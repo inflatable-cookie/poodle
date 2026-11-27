@@ -392,23 +392,10 @@ block's own height.
 - GPUI remains unwindowed for now. That affects materialization cost, not the
   detached-scroll state machine or the rendered order.
 - Markdown renders from `poodle-markdown` blocks, not from HTML.
-- `AgentTranscript::from_spec(spec, theme)` forwards the same four events as
-  Jetstream — `.on_tool_run_toggle(...)`, `.on_tool_call_toggle(...)`,
+- `AgentTranscript::from_spec(spec, theme)` forwards four events:
+  `.on_tool_run_toggle(...)`, `.on_tool_call_toggle(...)`,
   `.on_changed_files_toggle(...)`, `.on_file_select(...)` — into whichever
   block raises them. A host attaches at the transcript, not the blocks.
-
-## 10a. Jetstream Notes
-
-- `AgentTranscript::from_spec(spec, theme)` then `.on_tool_run_toggle(...)`,
-  `.on_tool_call_toggle(...)`, `.on_changed_files_toggle(...)`,
-  `.on_file_select(...)`.
-- The transcript forwards handlers into the block that raises each event rather
-  than re-deriving which block was clicked. It is the only level that sees every
-  block, and the host holds all the expansion state, so this is where a host
-  attaches.
-- `onScrollStateChange` and `onOpenDiff` are web-only. The first belongs to a
-  scroll container the component does not own here; the second has no native
-  affordance to fire it.
 
 ## 11. Parity Checklist
 
@@ -444,7 +431,6 @@ block's own height.
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Windowed blocks are absent from the accessibility tree | inherent to virtualization on every platform; `virtualized={false}` is the documented escape | accepted | revisit if a platform gains a virtualized-a11y API |
-| Jetstream renders unwindowed | `jetstream-ui` materializes every child of a scroll container; windowing needs engine support | accepted, tracked | engine work scoped separately |
 | GPUI renders unwindowed | the current node backend materializes every child; the tracked viewport still owns real scrolling and anchoring | accepted, tracked | add native windowing only when measured transcript cost requires it |
 | Natives do not stream | neither native re-renders per token during spec resolution; unrelated to interaction, which GPUI does support | accepted | host drives re-render |
 

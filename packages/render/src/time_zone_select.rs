@@ -1,7 +1,6 @@
 //! TimeZoneSelect — a searchable list of zones.
 //!
 //! Contract: `docs/contracts/components/time-zone-select.md`
-//! Ported from: `packages/jetstream/components/src/time_zone_select.rs`.
 //!
 //! Thin wrapper over `select`: the timezone options map into a `SelectSpec`
 //! (via `spec.to_select_spec()`), so the trigger, search input, option list,

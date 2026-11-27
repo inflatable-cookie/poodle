@@ -110,11 +110,6 @@ Native construction requires `FaderHandlers::new(instance_id)` with a
 lifetime-stable instance scope for root, entry, and capture identity. The
 shared renderer receives VisualState and serializable geometry.
 
-## 10a. Jetstream Notes
-
-Jetstream uses the same Rust machine/spec/node builder and preserves paired
-gesture begin/end effects for host automation.
-
 ## 11. Parity Checklist
 
 - identical law, detent, fine-drag, reset, entry, and gesture behavior

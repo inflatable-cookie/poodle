@@ -1,7 +1,6 @@
 //! TabStrip — closable/reorderable tab row (horizontal or vertical).
 //!
 //! Contract: `docs/contracts/components/tab-strip.md`
-//! Ported from: `packages/jetstream/components/src/tab_strip.rs`.
 //!
 //! Keyboard nav + selection commit are host-owned; tabs are focusable.
 

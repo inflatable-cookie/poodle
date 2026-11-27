@@ -1,7 +1,6 @@
 //! AgentQuestion — a question the agent needs answered before it continues.
 //!
 //! Contract: `docs/contracts/components/agent-question.md`
-//! Ported from: `packages/jetstream/components/src/agent_question.rs`.
 
 use std::sync::Arc;
 

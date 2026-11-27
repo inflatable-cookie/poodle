@@ -442,18 +442,6 @@ A custom header owns its typography.
 - Background inertness must be enforced (not just visual overlay).
 - Width presets must be mapped to equivalent pixel constraints.
 
-## 10a. Jetstream Notes
-
-- `Dialog::from_spec(spec, theme).child(...).actions(...).on_request_close(...)`.
-- The event is `on_request_close`, not `on_open_change`: the component does not
-  own the open state and cannot close itself. It reports that a dismissal route
-  was taken.
-- Clicks bubble to the nearest clickable ancestor, so the panel carries an inert
-  handler of its own. Without it every click *inside* the dialog would reach the
-  backdrop — pressing "Save" would dismiss the dialog it was saving.
-- `dismissOnBackdrop` guards the backdrop route only; the close button always
-  dismisses. Escape on Jetstream is host-event-loop work.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -506,7 +494,6 @@ A custom header owns its typography.
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | The alertdialog role does not itself block backdrop dismissal | `AlertDialog.svelte` passes `dismissOnBackdrop={!working}`, so an alert dialog dismisses like any other and stops only while its confirm is in flight. The native spec briefly carved the role out, which made every native alert dialog undismissable | fixed | none |
-| Escape on Jetstream is host-event-loop work | Jetstream preview event loop handles Escape while GPUI backend owns Escape dismissal via overlay dismiss layers | accepted | align Jetstream when backend overlay layers land |
 | exact transition timing may differ slightly | runtime animation systems differ | allowed | keep modality, focus trap, and dismissal semantics strict |
 | CSS color-mix vs GPUI color blending | different color systems per platform | allowed | same visual result required |
 | backdrop as button vs div with click handler | semantic choice for click handling | allowed | backdrop dismissal behavior must match |

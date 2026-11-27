@@ -21,9 +21,8 @@ Audio controls are reusable Poodle primitives, not Loophole widgets.
 - `packages/contracts/components/` carries renderer-neutral native specs whose
   public fields resolve to those visual states.
 - `packages/render/` consumes native visual states and emits `poodle-node`
-  trees. GPUI and Jetstream remain backend interpreters plus input, lifecycle,
-  hit-testing, and accessibility adapters; neither backend owns audio drawing
-  policy.
+  trees. GPUI interprets nodes and owns input, lifecycle, hit-testing, and
+  accessibility adaptation; it does not own audio drawing policy.
 - No new package is added. The proposed instrument package still has no
   independent runtime boundary until asset skins or host bindings exist.
 
@@ -312,7 +311,7 @@ semantics, not a Loophole mixer component and not a second meter contract.
 - The first painter is Canvas2D. Its input is one preallocated flat draw pass
   and its lifecycle is injectable. WebGL2 is a later admission decision, not
   part of the first delivery card.
-- Native runtimes do not gain `MeterSurface`: GPUI and Jetstream already submit
+- Native runtimes do not gain `MeterSurface`: GPUI already submits
   meter nodes through one renderer scene. Portable AudioMeter meaning remains
   identical; only the web paint mechanism changes.
 
@@ -401,13 +400,10 @@ VisualState; they never infer polarity or range.
 Standard renderers consume semantic tokens through complete
 `--poodle-recipe-<component>-...` hook sets on web and the same semantic token
 meanings through `ThemeProvider` on native. Svelte and React share CSS and web
-machines. GPUI and Jetstream share Rust headless logic, specs, and node
-builders; runtime differences are limited to backend input and accessibility
-capabilities and must be recorded in each component contract.
+machines. GPUI uses Rust headless logic, specs, and node builders. Backend input and
+accessibility capabilities are recorded in each component contract.
 
 Every audio component ships a standalone specimen page in each active preview.
-Jetstream receives the same case-backed page when its backend admission lane
-reopens.
 The page must cover the contract's named states rather than merely prove the
 component can mount. Parity evidence includes web interaction tests, native
 headless/render tests, registry and adapter-manifest drift checks, preview

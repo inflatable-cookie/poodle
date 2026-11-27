@@ -1,7 +1,6 @@
 //! Field — form field wrapper: header, control slot, validation messages.
 //!
 //! Contract: `docs/contracts/components/field.md`
-//! Ported from: `packages/jetstream/components/src/field.rs`.
 
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,

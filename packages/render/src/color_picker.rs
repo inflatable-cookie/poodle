@@ -1,8 +1,6 @@
 //! ColorPicker — swatch trigger + picker surface.
 //!
 //! Contract: `docs/contracts/components/color-picker.md`
-//! Ported from: `packages/jetstream/components/src/color_picker/` (mod +
-//! parts + parts2, merged).
 //!
 //! Anatomy: trigger swatch (the spec's ACTUAL current color) + optional
 //! inline hex input, and — when open — the surface popover containing the 2D
@@ -13,7 +11,7 @@
 //! The gradient/swatch/thumb COLORS are computed from the picker's value via
 //! `crate::color` math — the one legitimate non-token color source (per
 //! contract). Values stay sRGB; backends convert at their edge (the old
-//! Jetstream tier fed raw bytes into its linear pipeline — the established
+//! native renderer fed raw bytes into its linear pipeline — the established
 //! custom-hex divergence, fixed here; the parity suite pins fixed-point hex
 //! values where both agree).
 //!

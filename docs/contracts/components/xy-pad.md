@@ -96,11 +96,6 @@ Reset uses `on_double_activate`. Native construction requires
 the group and both axis sliders. The shared renderer consumes one atomic
 VisualState.
 
-## 10a. Jetstream Notes
-
-Jetstream uses the same Rust transition, spec, and node builder and preserves
-atomic pair effects.
-
 ## 11. Parity Checklist
 
 - same independent laws, atomic pair effects, fine drag, reset, and keys

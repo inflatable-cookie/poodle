@@ -1,7 +1,6 @@
 //! Stepper — the route through a wizard process.
 //!
 //! Contract: `docs/contracts/components/stepper.md`
-//! Ported from: `packages/jetstream/components/src/stepper.rs`.
 //!
 //! Status is read from the step, never from its index — a step that ran and
 //! failed renders as failed wherever it sits. The rerun control sits OUTSIDE
@@ -378,9 +377,6 @@ fn summary_row(
         .unwrap_or_default();
 
     let mut summary = Node::button("");
-    // Jetstream routes clicks by node id rather than by reading `on_activate`,
-    // so the summary carries one — otherwise the toggle is reachable on GPUI
-    // and inert on Jetstream.
     summary.id = Some("poodle-stepper-summary".to_string());
     // The visible `n/m` is decorative — "five slash five" is not a sentence, so
     // the name spells it out. Chevron and rail restate the same facts.

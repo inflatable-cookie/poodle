@@ -1,7 +1,6 @@
 //! ConfirmAction — a trigger that opens a confirm dialog.
 //!
 //! Contract: `docs/contracts/components/confirm-action.md`
-//! Ported from: `packages/jetstream/components/src/confirm_action.rs`.
 //!
 //! Owns only the trigger/tone wiring and delegates every dialog and button
 //! visual to the composed primitives, so it never re-implements (and never

@@ -1,7 +1,6 @@
 //! AgentTranscript — the output surface of an agent conversation.
 //!
 //! Contract: `docs/contracts/components/agent-transcript.md`
-//! Ported from: `packages/jetstream/components/src/agent_transcript.rs`.
 //!
 //! Grouping comes from `poodle-headless`, shared with the web target through
 //! JSON vectors, so a turn summarises identically on both. Rendering is

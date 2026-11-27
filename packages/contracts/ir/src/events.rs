@@ -83,7 +83,7 @@ pub struct EventPayload {
 /// The value kind of an event payload (`CROSS-05`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PayloadKind {
-    /// No payload, e.g. `onClick` and Jetstream `on_click` (`BTN-27`).
+    /// No payload, e.g. `onClick`.
     #[serde(rename = "none")]
     None,
     /// A string, e.g. `onValueChange(string)` (`TXT-13`).

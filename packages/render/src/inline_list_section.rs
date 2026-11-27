@@ -1,7 +1,6 @@
 //! InlineListSection — compact titled list section.
 //!
 //! Contract: `docs/contracts/components/inline-list-section.md`
-//! Ported from: `packages/jetstream/components/src/inline_list_section.rs`.
 //!
 //! Uppercase title + optional count pill + optional action header, then
 //! either an empty message or the item list, optionally wrapped in a Card.

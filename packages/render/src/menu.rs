@@ -1,7 +1,7 @@
 //! Menu — the panel of a dropdown menu: actions, checks, radios, separators.
 //!
 //! Contract: `docs/contracts/components/menu.md`
-//! Ported from: `packages/jetstream/components/src/menu.rs`. Renders the
+//! Renders the
 //! panel only — the trigger belongs to the consumer, and open/close policy is
 //! the host's.
 

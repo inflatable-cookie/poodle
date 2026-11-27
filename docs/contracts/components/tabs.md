@@ -91,7 +91,7 @@ and the source-free packed-consumer fixture must observe the same one-time
 
 `focusOnValueChange` is web-only and is deliberately absent from `TabsSpec`.
 Capture and transfer are DOM adapter effects; this bounded consumer unblock
-does not add a GPUI or Jetstream focus promise.
+does not add a GPUI focus promise.
 
 `panelScroll` is web-only and is deliberately absent from `TabsSpec`. It
 selects CSS overflow ownership for the web panel; native renderers do not use a
@@ -211,8 +211,8 @@ notification straight back in.
 Vertical orientation does not shed. It overflows by height, which these
 width measurements say nothing about.
 
-Neither native target sheds. Shedding is a measured-layout behaviour and GPUI
-and Jetstream render from spec state without a measurement loop; they carry the
+GPUI does not shed. Shedding is a measured-layout behaviour and GPUI
+renders from spec state without a measurement loop; it carries the
 props for parity and ignore them, as they already do for `collapseWhenOverflow`.
 
 
@@ -232,7 +232,7 @@ props for parity and ignore them, as they already do for `collapseWhenOverflow`.
 The drag-source / drop-target visuals are driven by the drag substrate's
 session snapshot, keyed by the strip's own registration ids
 (`[data-drag-source]` / `[data-drop-target]`). No web adapter owns drag state
-of its own. In the spec-driven targets (GPUI, Jetstream) the host sets
+of its own. In the spec-driven targets (GPUI) the host sets
 `dragValue` / `dropTargetValue` (the tab values being dragged / hovered) on the
 spec; both default unset. GPUI consumes the same inset drop-target ring through
 the shared node shadow layer.
@@ -1036,17 +1036,6 @@ does not read the hook.
   with `min_height` 0 and vertical `Scroll` overflow so it fills and scrolls,
   and the strip keeps its natural height (no grow).
 
-## 10a. Jetstream Notes
-
-- `Tabs::from_spec(spec, theme).on_change(...).on_close(...)`, carrying the
-  tab's value in both cases.
-- The close button takes a handler of its own — an inert one when no `on_close`
-  is wired. Clicks bubble to the nearest clickable ancestor, so without it the X
-  would select the tab it was closing, which is the worst available outcome for
-  that gesture.
-- A disabled tab is not a selection route, and neither is the close button on
-  one.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -1086,9 +1075,8 @@ does not read the hook.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream has no reorder or drag events | `onReorder` and the `onDrag*` trio are keyboard- and drag-driven on the web; neither route exists on this target yet | accepted, tracked | — |
 | Inactive panels may stay mounted or unmounted | runtime rendering strategy differs | allowed | keep semantics and state continuity strict |
-| `focusOnValueChange` is web-only | DOM panel-unmount capture has no GPUI/Jetstream equivalent in this bounded consumer unblock | accepted, this card | later native focus-adapter work if a consumer needs it |
+| `focusOnValueChange` is web-only | DOM panel-unmount capture has no GPUI equivalent in this bounded consumer unblock | accepted, this card | later native focus-adapter work if a consumer needs it |
 | GPUI uses opacity multiplication instead of CSS color-mix | platform capability | allowed | visual result must match |
 
 ## 13. Specimen Definitions

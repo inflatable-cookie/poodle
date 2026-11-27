@@ -471,14 +471,6 @@ Toggle mode is activated when `pressed` is non-null OR `defaultPressed` is non-n
   The resting 1px border is preserved, not recoloured or widened, and layout is
   unaffected — the native counterpart of the web `outline` + `outline-offset`.
 
-## 10a. Jetstream Notes
-
-- `Button::from_spec(spec, theme).on_click(...)`. The handler takes no payload:
-  a press is the whole event, and the engine's `ClickEvent` carries pointer
-  coordinates that are the runtime's business, not a component's.
-- Loading is treated as disabled for interaction, matching the visual state the
-  contract already specifies.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -511,8 +503,6 @@ Toggle mode is activated when `pressed` is non-null OR `defaultPressed` is non-n
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream has no `onFocus` / `onBlur` | the runtime raises pointer events, not focus ones; a handler for an event that is never delivered is worse than a missing one | accepted, tracked | arrives with focus plumbing |
-| Jetstream has no `onPressedChange` | `pressed` is a spec input there; a host that owns the state derives the change from `on_click` | accepted | none |
 | active translateY(0.03125rem) may be omitted in GPUI | sub-pixel transform, GPUI limitation | allowed | revisit if GPUI gains sub-pixel transforms |
 | CSS transition timing | GPUI may not support CSS-style transitions | allowed | match where possible |
 | Recipe fallback chain | CSS custom property vs Rust spec/token override | allowed | same visual result |

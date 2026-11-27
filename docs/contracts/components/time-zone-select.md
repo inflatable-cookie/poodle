@@ -154,13 +154,6 @@ beyond plain props. Classified in the long-tail sweep.
 - GPUI must preserve `Select` semantics while using the same default timezone option source
 - `defaultTimeZoneOptions()` equivalent must be available in Rust
 
-## 10a. Jetstream Notes
-
-- `TimeZoneSelect::from_spec(spec, theme).on_toggle(...)`, forwarded to the
-  composed `Select` rather than re-implemented.
-- `on_change` carries the chosen zone's id, forwarded from the composed
-  `Select` rather than re-implemented.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

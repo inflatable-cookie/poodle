@@ -48,8 +48,8 @@ explicitly selected.
                          /                    \
              TypeScript machine             Rust machine
               poodle-core              poodle-headless/render
-                /       \                    /          \
-          Svelte       React              GPUI       Jetstream deferred
+                /       \                    |
+          Svelte       React              GPUI
                 \       /                    |
           web sensors and transports   native input adapter
                     \                       /

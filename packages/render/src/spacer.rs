@@ -1,7 +1,6 @@
 //! Spacer — flexible space filler for flex layouts.
 //!
 //! Contract: `docs/contracts/components/spacer.md`
-//! Ported from: `packages/jetstream/components/src/spacer.rs`.
 
 use poodle_node::{LayoutDirection, Node};
 use poodle_specs::SpacerSpec;

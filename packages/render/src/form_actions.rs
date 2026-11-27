@@ -1,7 +1,6 @@
 //! FormActions — form action bar.
 //!
 //! Contract: `docs/contracts/components/form-actions.md`
-//! Ported from: `packages/jetstream/components/src/form_actions.rs`.
 
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::{

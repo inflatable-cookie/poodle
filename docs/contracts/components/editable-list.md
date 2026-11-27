@@ -499,16 +499,6 @@ controller. Rows use `useDragSource` / `useDropTarget`. The public
 
 `poodle_render::editable_list` takes `EditableListHandlers` and renders the rows, handle, remove, add row, and workflow chrome. Reordering runs on the renderer-neutral drag substrate (architecture 011, spec 069): the handle registers a `NodeDragSource` and every enabled row a `NodeDropTarget`, both scoped to `EditableListHandlers::instance_id`, with the shared vertical band rule and self-drop rejection. `on_reorder` fires with the **complete next item order** — the same public result the web `onReorder` / `onChange` carry — and the drop is revalidated against the spec's live items before it commits. The live region and `<ul>`/`role` semantics remain host-projected. Text input and add button compose from primitives.
 
-## 10a. Jetstream Notes
-
-- `EditableList::from_spec(spec, theme).on_remove(...).on_submit(...).on_cancel(...)`.
-- `on_remove` carries the row's index, matching the contract's own index-based
-  `onRemove`.
-- No `on_add`: the add button renders disabled, because the draft field is typed
-  and this runtime cannot know it has content — a handler on a control that can
-  never be pressed would be dead by construction.
-- No `on_change` (typed): add, remove, and edit remain host-owned intents.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

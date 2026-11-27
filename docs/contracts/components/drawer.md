@@ -314,15 +314,6 @@ identical.
   top/bottom use 100vw x min(24rem, 100vh)
 - border-radius is 0 (no rounding on drawer surfaces)
 
-## 10a. Jetstream Notes
-
-- `Drawer::from_spec(spec, theme).content(...).actions(...).on_request_close(...)`.
-- The backdrop is the only dismissal route the component draws — the contract
-  anatomy has no close affordance. A non-modal drawer draws no backdrop and so
-  has none at all, which is the point of non-modal.
-- The panel takes an inert click handler so clicks inside it do not reach the
-  backdrop.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

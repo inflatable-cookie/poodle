@@ -2,7 +2,6 @@
 //! state).
 //!
 //! Contract: `docs/contracts/components/popover.md`
-//! Ported from: `packages/jetstream/components/src/popover.rs`.
 //!
 //! The composition owns the whole portable overlay profile: a fixed-size
 //! trigger, the conditional dialog surface, stable part identity, accessibility
@@ -61,7 +60,7 @@ pub struct PopoverHandlers {
 }
 
 /// The popover surface only — used by hosts that compose their own trigger
-/// (message centre, Jetstream compat). The full overlay profile lives in
+/// (such as the message centre). The full overlay profile lives in
 /// [`popover`].
 pub fn popover_surface(spec: &PopoverSpec, ctx: &RenderContext<'_>, content: Option<Node>) -> Node {
     // Contract §8 surface: background = background-elevated, border =

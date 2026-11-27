@@ -480,17 +480,11 @@ Rendering style roles: the trigger reads the control border and fill, including 
 - expected crate/module surface: `poodle_gpui::composites::model_picker`
 - theme access via `GpuiThemeProvider`; all dimensions/colors resolved from tokens
 - the render is a faithful function of the full spec state: `ModelPickerSpec`
-  carries `is_open`, so GPUI and Jetstream render the complete panel (model rows
+  carries `is_open`, so GPUI render the complete panel (model rows
   with selection marks, plus one section per applicable axis). The shared native
   limitation applies — the preview does not drive clicks, and anchored
   positioning is platform-owned, so the surface renders inline below the trigger
 - no ARIA API. The accessible-name intent is carried on the node and reaches AccessKit (003); no live platform-tree assertion covers it yet. Documented as an accepted delta
-
-## 10a. Jetstream Notes
-
-- `ModelPicker::from_spec(spec, theme).on_change(...)`, carrying the chosen
-  model's value. Axis options report through the same event: both are choices in
-  the same panel, and a host wiring only one would silently drop the other.
 
 ## 11. Parity Checklist
 
@@ -539,10 +533,9 @@ Rendering style roles: the trigger reads the control border and fill, including 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Native targets render `subdued` at its resting strength only | hover and focus-within are web states; the native previews resolve a spec, not a pointer position | accepted | host restores emphasis on interaction if it wires one |
-| GPUI/Jetstream preview doesn't drive live clicks | shared render-only posture across all native components; the panel is rendered from full spec state | accepted | host wires interaction |
+| GPUI preview doesn't drive live clicks | shared render-only posture across all native components; the panel is rendered from full spec state | accepted | host wires interaction |
 | Only `select` and `toggle` axis kinds | v1 scope; covers effort levels, speed modes, context sizes and booleans | accepted (by design) | multi-select / numeric axes if a consumer needs them |
 | The segmented/list threshold is a constant, not a prop | one number, and `control` already gives per-axis escape | accepted | promote to a prop if a consumer needs a different global cut |
-| Jetstream loads images from file paths, not URLs or data URIs | the runtime's image widget takes an asset path; remote fetching is host/app work | accepted | hosts pass a resolved asset path on that target |
 | Axis values are `string \| boolean` | keeps the selection JSON-serializable and cross-renderer trivial | accepted | numeric axes would extend the union |
 
 ## 13. Approval And Adoption Notes

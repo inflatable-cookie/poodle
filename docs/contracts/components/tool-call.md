@@ -222,10 +222,7 @@ not chrome.
 
 ### Interaction Per Target
 
-Both natives are interactive. GPUI's row carries a real click handler through
-`cx.listener`; Jetstream's is `ToolCall::from_spec(spec, theme).on_toggle(...)`,
-whose handler is `Send + Sync + 'static` and so captures an `Arc` rather than
-borrowing host state.
+GPUI's row carries a click handler through `cx.listener`.
 
 A row with no output is not clickable on either target. The shared renderer
 attaches activation only when `ToolCallSpec::has_output()` is true; see

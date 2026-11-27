@@ -440,15 +440,6 @@ siblings, so it is density.
   focus handle and keyboard entry (Tab traversal, `Enter`/`Space` activation)
   works without a prior pointer press.
 
-## 10a. Jetstream Notes
-
-- `Stepper::from_spec(spec, theme).on_change(...).on_rerun(...)`, each carrying
-  the step's value. This is the component whose GPUI handlers were stored and
-  never attached — the defect that started this work — so these tests are the
-  reference for what "actually wired" means.
-- The rerun sits inside a clickable step, so it takes its own handler, inert
-  when unwired: rerunning a step must not also select it.
-
 ## 11. Parity Checklist
 
 - [ ] equal-column layout with dividers between steps
@@ -480,8 +471,8 @@ component accepts a handler it never reads.
 | Target | Delta | Reason |
 |--------|-------|--------|
 | GPUI | no live platform-tree assertion yet | A2 hold — `003-native-accessibility.md` |
-| GPUI, Jetstream | selection, rerun and collapse wiring live in the preview event loop | components render from spec state |
-| GPUI, Jetstream | the collapsed chevron is the shared `chevron-right` / `chevron-down` icon; the rail is a row of rounded boxes | no CSS, so both are drawn as nodes |
+| GPUI | selection, rerun and collapse wiring live in the preview event loop | components render from spec state |
+| GPUI | the collapsed chevron is the shared `chevron-right` / `chevron-down` icon; the rail is a row of rounded boxes | no CSS, so both are drawn as nodes |
 | GPUI | marker glyphs are text characters (`✓ ✕ ◌ ⟳`) rather than icon assets | matches the surrounding GPUI components, which draw glyphs the same way |
 | GPUI | the `running` marker is a static glyph, not an animated spinner | GPUI components render from spec state with no frame loop of their own |
 

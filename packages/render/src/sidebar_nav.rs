@@ -1,7 +1,6 @@
 //! SidebarNav — a grouped navigation rail.
 //!
 //! Contract: `docs/contracts/components/sidebar-nav.md`
-//! Ported from: `packages/jetstream/components/src/sidebar_nav.rs`.
 
 use std::sync::Arc;
 

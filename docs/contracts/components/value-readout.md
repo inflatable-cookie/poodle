@@ -85,10 +85,6 @@ VisualState plus already-formatted text.
 The Rust formatter is the native conformance source. The node builder receives
 only readout VisualState and formatted text.
 
-## 10a. Jetstream Notes
-
-Jetstream consumes the same native spec and node builder as GPUI.
-
 ## 11. Parity Checklist
 
 - identical formatting and enabled state

@@ -1,8 +1,6 @@
 //! RelationPicker — pick related records, with drill-down.
 //!
 //! Contract: `docs/contracts/components/relation-picker.md`
-//! Ported from: `packages/jetstream/components/src/relation_picker/` (mod +
-//! parts, merged).
 //!
 //! Render-only: candidate toggling, drill navigation (advance / back /
 //! breadcrumb jump), live search typing, and keyboard nav are host-owned —

@@ -1,6 +1,6 @@
 # TabStrip
 
-> **Implementation note**: no standalone Svelte component. In Svelte, the tablist is built directly into `Tabs` rather than extracted as a separate primitive. `TabStrip` exists as a standalone component in Jetstream (`tab_strip.rs`) where separating the tablist from panel management is useful.
+> **Implementation note**: no standalone Svelte component. In Svelte, the tablist is built directly into `Tabs` rather than extracted as a separate primitive.
 
 Status: detailed contract
 

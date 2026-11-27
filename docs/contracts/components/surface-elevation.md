@@ -31,7 +31,7 @@ surface creator
 | Input | Type | Required | Notes |
 |-------|------|----------|-------|
 | `--poodle-surface` | CSS custom property | yes for surface creators | Must match the creator's computed background value |
-| surface context | renderer context value | yes for GPUI and Jetstream creators | Native equivalent of `--poodle-surface` |
+| surface context | renderer context value | yes for GPUI creators | Native equivalent of `--poodle-surface` |
 | mix ratio | tokenised constant | yes for consumers | Keeps contrast tiers consistent across renderers |
 
 ## 4. States

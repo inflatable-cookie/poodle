@@ -4,8 +4,7 @@
 //! Contract: `docs/contracts/components/inline-remediation.md`
 //! Reference: there is NO Svelte component (contract §8 Known Delta: Svelte
 //! composes inline recovery from the `Callout` primitive). The contract is the
-//! sole authority; the Jetstream `js_inline_remediation` component is the
-//! cross-target proof of the same anatomy.
+//! sole authority.
 //!
 //! There is no GPUI `InlineRemediation` component yet (the contract's open
 //! decision is whether to build one or fold into `Callout`). Until that lands,

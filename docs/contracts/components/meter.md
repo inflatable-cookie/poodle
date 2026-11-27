@@ -293,7 +293,6 @@ white at the leading edge); in `ring` the arc is flat.
 |-------|-------------|-----------------|-----------|
 | native meter styling may vary | platform visuals are not the contract | allowed | keep measurement semantics strict |
 | hidden native meter is Svelte-specific | GPUI uses native accessibility APIs directly | allowed | ensure semantic parity |
-| GPUI / Jetstream render the ring as a circular track plus the value readout, without the swept arc | neither runtime exposes conic gradients or arc geometry through the div/JsEl builders; the proportion stays legible through the readout, and the measurement semantics are unchanged | accepted | revisit if either runtime gains an arc/shader primitive |
 
 ## 13. Specimen Definitions
 
@@ -301,6 +300,7 @@ All preview apps must render the following specimens identically.
 
 ### Sizes
 
+| GPUI renders the ring as a circular track plus the value readout, without the swept arc | GPUI does not expose conic gradients or arc geometry through its div builder; the readout preserves the measurement | accepted | revisit if GPUI gains an arc or shader primitive |
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
 | Sizes | `shape="ring"`, `value=60`, `size=xs..xl` | One ring representative per size; diameter and ring thickness step across the full size ladder |

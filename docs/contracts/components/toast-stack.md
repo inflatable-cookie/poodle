@@ -390,11 +390,6 @@ ordinary host focus order. Only then retain any inert visual remnant.
   semantic id, so it leaves live-region, accessibility, focus, and hit-test
   ownership the moment its item leaves the semantic list.
 
-## 10a. Jetstream Notes
-
-- `ToastStack::from_spec(spec, theme).on_dismiss(...).on_action(...)`, each
-  carrying the toast's id.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

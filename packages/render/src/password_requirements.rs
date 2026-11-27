@@ -1,7 +1,6 @@
 //! PasswordRequirements — policy checklist with pass/fail indicators.
 //!
 //! Contract: `docs/contracts/components/password-requirements.md`
-//! Ported from: `packages/jetstream/components/src/password_requirements.rs`.
 
 use poodle_node::{ColorValue, CrossAxisAlignment, LayoutDirection, Node, NodeRole};
 use poodle_specs::PasswordRequirementsSpec;

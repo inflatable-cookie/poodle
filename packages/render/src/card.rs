@@ -1,7 +1,7 @@
 //! Card — surface container: variants, density spacing, media region.
 //!
 //! Contract: `docs/contracts/components/card.md`
-//! Ported from: `packages/jetstream/components/src/card.rs`; paint reconciled
+//! Paint was reconciled
 //! to the old GPUI tier in g12.019 so composed card families keep their native
 //! border and shadow recipes.
 

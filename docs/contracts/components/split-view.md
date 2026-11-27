@@ -451,23 +451,6 @@ None.
   paint-only in the backend, so the cluster still hit-tests while invisible —
   its own bounds are the reveal region.
 
-## 10a. Jetstream Notes
-
-- `SplitView::from_spec(spec, theme).primary(...).secondary(...)` then
-  `.on_primary_collapse(...)` / `.on_secondary_collapse(...)`, forwarded to the
-  composed `CollapseToggle`s.
-- The divider forwards its drag as `.on_resize(phase, axis_delta)` — the
-  composed `ResizeHandle`'s gesture verbatim: `Start`/`End` bracket it, `Move`
-  carries the delta in logical px along the split axis.
-- Known Delta: this is a pixel delta, not the contract's
-  `onRatioChange(ratio)`. Converting needs the rendered axis extent, which
-  the immediate-mode build never sees and the host (who laid the split out)
-  already has — it applies `ratio += delta / extent` and clamps. Emitting a
-  ratio from a guessed extent would be worse than an honest delta.
-- `toggle_visibility` is honoured through the same shared render tier as GPUI;
-  `jetstream-poodle` maps the hover `StylePatch`'s `opacity` onto the
-  element's hover override.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -503,12 +486,12 @@ None.
 | The zero-footprint seam (default off) is shared by the web targets; the natives still paint the divider line | the seam behavior was proven in the Svelte host first and React now matches the opt-in, `--poodle-split-seam` anchoring, and collapsed-pane seam tracking | pending review | port the default-off seam to the natives when one is next touched |
 | The both-collapsed expand-toggle rule is web parity | the trap was proven against the Svelte host and the React mirror now matches; the natives hide both toggles when both panes are collapsed | pending review | port to the natives with the seam work |
 | The natives' hover-reveal zone is the toggle cluster's own bounds, not the divider's grab strip — the pointer must reach the pill rather than the seam around it | the shared render tier has no absolute positioning for the cluster, so it sits inline beside the handle rather than overlaying it; there is no "hovering a sibling reveals me" primitive in the node vocabulary | pending review | widen when the node vocabulary gains group-hover |
-| The natives have no `:focus-within` equivalent, so a keyboard-focused toggle is not revealed | GPUI has no focus routing for the split, and Jetstream's focus does not feed the hover patch | pending review | revisit with native keyboard resize |
 
 ## 12. Specimen Definitions
 
 ### Group: Horizontal Split
 
+| GPUI has no `:focus-within` equivalent, so a keyboard-focused toggle is not revealed | GPUI has no focus routing for the split | pending review | revisit with native keyboard resize |
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Horizontal split | `orientation="horizontal"`, primary snippet with "Primary pane", secondary snippet with "Secondary pane" | Two side-by-side panes divided by a vertical divider; resizable horizontally |

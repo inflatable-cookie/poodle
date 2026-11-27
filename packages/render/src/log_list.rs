@@ -1,7 +1,6 @@
 //! LogList — filterable log rows.
 //!
 //! Contract: `docs/contracts/components/log-list.md`
-//! Ported from: `packages/jetstream/components/src/log_list.rs`.
 //!
 //! Two surfaces, matching the contract/Svelte `variant` split:
 //! - **stream**: level-filter chips + text-filter affordance + entry area.

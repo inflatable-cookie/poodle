@@ -1,7 +1,6 @@
 //! Collapsible — a single disclosure region with heading, chevron, content.
 //!
 //! Contract: `docs/contracts/components/collapsible.md`
-//! Ported from: `packages/jetstream/components/src/collapsible.rs`.
 
 use std::sync::Arc;
 

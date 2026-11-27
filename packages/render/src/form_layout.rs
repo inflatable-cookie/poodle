@@ -2,7 +2,6 @@
 //! field grid and actions.
 //!
 //! Contract: `docs/contracts/components/form-layout.md`
-//! Ported from: `packages/jetstream/components/src/form_layout.rs`.
 
 use poodle_node::{ColorValue, LayoutDirection, Node, NodeRole};
 use poodle_specs::{CallOutSpec, CalloutAnnounceMode, FormActionsSpec, FormLayoutSpec, StatusTone};

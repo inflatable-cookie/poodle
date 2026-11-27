@@ -7,7 +7,6 @@
 //! restored the hand-written declaration.
 //!
 //! Contract: `docs/contracts/components/button.md`
-//! Ported from: `packages/jetstream/components/src/button.rs`
 
 use poodle_tokens::semantic;
 

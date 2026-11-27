@@ -1,7 +1,6 @@
 //! Calendar — a month grid with navigation.
 //!
 //! Contract: `docs/contracts/components/calendar.md`
-//! Ported from: `packages/jetstream/components/src/calendar/` (mod + parts).
 //!
 //! Anatomy (contract §2):
 //! ```text
@@ -17,7 +16,7 @@
 //! the resulting `"YYYY-MM"` month when navigation crosses its boundary.
 //!
 //! Colour recipes here are the old tier's *linear-space* lerp
-//! (`jetstream_ui::color_mix`), so they go through [`mix_linear`], not
+//! so they go through [`mix_linear`], not
 //! `mix_srgb` — the third mix recipe after theme_ext's sRGB mix and the
 //! alpha tint.
 

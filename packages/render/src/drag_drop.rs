@@ -9,9 +9,7 @@
 //! components that both reorder a flat list must not write the band rule
 //! twice; a rule written twice is the drift the substrate exists to remove.
 //!
-//! Nothing here is GPUI-, Jetstream-, or DOM-shaped. Both native backends
-//! build from these same registrations, which is what keeps deferred Jetstream
-//! construction renderer-neutral.
+//! These registrations are renderer-neutral; GPUI interprets the resulting nodes.
 
 use std::sync::Arc;
 

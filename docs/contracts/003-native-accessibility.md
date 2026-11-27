@@ -2,12 +2,10 @@
 
 Status: active
 Owner: Poodle core
-Applies to: every contract with ARIA requirements, on the GPUI and Jetstream targets
+Applies to: every contract with ARIA requirements, on the GPUI target
 
 ## The Fact
 
-**The two native runtimes are at different stages of AccessKit adoption.**
-Jetstream projects its rendered tree into a live platform accessibility tree.
 Poodle's GPUI backend maps direct node roles, names, states, and values
 through GPUI 1.22.0's AccessKit path. The live, non-activating AXUIElement
 proof selects its window by title and walks only that window's subtree. The
@@ -30,17 +28,6 @@ assertion for it yet.
 | Runtime | State | Evidence |
 |---------|-------|----------|
 | gpui-unofficial 1.22.0 | **AccessKit live; bounded platform proof.** The selector read named controls without foreground activation and detected its planted unnamed control. It verifies Button, Checkbox, Slider, and selected Tab signals, clearing A2 for Button, Checkbox, Slider, and Tabs. Disclosure expanded state, Checkbox mixed-state distinction, and ID-based relationships remain unverified; every other portable row retains its A2 hold. | `packages/gpui/native-accessibility-proof.json#livePlatformProofAttempt`; the census records the cleared rows and remaining holds. |
-| Jetstream | **AccessKit, live.** `jetstream-ui::accessibility` projects the retained `UiTree` into an `accesskit::TreeUpdate`; `jetstream-platform` owns an `accesskit_winit` adapter and routes action requests back through the same handlers pointer input uses. | `jetstream` commit `7e997892`, and measured: its preview exposes **471 elements of our own UI, 467 named**, read out of macOS through `AXUIElement`. |
-
-The Jetstream measurement is broad live platform evidence. GPUI's bounded
-fixture proves selected Poodle semantics reach the macOS tree without
-foreground activation; it clears A2 only for the component rows it asserts.
-
-The earlier version of this document said neither runtime had an API and
-recommended not scheduling the work at all. That was right about GPUI 0.2.2
-and wrong about Jetstream, where the blocker was a decision no one had taken
-rather than anything upstream. The earlier roll-up preserves the original
-options study; this records what shipped.
 
 ## What This Means For `aria_label`
 
@@ -48,11 +35,6 @@ options study; this records what shipped.
 the target:
 
 - **Svelte and React** consume it, held to that by the axe sweep.
-- **Jetstream** consumes it. Shared render functions attach accessibility
-  metadata to `poodle-node`; the Jetstream backend projects that metadata into
-  AccessKit. `packages/jetstream/preview/src/bin/a11y.rs` exercises the
-  rendered tree headlessly, and `effigy test:jetstream-ax` checks the mounted
-  macOS accessibility tree.
 - **GPUI** carries the metadata through the shared renderer into
   `poodle-node`, and its node backend projects direct roles, names, states,
   and values into AccessKit; ID-based relationships remain unprojected.
@@ -62,20 +44,15 @@ the target:
   expanded state, Checkbox's mixed-state distinction, and ID-based
   relationships remain unverified.
 
-So the field is no longer uniformly inert on native. Do not write "native
-targets do not consume `aria_label`" — one of them does.
-
-### The rule for Jetstream components
+### The rule for native components
 
 **A spec's `aria_label` names the component as a whole, so it belongs on that
 component's root element and nowhere else.** A component that composes another
 forwards the spec and lets the inner component attach it; adding it in both
 places announces the name twice.
 
-Roles and bounds are derived — `Widget` gives the role, layout gives the
-`computed_rect` — so a component only states what cannot be inferred. A `Label`
-and a text `Button` are announced from their own text without any explicit
-labelling; an icon-only control is the case that needs it.
+A text label or button can be named by its own text; an icon-only control
+needs an explicit label.
 
 ## Update 2026-09-05
 
@@ -132,23 +109,7 @@ Deltas remain upstream items.
   own non-goals — it forbids claiming "mounted assistive-technology proof for
   sections that still only have spec-level or crate-test evidence". Its evidence
   is spec-level and crate-test level. That is the correct reading.
-- **Jetstream contracts are now binding.** A Jetstream component that ignores
-  its contract's ARIA section is a bug, not an accepted platform limit. What is
-  still missing is breadth, not capability: accessible *names* are swept across
-  every component, while roles, checked/expanded state and value are attached
-  only where a component sets them explicitly. **31 components now carry the
-  role their contract specifies**, with checked state on checkbox and switch and
-  expanded state on collapsible and select. What is left is the remaining
-  component roots, and per-element roles *inside* a component — a `menuitem`
-  within a menu, a `tab` within a tab list, an `option` within a listbox — which
-  are not attached at all.
-- **`effigy test:jetstream-ax` is the check.** It launches the preview, reads
-  its tree through `AXUIElement`, and fails on any non-structural element
-  without an accessible name. It found three real defects on its first run
-  (an unnamed contrast slider, an unnamed search field, and a decorative search
-  icon that was being announced), which is the argument for having it.
-
-## What Would Change The GPUI Half
+## Extending The GPUI Proof
 
 The source API and Poodle's direct role/name/state/value mapping are in place.
 The trusted AXUIElement proof read both the clean and planted-control trees
@@ -192,17 +153,3 @@ component must do and remain the specification its implementation is measured
 against. The mapping is implemented; the current platform evidence clears A2
 for the asserted Button, Checkbox, Slider, and Tabs properties, with the
 unverified Button expanded and Checkbox mixed-state details recorded above.
-
-On Jetstream the same requirements *are* binding — `aria-checked="mixed"` maps
-to `accesskit::Toggled::Mixed`, which `JsEl::aria_checked` sets. A reviewer
-holding a native component to its contract's ARIA section should read that
-section together with this one, and check which target they are looking at.
-
-## Prior Record
-
-This was documented before, as one row in `components/tree.md`'s Known Deltas
-table — accurate, but scoped to one component when it was a property of the
-whole native surface. An earlier draft of this document claimed "two other
-contracts" were affected; checking rather than asserting turned up 48. That
-draft also treated the two runtimes as one case, which is the error this
-revision corrects.

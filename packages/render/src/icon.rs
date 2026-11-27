@@ -1,7 +1,7 @@
 //! Icon — a named SVG glyph at a token-resolved size.
 //!
 //! Contract: `docs/contracts/components/icon.md`
-//! Ported from: `packages/jetstream/components/src/icon.rs`. Rasterisation and
+//! Rasterisation and
 //! tinting are backend concerns; the node names the glyph and its box.
 
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node, NodeRole};

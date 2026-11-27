@@ -3,7 +3,7 @@
 //! Contract: `docs/contracts/components/select.md`
 //! Reference: `packages/svelte/components/src/Select.svelte`
 //! The shared node tree carries the anatomy, token paths, and state recipes
-//! used by GPUI and Jetstream.
+//! used by GPUI.
 //!
 //! Closed state: trigger with chevron. Open state: relative wrapper holding
 //! the trigger plus an absolutely-positioned overlay panel of options.
@@ -505,7 +505,7 @@ pub fn select(spec: &SelectSpec, ctx: &RenderContext<'_>, handlers: &SelectHandl
     // Svelte's `--poodle-select-control-height` / inline-padding CSS vars —
     // not the fixed per-size tables (`control_height_rem` /
     // `control_space_x_rem`), which ignore the theme's density/control-size
-    // layering. At base tokens (the Jetstream provider, no axes) md/default
+    // layering. At base tokens (without axes) md/default
     // reproduces the old fixed values; under a preview axis the select now
     // follows the axis like Svelte does.
     let height = ctx.theme().resolve_space("size.control.height")

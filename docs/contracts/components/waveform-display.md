@@ -94,11 +94,6 @@ the selected columns and interaction flags.
 The adapter supplies viewport width and local hit positions to the Rust core.
 The node builder consumes reduced VisualState columns only.
 
-## 10a. Jetstream Notes
-
-Jetstream shares the Rust machine, spec, node builder, and bounded column
-contract.
-
 ## 11. Parity Checklist
 
 - same pyramid validation, level choice, aggregation, and 4,096-column cap

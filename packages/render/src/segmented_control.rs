@@ -1,8 +1,7 @@
 //! SegmentedControl — an inline choice between exclusive options.
 //!
 //! Contract: `docs/contracts/components/segmented-control.md`
-//! Ported from: `packages/jetstream/components/src/segmented_control.rs`,
-//! reconciled against the old GPUI tier
+//! Reconciled against the old GPUI tier
 //! (`packages/gpui/components/src/primitives/segmented_control.rs`) for the
 //! g12.019 node-backend migration.
 

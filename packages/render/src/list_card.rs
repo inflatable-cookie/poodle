@@ -1,7 +1,6 @@
 //! ListCard — one row-card in a list.
 //!
 //! Contract: `docs/contracts/components/list-card.md`
-//! Ported from: `packages/jetstream/components/src/list_card.rs`.
 //!
 //! Anatomy (contract §2):
 //!

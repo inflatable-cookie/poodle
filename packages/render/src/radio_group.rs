@@ -1,7 +1,6 @@
 //! RadioGroup — one choice from a list.
 //!
 //! Contract: `docs/contracts/components/radio-group.md`
-//! Ported from: `packages/jetstream/components/src/radio_group.rs`.
 
 use std::sync::Arc;
 

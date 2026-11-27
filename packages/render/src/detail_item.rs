@@ -1,7 +1,6 @@
 //! DetailItem — label/value row: inline or stacked, simple or surface.
 //!
 //! Contract: `docs/contracts/components/detail-item.md`
-//! Ported from: `packages/jetstream/components/src/detail_item.rs`.
 
 use std::sync::Arc;
 

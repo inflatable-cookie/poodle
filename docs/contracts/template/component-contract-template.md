@@ -152,7 +152,7 @@ them. Every effect must state its cleanup rule.
 
 Attribute/handler output per anatomy part, as a function of state and context.
 `data-scope` is the component name on every part; `data-part` is the part
-name. Renderers without DOM attributes (GPUI, Jetstream) map each row to the
+name. Renderers without DOM attributes (GPUI) map each row to the
 equivalent native accessibility and state exposure.
 
 | Part | Attribute | Value |
@@ -235,13 +235,6 @@ only appear when they are the semantic source for a documented rule.
 - theme access strategy:
 - implementation-only details:
 - known GPUI-native deltas:
-
-## 12. Jetstream Notes
-
-- expected module surface:
-- projection into the Jetstream tree and AccessKit:
-- implementation-only details:
-- known Jetstream-specific deltas:
 
 ## 13. Parity Checklist
 

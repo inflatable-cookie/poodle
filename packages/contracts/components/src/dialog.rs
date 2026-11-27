@@ -164,8 +164,7 @@ impl DialogSpec {
     /// Svelte reference: `AlertDialog.svelte` passes
     /// `dismissOnBackdrop={!working}`, so an alert dialog dismisses on backdrop
     /// exactly like any other dialog and stops only while its confirm is in
-    /// flight. The carve-out made every native alert dialog undismissable —
-    /// found by a Jetstream click test, not by inspection.
+    /// flight. The carve-out made every native alert dialog undismissable.
     pub fn effective_dismiss_on_backdrop(&self) -> bool {
         self.dismiss_on_backdrop
     }

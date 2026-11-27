@@ -18,7 +18,7 @@ Decision (g11.005): recipes are **CSS custom-property contracts, not a
 JavaScript API**. They are plain data by nature — a variable name and a
 value — which keeps them framework-free, SSR-safe, zero-runtime, and
 mappable to the Rust runtimes (each public recipe variable corresponds to a
-spec field / token override on the GPUI/Jetstream side).
+spec field / token override on the GPUI side).
 
 ## Naming And Resolution
 

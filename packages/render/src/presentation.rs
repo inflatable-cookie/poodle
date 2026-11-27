@@ -1,10 +1,7 @@
 //! Per-size and per-density metric ladders, shared by every component.
 //!
-//! Copied from `packages/jetstream/components/src/presentation/` — the values
-//! are the Svelte CSS tables, transcribed. The copies there and in
-//! `packages/gpui` die as the migration deletes those tiers; this becomes the
-//! only Rust transcription. Until then, the parity fixtures keep all three
-//! honest: a divergent value shows up as a node/output mismatch, not a guess.
+//! The values are transcribed from the Svelte CSS tables; this is the
+//! shared Rust transcription.
 
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
 

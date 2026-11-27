@@ -1,7 +1,7 @@
 //! Dialog — a modal surface over a scrim.
 //!
 //! Contract: `docs/contracts/components/dialog.md`
-//! Ported from: `packages/jetstream/components/src/dialog.rs`. The event is
+//! The event is
 //! request-close, not open-change: the component cannot close itself; it
 //! reports that a dismissal route was taken and the host decides.
 

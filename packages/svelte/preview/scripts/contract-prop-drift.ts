@@ -230,7 +230,7 @@ export function contractProps(
       // A prop the contract marks as belonging to specific targets is not drift:
       // some state the DOM owns natively has to be a controlled prop where there
       // is no DOM. TextInput's caret is the case that forced this — `<input>`
-      // owns its selection, GPUI and Jetstream have to be told. Marked in the
+      // owns its selection, GPUI has to be told. Marked in the
       // notes column as "**Rust targets only**" or similar. Such props are
       // documented, so they never count as undocumented on the Svelte side
       // either — only the contract-only direction ignores them.

@@ -130,7 +130,7 @@ pub enum AxisValues {
     #[serde(rename = "named")]
     Named(Vec<Identifier>),
     /// A continuous range, e.g. the neutral-contrast axis (`CROSS-10`,
-    /// `SHELL-04`: web 0.4–1.6, GPUI 0..1, Jetstream knob). `min ≤ default
+    /// `SHELL-04`: web 0.4–1.6, GPUI 0..1). `min ≤ default
     /// ≤ max` is validated.
     #[serde(rename = "continuous")]
     Continuous {

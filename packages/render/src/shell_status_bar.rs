@@ -2,7 +2,6 @@
 //! with a leading region (slot content or summary fallback) and a trailing
 //! region (only rendered when trailing items exist), arranged space-between.
 //!
-//! Ported from: `packages/jetstream/components/src/shell_status_bar.rs`.
 
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node, NodeRole};
 use poodle_specs::ShellStatusBarSpec;

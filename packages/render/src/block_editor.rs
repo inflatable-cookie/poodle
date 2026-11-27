@@ -1,7 +1,6 @@
 //! BlockEditor — per-block toolbar chrome + typed content area.
 //!
 //! Contract: `docs/contracts/components/block-editor.md`
-//! Ported from: `packages/jetstream/components/src/block_editor.rs`.
 //!
 //! Renders the contract chrome (per-block toolbar with drag grip, TypeSelect,
 //! move buttons, AddSelect, remove button) plus a content area that renders

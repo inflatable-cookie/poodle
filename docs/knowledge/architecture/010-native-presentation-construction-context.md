@@ -101,9 +101,6 @@ root md/default
   metadata.
 - GPUI interprets the resulting nodes. It does not implement presentation
   inheritance or motion-preference discovery.
-- Jetstream follows its current admission status. Required compile adaptation
-  may consume the shared context API, but this decision does not claim
-  Jetstream parity.
 - Svelte and React retain their framework-native context implementations and
   shared CSS. No cross-language context representation is introduced.
 

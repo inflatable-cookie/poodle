@@ -285,7 +285,6 @@ engine classes to its semantic tokens inside the component distribution.
 - Rust and GPUI are future admission work. They expose no placeholder and make
   no current parity claim. A later native editor uses its native text system
   against this semantic contract.
-- Jetstream remains deferred under the programme-wide working rule.
 - Syntax parser internals, viewport implementation, and undo storage remain
   private. No engine type crosses the public API.
 

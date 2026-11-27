@@ -1,7 +1,6 @@
 //! ToggleGroup — a row of options, single- or multi-select.
 //!
 //! Contract: `docs/contracts/components/toggle-group.md`
-//! Ported from: `packages/jetstream/components/src/toggle_group.rs`.
 //!
 //! Selection always flows through `toggle_group_transition`. The callback
 //! receives the owned resulting `ToggleGroupValue`, not the activated option.

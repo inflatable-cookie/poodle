@@ -1,7 +1,6 @@
 //! Tooltip — the bubble only; anchoring and open/dismiss are host concerns.
 //!
 //! Contract: `docs/contracts/components/tooltip.md` §8.
-//! Ported from: `packages/jetstream/components/src/tooltip.rs`.
 
 use poodle_node::{LayoutDirection, Node, NodeRole, ShadowValue};
 use poodle_specs::TooltipSpec;

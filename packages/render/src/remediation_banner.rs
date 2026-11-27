@@ -1,7 +1,6 @@
 //! RemediationBanner — announcing recovery banner.
 //!
 //! Contract: `docs/contracts/components/remediation-banner.md`
-//! Ported from: `packages/jetstream/components/src/remediation_banner.rs`.
 //!
 //! Anatomy (contract §2): icon + content (title/message/actions) + dismiss.
 

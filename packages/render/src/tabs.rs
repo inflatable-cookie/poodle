@@ -1,7 +1,7 @@
 //! Tabs — a tab bar in the card, pill, and block variants.
 //!
 //! Contract: `docs/contracts/components/tabs.md`
-//! Ported from: `packages/jetstream/components/src/tabs/`. Content for the
+//! Content for the
 //! active tab renders below this element, by the caller. The card variant
 //! renders icon, count, and close-button accessories; close buttons wire
 //! through `on_close` (inert when unwired, so an unwired X does not bubble to

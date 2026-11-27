@@ -1196,7 +1196,7 @@ writeRustFile(
   "typed/types.rs",
   `${formatHeader("//")}
 /// RGBA color as four f32 values in 0.0\u20131.0 range.
-/// Compatible with Jetstream \`Vec4\` and GPUI color types.
+/// Compatible with GPUI color types.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ColorValue(pub f32, pub f32, pub f32, pub f32);
 

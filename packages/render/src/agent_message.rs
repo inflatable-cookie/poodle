@@ -1,7 +1,6 @@
 //! AgentMessage — agent prose.
 //!
 //! Contract: `docs/contracts/components/agent-message.md`
-//! Ported from: `packages/jetstream/components/src/agent_message.rs`.
 //!
 //! Markdown parses through `poodle-markdown` into the same block model the web
 //! target renders, so both show the same document.

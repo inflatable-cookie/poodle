@@ -1,7 +1,6 @@
 //! HoverCard — the open hover-card surface.
 //!
 //! Contract: `docs/contracts/components/hover-card.md`
-//! Ported from: `packages/jetstream/components/src/hover_card.rs`.
 //!
 //! The trigger relationship, delay timers, anchored placement and viewport
 //! clamping are host-owned (contract §12 Known Delta); this renders the

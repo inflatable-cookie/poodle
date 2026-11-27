@@ -1,7 +1,6 @@
 //! TimeAgo — relative time label.
 //!
 //! Contract: `docs/contracts/components/time-ago.md`
-//! Ported from: `packages/jetstream/components/src/time_ago.rs`.
 //!
 //! Computes the relative-time string from `spec.timestamp` (parse → diff vs
 //! `now` → shared `TimeAgoSpec::format_relative`). The threshold table lives

@@ -330,12 +330,6 @@ Density controls list and item gap only. It does NOT affect font-size.
   channel, so they must not be sent through `on_navigate`. This is a runtime
   delta against web anchor navigation, not a reason to reverse the callback.
 
-## 10a. Jetstream Notes
-
-- Jetstream remains deferred. Shared `poodle-render` matches the web callback
-  rule: `on_navigate` receives `value`, never `href`. The in-repo adapter
-  currently passes no handler. Native URL routing is still absent.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

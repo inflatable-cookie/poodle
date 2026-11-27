@@ -4,10 +4,8 @@
 //! This crate is the GPUI half of the inversion `g12.019` completes. Poodle's
 //! components (`poodle-render`) emit `Spec + Theme → Node` trees and know
 //! nothing of GPUI; this adapter translates that vocabulary into GPUI 1.22.0's
-//! fluent element API. The transcription source is the Jetstream backend
-//! (`jetstream-poodle/src/lib.rs`), whose channel walk this mirrors channel by
-//! channel; where GPUI has no equivalent channel the gap is documented inline
-//! and in the crate's channel table (see task g12.019 (Git history)).
+//! fluent element API. Where GPUI has no equivalent channel, the gap is
+//! documented inline and in the crate's channel table.
 //!
 //! What this backend owns (and the vocabulary correctly does not): text
 //! measurement and shaping (GPUI's text system), hit-testing and event
@@ -782,7 +780,7 @@ pub(crate) fn current_dismiss_layer() -> Option<String> {
     CURRENT_DISMISS_LAYER.with(|layer| layer.borrow().clone())
 }
 
-/// The channels every box gets, in the Jetstream walk's order: layout,
+/// The channels every box gets, in traversal order: layout,
 /// position, paint, text, cursor, state patches, children. `id` is the
 /// resolved element identity (see `build_box`) — "" only on the stateless
 /// path, which never tracks focus.

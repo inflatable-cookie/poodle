@@ -291,17 +291,16 @@ composer owns the editor, the toolbar and the submit control; see
 - Digit shortcuts are bound on the root and ignored while focus is in the
   composer's editor, so typing "1" into an override does not select an option.
 
-## 12. GPUI And Jetstream Notes
+## 12. GPUI Notes
 
-- Both natives wire real click handlers. GPUI takes `.on_select`/`.on_dismiss`
-  through `cx.listener`; Jetstream is
-  `AgentQuestion::from_spec(spec, theme).on_select(...).on_dismiss(...)`.
+- GPUI wires real click handlers, taking `.on_select` and `.on_dismiss`
+  through `cx.listener`.
 - `onSelect` carries the option's **value**, not its label: the label is what
   the reader sees and hosts localise it.
 - Selection state is the host's. A click is reported as a click; turning it into
   the next selection is `toggleQuestionSelection` from the shared headless core,
-  which is what keeps single- and multi-select identical across targets.
-- No digit shortcuts: key handling is host-event-loop work on both natives.
+  which keeps single- and multi-select identical across targets.
+- No digit shortcuts: key handling is host-event-loop work.
 
 ## 13. Parity Checklist
 

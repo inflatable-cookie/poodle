@@ -1,7 +1,6 @@
 //! EditableLabel — a click-to-edit label.
 //!
 //! Contract: `docs/contracts/components/editable-label.md`
-//! Ported from: `packages/jetstream/components/src/editable_label.rs`.
 //!
 //! Renders the correct mode for the current spec state:
 //!   - display mode (`is_editing == false`): the label text (or empty-text /

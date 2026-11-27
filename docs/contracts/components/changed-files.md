@@ -200,15 +200,6 @@ the header and chip gaps. Density never changes the header's height.
 - Reuses the GPUI `Tree` implementation and its flat-mode metrics.
 - Expansion is host-driven through the spec.
 
-## 10a. Jetstream Notes
-
-- `ChangedFiles::from_spec(spec, theme).on_toggle(...).on_file_select(...)`.
-- `onFileSelect` carries the file's **full path**, from a chip and from a tree
-  row alike. The chip shows the leaf and a collapsed chain shows `crates/latex`,
-  so neither label identifies the file on its own.
-- Directory rows are not clickable. A directory expands; reporting one as a file
-  selection would make every host filter directories back out.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

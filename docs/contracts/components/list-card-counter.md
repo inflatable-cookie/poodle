@@ -149,11 +149,6 @@ None.
   `em` scaling with ratio-preserving metrics from a 1rem baseline until
   parent-relative inline layout exists
 
-## 10a. Jetstream Notes
-
-- `ListCardCounter::from_spec(spec, theme).on_link_click(...)`. Only a linked
-  counter fires — an unlinked counter is a statistic, not a control.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -177,9 +172,6 @@ None.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream tooltip trigger wrapping | current Jetstream tooltip helper is panel-only and does not yet compose a standard trigger+overlay path | allowed | add trigger-wrapped tooltip composition, then honor `tooltip` literally |
-| Jetstream linked counter semantics | Jetstream has no native anchor widget in this layer, so linked counters only expose linked styling today | allowed | add shell-owned navigation semantics when the runtime surface supports them |
-| tabular numerals | current Jetstream text surface does not expose numeric font-feature controls | allowed | add numeric-feature support, then apply `tabular-nums` literally |
 
 ## 13. Specimen Definitions
 

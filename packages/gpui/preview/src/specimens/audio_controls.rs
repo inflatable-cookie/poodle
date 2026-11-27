@@ -1,8 +1,7 @@
 //! The twelve audio-family specimen pages.
 //!
-//! Content comes from `poodle_render::audio_specimens`, which is shared with
-//! Jetstream; the Examples / Sizes / Densities structure around it is GPUI's
-//! own. Every one of these controls takes both `size` and `density`, so every
+//! Content comes from `poodle_render::audio_specimens`; the Examples / Sizes /
+//! Densities structure around it is GPUI's own. Every one of these controls takes both `size` and `density`, so every
 //! page admits both axis panes. Knob, Fader, and XYPad Examples bind
 //! instance-scoped handlers so interaction rebuilds the page.
 

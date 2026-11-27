@@ -78,11 +78,6 @@ receives only VisualState.
 The adapter owns press/release/cancel and focus translation. The shared node
 builder consumes VisualState with lamp state distinct from selected state.
 
-## 10a. Jetstream Notes
-
-Jetstream consumes the same Rust transition, spec, and node builder and maps
-the result to button/toggle accessibility.
-
 ## 11. Parity Checklist
 
 - same latch, momentary, and multi-state transitions

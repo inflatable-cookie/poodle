@@ -1,7 +1,6 @@
 //! ActionDiscoveryPanel — grouped actions with shortcuts.
 //!
 //! Contract: `docs/contracts/components/action-discovery-panel.md`
-//! Ported from: `packages/jetstream/components/src/action_discovery_panel.rs`.
 //!
 //! Renders grouped action sections (Eyebrow heading + action rows), the
 //! active-item accent state, badge/kbd chips, and the loading/error/empty/

@@ -1,7 +1,6 @@
 //! StatusIndicator — colored dot with optional label.
 //!
 //! Contract: `docs/contracts/components/status-indicator.md`
-//! Ported from: `packages/jetstream/components/src/status_indicator.rs`.
 //!
 //! Contract dimensions: dot 0.5625rem square at md (size-scaled), pill
 //! radius; gap 0.4375rem; label 0.75rem weight 600. The dot's box-shadow

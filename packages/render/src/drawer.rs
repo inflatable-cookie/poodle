@@ -1,7 +1,7 @@
 //! Drawer — an edge-anchored slide-out panel over an optional scrim.
 //!
 //! Contract: `docs/contracts/components/drawer.md`
-//! Ported from: `packages/jetstream/components/src/drawer.rs`. No close
+//! No close
 //! affordance — the contract anatomy has none; the backdrop is the only
 //! dismissal route the component draws.
 

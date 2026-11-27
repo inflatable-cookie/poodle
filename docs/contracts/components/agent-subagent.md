@@ -26,9 +26,7 @@ something the provider never said.
 
 The active implementation surfaces are the Svelte and React web shells, the
 shared headless model/spec/render path, and the GPUI preview adapter. They all
-render the current static group semantics below. Jetstream remains deferred at
-the program level and is not an implementation or effect target of this
-contract.
+render the current static group semantics below.
 
 `unknown` renders literally as "Unknown". It means "no portable status was
 supplied", and any prettier word would be a fact the provider did not give —
@@ -257,7 +255,7 @@ status and lines update, and terminal statuses settle it in place.
   render the activity line only for non-terminal statuses, the summary only for
   terminal statuses, and a spinner only for `running`.
 
-## 11. Shared Rust, GPUI, And Jetstream Notes
+## 11. Shared Rust And GPUI Notes
 
 The shared headless core owns the status vocabulary, terminal mapping, and
 spinner mapping. `AgentSubagentSpec` carries the item, disclosure state, detail
@@ -270,9 +268,6 @@ The GPUI preview uses `node_compat::AgentSubagent::from_spec` and the shared
 renderer for its running, waiting, completed, failed, unknown, size and
 density specimens. It is a shipped static composition path, not a deferred
 variant.
-
-Jetstream remains program-deferred. This contract makes no Jetstream variant,
-effect, or admission claim.
 
 ## 12. Parity Checklist
 
@@ -301,7 +296,6 @@ effect, or admission claim.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream remains program-deferred; Svelte, React, shared Rust composition and GPUI preview are active static surfaces | Jetstream follows the current program admission posture; the active cohort already uses the shared AgentSubagent model and rendering path | accepted for this lane | any Jetstream admission is a separate program decision |
 | Web shells omit the open action without a handler; the native renderer emits an inert labeled action when its handler is absent | the adapters currently expose different handler boundaries, and the observable output must remain documented until a parity change is separately approved | current implementation delta | reconcile action presence only in a scoped parity change |
 | The disclosure exists only when `detailLines` is non-empty | an expand control opening an empty region is noise; the host decides when there is detail to reveal | pending review | none |
 | The Svelte transcript passes no expansion state for groups | a child's expansion is local state the transcript host does not need to hold; the native spec carries `expanded_subagent_groups` for hosts that want to drive it | pending review | none |

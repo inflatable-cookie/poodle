@@ -1,7 +1,6 @@
 //! MetaBar — wrapping inline metadata row with dot separators.
 //!
 //! Contract: `docs/contracts/components/meta-bar.md`
-//! Ported from: `packages/jetstream/components/src/meta_bar.rs`.
 
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
 use poodle_specs::MetaBarSpec;

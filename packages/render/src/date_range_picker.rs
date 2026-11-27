@@ -1,7 +1,6 @@
 //! DateRangePicker — a trigger and a range-calendar popover.
 //!
 //! Contract: `docs/contracts/components/date-range-picker.md`
-//! Ported from: `packages/jetstream/components/src/date_range_picker.rs`.
 //!
 //! Same shell as [`crate::date_picker::date_picker`]; the composed calendar runs in range
 //! mode and the trigger's display string mirrors Svelte `valueLabel`: a

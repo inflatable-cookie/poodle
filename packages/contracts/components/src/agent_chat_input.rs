@@ -498,7 +498,7 @@ impl AgentChatInputSpec {
         }
     }
 
-    // ── Token accessors (shared by GPUI + Jetstream) ──────────────────────
+    // ── Token accessors (shared token accessors) ──────────────────────
 
     /// Two steps up the background ladder (canvas → surface → panel): one step is
     /// too close to the page for the composer to read as a distinct block.

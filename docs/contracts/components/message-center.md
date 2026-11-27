@@ -140,9 +140,9 @@ open wiring and derived unread presentation.
 
 ## 7. Framework parity
 
-Svelte, React, GPUI, and Jetstream share the same item shape, defaults,
-callbacks, read-state semantics, sizing, density, and token usage. The Rust
-targets use `MessageCenterSpec` plus the shared `poodle-render` node tree;
+Svelte, React, and GPUI share the same item shape, defaults,
+callbacks, read-state semantics, sizing, density, and token usage. The native
+target uses `MessageCenterSpec` plus the shared `poodle-render` node tree;
 open/read/remove/select/mark-all state remains host-owned. This component does
 not introduce an Underlay-facing dependency.
 

@@ -289,7 +289,7 @@ None (styling is minimal; visual treatment is owned by ToastStack).
 
 - `packages/render/src/toast_host.rs` owns the shared positioned container and
   composes the real `ToastStack` node.
-- GPUI and Jetstream backends interpret the same placement, accessibility, and
+- GPUI backends interpret the same placement, accessibility, and
   action metadata.
 - Store subscription, timer scheduling, and overlay mounting remain host-owned
   runtime concerns. Native render does not own clocks.

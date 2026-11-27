@@ -218,8 +218,8 @@ impl Density {
 
 /// Control size lives in `presentation_axes` (see the re-export above).
 
-/// The neutral-contrast axis is continuous, like the web preview's range input
-/// and the Jetstream shell's slider. It used to be four preset stops behind a
+/// The neutral-contrast axis is continuous, like the web preview's range input.
+/// It used to be four preset stops behind a
 /// toggle group here, which could not express the values between them.
 pub const CONTRAST_MIN: f32 = 0.0;
 pub const CONTRAST_MAX: f32 = 1.0;

@@ -1,7 +1,6 @@
 //! Tree — hierarchical disclosure tree.
 //!
 //! Contract: `docs/contracts/components/tree.md`
-//! Ported from: `packages/jetstream/components/src/tree.rs`.
 //!
 //! Renders the currently-visible rows (a node is visible when every ancestor
 //! branch is expanded) as a flat flex column. Depth is expressed with indent

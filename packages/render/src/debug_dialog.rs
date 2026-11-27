@@ -1,7 +1,6 @@
 //! DebugDialog — debug-data disclosure.
 //!
 //! Contract: `docs/contracts/components/debug-dialog.md`
-//! Ported from: `packages/jetstream/components/src/debug_dialog.rs`.
 //!
 //! Renders a trigger button when a value is present. The dialog is host-owned
 //! (`open`): Svelte keeps the trigger mounted and opens the Dialog from it.
@@ -23,7 +22,7 @@ pub struct DebugDialogHandlers {
     pub on_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 }
 
-/// Catalogue/Jetstream path: a present value paints the open dialog so the
+/// Catalogue path: a present value paints the open dialog so the
 /// JSON dump is visible without a host toggle.
 pub fn debug_dialog(spec: &DebugDialogSpec, ctx: &RenderContext<'_>) -> Node {
     debug_dialog_with_state(spec, ctx, spec.has_value(), DebugDialogHandlers::default())

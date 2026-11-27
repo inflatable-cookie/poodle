@@ -331,6 +331,7 @@ static/opacity approximation from architecture 012; that remains a visual gap.
 - The instance id is lifetime-stable construction data, not an item value or
   render-order fallback. Trigger and panel runtime ids derive from it plus the
   authored item value.
+- The whole header row is the trigger, not just the chevron.
 - GPUI must expose button role with expanded state on each trigger
 - Region association between trigger and panel must be maintained
 - Group role required in multiple mode
@@ -340,14 +341,6 @@ static/opacity approximation from architecture 012; that remains a visual gap.
 - Chevron rotation animation maps to indicator transform
 - Panel expand/collapse must animate height over ~180ms (equivalent to Svelte
   `slide` transition)
-
-## 10a. Jetstream Notes
-
-- Jetstream backend admission remains program-deferred. In-repo callers migrate
-  mechanically to the same semantic value and required instance scope.
-- When admitted, Jetstream consumes the same resulting-selection callback as
-  GPUI. It does not receive only the activated item or reconstruct membership.
-- The whole header row is the trigger, not just the chevron.
 
 ## 11. Parity Checklist
 

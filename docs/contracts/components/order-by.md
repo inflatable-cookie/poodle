@@ -626,29 +626,6 @@ The panel uses the following internal component instances:
 - The reset `×` IconButton handler uses `stopPropagation` and `preventDefault` to avoid toggling the dropdown
 - The surface is a `role="dialog"` element with `tabindex="-1"`; on open the component auto-focuses the first focusable control, and closes on outside-click or Escape
 
-## 10a. Jetstream Notes
-
-- `OrderByHandlers::new(instance_id)` with `on_direction_toggle` and
-  `on_remove`, each carrying the field's key.
-- `on_reorder` carries the **complete next ordering** as `Vec<OrderByField>`,
-  the renderer-neutral mirror of the web `onChange` payload. The renderer, not
-  the host, applies the accepted move to the ordering the spec carries.
-- Reordering runs on the renderer-neutral substrate: the row handle registers a
-  `NodeDragSource` and every enabled row a `NodeDropTarget`, both scoped to
-  `instance_id`. The band rule is `crate::drag_drop::vertical_band_resolver`,
-  self-drops are rejected, and the drop is revalidated against the spec's live
-  field list before it commits.
-- `Alt+ArrowUp` / `Alt+ArrowDown` on the handle reach the same emitter, so the
-  keyboard and pointer routes produce one identical result payload.
-- The handle is a focusable button. It is never drawn without its handler:
-  a spec that cannot reorder draws no grip.
-- Runtime asymmetry, deliberate: on the web `Alt+Arrow` issues a keyboard drop
-  command and therefore runs as a real substrate session, announcement and all.
-  Natively it reaches the same emitter directly, because the native controller
-  exposes no keyboard-drop command to a renderer. The result payload is
-  identical on both; the native chord produces no substrate announcement, and
-  leaves focus on the handle it was pressed on.
-
 ## 13. Parity Checklist
 
 ### Tier 1: Strict Parity
