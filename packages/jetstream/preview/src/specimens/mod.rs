@@ -275,7 +275,7 @@ fn build_specimen_page(
     // Specimen section — filtered to the active Examples/Sizes/Densities view,
     // with a text-variant Tabs switcher when the specimen has those sections
     // (mirrors the Svelte SpecimenLayout).
-    let mounted = match poodle_specimens::Specimen::from_slug(entry.slug) {
+    let mounted = match jetstream_shared_specimen(entry.slug) {
         Some(specimen) => Some((
             shared::render(specimen, theme, state),
             shared::tabs(specimen),
@@ -342,13 +342,24 @@ fn el(e: crate::nel::El) -> JsEl {
     jetstream_poodle::to_js_el(&e.0)
 }
 
+/// Only the original poodle#171 proof routes remain mounted in Jetstream;
+/// newly moved specimens mount in GPUI only.
+fn jetstream_shared_specimen(slug: &str) -> Option<poodle_specimens::Specimen> {
+    match poodle_specimens::Specimen::from_slug(slug)? {
+        specimen @ (poodle_specimens::Specimen::Button
+        | poodle_specimens::Specimen::Select
+        | poodle_specimens::Specimen::DataTable) => Some(specimen),
+        _ => None,
+    }
+}
+
 /// Route a component slug to its specimen renderer.
 pub fn render_specimen(
     slug: &str,
     theme: &JetstreamThemeProvider,
     state: &AppState,
 ) -> Option<JsEl> {
-    if let Some(specimen) = poodle_specimens::Specimen::from_slug(slug) {
+    if let Some(specimen) = jetstream_shared_specimen(slug) {
         return Some(shared::render(specimen, theme, state));
     }
     match slug {

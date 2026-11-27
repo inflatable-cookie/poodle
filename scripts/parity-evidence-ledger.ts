@@ -581,8 +581,16 @@ function expectedComponentRow(
     const specPath = findRustSpec(root, name);
     const renderPath = findRenderModule(root, name);
     const gpuiSource = read(root, gpuiRegistryPath);
+    const sharedSpecimensPath = "packages/specimens/src/lib.rs";
+    const sharedSpecimensSource = read(root, sharedSpecimensPath);
     const routePattern = new RegExp(`"${escapeRegExp(slug)}"\\s*=>`);
-    if (!routePattern.test(gpuiSource)) throw new Error(`GPUI specimen route missing for ${name}: ${slug}.`);
+    const sharedSlugPattern = new RegExp(`=>\\s*"${escapeRegExp(slug)}"`);
+    const routePath = routePattern.test(gpuiSource)
+      ? gpuiRegistryPath
+      : gpuiSource.includes("Specimen::from_slug") && sharedSlugPattern.test(sharedSpecimensSource)
+        ? sharedSpecimensPath
+        : null;
+    if (routePath === null) throw new Error(`GPUI specimen route missing for ${name}: ${slug}.`);
 
     base["Shared Rust surface"] = cell(
       "present",
@@ -590,7 +598,7 @@ function expectedComponentRow(
     );
     base["GPUI construction"] = cell(
       "focused",
-      `route ${pathRef(gpuiRegistryPath, slug)}; ${pathRef("packages/gpui/preview/src/specimen_probe.rs")} via effigy probe:gpui-specimens (${portableCount}/${portableCount} routes)`,
+      `route ${pathRef(routePath, slug)}; ${pathRef("packages/gpui/preview/src/specimen_probe.rs")} via effigy probe:gpui-specimens (${portableCount}/${portableCount} routes)`,
     );
 
     const nucleus = nucleusRows.get(name);
