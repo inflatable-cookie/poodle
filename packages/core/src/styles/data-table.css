@@ -51,6 +51,9 @@
   .poodle-data-table__toolbar-btn:hover {
     background: var(--poodle-recipe-data-table-hover-toolbar-btn-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent)));
   }
+  .poodle-data-table__toolbar-btn:active {
+    background: var(--poodle-recipe-data-table-toolbar-btn-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-data-table__toolbar-btn:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);

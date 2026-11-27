@@ -308,6 +308,9 @@
   .poodle-select__option:hover:not(:disabled) {
     background: var(--poodle-recipe-select-highlighted-hover-option-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)));
   }
+  .poodle-select__option:active:not(:disabled) {
+    background: var(--poodle-recipe-select-option-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-select__option:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);

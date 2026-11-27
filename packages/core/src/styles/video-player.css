@@ -121,6 +121,9 @@
   .poodle-video-player__btn:hover {
     background: var(--poodle-recipe-video-player-hover-btn-fill, var(--poodle-style-control-fillHover, rgba(255, 255, 255, 0.15)));
   }
+  .poodle-video-player__btn:active {
+    background: var(--poodle-recipe-video-player-btn-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-video-player__btn:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);

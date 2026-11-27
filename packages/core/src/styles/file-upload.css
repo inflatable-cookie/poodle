@@ -184,6 +184,9 @@
     color: var(--poodle-recipe-file-upload-hover-focus-remove-text, var(--poodle-color-text-primary, #f5f5f5));
     outline: none;
   }
+  .poodle-file-upload__remove:active {
+    background: var(--poodle-recipe-file-upload-remove-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-file-upload__remove svg {
     width: 0.875rem;

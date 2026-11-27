@@ -78,6 +78,9 @@
     background: var(--poodle-recipe-media-picker-hover-focus-item-fill, var(--poodle-style-control-fillHover, var(--poodle-color-background-panel, #1a1a1a)));
     outline: none;
   }
+  .poodle-media-picker__item:active {
+    background: var(--poodle-recipe-media-picker-item-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-media-picker__thumb {
     width: var(--poodle-media-picker-thumb-size);

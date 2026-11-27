@@ -80,6 +80,9 @@
     background: var(--poodle-recipe-code-copy-hover-fill, var(--poodle-style-control-fillHover, transparent));
     color: var(--poodle-recipe-code-hover-copy-text, var(--poodle-color-text-primary));
   }
+  .poodle-code__copy:active {
+    background: var(--poodle-recipe-code-copy-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-code__copy:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);

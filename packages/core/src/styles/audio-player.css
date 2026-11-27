@@ -87,6 +87,9 @@
   .poodle-audio-player__mute:hover {
     background: var(--poodle-recipe-audio-player-hover-mute-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
   }
+  .poodle-audio-player__mute:active {
+    background: var(--poodle-recipe-audio-player-mute-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-audio-player__play:focus-visible,
   .poodle-audio-player__mute:focus-visible {

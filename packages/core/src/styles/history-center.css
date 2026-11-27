@@ -44,6 +44,9 @@
   background: var(--poodle-style-control-fillHover, transparent);
   color: var(--poodle-color-text-primary);
 }
+  .poodle-history-center__list-trigger:active {
+    background: var(--poodle-style-control-fillActive, transparent);
+  }
 .poodle-history-center__list-trigger:focus-visible {
   outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
   outline-offset: -0.0625rem;
@@ -259,6 +262,9 @@
   );
   color: var(--poodle-color-text-primary);
 }
+  .poodle-history-center__fork:active {
+    background: var(--poodle-recipe-history-center-item-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
 .poodle-history-center__fork:focus-visible {
   outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);

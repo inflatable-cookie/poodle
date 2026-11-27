@@ -114,6 +114,9 @@
     background: var(--poodle-recipe-markdown-editor-hover-tool-btn-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
     color: var(--poodle-recipe-markdown-editor-hover-tool-btn-text, var(--poodle-color-text-primary));
   }
+  .poodle-md-editor__tool-btn:active:not(:disabled) {
+    background: var(--poodle-recipe-markdown-editor-tool-btn-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-md-editor__tool-btn:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);

@@ -18,6 +18,9 @@
     background: var(--poodle-recipe-collapse-toggle-hover-fill, var(--poodle-style-control-fillHover, var(--poodle-color-surface-hover)));
     color: var(--poodle-recipe-collapse-toggle-hover-text, var(--poodle-color-text-default));
   }
+  .poodle-collapse-toggle:active {
+    background: var(--poodle-recipe-collapse-toggle-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-collapse-toggle:disabled {
     opacity: 0.4;

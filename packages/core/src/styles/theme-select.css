@@ -145,6 +145,9 @@
   .poodle-theme-select__tile:hover {
     background: var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent));
   }
+  .poodle-theme-select__tile:active {
+    background: var(--poodle-style-control-fillActive, transparent);
+  }
 
   .poodle-theme-select__tile:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);

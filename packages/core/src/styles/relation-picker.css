@@ -99,6 +99,9 @@
     background: var(--poodle-recipe-relation-picker-hover-back-fill, var(--poodle-style-control-fillHover, var(--poodle-color-surface-hover, rgba(148, 163, 184, 0.12))));
     color: var(--poodle-recipe-relation-picker-hover-back-text, var(--poodle-color-text-primary));
   }
+  .poodle-drill-breadcrumbs__back:active {
+    background: var(--poodle-recipe-relation-picker-back-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-drill-breadcrumbs__sep {
     color: var(--poodle-recipe-relation-picker-sep-text, var(--poodle-color-text-secondary));
@@ -124,6 +127,9 @@
 
   .poodle-drill-breadcrumbs__item:hover {
     background: var(--poodle-recipe-relation-picker-hover-item-fill, var(--poodle-style-control-fillHover, var(--poodle-color-surface-hover, rgba(148, 163, 184, 0.12))));
+  }
+  .poodle-drill-breadcrumbs__item:active {
+    background: var(--poodle-recipe-relation-picker-item-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-drill-level-label {
@@ -167,6 +173,9 @@
 
   .poodle-drill-list__button:hover {
     background: var(--poodle-recipe-relation-picker-hover-button-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent)));
+  }
+  .poodle-drill-list__button:active {
+    background: var(--poodle-recipe-relation-picker-button-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-drill-list__button:focus-visible {

@@ -222,6 +222,9 @@
     color: var(--poodle-recipe-tree-hover-row-text, var(--poodle-color-text-primary));
     background: var(--poodle-recipe-tree-hover-row-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 60%, transparent)));
   }
+  .poodle-tree__row:active {
+    background: var(--poodle-recipe-tree-row-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-tree__item[data-selected="true"] > .poodle-tree__row {
     color: var(--poodle-recipe-tree-selected-row-text, var(--poodle-style-selection-text, var(--poodle-color-text-primary)));

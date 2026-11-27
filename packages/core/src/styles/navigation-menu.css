@@ -47,6 +47,9 @@
     background: var(--poodle-recipe-navigation-menu-hover-focus-trigger-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
     outline: none;
   }
+  .poodle-navigation-menu__trigger:active:not(:disabled) {
+    background: var(--poodle-recipe-navigation-menu-trigger-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   /* activeEdge: an opt-in edge on the trigger. `outline` restores the
      decoration the trigger had by default before g13.016 (border-subtle@72%
@@ -101,6 +104,16 @@
      trigger — only the selection fill is gone. */
   .poodle-navigation-menu[data-active-fill="none"] .poodle-navigation-menu__trigger[data-open="true"] {
     background: var(--poodle-recipe-navigation-menu-trigger-fill, transparent);
+  }
+
+  /* The open trigger keeps its hover and press fills with no selection fill. The
+     rule above is more specific than the generic hover, so restate both here. */
+  .poodle-navigation-menu[data-active-fill="none"] .poodle-navigation-menu__trigger[data-open="true"]:hover:not(:disabled) {
+    background: var(--poodle-recipe-navigation-menu-hover-focus-trigger-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
+  }
+
+  .poodle-navigation-menu[data-active-fill="none"] .poodle-navigation-menu__trigger[data-open="true"]:active:not(:disabled) {
+    background: var(--poodle-recipe-navigation-menu-trigger-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-navigation-menu__trigger:disabled {

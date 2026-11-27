@@ -42,6 +42,9 @@
     background: var(--poodle-recipe-menu-surface-hover-focus-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)));
     outline: none;
   }
+  .poodle-menu-surface__item:active:not(:disabled) {
+    background: var(--poodle-recipe-menu-surface-item-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-menu-surface__item[data-tone="danger"] {
     color: var(--poodle-recipe-menu-surface-danger-item-text, var(--poodle-color-status-danger));

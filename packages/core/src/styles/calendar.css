@@ -127,6 +127,9 @@
   .poodle-calendar__nav:hover:not(:disabled) {
     background: var(--poodle-recipe-calendar-hover-nav-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 82%, var(--poodle-color-background-elevated))));
   }
+  .poodle-calendar__nav:active:not(:disabled) {
+    background: var(--poodle-recipe-calendar-nav-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-calendar__weekdays {
     gap: 0.125rem;

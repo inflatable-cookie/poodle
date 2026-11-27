@@ -173,6 +173,9 @@
   background: var(--poodle-style-control-fillHover, transparent);
   color: var(--poodle-color-text-primary);
 }
+  .poodle-agent-question__dismiss:active {
+    background: var(--poodle-style-control-fillActive, transparent);
+  }
 
 .poodle-agent-question__dismiss:focus-visible {
   outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);

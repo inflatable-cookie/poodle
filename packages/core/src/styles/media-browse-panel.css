@@ -64,6 +64,9 @@
     background: var(--poodle-recipe-media-browse-panel-hover-focus-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 90%, transparent)));
     outline: none;
   }
+  .poodle-media-browse-panel__item:active {
+    background: var(--poodle-recipe-media-browse-panel-item-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-media-browse-panel__image {
     display: block;

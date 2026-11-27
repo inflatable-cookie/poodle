@@ -77,6 +77,9 @@
   .poodle-page-loading__cancel:hover {
     background: var(--poodle-recipe-page-loading-hover-cancel-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)));
   }
+  .poodle-page-loading__cancel:active {
+    background: var(--poodle-recipe-page-loading-cancel-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-page-loading__cancel:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);

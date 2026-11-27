@@ -105,6 +105,9 @@
     background: var(--poodle-recipe-pagination-hover-focus-button-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
     outline: none;
   }
+  .poodle-pagination__button:active:not(:disabled) {
+    background: var(--poodle-recipe-pagination-button-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-pagination__ellipsis {
     display: inline-flex;

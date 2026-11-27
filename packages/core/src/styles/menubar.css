@@ -41,6 +41,9 @@
     background: var(--poodle-recipe-menubar-open-hover-focus-trigger-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)));
     outline: none;
   }
+  .poodle-menubar__trigger:active:not(:disabled) {
+    background: var(--poodle-recipe-menubar-trigger-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   /* The open trigger is the active item: its fill is the selection item fill.
      Declared after focus-visible so an open, focused trigger takes this fill. */
@@ -88,6 +91,9 @@
   .poodle-menubar__item:focus-visible {
     background: var(--poodle-recipe-menubar-hover-focus-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)));
     outline: none;
+  }
+  .poodle-menubar__item:active:not(:disabled) {
+    background: var(--poodle-recipe-menubar-item-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-menubar__meta {

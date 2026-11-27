@@ -744,6 +744,9 @@
     background: var(--poodle-recipe-list-card-hover-focus-context-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)));
     outline: none;
   }
+  .poodle-list-card__context-item:active:not(:disabled) {
+    background: var(--poodle-recipe-list-card-context-item-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-list-card__context-item[data-tone="danger"] {
     color: var(--poodle-recipe-list-card-danger-context-item-text, var(--poodle-color-status-danger));

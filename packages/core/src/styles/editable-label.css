@@ -38,6 +38,9 @@
     background: var(--poodle-recipe-editable-label-hover-focus-display-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 52%, transparent)));
     outline: none;
   }
+  .poodle-editable-label__display:active:not(:disabled) {
+    background: var(--poodle-recipe-editable-label-input-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-editable-label__display:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);

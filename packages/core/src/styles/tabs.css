@@ -606,6 +606,9 @@
     background: var(--poodle-recipe-tabs-hover-close-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 84%, transparent)));
     color: var(--poodle-recipe-tabs-hover-close-text, var(--poodle-color-text-primary));
   }
+  .poodle-tabs__close:active {
+    background: var(--poodle-recipe-tabs-close-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
   .poodle-tabs__close:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
