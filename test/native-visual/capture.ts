@@ -18,11 +18,21 @@ const PREVIEW_BIN = path.join(repoRoot, GPUI_PREVIEW_CWD, "target/debug/poodle-p
 
 /** Compile once, before any capture. Throws with cargo's output if it fails. */
 export function ensurePreviewBuilt(): void {
-  const build = Bun.spawnSync(["sh", path.join(repoRoot, "scripts/rust-driver.sh"), "build", "--quiet"], {
-    cwd: path.join(repoRoot, GPUI_PREVIEW_CWD),
-    stdout: "ignore",
-    stderr: "pipe",
-  });
+  const build = Bun.spawnSync(
+    [
+      "sh",
+      path.join(repoRoot, "scripts/rust-driver.sh"),
+      "build",
+      "--features",
+      "native-preview",
+      "--quiet",
+    ],
+    {
+      cwd: path.join(repoRoot, GPUI_PREVIEW_CWD),
+      stdout: "ignore",
+      stderr: "pipe",
+    },
+  );
   if (!build.success) {
     throw new Error(`preview build failed:\n${build.stderr.toString()}`);
   }
