@@ -807,12 +807,16 @@
 "test:headless-theme-resolver" = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/headless/Cargo.toml --test theme_resolver_conformance"
 "check:headless-theme-resolver" = "sh scripts/rust-driver.sh check --manifest-path packages/contracts/headless/Cargo.toml"
 "test:listbox-spec" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/contracts/components/Cargo.toml listbox::tests"
-# poodle#200 / i-362ac535a6740c52e0bf43d372882f72: compile every GPUI and
-# render test target on each Rust PR without running native tests. GPUI's Linux
-# font-kit build normally probes fontconfig with pkg-config; the dlopen mode
-# keeps this compile-only gate usable on the stock Ubuntu PR runner.
+# poodle#200 / i-362ac535a6740c52e0bf43d372882f72: compile every headless
+# GPUI preview integration target plus the GPUI adapter, node-backend and
+# render tests on each Rust PR. Name preview integration targets explicitly:
+# its default binary test target is the macOS AppKit application. GPUI's Linux
+# font-kit build uses dlopen to avoid requiring fontconfig pkg-config metadata.
 "check:gpui-render-test-targets" = [
-  { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/preview/Cargo.toml", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
+  { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
+  { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/preview/Cargo.toml --test catalogue", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
+  { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/preview/Cargo.toml --test icon_geometry_headless", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
+  { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/preview/Cargo.toml --test visual_fixture_inventory", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
   { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/adapter/Cargo.toml", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
   { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/node-backend/Cargo.toml", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
   { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/render/Cargo.toml" },
