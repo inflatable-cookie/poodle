@@ -364,15 +364,17 @@ function checkReleaseAutomation(): void {
   requireRun(native, "effigy ci:native", ".github/workflows/ci-native.yml");
 
   const rustSetup = "uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c";
-  for (const [source, file] of [
-    [rust, ".github/workflows/ci-rust.yml"],
-    [native, ".github/workflows/ci-native.yml"],
+  // ci-native builds GPUI's macOS crate, which needs Rust 1.98 from
+  // gpui-unofficial 1.30 (operator approval 2026-11-27); ci-rust stays on 1.95.
+  for (const [source, file, toolchain] of [
+    [rust, ".github/workflows/ci-rust.yml", "1.95"],
+    [native, ".github/workflows/ci-native.yml", "1.98"],
   ] as const) {
     assert(source.includes(rustSetup), `${file} must use the reviewed Rust action`);
-    assert(source.includes('toolchain: "1.95"'), `${file} must select Rust 1.95 explicitly`);
+    assert(source.includes(`toolchain: "${toolchain}"`), `${file} must select Rust ${toolchain} explicitly`);
   }
   assert(
-    !release.includes(rustSetup) && !release.includes('toolchain: "1.95"'),
+    !release.includes(rustSetup) && !/toolchain: "1\.\d+"/.test(release),
     "release.yml must not install a Rust toolchain",
   );
 

@@ -16,7 +16,7 @@ name: Release
 # No long-lived npm token: npm trusted publishing exchanges a short-lived OIDC
 # token for publish rights. Publication uses `--access public`, the runner is
 # Linux, and the job hard-stops at ten minutes. Aggregate `qa`, Rust, native,
-# GPUI and Jetstream selectors are not release authority and never appear here.
+# and GPUI selectors are not release authority and never appear here.
 #
 # Before the first run, each package needs its trusted publisher configured at
 # npmjs.com -> package -> Settings -> Trusted Publisher, naming this repository
