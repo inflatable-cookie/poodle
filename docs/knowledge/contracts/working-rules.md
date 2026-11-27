@@ -311,7 +311,8 @@ where the repository already provides the workaround, the trap links to it:
   [`test/browser-probe/`](../../../test/browser-probe/index.ts)
   (`withFixture` or `withPreviews`). Each run owns a server on an ephemeral
   port with its own vite cache, and stops it however the probe ends. Run one
-  through its selector, or all of them with `effigy probes:browser`.
+  through its selector, or all of them with `effigy probes:browser`, which
+  runs past failures and reports every result.
 - **WebKit:** some ports are restricted (for example 4190: "Not allowed to use
   restricted network port"). Never hand a probe a fixed port, and run one
   Playwright engine per process.

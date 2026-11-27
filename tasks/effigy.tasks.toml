@@ -1089,9 +1089,11 @@ qa = "bun scripts/validation/run-board.ts qa:board"
 
 # Milestone QA: every one-off browser probe under test/, one at a time. Needs
 # playwright browsers and built web dists (`effigy web:dist`); stays out of
-# ci:web. The shared boot is test/browser-probe. The first failure stops the
-# run, so the probes that fail on main (the last three) come last.
-"probes:browser" = [
+# ci:web. The shared boot is test/browser-probe. Every member runs, one engine
+# at a time, even after a failure; the run then fails if any of them did. A
+# plain task list would stop at the first failure.
+"probes:browser" = "bun test/browser-probe/run-all.ts probes:browser:members"
+"probes:browser:members" = [
   { task = "test:markdown-editor-preview-scroll" },
   { task = "test:motion-policy-browser" },
   { task = "test:block-slider-hit" },
