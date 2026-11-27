@@ -56,7 +56,7 @@ function diffRatio(a: Buffer, b: Buffer): number {
  * launch plus a wait for the file to appear — there is no window to drive.
  *
  * That also means it needs a live macOS window-server session, which is why
- * this gate is local-only, like `check:jetstream`.
+ * this gate is local-only.
  */
 /**
  * Capture until two consecutive attempts agree.

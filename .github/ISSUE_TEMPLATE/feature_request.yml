@@ -26,7 +26,6 @@ body:
         - label: Svelte
         - label: React
         - label: GPUI
-        - label: Jetstream
         - label: Shared contracts, tokens, icons, or tooling
   - type: textarea
     id: boundary

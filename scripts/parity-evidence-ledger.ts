@@ -893,10 +893,6 @@ runtime.
 - Portable native components: **${portableCount}**, derived from the generated catalogue.
 - Native \`not-applicable\`: **MeterSurface** only, by the fixed web-only
   boundary. It remains in the ${publicCount}-component public denominator.
-- Jetstream specimen deferred: **Listbox**; the shared Rust and GPUI
-  implementation is admitted, while Jetstream remains outside the task scope.
-- Jetstream: one program-level \`deferred\` target. Shared Rust composition and
-  the in-repo adapter do not make the sibling backend pass.
 
 ## Evidence vocabulary
 
@@ -923,7 +919,6 @@ ${summaryMarkdown(rows)}
 | React | implementation and focused tests are present; React axe sweep is missing | no React axe equivalent; Svelte axe evidence does not transfer |
 | Shared Rust | ${portableCount} renderer-neutral surfaces present; MeterSurface is not-applicable | \`packages/contracts/components/src/\`; \`packages/render/src/\` |
 | GPUI | ${portableCount}/${portableCount} portable specimen routes construct headlessly; mounted behaviour is bounded | \`packages/gpui/preview/src/specimen_probe.rs\`; \`packages/gpui/preview/tests/headless_regressions.rs\` |
-| Jetstream | deferred at program level | \`packages/jetstream/cross-runtime-parity-report.json\` |
 
 ## Component evidence ledger
 
@@ -989,12 +984,6 @@ ${expectedMapTable()}
   landed. \`g16.005\` closed Slider axis, keyboard, and mounted parity.
   \`g16.006\` closed Tabs drag, keyboard, and mounted parity. This ledger
   does not compile another card or choose a visual-fixture lane.
-
-## Jetstream posture
-
-| Target | Status | Boundary |
-| --- | --- | --- |
-| Jetstream backend admission | \`deferred\` | The sibling converter, input, accessibility, preview, and visual programme remains outside the active cohort. |
 
 ## Checker
 
@@ -1114,9 +1103,6 @@ export function validateLedgerText(markdown: string, root = ROOT): void {
   ];
   for (const phrase of requiredPhrases) {
     if (!markdown.includes(phrase)) errors.push(`missing limitations statement: ${phrase}`);
-  }
-  if (!/\| Jetstream backend admission \| `deferred` \|/.test(markdown)) {
-    errors.push("Jetstream posture is not program-level deferred.");
   }
 
   if (errors.length > 0) throw new Error(errors.join("\n"));

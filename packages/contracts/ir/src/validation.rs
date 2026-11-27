@@ -917,7 +917,6 @@ fn validate_component_capabilities(
                 crate::RuntimeTarget::Svelte,
                 crate::RuntimeTarget::React,
                 crate::RuntimeTarget::Gpui,
-                crate::RuntimeTarget::Jetstream,
             ] {
                 if !seen.contains(&runtime) {
                     findings.push(Finding::new(

@@ -83,7 +83,7 @@ see the core package README.
   host-owned semantics even when the components own shell posture
 - virtualization strategy, embed runtimes, and richer asset playback stay out
   of the public package contract for now
-- GPUI and Jetstream parity for this family is documented in contracts
+- GPUI parity for this family is documented in contracts
 
 See the [Svelte developer guide](https://github.com/inflatable-cookie/poodle/blob/main/docs/guides/svelte-developer-guide.md)
 for themes, icon generation, component conventions, and application recipes.

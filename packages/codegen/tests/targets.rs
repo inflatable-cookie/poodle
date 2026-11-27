@@ -450,7 +450,7 @@ fn conformance_vectors_carry_steps_kinds_and_declared_by() {
             .iter()
             .map(|target| target.as_str().expect("runtime target"))
             .collect::<Vec<_>>(),
-        vec!["svelte", "react", "gpui", "jetstream"]
+        vec!["svelte", "react", "gpui"]
     );
     assert_eq!(
         vector["declared_by"][0].as_str(),

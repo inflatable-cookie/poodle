@@ -297,7 +297,6 @@ fn render_scene_file(scene: &Scene, source_path: &str) -> String {
                         poodle_ir::RuntimeTarget::Svelte => "svelte",
                         poodle_ir::RuntimeTarget::React => "react",
                         poodle_ir::RuntimeTarget::Gpui => "gpui",
-                        poodle_ir::RuntimeTarget::Jetstream => "jetstream",
                     })
                 })
                 .collect::<Vec<_>>()

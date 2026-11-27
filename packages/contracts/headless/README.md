@@ -4,7 +4,7 @@ Pure Rust state machines and interaction rules shared by Poodle's native
 renderers.
 
 The crate covers text editing, selection, disclosure, overlays, menus, dates,
-sliders, and other behavior that must not drift between GPUI and Jetstream.
+sliders, and other behavior that native components share.
 Conformance fixtures keep these rules aligned with
 `@inflatable-cookie/poodle-core` on the web.
 

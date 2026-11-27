@@ -158,7 +158,7 @@ join or filter a declared array again.
 - Nothing about whether Button is correct, complete, or at parity. The
   inventory is diagnostic; it cannot mark a component done.
 - Nothing about renderers that do not yet consume it — Svelte, React, and GPUI
-  adapters arrive in `g15.047`, and Jetstream is out of scope.
+  adapters arrive in `g15.047`.
 - Nothing about coverage. 18 sampled cases of one component say nothing about
   the other components or the untested variant × tone combinations.
 

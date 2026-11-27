@@ -16,7 +16,6 @@ body:
         - Svelte
         - React
         - GPUI
-        - Jetstream
         - Shared web core, tokens, or icons
         - Shared Rust contracts or renderer
         - Documentation or tooling

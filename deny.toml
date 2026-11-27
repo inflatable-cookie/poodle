@@ -6,7 +6,7 @@ unsound = "all"
 yanked = "deny"
 
 [licenses]
-# Permissive licenses present in Poodle's four public Rust dependency graphs.
+# Permissive licenses present in Poodle's three public Rust dependency graphs.
 # `cargo deny check licenses` still rejects any new identifier until this policy
 # is reviewed deliberately.
 unused-allowed-license = "allow"

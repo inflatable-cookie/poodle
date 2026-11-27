@@ -1,7 +1,7 @@
 [tasks]
-# No root Cargo.toml on purpose: the crates are independent (the jetstream
-# tree path-depends on the sibling engine repo), so Rust deps are fetched
-# per manifest by the script rather than assuming a workspace at the root.
+# No root Cargo.toml on purpose: the crates are independent, so Rust deps are
+# fetched per manifest by the script rather than assuming a workspace at the
+# root.
 "bootstrap:deps" = [
   "bun install",
   "bun scripts/bootstrap-rust.ts",
@@ -54,13 +54,11 @@
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/svelte/preview/src --target shell-scene" },
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/react/preview/src --target shell-scene" },
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/gpui/preview/src --target shell-rust" },
-  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/jetstream/preview/src --target shell-rust" },
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --machine-interfaces packages/contracts/headless/machine-interfaces.json --out packages/core/src --target machine-ts" },
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --machine-interfaces packages/contracts/headless/machine-interfaces.json --out packages/contracts/headless/src --target machine-rust" },
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/svelte/preview/src --target specimen-ts" },
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/react/preview/src --target specimen-ts" },
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/gpui/preview/src --target specimen-rust" },
-  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/jetstream/preview/src --target specimen-rust" },
 ]
 "ir:check" = [
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-shell packages/codegen/fixtures/shell-model.json --check" },
@@ -69,26 +67,22 @@
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/svelte/preview/src --target shell-scene --check" },
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/react/preview/src --target shell-scene --check" },
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/gpui/preview/src --target shell-rust --check" },
-  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/jetstream/preview/src --target shell-rust --check" },
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --machine-interfaces packages/contracts/headless/machine-interfaces.json --out packages/core/src --target machine-ts --check" },
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --machine-interfaces packages/contracts/headless/machine-interfaces.json --out packages/contracts/headless/src --target machine-rust --check" },
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/svelte/preview/src --target specimen-ts --check" },
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/react/preview/src --target specimen-ts --check" },
   { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/gpui/preview/src --target specimen-rust --check" },
-  { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/jetstream/preview/src --target specimen-rust --check" },
 ]
 
     "catalogue:build" = [
       { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/svelte/preview/src --target catalogue-ts" },
       { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/react/preview/src --target catalogue-ts" },
       { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/gpui/preview/src --target catalogue-rust" },
-      { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/jetstream/preview/src --target catalogue-rust" },
     ]
     "catalogue:check" = [
       { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/svelte/preview/src --target catalogue-ts --check" },
       { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/react/preview/src --target catalogue-ts --check" },
       { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/gpui/preview/src --target catalogue-rust --check" },
-      { run = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/jetstream/preview/src --target catalogue-rust --check" },
     ]
 
     # Focused native regression board (g14.021).
@@ -166,16 +160,6 @@
 "gpui:test" = "sh scripts/rust-driver.sh test -p poodle-gpui --manifest-path packages/gpui/adapter/Cargo.toml"
 "gpui:preview" = [{ task = "gpui:run" }]
 
-# Jetstream native preview (game engine)
-# Preflight names a missing or stale sibling checkout instead of cargo's
-# unresolved path error. Poodle does not vendor Jetstream.
-"jetstream:build" = "bun scripts/jetstream-build.ts"
-"check:jetstream-preview" = "sh scripts/rust-driver.sh check -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
-"jetstream:run" = "sh scripts/rust-driver.sh run -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml -- {args}"
-# Theme and accessibility role tests. No sibling checkout is needed.
-"jetstream:test" = "sh scripts/rust-driver.sh test --manifest-path packages/jetstream/adapter/Cargo.toml"
-"jetstream:preview" = [{ task = "jetstream:run" }]
-
 # Reports
 "report:parity" = [
   { task = "tokens:build" },
@@ -194,7 +178,7 @@
 "test:gpui-census" = "bun test --timeout 120000 scripts/gpui-functionality-census.test.ts"
 "update:gpui-census" = "bun scripts/gpui-functionality-census.ts {args}"
 
-# CI gates — light, ubuntu-only. No native (gpui/jetstream) crates, no vite
+# CI gates — light, ubuntu-only. No native (GPUI) crates, no vite
 # preview builds. The GitHub workflows bootstrap their pinned runtimes and
 # Effigy before launching the named selectors. `effigy ci` is the local gate
 # when dependencies are already installed. `effigy ci:fresh` is the
@@ -318,7 +302,6 @@
   { run = "sh scripts/rust-driver.sh deny --manifest-path packages/render/Cargo.toml check advisories sources" },
   { run = "sh scripts/rust-driver.sh deny --manifest-path packages/gpui/node-backend/Cargo.toml check advisories sources" },
   { run = "sh scripts/rust-driver.sh deny --manifest-path packages/gpui/adapter/Cargo.toml check advisories sources" },
-  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/jetstream/adapter/Cargo.toml check advisories sources" },
 ]
 "test:repository-security" = "bun test scripts/audit-repository-security.test.ts"
 # cargo deny runs through scripts/rust-driver.sh: `oxide deny` locally, `cargo` under
@@ -328,7 +311,6 @@
   { run = "sh scripts/rust-driver.sh deny --manifest-path packages/render/Cargo.toml check licenses" },
   { run = "sh scripts/rust-driver.sh deny --manifest-path packages/gpui/node-backend/Cargo.toml check licenses" },
   { run = "sh scripts/rust-driver.sh deny --manifest-path packages/gpui/adapter/Cargo.toml check licenses" },
-  { run = "sh scripts/rust-driver.sh deny --manifest-path packages/jetstream/adapter/Cargo.toml check licenses" },
 ]
 # Svelte <-> React anatomy parity gate (subset of the vitest run above; also
 # usable standalone). Diffs the poodle-* classes each implementation emits.
@@ -593,7 +575,7 @@
 # Native visual gate (g12.014). Baseline-based rather than cross-target: GPUI is
 # a different renderer, so a diff against Svelte would be all noise. LOCAL-ONLY —
 # the GPUI preview screenshots its own window, so it needs a live macOS window
-# server, same constraint as check:jetstream.
+# server.
 "test:native-visual" = "bun test/native-visual/run.ts"
 # Refresh preserves before/after/diff evidence plus a machine-readable manifest
 # in a timestamped test/native-visual/out/ run directory. Comparison never
@@ -601,34 +583,10 @@
 "native-visual:refresh" = "bun test/native-visual/run.ts --refresh"
 "native-visual:update" = "bun test/native-visual/run.ts --refresh"
 
-# Jetstream native visual gate — headless offscreen render, no window server.
-# 135 specimens in ~90s with zero flake, where the GPUI gate takes ~20min with
-# ~3%. This is the one to trust. Still local-only, but only because it needs the
-# sibling jetstream repo — nothing about it requires a display.
-"test:jetstream-visual" = "bun test/native-visual/jetstream.ts"
-"jetstream-visual:update" = "bun test/native-visual/jetstream.ts --update"
-# Reads the preview's real macOS accessibility tree through AXUIElement.
-# Local-only: needs a window server and Accessibility permission.
-"test:jetstream-ax" = "bun test/native-visual/ax-audit.ts"
 # Reads named Poodle controls from a live GPUI AccessKit tree through
 # AXUIElement. Its focus:false window is monitored and never activated; the
 # selector also proves its name audit rejects a planted unnamed control.
 "test:gpui-ax" = "bun packages/gpui/preview/scripts/gpui-ax-audit.ts"
-"jetstream-ax:dump" = "bun test/native-visual/ax-audit.ts --dump"
-# Projects every specimen's accessibility tree headlessly — no window, no
-# display, all 132 specimens. Complements test:jetstream-ax, which proves the
-# tree reaches macOS but only for the screen the preview is showing.
-"test:jetstream-a11y" = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin a11y"
-"jetstream-a11y:roles" = "sh scripts/rust-driver.sh run --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin a11y -- --roles"
-# Contract ARIA roles vs the roles Jetstream actually projects — the
-# accessibility counterpart of contract-spec-drift.
-#
-# Gating. It gated once before on a false zero: the exemption list was written
-# by reasoning rather than checking, and hid 20 real gaps behind "needs an
-# overlay open". The list is now verified against the specimen sources, so a
-# component whose specimen opens the overlay cannot claim the excuse.
-"drift:roles" = "bun --cwd packages/svelte/preview scripts/contract-role-drift.ts"
-
 # Svelte type gate over @inflatable-cookie/poodle-svelte. Driven through the install-smoke consumer
 # because svelte-check needs a tsconfig + a resolved `svelte` — and it type-checks
 # the WHOLE linked component package, not just what the smoke app imports
@@ -711,7 +669,7 @@
 "docs:react-specimen-drift" = "bun packages/svelte/preview/scripts/react-specimen-drift.ts"
 # The g13.018 capability gate: every declared per-runtime capability row —
 # provided, delegated, or absent with a reason — must be true against the
-# runtime sources. Absence must stay true (Jetstream gains an edit handler
+# runtime sources. Absence must stay true (a runtime gains an edit handler
 # while still declared as lacking text editing → fail) and a provision must
 # have a trace (a runtime claiming a capability it does not implement →
 # fail). Both directions proven live by card 051. Runs inside ci:web; this
@@ -770,20 +728,8 @@
   { run = "bun scripts/check-react-stylesheet-imports.ts" },
   { run = "bun test scripts/check-react-stylesheet-imports.test.ts" },
 ]
-# The Jetstream sibling, and stronger: GPUI can only check that a handler field
-# is read, because a real click there needs a live window. Jetstream dispatches
-# clicks with no window, so this demands a test that actually drives one. Also
-# `drift:clicks` is retired: it proved a real pointer gesture reached every
-# Jetstream builder, but its subject — `poodle-jetstream-components` and its
-# `click_probe` tests — was deleted in `ee704699` when Jetstream moved onto
-# `poodle-render` nodes. The adapter that replaced it lives in the sibling
-# jetstream repo, which is outside this repo's boundary, so the gate has
-# nothing here to watch. GPUI's `drift:handlers` survives and now covers the
-# shared `poodle-render` handlers both targets render, and `drift:events`
-# recovers the half of its rule that was genuinely lost: a control that is
-# rendered but that no host can reach.
 # Pure contract crates only — each is a separate crate tree, all cross-platform
-# (no gpui/game_ui deps). Native component crates are covered locally/nightly.
+# (no GPUI deps). Native component crates are covered locally/nightly.
 "test:conformance-kit" = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/conformance/Cargo.toml {args}"
 "test:contracts" = [
   { task = "test:conformance-kit" },
@@ -978,16 +924,14 @@
 # new modules would silently escape. Runtime recorded 2026-09-30 (warm
 # checkout): 8s wall, 1.6s of test time.
 "test:gpui-preview" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview"
-"test:jetstream-preview" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin poodle-jetstream-preview"
 # The native presentation cascade (architecture 010, g15.043): component specs
 # keep size/density omission, public renderers take RenderContext rather than
 # a bare ThemeProvider, and the GPUI preview never regains a passthrough or
 # manual-equivalent UiPresentationProvider. Planted regressions of all three
 # classes were proven caught.
 "drift:presentation-cascade" = "bun scripts/check-presentation-cascade.ts"
-# Self-contained native board. This intentionally stops at Poodle-owned Rust,
-# GPUI, and the in-repo Jetstream adapter; it must run from an ordinary Poodle
-# worktree with no sibling engine checkout.
+# Self-contained native board: Poodle-owned Rust and GPUI. It must run from an
+# ordinary Poodle worktree.
 "ci:native" = [
   { task = "drift:handlers" },
   { task = "drift:events" },
@@ -995,7 +939,6 @@
   { task = "drift:presentation-cascade" },
   { task = "check:gpui" },
   { task = "gpui:test" },
-  { task = "jetstream:test" },
   # Focused native regressions on GPUI's in-memory test platform (g14.023,
   # retained by g14.021): no window, no focus, no OS activation.
   { task = "regressions:native" },
@@ -1010,19 +953,6 @@
   # The capture target's own headless surface: the activation boundary, the
   # device-size policy, and every rejected-before-a-window negative case.
   { task = "smoke:gpui-window-capture" },
-]
-
-# Paired-repository Jetstream admission board. The preview, accessibility
-# projection, and role drift checks path-depend on the sibling Jetstream engine
-# and therefore stay explicit rather than leaking into default QA.
-"ci:jetstream" = [
-  { task = "jetstream:build" },
-  { task = "test:jetstream-a11y" },
-  { task = "drift:roles" },
-]
-"qa:jetstream" = [
-  { task = "ci:jetstream" },
-  { task = "test:jetstream-visual" },
 ]
 
 # Documentation
@@ -1074,10 +1004,9 @@ health = [
   { task = "docs:lint" },
 ]
 
-# Full self-contained local release board (headless / CPU-only). Visual GPUI
-# and paired Jetstream sweeps stay separate (`test:native-visual`,
-# `qa:jetstream`). Was previously misnamed `health`, which made every
-# `effigy doctor` run the whole suite.
+# Full self-contained local release board (headless / CPU-only). The GPUI
+# visual sweep stays separate (`test:native-visual`). Was previously misnamed
+# `health`, which made every `effigy doctor` run the whole suite.
 #
 # g18.032 / spec 071: `qa:board` is the complete assertion inventory. `qa`
 # executes it through the bounded, observable validation runner, which emits a

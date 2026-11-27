@@ -41,13 +41,10 @@ Do not duplicate component styling between Svelte and React.
 ## Native Substrates
 
 Rust component specs are renderer-neutral data. `poodle-render` turns a spec,
-theme provider, slots, and handlers into a `poodle-node` tree. GPUI and
-Jetstream backends interpret that tree using runtime-native layout, drawing,
-input, text, focus, and lifecycle facilities.
-
-Jetstream's preview uses that node route through the sibling repository's
-`jetstream-poodle` converter. Shared renderer tests exercise node composition
-with a token-backed fixture that requires neither backend.
+theme provider, slots, and handlers into a `poodle-node` tree. The GPUI backend
+interprets that tree using runtime-native layout, drawing, input, text, focus,
+and lifecycle facilities. Shared renderer tests exercise node composition with
+a token-backed fixture that requires no backend.
 
 Shared composition and appearance belong in `poodle-render`. A backend-specific
 branch is justified only by a runtime capability or limitation, and any

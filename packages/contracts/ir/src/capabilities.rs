@@ -75,7 +75,7 @@ pub struct CapabilityRequirement {
     /// contract section, e.g. "caret/selection ownership — `T §6` (`TXT-21`)".
     pub purpose: String,
     /// Per-runtime provision of the capability (`IR-08`; `g13.018` R3):
-    /// which of the four runtimes provide it and which do not, each with
+    /// which of the three runtimes provide it and which do not, each with
     /// a reason. When declared, validation requires every runtime to be
     /// listed — "not listed" must never silently mean "absent". Pre-`g13.018`
     /// requirements (capability + purpose only) stay valid and serialize
@@ -107,9 +107,9 @@ pub enum CapabilityProvision {
 /// R3): explicit provision or explicit, reasoned absence.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CapabilityRuntimeStatus {
-    /// The runtime this row describes. Reuses [`RuntimeTarget`] — the four
-    /// pilot runtimes (`Svelte`, `React`, `Gpui`, `Jetstream`); there is
-    /// deliberately no second runtime list (`g13.018` R2).
+    /// The runtime this row describes. Reuses [`RuntimeTarget`] — the three
+    /// runtimes (`Svelte`, `React`, `Gpui`); there is deliberately no second
+    /// runtime list (`g13.018` R2).
     pub runtime: RuntimeTarget,
     /// Whether the runtime provides, delegates, or lacks the capability.
     pub provision: CapabilityProvision,

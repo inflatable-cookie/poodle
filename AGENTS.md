@@ -2,10 +2,10 @@
 
 Poodle is a generalized design system: tokens, primitives and reusable
 composites, delivered as Svelte and React web packages and a shared Rust
-renderer with GPUI and Jetstream backends, all bound to one set of
-renderer-neutral contracts. It serves applications that need one UI language
-across web and native. It must never become a home for one product's widgets
-or a consumer-shaped adapter layer.
+renderer with a GPUI backend, all bound to one set of renderer-neutral
+contracts. It serves applications that need one UI language across web and
+native. It must never become a home for one product's widgets or a
+consumer-shaped adapter layer.
 
 ## Where things live
 
@@ -44,8 +44,8 @@ guardrails below stay local.
   App-specific DAW widgets stay in their owning products.
 - Svelte, React, shared Rust composition and GPUI follow one documented
   contract. Parity means semantic inputs, states, behavior and token use first.
-  Svelte is the parity authority. Jetstream follows its admission status in
-  [working rules](docs/knowledge/contracts/working-rules.md).
+  Svelte is the parity authority. GPUI is the one native backend; see
+  [vision](docs/knowledge/vision.md#direction).
 - Underlay and its applications import Poodle's published packages directly;
   any translation lives in the consumer. Poodle carries no consumer-named
   directory or adapter (architecture 001, operator decision 2026-09-02).
@@ -81,8 +81,6 @@ Targeted checks per task, full QA at milestones (Tom, 2026-09-30).
 
 - **Set up fresh worktrees explicitly.** Nucleus allocates the Git worktree.
   Run `effigy bootstrap:deps && effigy web:dist` before your first check.
-  For Jetstream preview work, first follow the
-  [local Jetstream setup](docs/guides/jetstream-developer-guide.md#set-up-jetstream).
 - **Workers** run, once, the Effigy selectors for the code they changed, a
   compile or type check of what they touched, and `effigy docs:lint` if docs
   or evidence changed. Then they open the PR. No whole suites (`qa`,
@@ -101,10 +99,10 @@ Kill only processes you started, by PID; never `pkill -f` or `killall`. Run
 [working rules](docs/knowledge/contracts/working-rules.md#validation).
 
 <!-- oxide:begin -->
-<!-- oxide:workspaces: packages/codegen packages/contracts/adapter packages/contracts/components packages/contracts/events packages/contracts/headless packages/contracts/ir packages/contracts/layout packages/contracts/markdown packages/contracts/node packages/contracts/style packages/contracts/tokens packages/gpui/adapter packages/gpui/node-backend packages/gpui/preview packages/jetstream/adapter packages/jetstream/preview packages/render -->
+<!-- oxide:workspaces: packages/codegen packages/contracts/adapter packages/contracts/components packages/contracts/events packages/contracts/headless packages/contracts/ir packages/contracts/layout packages/contracts/markdown packages/contracts/node packages/contracts/style packages/contracts/tokens packages/gpui/adapter packages/gpui/node-backend packages/gpui/preview packages/render -->
 ## Rust commands: use `oxide`
 
-Covers Cargo workspaces `packages/codegen`, `packages/contracts/adapter`, `packages/contracts/components`, `packages/contracts/events`, `packages/contracts/headless`, `packages/contracts/ir`, `packages/contracts/layout`, `packages/contracts/markdown`, `packages/contracts/node`, `packages/contracts/style`, `packages/contracts/tokens`, `packages/gpui/adapter`, `packages/gpui/node-backend`, `packages/gpui/preview`, `packages/jetstream/adapter`, `packages/jetstream/preview`, `packages/render`, relative to this file's folder.
+Covers Cargo workspaces `packages/codegen`, `packages/contracts/adapter`, `packages/contracts/components`, `packages/contracts/events`, `packages/contracts/headless`, `packages/contracts/ir`, `packages/contracts/layout`, `packages/contracts/markdown`, `packages/contracts/node`, `packages/contracts/style`, `packages/contracts/tokens`, `packages/gpui/adapter`, `packages/gpui/node-backend`, `packages/gpui/preview`, `packages/render`, relative to this file's folder.
 
 - Write `oxide` wherever you would write `cargo`: `oxide check`, `oxide test`, `oxide run -- <args>`, `oxide add <crate>`.
 - Profiles: `quick` (default), `--profile debug` for a debugger, `--release`. Oxide places build output, so it refuses `--target-dir`.

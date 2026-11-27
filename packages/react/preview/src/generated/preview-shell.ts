@@ -5,7 +5,7 @@
 export const previewShell = {
   id: "preview-shell",
   name: "Preview shell",
-  description: "The shared preview shell of g13.004: theme/size/density/contrast axes (SHELL-01-04), navigation (SHELL-05), search (SHELL-06), specimen tabs (SHELL-07), preview state (SHELL-08), and parity vocabulary (SHELL-09). Rendered by all four runtimes.",
+  description: "The shared preview shell of g13.004: theme/size/density/contrast axes (SHELL-01-04), navigation (SHELL-05), search (SHELL-06), specimen tabs (SHELL-07), preview state (SHELL-08), and parity vocabulary (SHELL-09). Rendered by all three runtimes.",
   controls: [
     { kind: "theme", label: "Theme", values: ["clay", "cobalt", "eclipse", "forest", "graphite", "hornet", "iceberg", "meadow", "midnight", "nord", "rose", "solarized"] },
     { kind: "size", label: "Size", values: ["xs", "sm", "md", "lg", "xl"] },
@@ -39,7 +39,7 @@ export const previewShell = {
       contrast: 0.5,
     },
     reviewRoutePresets: ["components", "tokens"],
-    targets: ["svelte", "react", "gpui", "jetstream"],
+    targets: ["svelte", "react", "gpui"],
     visualGates: [
       { tier: "smoke", axes: [] },
       { tier: "axis", axes: ["size", "density", "contrast"] },

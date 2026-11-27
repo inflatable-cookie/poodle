@@ -166,22 +166,6 @@
       "channel": "internal"
     },
     {
-      "name": "poodle-jetstream",
-      "path": "packages/jetstream/adapter",
-      "kind": "theme-provider",
-      "language": "rust",
-      "publicIntent": true,
-      "channel": "preview"
-    },
-    {
-      "name": "poodle-jetstream-preview",
-      "path": "packages/jetstream/preview",
-      "kind": "tooling",
-      "language": "rust",
-      "publicIntent": false,
-      "channel": "internal"
-    },
-    {
       "name": "poodle-codegen",
       "path": "packages/codegen",
       "kind": "tooling",

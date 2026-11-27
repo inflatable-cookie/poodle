@@ -414,7 +414,7 @@
     {
       "id": "gauge-bounds",
       "name": "gauge bounds",
-      "applies_to": ["svelte", "react", "gpui", "jetstream"],
+      "applies_to": ["svelte", "react", "gpui"],
       "steps": [
         {
           "id": "lower-at-most-upper",

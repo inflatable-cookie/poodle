@@ -101,7 +101,7 @@ export const WEB_ONLY: Record<string, Record<string, string>> = {
     crossWindowSourceBridge:
       "cross-window bridge is a host capability, not renderer-neutral component data",
     element:
-      "AppHeader bindable DOM node (g13-b014) for host-attached behaviour; GPUI/Jetstream own window dragging as an adapter capability",
+      "AppHeader bindable DOM node (g13-b014) for host-attached behaviour; GPUI owns window dragging as an adapter capability",
   },
   "model-connection-card": {
     defaultOpen:
@@ -144,7 +144,7 @@ export const WEB_ONLY: Record<string, Record<string, string>> = {
     focusOnValueChange:
       "g16.060: controlled-panel focus transfer is a DOM adapter effect; native has no panel-unmount capture here",
     panelScroll:
-      "web-only scroll ownership is CSS overflow on the DOM panel; GPUI/Jetstream have no DOM panel scroll container",
+      "web-only scroll ownership is CSS overflow on the DOM panel; GPUI has no DOM panel scroll container",
   },
 };
 

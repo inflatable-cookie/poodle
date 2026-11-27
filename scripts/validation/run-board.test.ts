@@ -94,7 +94,7 @@ describe("validation board repository inventory", () => {
     const runner = readFileSync(join(repoRoot, "scripts/validation/fresh.ts"), "utf8");
     expect(runner).toContain('run("bun", ["install", "--frozen-lockfile"], path)');
     expect(runner).toContain('run("effigy", ["ci"], path)');
-    expect(runner).not.toMatch(/native|windowed|jetstream|release:|"qa"/);
+    expect(runner).not.toMatch(/native|windowed|release:|"qa"/);
     const ci = collectUnits(nodes, "ci", repoRoot, policy).units.map((unit) => unit.label);
     expect(ci).toContain("test:core");
   });

@@ -18,11 +18,10 @@ export type ComponentEntry = CatalogueNavEntry & {
  * Web-only catalogue entries.
  *
  * The canonical catalogue is the portable component inventory and also feeds
- * the GPUI and Jetstream preview catalogues. Surfaces without a current shared
- * native implementation stay in this web catalogue supplement until admitted
- * to the portable inventory. MeterSurface is permanently web-only (spec 068 /
- * g14.024). Listbox is now canonical; Jetstream's specimen remains deferred in
- * its local registry.
+ * the GPUI preview catalogue. Surfaces without a current shared native
+ * implementation stay in this web catalogue supplement until admitted to the
+ * portable inventory. MeterSurface is permanently web-only (spec 068 /
+ * g14.024). Listbox is now canonical.
  */
 export const webOnlyComponents: CanonicalComponent[] = [
   {

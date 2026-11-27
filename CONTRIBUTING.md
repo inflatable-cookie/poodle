@@ -29,7 +29,7 @@ the local environment is unclear.
   stay in the application.
 - Shared web state and CSS belong in `poodle-core`.
 - Shared native component recipes belong in `poodle-render`.
-- GPUI and Jetstream backends own runtime interpretation only.
+- The GPUI backend owns runtime interpretation only.
 - Underlay-facing APIs remain Underlay-owned behind the bridge.
 
 Read the [product guardrails](docs/knowledge/architecture/product-guardrails.md) and

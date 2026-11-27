@@ -9,7 +9,7 @@ permitted subsets, props, controlled state, events, anatomy parts,
 state-derived attributes, axes, token and recipe references, accessibility
 intent, adapter capabilities, keyboard tables, VisualState projections,
 conformance vectors, and scenes. It does not render, does not generate code,
-and depends on no framework, DOM, GPUI, Jetstream, or `poodle-node` types.
+and depends on no framework, DOM, GPUI, or `poodle-node` types.
 
 Governing references:
 

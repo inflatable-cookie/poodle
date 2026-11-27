@@ -480,7 +480,7 @@
           "default": null,
           "required": false,
           "web_only": false,
-          "description": "fixture content prop (g14-b005): projected to children on web, the native spec content field on GPUI/Jetstream",
+          "description": "fixture content prop (g14-b005): projected to children on web, the native spec content field on GPUI",
           "permitted_subset": null
         },
         {
@@ -692,7 +692,7 @@
           "default": null,
           "required": false,
           "web_only": false,
-          "description": "fixture content prop (g14-b005): projected to children on web, the native spec label field on GPUI/Jetstream",
+          "description": "fixture content prop (g14-b005): projected to children on web, the native spec label field on GPUI",
           "permitted_subset": null
         },
         {

@@ -9,8 +9,7 @@
       "applies_to": [
         "svelte",
         "react",
-        "gpui",
-        "jetstream"
+        "gpui"
       ],
       "declared_by": [
         "gauge"

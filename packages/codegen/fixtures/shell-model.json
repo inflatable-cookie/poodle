@@ -7,7 +7,7 @@
     {
       "id": "preview-shell",
       "name": "Preview shell",
-      "description": "The shared preview shell of g13.004: theme/size/density/contrast axes (SHELL-01-04), navigation (SHELL-05), search (SHELL-06), specimen tabs (SHELL-07), preview state (SHELL-08), and parity vocabulary (SHELL-09). Rendered by all four runtimes.",
+      "description": "The shared preview shell of g13.004: theme/size/density/contrast axes (SHELL-01-04), navigation (SHELL-05), search (SHELL-06), specimen tabs (SHELL-07), preview state (SHELL-08), and parity vocabulary (SHELL-09). Rendered by all three runtimes.",
       "instances": [],
       "axes": [
         {
@@ -121,8 +121,7 @@
         "targets": [
           "svelte",
           "react",
-          "gpui",
-          "jetstream"
+          "gpui"
         ],
         "visual_gates": [
           {

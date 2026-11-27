@@ -24,8 +24,6 @@ pub enum RuntimeTarget {
     React,
     #[serde(rename = "gpui")]
     Gpui,
-    #[serde(rename = "jetstream")]
-    Jetstream,
 }
 
 /// A shared conformance vector — machine semantics executed by each runtime

@@ -19,7 +19,6 @@
 #       packages/contracts/tokens/src/generated/    build-tokens.ts
 #       packages/contracts/headless/src/generated/  poodle-codegen `machine-rust`
 #       packages/gpui/preview/src/generated/        poodle-codegen `shell-rust`, `specimen-rust`, `catalogue-rust`
-#       packages/jetstream/preview/src/generated/   same targets
 #   - `*.generated.rs`:
 #       packages/contracts/components/src/icon_geometry.generated.rs  build-default-icons.ts
 #
@@ -161,7 +160,6 @@ self_test() {
   expect_generated "packages/contracts/tokens/src/generated/primitives.rs"
   expect_generated "packages/contracts/headless/src/generated/machines/modal.rs"
   expect_generated "packages/gpui/preview/src/generated/preview-shell.rs"
-  expect_generated "packages/jetstream/preview/src/generated/specimens/specimens.rs"
   expect_generated "packages/contracts/components/src/icon_geometry.generated.rs"
   # 2. Authored files survive, including generated-adjacent names.
   expect_authored "packages/render/src/action_discovery_panel.rs"

@@ -202,8 +202,6 @@ const CARGO_CRATE_NAMES: Record<string, string> = {
   "packages/gpui/adapter/Cargo.toml": "poodle-gpui",
   "packages/gpui/node-backend/Cargo.toml": "poodle-gpui-node-backend",
   "packages/gpui/preview/Cargo.toml": "poodle-gpui-preview",
-  "packages/jetstream/adapter/Cargo.toml": "poodle-jetstream",
-  "packages/jetstream/preview/Cargo.toml": "poodle-jetstream-preview",
   "packages/render/Cargo.toml": "poodle-render",
   "packages/specimens/Cargo.toml": "poodle-specimens",
 };

@@ -83,7 +83,7 @@ pub struct ShellScene {
 pub static PREVIEW_SHELL: ShellScene = ShellScene {
     id: "preview-shell",
     name: "Preview shell",
-    description: "The shared preview shell of g13.004: theme/size/density/contrast axes (SHELL-01-04), navigation (SHELL-05), search (SHELL-06), specimen tabs (SHELL-07), preview state (SHELL-08), and parity vocabulary (SHELL-09). Rendered by all four runtimes.",
+    description: "The shared preview shell of g13.004: theme/size/density/contrast axes (SHELL-01-04), navigation (SHELL-05), search (SHELL-06), specimen tabs (SHELL-07), preview state (SHELL-08), and parity vocabulary (SHELL-09). Rendered by all three runtimes.",
     controls: &[
         ShellControl { kind: "theme", label: "Theme", values: Some(&["clay", "cobalt", "eclipse", "forest", "graphite", "hornet", "iceberg", "meadow", "midnight", "nord", "rose", "solarized"]), min: None, max: None, default_value: None, placeholder: None },
         ShellControl { kind: "size", label: "Size", values: Some(&["xs", "sm", "md", "lg", "xl"]), min: None, max: None, default_value: None, placeholder: None },
@@ -117,7 +117,7 @@ pub static PREVIEW_SHELL: ShellScene = ShellScene {
             contrast: Some(0.5),
         },
         review_route_presets: &["components", "tokens"],
-        targets: &["svelte", "react", "gpui", "jetstream"],
+        targets: &["svelte", "react", "gpui"],
         visual_gates: &[
             ShellVisualGate { tier: "smoke", axes: &[] },
             ShellVisualGate { tier: "axis", axes: &["size", "density", "contrast"] },

@@ -16,7 +16,7 @@ audience.
 ## Product Purpose
 
 Poodle is a contract-first design system for applications that need one UI
-language across Svelte, React, GPUI, and Jetstream. It makes component meaning,
+language across Svelte, React, and GPUI. It makes component meaning,
 design tokens, themes, interaction rules, and accessibility expectations
 portable across runtimes while leaving each renderer idiomatic.
 
@@ -38,7 +38,7 @@ Product engineers consume published runtime packages, exact pre-1.0 versions,
 component contracts, integration guides, and generated theme assets. Maintainers
 work from normative component contracts and W3C DTCG token sources, exercise
 Svelte and React previews, and verify native behavior through the shared Rust
-renderer and its GPUI or Jetstream backend.
+renderer and its GPUI backend.
 
 Poodle is evaluated through real component behavior and parity evidence.
 Preview galleries help explore the system but do not by themselves prove
@@ -53,9 +53,8 @@ conformance.
   accessibility behavior, layout, token usage, and allowed runtime differences.
 - Web behavior and styles are shared through `@inflatable-cookie/poodle-core`;
   Svelte and React expose thin idiomatic shells.
-- Native composition is shared through `poodle-render`; GPUI and Jetstream
-  backends interpret renderer-neutral nodes rather than reimplementing
-  components.
+- Native composition is shared through `poodle-render`; the GPUI backend
+  interprets renderer-neutral nodes rather than reimplementing components.
 - The W3C DTCG token schema generates aligned CSS, TypeScript, and Rust
   artifacts. Theme, density, and control size are independent axes.
 - Engine-backed editors wrap CodeMirror, TipTap, and ProseMirror behind narrow
@@ -66,8 +65,7 @@ conformance.
   consumer.
 - Poodle is pre-1.0. Breaking changes may ship in `0.x` minor releases; adopters
   pin exact versions and read release notes.
-- Svelte and GPUI are preview surfaces, React is experimental, and Jetstream
-  integration remains deferred until explicitly admitted.
+- Svelte and GPUI are preview surfaces and React is experimental.
 
 ## Brand Commitments
 
@@ -83,7 +81,7 @@ behavior.
 - Package and renderer ownership: `docs/knowledge/architecture/001-poodle-system-shape.md`.
 - Normative behavior: `docs/contracts/components/`.
 - Canonical token sources: `packages/tokens/schema/`.
-- Real Svelte, React, GPUI, and Jetstream preview surfaces under `packages/`.
+- Real Svelte, React, and GPUI preview surfaces under `packages/`.
 - Tests and parity receipts under `docs/evidence/` record implementation
   and validation history. They are evidence, not substitutes for current
   component contracts.
