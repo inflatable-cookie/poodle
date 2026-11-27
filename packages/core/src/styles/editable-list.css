@@ -137,7 +137,7 @@
     padding: var(--poodle-editable-list-item-y) var(--poodle-editable-list-item-x);
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-editable-list-item-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-editable-list-item-fill, transparent);
     font-size: var(--poodle-editable-list-font-size);
     color: var(--poodle-recipe-editable-list-item-text, var(--poodle-color-text-primary));
     outline: none;

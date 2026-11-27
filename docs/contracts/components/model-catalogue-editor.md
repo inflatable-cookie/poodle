@@ -161,7 +161,7 @@ and disclosure transition for the hidden section.
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Row | `var(--poodle-style-control-fill, var(--poodle-color-background-surface))`, `var(--poodle-style-control-border, var(--poodle-color-border-subtle))`, `var(--poodle-style-control-shadow, none)`, `radius.control` | compact item |
+| Row | `transparent`, `var(--poodle-style-control-border, var(--poodle-color-border-subtle))`, `var(--poodle-style-control-shadow, none)`, `radius.control` | compact item |
 | Grabbed/drop | `color.accent.base`, `color.accent.focusRing` | movement |
 | Hidden | `color.text.muted`, `var(--poodle-style-surface-fill, var(--poodle-color-background-panel))`, `var(--poodle-style-surface-shadow, none)` | secondary posture |
 | Utilities | semantic chrome size/focus tokens | actions |

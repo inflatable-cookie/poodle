@@ -100,7 +100,7 @@
     padding: 0;
     border: 0;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-markdown-editor-tool-btn-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-markdown-editor-tool-btn-fill, transparent);
     color: var(--poodle-recipe-markdown-editor-tool-btn-text, var(--poodle-color-text-secondary));
     cursor: pointer;
     font-family: var(--poodle-typography-code-family);

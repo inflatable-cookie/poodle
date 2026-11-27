@@ -132,7 +132,7 @@
     border: 0;
     border-left: 0.1875rem solid transparent;
     border-radius: 0.1875rem calc(var(--poodle-radius-control) - 0.125rem) calc(var(--poodle-radius-control) - 0.125rem) 0.1875rem;
-    background: var(--poodle-recipe-sidebar-nav-item-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-sidebar-nav-item-fill, transparent);
     color: var(--poodle-recipe-sidebar-nav-item-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-recipe-sidebar-nav-item-font-family, var(--poodle-font-sans, var(--poodle-typography-label-family)));
     font-size: var(--poodle-recipe-sidebar-nav-item-font-size, var(--poodle-sidebar-nav-item-type-size, var(--poodle-sidebar-nav-item-font-size)));

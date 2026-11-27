@@ -288,7 +288,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 | `padding` | `0` |
 | `border` | `0` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `var(--poodle-recipe-video-player-btn-fill, var(--poodle-style-control-fill, transparent))` |
+| `background` | `var(--poodle-recipe-video-player-btn-fill, transparent)` |
 | `color` | `rgba(255, 255, 255, 0.9)` |
 | `cursor` | `pointer` |
 | `transition` | `background 0.15s ease` |

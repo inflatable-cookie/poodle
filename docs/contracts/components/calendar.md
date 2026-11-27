@@ -215,7 +215,7 @@ Header editing:
 
 ## 8. Token Usage — Exact Values
 
-Rendering style roles: the year button, year input and navigation buttons read the control roles (`-fill`, `-fillHover` and `-border`). Day cells keep no resting paint; a fill on each of the grid's cells is markup noise for the redesign.
+Rendering style roles: the year input reads the control roles (`-fill`, `-fillHover` and `-border`). The year button and navigation buttons rest transparent and fill with `-fillHover` on hover. Day cells keep no resting paint; a fill on each of the grid's cells is markup noise for the redesign.
 
 ### Root `.calendar`
 

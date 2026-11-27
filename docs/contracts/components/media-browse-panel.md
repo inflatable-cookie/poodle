@@ -195,7 +195,7 @@ beyond plain props. Classified in the long-tail sweep.
 | padding | `0.75rem` (default) |
 | border | `0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-subtle))` |
 | border-radius | `var(--poodle-radius-surface)` |
-| background | `var(--poodle-recipe-media-browse-panel-item-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-panel) 92%, transparent)))` |
+| background | `var(--poodle-recipe-media-browse-panel-item-fill, transparent)` |
 | color | `inherit` |
 | text-align | `left` |
 | cursor | `pointer` |

@@ -53,6 +53,20 @@
       color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
+  /* The year button is text-like: it rests transparent and fills only on hover.
+     The month button keeps its resting fill. */
+  .poodle-calendar__year-button {
+    background: var(--poodle-recipe-calendar-year-button-fill, transparent);
+  }
+
+  .poodle-calendar__year-button:hover:not(:disabled) {
+    background: var(--poodle-recipe-calendar-year-button-hover-fill, var(--poodle-style-control-fillHover, transparent));
+  }
+
+  .poodle-calendar__year-button:active:not(:disabled) {
+    background: var(--poodle-recipe-calendar-year-button-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
+
   .poodle-calendar__month-button:hover:not(:disabled),
   .poodle-calendar__year-button:hover:not(:disabled) {
     color: var(--poodle-recipe-calendar-hover-year-button-text, var(--poodle-color-text-primary));
@@ -104,7 +118,7 @@
     height: 2rem;
     border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-calendar-nav-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
+    background: var(--poodle-recipe-calendar-nav-fill, transparent);
     color: var(--poodle-recipe-calendar-nav-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font: inherit;

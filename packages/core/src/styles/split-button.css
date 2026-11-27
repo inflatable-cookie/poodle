@@ -35,7 +35,7 @@
   }
 
   .poodle-split-button[data-variant="ghost"] {
-    --poodle-split-fill: var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-surface) 42%, transparent));
+    --poodle-split-fill: transparent;
     --poodle-split-border: var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent));
   }
 
@@ -273,7 +273,7 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: var(--poodle-recipe-split-button-item-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-split-button-item-fill, transparent);
     color: var(--poodle-recipe-split-button-item-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font: inherit;

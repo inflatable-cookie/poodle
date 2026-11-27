@@ -86,7 +86,7 @@
     padding: 0 var(--poodle-space-control-x);
     border: 0.0625rem solid var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-pagination-button-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
+    background: var(--poodle-recipe-pagination-button-fill, transparent);
     color: var(--poodle-recipe-pagination-button-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);

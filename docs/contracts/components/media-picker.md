@@ -198,7 +198,7 @@ Composed from `Dialog`, `Tabs`, `TextInput`, and `FileUpload` primitives. Wraps 
 | padding | `0.375rem` (default) |
 | border | `0.0625rem solid var(--poodle-style-control-border, transparent)` |
 | border-radius | `var(--poodle-radius-control, 0.375rem)` |
-| background | `var(--poodle-recipe-media-picker-item-fill, var(--poodle-style-control-fill, transparent))` |
+| background | `var(--poodle-recipe-media-picker-item-fill, transparent)` |
 | cursor | `pointer` |
 | transition | `border-color 0.1s, background 0.1s` |
 

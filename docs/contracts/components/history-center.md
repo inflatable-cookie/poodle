@@ -657,7 +657,7 @@ region (R6) and the picker (R1) — one event, both sites.
 
 ## 8. Token Usage
 
-Rendering style roles: entry rows and fork buttons read the control fill at rest, and entry and fork hovers read `--poodle-style-control-fillHover`. The list trigger reads `--poodle-style-control-fill`, and the rename input reads the control border and fill.
+Rendering style roles: entry rows, fork buttons and the list trigger rest transparent, and entry, fork and list-trigger hovers read `--poodle-style-control-fillHover`. The rename input reads the control border and fill.
 
 Semantic roles by default; recipes are the override surface (architecture
 007). Public hooks:

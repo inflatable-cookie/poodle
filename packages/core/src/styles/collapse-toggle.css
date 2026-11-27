@@ -8,7 +8,7 @@
     padding: 0.125rem;
     border: 0;
     border-radius: var(--poodle-radius-sm, 0.25rem);
-    background: var(--poodle-recipe-collapse-toggle-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-collapse-toggle-fill, transparent);
     color: var(--poodle-recipe-collapse-toggle-text, var(--poodle-color-text-muted));
     cursor: pointer;
     line-height: 1;

@@ -84,7 +84,7 @@
     padding-inline: var(--poodle-tree-row-pad-inline);
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: var(--poodle-recipe-tree-row-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-tree-row-fill, transparent);
     color: var(--poodle-recipe-tree-row-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-tree-row-font);

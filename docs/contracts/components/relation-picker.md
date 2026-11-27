@@ -268,7 +268,7 @@ Composite over PickerShell; owns query/selection plumbing. Behavior belongs to c
 
 ## 8. Token Usage — Exact Values
 
-Rendering style roles: the drill back, breadcrumb and list buttons read the control fill, and their hovers read `--poodle-style-control-fillHover`. The item card reads the control border and fill.
+Rendering style roles: the drill back, breadcrumb and list buttons rest transparent, and their hovers read `--poodle-style-control-fillHover`. The item card reads the control border, rests transparent, and fills with `--poodle-style-control-fillHover` on hover.
 
 ### Data Attributes
 

@@ -92,8 +92,9 @@ indicator role against the neutral control fill. Keyboard key colours and audio-
 their instrument meaning.
 
 The list, detail and form-layout stylesheets follow the same chains. Selection
-summary chips and their overflow pill read the control fill and shadow roles,
-because they are filled, removable controls. Clickable nav cards read the
+summary chips read the control fill and shadow roles, because they are filled,
+removable controls. The overflow count is static text and has no fill. Clickable
+nav cards read the
 surface boundary at rest and the control hover fill on hover. Table shells,
 inline list count pills and rows, detail item surface presentations and the
 detail shell's state panel read the surface fill and border. The form-layout
@@ -128,6 +129,15 @@ the surface roles, and a floating one reads `-floatingFill` before `-fill`.
 Bands inside a container (toolbars, headers, footers, filter rows), tone and
 status paint, chips, badges, dividers, the calendar's day cells and the
 scroll button keep their own values, listed for the redesign.
+
+Resting fill follows what the control is. Value-holding controls keep the control
+fill at rest: text inputs, select and picker triggers, filled and secondary
+buttons, switch, checkbox and radio indicators, sliders, segmented-control
+tracks, dropzones and audio surfaces. Text-like controls rest transparent and
+fill on hover with `--poodle-style-control-fillHover` (and `-fillActive` on
+press): links and breadcrumbs, nav and menu items, options, list and tree rows,
+tabs, ghost and toolbar icon buttons, disclosure triggers, and close, copy and
+remove buttons. Static text takes no fill.
 
 ## Public Surface vs Internal Variables
 

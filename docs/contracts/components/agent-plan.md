@@ -209,7 +209,7 @@ Region.
 | accept fill | `--poodle-color-accent-base` |
 | accept label | `--poodle-color-text-inverse` |
 | accept fill, hovered | `--poodle-color-accent-hover` |
-| secondary fill | `var(--poodle-style-control-fill, transparent)` (`fillHover`, `fillActive` on interaction) |
+| secondary fill | `transparent` (`fillHover`, `fillActive` on interaction) |
 | secondary shadow | `var(--poodle-style-control-shadow, none)` |
 | secondary label | `var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary))` |
 | secondary border | `var(--poodle-style-control-border, var(--poodle-color-border-subtle))` |

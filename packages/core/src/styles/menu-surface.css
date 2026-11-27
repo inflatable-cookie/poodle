@@ -29,7 +29,7 @@
       calc(var(--poodle-menu-item-padding-x-base) + var(--poodle-menu-item-padding-x-adjust));
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: var(--poodle-recipe-menu-surface-item-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-menu-surface-item-fill, transparent);
     color: var(--poodle-recipe-menu-surface-item-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font: inherit;

@@ -90,7 +90,7 @@
     padding: 0;
     border: none;
     border-radius: var(--poodle-radius-sm, 0.25rem);
-    background: var(--poodle-recipe-relation-picker-back-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-relation-picker-back-fill, transparent);
     color: var(--poodle-recipe-relation-picker-back-text, var(--poodle-color-text-secondary));
     cursor: pointer;
   }
@@ -111,7 +111,7 @@
     padding: 0.125rem var(--poodle-relation-picker-breadcrumb-x);
     border: none;
     border-radius: var(--poodle-radius-sm, 0.25rem);
-    background: var(--poodle-recipe-relation-picker-item-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-relation-picker-item-fill, transparent);
     color: var(--poodle-recipe-relation-picker-item-text, var(--poodle-color-accent-base));
     font-size: var(--poodle-typography-label-size);
     font-weight: 500;
@@ -157,7 +157,7 @@
     padding: var(--poodle-relation-picker-list-y) var(--poodle-relation-picker-list-x);
     border: none;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-relation-picker-button-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-relation-picker-button-fill, transparent);
     color: var(--poodle-recipe-relation-picker-button-text, var(--poodle-color-text-primary));
     cursor: pointer;
     text-align: left;
@@ -232,8 +232,16 @@
     padding: var(--poodle-relation-picker-item-y) var(--poodle-relation-picker-item-x);
     border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-subtle));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-relation-picker-item-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent)));
+    background: var(--poodle-recipe-relation-picker-item-fill, transparent);
     color: var(--poodle-recipe-relation-picker-item-text, var(--poodle-color-text-primary));
+  }
+
+  .poodle-relation-picker__item:hover:not(:disabled) {
+    background: var(--poodle-recipe-relation-picker-item-hover-fill, var(--poodle-style-control-fillHover, transparent));
+  }
+
+  .poodle-relation-picker__item:active:not(:disabled) {
+    background: var(--poodle-recipe-relation-picker-item-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-relation-picker__item[data-selection-mode="single"] {

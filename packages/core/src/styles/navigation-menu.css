@@ -22,7 +22,7 @@
     padding: 0 var(--poodle-space-control-x);
     border: 0;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-navigation-menu-trigger-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent)));
+    background: var(--poodle-recipe-navigation-menu-trigger-fill, transparent);
     color: var(--poodle-recipe-navigation-menu-trigger-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
@@ -100,7 +100,7 @@
      hover/focus accent-12% rule still applies, exactly as for an idle
      trigger — only the selection fill is gone. */
   .poodle-navigation-menu[data-active-fill="none"] .poodle-navigation-menu__trigger[data-open="true"] {
-    background: var(--poodle-recipe-navigation-menu-trigger-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent)));
+    background: var(--poodle-recipe-navigation-menu-trigger-fill, transparent);
   }
 
   .poodle-navigation-menu__trigger:disabled {

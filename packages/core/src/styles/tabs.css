@@ -334,7 +334,7 @@
     min-height: calc(var(--poodle-tabs-control-height) - 0.25rem);
     padding: 0 var(--poodle-tabs-control-x);
     border: 0;
-    background: var(--poodle-recipe-tabs-tab-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-tabs-tab-fill, transparent);
     color: var(--poodle-recipe-tabs-tab-text, var(--poodle-color-text-secondary));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
@@ -342,6 +342,15 @@
     font-weight: var(--poodle-typography-label-weight);
     line-height: var(--poodle-typography-label-lineHeightTight);
     white-space: nowrap;
+  }
+
+  /* Card tabs sit inside a filled card item, which carries the hover fill. */
+  .poodle-tabs:not([data-variant="card"]) .poodle-tabs__tab:hover:not(:disabled) {
+    background: var(--poodle-recipe-tabs-tab-hover-fill, var(--poodle-style-control-fillHover, transparent));
+  }
+
+  .poodle-tabs:not([data-variant="card"]) .poodle-tabs__tab:active:not(:disabled) {
+    background: var(--poodle-recipe-tabs-tab-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-tabs[data-full-width="true"]:not([data-orientation="vertical"]) .poodle-tabs__tab {
@@ -588,7 +597,7 @@
     padding: 0;
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: var(--poodle-recipe-tabs-close-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-tabs-close-fill, transparent);
     color: var(--poodle-recipe-tabs-close-text, var(--poodle-color-text-secondary));
     cursor: pointer;
   }

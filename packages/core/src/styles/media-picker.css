@@ -66,7 +66,7 @@
     padding: var(--poodle-media-picker-item-pad);
     border: 0.0625rem solid var(--poodle-style-control-border, transparent);
     border-radius: var(--poodle-radius-control, 0.375rem);
-    background: var(--poodle-recipe-media-picker-item-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-media-picker-item-fill, transparent);
     color: inherit;
     cursor: pointer;
     transition: border-color 0.1s, background 0.1s;

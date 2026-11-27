@@ -173,7 +173,7 @@
     padding: 0;
     border: none;
     border-radius: 999px;
-    background: var(--poodle-recipe-file-upload-remove-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-file-upload-remove-fill, transparent);
     color: var(--poodle-recipe-file-upload-remove-text, var(--poodle-color-text-secondary, #999));
     cursor: pointer;
   }

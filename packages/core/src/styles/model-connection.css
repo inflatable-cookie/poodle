@@ -56,12 +56,20 @@
   padding: var(--poodle-space-stack-sm) var(--poodle-space-inline-md);
   border: 1px solid var(--poodle-style-control-border, var(--poodle-color-border-subtle));
   border-radius: var(--poodle-radius-surface);
-  background: var(--poodle-style-control-fill, var(--poodle-color-background-surface));
+  background: transparent;
   box-shadow: var(--poodle-style-control-shadow, none);
   color: inherit;
   text-align: start;
   cursor: pointer;
   font: inherit;
+}
+
+.poodle-model-connection-picker__option:hover:not(:disabled) {
+  background: var(--poodle-style-control-fillHover, transparent);
+}
+
+.poodle-model-connection-picker__option:active:not(:disabled) {
+  background: var(--poodle-style-control-fillActive, transparent);
 }
 
 .poodle-model-connection-picker__option:not(:disabled):not([aria-disabled="true"]):not([aria-checked="true"]):hover {
@@ -400,8 +408,16 @@
   padding: var(--poodle-space-stack-sm) var(--poodle-space-inline-md);
   border: 1px solid var(--poodle-style-control-border, var(--poodle-color-border-subtle));
   border-radius: var(--poodle-radius-control);
-  background: var(--poodle-style-control-fill, var(--poodle-color-background-surface));
+  background: transparent;
   box-shadow: var(--poodle-style-control-shadow, none);
+}
+
+.poodle-model-catalogue-editor__row:hover:not(:disabled) {
+  background: var(--poodle-style-control-fillHover, transparent);
+}
+
+.poodle-model-catalogue-editor__row:active:not(:disabled) {
+  background: var(--poodle-style-control-fillActive, transparent);
 }
 
 /* The generic provider posture is unlayered and would otherwise replace the

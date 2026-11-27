@@ -282,7 +282,7 @@ component scrolls the target into view after any page or limit change:
 
 ## 8. Token Usage — Exact Values
 
-Rendering style roles: the bar reads the surface border and fill. The limit select and page buttons read the control border and fill, and the page-button hover reads `--poodle-style-control-fillHover`.
+Rendering style roles: the bar reads the surface border and fill. The limit select reads the control border and fill. Page buttons read the control border, rest transparent, and fill with `--poodle-style-control-fillHover` on hover.
 
 ### Root `.pagination` (base — no chrome by default)
 

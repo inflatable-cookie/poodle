@@ -27,7 +27,7 @@
     padding: 0 var(--poodle-space-control-x);
     border: 0;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-menubar-trigger-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-menubar-trigger-fill, transparent);
     color: var(--poodle-recipe-menubar-trigger-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
@@ -76,7 +76,7 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: var(--poodle-recipe-menubar-item-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-menubar-item-fill, transparent);
     color: var(--poodle-recipe-menubar-item-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font: inherit;

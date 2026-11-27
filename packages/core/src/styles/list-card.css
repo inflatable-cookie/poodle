@@ -731,7 +731,7 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: var(--poodle-recipe-list-card-context-item-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-list-card-context-item-fill, transparent);
     color: var(--poodle-recipe-list-card-context-item-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font: inherit;
