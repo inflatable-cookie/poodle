@@ -2,8 +2,22 @@
 //! the resulting nodes and drains its session between input and repaint.
 
 mod button;
+mod checkbox;
+mod code_input;
 mod data_table;
+mod icon_button;
+mod number_input;
+mod radio;
+mod radio_group;
+mod rating;
+mod segmented_control;
 mod select;
+mod split_button;
+mod switch;
+mod text_input;
+mod toggle_group;
+mod token_input;
+mod tri_state_switch;
 
 use std::sync::{Arc, Mutex};
 
@@ -17,39 +31,122 @@ pub enum Specimen {
     Button,
     Select,
     DataTable,
+    Checkbox,
+    Switch,
+    Radio,
+    RadioGroup,
+    TriStateSwitch,
+    SegmentedControl,
+    ToggleGroup,
+    TextInput,
+    NumberInput,
+    TokenInput,
+    CodeInput,
+    Rating,
+    IconButton,
+    SplitButton,
 }
 
-const SIZES: &[(ControlSize, &str)] = &[
-    (ControlSize::Xs, "xs"),
-    (ControlSize::Sm, "sm"),
-    (ControlSize::Md, "md"),
-    (ControlSize::Lg, "lg"),
-    (ControlSize::Xl, "xl"),
-];
-const DENSITIES: &[(ControlDensity, &str)] = &[
-    (ControlDensity::Compact, "compact"),
-    (ControlDensity::Default, "default"),
-    (ControlDensity::Comfortable, "comfortable"),
+/// One row in an axis pane.
+///
+/// `value` is a stable component-specific axis identifier passed back in
+/// [`View`]; it does not shift when another row is added, removed or reordered.
+/// `label` is the display label shown beside the row.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct AxisRow {
+    pub value: &'static str,
+    pub label: &'static str,
+}
+
+impl AxisRow {
+    pub const fn new(value: &'static str, label: &'static str) -> Self {
+        Self { value, label }
+    }
+
+    pub const fn same(value: &'static str) -> Self {
+        Self {
+            value,
+            label: value,
+        }
+    }
+}
+
+pub(crate) const CONTROL_SIZES: &[AxisRow] = &[
+    AxisRow::same("xs"),
+    AxisRow::same("sm"),
+    AxisRow::same("md"),
+    AxisRow::same("lg"),
+    AxisRow::same("xl"),
 ];
 
-/// A tab and, for an axis tab, its ordered public values and display labels.
+pub(crate) const CONTROL_DENSITIES: &[AxisRow] = &[
+    AxisRow::same("compact"),
+    AxisRow::same("default"),
+    AxisRow::same("comfortable"),
+];
+
+pub(crate) fn control_size(value: &str) -> ControlSize {
+    match value {
+        "xs" => ControlSize::Xs,
+        "sm" => ControlSize::Sm,
+        "md" => ControlSize::Md,
+        "lg" => ControlSize::Lg,
+        "xl" => ControlSize::Xl,
+        other => panic!("unknown ControlSize axis value: {other:?}"),
+    }
+}
+
+pub(crate) fn control_density(value: &str) -> ControlDensity {
+    match value {
+        "compact" => ControlDensity::Compact,
+        "default" => ControlDensity::Default,
+        "comfortable" => ControlDensity::Comfortable,
+        other => panic!("unknown ControlDensity axis value: {other:?}"),
+    }
+}
+
+/// A tab and, for an axis tab, its ordered public rows.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Pane {
     Examples,
-    Sizes(&'static [(ControlSize, &'static str)]),
-    Densities(&'static [(ControlDensity, &'static str)]),
+    Sizes(&'static [AxisRow]),
+    Densities(&'static [AxisRow]),
 }
 
-/// A body request. Axis panes render one representative per requested value.
+/// A body request. Axis panes render one representative per stable row value.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum View {
     Examples,
-    Size(ControlSize),
-    Density(ControlDensity),
+    Size(&'static str),
+    Density(&'static str),
 }
 
+const STANDARD_PANES: &[Pane] = &[
+    Pane::Examples,
+    Pane::Sizes(CONTROL_SIZES),
+    Pane::Densities(CONTROL_DENSITIES),
+];
+
 impl Specimen {
-    pub const ALL: [Self; 3] = [Self::Button, Self::Select, Self::DataTable];
+    pub const ALL: [Self; 17] = [
+        Self::Button,
+        Self::Select,
+        Self::DataTable,
+        Self::Checkbox,
+        Self::Switch,
+        Self::Radio,
+        Self::RadioGroup,
+        Self::TriStateSwitch,
+        Self::SegmentedControl,
+        Self::ToggleGroup,
+        Self::TextInput,
+        Self::NumberInput,
+        Self::TokenInput,
+        Self::CodeInput,
+        Self::Rating,
+        Self::IconButton,
+        Self::SplitButton,
+    ];
 
     pub fn from_slug(slug: &str) -> Option<Self> {
         Self::ALL
@@ -62,16 +159,64 @@ impl Specimen {
             Self::Button => "button",
             Self::Select => "select",
             Self::DataTable => "data-table",
+            Self::Checkbox => "checkbox",
+            Self::Switch => "switch",
+            Self::Radio => "radio",
+            Self::RadioGroup => "radio-group",
+            Self::TriStateSwitch => "tri-state-switch",
+            Self::SegmentedControl => "segmented-control",
+            Self::ToggleGroup => "toggle-group",
+            Self::TextInput => "text-input",
+            Self::NumberInput => "number-input",
+            Self::TokenInput => "token-input",
+            Self::CodeInput => "code-input",
+            Self::Rating => "rating",
+            Self::IconButton => "icon-button",
+            Self::SplitButton => "split-button",
+        }
+    }
+
+    pub const fn title(self) -> &'static str {
+        match self {
+            Self::Button => "Button",
+            Self::Select => "Select",
+            Self::DataTable => "DataTable",
+            Self::Checkbox => "Checkbox",
+            Self::Switch => "Switch",
+            Self::Radio => "Radio",
+            Self::RadioGroup => "RadioGroup",
+            Self::TriStateSwitch => "TriStateSwitch",
+            Self::SegmentedControl => "SegmentedControl",
+            Self::ToggleGroup => "ToggleGroup",
+            Self::TextInput => "TextInput",
+            Self::NumberInput => "NumberInput",
+            Self::TokenInput => "TokenInput",
+            Self::CodeInput => "CodeInput",
+            Self::Rating => "Rating",
+            Self::IconButton => "IconButton",
+            Self::SplitButton => "SplitButton",
         }
     }
 
     pub const fn panes(self) -> &'static [Pane] {
         match self {
-            Self::Button | Self::Select | Self::DataTable => &[
-                Pane::Examples,
-                Pane::Sizes(SIZES),
-                Pane::Densities(DENSITIES),
-            ],
+            Self::Button
+            | Self::Select
+            | Self::DataTable
+            | Self::Checkbox
+            | Self::Switch
+            | Self::Radio
+            | Self::RadioGroup
+            | Self::TriStateSwitch
+            | Self::SegmentedControl
+            | Self::ToggleGroup
+            | Self::TextInput
+            | Self::NumberInput
+            | Self::TokenInput
+            | Self::CodeInput
+            | Self::Rating
+            | Self::IconButton
+            | Self::SplitButton => STANDARD_PANES,
         }
     }
 }
@@ -86,6 +231,19 @@ enum Event {
     Button(button::Event),
     Select(select::Event),
     DataTable(data_table::Event),
+    Checkbox(checkbox::Event),
+    Switch(switch::Event),
+    Radio(radio::Event),
+    RadioGroup(radio_group::Event),
+    TriStateSwitch(tri_state_switch::Event),
+    SegmentedControl(segmented_control::Event),
+    ToggleGroup(toggle_group::Event),
+    TextInput(text_input::Event),
+    NumberInput(number_input::Event),
+    CodeInput(code_input::Event),
+    Rating(rating::Event),
+    IconButton(icon_button::Event),
+    SplitButton(split_button::Event),
 }
 
 type Sink<E> = Arc<dyn Fn(E) + Send + Sync>;
@@ -98,6 +256,19 @@ pub struct Session {
     button: button::State,
     select: select::State,
     data_table: data_table::State,
+    checkbox: checkbox::State,
+    switch: switch::State,
+    radio: radio::State,
+    radio_group: radio_group::State,
+    tri_state_switch: tri_state_switch::State,
+    segmented_control: segmented_control::State,
+    toggle_group: toggle_group::State,
+    text_input: text_input::State,
+    number_input: number_input::State,
+    code_input: code_input::State,
+    rating: rating::State,
+    icon_button: icon_button::State,
+    split_button: split_button::State,
 }
 
 impl Session {
@@ -107,6 +278,20 @@ impl Session {
                 Specimen::Button => button::axis(view, ctx),
                 Specimen::Select => select::axis(view, ctx),
                 Specimen::DataTable => data_table::axis(view, ctx),
+                Specimen::Checkbox => checkbox::axis(view, ctx),
+                Specimen::Switch => switch::axis(view, ctx),
+                Specimen::Radio => radio::axis(view, ctx),
+                Specimen::RadioGroup => radio_group::axis(view, ctx),
+                Specimen::TriStateSwitch => tri_state_switch::axis(view, ctx),
+                Specimen::SegmentedControl => segmented_control::axis(view, ctx),
+                Specimen::ToggleGroup => toggle_group::axis(view, ctx),
+                Specimen::TextInput => text_input::axis(view, ctx),
+                Specimen::NumberInput => number_input::axis(view, ctx),
+                Specimen::TokenInput => token_input::axis(view, ctx),
+                Specimen::CodeInput => code_input::axis(view, ctx),
+                Specimen::Rating => rating::axis(view, ctx),
+                Specimen::IconButton => icon_button::axis(view, ctx),
+                Specimen::SplitButton => split_button::axis(view, ctx),
             };
         }
         let mut node = match specimen {
@@ -114,6 +299,44 @@ impl Session {
             Specimen::Select => select::examples(&self.select, self.sink(Event::Select), ctx),
             Specimen::DataTable => {
                 data_table::examples(&self.data_table, self.sink(Event::DataTable), ctx)
+            }
+            Specimen::Checkbox => {
+                checkbox::examples(&self.checkbox, self.sink(Event::Checkbox), ctx)
+            }
+            Specimen::Switch => switch::examples(&self.switch, self.sink(Event::Switch), ctx),
+            Specimen::Radio => radio::examples(&self.radio, self.sink(Event::Radio), ctx),
+            Specimen::RadioGroup => {
+                radio_group::examples(&self.radio_group, self.sink(Event::RadioGroup), ctx)
+            }
+            Specimen::TriStateSwitch => tri_state_switch::examples(
+                &self.tri_state_switch,
+                self.sink(Event::TriStateSwitch),
+                ctx,
+            ),
+            Specimen::SegmentedControl => segmented_control::examples(
+                &self.segmented_control,
+                self.sink(Event::SegmentedControl),
+                ctx,
+            ),
+            Specimen::ToggleGroup => {
+                toggle_group::examples(&self.toggle_group, self.sink(Event::ToggleGroup), ctx)
+            }
+            Specimen::TextInput => {
+                text_input::examples(&self.text_input, self.sink(Event::TextInput), ctx)
+            }
+            Specimen::NumberInput => {
+                number_input::examples(&self.number_input, self.sink(Event::NumberInput), ctx)
+            }
+            Specimen::TokenInput => token_input::examples(ctx),
+            Specimen::CodeInput => {
+                code_input::examples(&self.code_input, self.sink(Event::CodeInput), ctx)
+            }
+            Specimen::Rating => rating::examples(&self.rating, self.sink(Event::Rating), ctx),
+            Specimen::IconButton => {
+                icon_button::examples(&self.icon_button, self.sink(Event::IconButton), ctx)
+            }
+            Specimen::SplitButton => {
+                split_button::examples(&self.split_button, self.sink(Event::SplitButton), ctx)
             }
         };
         node.id = Some(format!("specimen-{}-examples", specimen.slug()));
@@ -139,6 +362,56 @@ impl Session {
                 Event::DataTable(event) => {
                     self.data_table =
                         data_table::reduce(std::mem::take(&mut self.data_table), event);
+                }
+                Event::Checkbox(event) => {
+                    self.checkbox = checkbox::reduce(std::mem::take(&mut self.checkbox), event);
+                }
+                Event::Switch(event) => {
+                    self.switch = switch::reduce(std::mem::take(&mut self.switch), event);
+                }
+                Event::Radio(event) => {
+                    self.radio = radio::reduce(std::mem::take(&mut self.radio), event);
+                }
+                Event::RadioGroup(event) => {
+                    self.radio_group =
+                        radio_group::reduce(std::mem::take(&mut self.radio_group), event);
+                }
+                Event::TriStateSwitch(event) => {
+                    self.tri_state_switch =
+                        tri_state_switch::reduce(std::mem::take(&mut self.tri_state_switch), event);
+                }
+                Event::SegmentedControl(event) => {
+                    self.segmented_control = segmented_control::reduce(
+                        std::mem::take(&mut self.segmented_control),
+                        event,
+                    );
+                }
+                Event::ToggleGroup(event) => {
+                    self.toggle_group =
+                        toggle_group::reduce(std::mem::take(&mut self.toggle_group), event);
+                }
+                Event::TextInput(event) => {
+                    self.text_input =
+                        text_input::reduce(std::mem::take(&mut self.text_input), event);
+                }
+                Event::NumberInput(event) => {
+                    self.number_input =
+                        number_input::reduce(std::mem::take(&mut self.number_input), event);
+                }
+                Event::CodeInput(event) => {
+                    self.code_input =
+                        code_input::reduce(std::mem::take(&mut self.code_input), event);
+                }
+                Event::Rating(event) => {
+                    self.rating = rating::reduce(std::mem::take(&mut self.rating), event);
+                }
+                Event::IconButton(event) => {
+                    self.icon_button =
+                        icon_button::reduce(std::mem::take(&mut self.icon_button), event);
+                }
+                Event::SplitButton(event) => {
+                    self.split_button =
+                        split_button::reduce(std::mem::take(&mut self.split_button), event);
                 }
             }
         }

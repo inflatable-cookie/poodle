@@ -3,12 +3,12 @@ use std::sync::Arc;
 use poodle_headless::select::SelectContext;
 use poodle_node::Node;
 use poodle_render::{
-    select, select_search_focus_id, select_trigger_focus_id, RenderContext, SelectHandlers,
-    SelectTransitionResult,
+    apply_select_intent, select, select_search_focus_id, select_trigger_focus_id, RenderContext,
+    SelectHandlers, SelectIntent, SelectTransitionResult,
 };
 use poodle_specs::{ChoiceOption, SelectMode, SelectSpec};
 
-use crate::{column, readout, section, Effect, Sink, View, DENSITIES, SIZES};
+use crate::{column, control_density, control_size, readout, section, Effect, Sink, View};
 
 #[derive(Clone, Copy)]
 pub(crate) enum Instance {
@@ -31,6 +31,31 @@ impl Instance {
             Self::Rich => "select-rich",
             Self::Grouped => "select-native-grouped",
             Self::Clearable => "select-clearable",
+        }
+    }
+
+    fn base_spec(self) -> SelectSpec {
+        match self {
+            Self::Native => SelectSpec::new(fruit()).with_placeholder("Choose a fruit"),
+            Self::Custom => {
+                custom(SelectSpec::new(countries()).with_placeholder("Choose a country"))
+            }
+            Self::Searchable => SelectSpec {
+                searchable: true,
+                ..SelectSpec::new(frameworks()).with_placeholder("Search frameworks...")
+            },
+            Self::Freeform => SelectSpec {
+                searchable: true,
+                freeform: true,
+                ..SelectSpec::new(frameworks()).with_placeholder("Type or select...")
+            },
+            Self::Rich => custom(SelectSpec::new(countries()).with_placeholder("Choose a country")),
+            Self::Grouped => SelectSpec::new(food()).with_placeholder("Choose a food"),
+            Self::Clearable => custom(
+                SelectSpec::new(fruit())
+                    .with_placeholder("All fruits")
+                    .with_clearable(true),
+            ),
         }
     }
 }
@@ -62,19 +87,24 @@ impl State {
 
 pub(crate) struct Event {
     instance: Instance,
-    transition: SelectTransitionResult,
+    intent: SelectIntent,
 }
 
 pub(crate) fn reduce(mut state: State, event: Event) -> (State, Option<Effect>) {
     let entry = &mut state.instances[event.instance as usize];
-    let previous = entry.context.as_ref();
+    let current = entry
+        .context
+        .take()
+        .unwrap_or_else(|| event.instance.base_spec().select_context());
+    let was_open = current.open;
+    let prev_query = current.query.clone();
     let SelectTransitionResult {
         context,
         search_selection,
         ..
-    } = event.transition;
+    } = apply_select_intent(current, entry.caret, event.intent);
 
-    let focus = if previous.is_some_and(|previous| previous.open) != context.open {
+    let focus = if was_open != context.open {
         let scope = event.instance.scope();
         Some(Effect::Focus(if context.open && context.searchable {
             select_search_focus_id(scope)
@@ -87,7 +117,7 @@ pub(crate) fn reduce(mut state: State, event: Event) -> (State, Option<Effect>) 
 
     if let Some(caret) = search_selection {
         entry.caret = caret;
-    } else if previous.map_or("", |previous| previous.query.as_str()) != context.query {
+    } else if prev_query != context.query {
         let end = context.query.chars().count();
         entry.caret = (end, end);
     }
@@ -95,13 +125,8 @@ pub(crate) fn reduce(mut state: State, event: Event) -> (State, Option<Effect>) 
     (state, focus)
 }
 
-fn live(
-    instance: Instance,
-    mut spec: SelectSpec,
-    state: &State,
-    sink: &Sink<Event>,
-    ctx: &RenderContext<'_>,
-) -> Node {
+fn live(instance: Instance, state: &State, sink: &Sink<Event>, ctx: &RenderContext<'_>) -> Node {
+    let mut spec = instance.base_spec();
     let entry = state.instance(instance);
     if let Some(context) = &entry.context {
         spec = spec.applying_context(context);
@@ -109,13 +134,9 @@ fn live(
     let (start, end) = entry.caret;
     spec = spec.with_search_selection(start, end);
     let sink = Arc::clone(sink);
-    let handlers =
-        SelectHandlers::new(instance.scope()).on_transition(Arc::new(move |transition| {
-            sink(Event {
-                instance,
-                transition,
-            });
-        }));
+    let handlers = SelectHandlers::new(instance.scope()).on_intent(Arc::new(move |intent| {
+        sink(Event { instance, intent });
+    }));
     select(&spec, ctx, &handlers)
 }
 
@@ -179,39 +200,16 @@ fn narrow(gap: f32, children: Vec<Node>) -> Node {
 pub(crate) fn examples(state: &State, sink: Sink<Event>, ctx: &RenderContext<'_>) -> Node {
     use Instance::{Clearable, Custom, Freeform, Grouped, Native, Rich, Searchable};
 
-    let show = |instance, spec| live(instance, spec, state, &sink, ctx);
-    let with_value = |instance, spec| {
-        let mut children = vec![show(instance, spec)];
+    let show = |instance| live(instance, state, &sink, ctx);
+    let with_value = |instance| {
+        let mut children = vec![show(instance)];
         if let Some(value) = state.value(instance) {
             children.push(readout(format!("Selected: {value}"), ctx));
         }
         narrow(6.0, children)
     };
-    let native = section(
-        "Native select",
-        [with_value(
-            Native,
-            SelectSpec::new(fruit()).with_placeholder("Choose a fruit"),
-        )],
-        ctx,
-    );
-    let dropdown = section(
-        "Custom dropdown",
-        [with_value(
-            Custom,
-            custom(SelectSpec::new(countries()).with_placeholder("Choose a country")),
-        )],
-        ctx,
-    );
-    let search = SelectSpec {
-        searchable: true,
-        ..SelectSpec::new(frameworks()).with_placeholder("Search frameworks...")
-    };
-    let freeform = SelectSpec {
-        searchable: true,
-        freeform: true,
-        ..SelectSpec::new(frameworks()).with_placeholder("Type or select...")
-    };
+    let native = section("Native select", [with_value(Native)], ctx);
+    let dropdown = section("Custom dropdown", [with_value(Custom)], ctx);
     let freeform_context = state.instance(Freeform).context.as_ref();
     let value = state.value(Freeform).unwrap_or("—");
     let query = freeform_context.map_or("—", |context| context.query.as_str());
@@ -221,11 +219,11 @@ pub(crate) fn examples(state: &State, sink: Sink<Event>, ctx: &RenderContext<'_>
         [narrow(
             12.0,
             vec![
-                with_value(Searchable, search),
+                with_value(Searchable),
                 column(
                     6.0,
                     vec![
-                        show(Freeform, freeform),
+                        show(Freeform),
                         readout(
                             format!("value: {value} · query: {query} · open: {open}"),
                             ctx,
@@ -238,34 +236,12 @@ pub(crate) fn examples(state: &State, sink: Sink<Event>, ctx: &RenderContext<'_>
     );
     let choices = section(
         "Rich and grouped options",
-        [narrow(
-            12.0,
-            vec![
-                show(
-                    Rich,
-                    custom(SelectSpec::new(countries()).with_placeholder("Choose a country")),
-                ),
-                show(
-                    Grouped,
-                    SelectSpec::new(food()).with_placeholder("Choose a food"),
-                ),
-            ],
-        )],
+        [narrow(12.0, vec![show(Rich), show(Grouped)])],
         ctx,
     );
     let clearable = section(
         "Clearable selection",
-        [narrow(
-            0.0,
-            vec![show(
-                Clearable,
-                custom(
-                    SelectSpec::new(fruit())
-                        .with_placeholder("All fruits")
-                        .with_clearable(true),
-                ),
-            )],
-        )],
+        [narrow(0.0, vec![show(Clearable)])],
         ctx,
     );
     let disabled = SelectSpec {
@@ -295,20 +271,8 @@ pub(crate) fn examples(state: &State, sink: Sink<Event>, ctx: &RenderContext<'_>
 pub(crate) fn axis(view: View, ctx: &RenderContext<'_>) -> Node {
     let spec = SelectSpec::new(fruit()).with_placeholder("Select...");
     let (spec, axis, label) = match view {
-        View::Size(size) => (
-            spec.with_size(size),
-            "size",
-            SIZES.iter().find(|(value, _)| *value == size).unwrap().1,
-        ),
-        View::Density(density) => (
-            spec.with_density(density),
-            "density",
-            DENSITIES
-                .iter()
-                .find(|(value, _)| *value == density)
-                .unwrap()
-                .1,
-        ),
+        View::Size(value) => (spec.with_size(control_size(value)), "size", value),
+        View::Density(value) => (spec.with_density(control_density(value)), "density", value),
         View::Examples => unreachable!("Examples uses the session"),
     };
     select(

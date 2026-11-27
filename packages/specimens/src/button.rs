@@ -4,7 +4,7 @@ use poodle_node::Node;
 use poodle_render::{button, RenderContext};
 use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant};
 
-use crate::{column, readout, row, section, Sink, View};
+use crate::{column, control_density, control_size, readout, row, section, Sink, View};
 
 #[derive(Default)]
 pub(crate) struct State {
@@ -167,8 +167,10 @@ pub(crate) fn examples(state: &State, sink: Sink<Event>, ctx: &RenderContext<'_>
 
 pub(crate) fn axis(view: View, ctx: &RenderContext<'_>) -> Node {
     let spec = match view {
-        View::Size(size) => spec("Enabled", ButtonVariant::Primary).with_size(size),
-        View::Density(density) => spec("Toggle", ButtonVariant::Primary).with_density(density),
+        View::Size(value) => spec("Enabled", ButtonVariant::Primary).with_size(control_size(value)),
+        View::Density(value) => {
+            spec("Toggle", ButtonVariant::Primary).with_density(control_density(value))
+        }
         View::Examples => unreachable!("Examples uses the session"),
     };
     button(&spec, ctx, None)

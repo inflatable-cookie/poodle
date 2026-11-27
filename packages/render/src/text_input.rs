@@ -74,6 +74,100 @@ fn report_edit(
     }
 }
 
+/// Ordered input intent for a controlled TextInput reducer.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum TextInputIntent {
+    Insert(String),
+    Key {
+        key: String,
+        shift: bool,
+        accel: bool,
+    },
+    Replace(String),
+    SelectRange {
+        start: usize,
+        end: usize,
+        granularity: poodle_node::SelectGranularity,
+    },
+    Clear,
+    FocusChange(bool),
+    Submit,
+    Cancel,
+}
+
+/// Apply one [`TextInputIntent`] against live session state (`value`, `selection`).
+pub fn apply_text_input_intent(
+    value: &mut String,
+    selection: &mut (usize, usize),
+    max_length: Option<usize>,
+    intent: TextInputIntent,
+) {
+    match intent {
+        TextInputIntent::Insert(inserted) => {
+            let outcome = poodle_headless::text_input::insert_transition(
+                value,
+                poodle_headless::text_input::EditState {
+                    anchor: selection.0,
+                    head: selection.1,
+                },
+                &inserted,
+                max_length,
+            );
+            if let Some(next) = outcome.value {
+                *value = next;
+            }
+            *selection = (outcome.state.anchor, outcome.state.head);
+        }
+        TextInputIntent::Key { key, shift, accel } => {
+            if let Some(outcome) = poodle_headless::text_input::edit_transition(
+                value,
+                poodle_headless::text_input::EditState {
+                    anchor: selection.0,
+                    head: selection.1,
+                },
+                &key,
+                shift,
+                accel,
+                max_length,
+            ) {
+                if let Some(next) = outcome.value {
+                    *value = next;
+                }
+                *selection = (outcome.state.anchor, outcome.state.head);
+            }
+        }
+        TextInputIntent::Replace(next) => {
+            let next = match max_length {
+                Some(limit) => next.chars().take(limit).collect(),
+                None => next,
+            };
+            let len = next.chars().count();
+            *value = next;
+            *selection = (len, len);
+        }
+        TextInputIntent::SelectRange {
+            start,
+            end,
+            granularity,
+        } => {
+            *selection = match granularity {
+                poodle_node::SelectGranularity::Character => (start, end),
+                poodle_node::SelectGranularity::Word => {
+                    let (a, _) = poodle_headless::text_input::word_range_at(value, start);
+                    let (_, b) = poodle_headless::text_input::word_range_at(value, end);
+                    (a, b)
+                }
+                poodle_node::SelectGranularity::Line => (0, value.chars().count()),
+            };
+        }
+        TextInputIntent::Clear => {
+            value.clear();
+            *selection = (0, 0);
+        }
+        TextInputIntent::FocusChange(_) | TextInputIntent::Submit | TextInputIntent::Cancel => {}
+    }
+}
+
 /// Host callbacks for an editable field.
 ///
 /// `on_change` reports the new value; `on_selection_change` reports where the
@@ -91,6 +185,8 @@ pub struct TextInputHandlers {
     pub on_submit: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_cancel: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_clear: Option<Arc<dyn Fn() + Send + Sync>>,
+    /// Ordered input intents emitted without computing against the painted spec.
+    pub on_intent: Option<Arc<dyn Fn(TextInputIntent) + Send + Sync>>,
 }
 
 /// Render a text input with host-owned replacement-text updates.
@@ -275,25 +371,37 @@ pub fn text_input_with_handlers(
             caret.showing_placeholder = showing_placeholder;
         }
         value_caret = value.caret;
-        if let Some(on_selection_change) = handlers.on_selection_change.clone() {
+        if handlers.on_selection_change.is_some() || handlers.on_intent.is_some() {
             // The backend names the granularity because it counts the clicks;
             // resolving it needs to know what a word is, which is a text rule
             // and therefore shared, not per-backend.
             let text = spec.current_value().to_string();
+            let on_selection_change = handlers.on_selection_change.clone();
+            let on_intent = handlers.on_intent.clone();
             let handler: Arc<dyn Fn(usize, usize, poodle_node::SelectGranularity) + Send + Sync> =
                 Arc::new(
                     move |start: usize, end: usize, granularity: poodle_node::SelectGranularity| {
-                        let (start, end) = match granularity {
-                            poodle_node::SelectGranularity::Character => (start, end),
-                            poodle_node::SelectGranularity::Word => {
-                                let (a, _) =
-                                    poodle_headless::text_input::word_range_at(&text, start);
-                                let (_, b) = poodle_headless::text_input::word_range_at(&text, end);
-                                (a, b)
-                            }
-                            poodle_node::SelectGranularity::Line => (0, text.chars().count()),
-                        };
-                        on_selection_change(start, end);
+                        if let Some(intent) = &on_intent {
+                            intent(TextInputIntent::SelectRange {
+                                start,
+                                end,
+                                granularity,
+                            });
+                        }
+                        if let Some(on_selection_change) = &on_selection_change {
+                            let (start, end) = match granularity {
+                                poodle_node::SelectGranularity::Character => (start, end),
+                                poodle_node::SelectGranularity::Word => {
+                                    let (a, _) =
+                                        poodle_headless::text_input::word_range_at(&text, start);
+                                    let (_, b) =
+                                        poodle_headless::text_input::word_range_at(&text, end);
+                                    (a, b)
+                                }
+                                poodle_node::SelectGranularity::Line => (0, text.chars().count()),
+                            };
+                            on_selection_change(start, end);
+                        }
                     },
                 );
             value.interaction.on_select_range = Some(Arc::clone(&handler));
@@ -304,21 +412,27 @@ pub fn text_input_with_handlers(
             let (start, end) = spec.selection_range();
             let on_selection = handlers.on_selection_change.clone();
             let change = on_change.clone();
+            let on_intent = handlers.on_intent.clone();
             // `maxLength` is spent here, before the host is told anything: the
             // shared transition owns the rule, so GPUI and Jetstream cannot
             // drift from `<input maxlength>` and from each other.
             let limit = spec.max_length;
             value.interaction.on_edit_insert = Some(Arc::new(move |inserted: &str| {
-                let outcome = poodle_headless::text_input::insert_transition(
-                    &text,
-                    poodle_headless::text_input::EditState {
-                        anchor: start,
-                        head: end,
-                    },
-                    inserted,
-                    limit,
-                );
-                report_edit(outcome, &text, (start, end), &change, &on_selection);
+                if let Some(intent) = &on_intent {
+                    intent(TextInputIntent::Insert(inserted.to_string()));
+                }
+                if change.is_some() || on_selection.is_some() {
+                    let outcome = poodle_headless::text_input::insert_transition(
+                        &text,
+                        poodle_headless::text_input::EditState {
+                            anchor: start,
+                            head: end,
+                        },
+                        inserted,
+                        limit,
+                    );
+                    report_edit(outcome, &text, (start, end), &change, &on_selection);
+                }
             }));
         }
     }
@@ -355,7 +469,11 @@ pub fn text_input_with_handlers(
         }
         let change = on_change.clone();
         let on_clear = handlers.on_clear.clone();
+        let on_intent = handlers.on_intent.clone();
         clear.interaction.on_activate = Some(Arc::new(move || {
+            if let Some(intent) = &on_intent {
+                intent(TextInputIntent::Clear);
+            }
             if let Some(change) = &change {
                 change("");
             }
@@ -478,18 +596,28 @@ pub fn text_input_with_handlers(
         let (start, end) = spec.selection_range();
         let on_selection = handlers.on_selection_change.clone();
         let change = on_change.clone();
+        let on_intent = handlers.on_intent.clone();
         let limit = spec.max_length;
         root.interaction.on_edit_key = Some(Arc::new(move |key, mods| {
-            let state = poodle_headless::text_input::EditState {
-                anchor: start,
-                head: end,
-            };
-            let Some(outcome) = poodle_headless::text_input::edit_transition(
-                &value, state, key, mods.shift, mods.accel, limit,
-            ) else {
-                return;
-            };
-            report_edit(outcome, &value, (start, end), &change, &on_selection);
+            if let Some(intent) = &on_intent {
+                intent(TextInputIntent::Key {
+                    key: key.to_string(),
+                    shift: mods.shift,
+                    accel: mods.accel,
+                });
+            }
+            if change.is_some() || on_selection.is_some() {
+                let state = poodle_headless::text_input::EditState {
+                    anchor: start,
+                    head: end,
+                };
+                let Some(outcome) = poodle_headless::text_input::edit_transition(
+                    &value, state, key, mods.shift, mods.accel, limit,
+                ) else {
+                    return;
+                };
+                report_edit(outcome, &value, (start, end), &change, &on_selection);
+            }
         }));
         // Paste and cut arrive as content, not as a keystroke, so they go
         // through the same edit model by a different door.
@@ -498,18 +626,24 @@ pub fn text_input_with_handlers(
             let (start, end) = spec.selection_range();
             let on_selection = handlers.on_selection_change.clone();
             let change = on_change.clone();
+            let on_intent = handlers.on_intent.clone();
             let limit = spec.max_length;
             root.interaction.on_edit_insert = Some(Arc::new(move |text: &str| {
-                let outcome = poodle_headless::text_input::insert_transition(
-                    &value,
-                    poodle_headless::text_input::EditState {
-                        anchor: start,
-                        head: end,
-                    },
-                    text,
-                    limit,
-                );
-                report_edit(outcome, &value, (start, end), &change, &on_selection);
+                if let Some(intent) = &on_intent {
+                    intent(TextInputIntent::Insert(text.to_string()));
+                }
+                if change.is_some() || on_selection.is_some() {
+                    let outcome = poodle_headless::text_input::insert_transition(
+                        &value,
+                        poodle_headless::text_input::EditState {
+                            anchor: start,
+                            head: end,
+                        },
+                        text,
+                        limit,
+                    );
+                    report_edit(outcome, &value, (start, end), &change, &on_selection);
+                }
             }));
         }
         // The root carries the caret too. It never *draws* one — it has
@@ -522,15 +656,58 @@ pub fn text_input_with_handlers(
         // snapshot moves the caret as well as the value, and undo arrives as a
         // keystroke at the focusable root.
         root.interaction.on_select_range = value_select.clone();
-        root.interaction.on_text_change = on_change;
+        root.interaction.on_text_change = match (on_change, handlers.on_intent.clone()) {
+            (Some(change), Some(intent)) => Some(Arc::new(move |next: &str| {
+                intent(TextInputIntent::Replace(next.to_string()));
+                change(next);
+            })),
+            (Some(change), None) => Some(change),
+            (None, Some(intent)) => Some(Arc::new(move |next: &str| {
+                intent(TextInputIntent::Replace(next.to_string()));
+            })),
+            (None, None) => None,
+        };
     }
     if !spec.is_disabled {
         // Read-only fields still participate in focus and selection. Report
         // both focus directions for them too; only mutation channels are
         // withheld above.
-        root.interaction.on_focus_change = handlers.on_focus_change.clone();
-        root.interaction.on_submit = handlers.on_submit.clone();
-        root.interaction.on_cancel = handlers.on_cancel.clone();
+        root.interaction.on_focus_change =
+            match (handlers.on_focus_change.clone(), handlers.on_intent.clone()) {
+                (Some(cb), Some(intent)) => Some(Arc::new(move |focused| {
+                    intent(TextInputIntent::FocusChange(focused));
+                    cb(focused);
+                })),
+                (Some(cb), None) => Some(cb),
+                (None, Some(intent)) => Some(Arc::new(move |focused| {
+                    intent(TextInputIntent::FocusChange(focused));
+                })),
+                (None, None) => None,
+            };
+        root.interaction.on_submit = match (handlers.on_submit.clone(), handlers.on_intent.clone())
+        {
+            (Some(cb), Some(intent)) => Some(Arc::new(move || {
+                intent(TextInputIntent::Submit);
+                cb();
+            })),
+            (Some(cb), None) => Some(cb),
+            (None, Some(intent)) => Some(Arc::new(move || {
+                intent(TextInputIntent::Submit);
+            })),
+            (None, None) => None,
+        };
+        root.interaction.on_cancel = match (handlers.on_cancel.clone(), handlers.on_intent.clone())
+        {
+            (Some(cb), Some(intent)) => Some(Arc::new(move || {
+                intent(TextInputIntent::Cancel);
+                cb();
+            })),
+            (Some(cb), None) => Some(cb),
+            (None, Some(intent)) => Some(Arc::new(move || {
+                intent(TextInputIntent::Cancel);
+            })),
+            (None, None) => None,
+        };
     }
     if spec.is_disabled {
         root.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());

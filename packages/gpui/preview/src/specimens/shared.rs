@@ -17,11 +17,9 @@ pub(crate) fn render(
     for pane in specimen.panes() {
         axes = match pane {
             Pane::Examples => axes,
-            Pane::Sizes(values) => {
-                axes.with_size_values(values, |value, _| build(View::Size(value)))
-            }
-            Pane::Densities(values) => {
-                axes.with_density_values(values, |value, _| build(View::Density(value)))
+            Pane::Sizes(rows) => axes.with_size_rows(rows, |value, _| build(View::Size(value))),
+            Pane::Densities(rows) => {
+                axes.with_density_rows(rows, |value, _| build(View::Density(value)))
             }
         };
     }
