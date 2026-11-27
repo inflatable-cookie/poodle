@@ -732,7 +732,10 @@ mod tests {
 
     #[test]
     fn a_homebrew_formula_keg_reads_as_homebrew() {
-        assert_eq!(install_manager_label(InstallManager::HomebrewFormula), "Homebrew");
+        assert_eq!(
+            install_manager_label(InstallManager::HomebrewFormula),
+            "Homebrew"
+        );
     }
 
     #[test]
