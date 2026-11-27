@@ -1,24 +1,22 @@
 /**
- * g18.011 UX acceptance sweep — RichTextEditor, RichTextRenderer,
+ * UX acceptance sweep — RichTextEditor, RichTextRenderer,
  * MarkdownRenderer real-browser journeys.
  *
  * Drives the real public specimen routes on both preview applications
- * (Svelte :4173 `#/components/<slug>`, React :4180 `#components/<slug>`)
+ * (Svelte `#/components/<slug>`, React `#components/<slug>`)
  * through ordinary editing, configuration, keyboard, pointer, theme and
  * constrained-layout journeys, capturing screenshots and a JSON report.
  * Evidence-only: this sweep never repairs product code.
  *
  * Run from the repository root:
- *   effigy test:g18-011-ux-sweep-editors
+ *   effigy test:web-editor-ux-sweep-editors
  */
-import { chromium, webkit, type Browser, type BrowserType, type Page } from "playwright";
+import type { Browser, Page } from "playwright";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-import { startPreviews } from "../visual/server";
+import { selectedEngines, settle, withBrowser, withPreviews } from "../browser-probe";
 
-const browserFlag =
-  process.argv.find((a) => a.startsWith("--browser="))?.slice("--browser=".length) ?? "";
 const OUT_BASE = fileURLToPath(new URL("./out", import.meta.url));
 
 type Severity = "blocking" | "follow-up" | "accepted";
@@ -73,16 +71,6 @@ function specimenUrl(base: string, framework: "svelte" | "react", slug: string, 
   const hash = framework === "svelte" ? `#/components/${slug}` : `#components/${slug}`;
   const densityParam = density ? `&density=${density}` : "";
   return `${base}/?theme=${theme}${densityParam}${hash}`;
-}
-
-async function settle(page: Page, ms = 350): Promise<void> {
-  await page.evaluate(
-    (ms) =>
-      new Promise<void>((resolve) => {
-        requestAnimationFrame(() => window.setTimeout(resolve, ms));
-      }),
-    ms,
-  );
 }
 
 async function shoot(page: Page, name: string, outDir: string): Promise<string> {
@@ -736,42 +724,22 @@ async function densityJourney(browser: Browser, framework: "svelte" | "react", b
 
 /* ================= main ================= */
 
-/** Launch exactly the engine(s) named by --browser (sibling-probe convention). */
-const ENGINES: Array<[string, BrowserType]> = (
-  [
-    ["chromium", chromium],
-    ["webkit", webkit],
-  ] as Array<[string, BrowserType]>
-).filter(([name]) => !browserFlag || browserFlag === name);
+const ENGINES = selectedEngines();
 
-if (ENGINES.length === 0) {
-  console.error(`unknown --browser=${browserFlag}`);
-  process.exit(2);
-}
-
-const servers = await startPreviews();
-const BASES: Record<"svelte" | "react", string> = {
-  svelte: servers.urls.svelte,
-  react: servers.urls.react,
-};
-
-try {
+await withPreviews(async (urls) => {
   for (const [engineName, engine] of ENGINES) {
     const outDir = `${OUT_BASE}/${engineName}`;
     mkdirSync(outDir, { recursive: true });
     const passesBefore = passes;
     const findingsBefore = findings.length;
-    const browser = await engine.launch();
-    try {
+    await withBrowser(engine, async (browser) => {
       for (const fw of ["svelte", "react"] as const) {
-        await runRichTextEditor(browser, fw, BASES[fw], outDir);
-        await runRichTextRenderer(browser, fw, BASES[fw], outDir);
-        await runMarkdownRenderer(browser, fw, BASES[fw], outDir);
-        await densityJourney(browser, fw, BASES[fw], outDir);
+        await runRichTextEditor(browser, fw, urls[fw], outDir);
+        await runRichTextRenderer(browser, fw, urls[fw], outDir);
+        await runMarkdownRenderer(browser, fw, urls[fw], outDir);
+        await densityJourney(browser, fw, urls[fw], outDir);
       }
-    } finally {
-      await browser.close();
-    }
+    });
     const engineFindings = findings.slice(findingsBefore);
     const engineBlocking = engineFindings.filter((f) => f.severity === "blocking").length;
     writeFileSync(
@@ -792,9 +760,7 @@ try {
       console.log(`  observed: ${f.observed}`);
     }
   }
-} finally {
-  await servers.stop();
-}
+});
 
 const blocking = findings.filter((f) => f.severity === "blocking");
 if (blocking.length > 0) {

@@ -7,82 +7,20 @@
  *   bun test/code-editor-line-numbers/probe.ts --browser=webkit
  */
 
-import { chromium, webkit, type Browser, type BrowserType, type Page } from "playwright";
-import { fileURLToPath } from "node:url";
+import type { Page } from "playwright";
 
-const browserFlag = process.argv.find((arg) => arg.startsWith("--browser="))?.slice("--browser=".length);
-const engines: Array<[string, BrowserType]> = (
-  [
-    ["chromium", chromium],
-    ["webkit", webkit],
-  ] as Array<[string, BrowserType]>
-).filter(([name]) => !browserFlag || browserFlag === name);
+import {
+  check,
+  finish,
+  selectedEngines,
+  settle,
+  withBrowser,
+  withFixture,
+} from "../browser-probe";
 
-if (engines.length === 0) {
-  throw new Error(`Unknown --browser=${browserFlag}`);
-}
-
-const fixtureRoot = fileURLToPath(new URL(".", import.meta.url));
-const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
-const viteBin = fileURLToPath(
-  new URL("../../packages/svelte/preview/node_modules/vite/bin/vite.js", import.meta.url),
-);
-const port = 4197;
-const url = `http://127.0.0.1:${port}/`;
+const engines = selectedEngines();
 
 const INITIAL_DOC = "const answer = 42;\nconst unused = 0;\n";
-
-let failures = 0;
-
-function check(label: string, ok: boolean, detail = ""): void {
-  if (!ok) failures += 1;
-  console.log(`${ok ? "  ok  " : "  FAIL"}  ${label}${detail ? `  — ${detail}` : ""}`);
-}
-
-async function waitForServer(timeoutMs = 30_000): Promise<void> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(1000) });
-      if (res.ok) return;
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 150));
-    }
-  }
-  throw new Error(`code-editor line-numbers fixture on :${port} did not start`);
-}
-
-const child = Bun.spawn(
-  [
-    "bun",
-    viteBin,
-    "--config",
-    `${fixtureRoot}/vite.config.ts`,
-    "--port",
-    String(port),
-    "--strictPort",
-    "--host",
-    "127.0.0.1",
-  ],
-  {
-    cwd: repoRoot,
-    stdout: "inherit",
-    stderr: "inherit",
-  },
-);
-
-await waitForServer();
-
-async function settle(page: Page): Promise<void> {
-  await page.evaluate(
-    () =>
-      new Promise<void>((resolve) => {
-        requestAnimationFrame(() => {
-          window.setTimeout(resolve, 200);
-        });
-      }),
-  );
-}
 
 async function readState(page: Page, framework: string): Promise<{
   gutter: boolean;
@@ -141,13 +79,13 @@ async function toggleLineNumbers(page: Page, framework: string): Promise<void> {
 async function focusEditor(page: Page, framework: string): Promise<void> {
   const section = `[data-framework="${framework}"]`;
   await page.locator(`${section} [data-before]`).click();
-  await settle(page);
+  await settle(page, 200);
   // Tab order differs by engine: WebKit skips buttons entirely, Chromium
   // visits the line-numbers toggle first. Walk forward until the editing
   // surface holds focus.
   for (let tabs = 0; tabs < 4; tabs += 1) {
     await page.keyboard.press("Tab");
-    await settle(page);
+    await settle(page, 200);
     const state = await readState(page, framework);
     if (state.focused) return;
   }
@@ -189,7 +127,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
 
   // 1. Live off: the gutter disappears without a new editor instance.
   await toggle.click();
-  await settle(page);
+  await settle(page, 200);
   const off = await readState(page, framework);
   check(
     `${browserName} ${framework} live off removes the gutter and flips the button`,
@@ -199,7 +137,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
 
   // 2. Live on: the same view restores the exact logical-line gutter.
   await toggle.click();
-  await settle(page);
+  await settle(page, 200);
   const on = await readState(page, framework);
   check(
     `${browserName} ${framework} live on restores the gutter on the same editor`,
@@ -213,9 +151,9 @@ async function runFramework(page: Page, framework: string, browserName: string):
   check(`${browserName} ${framework} Tab lands on the editing surface`, entered.focused);
   await page.keyboard.press("End");
   await toggleLineNumbers(page, framework);
-  await settle(page);
+  await settle(page, 200);
   await toggleLineNumbers(page, framework);
-  await settle(page);
+  await settle(page, 200);
   const afterToggle = await readState(page, framework);
   check(
     `${browserName} ${framework} focus survives both transitions`,
@@ -223,7 +161,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
     `focused=${afterToggle.focused} gutter=${afterToggle.gutter}`,
   );
   await page.keyboard.press("Enter");
-  await settle(page);
+  await settle(page, 200);
   const afterEnter = await readState(page, framework);
   const enterDoc = "const answer = 42;\n\nconst unused = 0;\n";
   check(
@@ -232,7 +170,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
     `doc=${JSON.stringify(afterEnter.doc)}`,
   );
   await pressModChord(page, framework, "z");
-  await settle(page);
+  await settle(page, 200);
   const afterUndo = await readState(page, framework);
   check(
     `${browserName} ${framework} undo history survives the presentation toggle`,
@@ -242,7 +180,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
 
   // 4. An active diagnostic and its navigation state survive the toggle.
   await page.keyboard.press("F8");
-  await settle(page);
+  await settle(page, 200);
   const diagnosticOn = await readState(page, framework);
   check(
     `${browserName} ${framework} F8 announces the diagnostic`,
@@ -250,7 +188,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
     `message=${JSON.stringify(diagnosticOn.message)}`,
   );
   await toggleLineNumbers(page, framework);
-  await settle(page);
+  await settle(page, 200);
   const diagnosticOff = await readState(page, framework);
   check(
     `${browserName} ${framework} the active diagnostic and its mark survive live off`,
@@ -260,7 +198,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
     `gutter=${diagnosticOff.gutter} message=${JSON.stringify(diagnosticOff.message)} mark=${diagnosticOff.diagnosticMark}`,
   );
   await page.keyboard.press("F8");
-  await settle(page);
+  await settle(page, 200);
   const diagnosticWrap = await readState(page, framework);
   check(
     `${browserName} ${framework} F8 navigation stays coherent after the toggle`,
@@ -268,7 +206,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
     `message=${JSON.stringify(diagnosticWrap.message)}`,
   );
   await toggleLineNumbers(page, framework);
-  await settle(page);
+  await settle(page, 200);
   const restored = await readState(page, framework);
   check(
     `${browserName} ${framework} live on restores the gutter with the diagnostic intact`,
@@ -279,7 +217,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
   // 5. Rapid controlled updates: the latest host value wins.
   await toggleLineNumbers(page, framework); // off
   await toggleLineNumbers(page, framework); // on
-  await settle(page);
+  await settle(page, 200);
   const rapidOn = await readState(page, framework);
   check(
     `${browserName} ${framework} rapid off/on resolves to on`,
@@ -289,7 +227,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
   await toggleLineNumbers(page, framework); // off
   await toggleLineNumbers(page, framework); // on
   await toggleLineNumbers(page, framework); // off
-  await settle(page);
+  await settle(page, 200);
   const rapidOff = await readState(page, framework);
   check(
     `${browserName} ${framework} rapid on/off/on/off resolves to off`,
@@ -297,7 +235,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
     `gutter=${rapidOff.gutter} pressed=${rapidOff.pressed}`,
   );
   await toggleLineNumbers(page, framework);
-  await settle(page);
+  await settle(page, 200);
   const final = await readState(page, framework);
   check(
     `${browserName} ${framework} final toggle restores the initial presentation`,
@@ -306,29 +244,17 @@ async function runFramework(page: Page, framework: string, browserName: string):
   );
 }
 
-try {
+await withFixture(import.meta.url, async (origin) => {
   for (const [browserName, browserType] of engines) {
-    let browser: Browser | undefined;
-    try {
-      browser = await browserType.launch({ headless: true });
+    await withBrowser(browserType, async (browser) => {
       const page = await browser.newPage({ viewport: { width: 960, height: 720 } });
-      await page.goto(url, { waitUntil: "networkidle" });
+      await page.goto(`${origin}/`, { waitUntil: "networkidle" });
       await page.waitForSelector('[data-framework="svelte"] .poodle-code-editor');
       await page.waitForSelector('[data-framework="react"] .poodle-code-editor');
       await runFramework(page, "svelte", browserName);
       await runFramework(page, "react", browserName);
-    } finally {
-      await browser?.close();
-    }
+    });
   }
-} finally {
-  child.kill();
-  await child.exited;
-}
+});
 
-if (failures > 0) {
-  console.error(`\n${failures} check(s) failed`);
-  process.exit(1);
-}
-
-console.log("\nall CodeEditor line-numbers checks passed");
+finish("CodeEditor line-numbers");

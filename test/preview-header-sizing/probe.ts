@@ -1,8 +1,8 @@
 /**
- * g18.025 preview header control sizing — paired real-browser geometry proof.
+ * Preview header control sizing — paired real-browser geometry proof.
  *
- *   bun test/g18-025-preview-header-sizing/probe.ts --browser=chromium
- *   bun test/g18-025-preview-header-sizing/probe.ts --browser=webkit
+ *   bun test/preview-header-sizing/probe.ts --browser=chromium
+ *   bun test/preview-header-sizing/probe.ts --browser=webkit
  *
  * Law under test, on both live preview applications (Svelte, React):
  * - every painted header control resolves the selected `controlSize` stop
@@ -17,28 +17,11 @@
  * - Size, Density, Theme, Contrast, Search, wrapping, and keyboard journeys
  *   keep working while the five controls stay aligned.
  */
-import { chromium, webkit, type BrowserType, type Page } from "playwright";
+import type { Page } from "playwright";
 
-import { startPreviews } from "../visual/server";
+import { check, finish, selectedEngines, withBrowser, withPreviews } from "../browser-probe";
 
-const browserFlag = process.argv.find((arg) => arg.startsWith("--browser="))?.slice("--browser=".length);
-const engines: Array<[string, BrowserType]> = (
-  [
-    ["chromium", chromium],
-    ["webkit", webkit],
-  ] as Array<[string, BrowserType]>
-).filter(([name]) => !browserFlag || browserFlag === name);
-
-if (engines.length === 0) {
-  throw new Error(`Unknown --browser=${browserFlag}`);
-}
-
-let failures = 0;
-
-function check(label: string, ok: boolean, detail = ""): void {
-  if (!ok) failures += 1;
-  console.log(`${ok ? "  ok  " : "  FAIL"}  ${label}${detail ? `  — ${detail}` : ""}`);
-}
+const engines = selectedEngines();
 
 function near(a: number, b: number, tolerance = 1.5): boolean {
   return Math.abs(a - b) <= tolerance;
@@ -290,34 +273,27 @@ async function probeToggleGroupLadder(page: Page, engine: string, framework: str
   }
 }
 
-let servers: Awaited<ReturnType<typeof startPreviews>> | undefined;
-
-try {
-  servers = await startPreviews();
+await withPreviews(async (urls) => {
   for (const [name, engine] of engines) {
-    console.log(`\n[g18-025-preview-header-sizing] ${name}`);
-    const browser = await engine.launch({ headless: true });
-    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-    // One measured header per framework at the default sm stop, for parity.
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(servers.urls.svelte, { waitUntil: "domcontentloaded", timeout: 120_000 });
-    await page.locator(HEADER).waitFor({ timeout: 60_000 });
-    const svelte = await measureHeader(page);
-    await page.goto(servers.urls.react, { waitUntil: "domcontentloaded", timeout: 120_000 });
-    await page.locator(HEADER).waitFor({ timeout: 60_000 });
-    const react = await measureHeader(page);
-    assertFrameworkParity(svelte, react, `${name} parity`);
-    // Full journeys per framework.
-    await probe(page, name, "svelte", servers.urls.svelte);
-    await probe(page, name, "react", servers.urls.react);
-    await probeToggleGroupLadder(page, name, "svelte", servers.urls.svelte);
-    await probeToggleGroupLadder(page, name, "react", servers.urls.react);
-    await browser.close();
+    console.log(`\n[preview-header-sizing] ${name}`);
+    await withBrowser(engine, async (browser) => {
+      const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+      // One measured header per framework at the default sm stop, for parity.
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await page.goto(urls.svelte, { waitUntil: "domcontentloaded", timeout: 120_000 });
+      await page.locator(HEADER).waitFor({ timeout: 60_000 });
+      const svelte = await measureHeader(page);
+      await page.goto(urls.react, { waitUntil: "domcontentloaded", timeout: 120_000 });
+      await page.locator(HEADER).waitFor({ timeout: 60_000 });
+      const react = await measureHeader(page);
+      assertFrameworkParity(svelte, react, `${name} parity`);
+      // Full journeys per framework.
+      await probe(page, name, "svelte", urls.svelte);
+      await probe(page, name, "react", urls.react);
+      await probeToggleGroupLadder(page, name, "svelte", urls.svelte);
+      await probeToggleGroupLadder(page, name, "react", urls.react);
+    });
   }
-} finally {
-  // Stops only the servers this run spawned; reused previews stay up (the
-  // visual gate contract in test/visual/server.ts).
-  await servers?.stop();
-}
+});
 
-process.exit(failures === 0 ? 0 : 1);
+finish("preview-header-sizing");

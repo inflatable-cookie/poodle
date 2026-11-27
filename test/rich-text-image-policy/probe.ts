@@ -1,8 +1,17 @@
-import { chromium, webkit, type Browser, type BrowserType, type Page } from "playwright";
+import type { BrowserType, Page } from "playwright";
 
+import {
+  check,
+  deadline,
+  failureCount,
+  finish,
+  rewindFailures,
+  selectedEngines,
+  withBrowser,
+  withPreviews,
+} from "../browser-probe";
 import { specimenUrl } from "../visual/capture";
-import { SERVERS, SMOKE_AXES, type Framework } from "../visual/config";
-import { startPreviews } from "../visual/server";
+import { SMOKE_AXES, type Framework } from "../visual/config";
 
 /**
  * Headless Chromium + WebKit proof for the RichTextEditor Image Policy
@@ -20,16 +29,7 @@ import { startPreviews } from "../visual/server";
  * than assumed.
  */
 
-let failures = 0;
-
-function check(label: string, ok: boolean, detail = ""): void {
-  if (ok) {
-    console.log(`  ok   ${label}`);
-  } else {
-    failures += 1;
-    console.error(`  FAIL ${label}${detail ? ` — ${detail}` : ""}`);
-  }
-}
+const engines = selectedEngines();
 
 interface Geometry {
   complete: boolean;
@@ -274,51 +274,28 @@ async function runSection(
 ): Promise<void> {
   const attempts = 2;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
-    const failuresBefore = failures;
-    let browser: Browser | null = null;
+    const failuresBefore = failureCount();
     try {
-      browser = await browserType.launch();
-      const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-      const page = await context.newPage();
-      await Promise.race([
-        runSpecimen(page, base, framework),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("section watchdog: no completion within 180s")), 180_000),
-        ),
-      ]);
-      await browser.close();
+      await withBrowser(browserType, async (browser) => {
+        const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+        const page = await context.newPage();
+        await deadline(180_000, "section watchdog: no completion within 180s", runSpecimen(page, base, framework));
+      });
       return;
     } catch (error) {
-      await browser?.close().catch(() => {});
       if (attempt === attempts) throw error;
-      failures = failuresBefore;
+      rewindFailures(failuresBefore);
       console.log(`  retrying ${browserName}/${framework} on a fresh browser after: ${String(error).slice(0, 140)}`);
     }
   }
 }
 
-async function main(): Promise<void> {
-  await startPreviews();
-  const bases: Record<Framework, string> = {
-    svelte: `http://127.0.0.1:${SERVERS.svelte.port}`,
-    react: `http://127.0.0.1:${SERVERS.react.port}`,
-  };
-  const only = process.argv.find((arg) => arg.startsWith("--browser="))?.slice("--browser=".length);
-  const engines = ([["chromium", chromium], ["webkit", webkit]] as Array<[string, BrowserType]>).filter(
-    ([name]) => only === undefined || name === only,
-  );
-  if (engines.length === 0) throw new Error(`Unknown --browser=${only}`);
+await withPreviews(async (urls) => {
   for (const [browserName, browserType] of engines) {
     for (const framework of ["svelte", "react"] as Framework[]) {
-      await runSection(browserType, browserName, framework, bases[framework]);
+      await runSection(browserType, browserName, framework, urls[framework]);
     }
   }
-  if (failures > 0) {
-    console.error(`\nrich-text image policy probe: ${failures} failing check(s)`);
-    process.exit(1);
-  }
-  console.log("\nrich-text image policy probe: all checks passed");
-  process.exit(0);
-}
+});
 
-await main();
+finish("rich-text image policy");

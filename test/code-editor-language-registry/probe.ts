@@ -17,28 +17,18 @@
  *   bun test/code-editor-language-registry/probe.ts --browser=webkit
  */
 
-import { chromium, webkit, type Browser, type BrowserType, type Page } from "playwright";
-import { fileURLToPath } from "node:url";
+import type { Page } from "playwright";
 
-const browserFlag = process.argv.find((arg) => arg.startsWith("--browser="))?.slice("--browser=".length);
-const engines: Array<[string, BrowserType]> = (
-  [
-    ["chromium", chromium],
-    ["webkit", webkit],
-  ] as Array<[string, BrowserType]>
-).filter(([name]) => !browserFlag || browserFlag === name);
+import {
+  check,
+  finish,
+  selectedEngines,
+  settle,
+  withBrowser,
+  withFixture,
+} from "../browser-probe";
 
-if (engines.length === 0) {
-  throw new Error(`Unknown --browser=${browserFlag}`);
-}
-
-const fixtureRoot = fileURLToPath(new URL(".", import.meta.url));
-const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
-const viteBin = fileURLToPath(
-  new URL("../../packages/svelte/preview/node_modules/vite/bin/vite.js", import.meta.url),
-);
-const port = 4199;
-const url = `http://127.0.0.1:${port}/`;
+const engines = selectedEngines();
 
 /**
  * g18.023: the representative TypeScript sample. It must expose at least five
@@ -111,58 +101,6 @@ const ALL_THEMES = [
   "clay",
   "meadow",
 ] as const;
-
-let failures = 0;
-
-function check(label: string, ok: boolean, detail = ""): void {
-  if (!ok) failures += 1;
-  console.log(`${ok ? "  ok  " : "  FAIL"}  ${label}${detail ? `  — ${detail}` : ""}`);
-}
-
-async function waitForServer(timeoutMs = 30_000): Promise<void> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(1000) });
-      if (res.ok) return;
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 150));
-    }
-  }
-  throw new Error(`code-editor language-registry fixture on :${port} did not start`);
-}
-
-const child = Bun.spawn(
-  [
-    "bun",
-    viteBin,
-    "--config",
-    `${fixtureRoot}/vite.config.ts`,
-    "--port",
-    String(port),
-    "--strictPort",
-    "--host",
-    "127.0.0.1",
-  ],
-  {
-    cwd: repoRoot,
-    stdout: "inherit",
-    stderr: "inherit",
-  },
-);
-
-await waitForServer();
-
-async function settle(page: Page): Promise<void> {
-  await page.evaluate(
-    () =>
-      new Promise<void>((resolve) => {
-        requestAnimationFrame(() => {
-          window.setTimeout(resolve, 200);
-        });
-      }),
-  );
-}
 
 type Counters = { typescript: number; json: number; broken: number };
 
@@ -427,7 +365,7 @@ async function typeText(page: Page, framework: string, text: string): Promise<vo
   await page.locator(`[data-framework="${framework}"] [data-part='main-editor'] .cm-content`).click();
   await page.keyboard.press("ControlOrMeta+End");
   await page.keyboard.type(text);
-  await settle(page);
+  await settle(page, 200);
 }
 
 /** Double-click a word to make a real text selection on the mounted editor. */
@@ -437,7 +375,7 @@ async function selectWord(page: Page, framework: string, word: string): Promise<
     .getByText(word, { exact: true })
     .first()
     .dblclick();
-  await settle(page);
+  await settle(page, 200);
 }
 
 /** Undo until the document is exactly `doc`, bounded for flake safety. */
@@ -446,7 +384,7 @@ async function undoUntil(page: Page, framework: string, doc: string): Promise<bo
     const current = await readEditor(page, framework);
     if (current.doc === doc) return true;
     await page.keyboard.press("ControlOrMeta+z");
-    await settle(page);
+    await settle(page, 200);
   }
   return (await readEditor(page, framework)).doc === doc;
 }
@@ -544,7 +482,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
   // 1. Controlled switch to the second consumer language: one additional lazy
   //    load, same editor instance, document preserved.
   await selectLanguage(page, framework, "json");
-  await settle(page);
+  await settle(page, 200);
   const jsonState = await readEditor(page, framework);
   const jsonCounters = await counters(page, framework);
   check(
@@ -555,7 +493,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
 
   // 2. Switching back reuses the memoized load: no new loader invocation.
   await selectLanguage(page, framework, "typescript");
-  await settle(page);
+  await settle(page, 200);
   const backState = await readEditor(page, framework);
   const backCounters = await counters(page, framework);
   check(
@@ -568,7 +506,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
   //     keys read as property, strings as string, numbers/booleans as
   //     literal, and braces/separators as punctuation.
   await clickPart(page, framework, "sample-json");
-  await settle(page);
+  await settle(page, 200);
   const jsonSampleSpans = await styledSpans(page, framework);
   const jsonExpectations: Array<[string, SyntaxRole, RegExp]> = [
     ["answer key", "property", /^"answer"$/],
@@ -603,11 +541,11 @@ async function runFramework(page: Page, framework: string, browserName: string):
     `distinct=${combinedChromatic.size}`,
   );
   await clickPart(page, framework, "sample-typescript");
-  await settle(page);
+  await settle(page, 200);
 
   // 3. Plain text is built in: no registry entry, no loader, same editor.
   await selectLanguage(page, framework, "plain-text");
-  await settle(page);
+  await settle(page, 200);
   const plainState = await readEditor(page, framework);
   const plainCounters = await counters(page, framework);
   check(
@@ -632,9 +570,9 @@ async function runFramework(page: Page, framework: string, browserName: string):
     `doc=${JSON.stringify(typed.doc)}`,
   );
   await selectLanguage(page, framework, "typescript");
-  await settle(page);
+  await settle(page, 200);
   await selectLanguage(page, framework, "json");
-  await settle(page);
+  await settle(page, 200);
   const afterSwitch = await readEditor(page, framework);
   check(
     `${browserName} ${framework} typed text survives two language switches`,
@@ -653,8 +591,8 @@ async function runFramework(page: Page, framework: string, browserName: string):
   //    language stays active, and nothing remounts.
   const beforeBroken = await counters(page, framework);
   await selectLanguage(page, framework, "broken");
-  await settle(page);
-  await settle(page);
+  await settle(page, 200);
+  await settle(page, 200);
   const brokenState = await readEditor(page, framework);
   const brokenCounters = await counters(page, framework);
   const rejections = await page.evaluate(() => {
@@ -675,7 +613,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
   // 6. Recovery: reselecting an admitted id reconfigures through the memoized
   //    registry without remounting.
   await selectLanguage(page, framework, "typescript");
-  await settle(page);
+  await settle(page, 200);
   const recovered = await readEditor(page, framework);
   const recoveredCounters = await counters(page, framework);
   check(
@@ -693,7 +631,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
     if (!(button instanceof HTMLElement)) throw new Error(`missing ${fw} mount-invalid button`);
     button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
   }, framework);
-  await settle(page);
+  await settle(page, 200);
   const refusal = await page.evaluate((fw) => {
     const scope = document.querySelector(`[data-framework="${fw}"]`);
     if (!(scope instanceof HTMLElement)) throw new Error(`missing ${fw} section`);
@@ -722,7 +660,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
   // 8. g18.021: full -> plain performance mode drops token presentation on the
   //    same mounted editor without consulting the registry; full restores it.
   await clickPart(page, framework, "mode-plain");
-  await settle(page);
+  await settle(page, 200);
   const plainModeState = await readEditor(page, framework);
   const plainModeCounters = await counters(page, framework);
   const plainModeSpans = await styledSpans(page, framework);
@@ -737,7 +675,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
     `counters=${JSON.stringify(plainModeCounters)}`,
   );
   await clickPart(page, framework, "mode-full");
-  await settle(page);
+  await settle(page, 200);
   const restoredModeState = await readEditor(page, framework);
   const restoredModeSpans = await styledSpans(page, framework);
   const restoredKeyword = restoredModeSpans.find((span) => span.text.trim() === "const");
@@ -752,7 +690,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
   //    invalid role AND a non-colour wavy-underline cue, then lose both when
   //    the document is repaired. Host diagnostics stay host-owned.
   await clickPart(page, framework, "sample-invalid");
-  await settle(page);
+  await settle(page, 200);
   const invalidState = await readEditor(page, framework);
   const invalidRefs = await roleColors(page);
   const invalidSpans = await styledSpans(page, framework);
@@ -796,7 +734,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
     `contrast=${invalidCue.contrast.toFixed(2)}`,
   );
   await clickPart(page, framework, "sample-typescript");
-  await settle(page);
+  await settle(page, 200);
   const cleanedSpans = await styledSpans(page, framework);
   check(
     `${browserName} ${framework} repairing the document removes the invalid marks`,
@@ -859,7 +797,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
   await page.keyboard.press("ControlOrMeta+f");
   await page.keyboard.type("balance");
   await page.keyboard.press("Enter");
-  await settle(page);
+  await settle(page, 200);
   const searchOverlay = await page.evaluate((fw) => {
     const content = document.querySelector(
       `[data-framework="${fw}"] [data-part='main-editor'] .cm-content`,
@@ -880,7 +818,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
     `background=${searchOverlay} alpha=${searchOverlay === null ? "-" : overlayAlpha(searchOverlay)}`,
   );
   await page.keyboard.press("Escape");
-  await settle(page);
+  await settle(page, 200);
 
   // 11. g18.023: every named theme's actual panel keeps every syntax role at
   //     AA contrast, and switching themes restyles the same mounted editor
@@ -899,7 +837,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
   let previousWasLight: boolean | null = null;
   for (const theme of ALL_THEMES) {
     await setTheme(page, theme);
-    await settle(page);
+    await settle(page, 200);
     const { contrasts, panel } = await roleContrasts(page, framework);
     const worst = SYNTAX_ROLES.reduce(
       (min, role) => (contrasts[role] < contrasts[min] ? role : min),
@@ -958,7 +896,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
   // The light themes select the light primitives through their role-level
   // overrides: iceberg's keyword must be exactly the light primitive.
   await setTheme(page, "iceberg");
-  await settle(page);
+  await settle(page, 200);
   const icebergRefs = await roleColors(page);
   check(
     `${browserName} ${framework} iceberg keyword role equals the light primitive`,
@@ -971,7 +909,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
     JSON.stringify(SYNTAX_ROLES.filter((role) => icebergRefs[role] === eclipseRefs[role])),
   );
   await setTheme(page, "eclipse");
-  await settle(page);
+  await settle(page, 200);
   const eclipseAgain = await styledSpans(page, framework);
   const eclipseKeyword = eclipseAgain.find((span) => span.text.trim() === "const");
   check(
@@ -983,7 +921,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
   // 12. g18.023: forced colours keep the editor legible — text stays painted
   //     and mounted, and the presentation recovers after the mode ends.
   await page.emulateMedia({ forcedColors: "active" });
-  await settle(page);
+  await settle(page, 200);
   const forced = await page.evaluate((fw) => {
     const content = document.querySelector(
       `[data-framework="${fw}"] [data-part='main-editor'] .cm-content`,
@@ -1008,7 +946,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
     JSON.stringify(forced),
   );
   await page.emulateMedia({ forcedColors: "none" });
-  await settle(page);
+  await settle(page, 200);
   const afterForced = await styledSpans(page, framework);
   const afterForcedKeyword = afterForced.find((span) => span.text.trim() === "const");
   check(
@@ -1018,29 +956,17 @@ async function runFramework(page: Page, framework: string, browserName: string):
   );
 }
 
-try {
+await withFixture(import.meta.url, async (origin) => {
   for (const [browserName, browserType] of engines) {
-    let browser: Browser | undefined;
-    try {
-      browser = await browserType.launch({ headless: true });
+    await withBrowser(browserType, async (browser) => {
       const page = await browser.newPage({ viewport: { width: 960, height: 720 } });
-      await page.goto(url, { waitUntil: "networkidle" });
+      await page.goto(`${origin}/`, { waitUntil: "networkidle" });
       await page.waitForSelector('[data-framework="svelte"] [data-part="main-editor"] .poodle-code-editor');
       await page.waitForSelector('[data-framework="react"] [data-part="main-editor"] .poodle-code-editor');
       await runFramework(page, "svelte", browserName);
       await runFramework(page, "react", browserName);
-    } finally {
-      await browser?.close();
-    }
+    });
   }
-} finally {
-  child.kill();
-  await child.exited;
-}
+});
 
-if (failures > 0) {
-  console.error(`\n${failures} check(s) failed`);
-  process.exit(1);
-}
-
-console.log("\nall CodeEditor language-registry checks passed");
+finish("CodeEditor language-registry");

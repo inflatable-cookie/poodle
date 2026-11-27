@@ -304,11 +304,18 @@ where the repository already provides the workaround, the trap links to it:
   wedge the page. Use the shared `captureSession` in
   [`test/visual/session.ts`](../../../test/visual/session.ts): it absorbs
   choosers and dialogs, recycles the page on a fixed cadence, restarts a dead
-  preview, and enforces a per-page deadline. Boot previews through
-  `startPreviews()` so the fixed port is bound with `--strictPort`.
+  preview, and enforces a per-page deadline. The visual gate and the probes in
+  `test/visual/` boot previews through `startPreviews()` so the fixed port is
+  bound with `--strictPort`.
+- **One-off browser probes:** boot through
+  [`test/browser-probe/`](../../../test/browser-probe/index.ts)
+  (`withFixture` or `withPreviews`). Each run owns a server on an ephemeral
+  port with its own vite cache, and stops it however the probe ends. Run one
+  through its selector, or all of them with `effigy probes:browser`, which
+  runs past failures and reports every result.
 - **WebKit:** some ports are restricted (for example 4190: "Not allowed to use
-  restricted network port"). Browser probes pick a free port outside that
-  list, and run one Playwright engine per process.
+  restricted network port"). Never hand a probe a fixed port, and run one
+  Playwright engine per process.
 - **GPUI headless platform:** a view renders several times per
   `window.draw`, so interactive nodes in mounted regressions declare explicit
   ids, or press and release land on different elements. `Frame::clear` never

@@ -9,71 +9,17 @@
  *   bun test/rich-text-heading-mode/probe.ts --browser=webkit
  */
 
-import { chromium, webkit, type Browser, type BrowserType, type Page } from "playwright";
-import { fileURLToPath } from "node:url";
+import type { Page } from "playwright";
 
-const browserFlag = process.argv
-  .find((arg) => arg.startsWith("--browser="))
-  ?.slice("--browser=".length);
-const engines: Array<[string, BrowserType]> = (
-  [
-    ["chromium", chromium],
-    ["webkit", webkit],
-  ] as Array<[string, BrowserType]>
-).filter(([name]) => !browserFlag || browserFlag === name);
+import {
+  check,
+  finish,
+  selectedEngines,
+  withBrowser,
+  withFixture,
+} from "../browser-probe";
 
-if (engines.length === 0) {
-  throw new Error(`Unknown --browser=${browserFlag}`);
-}
-
-const fixtureRoot = fileURLToPath(new URL(".", import.meta.url));
-const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
-const viteBin = fileURLToPath(
-  new URL("../../packages/svelte/preview/node_modules/vite/bin/vite.js", import.meta.url),
-);
-const port = 4199;
-const url = `http://127.0.0.1:${port}/`;
-
-let failures = 0;
-
-function check(label: string, ok: boolean, detail = ""): void {
-  if (!ok) failures += 1;
-  console.log(`${ok ? "  ok  " : "  FAIL"}  ${label}${detail ? `  — ${detail}` : ""}`);
-}
-
-async function waitForServer(timeoutMs = 30_000): Promise<void> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(1000) });
-      if (res.ok) return;
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 150));
-    }
-  }
-  throw new Error(`rich-text heading-mode fixture on :${port} did not start`);
-}
-
-const child = Bun.spawn(
-  [
-    "bun",
-    viteBin,
-    "--config",
-    `${fixtureRoot}/vite.config.ts`,
-    "--port",
-    String(port),
-    "--strictPort",
-    "--host",
-    "127.0.0.1",
-  ],
-  {
-    cwd: repoRoot,
-    stdout: "inherit",
-    stderr: "inherit",
-  },
-);
-
-await waitForServer();
+const engines = selectedEngines();
 
 async function settle(page: Page): Promise<void> {
   await page.evaluate(
@@ -480,29 +426,17 @@ async function runFramework(page: Page, framework: string, browserName: string):
   );
 }
 
-try {
+await withFixture(import.meta.url, async (origin) => {
   for (const [browserName, browserType] of engines) {
-    let browser: Browser | undefined;
-    try {
-      browser = await browserType.launch({ headless: true });
+    await withBrowser(browserType, async (browser) => {
       const page = await browser.newPage({ viewport: { width: 960, height: 720 } });
-      await page.goto(url, { waitUntil: "networkidle" });
+      await page.goto(`${origin}/`, { waitUntil: "networkidle" });
       await page.waitForSelector('[data-framework="svelte"] .poodle-rich-text-editor');
       await page.waitForSelector('[data-framework="react"] .poodle-rich-text-editor');
       await runFramework(page, "svelte", browserName);
       await runFramework(page, "react", browserName);
-    } finally {
-      await browser?.close();
-    }
+    });
   }
-} finally {
-  child.kill();
-  await child.exited;
-}
+});
 
-if (failures > 0) {
-  console.error(`\n${failures} check(s) failed`);
-  process.exit(1);
-}
-
-console.log("\nall RichTextEditor heading-mode checks passed");
+finish("RichTextEditor heading-mode");
