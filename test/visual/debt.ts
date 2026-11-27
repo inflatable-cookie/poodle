@@ -15,11 +15,11 @@
  * instead of inheriting debt.
  *
  * Measured 2026-11-26 on main (after the poodle#189 default-style switch;
- * sweep tier, 344 comparisons across 172 active slugs): 37 recorded pairs
- * across 19 slugs — 18 size across 9 slugs, 19 pixels across 10 slugs
- * (including the 2 intermittent `text-input` flipper pairs), 0 capture.
- * `embed-preview` moved to `SKIPPED` (remote Vimeo iframe nondeterminism),
- * and `color-picker` (`iceberg-compact-md`) now passes and was removed.
+ * sweep tier, 344 comparisons across 172 active slugs): 39 recorded pairs
+ * across 20 slugs — 18 size across 9 slugs, 21 pixels across 11 slugs
+ * (including the 4 intermittent flipper pairs for `color-picker` and
+ * `text-input`), 0 capture. `embed-preview` moved to `SKIPPED` (remote Vimeo
+ * iframe nondeterminism).
  */
 
 export type VisualDebtFailureKind = "capture" | "size" | "pixels";
@@ -30,7 +30,7 @@ export type VisualDebtEntry = {
   /** Axis ids this entry covers, e.g. `eclipse-compact-md`. */
   axes: readonly string[];
   kind: VisualDebtFailureKind;
-  /** True only for non-deterministic flippers; stale iff every executed axis passes. */
+  /** True only for non-deterministic flippers; never flagged as stale when passing. */
   intermittent?: boolean;
   reason: string;
 };
@@ -70,6 +70,14 @@ export const DEBT: VisualDebtEntry[] = [
     kind: "pixels",
     reason:
       "0.41% on eclipse only — CodeMirror line/glyph rasterization; the iceberg axis matches; untriaged.",
+  },
+  {
+    slug: "color-picker",
+    axes: ["eclipse-compact-md", "iceberg-compact-md"],
+    kind: "pixels",
+    intermittent: true,
+    reason:
+      "0.081-0.092% — intermittent 1px shift on the Default open, RGB mode anchored popover (0.081% on eclipse-compact-md, 0.092% on iceberg-compact-md; passes 0% on clean runs); both sweep axes are recorded; untriaged.",
   },
   {
     slug: "dock-region",

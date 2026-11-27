@@ -18,6 +18,16 @@ describe("visual debt ledger and report classification", () => {
         expect(entry.reason).not.toContain("untriaged");
       }
     }
+    const sizeEntries = DEBT.filter((entry) => entry.kind === "size");
+    const pixelEntries = DEBT.filter((entry) => entry.kind === "pixels");
+    const countPairs = (entries: readonly VisualDebtEntry[]) =>
+      entries.reduce((sum, entry) => sum + entry.axes.length, 0);
+    expect(DEBT.length).toBe(20);
+    expect(sizeEntries.length).toBe(9);
+    expect(pixelEntries.length).toBe(11);
+    expect(countPairs(sizeEntries)).toBe(18);
+    expect(countPairs(pixelEntries)).toBe(21);
+    expect(countPairs(DEBT)).toBe(39);
   });
 
   test("strict axis tier contains no debt slugs", () => {
@@ -77,7 +87,7 @@ describe("visual debt ledger and report classification", () => {
     expect(findStaleDebt(executed, failures, debt)).toEqual([]);
   });
 
-  test("intermittent entries pass while at least one executed axis fails, and fail if all pass", () => {
+  test("intermittent entries are never flagged as stale even when all executed axes pass", () => {
     const debt: VisualDebtEntry[] = [
       {
         slug: "text-input",
@@ -92,12 +102,7 @@ describe("visual debt ledger and report classification", () => {
       { slug: "text-input", axis: "iceberg-compact-md", kind: "pixels", detail: "0.068%" },
     ];
     expect(findStaleDebt(executed, oneFails, debt)).toEqual([]);
-
-    const allPass = findStaleDebt(executed, [], debt);
-    expect(allPass.map((entry) => entry.axis)).toEqual([
-      "eclipse-compact-md",
-      "iceberg-compact-md",
-    ]);
+    expect(findStaleDebt(executed, [], debt)).toEqual([]);
   });
 
   test("skipped or absent slugs in debt are flagged on full sweep", () => {

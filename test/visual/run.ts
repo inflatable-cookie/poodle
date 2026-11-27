@@ -96,29 +96,14 @@ export function findStaleDebt(
       continue;
     }
 
+    // Intermittent flippers pass on clean runs; never report them as stale
+    // just because their executed axes happened to pass in this sweep.
+    if (entry.intermittent) continue;
+
     const executedAxes = entry.axes.filter((axis) =>
       executedPairs.has(`${entry.slug}::${axis}`),
     );
     if (executedAxes.length === 0) continue;
-
-    if (entry.intermittent) {
-      const anyFails = executedAxes.some((axis) =>
-        failures.some(
-          (f) => f.slug === entry.slug && f.axis === axis && f.kind === entry.kind,
-        ),
-      );
-      if (!anyFails) {
-        for (const axis of executedAxes) {
-          stale.push({
-            slug: entry.slug,
-            axis,
-            kind: entry.kind,
-            reason: entry.reason,
-          });
-        }
-      }
-      continue;
-    }
 
     for (const axis of executedAxes) {
       const stillFails = failures.some(

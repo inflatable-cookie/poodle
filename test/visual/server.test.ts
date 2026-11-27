@@ -163,6 +163,7 @@ describe("visual preview port occupancy", () => {
   test("isPathInsideRoot only accepts paths inside the checkout", () => {
     expect(isPathInsideRoot(REPO_ROOT, REPO_ROOT)).toBe(true);
     expect(isPathInsideRoot(`${REPO_ROOT}/packages/svelte/preview`, REPO_ROOT)).toBe(true);
+    expect(isPathInsideRoot(`${REPO_ROOT}/..something`, REPO_ROOT)).toBe(true);
     expect(isPathInsideRoot(`${REPO_ROOT}-sibling/packages/svelte/preview`, REPO_ROOT)).toBe(false);
     expect(isPathInsideRoot("/tmp", REPO_ROOT)).toBe(false);
   });
