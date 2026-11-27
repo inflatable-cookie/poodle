@@ -134,6 +134,13 @@ pub struct DragSessionContext {
     pub session: Option<DragSession>,
 }
 
+/// What carries a session whose external preparation produced nothing usable.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DragFallbackTransport {
+    /// The adapter's own transport, without the external one.
+    Local,
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum DragSessionEvent {
     /// `session_id` must be freshly minted; see [`DragSession::session_id`].
@@ -147,11 +154,16 @@ pub enum DragSessionEvent {
     Prepared {
         session_id: String,
     },
+    /// Preparation produced nothing usable. A `transport` is the adapter
+    /// saying it can still carry the gesture itself, so the same session arms.
+    /// Without one nothing can, and the session cancels.
     PrepareDeclined {
         session_id: String,
+        transport: Option<DragFallbackTransport>,
     },
     PrepareFailed {
         session_id: String,
+        transport: Option<DragFallbackTransport>,
     },
     Activate {
         session_id: String,
@@ -232,8 +244,8 @@ impl DragSessionEvent {
         match self {
             DragSessionEvent::Prepare { session_id, .. }
             | DragSessionEvent::Prepared { session_id }
-            | DragSessionEvent::PrepareDeclined { session_id }
-            | DragSessionEvent::PrepareFailed { session_id }
+            | DragSessionEvent::PrepareDeclined { session_id, .. }
+            | DragSessionEvent::PrepareFailed { session_id, .. }
             | DragSessionEvent::Activate { session_id }
             | DragSessionEvent::TargetIntent { session_id, .. }
             | DragSessionEvent::TargetCleared { session_id }
@@ -481,10 +493,22 @@ pub fn drag_session_transition(
         DragSessionEvent::Prepared { .. } if phase == DragSessionPhase::Preparing => {
             (DragSessionPhase::Armed, context, vec![])
         }
-        DragSessionEvent::PrepareDeclined { .. } if phase == DragSessionPhase::Preparing => {
+        DragSessionEvent::PrepareDeclined {
+            transport: Some(DragFallbackTransport::Local),
+            ..
+        }
+        | DragSessionEvent::PrepareFailed {
+            transport: Some(DragFallbackTransport::Local),
+            ..
+        } if phase == DragSessionPhase::Preparing => (DragSessionPhase::Armed, context, vec![]),
+        DragSessionEvent::PrepareDeclined {
+            transport: None, ..
+        } if phase == DragSessionPhase::Preparing => {
             cancel(phase, session, DragCancelReason::PreparationDeclined)
         }
-        DragSessionEvent::PrepareFailed { .. } if phase == DragSessionPhase::Preparing => {
+        DragSessionEvent::PrepareFailed {
+            transport: None, ..
+        } if phase == DragSessionPhase::Preparing => {
             cancel(phase, session, DragCancelReason::PreparationFailed)
         }
         DragSessionEvent::Activate { .. } if phase == DragSessionPhase::Armed => {
@@ -780,9 +804,11 @@ mod tests {
             },
             DragSessionEvent::PrepareDeclined {
                 session_id: id.clone(),
+                transport: None,
             },
             DragSessionEvent::PrepareFailed {
                 session_id: id.clone(),
+                transport: Some(DragFallbackTransport::Local),
             },
             DragSessionEvent::Activate {
                 session_id: id.clone(),

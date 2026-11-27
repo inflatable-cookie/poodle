@@ -50,9 +50,9 @@ use gpui::{
 };
 use poodle_headless::drag_drop::{
     drag_session_transition, resolve_drop_target, DragAnnouncementKind, DragCancelReason,
-    DragOperation, DragSession, DragSessionContext, DragSessionEffect, DragSessionEvent,
-    DragSessionPhase, DragSubject, DragTerminalOutcome, DropEligibility, DropIntent, DropPosition,
-    DropTargetCandidate,
+    DragFallbackTransport, DragOperation, DragSession, DragSessionContext, DragSessionEffect,
+    DragSessionEvent, DragSessionPhase, DragSubject, DragTerminalOutcome, DropEligibility,
+    DropIntent, DropPosition, DropTargetCandidate,
 };
 use poodle_node::{
     can_export_anything, validate_file_export, validate_inbound_files, CrossWindowAbort,
@@ -383,6 +383,22 @@ struct FileExportTransaction {
     settled: bool,
     /// The gesture reached its activation threshold before the receipt armed.
     pending_activation: bool,
+}
+
+/// Why an external preparation produced nothing usable.
+#[derive(Clone, Copy)]
+enum PreparationRefusal {
+    Declined,
+    Failed,
+}
+
+impl PreparationRefusal {
+    fn cancel_reason(self) -> DragCancelReason {
+        match self {
+            Self::Declined => DragCancelReason::PreparationDeclined,
+            Self::Failed => DragCancelReason::PreparationFailed,
+        }
+    }
 }
 
 /// The external file batch this window is currently being offered.
@@ -1080,21 +1096,9 @@ impl DragDropController {
         }
 
         match receipt {
-            None => {
-                self.dispatch(
-                    DragSessionEvent::PrepareDeclined {
-                        session_id: session_id.to_owned(),
-                    },
-                    cx,
-                );
-            }
+            None => self.end_external_preparation(session_id, PreparationRefusal::Declined, cx),
             Some(receipt) if !receipt.is_valid() => {
-                self.dispatch(
-                    DragSessionEvent::PrepareFailed {
-                        session_id: session_id.to_owned(),
-                    },
-                    cx,
-                );
+                self.end_external_preparation(session_id, PreparationRefusal::Failed, cx);
             }
             Some(receipt) => {
                 let activate = {
@@ -1121,6 +1125,90 @@ impl DragDropController {
                     self.start_cross_window_transport(session_id);
                 }
             }
+        }
+    }
+
+    /// A host preparation produced nothing usable; the drag need not end.
+    ///
+    /// A decline or failure refuses only the transfer or export. While the
+    /// pointer that started the drag is still down, the same session continues
+    /// on the local transport. A keyboard pickup holds no pointer, and a
+    /// source disabled while the host decided can carry nothing, so those
+    /// cancel. Shared by both host bridges.
+    fn end_external_preparation(
+        &self,
+        session_id: &str,
+        refusal: PreparationRefusal,
+        cx: &mut App,
+    ) {
+        let (local, exporting) = {
+            let state = self.state.borrow();
+            let local = state.input_kind != Some(NodeDragInputKind::Keyboard)
+                && state.context.session.as_ref().is_some_and(|session| {
+                    session.session_id == session_id
+                        && state
+                            .sources
+                            .get(&session.source_id)
+                            .is_some_and(|record| !record.registration.disabled)
+                });
+            let exporting = state
+                .file_export
+                .as_ref()
+                .is_some_and(|transaction| transaction.session_id == session_id);
+            (local, exporting)
+        };
+
+        if local {
+            // The drag goes on, but a refused export is still news. Said while
+            // the transaction is held, which is what gives it the export's own
+            // wording.
+            if exporting {
+                self.announce(DragAnnouncementKind::Cancelled);
+            }
+            self.release_source_transaction(session_id, refusal.cancel_reason());
+        }
+
+        let transport = local.then_some(DragFallbackTransport::Local);
+        let session_id = session_id.to_owned();
+        self.dispatch(
+            match refusal {
+                PreparationRefusal::Declined => DragSessionEvent::PrepareDeclined {
+                    session_id: session_id.clone(),
+                    transport,
+                },
+                PreparationRefusal::Failed => DragSessionEvent::PrepareFailed {
+                    session_id: session_id.clone(),
+                    transport,
+                },
+            },
+            cx,
+        );
+        // This runtime opens a session only once its drag has started, so the
+        // activation that waited on the host is already due.
+        if local {
+            self.dispatch(DragSessionEvent::Activate { session_id }, cx);
+        }
+    }
+
+    /// Release whichever outgoing host transaction this session holds.
+    fn release_source_transaction(&self, session_id: &str, reason: DragCancelReason) {
+        let owns_source = self
+            .state
+            .borrow()
+            .cross_window_source
+            .as_ref()
+            .is_some_and(|transaction| transaction.session_id == session_id);
+        if owns_source {
+            self.release_cross_window_source(reason);
+        }
+        let owns_export = self
+            .state
+            .borrow()
+            .file_export
+            .as_ref()
+            .is_some_and(|transaction| transaction.session_id == session_id);
+        if owns_export {
+            self.release_file_export(reason);
         }
     }
 
@@ -1245,12 +1333,7 @@ impl DragDropController {
 
         let Some(prepared) = prepared else {
             self.set_export_state(DragExportState::Unavailable, Some("host declined".into()));
-            self.dispatch(
-                DragSessionEvent::PrepareDeclined {
-                    session_id: session_id.to_owned(),
-                },
-                cx,
-            );
+            self.end_external_preparation(session_id, PreparationRefusal::Declined, cx);
             return;
         };
 
@@ -1261,12 +1344,7 @@ impl DragDropController {
             // for a drag that will never start is not silently abandoned.
             bridge.cancel(prepared, DragCancelReason::PreparationFailed);
             self.set_export_state(DragExportState::Failed, Some(format!("{reason:?}")));
-            self.dispatch(
-                DragSessionEvent::PrepareFailed {
-                    session_id: session_id.to_owned(),
-                },
-                cx,
-            );
+            self.end_external_preparation(session_id, PreparationRefusal::Failed, cx);
             return;
         }
 
@@ -3060,15 +3138,7 @@ impl DragDropController {
                     Some(DragTerminalOutcome::Cancelled { reason }) => *reason,
                     _ => DragCancelReason::Explicit,
                 };
-                let owns_source = self
-                    .state
-                    .borrow()
-                    .cross_window_source
-                    .as_ref()
-                    .is_some_and(|transaction| transaction.session_id == session_id);
-                if owns_source {
-                    self.release_cross_window_source(reason);
-                }
+                self.release_source_transaction(&session_id, reason);
                 let owns_projection = self
                     .state
                     .borrow()
@@ -3077,15 +3147,6 @@ impl DragDropController {
                     .is_some_and(|transaction| transaction.session_id == session_id);
                 if owns_projection {
                     self.release_cross_window_projection(reason);
-                }
-                let owns_export = self
-                    .state
-                    .borrow()
-                    .file_export
-                    .as_ref()
-                    .is_some_and(|transaction| transaction.session_id == session_id);
-                if owns_export {
-                    self.release_file_export(reason);
                 }
                 let owns_inbound = self
                     .state

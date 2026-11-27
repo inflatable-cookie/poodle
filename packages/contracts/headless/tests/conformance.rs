@@ -1077,6 +1077,15 @@ fn drag_terminal_outcome(value: &Value) -> DragTerminalOutcome {
     }
 }
 
+fn drag_fallback_transport(value: &Value) -> Option<DragFallbackTransport> {
+    value
+        .get("transport")
+        .map(|transport| match transport.as_str() {
+            Some("local") => DragFallbackTransport::Local,
+            other => panic!("unknown drag fallback transport {other:?}"),
+        })
+}
+
 fn drag_event(value: &Value) -> DragSessionEvent {
     let session_id = s(value, "sessionId").to_string();
 
@@ -1094,8 +1103,14 @@ fn drag_event(value: &Value) -> DragSessionEvent {
                 .collect(),
         },
         "PREPARED" => DragSessionEvent::Prepared { session_id },
-        "PREPARE_DECLINED" => DragSessionEvent::PrepareDeclined { session_id },
-        "PREPARE_FAILED" => DragSessionEvent::PrepareFailed { session_id },
+        "PREPARE_DECLINED" => DragSessionEvent::PrepareDeclined {
+            session_id,
+            transport: drag_fallback_transport(value),
+        },
+        "PREPARE_FAILED" => DragSessionEvent::PrepareFailed {
+            session_id,
+            transport: drag_fallback_transport(value),
+        },
         "ACTIVATE" => DragSessionEvent::Activate { session_id },
         "TARGET_INTENT" => DragSessionEvent::TargetIntent {
             session_id,

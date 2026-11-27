@@ -174,8 +174,14 @@ export type DragSessionEvent =
       allowedOperations: readonly DragOperation[];
     }
   | { type: "PREPARED"; sessionId: string }
-  | { type: "PREPARE_DECLINED"; sessionId: string }
-  | { type: "PREPARE_FAILED"; sessionId: string }
+  /**
+   * Preparation produced nothing usable. `transport: "local"` is the adapter
+   * saying it can still carry the gesture itself, so the same session arms
+   * without the external transport. Without it nothing can, and the session
+   * cancels.
+   */
+  | { type: "PREPARE_DECLINED"; sessionId: string; transport?: "local" }
+  | { type: "PREPARE_FAILED"; sessionId: string; transport?: "local" }
   | { type: "ACTIVATE"; sessionId: string }
   | { type: "TARGET_INTENT"; sessionId: string; intent: DropIntent }
   | { type: "TARGET_CLEARED"; sessionId: string }
@@ -385,10 +391,14 @@ export function dragSessionTransition(
       return phase === "preparing" ? { state: "armed", context, effects: [] } : inert;
 
     case "PREPARE_DECLINED":
-      return phase === "preparing" ? cancel(phase, session, "preparation-declined") : inert;
-
     case "PREPARE_FAILED":
-      return phase === "preparing" ? cancel(phase, session, "preparation-failed") : inert;
+      if (phase !== "preparing") return inert;
+      if (event.transport === "local") return { state: "armed", context, effects: [] };
+      return cancel(
+        phase,
+        session,
+        event.type === "PREPARE_DECLINED" ? "preparation-declined" : "preparation-failed",
+      );
 
     case "ACTIVATE":
       return phase === "armed"

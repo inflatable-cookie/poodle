@@ -123,6 +123,16 @@ File-backed export is the portable baseline. Promised files and arbitrary
 custom MIME data are optional advertised capabilities. Consumer code must not
 branch on user agents or shell names.
 
+### A refused host preparation
+
+A host bridge that declines or fails preparation refuses only the transfer or
+export. While the pointer gesture that asked is still live, the adapter sends
+the refusal with the local transport choice: the same session arms, the gesture
+and any pending activation carry on, and no terminal runs. A refused export is
+still announced. A keyboard pickup, or a source disabled or removed meanwhile,
+has nothing to carry it, so the session cancels with `preparation-declined` or
+`preparation-failed`.
+
 ## Session And Payload Boundaries
 
 A semantic subject is stable and intentionally small:
