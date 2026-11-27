@@ -1,0 +1,146 @@
+{
+  "breadcrumbs-eclipse": {
+    "rest": {
+      "width": 992,
+      "height": 484
+    },
+    "restBg": "rgba(0, 0, 0, 0)",
+    "hoverBg": "rgba(238, 242, 246, 0.086)"
+  },
+  "sidebar-nav-eclipse": {
+    "rest": {
+      "width": 992,
+      "height": 1682
+    },
+    "restBg": "rgba(0, 0, 0, 0)",
+    "hoverBg": "rgba(238, 242, 246, 0.086)"
+  },
+  "menu-eclipse": {
+    "rest": {
+      "width": 992,
+      "height": 427.5
+    },
+    "openRestBg": "rgba(238, 242, 246, 0.086)",
+    "openTargetCount": 5,
+    "restBg": "rgba(0, 0, 0, 0)",
+    "hoverBg": "rgba(238, 242, 246, 0.086)"
+  },
+  "select-eclipse": {
+    "rest": {
+      "width": 992,
+      "height": 879
+    },
+    "openRestBg": "rgba(0, 0, 0, 0)",
+    "openTargetCount": 5,
+    "restBg": "rgba(238, 242, 246, 0.086)",
+    "hoverBg": "rgba(238, 242, 246, 0.086)"
+  },
+  "tree-eclipse": {
+    "rest": {
+      "width": 992,
+      "height": 3317
+    },
+    "restBg": "rgba(0, 0, 0, 0)",
+    "hoverBg": "rgba(238, 242, 246, 0.086)"
+  },
+  "tabs-eclipse": {
+    "rest": {
+      "width": 992,
+      "height": 1144
+    },
+    "restBg": "rgba(0, 0, 0, 0)",
+    "hoverBg": "rgba(238, 242, 246, 0.086)"
+  },
+  "data-table-eclipse": {
+    "rest": {
+      "width": 992,
+      "height": 1151
+    },
+    "restBg": "rgba(0, 0, 0, 0)",
+    "hoverBg": "rgba(238, 242, 246, 0.086)"
+  },
+  "text-input-eclipse": {
+    "rest": {
+      "width": 992,
+      "height": 1024.75
+    }
+  },
+  "button-eclipse": {
+    "rest": {
+      "width": 992,
+      "height": 879
+    }
+  },
+  "breadcrumbs-iceberg": {
+    "rest": {
+      "width": 992,
+      "height": 484
+    },
+    "restBg": "rgba(0, 0, 0, 0)",
+    "hoverBg": "rgba(19, 26, 34, 0.07)"
+  },
+  "sidebar-nav-iceberg": {
+    "rest": {
+      "width": 992,
+      "height": 1682
+    },
+    "restBg": "rgba(0, 0, 0, 0)",
+    "hoverBg": "rgba(19, 26, 34, 0.07)"
+  },
+  "menu-iceberg": {
+    "rest": {
+      "width": 992,
+      "height": 427.5
+    },
+    "openRestBg": "rgba(19, 26, 34, 0.07)",
+    "openTargetCount": 5,
+    "restBg": "rgba(0, 0, 0, 0)",
+    "hoverBg": "rgba(19, 26, 34, 0.07)"
+  },
+  "select-iceberg": {
+    "rest": {
+      "width": 992,
+      "height": 879
+    },
+    "openRestBg": "rgba(0, 0, 0, 0)",
+    "openTargetCount": 5,
+    "restBg": "rgba(19, 26, 34, 0.07)",
+    "hoverBg": "rgba(19, 26, 34, 0.07)"
+  },
+  "tree-iceberg": {
+    "rest": {
+      "width": 992,
+      "height": 3317
+    },
+    "restBg": "rgba(0, 0, 0, 0)",
+    "hoverBg": "rgba(19, 26, 34, 0.07)"
+  },
+  "tabs-iceberg": {
+    "rest": {
+      "width": 992,
+      "height": 1144
+    },
+    "restBg": "rgba(0, 0, 0, 0)",
+    "hoverBg": "rgba(19, 26, 34, 0.07)"
+  },
+  "data-table-iceberg": {
+    "rest": {
+      "width": 992,
+      "height": 1151
+    },
+    "restBg": "rgba(0, 0, 0, 0)",
+    "hoverBg": "rgba(19, 26, 34, 0.07)"
+  },
+  "text-input-iceberg": {
+    "rest": {
+      "width": 992,
+      "height": 1024.75
+    }
+  },
+  "button-iceberg": {
+    "rest": {
+      "width": 992,
+      "height": 879
+    }
+  }
+}
