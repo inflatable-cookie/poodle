@@ -415,7 +415,7 @@ fn build_search(
     // and the current query as its value. Typing/clear are host-owned.
     let mut search_spec = TextInputSpec::new()
         .with_id("relation-picker-search")
-        .with_input_type("search")
+        .with_type(poodle_specs::TextInputType::Search)
         .with_leading_icon("search")
         .with_size(effective_size)
         .with_size_role(spec.size_role)

@@ -148,7 +148,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(TextInput::from_spec(
                     TextInputSpec::new()
                         .with_id("search-field")
-                        .with_input_type("search")
+                        .with_type(poodle_specs::TextInputType::Search)
                         .with_placeholder("Search..."),
                     theme,
                 )),
@@ -168,7 +168,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_prefix("$")
                         .with_suffix("USD")
                         .with_placeholder("0.00")
-                        .with_input_type("number"),
+                        .with_type(poodle_specs::TextInputType::Number),
                     theme,
                 )),
         )
@@ -187,7 +187,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             TextInput::from_spec(
                                 TextInputSpec::new()
                                     .with_id("multiline-field")
-                                    .with_input_type("multiline")
+                                    .with_type(poodle_specs::TextInputType::Multiline)
                                     .with_rows(3)
                                     .with_max_length(280)
                                     .with_show_char_count(true)

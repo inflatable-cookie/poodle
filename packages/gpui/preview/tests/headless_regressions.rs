@@ -11554,8 +11554,8 @@ fn nucleus_popover_element(
     }
     if let Some(rem) = fixed_width_rem {
         spec = spec
-            .with_surface_min_width(poodle_specs::Dimension::new(format!("{rem}rem")))
-            .with_surface_max_width(poodle_specs::Dimension::new(format!("{rem}rem")));
+            .with_surface_min_width_rem(poodle_specs::Rem::try_new(rem).expect("valid rem"))
+            .with_surface_max_width_rem(poodle_specs::Rem::try_new(rem).expect("valid rem"));
     }
     let scope_tag = scope;
     let content = nucleus_popover_content(scope, &theme, Arc::clone(&clicks));
@@ -26130,7 +26130,7 @@ struct TextFieldState {
     value: String,
     selection: (usize, usize),
     is_focused: bool,
-    input_type: String,
+    input_type: poodle_specs::TextInputType,
     placeholder: Option<String>,
     is_disabled: bool,
     is_read_only: bool,
@@ -26144,7 +26144,7 @@ impl TextFieldState {
             value: value.to_owned(),
             selection: (0, 0),
             is_focused: false,
-            input_type: "text".to_owned(),
+            input_type: poodle_specs::TextInputType::Text,
             placeholder: None,
             is_disabled: false,
             is_read_only: false,
@@ -26153,7 +26153,7 @@ impl TextFieldState {
     }
 
     fn searchable(mut self) -> Self {
-        self.input_type = "search".to_owned();
+        self.input_type = poodle_specs::TextInputType::Search;
         self
     }
 
@@ -26272,7 +26272,7 @@ fn text_field_element(host: &Arc<TextFieldHost>, name: &str) -> gpui::AnyElement
         .with_value(&state.value)
         .with_selection(state.selection.0, state.selection.1)
         .with_is_focused(state.is_focused)
-        .with_type(&state.input_type)
+        .with_type(state.input_type)
         .with_disabled(state.is_disabled)
         .with_read_only(state.is_read_only);
     if let Some(placeholder) = &state.placeholder {
@@ -26509,7 +26509,7 @@ fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
         // Search clear button
         let search_spec = TextInputSpec::new()
             .with_id("search-proof")
-            .with_type("search")
+            .with_type(poodle_specs::TextInputType::Search)
             .with_value("query")
             .with_show_clear_button(true);
         let search_node = poodle_render::text_input_with_handlers(
@@ -37656,7 +37656,7 @@ fn markdown_editor_bounded_preview_scrolls_under_host_height() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let spec = MarkdownEditorSpec::new()
-            .with_mode("preview")
+            .with_mode(poodle_specs::MarkdownEditorMode::Preview)
             .with_value(long_markdown());
         let activated = Arc::new(Mutex::new(false));
         let mut editor = markdown_editor(&spec, &ctx);
@@ -58111,7 +58111,7 @@ fn first_mounted_parity_skeleton() {
         let ctx = RenderContext::new(&theme_provider);
         let full_ctx = ctx.with_first_frame_committed(true);
         let spec = SkeletonSpec::new()
-            .with_shape("block")
+            .with_shape(poodle_specs::SkeletonShape::Block)
             .with_width("12rem")
             .with_height("3rem");
         let mut full = poodle_render::skeleton(&spec, &full_ctx);

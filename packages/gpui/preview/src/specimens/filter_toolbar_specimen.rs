@@ -41,7 +41,7 @@ fn search_input(theme: &GpuiThemeProvider, id: &str) -> TextInput {
     TextInput::from_spec(
         TextInputSpec::new()
             .with_id(id)
-            .with_input_type("search")
+            .with_type(poodle_specs::TextInputType::Search)
             .with_placeholder("Search…"),
         theme,
     )

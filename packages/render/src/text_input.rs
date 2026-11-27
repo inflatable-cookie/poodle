@@ -180,10 +180,9 @@ pub fn text_input_with_handlers(
         inner = inner.child(el);
     }
 
-    let leading_name = spec
-        .leading_icon
-        .clone()
-        .or_else(|| (spec.input_type == "search").then(|| "search".to_owned()));
+    let leading_name = spec.leading_icon.clone().or_else(|| {
+        (spec.input_type == poodle_specs::TextInputType::Search).then(|| "search".to_owned())
+    });
     if let Some(name) = &leading_name {
         let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), ctx);
         glyph.id = Some("text-input-leading".to_owned());
@@ -332,7 +331,7 @@ pub fn text_input_with_handlers(
         inner = inner.child(glyph);
     }
 
-    let can_clear = spec.input_type == "search"
+    let can_clear = spec.input_type == poodle_specs::TextInputType::Search
         && spec.show_clear_button
         && !spec.is_disabled
         && !spec.is_read_only
@@ -549,7 +548,7 @@ pub fn text_input_with_handlers(
     } else if spec.validation_state == ValidationState::Pending {
         root.a11y.busy = Some(true);
     }
-    root.a11y.role = Some(if spec.input_type == "search" {
+    root.a11y.role = Some(if spec.input_type == poodle_specs::TextInputType::Search {
         NodeRole::SearchBox
     } else {
         NodeRole::TextInput
@@ -570,7 +569,7 @@ pub fn text_input_with_handlers(
         format!("{:?}", spec.validation_state).to_ascii_lowercase(),
     );
     root.roles
-        .insert("type".to_owned(), spec.input_type.clone());
+        .insert("type".to_owned(), spec.input_type.as_str().to_owned());
     root.child(inner)
 }
 
@@ -899,7 +898,7 @@ mod tests {
             text_input(
                 &TextInputSpec::new()
                     .with_id(id)
-                    .with_type("search")
+                    .with_type(poodle_specs::TextInputType::Search)
                     .with_value("kick"),
                 &ctx,
                 None,

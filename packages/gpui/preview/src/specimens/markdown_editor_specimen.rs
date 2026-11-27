@@ -7,19 +7,24 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::EyebrowSpec;
-use poodle_specs::MarkdownEditorSpec;
+use poodle_specs::{MarkdownEditorMode, MarkdownEditorSpec};
 use std::sync::Arc;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
-    let md_mode = state
+    let md_mode_str = state
         .specimens
         .text
         .get("editor-md-mode")
-        .cloned()
-        .unwrap_or_else(|| "split".to_string());
+        .map(String::as_str)
+        .unwrap_or("split");
+    let md_mode = match md_mode_str {
+        "edit" => MarkdownEditorMode::Edit,
+        "preview" => MarkdownEditorMode::Preview,
+        _ => MarkdownEditorMode::Split,
+    };
     let md_value = state.specimens.text.get("editor-md-value")
         .cloned()
         .unwrap_or_else(|| "# Hello World\n\nThis is a **markdown** editor with _split_ view mode.\n\n- Item one\n- Item two\n- Item three".to_string());
@@ -32,7 +37,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     MarkdownEditor::from_spec(
                         MarkdownEditorSpec::new()
                             .with_value(&md_value)
-                            .with_mode(&md_mode),
+                            .with_mode(md_mode),
                         theme,
                     )
                     .on_change({
@@ -56,7 +61,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 )
                 .child(
                     div().text_xs().text_color(color_to_hsla(text_secondary))
-                        .child(format!("Mode: {} | Length: {} chars", md_mode, md_value.len()))
+                        .child(format!("Mode: {} | Length: {} chars", md_mode.as_str(), md_value.len()))
                 )
         )
         // --- Edit only ---
@@ -67,7 +72,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     MarkdownEditor::from_spec(
                         MarkdownEditorSpec::new()
                             .with_placeholder("Start writing markdown...")
-                            .with_mode("edit")
+                            .with_mode(MarkdownEditorMode::Edit)
                             .with_min_height("120px"),
                         theme,
                     )
@@ -81,7 +86,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     MarkdownEditor::from_spec(
                         MarkdownEditorSpec::new()
                             .with_value("# Preview Mode\n\nThis editor is in preview-only mode. The toolbar still shows mode switches.")
-                            .with_mode("preview")
+                            .with_mode(MarkdownEditorMode::Preview)
                             .with_min_height("100px"),
                         theme,
                     )
@@ -113,7 +118,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 MarkdownEditor::from_spec(
                     MarkdownEditorSpec::new()
                         .with_value("## Release notes\n\nShip the axis panes.")
-                        .with_mode("split")
+                        .with_mode(MarkdownEditorMode::Split)
                         .with_min_height("160px")
                         .with_size(size),
                     theme,
@@ -124,7 +129,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 MarkdownEditor::from_spec(
                     MarkdownEditorSpec::new()
                         .with_value("## Release notes\n\nShip the axis panes.")
-                        .with_mode("split")
+                        .with_mode(MarkdownEditorMode::Split)
                         .with_min_height("160px")
                         .with_density(density),
                     theme,

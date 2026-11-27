@@ -8,7 +8,49 @@
 //!
 //! Contract: `docs/contracts/components/popover.md`
 
+use std::fmt;
+
 use poodle_tokens::semantic;
+
+/// Error returned when constructing a [`Rem`] from a negative or non-finite value.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct InvalidRemError;
+
+impl fmt::Display for InvalidRemError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("rem length must be finite and non-negative")
+    }
+}
+
+impl std::error::Error for InvalidRemError {}
+
+/// A validated finite, non-negative CSS `rem` length.
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+pub struct Rem(f32);
+
+impl Rem {
+    /// Construct a validated `rem` length, rejecting negative or non-finite values.
+    pub const fn try_new(value: f32) -> Result<Self, InvalidRemError> {
+        if value.is_finite() && value >= 0.0 {
+            Ok(Self(value))
+        } else {
+            Err(InvalidRemError)
+        }
+    }
+
+    /// Underlying length in `rem`.
+    pub const fn value(self) -> f32 {
+        self.0
+    }
+}
+
+impl TryFrom<f32> for Rem {
+    type Error = InvalidRemError;
+
+    fn try_from(value: f32) -> Result<Self, Self::Error> {
+        Self::try_new(value)
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct PopoverSpec {
@@ -22,8 +64,8 @@ pub struct PopoverSpec {
     pub block: bool,
     pub disabled: bool,
     pub surface_width: crate::types::PopoverSurfaceWidth,
-    pub surface_min_width: Option<crate::types::Dimension>,
-    pub surface_max_width: Option<crate::types::Dimension>,
+    pub surface_min_width_rem: Option<Rem>,
+    pub surface_max_width_rem: Option<Rem>,
 }
 
 impl Default for PopoverSpec {
@@ -39,8 +81,8 @@ impl Default for PopoverSpec {
             block: false,
             disabled: false,
             surface_width: crate::types::PopoverSurfaceWidth::Content,
-            surface_min_width: None,
-            surface_max_width: None,
+            surface_min_width_rem: None,
+            surface_max_width_rem: None,
         }
     }
 }
@@ -90,12 +132,12 @@ impl PopoverSpec {
         self.surface_width = value;
         self
     }
-    pub fn with_surface_min_width(mut self, value: impl Into<crate::types::Dimension>) -> Self {
-        self.surface_min_width = Some(value.into());
+    pub fn with_surface_min_width_rem(mut self, rem: Rem) -> Self {
+        self.surface_min_width_rem = Some(rem);
         self
     }
-    pub fn with_surface_max_width(mut self, value: impl Into<crate::types::Dimension>) -> Self {
-        self.surface_max_width = Some(value.into());
+    pub fn with_surface_max_width_rem(mut self, rem: Rem) -> Self {
+        self.surface_max_width_rem = Some(rem);
         self
     }
 }
@@ -107,41 +149,6 @@ pub const POPOVER_SURFACE_MIN_WIDTH_REM: f32 = 14.0;
 /// targets, so they resolve the `24rem` arm).
 pub const POPOVER_SURFACE_MAX_WIDTH_REM: f32 = 24.0;
 
-/// Parses a `Dimension` like `"14rem"` into rem. The portable unit is rem
-/// (contract §12): a non-rem value is a web-shell CSS length that does not
-/// port, and it is an authoring error — never a silent default. The case
-/// corpus and the Rust codegen reject such values before they reach this
-/// parser, so an assert here means a caller violated the portable contract.
-fn rem_of(dimension: &Option<crate::types::Dimension>, default: f32) -> f32 {
-    let Some(dimension) = dimension else {
-        return default;
-    };
-    let raw = dimension.as_str();
-    let Some(value) = raw.strip_suffix("rem") else {
-        panic!(
-            "PopoverSpec surface width bound `{raw}` is not a portable rem length (contract §12); arbitrary CSS lengths are a web-shell extension"
-        );
-    };
-    let mut digits = value.split('.');
-    let whole = digits.next().unwrap_or_default();
-    let shape_is_valid = !whole.is_empty()
-        && whole.chars().all(|ch| ch.is_ascii_digit())
-        && match digits.next() {
-            None => true,
-            Some(frac) => {
-                digits.next().is_none()
-                    && !frac.is_empty()
-                    && frac.chars().all(|ch| ch.is_ascii_digit())
-            }
-        };
-    match value.parse::<f32>() {
-        Ok(rem) if shape_is_valid && rem.is_finite() => rem,
-        _ => panic!(
-            "PopoverSpec surface width bound `{raw}` is not a portable rem length (contract §12)"
-        ),
-    }
-}
-
 impl PopoverSpec {
     /// The effective open state: the controlled value when supplied, else the
     /// uncontrolled default.
@@ -151,12 +158,14 @@ impl PopoverSpec {
 
     /// Effective surface min-width in rem (override or contract default `14rem`).
     pub fn effective_surface_min_width_rem(&self) -> f32 {
-        rem_of(&self.surface_min_width, POPOVER_SURFACE_MIN_WIDTH_REM)
+        self.surface_min_width_rem
+            .map_or(POPOVER_SURFACE_MIN_WIDTH_REM, Rem::value)
     }
 
     /// Effective surface max-width in rem (override or contract default `24rem`).
     pub fn effective_surface_max_width_rem(&self) -> f32 {
-        rem_of(&self.surface_max_width, POPOVER_SURFACE_MAX_WIDTH_REM)
+        self.surface_max_width_rem
+            .map_or(POPOVER_SURFACE_MAX_WIDTH_REM, Rem::value)
     }
 
     pub fn surface_fill_token(&self) -> &'static str {
@@ -181,19 +190,22 @@ impl PopoverSpec {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::{Dimension, OverlayPlacement, PopoverInitialFocus, PopoverSurfaceWidth};
+    use crate::types::{OverlayPlacement, PopoverInitialFocus, PopoverSurfaceWidth};
 
     #[test]
     fn portable_width_bound_accepts_rem() {
-        let spec = PopoverSpec::default().with_surface_min_width(Dimension::new("20.5rem"));
+        let rem = Rem::try_new(20.5).expect("20.5rem is valid");
+        let spec = PopoverSpec::default().with_surface_min_width_rem(rem);
         assert_eq!(spec.effective_surface_min_width_rem(), 20.5);
     }
 
     #[test]
-    #[should_panic(expected = "not a portable rem length")]
-    fn portable_width_bound_rejects_css_extensions() {
-        let spec = PopoverSpec::default().with_surface_min_width(Dimension::new("320px"));
-        let _ = spec.effective_surface_min_width_rem();
+    fn rem_rejects_negative_and_non_finite_values() {
+        assert_eq!(Rem::try_new(f32::NAN), Err(InvalidRemError));
+        assert_eq!(Rem::try_new(f32::INFINITY), Err(InvalidRemError));
+        assert_eq!(Rem::try_new(f32::NEG_INFINITY), Err(InvalidRemError));
+        assert_eq!(Rem::try_new(-4.0), Err(InvalidRemError));
+        assert_eq!(Rem::try_new(0.0).map(Rem::value), Ok(0.0));
     }
 
     #[test]
@@ -213,8 +225,8 @@ mod tests {
         assert!(!spec.block);
         assert!(!spec.disabled);
         assert_eq!(spec.surface_width, PopoverSurfaceWidth::Content);
-        assert_eq!(spec.surface_min_width, None);
-        assert_eq!(spec.surface_max_width, None);
+        assert_eq!(spec.surface_min_width_rem, None);
+        assert_eq!(spec.surface_max_width_rem, None);
     }
 
     #[test]
@@ -274,8 +286,8 @@ mod tests {
         assert_eq!(spec.effective_surface_min_width_rem(), 14.0);
         assert_eq!(spec.effective_surface_max_width_rem(), 24.0);
         let overridden = PopoverSpec::new()
-            .with_surface_min_width(Dimension::new("20rem"))
-            .with_surface_max_width(Dimension::new("20rem"));
+            .with_surface_min_width_rem(Rem::try_new(20.0).expect("20rem is valid"))
+            .with_surface_max_width_rem(Rem::try_new(20.0).expect("20rem is valid"));
         assert_eq!(overridden.effective_surface_min_width_rem(), 20.0);
         assert_eq!(overridden.effective_surface_max_width_rem(), 20.0);
     }

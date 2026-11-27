@@ -92,13 +92,6 @@ impl DialogSpec {
         self
     }
 
-    /// Deprecated — use `with_role` instead.
-    #[deprecated(note = "Use with_role instead")]
-    pub fn with_kind(mut self, kind: DialogKind) -> Self {
-        self.role = kind;
-        self
-    }
-
     pub fn with_dismiss_on_escape(mut self, dismiss_on_escape: bool) -> Self {
         self.dismiss_on_escape = dismiss_on_escape;
         self

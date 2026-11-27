@@ -51,7 +51,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             js_log_list(
                 &LogListSpec::new()
                     .with_entries(stream_entries(12))
-                    .with_filter_level("error"),
+                    .with_filter_level(LogLevel::Error),
                 theme,
                 "log-list-2",
             ),

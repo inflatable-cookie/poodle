@@ -26,11 +26,6 @@ pub struct PaginationSpec {
     pub sibling_count: usize,
     pub aria_label: Option<String>,
     pub variant: PaginationVariant,
-    /// When true the component renders without the outer panel chrome
-    /// (border + background). **Deprecated** inverse alias for `has_chrome`:
-    /// `None` means unset, which is why this is an `Option` and not a `bool` —
-    /// the contract only lets it override chrome when the host actually set it.
-    pub standalone: Option<bool>,
     /// Whether to show the "Showing X to Y of Z" info row.
     pub show_info: bool,
     /// Optional "showing X of Y" info text rendered alongside simple
@@ -68,7 +63,6 @@ impl Default for PaginationSpec {
             sibling_count: 1,
             aria_label: None,
             variant: PaginationVariant::Numbered,
-            standalone: None,
             show_info: true,
             info_text: None,
             total_items: None,
@@ -93,16 +87,8 @@ impl PaginationSpec {
 
     /// Whether to render the container treatment: padding, top border, tinted
     /// background.
-    ///
-    /// The contract's precedence: `standalone` wins when the host set it (as
-    /// the inverse), otherwise `chrome` decides. Both natives keyed off
-    /// `standalone` alone, which defaulted to `false` and so drew chrome by
-    /// default — the opposite of the contract and of Svelte.
     pub fn resolved_chrome(&self) -> bool {
-        match self.standalone {
-            Some(standalone) => !standalone,
-            None => self.has_chrome,
-        }
+        self.has_chrome
     }
 
     pub fn new() -> Self {
@@ -133,11 +119,6 @@ impl PaginationSpec {
 
     pub fn with_variant(mut self, variant: PaginationVariant) -> Self {
         self.variant = variant;
-        self
-    }
-
-    pub fn with_standalone(mut self, standalone: bool) -> Self {
-        self.standalone = Some(standalone);
         self
     }
 
@@ -440,19 +421,5 @@ mod chrome_tests {
     #[test]
     fn chrome_turns_the_treatment_on() {
         assert!(PaginationSpec::new().with_chrome(true).resolved_chrome());
-    }
-
-    /// The deprecated alias is the inverse, and wins when the host set it —
-    /// which is the whole reason `standalone` is an `Option`.
-    #[test]
-    fn standalone_overrides_chrome_as_its_inverse() {
-        assert!(!PaginationSpec::new()
-            .with_chrome(true)
-            .with_standalone(true)
-            .resolved_chrome(),);
-        assert!(PaginationSpec::new()
-            .with_chrome(false)
-            .with_standalone(false)
-            .resolved_chrome(),);
     }
 }

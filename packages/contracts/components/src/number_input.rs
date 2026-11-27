@@ -12,6 +12,22 @@ use poodle_tokens::semantic;
 
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState};
 
+/// Step direction for [`NumberInputSpec::can_step`].
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum NumberStepDirection {
+    Increment,
+    Decrement,
+}
+
+impl NumberStepDirection {
+    fn delta(self) -> i32 {
+        match self {
+            Self::Increment => 1,
+            Self::Decrement => -1,
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct NumberInputSpec {
     /// Controlled committed value. `None` is committed empty.
@@ -249,7 +265,7 @@ impl NumberInputSpec {
     ///
     /// Matches the transition machine: no draft → committed; empty draft →
     /// null baseline; valid draft → parsed value; invalid draft → inert.
-    pub fn can_step(&self, direction: i32) -> bool {
+    pub fn can_step(&self, direction: NumberStepDirection) -> bool {
         let context = self.to_context();
         if context.disabled || context.read_only {
             return false;
@@ -276,7 +292,7 @@ impl NumberInputSpec {
 
         step_number_value(
             baseline,
-            direction,
+            direction.delta(),
             self.min,
             self.max,
             self.step,
@@ -423,8 +439,8 @@ mod tests {
             .with_min(Some(0.0))
             .with_max(Some(10.0))
             .with_step(Some(1.0));
-        assert!(!at_max.can_step(1));
-        assert!(at_max.can_step(-1));
+        assert!(!at_max.can_step(NumberStepDirection::Increment));
+        assert!(at_max.can_step(NumberStepDirection::Decrement));
     }
 
     #[test]
@@ -435,7 +451,7 @@ mod tests {
             .with_step(Some(1.0))
             .with_draft_value(Some(String::new()));
         // Empty draft uses the null baseline (min), not committed 5.
-        assert!(empty_draft.can_step(1));
+        assert!(empty_draft.can_step(NumberStepDirection::Increment));
         assert_eq!(
             step_number_value(None, 1, Some(0.0), Some(10.0), Some(1.0), None),
             Some(0.0)
@@ -446,8 +462,8 @@ mod tests {
             .with_max(Some(10.0))
             .with_step(Some(1.0))
             .with_draft_value(Some("1e2".into()));
-        assert!(!invalid_draft.can_step(1));
-        assert!(!invalid_draft.can_step(-1));
+        assert!(!invalid_draft.can_step(NumberStepDirection::Increment));
+        assert!(!invalid_draft.can_step(NumberStepDirection::Decrement));
         assert_eq!(invalid_draft.accessible_value_now(), None);
     }
 
@@ -457,7 +473,7 @@ mod tests {
         assert_eq!(spec.min, None);
         assert_eq!(spec.max, None);
         assert_eq!(spec.step, None);
-        assert!(spec.can_step(1));
-        assert!(spec.can_step(-1));
+        assert!(spec.can_step(NumberStepDirection::Increment));
+        assert!(spec.can_step(NumberStepDirection::Decrement));
     }
 }

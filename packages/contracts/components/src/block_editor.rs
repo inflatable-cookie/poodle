@@ -175,19 +175,6 @@ impl BlockEditorSpec {
         self
     }
 
-    /// Legacy: returns the number of blocks (kept for back-compat with existing call sites).
-    pub fn block_count(&self) -> usize {
-        self.blocks.len()
-    }
-
-    /// Legacy: set block count by creating placeholder blocks. Prefer with_blocks().
-    pub fn with_block_count(mut self, block_count: usize) -> Self {
-        self.blocks = (0..block_count)
-            .map(|i| EditorBlock::new(format!("block-{}", i), "paragraph"))
-            .collect();
-        self
-    }
-
     pub fn fill_token(&self) -> &'static str {
         semantic::COLOR_BACKGROUND_SURFACE
     }

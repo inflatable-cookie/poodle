@@ -13,9 +13,19 @@ pub enum SkeletonPreset {
     AvatarLine,
 }
 
+/// Single-shape form factor for [`SkeletonSpec`]. Matches the contract `shape`
+/// prop (`"line" | "block" | "circle"`).
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum SkeletonShape {
+    #[default]
+    Line,
+    Block,
+    Circle,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct SkeletonSpec {
-    pub shape: String,
+    pub shape: SkeletonShape,
     pub width: Option<String>,
     pub height: Option<String>,
     pub is_animated: bool,
@@ -32,7 +42,7 @@ pub struct SkeletonSpec {
 impl Default for SkeletonSpec {
     fn default() -> Self {
         Self {
-            shape: String::from("rectangle"),
+            shape: SkeletonShape::Line,
             width: None,
             height: None,
             is_animated: true,
@@ -47,8 +57,8 @@ impl SkeletonSpec {
         Self::default()
     }
 
-    pub fn with_shape(mut self, shape: impl Into<String>) -> Self {
-        self.shape = shape.into();
+    pub fn with_shape(mut self, shape: SkeletonShape) -> Self {
+        self.shape = shape;
         self
     }
 
@@ -81,19 +91,16 @@ impl SkeletonSpec {
         semantic::COLOR_BACKGROUND_SURFACE
     }
 
-    /// Per-shape border radius token. Accepts both the contract shape
-    /// vocabulary (`line`/`block`/`circle`) and the legacy Rust vocabulary
-    /// (`text`/`rectangle`) so existing callers keep working:
-    /// - `line` / `text`  → `radius.control` (contract base skeleton radius)
-    /// - `circle`         → `radius.pill`    (contract `999rem`)
-    /// - `block` / other  → `radius.surface` (contract `calc(radius-surface − 0.25rem)`;
+    /// Per-shape border radius token matching the contract shape vocabulary:
+    /// - `Line`   → `radius.control` (contract base skeleton radius)
+    /// - `Circle` → `radius.pill`    (contract `999rem`)
+    /// - `Block`  → `radius.surface` (contract `calc(radius-surface − 0.25rem)`;
     ///   no token exists for the exact `−0.25rem` calc — closest is `radius.surface`)
     pub fn radius_token(&self) -> &'static str {
-        match self.shape.as_str() {
-            "circle" => semantic::RADIUS_PILL,
-            "line" | "text" => semantic::RADIUS_CONTROL,
-            // "block", "rectangle", and anything else
-            _ => semantic::RADIUS_SURFACE,
+        match self.shape {
+            SkeletonShape::Circle => semantic::RADIUS_PILL,
+            SkeletonShape::Line => semantic::RADIUS_CONTROL,
+            SkeletonShape::Block => semantic::RADIUS_SURFACE,
         }
     }
 
@@ -117,5 +124,30 @@ impl SkeletonSpec {
     /// static highlight tone.
     pub fn shimmer_highlight_token(&self) -> &'static str {
         semantic::COLOR_BACKGROUND_SURFACE
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_shape_is_line_and_radii_match_contract() {
+        let default_spec = SkeletonSpec::new();
+        assert_eq!(default_spec.shape, SkeletonShape::Line);
+        assert_eq!(default_spec.radius_token(), semantic::RADIUS_CONTROL);
+
+        assert_eq!(
+            SkeletonSpec::new()
+                .with_shape(SkeletonShape::Circle)
+                .radius_token(),
+            semantic::RADIUS_PILL
+        );
+        assert_eq!(
+            SkeletonSpec::new()
+                .with_shape(SkeletonShape::Block)
+                .radius_token(),
+            semantic::RADIUS_SURFACE
+        );
     }
 }

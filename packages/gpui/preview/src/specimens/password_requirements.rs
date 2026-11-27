@@ -45,7 +45,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .child(TextInput::from_spec(
                 TextInputSpec::new()
                     .with_id("password-preview")
-                    .with_input_type("password")
+                    .with_type(poodle_specs::TextInputType::Password)
                     .with_placeholder("Enter password"),
                 theme,
             ))

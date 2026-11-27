@@ -172,8 +172,12 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 theme,
                 "popover-surface-fixed",
                 PopoverSpec::new()
-                    .with_surface_min_width(poodle_specs::Dimension::new("20rem"))
-                    .with_surface_max_width(poodle_specs::Dimension::new("20rem"))
+                    .with_surface_min_width_rem(
+                        poodle_specs::Rem::try_new(20.0).expect("valid rem"),
+                    )
+                    .with_surface_max_width_rem(
+                        poodle_specs::Rem::try_new(20.0).expect("valid rem"),
+                    )
                     .with_aria_label("Fixed-width popover"),
                 "Fixed 20rem",
                 paragraph("Surface min-width and max-width are pinned to 20rem."),

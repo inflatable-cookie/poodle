@@ -145,24 +145,6 @@ impl StatusIndicatorSpec {
         }
     }
 
-    /// Contract: dot size 0.5625rem (9px) at the md baseline.
-    /// Back-compat accessor; prefer `dot_size_rem_for(size)`.
-    pub fn dot_size_rem(&self) -> f32 {
-        self.dot_size_rem_for(ControlSize::Md)
-    }
-
-    /// Contract: gap between dot and label 0.4375rem (7px) at md / default density.
-    /// Back-compat accessor; prefer `gap_rem_for(size, density)`.
-    pub fn gap_rem(&self) -> f32 {
-        self.gap_rem_for(ControlSize::Md, ControlDensity::Default)
-    }
-
-    /// Contract: label font-size 0.75rem (12px) at the md baseline.
-    /// Back-compat accessor; prefer `label_font_size_rem_for(size)`.
-    pub fn label_font_size_rem(&self) -> f32 {
-        self.label_font_size_rem_for(ControlSize::Md)
-    }
-
     /// Contract: label color token.
     pub fn label_color_token(&self) -> &'static str {
         "color.text.primary"

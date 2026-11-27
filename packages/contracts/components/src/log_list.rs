@@ -273,7 +273,7 @@ pub struct LogListSpec {
     pub entries: Vec<LogEntry>,
     pub max_entries: usize,
     pub auto_scroll: bool,
-    pub filter_level: Option<String>,
+    pub filter_level: Option<LogLevel>,
     /// Client-side text filter for stream entries (Svelte `filterText`).
     pub filter_text: String,
     /// Audit-mode loading flag; the loading surface shows when there are no
@@ -361,22 +361,25 @@ impl LogListSpec {
         })
     }
 
-    /// Stream rows only, in order, after the level and text filters.
-    /// Contract §"filteredEntries".
+    /// Stream rows only, in chronological order, after the level and text
+    /// filters and capped to the newest `max_entries` rows (matching Svelte's
+    /// `.slice(-maxEntries)`). Contract §"filteredEntries".
     pub fn stream_entries(&self) -> Vec<&StreamLogEntry> {
         let needle = self.filter_text.trim().to_lowercase();
-        self.entries
+        let mut filtered: Vec<&StreamLogEntry> = self
+            .entries
             .iter()
             .filter_map(|entry| match entry {
                 LogEntry::Stream(stream) => Some(stream),
                 LogEntry::Audit(_) => None,
             })
-            .filter(|stream| match self.filter_level.as_deref() {
-                Some(level) if !level.is_empty() => stream.level.value() == level,
-                _ => true,
-            })
+            .filter(|stream| self.filter_level.is_none_or(|level| stream.level == level))
             .filter(|stream| needle.is_empty() || stream.message.to_lowercase().contains(&needle))
-            .collect()
+            .collect();
+        if self.max_entries > 0 && filtered.len() > self.max_entries {
+            filtered.drain(..filtered.len() - self.max_entries);
+        }
+        filtered
     }
 
     /// Per-level stream counts for the level chips (Svelte `levelCounts`).
@@ -400,8 +403,8 @@ impl LogListSpec {
         self
     }
 
-    pub fn with_filter_level(mut self, filter_level: impl Into<String>) -> Self {
-        self.filter_level = Some(filter_level.into());
+    pub fn with_filter_level(mut self, filter_level: LogLevel) -> Self {
+        self.filter_level = Some(filter_level);
         self
     }
 
@@ -647,12 +650,33 @@ mod tests {
         assert_eq!(spec.stream_entries().len(), 3);
         assert_eq!(spec.level_count(LogLevel::Warn), 1);
 
-        let by_level = spec.clone().with_filter_level("warn");
+        let by_level = spec.clone().with_filter_level(LogLevel::Warn);
         assert_eq!(by_level.stream_entries().len(), 1);
 
         // Text filter is case-insensitive and matches the message.
         let by_text = spec.clone().with_filter_text("CACHE");
         assert_eq!(by_text.stream_entries().len(), 2);
+    }
+
+    #[test]
+    fn stream_entries_keeps_newest_max_entries_in_order() {
+        let spec = LogListSpec::new()
+            .with_entries([
+                LogEntry::Stream(StreamLogEntry::new("10:00:01", LogLevel::Info, "oldest")),
+                LogEntry::Stream(StreamLogEntry::new("10:00:02", LogLevel::Warn, "middle")),
+                LogEntry::Stream(StreamLogEntry::new("10:00:03", LogLevel::Error, "newest")),
+            ])
+            .with_max_entries(2);
+        let messages: Vec<&str> = spec
+            .stream_entries()
+            .into_iter()
+            .map(|entry| entry.message.as_str())
+            .collect();
+        assert_eq!(messages, vec!["middle", "newest"]);
+
+        // Matches Svelte's `.slice(-maxEntries)`: `0` yields `.slice(-0)` and retains all rows.
+        let unbounded = spec.with_max_entries(0);
+        assert_eq!(unbounded.stream_entries().len(), 3);
     }
 
     #[test]

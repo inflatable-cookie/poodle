@@ -129,7 +129,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_placeholder("0.00")
                     .with_prefix("$")
                     .with_suffix("USD")
-                    .with_input_mode("decimal"),
+                    .with_input_mode(poodle_specs::TextInputMode::Decimal),
                 theme,
             )),
         ))

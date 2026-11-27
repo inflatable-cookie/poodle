@@ -107,15 +107,13 @@ impl SliderSpec {
     }
 
     pub fn clamped_value(&self) -> f64 {
-        self.value.max(self.min).min(self.max)
+        let max = poodle_headless::slider::safe_slider_max(self.min, self.max);
+        poodle_headless::slider::clamp_value(self.value, self.min, max)
     }
 
     pub fn normalized_progress(&self) -> f64 {
-        if self.max <= self.min {
-            0.0
-        } else {
-            (self.clamped_value() - self.min) / (self.max - self.min)
-        }
+        let max = poodle_headless::slider::safe_slider_max(self.min, self.max);
+        poodle_headless::audio::normalize_value(self.clamped_value(), self.min, max, self.law)
     }
 
     pub fn range_fill_token(&self) -> &'static str {
@@ -163,5 +161,21 @@ impl SliderSpec {
     pub fn with_visible_value_text(mut self, text: impl Into<String>) -> Self {
         self.visible_value_text = Some(text.into());
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn degenerate_range_delegates_to_headless_safe_max() {
+        let equal_bounds = SliderSpec::new(10.5).with_bounds(10.0, 10.0);
+        assert_eq!(equal_bounds.clamped_value(), 10.5);
+        assert_eq!(equal_bounds.normalized_progress(), 0.5);
+
+        let inverted_bounds = SliderSpec::new(20.0).with_bounds(10.0, 5.0);
+        assert_eq!(inverted_bounds.clamped_value(), 11.0);
+        assert_eq!(inverted_bounds.normalized_progress(), 1.0);
     }
 }

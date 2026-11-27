@@ -219,6 +219,7 @@ pub use date_picker::DatePickerSpec;
 pub use date_range_picker::DateRangePickerSpec;
 pub use date_time_picker::DateTimePickerSpec;
 pub use date_time_range_picker::DateTimeRangePickerSpec;
+pub use date_time_zone_picker::DateTimeZonePickerSpec;
 pub use detail_item::{DetailItemLayout, DetailItemPresentation, DetailItemSpan, DetailItemSpec};
 pub use dialog::DialogSpec;
 pub use drawer::DrawerSpec;
@@ -231,7 +232,8 @@ pub use file_upload::{format_file_size, FileUploadItem, FileUploadSpec, FileUplo
 pub use form_actions::FormActionsSpec;
 pub use form_dialog::FormDialogSpec;
 pub use form_layout::FormLayoutSpec;
-pub use grid::{GridColumns, GridSpec, GridTrack};
+pub use grid::{GridColumns, GridSpec, GridTrack, MAX_GRID_REPEAT_TRACKS};
+pub use history_center::{HistoryCenterRejection, HistoryCenterSpec, HistoryCenterStatus};
 pub use hover_card::HoverCardSpec;
 pub use icon::{IconSize, IconSpec};
 pub use icon_button::IconButtonSpec;
@@ -264,38 +266,32 @@ pub use model_picker::{
     ModelPickerEmphasis, ModelPickerSpec, ModelPickerVariant, ModelSelection,
     SEGMENTED_AXIS_MAX_OPTIONS,
 };
+pub use motion_policy_provider::MotionPolicyProviderSpec;
 pub use nav_card::NavCardSpec;
 pub use navigation_menu::NavigationMenuSpec;
-pub use number_input::NumberInputSpec;
+pub use number_input::{NumberInputSpec, NumberStepDirection};
 pub use order_by::{
     ActiveSort, OrderByField, OrderBySpec, OrderByTriggerVariant, SortDirection, SortField,
 };
 pub use pagination::{PageItem, PaginationSpec, PaginationVariant};
 pub use password_requirements::{PasswordRequirementsPolicy, PasswordRequirementsSpec};
 pub use pill::{PillAppearance, PillFont, PillSize, PillSpec, PillTone};
-pub use popover::PopoverSpec;
+pub use poodle_headless::motion_policy::MotionPolicy;
+pub use popover::{InvalidRemError, PopoverSpec, Rem};
 pub use progress::ProgressSpec;
 pub use r#box::BoxSpec;
 pub use radio::RadioSpec;
 pub use radio_group::RadioGroupSpec;
-pub use ref_select::{RefKind, RefOption, RefSelectEmphasis, RefSelectSpec, RefSelectVariant};
-pub use tool_call::ToolCallSpec;
-pub use tool_call_group::ToolCallGroupSpec;
-/// Deprecated: use `CalendarSpec` with `CalendarMode::Range` instead.
-pub type RangeCalendarSpec = CalendarSpec;
 pub use range_slider::RangeSliderSpec;
 pub use rating::RatingSpec;
+pub use ref_select::{RefKind, RefOption, RefSelectEmphasis, RefSelectSpec, RefSelectVariant};
 pub use region::RegionSpec;
 pub use resize_handle::ResizeHandleSpec;
 pub use scroll_shell::ScrollShellSpec;
-/// Deprecated: use `TextInputSpec` with `input_type("search")` instead.
-pub type SearchInputSpec = TextInputSpec;
-/// Deprecated: use `TextInputSpec` with `input_type("search")` instead.
-pub type SearchFieldSpec = TextInputSpec;
 pub use segmented_control::{SegmentedControlOption, SegmentedControlSpec};
 pub use select::{SelectMode, SelectSpec, SelectVariant};
 pub use separator::SeparatorSpec;
-pub use skeleton::{SkeletonPreset, SkeletonSpec};
+pub use skeleton::{SkeletonPreset, SkeletonShape, SkeletonSpec};
 pub use slider::{SliderDirection, SliderPolarity, SliderSpec, SliderVariant};
 pub use spacer::SpacerSpec;
 pub use spinner::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
@@ -311,29 +307,20 @@ pub use tabs::{ActiveEdge, ActiveFill, TabsLayout, TabsOverflowStrategy, TabsShe
 pub use text::{
     TextElement, TextLeading, TextSize, TextSpacing, TextSpec, TextTone, TextWeight, TextWrap,
 };
-/// Deprecated: use `TextInputSpec` with `rows > 1` instead.
-pub type TextAreaSpec = TextInputSpec;
-pub use history_center::{HistoryCenterRejection, HistoryCenterSpec, HistoryCenterStatus};
-pub use text_input::TextInputSpec;
+pub use text_input::{TextInputMode, TextInputResize, TextInputSpec, TextInputType};
 pub use text_link::{TextLinkSpec, TextLinkTone};
 pub use time_ago::{TimeAgoFutureFormat, TimeAgoSpec, TimeAgoTooltipFormat};
 pub use time_input::TimeInputSpec;
 pub use time_zone_select::{
     default_time_zone_options, TimeZoneSelectSpec, TIME_ZONE_EMPTY_MESSAGE, TIME_ZONE_PLACEHOLDER,
 };
-pub use token_input::TokenInputSpec;
-pub use toolbar::ToolbarSpec;
-/// Deprecated: Toggle has been superseded by Button with `pressed` prop.
-pub type ToggleSpec = ButtonSpec;
-pub use date_time_zone_picker::DateTimeZonePickerSpec;
-pub use motion_policy_provider::MotionPolicyProviderSpec;
-pub use poodle_headless::motion_policy::MotionPolicy;
 pub use toggle_group::{ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
+pub use token_input::TokenInputSpec;
+pub use tool_call::ToolCallSpec;
+pub use tool_call_group::ToolCallGroupSpec;
+pub use toolbar::ToolbarSpec;
 pub use tooltip::TooltipSpec;
 pub use tri_state_switch::TriStateSwitchSpec;
-pub use ui_presentation_provider::UiPresentationProviderSpec;
-/// Deprecated: Use `DateTimeZonePickerSpec` instead.
-pub type ZonedDateTimePickerSpec = DateTimeZonePickerSpec;
 pub use types::{
     resolve_semantic_control_size, AccordionItemSpec, AccordionSelectionValue, Alignment,
     BadgeVariant, ButtonTone, ButtonVariant, CalendarWeekStart, CheckState, ChoiceOption,
@@ -346,6 +333,7 @@ pub use types::{
     SurfaceTone, TabActivationMode, TabDefinition, TabPin, TabStripItem, TabVariant,
     TimeZoneOption, ToneFill, TriStateValue, ValidationState, ZonedDateTimeValue,
 };
+pub use ui_presentation_provider::UiPresentationProviderSpec;
 
 // Composite exports
 pub use action_discovery_panel::ActionDiscoveryPanelSpec;
@@ -390,7 +378,7 @@ pub use log_list::{
     AuditLogEntry, LogActor, LogEntry, LogFilter, LogFilterKind, LogFilterOption, LogLevel,
     LogListSpec, StreamLogEntry,
 };
-pub use markdown_editor::MarkdownEditorSpec;
+pub use markdown_editor::{MarkdownEditorMode, MarkdownEditorSpec};
 pub use media_browse_panel::{MediaBrowseItem, MediaBrowsePanelSpec};
 pub use media_picker::{MediaPickerItem, MediaPickerSpec, MediaPickerTab};
 pub use media_preview::MediaPreviewSpec;
@@ -423,74 +411,6 @@ pub use update_center::UpdateCenterSpec;
 pub use update_status::UpdateStatusSpec;
 pub use validation_summary::ValidationSummarySpec;
 pub use video_player::VideoPlayerSpec;
-
-pub const CURRENT_GENERATION: &str = "g10.004";
-pub const STRUCTURAL_EXPORTS: &[&str] = &[
-    "BoxSpec",
-    "StackSpec",
-    "GridSpec",
-    "SurfaceSpec",
-    "SeparatorSpec",
-    "ScrollShellSpec",
-];
-pub const ACTION_FIELD_EXPORTS: &[&str] = &[
-    "ButtonSpec",
-    "IconButtonSpec",
-    "FieldSpec",
-    "FieldRelationships",
-    "TextInputSpec",
-    "FormActionsSpec",
-];
-pub const SELECTION_FEEDBACK_DATE_EXPORTS: &[&str] = &[
-    "CheckboxSpec",
-    "RadioGroupSpec",
-    "SwitchSpec",
-    "SelectSpec",
-    "SegmentedControlSpec",
-    "SliderSpec",
-    "ProgressSpec",
-    "SpinnerSpec",
-    "BadgeSpec",
-    "StatusIndicatorSpec",
-    "CalendarSpec",
-    "DatePickerSpec",
-    "DateRangePickerSpec",
-    "TimeInputSpec",
-    "DateTimePickerSpec",
-    "DateTimeRangePickerSpec",
-];
-pub const OVERLAY_NAVIGATION_EXPORTS: &[&str] = &[
-    "AccordionSpec",
-    "CollapsibleSpec",
-    "DialogSpec",
-    "DrawerSpec",
-    "PopoverSpec",
-    "TooltipSpec",
-    "MenuSpec",
-    "ContextMenuSpec",
-    "TabsSpec",
-    "NavigationMenuSpec",
-    "MenubarSpec",
-    "TabStripSpec",
-];
-pub const FORM_VALIDATION_REMEDIATION_EXPORTS: &[&str] = &[
-    "FormShellSpec",
-    "ValidationSummarySpec",
-    "RemediationBannerSpec",
-    "InlineRemediationSpec",
-];
-pub const DATA_BROWSE_DETAIL_PICKER_MEDIA_EXPORTS: &[&str] = &[
-    "DataTableSpec",
-    "DetailShellSpec",
-    "FilterToolbarSpec",
-    "PaginationSummarySpec",
-    "EmptyStateSpec",
-    "PickerShellSpec",
-    "RelationPickerSpec",
-    "SelectionSummarySpec",
-    "MediaThumbnailSpec",
-    "MediaPreviewSpec",
-];
 
 #[cfg(test)]
 mod tests {
@@ -696,11 +616,11 @@ mod tests {
     #[test]
     fn text_input_search_type_preserves_current_value() {
         let spec = TextInputSpec::new()
-            .with_input_type("search")
+            .with_type(super::TextInputType::Search)
             .with_default_value("track lane")
             .with_leading_icon("search");
 
-        assert_eq!(spec.input_type, "search");
+        assert_eq!(spec.input_type, super::TextInputType::Search);
         assert_eq!(spec.current_value(), "track lane");
         assert_eq!(spec.leading_icon.as_deref(), Some("search"));
     }

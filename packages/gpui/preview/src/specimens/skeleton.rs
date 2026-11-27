@@ -8,7 +8,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_render::RenderContext;
 
-use poodle_specs::{EyebrowSpec, SkeletonPreset, SkeletonSpec};
+use poodle_specs::{EyebrowSpec, SkeletonPreset, SkeletonShape, SkeletonSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider, context: &RenderContext<'_>) -> Div {
     let from_spec = |spec: SkeletonSpec| Skeleton::from_spec_with_context(spec, context);
@@ -27,17 +27,19 @@ pub(crate) fn render(theme: &GpuiThemeProvider, context: &RenderContext<'_>) -> 
                 .gap(px(12.0))
                 .items_center()
                 .child(from_spec(
-                    SkeletonSpec::new().with_shape("line").with_width("12rem"),
+                    SkeletonSpec::new()
+                        .with_shape(SkeletonShape::Line)
+                        .with_width("12rem"),
                 ))
                 .child(from_spec(
                     SkeletonSpec::new()
-                        .with_shape("circle")
+                        .with_shape(SkeletonShape::Circle)
                         .with_width("2.5rem")
                         .with_height("2.5rem"),
                 ))
                 .child(from_spec(
                     SkeletonSpec::new()
-                        .with_shape("block")
+                        .with_shape(SkeletonShape::Block)
                         .with_width("8rem")
                         .with_height("3rem"),
                 )),
@@ -115,7 +117,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider, context: &RenderContext<'_>) -> 
             "Static (no animation)",
             from_spec(
                 SkeletonSpec::new()
-                    .with_shape("line")
+                    .with_shape(SkeletonShape::Line)
                     .with_width("10rem")
                     .with_animated(false),
             ),

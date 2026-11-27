@@ -82,7 +82,7 @@ fn api_key_field(theme: &GpuiThemeProvider, id: &str, value: &str) -> Node {
             poodle_render::text_input(
                 &TextInputSpec::new()
                     .with_value(value)
-                    .with_type("password")
+                    .with_type(poodle_specs::TextInputType::Password)
                     .with_placeholder("sk-demo-placeholder"),
                 ctx,
                 None,

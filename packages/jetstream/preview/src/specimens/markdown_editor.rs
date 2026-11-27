@@ -4,14 +4,14 @@ use crate::compat::js_markdown_editor;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
-use poodle_specs::MarkdownEditorSpec;
+use poodle_specs::{MarkdownEditorMode, MarkdownEditorSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     let split_spec = MarkdownEditorSpec::new()
         .with_value("# Notes\n\nSide-by-side **editing** with `code` and a [link](url).")
-        .with_mode("split");
+        .with_mode(MarkdownEditorMode::Split);
     let split_status = format!("Mode: split | {} chars", split_spec.char_count());
 
     div()
@@ -23,7 +23,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             js_markdown_editor(
                 &MarkdownEditorSpec::new()
                     .with_value("# Hello\n\nThis is **bold** and _italic_ text.")
-                    .with_mode("edit"),
+                    .with_mode(MarkdownEditorMode::Edit),
                 theme,
             ),
         ))
@@ -39,7 +39,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             js_markdown_editor(
                 &MarkdownEditorSpec::new()
                     .with_value("# Preview\n\nRendered output; toolbar tools are disabled here.")
-                    .with_mode("preview"),
+                    .with_mode(MarkdownEditorMode::Preview),
                 theme,
             ),
         ))

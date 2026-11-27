@@ -10,7 +10,7 @@ use poodle_node::{
     AnimEasing, AnimKeyframe, AnimLoop, AnimProperty, ColorValue, CrossAxisAlignment,
     LayoutDirection, LayoutSizing, Node, NodeAnimation,
 };
-use poodle_specs::{SkeletonPreset, SkeletonSpec};
+use poodle_specs::{SkeletonPreset, SkeletonShape, SkeletonSpec};
 
 use crate::color::{mix_srgb, with_alpha};
 use crate::context::RenderContext;
@@ -84,20 +84,20 @@ fn single_shape(fill: ColorValue, radius: f32, spec: &SkeletonSpec) -> Node {
 
     let mut el = shape(fill, radius);
     let s = &mut el.style;
-    match spec.shape.as_str() {
-        "circle" => {
+    match spec.shape {
+        SkeletonShape::Circle => {
             let side = parsed_w.or(parsed_h).unwrap_or(rem_to_px(2.5));
             s.descriptor.layout.width = LayoutSizing::Fixed(side);
             s.descriptor.layout.height = LayoutSizing::Fixed(side);
         }
-        "block" => {
+        SkeletonShape::Block => {
             s.descriptor.layout.height = LayoutSizing::Fixed(parsed_h.unwrap_or(rem_to_px(6.0)));
             match parsed_w {
                 Some(w) => s.descriptor.layout.width = LayoutSizing::Fixed(w),
                 None => s.fill_width = true,
             }
         }
-        _ => {
+        SkeletonShape::Line => {
             s.descriptor.layout.height = LayoutSizing::Fixed(parsed_h.unwrap_or(rem_to_px(0.875)));
             match parsed_w {
                 Some(w) => s.descriptor.layout.width = LayoutSizing::Fixed(w),

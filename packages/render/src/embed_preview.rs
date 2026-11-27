@@ -11,7 +11,7 @@ use poodle_node::{
     CrossAxisAlignment, FocusRing, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node,
 };
-use poodle_specs::{EmbedPreviewSpec, SkeletonSpec, TextLinkSpec};
+use poodle_specs::{EmbedPreviewSpec, SkeletonShape, SkeletonSpec, TextLinkSpec};
 
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
@@ -110,7 +110,10 @@ pub fn embed_preview(
     if spec.is_loading {
         return root().child(
             state_column()
-                .child(skeleton(&SkeletonSpec::new().with_shape("block"), ctx))
+                .child(skeleton(
+                    &SkeletonSpec::new().with_shape(SkeletonShape::Block),
+                    ctx,
+                ))
                 .child(label("Loading preview...".to_string(), text_secondary)),
         );
     }

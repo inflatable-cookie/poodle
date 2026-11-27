@@ -15,7 +15,9 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeRole, StylePatch, TextChangeHandler,
 };
-use poodle_specs::{ButtonVariant, IconButtonSpec, MarkdownEditorSpec, TooltipSpec};
+use poodle_specs::{
+    ButtonVariant, IconButtonSpec, MarkdownEditorMode, MarkdownEditorSpec, TooltipSpec,
+};
 
 use crate::color::with_alpha;
 use crate::context::RenderContext;
@@ -200,13 +202,13 @@ pub fn markdown_editor_with_handlers(
     let mut toolbar = toolbar.child(tools_row);
 
     // Mode switcher — delegates chrome to IconButton.
-    let mode_button = |icon: &str, aria: &str, mode_val: &str| -> Node {
+    let mode_button = |icon: &str, aria: &str, mode_val: MarkdownEditorMode| -> Node {
         let on_activate = if spec.mode == mode_val {
             None
         } else {
             handlers.on_mode_change.as_ref().map(|handler| {
                 let handler = Arc::clone(handler);
-                let mode = mode_val.to_string();
+                let mode = mode_val.as_str().to_string();
                 Arc::new(move || handler(&mode)) as Arc<dyn Fn() + Send + Sync>
             })
         };
@@ -240,9 +242,9 @@ pub fn markdown_editor_with_handlers(
     }
     toolbar = toolbar.child(
         modes
-            .child(mode_button("pencil", "Edit", "edit"))
-            .child(mode_button("columns-2", "Split", "split"))
-            .child(mode_button("eye", "Preview", "preview")),
+            .child(mode_button("pencil", "Edit", MarkdownEditorMode::Edit))
+            .child(mode_button("columns-2", "Split", MarkdownEditorMode::Split))
+            .child(mode_button("eye", "Preview", MarkdownEditorMode::Preview)),
     );
     let el = el.child(toolbar);
 
@@ -498,7 +500,7 @@ mod tests {
         let ctx = RenderContext::new(&theme);
         let node = markdown_editor(
             &MarkdownEditorSpec::new()
-                .with_mode("preview")
+                .with_mode(MarkdownEditorMode::Preview)
                 .with_value("# Hello"),
             &ctx,
         );
@@ -535,7 +537,7 @@ mod tests {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let spec = MarkdownEditorSpec::new()
-            .with_mode("preview")
+            .with_mode(MarkdownEditorMode::Preview)
             .with_value("# Long\n\n".repeat(40));
         let node = markdown_editor(&spec, &ctx);
         let preview = preview_pane(&node);
@@ -556,7 +558,7 @@ mod tests {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let spec = MarkdownEditorSpec::new()
-            .with_mode("split")
+            .with_mode(MarkdownEditorMode::Split)
             .with_value(format!(
                 "short source\n\n{}",
                 "# Heading\n\nparagraph\n\n".repeat(30)

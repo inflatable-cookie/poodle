@@ -393,7 +393,6 @@ pub fn log_list(
                         .with_current_page(page)
                         .with_total_pages(spec.total_pages())
                         .with_page_size(spec.page_size)
-                        .with_standalone(true)
                         .with_aria_label("Log pagination"),
                     ctx,
                     instance_id,
@@ -417,15 +416,14 @@ pub fn log_list(
     }
 
     // Level filter chips
-    for level in &["info", "warn", "error"] {
-        let is_active = spec.filter_level.as_deref() == Some(level);
-        let chip_color = match *level {
-            "info" => info_color,
-            "warn" => warn_color,
-            "error" => error_color,
-            _ => text_secondary,
+    for level in [LogLevel::Info, LogLevel::Warn, LogLevel::Error] {
+        let is_active = spec.filter_level == Some(level);
+        let chip_color = match level {
+            LogLevel::Info => info_color,
+            LogLevel::Warn => warn_color,
+            LogLevel::Error => error_color,
         };
-        let mut chip = Node::button(*level);
+        let mut chip = Node::button(level.value());
         chip.style.descriptor.text_color = Some(if is_active {
             chip_color
         } else {
@@ -511,7 +509,7 @@ pub fn log_list(
             LogLevel::Error => mix_srgb(error_color, text_primary, 0.84),
         };
 
-        for (i, entry) in rows.iter().take(spec.max_entries).enumerate() {
+        for (i, entry) in rows.iter().enumerate() {
             let mut row = Node::container();
             {
                 let s = &mut row.style;
@@ -644,7 +642,7 @@ mod tests {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let node = log_list(
-            &stream_spec().with_filter_level("error"),
+            &stream_spec().with_filter_level(LogLevel::Error),
             &ctx,
             "log-list",
             LogListHandlers::default(),
@@ -670,7 +668,7 @@ mod tests {
     }
 
     #[test]
-    fn max_entries_caps_the_rendered_rows() {
+    fn max_entries_keeps_the_newest_rendered_rows() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let node = log_list(
@@ -680,7 +678,8 @@ mod tests {
             LogListHandlers::default(),
         );
         let runs = texts(&node);
-        assert!(runs.iter().any(|run| run == "Server started"));
+        assert!(runs.iter().any(|run| run == "Timeout"));
+        assert!(!runs.iter().any(|run| run == "Server started"));
         assert!(!runs.iter().any(|run| run == "Cache miss"));
     }
 

@@ -180,8 +180,9 @@ const ALIASES: Record<string, Record<string, string>> = {
   // The pair is stored as two scalars, which is what a thumb renderer wants.
   "range-slider": { value: "low" },
   // The pager stores the page it is on and the size of a page; `total` is the
-  // item count, `limit` the page size.
-  pagination: { page: "current_page", total: "total_items", limit: "page_size" },
+  // item count, `limit` the page size, and `standalone` is the contract's
+  // deprecated inverse alias for `chrome` (`has_chrome`).
+  pagination: { page: "current_page", total: "total_items", limit: "page_size", standalone: "has_chrome" },
   "pagination-summary": { currentPage: "page" },
   // `override` is a reserved word in Rust. A raw identifier would carry the
   // spelling at the cost of `r#override` at every call site.

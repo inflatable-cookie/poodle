@@ -135,7 +135,11 @@ fn render_browse_and_filter(a: &GpuiAdapter, t: &dyn ThemeProvider) -> DemoScree
     screen.push(a.render(&SurfaceSpec::new(), &s, t));
     screen.push(a.render(&PageHeaderSpec::new("Asset Library"), &s, t));
     screen.push(a.render(&FilterToolbarSpec::new(), &s, t));
-    screen.push(a.render(&TextInputSpec::new().with_input_type("search"), &s, t));
+    screen.push(a.render(
+        &TextInputSpec::new().with_type(poodle_specs::TextInputType::Search),
+        &s,
+        t,
+    ));
     screen.push(a.render(&DataTableSpec::new(vec![], vec![]), &s, t));
     screen.push(a.render(&PaginationSummarySpec::new(1, 25, 142), &s, t));
     screen.push(a.render(&EmptyStateSpec::new("No results found"), &s, t));
@@ -183,7 +187,11 @@ fn render_picker_and_selection(a: &GpuiAdapter, t: &dyn ThemeProvider) -> DemoSc
     screen.push(a.render(&PickerShellSpec::new("Select assets"), &s, t));
     screen.push(a.render(&RelationPickerSpec::new(vec![]), &s, t));
     screen.push(a.render(&SelectionSummarySpec::new(vec![]), &s, t));
-    screen.push(a.render(&TextInputSpec::new().with_input_type("search"), &s, t));
+    screen.push(a.render(
+        &TextInputSpec::new().with_type(poodle_specs::TextInputType::Search),
+        &s,
+        t,
+    ));
     screen.push(a.render(&CheckboxSpec::new(), &s, t));
     screen.push(a.render(&ButtonSpec::new(), &s, t));
 

@@ -852,7 +852,7 @@ impl PreviewRoot {
                         TextInput::from_spec(
                             TextInputSpec::new()
                                 .with_id("component-search")
-                                .with_input_type("search")
+                                .with_type(poodle_specs::TextInputType::Search)
                                 .with_placeholder(
                                     control.placeholder.unwrap_or("Find component..."),
                                 )
@@ -861,7 +861,7 @@ impl PreviewRoot {
                                     self.state.search_selection.0,
                                     self.state.search_selection.1,
                                 )
-                                .with_focused(self.state.search_focused)
+                                .with_is_focused(self.state.search_focused)
                                 .with_aria_label("Search components"),
                             &self.state.theme,
                         )
@@ -1104,7 +1104,7 @@ impl PreviewRoot {
                                             TextInput::from_spec(
                                                 TextInputSpec::new()
                                                     .with_id("token-inspector-query")
-                                                    .with_input_type("search")
+                                                    .with_type(poodle_specs::TextInputType::Search)
                                                     .with_placeholder("Filter tokens by path")
                                                     .with_value(&self.state.token_inspector_query)
                                                     .with_aria_label("Filter semantic tokens"),

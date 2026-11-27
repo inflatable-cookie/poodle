@@ -330,7 +330,7 @@ pub fn command_palette_with_handlers(
     let query_len = spec.query.chars().count();
     let query_spec = TextInputSpec::new()
         .with_id(query_spec_id)
-        .with_input_type("search")
+        .with_type(poodle_specs::TextInputType::Search)
         .with_leading_icon("search")
         .with_value(spec.query.clone())
         .with_selection(query_len, query_len)
