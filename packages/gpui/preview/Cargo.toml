@@ -10,23 +10,30 @@ publish = false
 [[bin]]
 name = "poodle-preview"
 path = "src/main.rs"
+required-features = ["native-preview"]
 
-# g16.005 window capture target. `required-features` keeps it out of every
-# ordinary build: `cargo build --bin poodle-preview` never sees it, and no
-# default, CI, qa, or release path builds or runs it. It opens a real macOS
-# window and needs Screen Recording permission, which is why its Effigy
-# selector carries the `-windowed` suffix.
+# g16.005 window capture target. Headless Rust PR checks disable default
+# features, which keeps this macOS AppKit binary out of their Linux builds. It
+# opens a real macOS window and needs Screen Recording permission, which is why
+# its Effigy selector carries the `-windowed` suffix.
 [[bin]]
 name = "poodle-window-capture"
 path = "src/bin/window_capture.rs"
 required-features = ["window-capture"]
 
 [features]
+# Keep native preview callers working by enabling the AppKit app by default.
+# Linux Rust PR checks opt out while compiling headless integration targets.
+default = ["native-preview"]
+native-preview = ["dep:objc2", "dep:objc2-foundation", "dep:objc2-app-kit"]
 # Window capture needs the receipt's content hash and the frontmost-application
 # monitor that proves the run took no focus. It does NOT need `test-support`:
 # the transport uses a real GPUI window, not the in-memory test platform, so
 # the fork-era coupling between capture and test-only APIs is gone.
 window-capture = [
+    "dep:objc2",
+    "dep:objc2-foundation",
+    "dep:objc2-app-kit",
     "dep:sha2",
     "dep:raw-window-handle",
     "objc2-app-kit/NSWorkspace",
@@ -55,17 +62,6 @@ poodle-tokens = { path = "../../contracts/tokens" }
 anyhow = "1"
 
 
-# The interactive preview app posts real NSEvents to its own window through
-# the AppKit queue (preview click/key drive — not the conformance path).
-objc2 = "0.6"
-objc2-foundation = "0.3"
-objc2-app-kit = { version = "0.3", features = [
-    "NSEvent",
-    "NSGraphicsContext",
-    "NSApplication",
-    "NSWindow",
-    "NSResponder",
-] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 # Window capture only: the receipt's content hash. Already in the graph as a
@@ -80,6 +76,20 @@ raw-window-handle = { version = "0.6", optional = true }
 # The completion-driven file pick (g15.007) awaits the OS prompt's oneshot
 # receiver in a task. Already in the graph as gpui's own dependency.
 futures = "0.3"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+# The interactive preview app posts real NSEvents to its own window through
+# the AppKit queue (preview click/key drive — not the conformance path).
+# Keep these dependencies off the Linux headless-test compile graph.
+objc2 = { version = "0.6", optional = true }
+objc2-foundation = { version = "0.3", optional = true }
+objc2-app-kit = { version = "0.3", optional = true, features = [
+    "NSEvent",
+    "NSGraphicsContext",
+    "NSApplication",
+    "NSWindow",
+    "NSResponder",
+] }
 
 # The preview rebuilds sizeable GPUI element trees while interacting. Keep
 # debug assertions and incremental compilation, but optimize the runtime path
