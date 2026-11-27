@@ -10,6 +10,7 @@ publish = false
 [[bin]]
 name = "poodle-preview"
 path = "src/main.rs"
+required-features = ["native-preview"]
 
 # g16.005 window capture target. `required-features` keeps it out of every
 # ordinary build: `cargo build --bin poodle-preview` never sees it, and no
@@ -22,11 +23,17 @@ path = "src/bin/window_capture.rs"
 required-features = ["window-capture"]
 
 [features]
+# Keep the AppKit preview binary out of headless integration builds. Native
+# app tasks opt in explicitly; Linux Rust PR checks compile only headless tests.
+native-preview = ["dep:objc2", "dep:objc2-foundation", "dep:objc2-app-kit"]
 # Window capture needs the receipt's content hash and the frontmost-application
 # monitor that proves the run took no focus. It does NOT need `test-support`:
 # the transport uses a real GPUI window, not the in-memory test platform, so
 # the fork-era coupling between capture and test-only APIs is gone.
 window-capture = [
+    "dep:objc2",
+    "dep:objc2-foundation",
+    "dep:objc2-app-kit",
     "dep:sha2",
     "dep:raw-window-handle",
     "objc2-app-kit/NSWorkspace",
@@ -74,9 +81,9 @@ futures = "0.3"
 # The interactive preview app posts real NSEvents to its own window through
 # the AppKit queue (preview click/key drive — not the conformance path).
 # Keep these dependencies off the Linux headless-test compile graph.
-objc2 = "0.6"
-objc2-foundation = "0.3"
-objc2-app-kit = { version = "0.3", features = [
+objc2 = { version = "0.6", optional = true }
+objc2-foundation = { version = "0.3", optional = true }
+objc2-app-kit = { version = "0.3", optional = true, features = [
     "NSEvent",
     "NSGraphicsContext",
     "NSApplication",
