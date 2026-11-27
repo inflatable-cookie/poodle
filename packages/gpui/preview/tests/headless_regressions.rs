@@ -33658,6 +33658,20 @@ fn model_picker_selection_and_identity_rebuild_through_mounted_input() {
         driver.draw_frame();
         assert!(host.lock().expect("picker host").left.is_open);
         assert_eq!(host.lock().expect("picker host").events, ["left:open:true"]);
+        driver.keyboard_activate(&left_trigger);
+        driver.draw_frame();
+        assert!(!host.lock().expect("picker host").left.is_open);
+        driver.keyboard_activate(&left_trigger);
+        driver.draw_frame();
+        {
+            let mut host = host.lock().expect("picker host");
+            assert!(host.left.is_open);
+            assert_eq!(
+                host.events,
+                ["left:open:true", "left:open:false", "left:open:true"]
+            );
+            host.events.truncate(1);
+        }
         let left_dialog = "model-picker:left:dialog";
         let left_list = format!("select:{}:listbox", root_id("left"));
         let left_atlas = option_id("left", "atlas");
