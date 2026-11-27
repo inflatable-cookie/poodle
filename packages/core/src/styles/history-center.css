@@ -139,19 +139,8 @@
 
 .poodle-history-center__row:last-child { border-bottom: 0; }
 
-/* The row is the single layer for hover and press. The entry button inside it
-   stays transparent, so its own hover never paints over the row's fill. */
 .poodle-history-center__row[data-part="entry"] {
   background: var(--poodle-recipe-history-center-item-fill, transparent);
-  border-radius: var(--poodle-radius-control);
-}
-
-.poodle-history-center__row[data-part="entry"]:hover:not(:disabled) {
-  background: var(--poodle-recipe-history-center-item-hover-fill, var(--poodle-style-control-fillHover, transparent));
-}
-
-.poodle-history-center__row[data-part="entry"]:active:not(:disabled) {
-  background: var(--poodle-recipe-history-center-item-active-fill, var(--poodle-style-control-fillActive, transparent));
 }
 
 .poodle-history-center__row[data-part="entry"][data-position="current"] {
@@ -173,14 +162,24 @@
   /* The focus ring is an inset outline, and an outline follows the element's
      own radius — with none it renders as a hard square across the full row
      width. `fork` and `rename-input` in this file already round on the control
-     radius; these full-width rows were the outliers. The row rounds its own
-     fill (see the row rule), so the button stays transparent. */
+     radius; these full-width rows were the outliers. The fill is on this
+     button, so it rounds with the control radius. */
   border-radius: var(--poodle-radius-control);
   background: transparent;
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
+}
+
+/* The entry action carries the hover and press fills. The fork disclosure is a
+   sibling of this button in the row, so the two fills never stack. */
+.poodle-history-center__entry-content:hover:not(:disabled) {
+  background: var(--poodle-recipe-history-center-item-hover-fill, var(--poodle-style-control-fillHover, transparent));
+}
+
+.poodle-history-center__entry-content:active:not(:disabled) {
+  background: var(--poodle-recipe-history-center-item-active-fill, var(--poodle-style-control-fillActive, transparent));
 }
 
 .poodle-history-center__entry-content:focus-visible {

@@ -27,6 +27,12 @@
     --poodle-split-fill-hover: color-mix(in srgb, var(--poodle-split-fill) 84%, var(--poodle-color-background-elevated));
   }
 
+  /* Ghost tones keep the control hover role. The tone rule above is for filled
+     variants and would otherwise replace it. */
+  .poodle-split-button[data-variant="ghost"][data-tone] {
+    --poodle-split-fill-hover: var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-split-fill) 84%, var(--poodle-color-background-elevated)));
+  }
+
   .poodle-split-button[data-variant="primary"] {
     --poodle-split-fill: var(--poodle-color-accent-base);
     --poodle-split-border: color-mix(in srgb, var(--poodle-color-accent-base) 84%, black);
