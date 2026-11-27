@@ -27,6 +27,7 @@ export type OfferReason = "staged" | "belowMinimumVersion" | "userInitiated";
 export type InstallManager =
   | "macAppStore"
   | "homebrewCask"
+  | "homebrewFormula"
   | "flatpak"
   | "snap"
   | "appImage"
@@ -96,6 +97,7 @@ export function installManagerLabel(manager: InstallManager): string {
     case "macAppStore":
       return "Mac App Store";
     case "homebrewCask":
+    case "homebrewFormula":
       return "Homebrew";
     case "flatpak":
       return "Flatpak";

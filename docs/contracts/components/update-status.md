@@ -52,7 +52,7 @@ type Channel = "production" | "beta" | "nightly";
 type OfferReason = "staged" | "belowMinimumVersion" | "userInitiated";
 
 type InstallManager =
-  | "macAppStore" | "homebrewCask" | "flatpak"
+  | "macAppStore" | "homebrewCask" | "homebrewFormula" | "flatpak"
   | "snap" | "appImage" | "nix" | "linuxDistribution";
 
 type UpdateAvailabilityProjection =
