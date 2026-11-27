@@ -5001,6 +5001,99 @@ fn a_bridged_gpui_source_prepares_before_activation_and_ends_on_the_host_termina
     });
 }
 
+/// A decline refuses the transfer, not the drag. With the pointer still down the
+/// same session continues locally and commits through this window's own target.
+#[test]
+fn a_declined_gpui_preparation_continues_the_held_drag_locally() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = HostStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+
+        let mut node = scoped_drag_tree("xw", &trace);
+        attach_bridge(&mut node, "xw-source", Arc::new(host.clone()));
+        let node = Arc::new(Mutex::new(node));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let source = payload_frac("xw-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Preparing);
+        let session = controller.snapshot().session_id.clone();
+
+        host.settle_prepare(0, None);
+        driver.draw_frame();
+
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+        assert_eq!(controller.snapshot().session_id, session);
+        assert_eq!(count_starting_with(&trace_of(&trace), "end:"), 0);
+
+        driver.pointer_drag(payload_frac("xw-zone-a", 0.5, 0.75));
+        driver.pointer_release(payload_frac("xw-zone-a", 0.5, 0.75));
+        driver.draw_frame();
+
+        let events = trace_of(&trace);
+        assert_eq!(count_starting_with(&events, "start:"), 1, "{events:?}");
+        assert_eq!(
+            count_starting_with(&events, "end:committed:"),
+            1,
+            "{events:?}"
+        );
+        assert_eq!(count_starting_with(&events, "end:"), 1, "{events:?}");
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert_eq!(host.log(|log| log.prepares.len()), 1);
+        assert!(host.log(|log| log.starts.is_empty() && log.cancels.is_empty()));
+    });
+}
+
+/// A keyboard pickup holds no pointer, so a declined preparation has nothing to
+/// continue and cancels.
+#[test]
+fn a_declined_gpui_keyboard_preparation_cancels() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = HostStub {
+            keyboard_picker: true,
+            ..HostStub::default()
+        };
+        let mut node = custom_drag_tree(&trace, false);
+        attach_bridge(&mut node, "custom-source", Arc::new(host.clone()));
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
+        driver.wait_for_focus_handle("custom-source");
+        driver.focus_element("custom-source");
+        let controller = driver.drag();
+
+        driver.dispatch_key_raw("space");
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Preparing);
+
+        host.settle_prepare(0, None);
+        driver.draw_frame();
+
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        let events = trace_of(&trace);
+        assert_eq!(count_starting_with(&events, "start:"), 0, "{events:?}");
+        assert_eq!(count_starting_with(&events, "end:"), 1, "{events:?}");
+    });
+}
+
 /// g16.026. A superseded preparation is aborted, its late receipt is handed
 /// straight back, and it cannot arm the session that replaced it.
 #[test]
@@ -35390,7 +35483,12 @@ fn a_gpui_export_receipt_beyond_its_capabilities_is_refused_and_returned() {
             controller.snapshot().file_export.map(|export| export.state),
             Some(poodle_node::DragExportState::Failed)
         );
-        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert_eq!(
+            controller.snapshot().phase,
+            DragSessionPhase::Dragging,
+            "the export is refused; the drag still under the pointer is not"
+        );
+        assert_eq!(count_starting_with(&trace_of(&trace), "end:"), 0);
         assert_eq!(
             host.artifacts(),
             vec!["export-1".to_string()],
@@ -35785,10 +35883,24 @@ fn gpui_export_terminals_are_announced_in_their_own_words() {
                 }
             }
 
-            *captured.lock().expect("announcement") = controller
-                .snapshot()
-                .announcement
-                .expect("an announcement for every terminal");
+            *captured.lock().expect("announcement") = match ending {
+                // Not a terminal: the refusal is said, then the same drag is
+                // picked up locally.
+                ExportEnding::Declined => {
+                    assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+                    let said = controller.announcements();
+                    assert_eq!(
+                        said.last().map(String::as_str),
+                        Some("Picked up Alpha."),
+                        "{said:?}"
+                    );
+                    said[said.len() - 2].clone()
+                }
+                _ => controller
+                    .snapshot()
+                    .announcement
+                    .expect("an announcement for every terminal"),
+            };
         });
         let text = announcement.lock().expect("announcement").clone();
         text

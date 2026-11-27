@@ -1655,6 +1655,128 @@
         ]
       },
       {
+        "name": "a declined preparation continuing locally arms the same session",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          {
+            "event": { "type": "PREPARE_DECLINED", "sessionId": "s0", "transport": "local" },
+            "phase": "preparing",
+            "effects": []
+          },
+          {
+            "event": { "type": "PREPARE_DECLINED", "sessionId": "s1", "transport": "local" },
+            "phase": "armed",
+            "session": { "sessionId": "s1", "sourceId": "src-a", "operation": "move", "intent": null },
+            "effects": []
+          },
+          {
+            "event": { "type": "PREPARE_DECLINED", "sessionId": "s1", "transport": "local" },
+            "phase": "armed",
+            "effects": []
+          },
+          {
+            "event": { "type": "PREPARE_DECLINED", "sessionId": "s1" },
+            "phase": "armed",
+            "effects": []
+          },
+          {
+            "event": { "type": "PREPARED", "sessionId": "s1" },
+            "phase": "armed",
+            "effects": []
+          },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": { "type": "PREPARE_FAILED", "sessionId": "s1", "transport": "local" },
+            "phase": "dragging",
+            "effects": []
+          },
+          {
+            "event": { "type": "PREPARE_FAILED", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": []
+          }
+        ]
+      },
+      {
+        "name": "a failed preparation continuing locally arms and still cancels once",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          {
+            "event": { "type": "PREPARE_FAILED", "sessionId": "s1", "transport": "local" },
+            "phase": "armed",
+            "session": { "sessionId": "s1" },
+            "effects": []
+          },
+          {
+            "event": { "type": "ESCAPE", "sessionId": "s1" },
+            "phase": "cancelled",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "cancelled", "reason": "escape" }
+              },
+              { "type": "announce", "kind": "cancelled" },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          },
+          {
+            "event": { "type": "PREPARE_FAILED", "sessionId": "s1", "transport": "local" },
+            "phase": "cancelled",
+            "effects": []
+          }
+        ]
+      },
+      {
         "name": "supersession cancels the first session and prepares the second",
         "steps": [
           {

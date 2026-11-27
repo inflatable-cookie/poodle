@@ -765,13 +765,6 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
   let crossWindowSource: CrossWindowSourceTransaction | null = null;
   /**
-   * A session that must not re-enter its source's host bridge.
-   *
-   * The local fallback reuses the same registration, so without this the
-   * declined bridge would be asked again and decline again forever.
-   */
-  let bridgeBypassSessionId: string | null = null;
-  /**
    * The host's own name for a subject this window has no source for.
    *
    * Announcements need a name, and an incoming projection or file batch is the
@@ -1107,11 +1100,6 @@ export function createDragDropController(options: DragDropControllerOptions = {}
           return [{ type: "PREPARED", sessionId: effect.sessionId }];
         }
 
-        if (bridgeBypassSessionId === effect.sessionId) {
-          bridgeBypassSessionId = null;
-          return [{ type: "PREPARED", sessionId: effect.sessionId }];
-        }
-
         const source = sources.get(effect.sourceId);
         if (!source || inputKind === null) {
           return [{ type: "PREPARED", sessionId: effect.sessionId }];
@@ -1166,14 +1154,9 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       case "cleanupSession":
         stopAutoScroll();
         releasePointerHardware();
-        if (crossWindowSource?.sessionId === effect.sessionId) {
-          releaseCrossWindowSource(releaseReasonFor(lastOutcome));
-        }
+        releaseSourceTransaction(effect.sessionId, releaseReasonFor(lastOutcome));
         if (crossWindowTarget?.sessionId === effect.sessionId) {
           releaseCrossWindowTarget();
-        }
-        if (fileExport?.sessionId === effect.sessionId) {
-          releaseFileExport(releaseReasonFor(lastOutcome));
         }
         if (inbound?.sessionId === effect.sessionId) {
           releaseInboundFiles(inboundOutcomeFor(lastOutcome));
@@ -1231,54 +1214,53 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   }
 
   /**
-   * The host preparation failed; the local drag has not.
+   * The host preparation produced nothing usable; the drag need not end.
    *
-   * A decline or failure cancels only the transfer or export, so the gesture
-   * the user is still making falls back to the ordinary local lifecycle with a
-   * fresh session and no host payload. Without this, a host that says "not
-   * this one" would also break same-window reorder. Shared by both host
-   * bridges: the reason a cross-window lease was refused and the reason a file
-   * could not be rendered are different, and what happens to the gesture
-   * afterwards is not.
+   * A decline or failure refuses only the transfer or export. While the pointer
+   * gesture that asked is still live, the same session continues on the local
+   * transport, so a host that says "not this one" does not also break
+   * same-window reorder. With no such gesture (a keyboard pickup, or a source
+   * since disabled or removed) nothing can carry the session and it cancels.
+   * Shared by both host bridges.
    */
   function endExternalPreparation(
     sessionId: string,
-    event: "PREPARE_DECLINED" | "PREPARE_FAILED",
-    sourceId: string,
+    type: "PREPARE_DECLINED" | "PREPARE_FAILED",
   ): void {
-    // The kernel's cancellation clears the gesture along with the session,
-    // which is right for a real terminal and wrong here: the pointer is still
-    // down and the user is still dragging. The gesture is held across the
-    // dispatch, hold timer included, so a declined touch source does not also
-    // lose the hold it was in the middle of.
-    const pending = gesture;
-    const holdTimer = pending?.holdTimer ?? null;
-    if (pending) pending.holdTimer = null;
-    dispatch({ type: event, sessionId });
-    if (pending) pending.holdTimer = holdTimer;
-    fallBackToLocalSession(pending, sourceId);
+    if (!gestureCanContinueLocally(sessionId)) {
+      dispatch({ type, sessionId });
+      return;
+    }
+    const reason = type === "PREPARE_DECLINED" ? "preparation-declined" : "preparation-failed";
+    // The drag goes on, but a refused export is still news. Said while the
+    // transaction is held, which is what gives it the export's own wording.
+    if (fileExport?.sessionId === sessionId) {
+      announce("cancelled", { status: "cancelled", reason });
+    }
+    releaseSourceTransaction(sessionId, reason);
+    dispatch({ type, sessionId, transport: "local" });
+    activatePendingGesture(sessionId);
   }
 
-  function fallBackToLocalSession(pending: PointerGesture | null, sourceId: string): void {
-    if (!pending || pending.sourceId !== sourceId || pending.activated) return;
-    if (phase !== "idle") return;
-    const source = sources.get(sourceId);
-    if (!source || source.registration.disabled || !source.element.isConnected) return;
-    const kind = pending.pointerType;
+  function gestureCanContinueLocally(sessionId: string): boolean {
+    if (!gesture || gesture.sessionId !== sessionId || gesture.activated) return false;
+    const source = sources.get(gesture.sourceId);
+    return source !== undefined && !source.registration.disabled && source.element.isConnected;
+  }
 
-    gesture = pending;
-    inputKind = kind;
-    pointerPosition = { x: pending.x, y: pending.y };
-
-    const sessionId = createSessionId();
-    bridgeBypassSessionId = sessionId;
-    pending.sessionId = beginSession(source, kind, pending.x, pending.y, sessionId);
-    if (!pending.thresholdReached) return;
-    const handle = resolveHandle(source.element, source.registration.handle);
-    if (currentPhase() === "armed") {
-      activate(pending.sessionId, handle, pending.pointerId);
-      if (gesture) hitTest(pending.x, pending.y);
+  /**
+   * Preparation is over: honour an activation that was waiting on it, rather
+   * than waiting for another pointer move that may never come.
+   */
+  function activatePendingGesture(sessionId: string): void {
+    if (gesture?.sessionId !== sessionId || !gesture.thresholdReached || currentPhase() !== "armed") {
+      return;
     }
+    const source = sources.get(gesture.sourceId);
+    if (!source) return;
+    const handle = resolveHandle(source.element, source.registration.handle);
+    activate(sessionId, handle, gesture.pointerId);
+    if (gesture) hitTest(gesture.x, gesture.y);
   }
 
   /**
@@ -1310,7 +1292,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
     const operation = source.registration.operation ?? source.registration.allowedOperations[0];
     if (operation === undefined) {
-      dispatch({ type: "PREPARE_FAILED", sessionId });
+      endExternalPreparation(sessionId, "PREPARE_FAILED");
       return;
     }
 
@@ -1327,7 +1309,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         abort.signal,
       );
     } catch {
-      dispatch({ type: "PREPARE_FAILED", sessionId });
+      endExternalPreparation(sessionId, "PREPARE_FAILED");
       return;
     }
 
@@ -1343,11 +1325,11 @@ export function createDragDropController(options: DragDropControllerOptions = {}
           return;
         }
         if (receipt === null) {
-          endExternalPreparation(sessionId, "PREPARE_DECLINED", transaction.sourceId);
+          endExternalPreparation(sessionId, "PREPARE_DECLINED");
           return;
         }
         if (!isCrossWindowDragReceipt(receipt)) {
-          endExternalPreparation(sessionId, "PREPARE_FAILED", transaction.sourceId);
+          endExternalPreparation(sessionId, "PREPARE_FAILED");
           return;
         }
         transaction.receipt = receipt;
@@ -1355,21 +1337,11 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         const advertised = sources.get(transaction.sourceId);
         if (advertised) applySourceDom(advertised);
         dispatch({ type: "PREPARED", sessionId });
-        // An armed receipt may arrive after the gesture already passed its
-        // activation threshold; the pending activation is honoured here rather
-        // than waiting for another pointer move that may never come.
-        if (gesture?.sessionId === sessionId && gesture.thresholdReached && phase === "armed") {
-          const live = sources.get(transaction.sourceId);
-          if (live) {
-            const handle = resolveHandle(live.element, live.registration.handle);
-            activate(sessionId, handle, gesture.pointerId);
-            hitTest(gesture.x, gesture.y);
-          }
-        }
+        activatePendingGesture(sessionId);
       },
       () => {
         if (crossWindowSource !== transaction || abort.signal.aborted) return;
-        endExternalPreparation(sessionId, "PREPARE_FAILED", transaction.sourceId);
+        endExternalPreparation(sessionId, "PREPARE_FAILED");
       },
     );
   }
@@ -1432,6 +1404,12 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       const receipt = transaction.receipt;
       safeCancel(() => transaction.bridge.cancel(receipt, reason));
     }
+  }
+
+  /** Release whichever outgoing host transaction this session holds. */
+  function releaseSourceTransaction(sessionId: string, reason: DragCancelReason): void {
+    if (crossWindowSource?.sessionId === sessionId) releaseCrossWindowSource(reason);
+    if (fileExport?.sessionId === sessionId) releaseFileExport(reason);
   }
 
   /** The cancel reason to hand the host, taken from the terminal that ran. */
@@ -1502,7 +1480,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     const operation = source.registration.operation ?? source.registration.allowedOperations[0];
     if (operation === undefined) {
       setExportState("failed", "no allowed operation");
-      dispatch({ type: "PREPARE_FAILED", sessionId });
+      endExternalPreparation(sessionId, "PREPARE_FAILED");
       return;
     }
 
@@ -1520,7 +1498,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       );
     } catch (error) {
       setExportState("failed", error instanceof Error ? error.message : String(error));
-      dispatch({ type: "PREPARE_FAILED", sessionId });
+      endExternalPreparation(sessionId, "PREPARE_FAILED");
       return;
     }
 
@@ -1534,7 +1512,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         }
         if (prepared === null) {
           setExportState("unavailable", "host declined");
-          endExternalPreparation(sessionId, "PREPARE_DECLINED", transaction.sourceId);
+          endExternalPreparation(sessionId, "PREPARE_DECLINED");
           return;
         }
 
@@ -1544,7 +1522,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
           // made for a drag that will never start does not simply leak.
           returnPreparedExport(bridge, prepared, "preparation-failed");
           setExportState("failed", validation.reason);
-          endExternalPreparation(sessionId, "PREPARE_FAILED", transaction.sourceId);
+          endExternalPreparation(sessionId, "PREPARE_FAILED");
           return;
         }
 
@@ -1559,22 +1537,12 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         const advertised = sources.get(transaction.sourceId);
         if (advertised) applySourceDom(advertised);
         dispatch({ type: "PREPARED", sessionId });
-        // A receipt may arrive after the gesture already passed its activation
-        // threshold; the pending activation is honoured here rather than
-        // waiting for another pointer move that may never come.
-        if (gesture?.sessionId === sessionId && gesture.thresholdReached && phase === "armed") {
-          const live = sources.get(transaction.sourceId);
-          if (live) {
-            const handle = resolveHandle(live.element, live.registration.handle);
-            activate(sessionId, handle, gesture.pointerId);
-            hitTest(gesture.x, gesture.y);
-          }
-        }
+        activatePendingGesture(sessionId);
       },
       (error: unknown) => {
         if (fileExport !== transaction || abort.signal.aborted) return;
         setExportState("failed", error instanceof Error ? error.message : String(error));
-        endExternalPreparation(sessionId, "PREPARE_FAILED", transaction.sourceId);
+        endExternalPreparation(sessionId, "PREPARE_FAILED");
       },
     );
   }

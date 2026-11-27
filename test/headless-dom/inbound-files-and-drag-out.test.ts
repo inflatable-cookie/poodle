@@ -618,6 +618,38 @@ describe("native file drag-out", () => {
     controller.destroy();
   });
 
+  it("says the export was refused, then picks the same session up locally", async () => {
+    const host = createExportHost({ deferPrepare: true });
+    const outcomes: DragTerminalOutcome[] = [];
+    const heard: string[] = [];
+    const controller = createDragDropController({
+      describeAnnouncement: (event) => {
+        heard.push(`${event.kind}:${event.exportState ?? "-"}`);
+        return event.kind;
+      },
+    });
+    const disconnect = controller.connect(root);
+    controller.registerSource(
+      sourceEl,
+      sourceReg({ fileExportBridge: host.bridge, onDragEnd: (outcome) => outcomes.push(outcome) }),
+    );
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 60, clientY: 20 }));
+    host.settlePrepare(null);
+    await settle();
+
+    expect(heard).toEqual(["cancelled:unavailable", "pickup:-"]);
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    expect(controller.getSnapshot().session?.sessionId).toBe(host.prepares[0]);
+    expect(controller.getSnapshot().fileExport?.state).toBe("unavailable");
+    expect(outcomes).toEqual([]);
+    expect(host.cancels).toEqual([]);
+
+    disconnect();
+    controller.destroy();
+  });
+
   it("reports a failed preparation as failed and still leaves a working local drag", async () => {
     const host = createExportHost({ failPrepare: true });
     const controller = createDragDropController();

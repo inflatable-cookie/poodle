@@ -96,6 +96,7 @@ interface HostOptions {
   /** Resolve preparation later so supersession and late completion are testable. */
   readonly deferPrepare?: boolean;
   readonly decline?: boolean;
+  readonly throwPrepare?: boolean;
   readonly commit?: DragDropCommitResult;
 }
 
@@ -115,6 +116,8 @@ function createHost(options: HostOptions = {}) {
   const stops: string[] = [];
   const prepares: string[] = [];
   const pending: Array<(receipt: CrossWindowDragReceipt | null) => void> = [];
+  const declines: Array<() => void> = [];
+  const signals: AbortSignal[] = [];
   let listener: ((event: CrossWindowDragTargetEvent) => void) | null = null;
   let terminal: ((outcome: DragTerminalOutcome) => void) | null = null;
   let issued = 0;
@@ -122,8 +125,10 @@ function createHost(options: HostOptions = {}) {
 
   const source: CrossWindowDragSourceBridge = {
     capabilities,
-    prepare(request) {
+    prepare(request, signal) {
       prepares.push(request.sessionId);
+      signals.push(signal);
+      if (options.throwPrepare) throw new Error("host unavailable");
       issued += 1;
       const receipt: CrossWindowDragReceipt = {
         protocolVersion: CROSS_WINDOW_DRAG_PROTOCOL_VERSION,
@@ -133,6 +138,7 @@ function createHost(options: HostOptions = {}) {
       if (!options.deferPrepare) return Promise.resolve(receipt);
       return new Promise((resolve) => {
         pending.push(() => resolve(receipt));
+        declines.push(() => resolve(null));
       });
     },
     start(receipt, transport, onTerminal) {
@@ -173,6 +179,10 @@ function createHost(options: HostOptions = {}) {
     starts,
     stops,
     prepares,
+    signals,
+    declinePrepare(index = 0) {
+      declines[index]?.();
+    },
     get lastReceipt(): CrossWindowDragReceipt {
       return { protocolVersion: CROSS_WINDOW_DRAG_PROTOCOL_VERSION, token: `lease-${issued}` };
     },
@@ -416,10 +426,22 @@ describe("cross-window drag bridge", () => {
   it("keeps local reorder working when the host declines the transfer", async () => {
     const host = createHost({ decline: true });
     const drops: unknown[] = [];
-    const controller = createDragDropController();
+    const starts: string[] = [];
+    const outcomes: DragTerminalOutcome[] = [];
+    const announcements: string[] = [];
+    const controller = createDragDropController({
+      describeAnnouncement: (event) => (announcements.push(event.kind), event.kind),
+    });
     const disconnect = controller.connect(sendingRoot);
     sendingRoot.append(targetEl);
-    controller.registerSource(sourceEl, sourceReg({ crossWindowSourceBridge: host.source }));
+    controller.registerSource(
+      sourceEl,
+      sourceReg({
+        crossWindowSourceBridge: host.source,
+        onDragStart: (session) => starts.push(session.sessionId),
+        onDragEnd: (outcome) => outcomes.push(outcome),
+      }),
+    );
     controller.registerTarget(
       targetEl,
       targetReg({ onDrop: (intent) => (drops.push(intent), { status: "committed" }) }),
@@ -429,13 +451,193 @@ describe("cross-window drag bridge", () => {
     await settle();
 
     // The cross-window attempt is dead; the gesture the user is still making
-    // is not.
+    // is not. Same session, local transport, and nothing has ended.
+    expect(controller.getSnapshot().phase).toBe("armed");
+    expect(controller.getSnapshot().session?.sessionId).toBe(host.prepares[0]);
+    expect(host.signals[0]?.aborted).toBe(true);
+    expect(host.signals[0]?.reason).toBe("preparation-declined");
+    expect(sourceEl.getAttribute("draggable")).toBe("false");
+    expect(outcomes).toEqual([]);
+    expect(announcements).toEqual([]);
+
     document.dispatchEvent(pointer("pointermove", { clientX: 40, clientY: 90 }));
     expect(controller.getSnapshot().phase).toBe("dragging");
+    expect(starts).toEqual(host.prepares);
     document.dispatchEvent(pointer("pointerup", { clientX: 40, clientY: 90 }));
+    await settle();
 
     expect(drops).toEqual([{ targetId: "dst", position: "inside", operation: "move" }]);
+    expect(outcomes.map((outcome) => outcome.status)).toEqual(["committed"]);
+    expect(announcements).not.toContain("cancelled");
+    expect(host.prepares).toHaveLength(1);
     expect(host.starts).toEqual([]);
+    expect(host.cancels).toEqual([]);
+
+    disconnect();
+    controller.destroy();
+  });
+
+  it("activates at once when the decline lands after the pointer passed its threshold", async () => {
+    const host = createHost({ deferPrepare: true });
+    const outcomes: DragTerminalOutcome[] = [];
+    const controller = createDragDropController();
+    const disconnect = controller.connect(sendingRoot);
+    sendingRoot.append(targetEl);
+    controller.registerSource(
+      sourceEl,
+      sourceReg({ crossWindowSourceBridge: host.source, onDragEnd: (outcome) => outcomes.push(outcome) }),
+    );
+    controller.registerTarget(targetEl, targetReg());
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 40, clientY: 90 }));
+    expect(controller.getSnapshot().phase).toBe("preparing");
+
+    // No further move: the waiting activation and its hit test happen now.
+    host.declinePrepare();
+    await settle();
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    expect(controller.getSnapshot().targetId).toBe("dst");
+    expect(controller.getSnapshot().session?.sessionId).toBe(host.prepares[0]);
+    expect(outcomes).toEqual([]);
+
+    document.dispatchEvent(pointer("pointerup", { clientX: 40, clientY: 90 }));
+    await settle();
+    expect(outcomes.map((outcome) => outcome.status)).toEqual(["committed"]);
+
+    disconnect();
+    controller.destroy();
+  });
+
+  it("cancels once on a release that beats the decline, which then changes nothing", async () => {
+    const host = createHost({ deferPrepare: true });
+    const outcomes: DragTerminalOutcome[] = [];
+    const controller = createDragDropController();
+    const disconnect = controller.connect(sendingRoot);
+    controller.registerSource(
+      sourceEl,
+      sourceReg({ crossWindowSourceBridge: host.source, onDragEnd: (outcome) => outcomes.push(outcome) }),
+    );
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointerup", { clientX: 20, clientY: 20 }));
+    host.declinePrepare();
+    await settle();
+
+    expect(controller.getSnapshot().phase).toBe("idle");
+    expect(outcomes).toEqual([{ status: "cancelled", reason: "explicit" }]);
+
+    disconnect();
+    controller.destroy();
+  });
+
+  it.each([
+    ["before", 0],
+    ["after", 400],
+  ])("keeps the touch hold when the decline lands %s it elapses", async (_when, heldFor) => {
+    vi.useFakeTimers();
+    const host = createHost({
+      capabilities: { pointer: true, touch: true, keyboardTargetPicker: false },
+      deferPrepare: true,
+    });
+    const controller = createDragDropController();
+    const disconnect = controller.connect(sendingRoot);
+    controller.registerSource(sourceEl, sourceReg({ crossWindowSourceBridge: host.source }));
+
+    sourceEl.dispatchEvent(
+      pointer("pointerdown", { clientX: 20, clientY: 20, pointerType: "touch" }),
+    );
+    await vi.advanceTimersByTimeAsync(heldFor);
+    host.declinePrepare();
+    await vi.advanceTimersByTimeAsync(400 - heldFor);
+
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    expect(controller.getSnapshot().session?.sessionId).toBe(host.prepares[0]);
+
+    disconnect();
+    controller.destroy();
+  });
+
+  it.each(["mouse", "touch"])(
+    "continues a %s gesture locally when the host throws from prepare",
+    (pointerType) => {
+      vi.useFakeTimers();
+      const host = createHost({
+        capabilities: { pointer: true, touch: true, keyboardTargetPicker: false },
+        throwPrepare: true,
+      });
+      const outcomes: DragTerminalOutcome[] = [];
+      const controller = createDragDropController();
+      const disconnect = controller.connect(sendingRoot);
+      controller.registerSource(
+        sourceEl,
+        sourceReg({ crossWindowSourceBridge: host.source, onDragEnd: (outcome) => outcomes.push(outcome) }),
+      );
+
+      sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20, pointerType }));
+      expect(controller.getSnapshot().phase).toBe("armed");
+
+      if (pointerType === "mouse") {
+        document.dispatchEvent(pointer("pointermove", { clientX: 40, clientY: 20 }));
+      }
+      // The hold for touch; the coalescing frame for the mouse move.
+      vi.advanceTimersByTime(400);
+      expect(controller.getSnapshot().phase).toBe("dragging");
+      expect(outcomes).toEqual([]);
+
+      disconnect();
+      controller.destroy();
+    },
+  );
+
+  it("cancels a declined keyboard preparation, which has no pointer to continue", async () => {
+    const host = createHost({
+      capabilities: { pointer: true, touch: false, keyboardTargetPicker: true },
+      decline: true,
+    });
+    const outcomes: DragTerminalOutcome[] = [];
+    const controller = createDragDropController();
+    const disconnect = controller.connect(sendingRoot);
+    controller.registerSource(
+      sourceEl,
+      sourceReg({
+        crossWindowSourceBridge: host.source,
+        keyboardOrder: 0,
+        onDragEnd: (outcome) => outcomes.push(outcome),
+      }),
+    );
+
+    sourceEl.focus();
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    await settle();
+
+    expect(host.prepares).toHaveLength(1);
+    expect(controller.getSnapshot().phase).toBe("idle");
+    expect(outcomes).toEqual([{ status: "cancelled", reason: "preparation-declined" }]);
+
+    disconnect();
+    controller.destroy();
+  });
+
+  it("cancels a decline for a source that was disabled while the host was deciding", async () => {
+    const host = createHost({ deferPrepare: true });
+    const outcomes: DragTerminalOutcome[] = [];
+    const controller = createDragDropController();
+    const disconnect = controller.connect(sendingRoot);
+    const registration = sourceReg({
+      crossWindowSourceBridge: host.source,
+      onDragEnd: (outcome) => outcomes.push(outcome),
+    });
+    const handle = controller.registerSource(sourceEl, registration);
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    handle.update({ ...registration, disabled: true });
+    host.declinePrepare();
+    await settle();
+    document.dispatchEvent(pointer("pointermove", { clientX: 60, clientY: 20 }));
+
+    expect(controller.getSnapshot().phase).toBe("idle");
+    expect(outcomes).toHaveLength(1);
 
     disconnect();
     controller.destroy();
