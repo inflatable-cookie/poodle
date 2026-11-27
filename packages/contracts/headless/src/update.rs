@@ -43,6 +43,8 @@ pub enum OfferReason {
 pub enum InstallManager {
     MacAppStore,
     HomebrewCask,
+    /// A Homebrew formula keg (`/Cellar/` on macOS or Linuxbrew).
+    HomebrewFormula,
     Flatpak,
     Snap,
     AppImage,
@@ -153,7 +155,7 @@ pub struct UpdateAheadOfChannel {
 pub fn install_manager_label(manager: InstallManager) -> &'static str {
     match manager {
         InstallManager::MacAppStore => "Mac App Store",
-        InstallManager::HomebrewCask => "Homebrew",
+        InstallManager::HomebrewCask | InstallManager::HomebrewFormula => "Homebrew",
         InstallManager::Flatpak => "Flatpak",
         InstallManager::Snap => "Snap",
         InstallManager::AppImage => "AppImage",
@@ -726,6 +728,14 @@ mod tests {
         assert_eq!(view.title, "Version 1.4.0 is available");
         assert_eq!(view.body.as_deref(), Some("Managed by Homebrew."));
         assert!(view.actions.is_empty());
+    }
+
+    #[test]
+    fn a_homebrew_formula_keg_reads_as_homebrew() {
+        assert_eq!(
+            install_manager_label(InstallManager::HomebrewFormula),
+            "Homebrew"
+        );
     }
 
     #[test]
