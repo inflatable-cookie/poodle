@@ -521,12 +521,6 @@ A small companion component for rendering icon + count pairs in the footer snipp
 - Text truncation uses GPUI's text ellipsis support
 - `tabular-nums` may require GPUI font feature flag
 
-## 10a. Jetstream Notes
-
-- `ListCard::from_spec(spec, theme).on_click(...)`, with the whole card as the
-  hit target. Only an interactive card fires — `isInteractive` or an `href` —
-  which is exactly the condition that already draws the pointer cursor.
-
 ## 12. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -562,7 +556,7 @@ A small companion component for rendering icon + count pairs in the footer snipp
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | tabular-nums font variant | may require GPUI font feature flag | allowed | match where possible |
-| GPUI active bar is a child rectangle with rounded leading corners, not an inset shadow | GPUI's `BoxShadow` has no inset flag, so the bar cannot be clipped by the card's radius as it is on the web and Jetstream | allowed | revisit if gpui gains inset shadows |
+| GPUI active bar is a child rectangle with rounded leading corners, not an inset shadow | GPUI's `BoxShadow` has no inset flag, so the bar cannot be clipped by the card's radius as it is on the web | allowed | revisit if gpui gains inset shadows |
 | ListCardCounter helper | Svelte-specific helper, GPUI may inline | allowed | match API if feasible |
 
 ## 14. Specimen Definitions

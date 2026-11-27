@@ -1,7 +1,6 @@
 //! Avatar — initials or image in a tone-coloured, shaped frame.
 //!
 //! Contract: `docs/contracts/components/avatar.md`
-//! Ported from: `packages/jetstream/components/src/avatar.rs`.
 
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,

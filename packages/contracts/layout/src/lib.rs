@@ -1,14 +1,12 @@
 //! Renderer-agnostic layout intent types for Poodle.
 //!
 //! These types describe layout intent without committing to a specific rendering
-//! target. Both GPUI (CSS-like flexbox) and Jetstream (`UiStyle` with `Direction`,
-//! `Sizing`, `Align`, `Justify`, `Edges`) can map losslessly from these types.
+//! target. GPUI maps these types to its CSS-like flexbox model.
 
 /// Primary axis for content flow.
 ///
 /// Maps to:
 /// - GPUI: `FlexDirection::Row` / `FlexDirection::Column`
-/// - Jetstream: `Direction::Horizontal` / `Direction::Vertical`
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum LayoutDirection {
     Row,
@@ -25,7 +23,6 @@ impl Default for LayoutDirection {
 ///
 /// Maps to:
 /// - GPUI: `Length::Auto`, `Length::Definite`, `flex_grow`/`flex_shrink`
-/// - Jetstream: `Sizing::Fixed`, `Sizing::Grow`, `Sizing::FitContent`
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum LayoutSizing {
     /// Size to fit content (intrinsic size).
@@ -47,7 +44,7 @@ impl Default for LayoutSizing {
 /// Edge insets (padding, margin) in pixels.
 ///
 /// All values are resolved `f32` pixels (not token references).
-/// Maps directly to both GPUI `Edges` and Jetstream `Edges`.
+/// Maps directly to GPUI `Edges`.
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct LayoutEdges {
     pub top: f32,
@@ -100,7 +97,6 @@ pub struct LayoutSpacing {
 ///
 /// Maps to:
 /// - GPUI: `JustifyContent::*`
-/// - Jetstream: `Justify::*`
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum MainAxisAlignment {
     Start,
@@ -119,7 +115,6 @@ impl Default for MainAxisAlignment {
 ///
 /// Maps to:
 /// - GPUI: `AlignItems::*`
-/// - Jetstream: `Align::*`
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum CrossAxisAlignment {
     Start,
@@ -146,8 +141,6 @@ pub struct LayoutAlignment {
 ///
 /// Maps to:
 /// - GPUI: `Overflow::Visible` / `Overflow::Hidden` / `Overflow::Scroll`
-/// - Jetstream: `Direction::Vertical` scroll on `ScrollView` widget
-///   (Jetstream only supports vertical scroll)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum LayoutOverflow {
     Visible,
@@ -167,7 +160,6 @@ impl Default for LayoutOverflow {
 /// Renderers map this to their native layout types:
 ///
 /// - **GPUI**: `Style { display: Flex, flex_direction, gap, padding, ... }`
-/// - **Jetstream**: `UiStyle { direction, sizing_x, sizing_y, gap, padding, ... }`
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct LayoutIntent {
     pub direction: LayoutDirection,

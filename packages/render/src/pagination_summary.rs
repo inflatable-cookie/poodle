@@ -1,6 +1,5 @@
 //! PaginationSummary — the "Showing X–Y of Z" line beside a pager.
 //!
-//! Ported from: `packages/jetstream/components/src/pagination_summary.rs`.
 
 use poodle_node::{Node, NodeRole};
 use poodle_specs::PaginationSummarySpec;

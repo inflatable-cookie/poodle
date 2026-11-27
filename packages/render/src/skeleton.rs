@@ -1,7 +1,7 @@
 //! Skeleton — loading placeholders that breathe.
 //!
 //! Contract: `docs/contracts/components/skeleton.md`
-//! Ported from: `packages/jetstream/components/src/skeleton.rs`. The shimmer
+//! The shimmer
 //! sweep still isn't representable (needs animated gradient stops); the
 //! ping-pong opacity pulse stands in, keyed so backends persist the clock
 //! across immediate-mode rebuilds.

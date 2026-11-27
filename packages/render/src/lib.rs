@@ -2,13 +2,8 @@
 //!
 //! Each component here is a pure function `Spec + Theme → poodle_node::Node`.
 //! No backend types, no measurement, no window: what a Button *is*, decided
-//! once. Per-backend adapters (GPUI's in this repo, Jetstream's in its own)
-//! interpret the node tree; the parity evidence for each backend lives with
-//! that backend, against fixtures this crate can generate headlessly.
-//!
-//! The g12.019 migration consolidated the former GPUI and Jetstream component
-//! tiers here after proving the node vocabulary against `Select`. Migration
-//! history lives in git; parity evidence lives with each backend.
+//! once. The GPUI backend interprets the node tree, with parity evidence against
+//! fixtures this crate can generate headlessly.
 
 mod layout_utils;
 #[cfg(test)]

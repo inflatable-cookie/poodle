@@ -1,6 +1,5 @@
 //! Banner — status strip with tone icon, title, message, dismiss affordance.
 //!
-//! Ported from: `packages/jetstream/components/src/banner.rs`.
 
 use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node};
 use poodle_specs::{BannerSpec, StatusTone};

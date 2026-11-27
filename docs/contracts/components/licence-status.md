@@ -142,8 +142,7 @@ Svelte and React share types, view derivation, copy, CSS, and tests. The web
 reference is incomplete until it adds the Rust spec, the shared renderer
 composition, specimens, and GPUI evidence. an earlier pilot rejected the conformance
 mechanism that card was originally written against; the follow-up is replanned and
-its execution method is undecided. Jetstream remains a separate deferred
-backend admission and is not claimed by that milestone.
+its execution method is undecided.
 
 ## 9. Acceptance Cases
 

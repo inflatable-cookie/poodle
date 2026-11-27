@@ -2,7 +2,7 @@
 //! [`crate::button::button`]s for cancel/confirm.
 //!
 //! Contract: `docs/contracts/components/alert-dialog.md`
-//! Ported from: `packages/jetstream/components/src/alert_dialog.rs`. Owns only
+//! Owns only
 //! the alert-specific content and the tone→confirm mapping; everything visual
 //! delegates to the composed primitives.
 

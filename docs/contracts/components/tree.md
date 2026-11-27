@@ -70,12 +70,10 @@ Status: detailed contract
 - **Inline rename** (`editingValue` + `onRenameCommit`/`onRenameCancel`): when a
   node is being edited its label swaps for a text input seeded with the current
   label. F2 starts rename; Enter / blur commits; Escape cancels. Svelte uses an
-  `<input>`; GPUI reuses the `EditableLabel` primitive; Jetstream renders an
-  editor box and routes character input through the app loop.
+  `<input>`; GPUI reuses the `EditableLabel` primitive.
 - **Context menu** (`onContextMenu`): right-clicking a row fires
   `onContextMenu(value, x, y)`; the host opens its own `ContextMenu` at the
-  pointer (items are app-specific). Jetstream polls the platform right-button and
-  renders the menu as a positioned overlay routed by token.
+  pointer (items are app-specific).
 - **Reorder** (`reorderable` + `onReorder`): rows are substrate drag sources; a drop fires
   `onReorder(from, to, position)` where `position` ∈ `before`/`after`/`inside`.
   The hovered row is the indicator anchor; the session's commit destination is
@@ -108,8 +106,7 @@ Status: detailed contract
   or pre-threshold release still selects. Svelte and
   React use the shared web drag substrate (source/focus owner on the
   `treeitem`, pointer/touch on the row handle, no HTML `DataTransfer`). GPUI
-  uses `on_drag`/`on_drop`/`drag_over`; Jetstream tracks mouse down→up over
-  rows.
+  uses `on_drag`/`on_drop`/`drag_over`.
 - **Externally authoritative reorder** (`reorderable` + `reorderAuthority`, paired
   Svelte/React): the host projects an ordered moving set once at session start,
   inspects the resolved Tree destination, and synchronously accepts, rewrites,
@@ -654,18 +651,6 @@ None.
   and the Node subject has no durable multi-row session value. Native keeps
   `on_reorder`; closing those generic substrate gaps is separate work.
 
-## 10a. Jetstream Notes
-
-- `Tree::from_spec(spec, theme).on_select(...).on_toggle_expand(...).on_check(...)`,
-  matching the GPUI target's handler names, each carrying the node's value.
-- A row has three click targets and they are three events. The twisty and the
-  checkbox sit *inside* the row, so each takes a handler of its own — inert when
-  unwired — because clicks bubble to the nearest clickable ancestor and an
-  unwired chevron would otherwise select the row it was expanding.
-- `on_check` names the node rather than asserting a next state: the host holds
-  the check state and the cascade rules, and a component that guessed would be
-  wrong for any tree where checking a parent checks its children.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -673,8 +658,7 @@ None.
 - [ ] all props have the same meaning and defaults
 - [ ] branch rule (`isBranch || children`) matches
 - [x] selection set semantics match (replace / toggle / range) — Svelte in-component,
-      GPUI via `on_selection_change`; Jetstream click-select only (no modifiers in
-      its `ClickEvent` — known runtime gap)
+      GPUI via `on_selection_change`
 - [ ] expansion controlled + uncontrolled resolution matches
 - [ ] `aria-level`, `aria-selected`, `aria-expanded`, `aria-disabled` exposure match
 - [x] keyboard model matches (arrows, Home/End, Enter/Space) in all 3 targets;
@@ -702,13 +686,8 @@ None.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream has no `onActivate` | activation is a double-click or Enter on the web; the runtime reports single clicks with no click count, and raises no key events | accepted, tracked | — |
-| Jetstream has no rename, reorder or context-menu events | inline rename needs a text field and key handling, reorder needs drag, and the context menu needs a right-click — none of which this target raises yet | accepted, tracked | — |
-| Jetstream has no `onLoadChildren` | lazy loading is driven by expansion, which the host already hears through `on_toggle_expand` | accepted (by design) | none |
 | GPUI tree structure is not proven on the platform tree | GPUI projects direct roles, names and states through AccessKit; no live assertion covers levels or groups | accepted (A2 hold) | add a named fixture to the GPUI live proof |
-| Jetstream per-item tree roles | the component root projects through AccessKit; per-item `treeitem` roles are not attached yet | accepted (A2 hold) | attach roles inside the component |
-| Virtual scroll is Svelte-only | GPUI/Jetstream have no row-windowing primitive; they render all visible rows | accepted | revisit if a Rust runtime gains windowing |
-| Rust interaction is host-driven | GPUI is stateless + driven by the owning view; Jetstream renders from spec with the app loop owning state/events | accepted | inherent to the runtimes |
+| Virtual scroll is Svelte-only | GPUI has no row-windowing primitive; it renders all visible rows | accepted | revisit if a Rust runtime gains windowing |
 | Selected inset ring is Svelte-only | A layout-affecting border would jitter rows in the immediate/retained runtimes | accepted | — |
 
 ## 13. Approval And Adoption Notes

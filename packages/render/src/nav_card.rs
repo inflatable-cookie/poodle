@@ -1,7 +1,7 @@
 //! NavCard — a card that navigates.
 //!
 //! Contract: `docs/contracts/components/nav-card.md`
-//! Ported from: `packages/jetstream/components/src/nav_card.rs`.
+
 //!
 //! The arrow carries the contract-exact resting opacity (0) and reveals on
 //! its OWN hover (no root→child group-hover channel) — same delta as the

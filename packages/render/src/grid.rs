@@ -1,7 +1,7 @@
 //! Grid — grid layout emulated as a flex-wrap container.
 //!
 //! Contract: `docs/contracts/components/grid.md`
-//! Ported from: `packages/jetstream/components/src/grid.rs`.
+
 //!
 //! Column tracks drive per-child flex:
 //!   - `Fr` tracks → zero-basis children divide free space by declared weight.

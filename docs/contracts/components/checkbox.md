@@ -342,15 +342,6 @@ cancels every visual handle without firing `onCheckedChange`.
 - readonly behavior: reject toggle attempts while maintaining focusability
 - keyboard toggle via Space must be explicitly handled
 
-## 10a. Jetstream Notes
-
-- `Checkbox::from_spec(spec, theme).on_change(...)`.
-- The payload is the state being moved **to**, matching GPUI's `Fn(&bool, …)`.
-  Hosts are stateless here — the spec they passed in *is* the current state — so
-  reporting the old value would make every caller re-derive the new one.
-- Mixed resolves to checked: the point of clicking a partial selection is to
-  complete it.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

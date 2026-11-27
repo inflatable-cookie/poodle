@@ -1,7 +1,7 @@
 //! Callout — inline notice: tone-tinted surface, icon badge, dismiss control.
 //!
 //! Contract: `docs/contracts/components/callout.md`
-//! Ported from: `packages/jetstream/components/src/callout.rs`. Pending hosts
+//! Pending hosts
 //! the shared ring spinner in the badge.
 
 use std::sync::Arc;

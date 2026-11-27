@@ -1,8 +1,7 @@
 //! IconButton — a button whose whole label is its glyph.
 //!
 //! Contract: `docs/contracts/components/icon-button.md`
-//! Ported from: `packages/jetstream/components/src/icon_button.rs`, with the
-//! metrics and state recipes re-transcribed from the axis-faithful old GPUI
+//! The metrics and state recipes were re-transcribed from the axis-faithful old GPUI
 //! tier (`packages/gpui/components/src/primitives/icon_button.rs`) in g12.019:
 //! the square is the axis-layered `size.control.height` token plus the
 //! per-size offset, the glyph is a token-resolved `IconSize` stop, and the
@@ -66,8 +65,7 @@ pub fn icon_button_with_handlers(
     // token plus the per-size offset — the old GPUI tier's form — not the
     // fixed md height plus an icon-button delta (`control_height_rem(Md)` /
     // `icon_button_size_delta_rem`), which ignore the theme's
-    // density/control-size layering. At base tokens (the Jetstream provider,
-    // no axes) md/default reproduces the old fixed 36px square.
+    // density/control-size layering. At base tokens (without axes) md/default reproduces the old fixed 36px square.
     let size_px = ctx
         .theme()
         .resolve_space(spec.control_height_token(ctx.base_size(spec.size)))

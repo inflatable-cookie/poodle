@@ -66,7 +66,7 @@ const FIXED_SHELL = [
 describe("preview catalogue audit", () => {
   // Supplement entries are catalogued by the web previews but deliberately
   // absent from the canonical manifest, which is the portable inventory and
-  // also feeds the GPUI/Jetstream catalogues. They are audited as their own
+  // also feeds the GPUI catalogue. It is audited as its own
   // closed set so the canonical invariant stays exact rather than becoming a
   // loose "superset" check.
   const webOnlySlugs = webOnlyComponents.map((component) => component.slug);

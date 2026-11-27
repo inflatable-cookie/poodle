@@ -1,7 +1,7 @@
 //! DataTable — rows, columns, sorting and selection.
 //!
 //! Contract: `docs/contracts/components/data-table.md`
-//! Ported from: `packages/jetstream/components/src/data_table.rs`.
+
 //!
 //! Anatomy (contract §3): Toolbar (export + column-visibility buttons),
 //! Header row (select-all + column labels + active sort icon + actions

@@ -1,7 +1,7 @@
 //! TextLink — inline navigation, rendered as a tone-coloured label.
 //!
 //! Contract: `docs/contracts/components/text-link.md`
-//! Ported from: `packages/jetstream/components/src/text_link.rs`. Font size is
+//! Font size is
 //! inherited, matching both old tiers.
 
 use std::sync::Arc;

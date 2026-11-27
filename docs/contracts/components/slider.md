@@ -621,12 +621,6 @@ layout.
   documented pre-v1 divergence tracked in the Known Deltas table
 - GPUI block metadata and hit bounds are not mounted assistive-technology proof
 
-## 10a. Jetstream Notes
-
-Jetstream backend admission is deferred. Its shared-Rust caller stays
-compile-compatible with the renderer-neutral Slider API, but this contract
-does not require Jetstream execution or evidence while that deferral stands.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

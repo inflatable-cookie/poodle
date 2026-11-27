@@ -1,7 +1,7 @@
 //! Meter — value meter (bar or ring).
 //!
 //! Contract: `docs/contracts/components/meter.md`
-//! Ported from: `packages/jetstream/components/src/meter.rs`.
+
 //!
 //! The linear shape uses a percentage-sized fill with its token-resolved
 //! gradient inside the parent-owned track. Ring shape follows the documented

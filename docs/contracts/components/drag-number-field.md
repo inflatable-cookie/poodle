@@ -98,11 +98,6 @@ only VisualState and formatted text; the shell owns the conditional input.
 The adapter owns horizontal drag, focus, key translation, and native text
 entry. The shared node builder never parses text or reads machine context.
 
-## 10a. Jetstream Notes
-
-Jetstream uses the same Rust transition and spec. Direct entry is represented
-by the node input vocabulary and committed by the adapter.
-
 ## 11. Parity Checklist
 
 - same drag, fine, parse, clamp, keyboard, and gesture behavior

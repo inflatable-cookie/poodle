@@ -1,7 +1,7 @@
 //! EmptyState — dashed frame, variant icon, copy block, remediation actions.
 //!
 //! Contract: `docs/contracts/components/empty-state.md`
-//! Ported from: `packages/jetstream/components/src/empty_state.rs`. Actions
+//! Actions
 //! compose [`crate::button::button`].
 
 use std::sync::Arc;

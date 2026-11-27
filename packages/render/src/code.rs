@@ -1,7 +1,7 @@
 //! Code — inline fragments and block display with toolbar, gutter, highlights.
 //!
 //! Contract: `docs/contracts/components/code.md`
-//! Ported from: `packages/jetstream/components/src/code.rs`. The copy button
+//! The copy button
 //! exposes its press through [`CodeHandlers::on_copy`]; clipboard and the 2s
 //! check swap stay host interactions.
 

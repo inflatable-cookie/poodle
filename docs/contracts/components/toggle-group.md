@@ -264,15 +264,6 @@ fill. Neutral selection layers its ink wash directly over the host surface.
   the base fill mix and the accent tint over it, not accent over transparent
 - Flex-wrap layout requires GPUI equivalent for multi-row wrapping
 
-## 10a. Jetstream Notes
-
-- Jetstream backend admission remains program-deferred. In-repo compatibility
-  callers still supply stable native interaction scopes and compile against the
-  shared renderer contract.
-- When the backend is admitted, it must consume the same resulting-selection
-  payload and focus semantics. Activated-option payloads are not an approved
-  runtime delta.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

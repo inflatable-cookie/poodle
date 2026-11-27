@@ -1,7 +1,7 @@
 //! ValidationSummary — the roll-up of active validation entries.
 //!
 //! Contract: `docs/contracts/components/validation-summary.md`
-//! Ported from: `packages/jetstream/components/src/validation_summary.rs`.
+
 //!
 //! Empty state (no active entries) renders nothing per contract §4. Entry
 //! labels are links whose activation queues focus to the matching field id;

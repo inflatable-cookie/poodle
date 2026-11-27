@@ -3,7 +3,7 @@
  *
  * Machines are pure: a transition takes the current state + context and an
  * event, and returns the next state + context plus effect intents. Adapters
- * (Svelte, future React, GPUI/Jetstream via the Rust mirror) own reactivity
+ * (Svelte, future React, GPUI via the Rust mirror) own reactivity
  * and execute effects. Callbacks are emitted as effects so transitions stay
  * side-effect free. See docs/knowledge/specs/archive/062-headless-core-and-dual-layer-strategy.md.
  */

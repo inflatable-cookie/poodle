@@ -6,7 +6,7 @@ Owner: Poodle core
 
 - Keep Poodle focused on reusable tokens, primitives, composites, workstation
   shells, and cross-runtime contracts.
-- Keep product-specific DAW, admin, and Jetstream-local behavior in its owning
+- Keep product-specific DAW and admin behavior in its owning
   application or runtime.
 - Treat contracts as behavioral authority. Preview specimens and screenshots
   are evidence, not proof by themselves.

@@ -1,7 +1,7 @@
 //! SplitButton — a primary action with a menu of alternates.
 //!
 //! Contract: `docs/contracts/components/split-button.md`
-//! Ported from: `packages/jetstream/components/src/split_button.rs`. The
+//! The
 //! recipe below now transcribes the old GPUI tier
 //! (`packages/gpui/components/src/primitives/split_button.rs`) exactly —
 //! axis-faithful metrics, its variant×tone color resolution, its state
@@ -128,7 +128,7 @@ pub fn split_button(
     // token plus the per-size offset — the old GPUI tier's form — not the
     // fixed per-size/per-density tables (`control_height_rem` /
     // `control_space_x_rem`), which ignore the theme's density/control-size
-    // layering. At base tokens (the Jetstream provider, no axes) md/default
+    // layering. At base tokens (without axes) md/default
     // reproduces the old fixed values; under a preview axis the control now
     // follows the axis like Svelte does.
     let height = ctx

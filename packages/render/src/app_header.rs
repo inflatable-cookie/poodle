@@ -1,7 +1,7 @@
 //! AppHeader — the app-level three-region header shell.
 //!
 //! Contract: `docs/contracts/components/app-header.md`
-//! Ported from: `packages/jetstream/components/src/app_header.rs`.
+
 //!
 //! Renders the contract §2 three-region shell:
 //!   - Identity region (title group: title + optional subtitle, or a custom

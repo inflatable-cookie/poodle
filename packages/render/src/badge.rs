@@ -1,7 +1,6 @@
 //! Badge — small status label.
 //!
 //! Contract: `docs/contracts/components/badge.md`
-//! Ported from: `packages/jetstream/components/src/badge.rs`.
 
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::{BadgeSpec, BadgeVariant};

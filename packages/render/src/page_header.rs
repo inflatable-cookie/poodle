@@ -2,7 +2,7 @@
 //! subtitle, host slots and a tone banner.
 //!
 //! Contract: `docs/contracts/components/page-header.md`
-//! Ported from: `packages/jetstream/components/src/page_header.rs`.
+
 //!
 //! Anatomy: root (stacked) → top-row (title block + actions-row) → secondary
 //! content (subtitle / breadcrumbs / meta) → banner. The title block stacks

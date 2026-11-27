@@ -1,7 +1,6 @@
 //! Switch — on/off toggle with track and thumb.
 //!
 //! Contract: `docs/contracts/components/switch.md`
-//! Ported from: `packages/jetstream/components/src/switch.rs`.
 
 use std::sync::Arc;
 

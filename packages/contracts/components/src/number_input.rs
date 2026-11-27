@@ -395,7 +395,7 @@ impl NumberInputSpec {
     }
 
     /// Inner gap between a stepper button and the field edge / value.
-    /// Svelte stepper column has no extra inline gap; the Jetstream layout
+    /// Svelte stepper column has no extra inline gap; the native layout
     /// uses the smallest inline space token here instead of a bare rem.
     pub fn stepper_gap_token(&self) -> &'static str {
         semantic::SPACE_INLINE_XS

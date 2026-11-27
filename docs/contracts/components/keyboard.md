@@ -114,11 +114,6 @@ machine or event access.
 The GPUI adapter resolves local coordinates and platform keys before the Rust
 transition and exposes note-button accessibility children.
 
-## 10a. Jetstream Notes
-
-Jetstream consumes the same Rust transition, spec, VisualState node builder,
-and accessibility tree.
-
 ## 11. Parity Checklist
 
 - same range, octave map, velocity quantization, pointer retargeting,

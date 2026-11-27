@@ -75,11 +75,6 @@ VisualState plus display geometry to its renderer.
 Host state pushes reduction frames through the Rust transition. The shared
 renderer receives only the resulting VisualState.
 
-## 10a. Jetstream Notes
-
-Jetstream uses the same Rust feed transition, spec, and node builder with a
-deterministic preview clock.
-
 ## 11. Parity Checklist
 
 - same positive-magnitude feed, attack/release, invalid-frame handling

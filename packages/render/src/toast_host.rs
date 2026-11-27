@@ -1,7 +1,6 @@
 //! ToastHost — positioned toast container. Wraps a ToastStack and positions
 //! it at the chosen screen corner.
 //!
-//! Ported from: `packages/jetstream/components/src/toast_host.rs`.
 
 use poodle_node::{LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodePosition};
 use poodle_specs::{ToastHostPlacement, ToastHostSpec, ToastPosition, ToastStackSpec};

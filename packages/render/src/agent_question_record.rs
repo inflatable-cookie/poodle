@@ -1,7 +1,7 @@
 //! AgentQuestionRecord — the read-only record an answered question leaves.
 //!
 //! Contract: `docs/contracts/components/agent-question-record.md`
-//! Ported from: `packages/jetstream/components/src/agent_question_record.rs`.
+
 //!
 //! No handlers, and that is the component: an answer the agent already has
 //! cannot be changed from the transcript, so there is nothing to click.

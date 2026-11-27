@@ -360,14 +360,13 @@ identifier belongs in repository fixtures.
 - share one stylesheet family between Svelte and React
 - implement matching Svelte and React components
 - add matching specimen pages and focused interaction tests
-- keep Rust, GPUI, Jetstream, Swallowtail, Nucleus, and Longhorn out of scope
+- keep Rust, GPUI, Swallowtail, Nucleus, and Longhorn out of scope
 
 ### Active-runtime tranche
 
 - starts only after g14.008 adopts the conformance pipeline
 - authors shared cases/specimen structure once
 - adds Rust declarations, shared renderer/node support, and GPUI execution
-- keeps Jetstream deferred under the current g14 backend policy
 
 The web reference may run beside the g14 pilot only through an explicit roadmap
 exception equivalent to the licence reference lane. It must not touch

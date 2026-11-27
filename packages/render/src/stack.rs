@@ -1,7 +1,6 @@
 //! Stack — flex stack layout.
 //!
 //! Contract: `docs/contracts/components/stack.md`
-//! Ported from: `packages/jetstream/components/src/stack.rs`.
 
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node, NodeRole};
 use poodle_specs::{Alignment, LayoutJustify, StackDirection, StackSpec};

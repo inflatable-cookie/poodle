@@ -1,13 +1,13 @@
 //! Button — the primary interactive control.
 //!
 //! Contract: `docs/contracts/components/button.md`
-//! Ported from: `packages/jetstream/components/src/button.rs`; metrics and
+//! Metrics and
 //! state recipes re-transcribed from
 //! `packages/gpui/components/src/primitives/button.rs` (the axis-faithful
 //! tier, matching Svelte): axis-layered tokens plus per-size/per-density
 //! offsets instead of the fixed per-size/per-density tables, the full
 //! variant × tone state recipes, and the pressed/toggle treatment. At base
-//! tokens (the Jetstream provider, no axes) md/default reproduces the old
+//! tokens (without axes) md/default reproduces the old
 //! fixed values; under a preview axis the button now follows the axis.
 
 use std::sync::Arc;

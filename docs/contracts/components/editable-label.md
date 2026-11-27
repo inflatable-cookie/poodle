@@ -424,16 +424,9 @@ ECMAScript `String.trim` or Rust `str::trim` as the authority.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream has no commit or cancel events | both are keyboard (Enter, Escape) or blur, and the runtime raises neither | accepted, tracked | — |
 | double-click ergonomics may vary by platform convention | pointer ergonomics are platform-sensitive | allowed | keep keyboard edit-entry parity strict |
 | DOM swap vs GPUI entity-state swap | rendering architecture differs | allowed | same visual and semantic result required |
 | color-mix formula rendering | GPUI may approximate color-mix | allowed | match visual result as closely as possible |
-
-## 12a. Jetstream Notes
-
-- `EditableLabel::from_spec(spec, theme).on_edit_start(...)`.
-- Already editing, nothing restarts: a host that resets its draft on edit-start
-  would otherwise lose what had been typed.
 
 ## 13. Specimen Definitions
 

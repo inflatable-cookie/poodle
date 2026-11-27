@@ -513,7 +513,7 @@ spacing — never the field's vertical padding or the action box.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| GPUI/Jetstream render the editor as static text and don't drive keystrokes | shared render-only posture across all native components; text input is host-event-loop work | accepted | host wires editing |
+| GPUI renders the editor as static text and doesn't drive keystrokes | shared render-only posture across all native components; text input is host-event-loop work | accepted | host wires editing |
 | Native auto-grow is line-count based, not text-measurement based | neither native runtime measures wrapped text during spec resolution | accepted | revisit if a measurement API lands |
 | Native context ring inherits Meter's ring delta (no swept arc) | see `meter.md` §12 | accepted | tracked on the Meter contract |
 | Action button is a bespoke `<button>`, not `IconButton` | circular accent treatment plus dual-state semantics are composer-specific; every other control reuses a primitive | accepted (by design) | promote to an `IconButton` variant if a second consumer needs it |

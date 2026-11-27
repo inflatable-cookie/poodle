@@ -222,7 +222,7 @@ entry it hangs off and the fork it belongs to as identifiers — no renderer
 recurses, no `svelte:self`, no self-import, no recursive React component.
 `flattenVisibleTreeRows` in `packages/core/src/tree.ts` is the in-repo
 precedent; the flat `depth`-carrying row list already has a native counterpart
-(`packages/render/src/tree.rs`), which is what the GPUI/Jetstream port
+(`packages/render/src/tree.rs`), which is what the GPUI port
 consumes. Depth alone is not enough — every row also carries its parent entry
 id and its fork identity as data, so the v2 ambiguity cannot return in any
 renderer (R1 condition).
@@ -717,8 +717,6 @@ inset step, font sizes) are internal and not part of the recipe contract.
   state; request, confirm, and cancel are distinct handler intents, so the
   destructive command cannot leave on the initial menu activation.
 - theme access strategy: recipe hooks map to spec fields / token overrides.
-- Jetstream execution remains program-deferred under the active-cohort rule;
-  it must consume the same shared Rust composition when that lane resumes.
 
 ## 11. Parity Checklist
 
@@ -750,14 +748,11 @@ inset step, font sizes) are internal and not part of the recipe contract.
 | Protocol constants not imported | `MAXIMUM_FORK_BRANCH_NAME_BYTES`/`MAXIMUM_FORK_PROJECTION_PAGE_SIZE` live in the Longhorn crate; the component enforces no protocol rule, `maxBranchNameBytes` is a client-side affordance only | maintainer ruling | bridge validates |
 | Rejection dismissal is component-local | The fixed surface has no rejection-dismiss callback; the notice is transient inline UI | this contract | revisit if hosts need dismissal control |
 | No virtualisation | Out of scope: paging plus a bounded scrolling list is the shared implementation; virtualisation would add a second rendering policy | card scope | revisit only with measured need across runtimes |
-| Jetstream execution | Jetstream is outside the active cohort; GPUI already executes the shared Rust composition | working-rules deferral | resume in the dedicated Jetstream parity lane |
 | `continuationsResult` / `runResult` are web-shell props | The portable claim is that the host answers `onLoadContinuations` / `onLoadContinuationRun` and the answer reaches the picker — asserted on Svelte and React by `HistoryCenter.test.ts` / `.tsx`, and on the shared renderer by `poodle-render`'s `history_center` tests. (The conformance corpus originally carried this claim; a later change moved it.) How the answer arrives is shell mechanism: the web shells take a reference-diffed prop because that suits data-down flow, while a native host holds the fork tree in its own state and hands the renderer a resolved view. Same boundary as TextInput's DOM vs GPUI editing paths. | — | none; revisit if a portable result-feed shape is ever needed |
 
 ## 13. Approval And Adoption Notes
 
-- contract status: `implemented` (Svelte + React + shared Rust/GPUI;
-  Jetstream program-deferred)
+- contract status: `implemented` (Svelte + React + shared Rust/GPUI)
 - approvers: Poodle core (cards `019`, `028`–`034`)
 - downstream adopters: Longhorn bridge (session → props mapping), consumer
   hosts that own undo/redo semantics
-- future follow-up: Jetstream execution when the deferred runtime lane resumes

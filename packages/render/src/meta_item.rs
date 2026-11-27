@@ -1,7 +1,6 @@
 //! MetaItem — uppercase label + value slot, for use inside MetaBar.
 //!
 //! Contract: `docs/contracts/components/meta-item.md`
-//! Ported from: `packages/jetstream/components/src/meta_item.rs`.
 
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node};
 use poodle_specs::MetaItemSpec;

@@ -365,36 +365,14 @@ References semantic roles; reuses `OrderBy` trigger/surface treatment and
 - expected crate/module surface: `poodle_gpui::primitives::filter_builder`
 - theme access via `GpuiThemeProvider`; all dimensions/colors resolved from tokens
 - the render is a faithful function of the **full** spec state: `FilterBuilderSpec`
-  carries `draft: Option<FilterDraft>` (adding vs editing), so GPUI + Jetstream
-  render the complete draft editor (operator select + operand editor per kind +
+  carries `draft: Option<FilterDraft>` (adding vs editing), so GPUI
+  renders the complete draft editor (operator select + operand editor per kind +
   Add/Update/Cancel) and gate the combinator on `!is_editing()`, matching
   Svelte/React for equivalent states. The one native limitation (shared by all
   components) is that the preview does not itself drive clicks — live open / select
   / add / edit / remove is host-event-loop work; anchored positioning is
   platform-owned (surface renders inline)
 - no ARIA API. The accessible-name intent is carried on the node and reaches AccessKit (003); no live platform-tree assertion covers it yet. Documented as an accepted delta
-
-## 10a. Jetstream Notes
-
-- `FilterBuilder::from_spec(spec, theme)` then the intent surface:
-  `.on_remove(id)`, `.on_reset()`, `.on_toggle()` (opener pressed),
-  `.on_picker_toggle("add-field" | "operator" | "operand")`,
-  `.on_field_pick(key)`, `.on_operator_change(key)`,
-  `.on_operand_change(option)`, `.on_combinator_change("and" | "or")`,
-  `.on_commit()`, `.on_cancel()`.
-- The contract's `onChange` carries a whole clause list, and a pointer produces
-  one intent on one control — so, as with `OrderBy`, the events name the intent
-  and the host rebuilds the expression and draft it already holds.
-  `on_operand_change` reports the option pressed (`"true"`/`"false"` for
-  boolean operands, the option value for enum and multi-enum); the host flips
-  membership itself.
-- `FilterBuilderSpec.open_picker: Option<FilterBuilderPicker>` says which
-  nested Select inside the panel shows its option list — native-only state
-  that the web's Selects keep internal. The host flips it from
-  `on_picker_toggle`.
-- Known Deltas: the typed operands (text, number, range) stay host-side — the
-  runtime raises no key events — and drag-to-collapse has no drag surface
-  here.
 
 ## 11. Parity Checklist
 
@@ -433,7 +411,7 @@ References semantic roles; reuses `OrderBy` trigger/surface treatment and
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| GPUI/Jetstream preview doesn't drive live clicks | native render is a faithful function of the full spec state (draft editor + edit-scoping rendered), but the preview event loop doesn't dispatch open/select/add/edit/remove — shared render-only posture across all components | accepted | host wires interaction; nothing FilterBuilder-specific left |
+| GPUI preview doesn't drive live clicks | native render is a faithful function of the full spec state (draft editor + edit-scoping rendered), but the preview event loop doesn't dispatch open/select/add/edit/remove — shared render-only posture across all components | accepted | host wires interaction; nothing FilterBuilder-specific left |
 | No nested Boolean groups | v1 scope; single commutative combinator only | accepted (by design) | forward-compatible expression shape retained for a future grouped-node model |
 | Clause `id` generated per-instance counter | opaque UI identity only; host may replace ids on round-trip | accepted | documented risk; host owns durable identity |
 

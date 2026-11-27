@@ -93,13 +93,11 @@ pub enum VectorStepKind {
 /// "Capability And Escape-hatch Rules", with the required owning runtime,
 /// reason, parity effect, evidence surface, and removal condition.
 ///
-/// Serves the `EXT` class rows: `BTN-26` (GPUI deltas), `BTN-27` (Jetstream
-/// deltas), `BTN-29` (Rust enum superset), `RNG-26` (GPUI native vertical),
-/// `RNG-27` (Jetstream pair reporting), `TXT-31` (Jetstream clear-only
-/// events).
+/// Serves `EXT` class rows such as `BTN-26` (GPUI deltas), `BTN-29`
+/// (Rust enum superset), and `RNG-26` (GPUI native vertical).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Extension {
-    /// Stable identifier for the extension, e.g. `jetstream-clear-only`.
+    /// Stable identifier for the extension, e.g. `gpui-native-vertical`.
     pub id: Identifier,
     /// Owning runtime and reason (spec 063 "owning runtime and reason").
     pub owning_runtime: RuntimeTarget,

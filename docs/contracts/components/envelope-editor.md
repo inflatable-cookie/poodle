@@ -89,11 +89,6 @@ helper. `EnvelopeVisual` receives only `EnvelopeVisualState`.
 The adapter owns point hit testing, drag capture, focus, and key translation.
 The shared node builder consumes ordered point VisualState only.
 
-## 10a. Jetstream Notes
-
-Jetstream consumes the same Rust point machine, spec, and node builder. Point
-controls are exposed as individually named accessibility children.
-
 ## 11. Parity Checklist
 
 - same normalized ordering, add/remove/drag, snapping, curve bounds, and keys

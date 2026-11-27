@@ -289,8 +289,7 @@ implemented in Poodle.
 Svelte and React share data types, submit resolver, validation copy, CSS, and
 test cases. File reading is thin framework/browser plumbing. The web reference
 is incomplete until it supplies native file-selection semantics and full
-active-cohort conformance. Jetstream remains a separate deferred backend
-admission.
+active-cohort conformance.
 
 ## 9. Acceptance Cases
 

@@ -4,7 +4,6 @@
 //! than low-level input. Rendering adapters map from their native event systems:
 //!
 //! - **GPUI**: Mouse/keyboard event subscriptions → semantic events
-//! - **Jetstream**: `UiEvent` enum (Clicked, ValueChanged, etc.) → semantic events
 
 /// A semantic event emitted by a Poodle component.
 ///
@@ -16,7 +15,6 @@ pub enum SemanticEvent {
     ///
     /// Emitted by: Button, IconButton, MenuItem, Link
     /// - GPUI: `on_click` handler
-    /// - Jetstream: `UiEvent::Clicked`
     Activated,
 
     /// A component's value changed.
@@ -24,56 +22,48 @@ pub enum SemanticEvent {
     /// Emitted by: TextInput, Slider, Select, Checkbox, Switch,
     /// DatePicker, TimePicker, ColorPicker, etc.
     /// - GPUI: `on_change` handler
-    /// - Jetstream: `UiEvent::ValueChanged` / `UiEvent::TextChanged`
     ValueChanged { value: EventValue },
 
     /// Focus moved to or from a component.
     ///
     /// Emitted by: Any focusable component
     /// - GPUI: `on_focus` / `on_blur` handlers
-    /// - Jetstream: `UiEvent::FocusGained` / `UiEvent::FocusLost`
     FocusChanged { gained: bool },
 
     /// An overlay or disclosure component opened or closed.
     ///
     /// Emitted by: Dialog, Drawer, Popover, Accordion, Collapsible, Menu, Select
     /// - GPUI: State change handlers
-    /// - Jetstream: `ScreenStack` push/pop for modals, widget state for others
     OpenChanged { open: bool },
 
     /// A selection changed in a single-or-multi-select context.
     ///
     /// Emitted by: Select, RadioGroup, SegmentedControl, Tabs, TabStrip
     /// - GPUI: Selection change handlers
-    /// - Jetstream: `UiEvent::ValueChanged` with selection payload
     SelectionChanged { value: EventValue },
 
     /// A form was submitted.
     ///
     /// Emitted by: FormShell, TextInput (with submit action)
     /// - GPUI: Form submit handler / enter key
-    /// - Jetstream: Button activation mapped to form context
     Submitted,
 
     /// A pending action was cancelled.
     ///
     /// Emitted by: Dialog (dismiss), FormShell (cancel), TextInput (escape)
     /// - GPUI: Escape key / cancel handler
-    /// - Jetstream: Back navigation or cancel button
     Cancelled,
 
     /// Pointer entered or left a component's bounds.
     ///
     /// Emitted by: Any hoverable component (Button, Tooltip trigger, etc.)
     /// - GPUI: `on_mouse_enter` / `on_mouse_leave`
-    /// - Jetstream: Not supported (gamepad/touch primary) — adapters may skip
     Hovered { entered: bool },
 
     /// A drag operation started, moved, or ended.
     ///
     /// Emitted by: Slider (thumb), EditableList (reorderable), SplitView (divider)
     /// - GPUI: Drag event handlers
-    /// - Jetstream: `UiEvent::DragStarted` / `DragMoved` / `DragEnded`
     DragChanged {
         phase: DragPhase,
         position: Option<(f32, f32)>,
@@ -83,24 +73,21 @@ pub enum SemanticEvent {
     ///
     /// Emitted by: Any component with keyboard shortcuts
     /// - GPUI: `on_key_down` handlers
-    /// - Jetstream: `UiEvent::KeyPressed` / `InputSystem` action bindings
     KeyPressed {
         key: String,
         modifiers: EventModifiers,
     },
 
-    /// Directional navigation (Jetstream gamepad / keyboard arrows).
+    /// Directional navigation (keyboard arrows).
     ///
     /// Emitted by: Focus system, list navigation, grid navigation
     /// - GPUI: Arrow key handlers
-    /// - Jetstream: Gamepad d-pad / `InputSystem` directional actions
     Navigate { direction: NavigateDirection },
 
     /// Scroll position changed.
     ///
     /// Emitted by: ScrollShell, DataTable
     /// - GPUI: Scroll event handlers
-    /// - Jetstream: `UiEvent::ScrollChanged`
     ScrollChanged { offset_x: f32, offset_y: f32 },
 }
 

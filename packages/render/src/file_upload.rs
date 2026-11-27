@@ -1,7 +1,7 @@
 //! FileUpload — a drag-and-drop upload zone and its file list.
 //!
 //! Contract: `docs/contracts/components/file-upload.md`
-//! Ported from: `packages/jetstream/components/src/file_upload.rs`.
+
 //!
 //! Anatomy (from contract):
 //! ```text

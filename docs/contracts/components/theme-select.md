@@ -184,12 +184,6 @@ and `background: var(--poodle-style-selection-itemFill, color-mix(in srgb, var(-
   (native apps switch their own `GpuiThemeProvider`); render-only build-verified
 - no ARIA API. The accessible-name intent is carried on the node and reaches AccessKit (003); no live platform-tree assertion covers it yet. Documented only.
 
-## 10a. Jetstream Notes
-
-- `ThemeSelect::from_spec(spec, theme).on_change(...)`, carrying the theme's
-  value.
-- The swatch grid is laid out in flow rather than in an absolute panel.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -220,7 +214,7 @@ and `background: var(--poodle-style-selection-itemFill, color-mix(in srgb, var(-
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Controller is web-only (Svelte/React) | applies `data-theme`; native apps switch their own ThemeProvider | accepted | — |
-| GPUI/Jetstream preview doesn't drive live selection | shared render-only posture — render is a faithful function of the spec; host wires interaction | accepted | — |
+| GPUI preview doesn't drive live selection | shared render-only posture — render is a faithful function of the spec; host wires interaction | accepted | — |
 | Native swatch colors sRGB→linear approximated | build-verified native color pipeline | accepted | — |
 
 ## 13. Approval And Adoption Notes

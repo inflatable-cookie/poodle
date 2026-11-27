@@ -1,7 +1,7 @@
 //! ModelPicker — model + capability-axis picker.
 //!
 //! Contract: `docs/contracts/components/model-picker.md`
-//! Ported from: `packages/jetstream/components/src/model_picker.rs`.
+
 //!
 //! Anatomy: root → trigger (optional model icon + label + axis summary +
 //! chevron) → dialog surface (model rows with group headings, badges and a

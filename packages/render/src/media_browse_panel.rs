@@ -1,7 +1,7 @@
 //! MediaBrowsePanel — grid of selectable media items.
 //!
 //! Contract: `docs/contracts/components/media-browse-panel.md`
-//! Ported from: `packages/jetstream/components/src/media_browse_panel.rs`.
+
 //!
 //! No `on_load_more`: paging is scroll-driven on the web and scroll events
 //! are not yet surfaced through the node vocabulary.

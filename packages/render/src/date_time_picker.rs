@@ -1,7 +1,7 @@
 //! DateTimePicker — a trigger and a calendar + time popover.
 //!
 //! Contract: `docs/contracts/components/date-time-picker.md`
-//! Ported from: `packages/jetstream/components/src/date_time_picker.rs`.
+
 //!
 //! Same shell as [`crate::date_picker::date_picker`]; the open surface stacks the composed
 //! calendar over a labelled time section (composed [`crate::time_input::time_input`]).

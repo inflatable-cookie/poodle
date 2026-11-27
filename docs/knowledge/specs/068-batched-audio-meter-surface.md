@@ -26,8 +26,7 @@ Loophole events, credentials, persistence, or audio-thread ownership.
 - `MeterSurface` is a web rendering coordinator, not a new portable component.
 - Canvas2D is the only required painter in this card. WebGL2 is deferred until
   measured evidence says it is needed.
-- Native AudioMeter contracts and renderers remain unchanged. GPUI and
-  Jetstream already batch node drawing at their scene boundary.
+- Native AudioMeter contracts and renderers remain unchanged. GPUI already batches node drawing at their scene boundary.
 
 ## MeterBus API
 

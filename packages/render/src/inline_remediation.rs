@@ -1,8 +1,7 @@
 //! InlineRemediation — inline fix suggestion.
 //!
 //! Contract: `docs/contracts/components/inline-remediation.md` (standalone
-//! authority). Ported from:
-//! `packages/jetstream/components/src/inline_remediation.rs`.
+//! authority).
 //!
 //! Anatomy (contract §2): Root `<aside>` → tone-colored **left border** →
 //! Content [Title?, Message] → optional Action (Button). No leading icon part

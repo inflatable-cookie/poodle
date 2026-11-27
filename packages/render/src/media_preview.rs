@@ -1,7 +1,7 @@
 //! MediaPreview — card with nested thumbnail, heading block, pill metadata.
 //!
 //! Contract: `docs/contracts/components/media-preview.md`
-//! Ported from: `packages/jetstream/components/src/media_preview.rs`.
+
 //!
 //! Composes `card` (media slot) with `media_thumbnail`, header (eyebrow /
 //! title / description + pill metadata), and body caption per §3/§10.

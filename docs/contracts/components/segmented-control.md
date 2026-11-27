@@ -273,13 +273,6 @@ Rendering style roles: the track reads the control border, fill and shadow. Segm
   and derive child scopes from it (for example `picker-a:mode`). Shared render
   is stateless and never derives identity from render order.
 
-## 10a. Jetstream Notes
-
-- `SegmentedControl::from_spec(spec, theme).on_change(...)`, carrying the chosen
-  option's value.
-- Re-picking the selected segment still fires. Swallowing it here would hide the
-  click from a consumer that treats re-selection as "confirm".
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

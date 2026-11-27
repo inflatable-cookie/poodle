@@ -1,7 +1,6 @@
 //! PickerShell — header/toolbar/selection/body/footer chrome for pickers.
 //!
 //! Contract: `docs/contracts/components/picker-shell.md`
-//! Ported from: `packages/jetstream/components/src/picker_shell.rs`.
 
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,

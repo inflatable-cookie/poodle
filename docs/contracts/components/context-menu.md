@@ -336,12 +336,6 @@ leaf-only activation.
   need for parity review.
 - The fixed positioning model translates to screen-coordinate placement in GPUI
 
-## 10a. Jetstream Notes
-
-- `ContextMenu::from_spec(spec, theme).on_action(...)`, as `Menu`.
-- No `on_open_change`: the right-click that summons the panel is the consumer's
-  event.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

@@ -1,7 +1,7 @@
 //! Pagination — pages, arrows and bounds.
 //!
 //! Contract: `docs/contracts/components/pagination.md`
-//! Ported from: `packages/jetstream/components/src/pagination_comp.rs`.
+
 //!
 //! Anatomy (per contract §2):
 //! ```text

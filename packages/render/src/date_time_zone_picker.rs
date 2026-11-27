@@ -1,7 +1,7 @@
 //! DateTimeZonePicker — a trigger and a calendar + time + zone popover.
 //!
 //! Contract: `docs/contracts/components/date-time-zone-picker.md`
-//! Ported from: `packages/jetstream/components/src/date_time_zone_picker.rs`.
+
 //!
 //! Same shell as the sibling pickers; the open surface stacks the composed
 //! calendar over TIME and TIME ZONE fields (composed [`crate::time_input::time_input`] +

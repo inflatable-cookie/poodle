@@ -1,7 +1,6 @@
 //! ChangedFiles — a collapsed card summarising a turn's file changes.
 //!
 //! Contract: `docs/contracts/components/changed-files.md`
-//! Ported from: `packages/jetstream/components/src/changed_files.rs`.
 
 use std::sync::Arc;
 

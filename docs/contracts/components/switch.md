@@ -337,11 +337,6 @@ Track padding is `0.125rem` at every size.
 - color-mix formulas for track background and border must achieve the same
   visual result by any means available in the rendering engine
 
-## 10a. Jetstream Notes
-
-- `Switch::from_spec(spec, theme).on_change(...)`, with the same
-  next-state payload as `Checkbox`.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

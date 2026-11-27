@@ -304,7 +304,7 @@ classes to semantic tokens inside the dedicated distribution.
   claim.
 - The editing surface's Escape-then-Tab escape runs in a capture-phase
   listener installed on the editor composition and removed at destroy.
-- Rust, GPUI, and Jetstream expose no placeholder and receive no parity credit
+- Rust and GPUI expose no placeholder and receive no parity credit
   from this web admission.
 
 ## 10. Parity Checklist

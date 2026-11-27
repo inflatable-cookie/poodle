@@ -1,7 +1,6 @@
 //! Text — the text primitive: tone, size, weight, wrap, compact spacing.
 //!
 //! Contract: `docs/contracts/components/text.md`
-//! Ported from: `packages/jetstream/components/src/text.rs`.
 
 use poodle_node::{LayoutDirection, LayoutOverflow, Node};
 use poodle_specs::{TextSpec, TextWeight, TextWrap};

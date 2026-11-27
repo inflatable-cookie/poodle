@@ -4,7 +4,7 @@
 // public prop exists on the Svelte component. Nothing guarded the native side,
 // and both native targets read their props from one place — the `poodle-specs`
 // crate. A prop that lands in the contract and in Svelte but never reaches the
-// Spec struct is invisible to GPUI and Jetstream, and no gate could see it.
+// Spec struct is invisible to GPUI, and no gate could see it.
 //
 // This compares the contract's "### Public Props" table against the fields of
 // the matching `<Name>Spec` struct.

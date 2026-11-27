@@ -1,7 +1,7 @@
 //! EditableList — rows with remove, an add row, and edit actions.
 //!
 //! Contract: `docs/contracts/components/editable-list.md`
-//! Ported from: `packages/jetstream/components/src/editable_list.rs`.
+
 //!
 //! Renders the contract anatomy (§2): an optional workflow header (cancel /
 //! submit `button` primitives), optional error / info banners, the item list

@@ -70,7 +70,7 @@ pub fn with_alpha(c: ColorValue, alpha: f32) -> ColorValue {
 
 /// Parse `#rgb` / `#rrggbb` / `#rrggbbaa` into an sRGB [`ColorValue`].
 ///
-/// Note: the old Jetstream tier fed hex overrides into its linear pipeline
+/// Note: the old native renderer fed hex overrides into its linear pipeline
 /// *without* conversion while token colours were converted — custom-coloured
 /// controls rendered brighter than intended. Here the hex lands in sRGB like
 /// every other colour and converts at the backend edge, which fixes that. The

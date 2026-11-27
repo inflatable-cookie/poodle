@@ -1,7 +1,7 @@
 //! DetailShell — detail page shell.
 //!
 //! Contract: `docs/contracts/components/detail-shell.md`
-//! Ported from: `packages/jetstream/components/src/detail_shell.rs`.
+
 //!
 //! Anatomy (contract §3): a root section stacking an optional header region
 //! (header slot OR title) over either the body (children, when

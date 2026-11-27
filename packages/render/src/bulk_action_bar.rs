@@ -1,7 +1,7 @@
 //! BulkActionBar — contextual selection bar.
 //!
 //! Contract: `docs/contracts/components/bulk-action-bar.md`
-//! Ported from: `packages/jetstream/components/src/bulk_action_bar.rs`.
+
 //!
 //! Anatomy (contract §2):
 //! ```text

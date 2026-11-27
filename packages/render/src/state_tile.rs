@@ -1,7 +1,7 @@
 //! StateTile — lightweight label-value tile.
 //!
 //! Contract: `docs/contracts/components/state-tile.md` (sole authority).
-//! Ported from: `packages/jetstream/components/src/state_tile.rs`.
+
 //!
 //! Anatomy (contract §2): Root → Label, Value, optional Trend (glyph +
 //! label), optional reserved Sparkline slot (the host renders the chart).

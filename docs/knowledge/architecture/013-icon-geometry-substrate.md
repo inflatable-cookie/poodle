@@ -222,4 +222,4 @@ and drops the scheduled task on teardown; allocation/p95 receipts over
 repeated samples; a sealed construction path with no crate-root consumer
 export; and private Svelte/React SSR, hydration, focus, layout, live rAF,
 and controlled start/mid/end/reverse/frozen shells. No native pixel, AT,
-public API, release, consumer, or Jetstream claim.
+public API, release, or consumer claim.

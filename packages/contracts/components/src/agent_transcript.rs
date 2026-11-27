@@ -44,9 +44,7 @@ impl AgentTranscriptSpec {
     pub fn new(items: Vec<TranscriptItem>) -> Self {
         Self {
             items,
-            // The natives render unwindowed: neither runtime measures blocks
-            // during spec resolution, and Jetstream's scroll container
-            // materializes every child regardless. See the contract's deltas.
+            // GPUI renders unwindowed: spec resolution does not measure blocks. See the contract's deltas.
             is_virtualized: false,
             estimated_block_height: 120.0,
             overscan: 3,

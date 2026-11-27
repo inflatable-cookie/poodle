@@ -1,7 +1,7 @@
 //! Spinner — animated loading indicator: ring, grid or dots.
 //!
 //! Contract: `docs/contracts/components/spinner.md`
-//! Ported from: `packages/jetstream/components/src/spinner.rs`. The animation
+//! The animation
 //! is *declared* on the node (keyframes, duration, loop); driving the clock is
 //! the backend's job, keyed by the animation's stable key so immediate-mode
 //! rebuilds don't restart it.

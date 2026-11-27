@@ -1,7 +1,6 @@
 //! FieldSet — legend, description, and an equal-column field grid.
 //!
 //! Contract: `docs/contracts/components/field-set.md`
-//! Ported from: `packages/jetstream/components/src/field_set.rs`.
 
 use poodle_node::{LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::FieldSetSpec;

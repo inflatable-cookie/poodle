@@ -121,7 +121,7 @@ The release checker proves structure rather than freezing incidental workflow
 steps. It requires:
 
 - one Effigy npm certificate entry in candidate mode;
-- no aggregate, Rust, native, GPUI or Jetstream selector or setup;
+- no aggregate, Rust, native, GPUI selector or setup;
 - Linux runner and the hard timeout;
 - candidate artifact and publish-time identity checks;
 - publication of archives rather than package directories;

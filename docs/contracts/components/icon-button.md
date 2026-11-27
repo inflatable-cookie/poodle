@@ -479,11 +479,6 @@ activates the button or emits a pressed-state callback.
 - Spinner animation must be replicated using GPUI's animation system
 - The `translateY(0.03125rem)` active press effect should be preserved
 
-## 10a. Jetstream Notes
-
-- `IconButton::from_spec(spec, theme).on_click(...)`, identical to `Button`.
-- Loading is treated as disabled for interaction.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -527,8 +522,6 @@ activates the button or emits a pressed-state callback.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream has no `onFocus` / `onBlur` | the runtime raises pointer events, not focus ones | accepted, tracked | arrives with focus plumbing |
-| Jetstream has no `onPressedChange` | `pressed` is a spec input there; the host derives the change from `on_click` | accepted | none |
 | Native tooltip uses `Node.tooltip` / GPUI chrome rather than the web overlay | placement, timing, and paint are runtime-owned; the node/backend already expose this channel | accepted | overlay, timer, Escape, and `aria-describedby` stay web |
 | Color-mix blending | GPUI may approximate color-mix differently | allowed | visual result must be comparable |
 | Custom property pattern | GPUI may use direct values instead of CSS custom properties | allowed | final computed colors must match |

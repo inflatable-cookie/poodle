@@ -1,7 +1,7 @@
 //! FormShell — sectioned form shell with status summary and actions region.
 //!
 //! Contract: `docs/contracts/components/form-shell.md`
-//! Ported from: `packages/jetstream/components/src/form_shell.rs`.
+
 //!
 //! `section_slots[i]` is the host-rendered field content for
 //! `spec.sections[i]`; `actions_slot` is the host-rendered action row. Submit

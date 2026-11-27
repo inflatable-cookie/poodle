@@ -172,13 +172,6 @@ beyond plain props. Classified in the long-tail sweep.
 - Actor and resource links are optional; when absent, plain text is rendered instead.
 - Filter and scroll buttons draw the standard ring (`border-width-focus` solid `accent-focusRing`, offset `0.125rem`).
 
-## 6a. Jetstream Notes
-
-- `LogList::from_spec(spec, theme).on_clear_filters(...)` — the one
-  pointer-reachable event. The refresh, export and paging affordances are not
-  drawn by this component, and the filters themselves are typed or open
-  `Select` panels.
-
 ## 7. Usage
 
 ### Audit list

@@ -118,12 +118,6 @@ from Node `on_continuous_value`, focus, keys, consumed `on_wheel`,
 requires `KnobHandlers::new(instance_id)` with a lifetime-stable instance
 scope for root and entry identity.
 
-## 10a. Jetstream Notes
-
-Jetstream consumes the same Rust machine, spec, and node builder as GPUI. Its
-adapter maps the slider role, formatted value, and gesture events into the
-runtime accessibility and input systems.
-
 ## 11. Parity Checklist
 
 - same laws, reset, fine mode, keyboard, wheel, entry, and gesture effects

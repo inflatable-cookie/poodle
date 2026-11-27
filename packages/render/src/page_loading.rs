@@ -1,7 +1,6 @@
 //! PageLoading — loading card (overlay or inline).
 //!
 //! Contract: `docs/contracts/components/page-loading.md`
-//! Ported from: `packages/jetstream/components/src/page_loading.rs`.
 
 use std::sync::Arc;
 

@@ -109,11 +109,6 @@ the flattened VisualState.
 The GPUI adapter maps pointer and platform keys into the Rust transition and
 publishes row, column, and cell accessibility nodes.
 
-## 10a. Jetstream Notes
-
-Jetstream consumes the same Rust machine, spec, node builder, and grid
-accessibility contract.
-
 ## 11. Parity Checklist
 
 - same ID normalization, row-major ordering, per-cell parameters, and enable state

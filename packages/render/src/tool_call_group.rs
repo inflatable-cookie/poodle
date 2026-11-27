@@ -1,7 +1,6 @@
 //! ToolCallGroup — a contiguous run of tool calls.
 //!
 //! Contract: `docs/contracts/components/tool-call-group.md`
-//! Ported from: `packages/jetstream/components/src/tool_call_group.rs`.
 
 use std::sync::Arc;
 

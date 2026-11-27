@@ -124,7 +124,7 @@ impl RemediationBannerSpec {
     }
 
     /// Tone → leading icon name (contract §2 Icon: tone-based default).
-    /// Shared so GPUI and Jetstream resolve the same glyph per tone.
+    /// Resolves the glyph for each tone.
     pub fn tone_icon_name(&self) -> &'static str {
         match self.tone {
             StatusTone::Neutral | StatusTone::Info => "info",

@@ -418,11 +418,6 @@ None.
   which the renderer names with a stable `sidebar-nav-{value}` id — when the
   overlay closes. Disabled items and items without rows never intercept
 
-## 10a. Jetstream Notes
-
-- `SidebarNav::from_spec(spec, theme).on_change(...)`, carrying the chosen
-  item's value. Disabled items never fire.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

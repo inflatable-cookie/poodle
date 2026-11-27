@@ -1,7 +1,7 @@
 //! DetailSectionGroup — multi-section layout.
 //!
 //! Contract: `docs/contracts/components/detail-section-group.md`
-//! Ported from: `packages/jetstream/components/src/detail_section_group.rs`.
+
 //!
 //! A wrapping grid (or vertical stack) of detail sections. Gap is
 //! density-driven; the column min width resolves from `min_column_width`.

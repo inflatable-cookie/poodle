@@ -776,7 +776,7 @@ impl PreviewRoot {
         }
 
         // Contrast — a real Slider over the continuous neutral-ramp axis,
-        // matching the web preview's range input and the Jetstream shell.
+        // matching the web preview's range input.
         // Four preset buttons could not express the values between them.
         // Header text is the scene's label, uppercased as house style; the
         // accessibility label is the scene's word, not a second copy (R3).

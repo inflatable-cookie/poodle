@@ -266,12 +266,6 @@ not turn the committed value back into a string union.
 - ColorPicker and FilterBuilder are regression consumers of the clean spec;
   they do not get component-specific fallback behavior.
 
-### Jetstream
-
-Jetstream remains program-deferred. It receives only mechanical compile
-maintenance required by the renderer-neutral spec and handler migration.
-Typing or parity is not claimed until backend admission.
-
 ## 9. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -299,7 +293,6 @@ Typing or parity is not claimed until backend admission.
 | Delta | Why Allowed | Approval Status | Follow-Up |
 | --- | --- | --- | --- |
 | focus event object callbacks are web-only | platform event objects are not portable value semantics | allowed | native exposes observable focus through its host/state channels |
-| Jetstream editing evidence is deferred | backend admission is program-deferred | allowed | do not report it as passing or complete |
 
 ## 11. Migration Boundary
 

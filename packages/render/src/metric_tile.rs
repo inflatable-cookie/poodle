@@ -1,7 +1,7 @@
 //! MetricTile — metric tile (Label | Value + Sparkline | Trend).
 //!
 //! Contract: `docs/contracts/components/metric-tile.md`
-//! Ported from: `packages/jetstream/components/src/metric_tile.rs`.
+
 //!
 //! The sparkline is a fixed-width strip of value-scaled bars (the Tier-3
 //! rendering substitution — no raw polyline primitive); dimensions and colour

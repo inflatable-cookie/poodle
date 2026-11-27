@@ -1,7 +1,7 @@
 //! FilterBuilder — filter clauses behind a trigger. Last of the big three.
 //!
 //! Contract: `docs/contracts/components/filter-builder.md`
-//! Ported from: `packages/jetstream/components/src/filter_builder.rs`.
+
 //!
 //! Events name the intent so the host applies it to the state it holds:
 //! remove/reset on the pills, toggle on the opener, picker_toggle +

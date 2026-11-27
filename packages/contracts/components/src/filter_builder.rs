@@ -631,7 +631,7 @@ impl FilterBuilderSpec {
         }
     }
 
-    // ── Token accessors (shared by GPUI + Jetstream) ──────────────────────
+    // ── Token accessors (shared token accessors) ──────────────────────
 
     pub fn label_color_token(&self) -> &'static str {
         semantic::COLOR_TEXT_SECONDARY

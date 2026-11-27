@@ -1,7 +1,7 @@
 //! TokenInput — committed token pills + a live draft input in a wrap row.
 //!
 //! Contract: `docs/contracts/components/token-input.md`
-//! Ported from: `packages/jetstream/components/src/token_input.rs`.
+
 //!
 //! `on_remove` fires with the removed token's value (contract §8a: a host
 //! removing by index would delete the wrong token whenever two removals arrive
@@ -148,7 +148,7 @@ fn commit_draft(
 }
 
 /// The shared renderer. `live` present means the draft is wired for editing;
-/// absent keeps the historical static draft (the shared Jetstream specimen).
+/// absent keeps a static draft.
 #[expect(
     clippy::too_many_arguments,
     reason = "the builder keeps every host channel explicit, matching the other handler-backed controls"

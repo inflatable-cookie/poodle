@@ -1,8 +1,8 @@
 //! Resolved style descriptor intermediate representation for Poodle.
 //!
 //! A `StyleDescriptor` captures the visual properties of a component instance
-//! after token resolution but before renderer-specific translation. Both GPUI
-//! and Jetstream adapters can use it as rendering input, eliminating duplicate
+//! after token resolution but before renderer-specific translation. The GPUI
+//! adapter can use it as rendering input, eliminating duplicate
 //! token resolution logic.
 
 use poodle_layout::LayoutIntent;
@@ -112,8 +112,7 @@ impl Default for CursorHint {
 /// Complete resolved visual style for a component instance.
 ///
 /// The shared renderer populates this descriptor after token resolution.
-/// The GPUI node backend and the Jetstream converter turn it into native
-/// styles at their respective runtime boundaries.
+/// The GPUI node backend turns it into native styles at the runtime boundary.
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct StyleDescriptor {
     // --- Colors ---

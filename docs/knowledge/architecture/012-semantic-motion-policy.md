@@ -189,7 +189,6 @@ exhaustive specimen surface, or permanent conformance authority.
 - GPUI owns supported channels and explicit approximations.
 - Components own semantic state, timers, focus, announcements, and accepted
   role-specific visuals.
-- Jetstream remains deferred.
 
 ## Rejected Alternatives
 

@@ -6,7 +6,7 @@ briefs. An answered question keeps only its pointer to where the answer lives.
 ## Q-004 — What is the route for the Rust renderers?
 
 Status: answered 2026-11-25, revised 2026-11-27 — the node tree is the seam
-and GPUI is the one native backend; Jetstream hosts stock GPUI. See
+and GPUI is the one native backend. See
 [vision](vision.md#direction).
 
 ## Q-003 — How far can a rendering style reach?

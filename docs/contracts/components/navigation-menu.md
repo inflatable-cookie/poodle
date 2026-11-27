@@ -410,13 +410,8 @@ no height change):
   `icon: Option<String>`. When set, the trigger renders the icon ahead of the
   label, separated by the trigger gap (`space.inline.sm`), sized from the
   effective control size and tinted to the trigger foreground (`text-primary`).
-  Both Rust targets (GPUI + Jetstream) render it; the Svelte reference still
+  GPUI renders it; the Svelte reference still
   under-implements (see §9 Svelte gap).
-
-## 10a. Jetstream Notes
-
-- `NavigationMenu::from_spec(spec, theme).on_change(...)`, carrying the chosen
-  entry's value. Disabled entries never fire.
 
 ## 11. Parity Checklist
 

@@ -10,7 +10,7 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
 
     // Direction is ALWAYS emitted. Node containers default to Column while a
     // bare gpui `div()` defaults to `display: block` and `flex-direction:
-    // row` — the "silent-Row" trap from the Jetstream ports. Silence here
+    // row`. Silence here
     // would lay every Column node out as a row.
     el = match d.layout.direction {
         LayoutDirection::Row => el.flex().flex_row(),
@@ -18,8 +18,7 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
     };
     record_probe_channel("layout.intent.direction");
     match d.layout.width {
-        // `.flex_grow(1.0)` is a flex property, not a width — matching the
-        // Jetstream `el.grow()` mapping, which is also a flex property.
+        // `.flex_grow(1.0)` is a flex property, not a width.
         LayoutSizing::Grow => el = el.flex_grow(1.0),
         LayoutSizing::Fixed(w) => el = el.w(px(w)),
         LayoutSizing::Fit => {}
@@ -35,7 +34,7 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
     match d.layout.height {
         LayoutSizing::Fixed(h) => el = el.h(px(h)),
         // Height-grow has no ported call site yet; when one appears it gets a
-        // dedicated mapping, not a guess (same punt as the Jetstream backend).
+        // dedicated mapping, not a guess.
         LayoutSizing::Grow | LayoutSizing::Fit => {}
         LayoutSizing::Constrained { min, max } => {
             if let Some(min) = min {
@@ -64,7 +63,7 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
         record_probe_channel("layout.geometry.flex-grow");
     }
     if style.flex_fill {
-        // Jetstream maps flex_fill to its grow() — grow + shrink, no stretch.
+        // Flex fill means grow + shrink, no stretch.
         // GPUI's `.flex_grow(1.0)` leaves shrink at its 1.0 default and does not
         // touch align-self, which is exactly that.
         el = el.flex_grow(1.0);
@@ -131,7 +130,7 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
         MainAxisAlignment::Start => {}
     }
     // Per-axis overflow — gpui supports each axis independently, so the
-    // Jetstream backend's combo chain becomes two direct emissions. Scroll
+    // two axes are emitted separately. Scroll
     // state lives on stateful elements (see `needs_state`); setting the
     // style fields directly is what the scroll helpers do internally.
     match d.layout.overflow_x {
@@ -224,8 +223,7 @@ pub(super) fn apply_paint<E: Styled>(mut el: E, node: &Node) -> E {
 
     // GPUI's fluent border widths are fixed steps (border_1, border_2,
     // …); arbitrary widths go straight to the refinement fields. Per-side
-    // widths compose with the uniform width exactly as the Jetstream walk's
-    // `border_widths[i] = w` did.
+    // widths compose with the uniform width.
     if d.border.width != 0.0 {
         let style_ref = el.style();
         let w = Some(px(d.border.width).into());

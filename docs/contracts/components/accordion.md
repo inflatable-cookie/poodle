@@ -341,14 +341,6 @@ static/opacity approximation from architecture 012; that remains a visual gap.
 - Panel expand/collapse must animate height over ~180ms (equivalent to Svelte
   `slide` transition)
 
-## 10a. Jetstream Notes
-
-- Jetstream backend admission remains program-deferred. In-repo callers migrate
-  mechanically to the same semantic value and required instance scope.
-- When admitted, Jetstream consumes the same resulting-selection callback as
-  GPUI. It does not receive only the activated item or reconstruct membership.
-- The whole header row is the trigger, not just the chevron.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

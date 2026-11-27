@@ -1,8 +1,6 @@
 //! Deterministic native specimen content for the audio family.
 //!
-//! GPUI and Jetstream both consume these exact node trees. Keeping the state
-//! matrix here prevents their coverage from drifting while their preview
-//! shells remain backend-owned.
+//! The GPUI preview consumes these node trees and their state matrix.
 //!
 //! [`AudioSpecimen`] hands out the three parts a specimen page is made of —
 //! the curated Examples pane, one representative at a requested size, one at a

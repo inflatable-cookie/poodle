@@ -327,10 +327,8 @@ pub fn text_input_with_handlers(
     // recorded it as a value — so undoing an empty field typed the placeholder
     // into the field for real.
     //
-    // A flag rather than a separate placeholder node: an absolutely-positioned
-    // sibling renders correctly in GPUI and overlaps in Jetstream, and the
-    // vocabulary is meant to describe intent, not to encode one backend's
-    // layout quirks.
+    // A flag rather than a separate placeholder node expresses intent without
+    // encoding backend layout quirks.
     let showing_placeholder = current_value.is_empty();
     let display: String = if showing_placeholder {
         spec.placeholder.as_deref().unwrap_or("").to_string()
@@ -414,8 +412,7 @@ pub fn text_input_with_handlers(
             let change = on_change.clone();
             let on_intent = handlers.on_intent.clone();
             // `maxLength` is spent here, before the host is told anything: the
-            // shared transition owns the rule, so GPUI and Jetstream cannot
-            // drift from `<input maxlength>` and from each other.
+            // shared transition owns the rule, matching `<input maxlength>`.
             let limit = spec.max_length;
             value.interaction.on_edit_insert = Some(Arc::new(move |inserted: &str| {
                 if let Some(intent) = &on_intent {

@@ -156,7 +156,6 @@ may schedule a clock; it does not redefine token values.
 - [x] frozen descendants schedule no clocks
 - [x] policy changes emit no semantic callback
 - [x] provider adds no layout, accessibility, or focus surface
-- [x] Jetstream remains deferred
 
 ## 13. Specimen Definitions
 

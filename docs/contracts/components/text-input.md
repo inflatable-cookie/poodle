@@ -270,7 +270,7 @@ plumbing stay adapter-side.
 
 ### Caret Ownership (Rust targets)
 
-`<input>` owns its caret, its selection and its focus. GPUI and Jetstream have
+`<input>` owns its caret, its selection and its focus. GPUI have
 no native editor to own them, so ownership splits three ways:
 
 - **The host owns the caret's position.** `selectionStart` and `selectionEnd`
@@ -634,13 +634,6 @@ The input control reserves inline padding for leading/trailing adornments so tex
 - character count must be computed from the same value source as the input
 - radius resolves directly from `--poodle-radius-control`
 
-## 11a. Jetstream Notes
-
-- `TextInput::from_spec(spec, theme).on_clear(...)`.
-- The clear button is the only part of a field a pointer can reach, so it is the
-  only wired event. It renders for a `search` field with a value, and a
-  disabled or read-only field does not clear.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
@@ -675,7 +668,6 @@ The input control reserves inline padding for leading/trailing adornments so tex
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Jetstream raises no typing or key events | the runtime delivers pointer events only, so `onValueChange`, `onKeyDown`, `onSubmit` and `onCancel` have no route; the host owns the editor and feeds the value back through the spec | accepted, tracked | — |
 | native text-caret visuals may differ | platform-native text rendering is acceptable | allowed | keep editing semantics strict |
 | CSS transition timing | GPUI may not support CSS-style transitions | allowed | match where possible |
 | Recipe fallback chain | CSS custom property vs Rust spec/token override | allowed | same visual result required |

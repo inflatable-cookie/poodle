@@ -71,12 +71,6 @@ beyond plain props. Classified in the long-tail sweep.
 - Disabled links are not rendered as anchors, so they are not reachable as dead
   navigation targets.
 
-## 5a. Jetstream Notes
-
-- `TextLink::from_spec(spec, theme).on_click(...)`. No payload: the `href` is on
-  the spec the caller already holds.
-- A disabled link is not a route and never fires.
-
 ## 6. Specimen
 
 - `TextLinkSpecimen.svelte` covers anchor, button, tone, disabled, and inline

@@ -1,7 +1,6 @@
 //! Separator — horizontal or vertical divider.
 //!
 //! Contract: `docs/contracts/components/separator.md`
-//! Ported from: `packages/jetstream/components/src/separator.rs`.
 
 use poodle_node::{LayoutSizing, Node, NodeRole};
 use poodle_specs::{SeparatorOrientation, SeparatorSpec};

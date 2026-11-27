@@ -557,15 +557,6 @@ Applied when viewport-aware horizontal flipping determines the menu would overfl
 - The custom chevron is a pointer-only decorative affordance (`tabindex="-1"`,
   `aria-hidden="true"`); it does not create a second tab stop
 
-## 10a. Jetstream Notes
-
-- `SelectHandlers::new(instance_scope).on_transition(...)`.
-- Trigger, clear, and option activation run through `select_transition` and
-  report one atomic result (`openChanged` / `queryChanged` / `valueChanged`).
-- The clear pill is inert when unwired, so clearing never also opens the
-  panel it was clearing.
-- There is no legacy toggle/change/clear callback surface.
-
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

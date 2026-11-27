@@ -356,7 +356,7 @@ impl RefSelectSpec {
         self.rows().is_empty() && !self.is_loading
     }
 
-    // ── Token accessors (shared by GPUI + Jetstream) ──────────────────────
+    // ── Token accessors (shared token accessors) ──────────────────────
 
     pub fn label_color_token(&self) -> &'static str {
         if self.emphasis.is_subdued() {

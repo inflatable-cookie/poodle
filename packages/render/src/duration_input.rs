@@ -1,7 +1,7 @@
 //! DurationInput — segmented duration entry (h : m [: s]).
 //!
 //! Contract: `docs/contracts/components/duration-input.md`
-//! Ported from: `packages/jetstream/components/src/duration_input.rs`.
+
 //!
 //! Size drives field width + vertical padding (contract §8 size table);
 //! density drives only the inline padding/gap. Display text, totals, and

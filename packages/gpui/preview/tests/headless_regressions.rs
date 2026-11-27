@@ -28089,7 +28089,7 @@ fn code_and_duration_inputs_traverse_on_tab_without_mutating() {
 /// dispatch and a host rebuild from those fields.
 ///
 /// Deliberately not claimed: IME, free-form parsing, selection ranges, visual
-/// comparison, or Jetstream admission.
+/// comparison.
 #[test]
 fn duration_input_segments_edit_and_rebuild_the_host_spec() {
     use poodle_adapter::ThemeProvider;
@@ -28445,7 +28445,7 @@ fn time_routing_tree(host: &Arc<TimeRouting>, mounted: &Arc<Mutex<Node>>) -> Nod
 /// Tab traversal, and disabled inertia.
 ///
 /// Deliberately not claimed: IME, locale/12-hour presentation, picker overlays,
-/// visual comparison, or Jetstream admission.
+/// visual comparison.
 #[test]
 fn time_input_segmented_editor_commits_drafts_and_bounds() {
     use poodle_adapter::ThemeProvider;
@@ -29702,8 +29702,7 @@ fn editable_label_commits_on_enter_and_once_through_the_blur_tab_causes() {
 /// focus requests, and terminal effects separate per caller id.
 ///
 /// Deliberately not claimed: browser behavior, application persistence or
-/// validation, OS input-method parity, A1 accessibility execution, V1 pixels,
-/// or Jetstream admission.
+/// validation, OS input-method parity, A1 accessibility execution, or V1 pixels.
 #[test]
 fn editable_label_live_draft_stays_off_the_committed_value() {
     use node_compat::IntoCompatNode;
@@ -30252,7 +30251,7 @@ fn editable_label_live_draft_stays_off_the_committed_value() {
 /// ellipsis crumbs stay inert and are not sequential stops.
 ///
 /// Deliberately not claimed: native URL routing, assistive-technology
-/// coverage, visual comparison, or Jetstream admission.
+/// coverage, visual comparison.
 #[test]
 fn breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard() {
     use poodle_adapter::ThemeProvider;
@@ -30463,7 +30462,7 @@ fn breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard() {
 ///
 /// Deliberately not claimed: Tooltip overlay chrome, web timer/Escape
 /// lifecycle, aria-describedby, assistive-technology coverage, visual
-/// comparison, or Jetstream admission.
+/// comparison.
 #[test]
 fn icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboard() {
     use poodle_node::NodeToggled;
@@ -30896,7 +30895,7 @@ fn icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboar
 ///
 /// Deliberately not claimed: content height animation, exact web transition
 /// timing, trigger snippets, assistive-technology coverage, visual
-/// comparison, or Jetstream admission.
+/// comparison.
 #[test]
 fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
     use poodle_adapter::ThemeProvider;
@@ -31617,7 +31616,7 @@ fn collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_key
 /// and keyboard dispatch with host-owned rebuilds.
 ///
 /// Deliberately not claimed: Select's own mounted ledger cell, navigation
-/// landmark/current-page accessibility, visual comparison, or Jetstream.
+/// landmark/current-page accessibility, visual comparison.
 #[test]
 fn pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard() {
     use poodle_adapter::ThemeProvider;

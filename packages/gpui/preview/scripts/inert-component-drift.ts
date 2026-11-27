@@ -8,9 +8,7 @@
  * an AlertDialog with Confirm and Cancel, a toast with a dismiss — and no host
  * can make any of it do anything.
  *
- * This rule was previously covered from the other end by `drift:clicks`, which
- * drove a real pointer gesture into every Jetstream builder. Its subject was
- * deleted in `ee704699`, and nothing replaced the coverage.
+ * This rule checks source wiring; mounted interaction tests exercise pointer gestures.
  *
  * The rule is deliberately coarse: **at least one** handler, not a name-by-name
  * match. Contract event names and Rust handler names legitimately differ

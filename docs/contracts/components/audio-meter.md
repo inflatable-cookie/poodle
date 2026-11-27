@@ -122,15 +122,6 @@ painter policy.
 Host state pushes aggregate frames through the Rust meter transition. The
 shared renderer consumes only the resulting per-channel VisualState.
 
-## 10a. Jetstream Notes
-
-Jetstream uses the same feed transition and node builder. Its preview clock
-pushes deterministic aggregate frames rather than audio-rate samples.
-
-`MeterSurface` has no native component counterpart. Native backends already
-batch AudioMeter nodes in their renderer scene; this is an accepted
-mechanism-only web delta, not missing observable behavior.
-
 ## 11. Parity Checklist
 
 - identical constants, RMS window, peak hold, decay, and clip latch

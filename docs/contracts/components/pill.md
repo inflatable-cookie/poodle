@@ -515,7 +515,6 @@ comfortable `min-width 0.2727em` / `padding-y 0.0909em` / `padding-x 0.1818em`.)
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | `color-mix` implementation | GPUI may pre-compute blended colors rather than using CSS `color-mix` | allowed | ensure visual equivalence across themes |
-| Jetstream mono font styling | current Jetstream `JsEl` text surface does not expose font-family or letter-spacing controls | allowed | implement text-family and tracking support in Jetstream, then apply `font="mono"` literally |
 
 ## 13. Specimen Definitions
 

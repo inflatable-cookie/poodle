@@ -1,7 +1,6 @@
 //! Progress — determinate bar or indeterminate 40% affordance.
 //!
 //! Contract: docs/contracts/components/progress.md
-//! Ported from: packages/jetstream/components/src/progress.rs.
 
 use poodle_node::{
     AnimEasing, AnimKeyframe, AnimLoop, AnimProperty, LayoutDirection, LayoutOverflow, Node,

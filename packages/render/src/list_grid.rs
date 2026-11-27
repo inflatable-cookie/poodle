@@ -1,7 +1,7 @@
 //! ListGrid — responsive card/tile layout.
 //!
 //! Contract: `docs/contracts/components/list-grid.md`
-//! Ported from: `packages/jetstream/components/src/list_grid.rs`.
+
 //! `flex_wrap` with per-cell min-width + flex:1 approximates CSS
 //! `auto-fill` / `minmax`.
 

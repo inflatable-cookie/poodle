@@ -1,7 +1,7 @@
 //! ListCardCounter — icon + count for list card footers.
 //!
 //! Contract: `docs/contracts/components/list-card-counter.md`
-//! Ported from: `packages/jetstream/components/src/list_card_counter.rs`.
+
 //!
 //! `href`: no anchor widget — linked styling (pointer cursor, hover colour)
 //! matches the contract's linked state; navigation is a shell concern.

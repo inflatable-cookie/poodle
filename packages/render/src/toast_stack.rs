@@ -1,7 +1,7 @@
 //! ToastStack — toast notification stack.
 //!
 //! Contract: `docs/contracts/components/toast-stack.md`
-//! Ported from: `packages/jetstream/components/src/toast_stack.rs`.
+
 //!
 //! Each toast: leading tone accent bar, title + optional message, optional
 //! Button action, Icon-backed dismiss button, tone-tinted gradient fill, and

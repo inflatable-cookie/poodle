@@ -1,7 +1,7 @@
 //! ScrollShell — scrollable container.
 //!
 //! Contract: `docs/contracts/components/scroll-shell.md`
-//! Ported from: `packages/jetstream/components/src/scroll_shell.rs`.
+
 //!
 //! Three-layer anatomy per contract §2:
 //!   Root      → clip boundary: radius-surface
