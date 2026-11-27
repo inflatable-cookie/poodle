@@ -807,9 +807,16 @@
 "test:headless-theme-resolver" = "sh scripts/rust-driver.sh test --manifest-path packages/contracts/headless/Cargo.toml --test theme_resolver_conformance"
 "check:headless-theme-resolver" = "sh scripts/rust-driver.sh check --manifest-path packages/contracts/headless/Cargo.toml"
 "test:listbox-spec" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/contracts/components/Cargo.toml listbox::tests"
-# poodle#200 / i-362ac535a6740c52e0bf43d372882f72: keep the GPUI mounted
-# regression target type-checked on every Rust PR without running its tests.
-"check:gpui-headless-regressions" = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions"
+# poodle#200 / i-362ac535a6740c52e0bf43d372882f72: compile every GPUI and
+# render test target on each Rust PR without running native tests. GPUI's Linux
+# font-kit build normally probes fontconfig with pkg-config; the dlopen mode
+# keeps this compile-only gate usable on the stock Ubuntu PR runner.
+"check:gpui-render-test-targets" = [
+  { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/preview/Cargo.toml", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
+  { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/adapter/Cargo.toml", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
+  { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/gpui/node-backend/Cargo.toml", env = { RUST_FONTCONFIG_DLOPEN = "1" } },
+  { run = "sh scripts/rust-driver.sh test --no-run --quiet --manifest-path packages/render/Cargo.toml" },
+]
 # Fails if the working tree is dirty. Belongs at the END of any gate that
 # runs a write-mode generator.
 #
@@ -923,7 +930,7 @@
 "ci:rust" = [
   { task = "test:contracts" },
   { task = "test:specimens" },
-  { task = "check:gpui-headless-regressions" },
+  { task = "check:gpui-render-test-targets" },
   { task = "check:backend-neutral" },
   { task = "ir:check" },
   { task = "catalogue:check" },
