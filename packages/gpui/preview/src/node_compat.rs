@@ -3129,6 +3129,8 @@ impl ModelPicker {
                     .expect("ModelPicker renderer keeps the composed Select trigger first");
                 let activate = Arc::clone(&handler);
                 trigger.interaction.on_activate = Some(Arc::new(move || activate(!is_open)));
+                let submit = Arc::clone(&handler);
+                trigger.interaction.on_submit = Some(Arc::new(move || submit(!is_open)));
                 if is_open {
                     trigger.interaction.on_dismiss = Some(Arc::new(move |reason| {
                         if reason != poodle_node::DismissReason::Outside || dismiss_on_outside {
