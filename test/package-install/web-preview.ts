@@ -48,7 +48,7 @@ import {
 } from "./scope";
 import { assertWebPreviewScope } from "./web-candidate";
 import { materializeCertificationCheckout } from "./clean-checkout";
-import { outputIncludes } from "./strip-ansi";
+import { runTypeProof, type TypeProofCase } from "./type-proof";
 
 const repoRoot = resolve(import.meta.dir, "../..");
 // macOS tmpdir is `/var/folders/...` → `/private/var/folders/...`. tsc
@@ -544,116 +544,18 @@ ${coreImportChecks}
 const PACKED_TYPE_PROOF_DIR = "packed-types";
 const PACKED_TYPE_PROOF_DIAGNOSTIC =
   "error TS2339: Property 'branchCount' does not exist on type 'HistoryEntry'.";
-/** Anything that would turn an expected failure into a silent pass. */
-const SUPPRESSION_MARKERS = ["@ts-expect-error", "@ts-ignore", "as any", ": any"];
-
-type PackedTypeCompile = {
-  config: string;
-  exitCode: number;
-  output: string;
-};
-
-async function runTypeCompile(
-  consumerRoot: string,
-  compiler: string,
-  config: string,
-): Promise<PackedTypeCompile> {
-  const env = { ...globalThis.process.env };
-  delete env.FORCE_COLOR;
-  const process = Bun.spawn([compiler, "--project", join(PACKED_TYPE_PROOF_DIR, config)], {
-    cwd: consumerRoot,
-    stdout: "pipe",
-    stderr: "pipe",
-    env,
-  });
-  const [stdout, stderr, exitCode] = await Promise.all([
-    new Response(process.stdout).text(),
-    new Response(process.stderr).text(),
-    process.exited,
-  ]);
-  return { config, exitCode, output: `${stdout}${stderr}`.trim() };
-}
-
-function assertUnsuppressed(consumerRoot: string, file: string): void {
-  // Raw source, comments included: `@ts-expect-error` IS a comment, so a guard
-  // that strips comments first can never see the thing it exists to catch.
-  // The fixture banners are written to avoid these literals for that reason.
-  const source = readFileSync(join(consumerRoot, PACKED_TYPE_PROOF_DIR, file), "utf8");
-  const found = SUPPRESSION_MARKERS.filter((marker) => source.includes(marker));
-  if (found.length > 0) {
-    throw new Error(
-      `${file} suppresses its expected failure (${found.join(", ")}); the negative proof would pass for the wrong reason`,
-    );
-  }
-}
-
-async function provePackedHistoryEntryTypes(
-  consumerRoot: string,
-): Promise<Record<string, unknown>> {
-  const compiler = join(consumerRoot, "node_modules", ".bin", "tsc");
-  if (!existsSync(compiler)) {
-    throw new Error(
-      "the packed consumer did not install a TypeScript compiler; the v3 type proof cannot run",
-    );
-  }
-
-  const positive = await runTypeCompile(consumerRoot, compiler, "tsconfig.positive.json");
-  if (positive.exitCode !== 0 || positive.output.length > 0) {
-    throw new Error(
-      `packed HistoryEntry positive proof failed on the installed tarball:\n${positive.output}`,
-    );
-  }
-
-  const negatives = [
-    {
-      importPath: "@inflatable-cookie/poodle-svelte",
-      file: "history-entry-root-negative.ts",
-      config: "tsconfig.root-negative.json",
-    },
-    {
-      importPath: "@inflatable-cookie/poodle-svelte/types",
-      file: "history-entry-types-negative.ts",
-      config: "tsconfig.types-negative.json",
-    },
-  ] as const;
-
-  const negativeEvidence = [];
-  for (const negative of negatives) {
-    assertUnsuppressed(consumerRoot, negative.file);
-    const compile = await runTypeCompile(consumerRoot, compiler, negative.config);
-    if (compile.exitCode === 0) {
-      throw new Error(
-        `packed ${negative.importPath} still accepts the retired v2 branchCount field`,
-      );
-    }
-    if (!outputIncludes(compile.output, PACKED_TYPE_PROOF_DIAGNOSTIC)) {
-      throw new Error(
-        `packed ${negative.importPath} rejected branchCount with the wrong diagnostic:\n${compile.output}`,
-      );
-    }
-    if (!outputIncludes(compile.output, negative.file)) {
-      throw new Error(
-        `packed ${negative.importPath} reported its diagnostic against another file:\n${compile.output}`,
-      );
-    }
-    negativeEvidence.push({
-      importPath: negative.importPath,
-      file: negative.file,
-      exitCode: compile.exitCode,
-      diagnostic: compile.output,
-      suppressed: false,
-    });
-  }
-
+async function provePackedHistoryEntryTypes(consumerRoot: string): Promise<Record<string, unknown>> {
+  const cases = [
+    { outcome: "pass", file: "history-entry-positive.ts", config: "tsconfig.positive.json" },
+    { outcome: "fail", importPath: "@inflatable-cookie/poodle-svelte", file: "history-entry-root-negative.ts", config: "tsconfig.root-negative.json", diagnostic: PACKED_TYPE_PROOF_DIAGNOSTIC },
+    { outcome: "fail", importPath: "@inflatable-cookie/poodle-svelte/types", file: "history-entry-types-negative.ts", config: "tsconfig.types-negative.json", diagnostic: PACKED_TYPE_PROOF_DIAGNOSTIC },
+  ] satisfies TypeProofCase[];
+  const result = await runTypeProof(consumerRoot, cases);
   return {
     compiler: "consumer/node_modules/.bin/tsc",
-    importPaths: negatives.map((negative) => negative.importPath),
-    positive: {
-      file: "history-entry-positive.ts",
-      exitCode: positive.exitCode,
-      diagnostics: [],
-    },
-    expectedFailures: negativeEvidence,
+    importPaths: result.negatives.map((item) => item.importPath),
+    positive: result.positives[0],
+    expectedFailures: result.negatives,
     sourceImports: false,
     workspaceAliases: false,
     declarationTextSubstitute: false,
@@ -665,13 +567,6 @@ const PACKED_SLIDER_VARIANT_DIAGNOSTIC = 'Type \'"standard"\' is not assignable'
 async function provePackedSliderVariantTypes(
   consumerRoot: string,
 ): Promise<Record<string, unknown>> {
-  const compiler = join(consumerRoot, "node_modules", ".bin", "tsc");
-  if (!existsSync(compiler)) {
-    throw new Error(
-      "the packed consumer did not install a TypeScript compiler; the SliderVariant type proof cannot run",
-    );
-  }
-
   const installedReactTypes = join(
     consumerRoot,
     "node_modules",
@@ -703,15 +598,6 @@ async function provePackedSliderVariantTypes(
       config: "tsconfig.slider-react-positive.json",
     },
   ] as const;
-  for (const item of [...publicPositives, ...mappedReactPositives]) {
-    const compile = await runTypeCompile(consumerRoot, compiler, item.config);
-    if (compile.exitCode !== 0 || compile.output.length > 0) {
-      throw new Error(
-        `packed SliderVariant positive proof failed on the installed tarball (${item.file}):\n${compile.output}`,
-      );
-    }
-  }
-
   const publicNegatives = [
     {
       importPath: "@inflatable-cookie/poodle-svelte",
@@ -731,32 +617,11 @@ async function provePackedSliderVariantTypes(
       config: "tsconfig.slider-react-negative.json",
     },
   ] as const;
-  const negativeEvidence = [];
-  for (const negative of [...publicNegatives, ...mappedReactNegatives]) {
-    assertUnsuppressed(consumerRoot, negative.file);
-    const compile = await runTypeCompile(consumerRoot, compiler, negative.config);
-    if (compile.exitCode === 0) {
-      throw new Error(`packed ${negative.importPath} still accepts the removed "standard" variant`);
-    }
-    if (!outputIncludes(compile.output, PACKED_SLIDER_VARIANT_DIAGNOSTIC)) {
-      throw new Error(
-        `packed ${negative.importPath} rejected "standard" with the wrong diagnostic:\n${compile.output}`,
-      );
-    }
-    if (!outputIncludes(compile.output, negative.file)) {
-      throw new Error(
-        `packed ${negative.importPath} reported its diagnostic against another file:\n${compile.output}`,
-      );
-    }
-    negativeEvidence.push({
-      importPath: negative.importPath,
-      file: negative.file,
-      exitCode: compile.exitCode,
-      diagnostic: compile.output,
-      suppressed: false,
-      compilerPathsMapped: false,
-    });
-  }
+  const result = await runTypeProof(consumerRoot, [
+    ...[...publicPositives, ...mappedReactPositives].map((item) => ({ ...item, outcome: "pass" as const })),
+    ...[...publicNegatives, ...mappedReactNegatives].map((item) => ({ ...item, outcome: "fail" as const, diagnostic: PACKED_SLIDER_VARIANT_DIAGNOSTIC })),
+  ]);
+  const negativeEvidence = result.negatives.map((item) => ({ ...item, compilerPathsMapped: false }));
   return {
     compiler: "consumer/node_modules/.bin/tsc",
     importPaths: [...publicNegatives, ...mappedReactNegatives].map(
@@ -895,13 +760,6 @@ async function proveInstalledReactPublicRoot(
 async function provePackedTreeReorderTypes(
   consumerRoot: string,
 ): Promise<Record<string, unknown>> {
-  const compiler = join(consumerRoot, "node_modules", ".bin", "tsc");
-  if (!existsSync(compiler)) {
-    throw new Error(
-      "the packed consumer did not install a TypeScript compiler; the Tree reorder type proof cannot run",
-    );
-  }
-
   const installedReactTypes = join(
     consumerRoot,
     "node_modules",
@@ -922,15 +780,6 @@ async function provePackedTreeReorderTypes(
   const mappedReactPositives = [
     { file: "tree-reorder-react-positive.ts", config: "tsconfig.tree-react-positive.json" },
   ] as const;
-  for (const item of [...publicPositives, ...mappedReactPositives]) {
-    const compile = await runTypeCompile(consumerRoot, compiler, item.config);
-    if (compile.exitCode !== 0 || compile.output.length > 0) {
-      throw new Error(
-        `packed Tree reorder positive proof failed on the installed tarball (${item.file}):\n${compile.output}`,
-      );
-    }
-  }
-
   const publicNegatives = [
     {
       importPath: "@inflatable-cookie/poodle-svelte",
@@ -956,35 +805,11 @@ async function provePackedTreeReorderTypes(
     },
   ] as const;
 
-  const negativeEvidence = [];
-  for (const negative of [...publicNegatives, ...mappedReactNegatives]) {
-    assertUnsuppressed(consumerRoot, negative.file);
-    const compile = await runTypeCompile(consumerRoot, compiler, negative.config);
-    if (compile.exitCode === 0) {
-      throw new Error(
-        `packed ${negative.importPath} still accepts reorderAuthority together with onReorder`,
-      );
-    }
-    if (!outputIncludes(compile.output, PACKED_TREE_REORDER_DIAGNOSTIC)) {
-      throw new Error(
-        `packed ${negative.importPath} rejected the exclusive union with the wrong diagnostic:\n${compile.output}`,
-      );
-    }
-    if (!outputIncludes(compile.output, negative.file)) {
-      throw new Error(
-        `packed ${negative.importPath} reported its diagnostic against another file:\n${compile.output}`,
-      );
-    }
-    negativeEvidence.push({
-      importPath: negative.importPath,
-      file: negative.file,
-      exitCode: compile.exitCode,
-      diagnostic: compile.output,
-      suppressed: false,
-      compilerPathsMapped: false,
-    });
-  }
-
+  const result = await runTypeProof(consumerRoot, [
+    ...[...publicPositives, ...mappedReactPositives].map((item) => ({ ...item, outcome: "pass" as const })),
+    ...[...publicNegatives, ...mappedReactNegatives].map((item) => ({ ...item, outcome: "fail" as const, diagnostic: PACKED_TREE_REORDER_DIAGNOSTIC })),
+  ]);
+  const negativeEvidence = result.negatives.map((item) => ({ ...item, compilerPathsMapped: false }));
   return {
     compiler: "consumer/node_modules/.bin/tsc",
     importPaths: [...publicNegatives, ...mappedReactNegatives].map((negative) => negative.importPath),
@@ -1005,7 +830,7 @@ async function provePackedTreeReorderTypes(
       sourceImports: false,
       workspaceAliases: false,
     },
-    reactPublicRoot: await proveInstalledReactPublicRoot(consumerRoot, compiler),
+    reactPublicRoot: await proveInstalledReactPublicRoot(consumerRoot, result.compiler),
     expectedFailures: negativeEvidence,
     sourceImports: false,
     workspaceAliases: false,

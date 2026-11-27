@@ -305,6 +305,8 @@
   { run = "bunx vitest run" },
 ]
 "test:web-pack-install" = "bun test/package-install/web-preview.ts"
+"test:web-type-proof" = "bun test test/package-install/type-proof.test.ts"
+"check:web-type-proof" = "bunx tsc --ignoreConfig --noEmit --strict --target ES2022 --module ESNext --moduleResolution Bundler --types node --skipLibCheck node_modules/.bun/bun-types@1.4.2/node_modules/bun-types/index.d.ts test/package-install/type-proof.ts test/package-install/type-proof.test.ts"
 "check:web-pack-install-roster" = "bunx tsc --ignoreConfig --noEmit --strict --target ES2022 --module ESNext --moduleResolution Bundler --types node test/package-install/roster.ts"
 # Compatibility selector for existing downstream handoffs and historical docs.
 "test:svelte-pack-install" = [{ task = "test:web-pack-install" }]
