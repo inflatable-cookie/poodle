@@ -1,7 +1,6 @@
 //! Floating overlay utility — positions a surface element relative to an
 //! anchor.
 //!
-
 //! A relative wrapper anchors the absolute surface; the surface is taken out
 //! of flow and positioned using `anchor_h` / `anchor_w` estimates supplied by
 //! the caller.

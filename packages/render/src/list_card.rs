@@ -1,7 +1,6 @@
 //! ListCard — one row-card in a list.
 //!
 //! Contract: `docs/contracts/components/list-card.md`
-
 //!
 //! Anatomy (contract §2):
 //!

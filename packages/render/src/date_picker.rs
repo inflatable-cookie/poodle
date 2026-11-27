@@ -1,7 +1,6 @@
 //! DatePicker — a trigger and a calendar popover.
 //!
 //! Contract: `docs/contracts/components/date-picker.md`
-
 //!
 //! Open/close, outside-click dismissal, Escape and calendar selection are
 //! host-owned; the component renders at the current spec state

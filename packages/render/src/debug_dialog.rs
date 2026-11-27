@@ -1,7 +1,6 @@
 //! DebugDialog — debug-data disclosure.
 //!
 //! Contract: `docs/contracts/components/debug-dialog.md`
-
 //!
 //! Renders a trigger button when a value is present. The dialog is host-owned
 //! (`open`): Svelte keeps the trigger mounted and opens the Dialog from it.

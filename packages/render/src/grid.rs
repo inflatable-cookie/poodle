@@ -1,7 +1,6 @@
 //! Grid — grid layout emulated as a flex-wrap container.
 //!
 //! Contract: `docs/contracts/components/grid.md`
-
 //!
 //! Column tracks drive per-child flex:
 //!   - `Fr` tracks → zero-basis children divide free space by declared weight.

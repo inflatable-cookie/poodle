@@ -1,7 +1,6 @@
 //! RangeSlider — a low and a high value along one track.
 //!
 //! Contract: `docs/contracts/components/range-slider.md`
-
 //!
 //! Reports both values together: the pair is the value. Each thumb drags
 //! separately; only the thumbs are draggable, not the window between them.

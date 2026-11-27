@@ -1,7 +1,6 @@
 //! BulkActionBar — contextual selection bar.
 //!
 //! Contract: `docs/contracts/components/bulk-action-bar.md`
-
 //!
 //! Anatomy (contract §2):
 //! ```text

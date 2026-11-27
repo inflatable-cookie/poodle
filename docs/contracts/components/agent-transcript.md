@@ -392,7 +392,8 @@ block's own height.
 - GPUI remains unwindowed for now. That affects materialization cost, not the
   detached-scroll state machine or the rendered order.
 - Markdown renders from `poodle-markdown` blocks, not from HTML.
-- `AgentTranscript::from_spec(spec, theme)` forwards four events — `.on_tool_run_toggle(...)`, `.on_tool_call_toggle(...)`,
+- `AgentTranscript::from_spec(spec, theme)` forwards four events:
+  `.on_tool_run_toggle(...)`, `.on_tool_call_toggle(...)`,
   `.on_changed_files_toggle(...)`, `.on_file_select(...)` — into whichever
   block raises them. A host attaches at the transcript, not the blocks.
 

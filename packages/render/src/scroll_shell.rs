@@ -1,7 +1,6 @@
 //! ScrollShell — scrollable container.
 //!
 //! Contract: `docs/contracts/components/scroll-shell.md`
-
 //!
 //! Three-layer anatomy per contract §2:
 //!   Root      → clip boundary: radius-surface

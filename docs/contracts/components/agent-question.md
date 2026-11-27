@@ -293,10 +293,14 @@ composer owns the editor, the toolbar and the submit control; see
 
 ## 12. GPUI Notes
 
-- GPUI wires click handlers through `cx.listener`.
-- `onSelect` carries the option value, not its label.
-- Selection state is the host’s; the shared headless core owns selection transitions.
-- Digit shortcuts are host-event-loop work.
+- GPUI wires real click handlers, taking `.on_select` and `.on_dismiss`
+  through `cx.listener`.
+- `onSelect` carries the option's **value**, not its label: the label is what
+  the reader sees and hosts localise it.
+- Selection state is the host's. A click is reported as a click; turning it into
+  the next selection is `toggleQuestionSelection` from the shared headless core,
+  which keeps single- and multi-select identical across targets.
+- No digit shortcuts: key handling is host-event-loop work.
 
 ## 13. Parity Checklist
 

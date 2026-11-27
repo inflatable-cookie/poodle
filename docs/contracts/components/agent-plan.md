@@ -235,7 +235,9 @@ Region.
 
 ## 12. GPUI Notes
 
-Deferred. Svelte is the reference implementation and the React mirror landed; the shared headless core, conformance vectors, specs, and `poodle-render` functions already exist, so a native variant is wiring. See §14.
+Deferred. Svelte is the reference implementation and the React mirror landed; the shared headless core, the conformance vectors, the spec
+structs and the `poodle-render` functions (`agent_plan`, `agent_plan_record`)
+already land, so a native variant is wiring, not design. See §14.
 
 ## 13. Parity Checklist
 

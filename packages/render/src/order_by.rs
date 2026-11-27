@@ -1,7 +1,6 @@
 //! OrderBy — ordered list of sort fields behind a trigger.
 //!
 //! Contract: `docs/contracts/components/order-by.md`
-
 //!
 //! The contract has a single `onChange` carrying the whole ordering. A pointer
 //! click produces one of two intents on one row, so that is what those events

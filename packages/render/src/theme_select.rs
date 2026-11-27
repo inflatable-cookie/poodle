@@ -1,7 +1,6 @@
 //! ThemeSelect — a grid of theme swatches behind a trigger.
 //!
 //! Contract: `docs/contracts/components/theme-select.md`
-
 //!
 //! Swatch hexes land in sRGB and linearise at the adapter edge — the same
 //! endpoint as the reference tier's explicit `to_linear` conversion.

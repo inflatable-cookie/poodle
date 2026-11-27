@@ -1,7 +1,6 @@
 //! AgentQuestionRecord — the read-only record an answered question leaves.
 //!
 //! Contract: `docs/contracts/components/agent-question-record.md`
-
 //!
 //! No handlers, and that is the component: an answer the agent already has
 //! cannot be changed from the transcript, so there is nothing to click.

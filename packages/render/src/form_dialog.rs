@@ -1,7 +1,6 @@
 //! FormDialog — dialog wrapping a form workflow.
 //!
 //! Contract: `docs/contracts/components/form-dialog.md`
-
 //!
 //! Composes `dialog` (shell: backdrop + panel + header + close + separator),
 //! `form_layout` (body: fields + error/success callouts), and `button` /

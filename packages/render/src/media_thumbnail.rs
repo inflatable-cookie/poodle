@@ -1,7 +1,6 @@
 //! MediaThumbnail — framed preview surface with badge/play/state overlays.
 //!
 //! Contract: `docs/contracts/components/media-thumbnail.md`
-
 //!
 //! No image decode in the node tier either: the `ready` frame always shows
 //! the token-resolved fallback icon. Height derives from the aspect ratio

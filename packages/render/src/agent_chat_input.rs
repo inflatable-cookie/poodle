@@ -1,7 +1,6 @@
 //! AgentChatInput — the composer: field, attachments, toolbar, action.
 //!
 //! Contract: `docs/contracts/components/agent-chat-input.md`
-
 //!
 //! The editor is render-only here (value or placeholder as text); editing,
 //! caret and focus are host concerns on every native target.

@@ -1,7 +1,6 @@
 //! Calendar — a month grid with navigation.
 //!
 //! Contract: `docs/contracts/components/calendar.md`
-
 //!
 //! Anatomy (contract §2):
 //! ```text

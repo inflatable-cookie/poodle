@@ -1,7 +1,6 @@
 //! SplitView — two panes with a resize divider and collapse toggles.
 //!
 //! Contract: `docs/contracts/components/split-view.md`
-
 //!
 //! Composes the real `resize_handle` divider and (when enabled) the real
 //! `collapse_toggle` buttons. The handle takes the split orientation

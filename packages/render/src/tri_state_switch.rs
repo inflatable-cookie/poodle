@@ -1,7 +1,6 @@
 //! TriStateSwitch — ternary exclude/default/include switch.
 //!
 //! Contract: `docs/contracts/components/tri-state-switch.md`
-
 //!
 //! The "Selection" capsule is realized by painting the active segment's own
 //! fill + border + shadow stack (no abstractly-positioned slider). The

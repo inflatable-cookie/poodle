@@ -44,6 +44,16 @@ the target:
   expanded state, Checkbox's mixed-state distinction, and ID-based
   relationships remain unverified.
 
+### The rule for native components
+
+**A spec's `aria_label` names the component as a whole, so it belongs on that
+component's root element and nowhere else.** A component that composes another
+forwards the spec and lets the inner component attach it; adding it in both
+places announces the name twice.
+
+A text label or button can be named by its own text; an icon-only control
+needs an explicit label.
+
 ## Update 2026-09-05
 
 Upstream gpui merged AccessKit on 2026-05-27 (zed-industries/zed#56065).

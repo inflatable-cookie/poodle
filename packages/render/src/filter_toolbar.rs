@@ -1,7 +1,6 @@
 //! FilterToolbar — collapsible filter header + responsive controls grid.
 //!
 //! Contract: `docs/contracts/components/filter-toolbar.md`
-
 //!
 //! - `children`: filter controls laid out in a responsive grid
 //! - `actions`: optional element rendered in the header row

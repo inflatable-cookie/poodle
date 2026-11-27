@@ -1,7 +1,6 @@
 //! CardToggleGroup — multi-select card group in a capped-column grid.
 //!
 //! Contract: `docs/contracts/components/card-toggle-group.md`
-
 //!
 //! Options lay out in a responsive auto-fit grid: each cell seeds just under
 //! a `1/columns` share of the row, grows to fill it, and wraps onto the next

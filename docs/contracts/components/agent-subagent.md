@@ -257,9 +257,17 @@ status and lines update, and terminal statuses settle it in place.
 
 ## 11. Shared Rust And GPUI Notes
 
-The shared headless core owns the status vocabulary, terminal mapping, and spinner mapping. `AgentSubagentSpec` carries the item, disclosure state, detail lines, labels, size and density. `poodle-render::agent_subagent` renders the static header, body, detail and action structure and accepts native handlers. Without a handler the labeled open action has no activation callback.
+The shared headless core owns the status vocabulary, terminal mapping, and
+spinner mapping. `AgentSubagentSpec` carries the item, disclosure state, detail
+lines, labels, size and density. `poodle-render::agent_subagent` renders the
+same static header/body/detail/action structure and accepts native handlers.
+Its current native behavior emits the labeled open action even without an open
+handler; without a handler it has no activation callback.
 
-The GPUI preview uses `node_compat::AgentSubagent::from_spec` and the shared renderer for its running, waiting, completed, failed, unknown, size and density specimens.
+The GPUI preview uses `node_compat::AgentSubagent::from_spec` and the shared
+renderer for its running, waiting, completed, failed, unknown, size and
+density specimens. It is a shipped static composition path, not a deferred
+variant.
 
 ## 12. Parity Checklist
 

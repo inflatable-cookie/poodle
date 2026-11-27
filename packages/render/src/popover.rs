@@ -2,7 +2,6 @@
 //! state).
 //!
 //! Contract: `docs/contracts/components/popover.md`
-
 //!
 //! The composition owns the whole portable overlay profile: a fixed-size
 //! trigger, the conditional dialog surface, stable part identity, accessibility

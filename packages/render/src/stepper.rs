@@ -1,7 +1,6 @@
 //! Stepper — the route through a wizard process.
 //!
 //! Contract: `docs/contracts/components/stepper.md`
-
 //!
 //! Status is read from the step, never from its index — a step that ran and
 //! failed renders as failed wherever it sits. The rerun control sits OUTSIDE

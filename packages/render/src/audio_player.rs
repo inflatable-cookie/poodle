@@ -1,7 +1,6 @@
 //! AudioPlayer — transport row with seek/volume bars.
 //!
 //! Contract: `docs/contracts/components/audio-player.md`
-
 //!
 //! Seek and volume are Progress nodes (true proportional fills); transport
 //! and mute are icon circles. Click/drag wiring is host-owned.

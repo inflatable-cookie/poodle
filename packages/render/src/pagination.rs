@@ -1,7 +1,6 @@
 //! Pagination — pages, arrows and bounds.
 //!
 //! Contract: `docs/contracts/components/pagination.md`
-
 //!
 //! Anatomy (per contract §2):
 //! ```text

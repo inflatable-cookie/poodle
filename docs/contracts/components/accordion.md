@@ -331,6 +331,7 @@ static/opacity approximation from architecture 012; that remains a visual gap.
 - The instance id is lifetime-stable construction data, not an item value or
   render-order fallback. Trigger and panel runtime ids derive from it plus the
   authored item value.
+- The whole header row is the trigger, not just the chevron.
 - GPUI must expose button role with expanded state on each trigger
 - Region association between trigger and panel must be maintained
 - Group role required in multiple mode

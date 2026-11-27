@@ -1,7 +1,6 @@
 //! Table — structured data table shell with header, rows, caption/empty.
 //!
 //! Contract: `docs/contracts/components/table.md`
-
 //!
 //! All visual properties resolve from tokens; size scales typography +
 //! vertical padding, density scales horizontal padding.

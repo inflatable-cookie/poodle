@@ -1,7 +1,6 @@
 //! DateTimeRangePicker — a trigger and a range-calendar + paired-times popover.
 //!
 //! Contract: `docs/contracts/components/date-time-range-picker.md`
-
 //!
 //! Same shell as the sibling pickers; the open surface stacks a range-mode
 //! calendar over a two-column START/END time row. Display text: each end

@@ -1,7 +1,6 @@
 //! EmbedInput — URL input with parsed embed preview pills.
 //!
 //! Contract: `docs/contracts/components/embed-input.md`
-
 //!
 //! Composes the real `text_input` primitive (multiline, rows=3) and the real
 //! `pill` provider chip — no hand-styled fakes.

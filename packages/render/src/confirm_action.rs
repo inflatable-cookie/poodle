@@ -1,7 +1,6 @@
 //! ConfirmAction — a trigger that opens a confirm dialog.
 //!
 //! Contract: `docs/contracts/components/confirm-action.md`
-
 //!
 //! Owns only the trigger/tone wiring and delegates every dialog and button
 //! visual to the composed primitives, so it never re-implements (and never

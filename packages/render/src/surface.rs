@@ -1,7 +1,6 @@
 //! Surface — themed container.
 //!
 //! Contract: `docs/contracts/components/surface.md` (+ `surface-elevation.md`)
-
 //!
 //! All fills, the border color/width, the radius, and the elevation treatment
 //! resolve from tokens or `SurfaceSpec` methods. The CSS color-mix

@@ -1,7 +1,6 @@
 //! SelectionSummary — chip row for a selection, with overflow and clear.
 //!
 //! Contract: `docs/contracts/components/selection-summary.md`
-
 //!
 //! Chip/overflow fills and stacked borders follow the old GPUI tier's
 //! elevated fill and reduced-alpha border recipe.

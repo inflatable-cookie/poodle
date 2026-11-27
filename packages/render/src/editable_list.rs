@@ -1,7 +1,6 @@
 //! EditableList — rows with remove, an add row, and edit actions.
 //!
 //! Contract: `docs/contracts/components/editable-list.md`
-
 //!
 //! Renders the contract anatomy (§2): an optional workflow header (cancel /
 //! submit `button` primitives), optional error / info banners, the item list

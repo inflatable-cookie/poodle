@@ -1,7 +1,6 @@
 //! TabStrip — closable/reorderable tab row (horizontal or vertical).
 //!
 //! Contract: `docs/contracts/components/tab-strip.md`
-
 //!
 //! Keyboard nav + selection commit are host-owned; tabs are focusable.
 

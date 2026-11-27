@@ -1,7 +1,6 @@
 //! ToolCall — one row of agent work.
 //!
 //! Contract: `docs/contracts/components/tool-call.md`
-
 //!
 //! Every dimension resolves from the spec's ladder; the only literal is the
 //! hairline the contract states as an absolute.

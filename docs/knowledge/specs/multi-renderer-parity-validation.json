@@ -67,8 +67,7 @@
     },
     "adapter_trait_readiness": {
       "status": "pass",
-      "description": "Adapter trait definitions are published",
-      "deferred": "Adapter implementations are maintained in GPUI"
+      "description": "Adapter trait definitions are published"
     }
   }
 }

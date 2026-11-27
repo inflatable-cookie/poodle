@@ -1,7 +1,6 @@
 //! ResizeHandle — a draggable divider.
 //!
 //! Contract: `docs/contracts/components/resize-handle.md`
-
 //!
 //! `on_resize` carries the drag's per-frame delta along the handle's axis —
 //! pixels, signed. The handle cannot know the panes' sizes, so an absolute

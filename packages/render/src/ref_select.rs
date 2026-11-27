@@ -1,7 +1,6 @@
 //! RefSelect — version-control ref chooser.
 //!
 //! Contract: `docs/contracts/components/ref-select.md`
-
 //!
 //! Anatomy: root → trigger (kind glyph + label + chevron) → dialog surface
 //! (search field, ref list with the current marker, empty/loading footers).

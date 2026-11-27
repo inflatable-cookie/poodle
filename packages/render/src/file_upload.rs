@@ -1,7 +1,6 @@
 //! FileUpload — a drag-and-drop upload zone and its file list.
 //!
 //! Contract: `docs/contracts/components/file-upload.md`
-
 //!
 //! Anatomy (from contract):
 //! ```text

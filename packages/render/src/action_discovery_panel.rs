@@ -1,7 +1,6 @@
 //! ActionDiscoveryPanel — grouped actions with shortcuts.
 //!
 //! Contract: `docs/contracts/components/action-discovery-panel.md`
-
 //!
 //! Renders grouped action sections (Eyebrow heading + action rows), the
 //! active-item accent state, badge/kbd chips, and the loading/error/empty/

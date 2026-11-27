@@ -1,7 +1,6 @@
 //! MediaPicker — media grid behind Browse | Upload tabs.
 //!
 //! Contract: `docs/contracts/components/media-picker.md`
-
 //!
 //! Single-select, select-and-close model. Thumbnail bitmaps are host-owned —
 //! `MediaPickerItem::has_thumbnail` only drives the placeholder-vs-image

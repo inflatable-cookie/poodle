@@ -138,7 +138,9 @@ lifecycle, and drawing remain in the backend.
   Soundcheck is the test consumer for a second style; Loophole is the
   long-term case. The route for the Rust renderers is recorded below and in
   [Q-004](questions.md#q-004--what-is-the-route-for-the-rust-renderers).
-- **Poodle has one native backend, GPUI.** See [system shape](architecture/001-poodle-system-shape.md).
+- **Poodle has one native backend, GPUI.** The 2026-11-27 ruling requires no
+  GPUI fork and one wgpu revision across the GPUI stack and its host. See
+  [system shape](architecture/001-poodle-system-shape.md).
 - **The node tree is the seam between Poodle and a native runtime.**
   Operator ruling 2026-11-25. Poodle owns everything up to the node tree:
   the contracts, tokens, styles, theme resolution, behaviour and the shared

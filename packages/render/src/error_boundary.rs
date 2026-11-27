@@ -1,7 +1,6 @@
 //! ErrorBoundary — error fallback.
 //!
 //! Contract: `docs/contracts/components/error-boundary.md`
-
 //!
 //! When the spec carries an error message, render the EmptyState fallback
 //! (title + message + retry action); otherwise render the wrapped child. The

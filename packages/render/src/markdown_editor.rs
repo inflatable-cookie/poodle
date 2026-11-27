@@ -1,7 +1,6 @@
 //! MarkdownEditor — toolbar + edit/split/preview panes.
 //!
 //! Contract: `docs/contracts/components/markdown-editor.md`
-
 //!
 //! The edit pane is a backend Input node. Keystrokes go through the shared
 //! text-input edit model and report via `on_change`. Toolbar tools apply the
