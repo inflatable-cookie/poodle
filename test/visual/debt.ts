@@ -4,7 +4,8 @@
  * `effigy visual:report` diffs every specimen slug against its React pair and
  * classifies each failing pair against this file: a pair recorded here is
  * known debt and reports as such; any other failing pair is a new regression
- * and fails the report. The strict tiers (`test:visual*`) do not read this
+ * and fails the report, and any recorded entry that now passes fails the
+ * report as stale debt. The strict tiers (`test:visual*`) do not read this
  * file — a gate failure is always a failure.
  *
  * Every entry names its failure class and a written reason. An entry without
@@ -13,14 +14,12 @@
  * Axes are listed explicitly, so an axis added to the sweep fails fresh
  * instead of inheriting debt.
  *
- * Measured 2026-09-27 on the web-gates branch (current main plus type-only
- * React fixes; sweep tier, 344 comparisons): 34 failing pairs across 19
- * slugs — 16 size, 18 pixels, 0 capture — plus two run-to-run flippers
- * found by a second sweep (text-input, embed-preview), recorded on both
- * axes with the evidence. The August figure (53 pairs over 308
- * comparisons) predates the current specimen set.
- * The rendering-style promotion on 2026-11-26 verified the Icon rows
- * against the former opt-in style at fc9b7ad24.
+ * Measured 2026-11-26 on main (after the poodle#189 default-style switch;
+ * sweep tier, 344 comparisons across 172 active slugs): 39 recorded pairs
+ * across 20 slugs — 18 size across 9 slugs, 21 pixels across 11 slugs
+ * (including the 4 intermittent flipper pairs for `color-picker` and
+ * `text-input`), 0 capture. `embed-preview` moved to `SKIPPED` (remote Vimeo
+ * iframe nondeterminism).
  */
 
 export type VisualDebtFailureKind = "capture" | "size" | "pixels";
@@ -31,6 +30,8 @@ export type VisualDebtEntry = {
   /** Axis ids this entry covers, e.g. `eclipse-compact-md`. */
   axes: readonly string[];
   kind: VisualDebtFailureKind;
+  /** True only for non-deterministic flippers; never flagged as stale when passing. */
+  intermittent?: boolean;
   reason: string;
 };
 
@@ -40,28 +41,28 @@ export const DEBT: VisualDebtEntry[] = [
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "pixels",
     reason:
-      "0.37-0.42% of pixels differ on both themes — segment/LED meter rasterization drift; untriaged.",
+      "0.37-0.43% of pixels differ on both themes — segment/LED meter rasterization drift; untriaged.",
   },
   {
     slug: "audio-switch",
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "size",
     reason:
-      "React renders the specimen 40px taller (759 vs 799) — switch-row layout divergence; untriaged.",
+      "React specimen uses inline gap 1.5rem vs Svelte .page gap 1rem across 5 gaps (+40px, 759 vs 799).",
   },
   {
     slug: "avatar",
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "pixels",
     reason:
-      "1.26% — initials glyphs sit at different offsets inside the circle between shells (diff reviewed; image avatars match); untriaged.",
+      "1.25% — initials glyphs sit at different offsets inside the circle between shells (diff reviewed; image avatars match); untriaged.",
   },
   {
     slug: "callout",
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "size",
     reason:
-      "React renders the specimen 11px taller at the same width (1103 vs 1114) — vertical text/spacing divergence; untriaged.",
+      "React SceneSpecimen passes String(undefined) to Callout when content is absent (+27.5px), offset by 0.5rem vs 0.75rem row gap (-16px; net +11px, 1103 vs 1114).",
   },
   {
     slug: "code-editor",
@@ -72,52 +73,46 @@ export const DEBT: VisualDebtEntry[] = [
   },
   {
     slug: "color-picker",
-    axes: ["iceberg-compact-md"],
+    axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "pixels",
+    intermittent: true,
     reason:
-      "0.16% on iceberg only — swatch/track rendering under the low-contrast theme; eclipse matches; untriaged.",
+      "0.081-0.092% — intermittent 1px shift on the Default open, RGB mode anchored popover (0.081% on eclipse-compact-md, 0.092% on iceberg-compact-md; passes 0% on clean runs); both sweep axes are recorded; untriaged.",
   },
   {
     slug: "dock-region",
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "pixels",
     reason:
-      "0.94-1.23% — dock stack/splitter geometry drift; untriaged.",
+      "1.13-1.23% — dock stack/splitter geometry drift; untriaged.",
   },
   {
     slug: "drag-number-field",
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "size",
     reason:
-      "React renders the specimen 56px taller (924 vs 980) — control layout divergence; untriaged.",
-  },
-  {
-    slug: "embed-preview",
-    axes: ["eclipse-compact-md", "iceberg-compact-md"],
-    kind: "pixels",
-    reason:
-      "14.6-19.9% — the remote Vimeo iframe paints a different decoded video frame per capture (diff reviewed; player chrome matches). Which theme fails flips between runs; both are recorded. Remote-media nondeterminism, the sweep-comparable cousin of the skipped media specimens; untriaged.",
+      "React specimen uses inline gap 1.5rem vs Svelte .page gap 1rem across 7 gaps (+56px, 924 vs 980).",
   },
   {
     slug: "envelope-editor",
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "size",
     reason:
-      "React renders the specimen 20px shorter (1872 vs 1852) — editor surface height divergence; untriaged.",
+      "React specimen puts the drag note in a horizontal Row (+7px) and omits the keyboard-nudges <p> note (-27px; net -20px, 1872 vs 1852).",
   },
   {
     slug: "fader",
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "pixels",
     reason:
-      "0.12-0.15% — fader track/handle antialiasing; untriaged.",
+      "0.115% — fader track/handle antialiasing; untriaged.",
   },
   {
     slug: "gain-reduction-meter",
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "pixels",
     reason:
-      "0.05% of pixels differ — just above the 0.02% default floor, glyph/canvas-edge antialiasing scale; untriaged.",
+      "0.05-0.10% of pixels differ — just above the 0.02% default floor, glyph/canvas-edge antialiasing scale; untriaged.",
   },
   {
     slug: "icon",
@@ -131,14 +126,14 @@ export const DEBT: VisualDebtEntry[] = [
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "size",
     reason:
-      "Svelte renders the specimen 6px taller than React (992x692 vs 992x686) at compact md on both themes. Measured with the base commit's stylesheets (037ddb7) and unchanged with the poodle#186 stylesheets: listbox.css is not in that change, so the divergence predates it.",
+      "React specimen lacks Svelte's scoped .poodle-listbox-card-detail rule (margin-top 0.25rem, font-size 0.8125rem; -2px across 3 cards = -6px, 692 vs 686).",
   },
   {
     slug: "markdown-renderer",
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "size",
     reason:
-      "React renders the specimen 26px taller (1140 vs 1166) — markdown typography/spacing divergence; untriaged.",
+      "React specimen lacks Svelte's scoped .markdown-renderer-policy-warning rule (margin 0 0 0.5rem, 0.8125rem; falls back to 1em p margins and 16px font = +26px, 1140 vs 1166).",
   },
   {
     slug: "model-connection-setup",
@@ -152,34 +147,35 @@ export const DEBT: VisualDebtEntry[] = [
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "pixels",
     reason:
-      "0.52-0.67% — pill geometry/typography drift; untriaged.",
+      "0.50-0.59% — pill geometry/typography drift; untriaged.",
   },
   {
     slug: "remediation-banner",
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "size",
     reason:
-      "React renders the specimen 32px taller (780 vs 812) — banner layout divergence; untriaged.",
+      "Svelte specimen omits .poodle-specimen flex gap 1rem that React's gallery.css applies across 2 group gaps (+32px, 780 vs 812).",
   },
   {
     slug: "text-input",
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "pixels",
+    intermittent: true,
     reason:
-      "0.07% — glyph rasterization at the default floor's edge; the failing axis flips between consecutive sweeps (iceberg then eclipse on 2026-09-27), so both are recorded; untriaged.",
+      "0.068% — flips between 0% and 0.068% across runs and themes at the third TextInput row; both sweep axes are recorded; untriaged.",
   },
   {
     slug: "validation-summary",
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "size",
     reason:
-      "React renders the specimen 16px taller (553 vs 569) — summary list spacing divergence; untriaged.",
+      "Svelte specimen omits .poodle-specimen flex gap 1rem that React's gallery.css applies across 1 group gap (+16px, 553 vs 569).",
   },
   {
     slug: "value-readout",
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "size",
     reason:
-      "React renders the specimen 64px taller (1031 vs 1095) — the sweep's largest size delta; untriaged.",
+      "React specimen uses inline gap 1.5rem vs Svelte .page gap 1rem across 8 gaps (+64px, 1031 vs 1095).",
   },
 ];

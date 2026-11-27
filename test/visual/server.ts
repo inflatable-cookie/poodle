@@ -1,7 +1,9 @@
 import { spawnSync } from "node:child_process";
+import { realpathSync } from "node:fs";
+import path from "node:path";
 
 import { listeningPidsOnPort } from "../../scripts/port-listeners";
-import { SERVERS, type Framework } from "./config";
+import { REPO_ROOT, SERVERS, type Framework } from "./config";
 
 /**
  * Boots (or reuses) the two vite previews the gate diffs against each other.
@@ -10,11 +12,10 @@ import { SERVERS, type Framework } from "./config";
  * die mid-sweep (its parent shell exits), which shows up as a wall of
  * ERR_CONNECTION_REFUSED captures. `ensureUp` lets the run recover instead.
  *
- * Ports are the fixed visual-baseline pair in `config.ts`. A leftover process
- * on those ports that is not a healthy preview used to swallow `--strictPort`
- * death (stdout ignored) while `waitForPort` polled the squatter's 404s for
- * 60s. Check the listen table before spawn, and print the child output if
- * the spawn dies.
+ * Ports are deterministic per checkout in `config.ts`, and `preparePreviewPort`
+ * checks the listen table before spawning or reusing: a listener whose working
+ * directory is outside this checkout is refused immediately with its owner
+ * named, and spawn failure prints the child output rather than polling 404s.
  */
 
 type OwnedPreview = {
@@ -24,7 +25,25 @@ type OwnedPreview = {
 
 const owned = new Map<Framework, OwnedPreview>();
 
-export type PortOccupant = { pid: number; command: string };
+export type PortOccupant = { pid: number; command: string; cwd: string | null };
+
+function safeRealpath(target: string): string {
+  try {
+    return realpathSync(target);
+  } catch {
+    return path.resolve(target);
+  }
+}
+
+export function isPathInsideRoot(candidate: string, root: string = REPO_ROOT): boolean {
+  const resolvedCandidate = safeRealpath(candidate);
+  const resolvedRoot = safeRealpath(root);
+  const rel = path.relative(resolvedRoot, resolvedCandidate);
+  return (
+    rel === "" ||
+    (rel !== ".." && !rel.startsWith(`..${path.sep}`) && !path.isAbsolute(rel))
+  );
+}
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -41,27 +60,89 @@ export async function isUp(port: number, timeoutMs = 5000): Promise<boolean> {
   }
 }
 
-export function previewPortOccupant(port: number): PortOccupant | null {
-  const pids = listeningPidsOnPort(port);
-  const pid = pids[0];
-  if (pid === undefined) return null;
+export function processCwd(
+  pid: number,
+  spawn: typeof spawnSync = spawnSync,
+): string | null {
+  const result = spawn("lsof", ["-p", String(pid), "-a", "-d", "cwd", "-Fn"], {
+    encoding: "utf8",
+  });
+  if (result.error || result.status !== 0 || result.signal !== null) {
+    return null;
+  }
+  for (const line of (result.stdout ?? "").split("\n")) {
+    if (line.startsWith("n")) {
+      const candidate = line.slice(1).trim();
+      return candidate ? safeRealpath(candidate) : null;
+    }
+  }
+  return null;
+}
+
+function occupantForPid(pid: number): PortOccupant {
   const args = spawnSync("ps", ["-p", String(pid), "-o", "args="], {
     encoding: "utf8",
   });
   const command = args.stdout.trim() || `pid ${pid}`;
-  return { pid, command };
+  return { pid, command, cwd: processCwd(pid) };
+}
+
+export function previewPortOccupant(port: number): PortOccupant | null {
+  const pids = listeningPidsOnPort(port);
+  const pid = pids[0];
+  if (pid === undefined) return null;
+  return occupantForPid(pid);
 }
 
 export function formatOccupiedPreviewPort(port: number, occupant: PortOccupant): string {
+  const cwdNote = occupant.cwd ? `, cwd ${occupant.cwd}` : "";
   return (
-    `visual preview port ${port} is already taken by pid ${occupant.pid} (${occupant.command}); ` +
-    "stop that process. The gate uses the fixed ports in test/visual/config.ts."
+    `visual preview port ${port} is already taken by pid ${occupant.pid} (${occupant.command}${cwdNote}); ` +
+    "stop that process. The gate uses the per-worktree ports in test/visual/config.ts."
+  );
+}
+
+export function formatForeignPreviewPort(
+  port: number,
+  occupant: PortOccupant,
+  checkoutRoot: string = REPO_ROOT,
+): string {
+  const cwdNote = occupant.cwd ?? "unknown";
+  return (
+    `visual preview port ${port} is held by a foreign preview (pid ${occupant.pid}, ` +
+    `cwd ${cwdNote}, ${occupant.command}); expected checkout ${checkoutRoot}. ` +
+    "Stop that process instead of reusing another checkout's preview."
   );
 }
 
 export function assertPreviewPortFree(port: number): void {
   const occupant = previewPortOccupant(port);
   if (occupant) throw new Error(formatOccupiedPreviewPort(port, occupant));
+}
+
+export async function preparePreviewPort(
+  port: number,
+  checkoutRoot: string = REPO_ROOT,
+): Promise<{ action: "reuse"; occupant: PortOccupant } | { action: "spawn" }> {
+  if (await isUp(port)) {
+    const pids = listeningPidsOnPort(port);
+    if (pids.length === 0) {
+      throw new Error(
+        `visual preview port ${port} answered HTTP but no local listener was found for checkout ${checkoutRoot}`,
+      );
+    }
+    let primary: PortOccupant | undefined;
+    for (const pid of pids) {
+      const occupant = occupantForPid(pid);
+      primary ??= occupant;
+      if (!occupant.cwd || !isPathInsideRoot(occupant.cwd, checkoutRoot)) {
+        throw new Error(formatForeignPreviewPort(port, occupant, checkoutRoot));
+      }
+    }
+    return { action: "reuse", occupant: primary! };
+  }
+  assertPreviewPortFree(port);
+  return { action: "spawn" };
 }
 
 export function formatPreviewSpawnFailure(args: {
@@ -141,11 +222,26 @@ export function waitForOwnedPreview(
   );
 }
 
+function killPreviewProcess(proc: ReturnType<typeof Bun.spawn>): void {
+  if (proc.pid) {
+    try {
+      process.kill(-proc.pid, "SIGTERM");
+    } catch {
+      /* process group may already be gone */
+    }
+  }
+  try {
+    proc.kill();
+  } catch {
+    /* already gone */
+  }
+}
+
 function spawnPreview(framework: Framework): OwnedPreview {
   const { cwd, port } = SERVERS[framework];
   const proc = Bun.spawn(
     ["bun", "run", "dev", "--port", String(port), "--strictPort", "--host", "127.0.0.1"],
-    { cwd, stdout: "pipe", stderr: "pipe" },
+    { cwd, stdout: "pipe", stderr: "pipe", detached: true },
   );
   const preview = { proc, output: collectSpawnOutput(proc) };
   owned.set(framework, preview);
@@ -162,13 +258,19 @@ function spawnPreview(framework: Framework): OwnedPreview {
  */
 export async function ensureUp(framework: Framework): Promise<boolean> {
   const { port } = SERVERS[framework];
-  if (await isUp(port)) return false;
+  if (await isUp(port)) {
+    await preparePreviewPort(port);
+    return false;
+  }
   await sleep(2000);
-  if (await isUp(port, 10_000)) return false;
+  if (await isUp(port, 10_000)) {
+    await preparePreviewPort(port);
+    return false;
+  }
 
   const previous = owned.get(framework);
   if (previous) {
-    previous.proc.kill();
+    killPreviewProcess(previous.proc);
     await previous.proc.exited;
     owned.delete(framework);
   }
@@ -190,11 +292,13 @@ export async function startPreviews(): Promise<PreviewServers> {
     const { port } = SERVERS[framework];
     urls[framework] = `http://127.0.0.1:${port}`;
 
-    if (await isUp(port)) {
-      console.log(`  reusing ${framework} preview already on :${port}`);
+    const portState = await preparePreviewPort(port);
+    if (portState.action === "reuse") {
+      console.log(
+        `  reusing ${framework} preview already on :${port} (pid ${portState.occupant.pid})`,
+      );
       continue;
     }
-    assertPreviewPortFree(port);
     spawnPreview(framework);
   }
 
@@ -209,7 +313,7 @@ export async function startPreviews(): Promise<PreviewServers> {
   return {
     urls,
     stop: async () => {
-      for (const item of owned.values()) item.proc.kill();
+      for (const item of owned.values()) killPreviewProcess(item.proc);
       await Promise.all([...owned.values()].map((item) => item.proc.exited));
       owned.clear();
     },

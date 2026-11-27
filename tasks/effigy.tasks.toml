@@ -357,7 +357,7 @@
 # chooser and a dialog are absorbed, and a hung navigation ends at the per-page
 # deadline with a fresh page instead of hanging the run. Needs playwright
 # browsers, so it rides with the visual gate instead of ci:web.
-"test:visual-harness" = "bun test test/visual/session.test.ts"
+"test:visual-harness" = "bun test test/visual/session.test.ts test/visual/report.test.ts"
 # g14.024 batched meter surface: headless Chromium + WebKit behavior matrix over
 # both previews. Needs playwright browsers + vite dev servers; stays out of
 # ci:web like the visual gate.
