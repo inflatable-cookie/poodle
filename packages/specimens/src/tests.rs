@@ -469,12 +469,11 @@ fn select_reduces_closed_to_open_batch_before_repaint() {
     let scope = "select-native";
     let trigger_id = select_trigger_focus_id(scope);
 
-    // On a closed Select, End and Enter alone remain inert.
+    // On a closed Select, End alone remains inert.
     let closed = session.render(Specimen::Select, View::Examples, &ctx);
     let trigger = by_id(&closed, &trigger_id);
     assert_eq!(trigger.a11y.expanded, Some(false));
     trigger.interaction.on_key.as_ref().unwrap()(NodeKey::End, Default::default());
-    trigger.interaction.on_submit.as_ref().unwrap()();
     assert_eq!(session.drain(), (true, vec![]));
     let still_closed = session.render(Specimen::Select, View::Examples, &ctx);
     assert!(!has_text(&still_closed, "Selected: elderberry"));
@@ -502,6 +501,19 @@ fn select_reduces_closed_to_open_batch_before_repaint() {
     let after = session.render(Specimen::Select, View::Examples, &ctx);
     assert!(has_text(&after, "Selected: elderberry"));
     assert_eq!(by_id(&after, &trigger_id).a11y.expanded, Some(false));
+
+    // Enter alone on a closed trigger opens the Select as one ordered action.
+    by_id(&after, &trigger_id)
+        .interaction
+        .on_submit
+        .as_ref()
+        .unwrap()();
+    assert_eq!(
+        session.drain(),
+        (true, vec![Effect::Focus(trigger_id.clone())])
+    );
+    let opened = session.render(Specimen::Select, View::Examples, &ctx);
+    assert_eq!(by_id(&opened, &trigger_id).a11y.expanded, Some(true));
 }
 
 #[test]

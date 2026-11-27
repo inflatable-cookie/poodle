@@ -736,6 +736,71 @@ fn shared_select_mount_applies_focus_effects_and_commits_an_option() {
 }
 
 #[test]
+fn shared_select_mount_batches_closed_to_open_enter_without_reopening() {
+    let _exclusive = NODE_TREE_RENDER.write().unwrap_or_else(|e| e.into_inner());
+    let app = TestAppContext::single();
+    poodle_gpui_node_backend::begin_probe_capture();
+    let (_root, mut cx) = open_stateful_route_window(&app, "select", 1600.0);
+    settle(&mut cx);
+
+    let scope = "select-native";
+    let trigger = poodle_render::select_trigger_focus_id(scope);
+    let handle = poodle_gpui_node_backend::focus_handle_for(&trigger).expect("trigger focus");
+    cx.update(|window, cx| handle.focus(window, cx));
+    settle(&mut cx);
+    assert_eq!(
+        poodle_gpui_node_backend::focus_state_for(&trigger),
+        Some(true)
+    );
+
+    // Send full key-down + key-up for ArrowDown, End, and Enter against the
+    // same closed painted tree without settling between them. Enter key-up
+    // must not synthesize a duplicate click that reopens the Select after
+    // committing the last option.
+    for key in ["down", "end", "enter"] {
+        let keystroke = gpui::Keystroke::parse(key).expect("keystroke parses");
+        cx.simulate_event(gpui::KeyDownEvent {
+            keystroke: keystroke.clone(),
+            is_held: false,
+            prefer_character_input: false,
+        });
+        cx.simulate_event(gpui::KeyUpEvent { keystroke });
+    }
+    settle(&mut cx);
+
+    let option_id = poodle_render::select_option_id(scope, "elderberry");
+    let painted = shared_painted_text("specimen-select-examples");
+    assert!(
+        painted.iter().any(|text| text == "Selected: elderberry"),
+        "closed-to-open batch should commit the last option, saw {painted:?}"
+    );
+    assert!(
+        poodle_gpui_node_backend::bounds_for(&option_id).is_none(),
+        "Enter key-up must not reopen the committed Select, saw {painted:?}"
+    );
+
+    // Pressing Enter (key-down + key-up) on the now-closed trigger opens it
+    // cleanly without double-toggling back closed.
+    let enter = gpui::Keystroke::parse("enter").expect("enter parses");
+    cx.simulate_event(gpui::KeyDownEvent {
+        keystroke: enter.clone(),
+        is_held: false,
+        prefer_character_input: false,
+    });
+    cx.simulate_event(gpui::KeyUpEvent { keystroke: enter });
+    settle(&mut cx);
+
+    let painted = shared_painted_text("specimen-select-examples");
+    assert!(
+        poodle_gpui_node_backend::bounds_for(&option_id).is_some(),
+        "Enter on closed trigger should open the listbox, saw {painted:?}"
+    );
+
+    close_route_window(&mut cx);
+    let _ = poodle_gpui_node_backend::take_probe_capture();
+}
+
+#[test]
 fn shared_data_table_mount_sorts_and_selects_through_pointer_input() {
     let _exclusive = NODE_TREE_RENDER.write().unwrap_or_else(|e| e.into_inner());
     let app = TestAppContext::single();

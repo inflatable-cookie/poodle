@@ -53,6 +53,9 @@ pub enum SelectIntent {
     HighlightFirst,
     HighlightLast,
     CommitHighlighted,
+    /// Enter pressed on the Select trigger: opens when closed, commits the
+    /// highlighted option when open.
+    TriggerSubmit,
     CommitOption {
         value: String,
     },
@@ -107,6 +110,14 @@ pub fn apply_select_intent(
             } else {
                 run_event(context, SelectEvent::CommitHighlighted, None)
             }
+        }
+        SelectIntent::TriggerSubmit => {
+            let event = if context.open {
+                SelectEvent::CommitHighlighted
+            } else {
+                SelectEvent::Toggle
+            };
+            run_event(context, event, None)
         }
         SelectIntent::CommitOption { value } => {
             run_event(context, SelectEvent::CommitOption { value }, None)
@@ -417,15 +428,22 @@ fn wire_dismiss(node: &mut Node, spec: &SelectSpec, handlers: &SelectHandlers) {
     }));
 }
 
+#[derive(Clone, Copy)]
+enum KeyTarget {
+    Trigger { focus_search: bool },
+    Search,
+}
+
 fn wire_open_keys(
     node: &mut Node,
     spec: &SelectSpec,
     handlers: &SelectHandlers,
-    focus_search: bool,
+    target: KeyTarget,
 ) {
     if spec.is_disabled || !handlers.has_handler() {
         return;
     }
+    let focus_search = matches!(target, KeyTarget::Trigger { focus_search: true });
     let spec_keys = spec.clone();
     let handlers_keys = handlers.clone();
     let search_id = select_search_focus_id(&handlers.instance_scope);
@@ -442,15 +460,26 @@ fn wire_open_keys(
     }));
     let spec_submit = spec.clone();
     let handlers_submit = handlers.clone();
-    node.interaction.on_submit = Some(Arc::new(move || {
-        emit_intent(&handlers_submit, SelectIntent::CommitHighlighted);
-        if spec_submit.current_open() {
-            emit_select_with_selection(
-                &spec_submit,
-                &handlers_submit,
-                SelectEvent::CommitHighlighted,
-                None,
-            );
+    node.interaction.on_submit = Some(Arc::new(move || match target {
+        KeyTarget::Trigger { .. } => {
+            emit_intent(&handlers_submit, SelectIntent::TriggerSubmit);
+            let event = if spec_submit.current_open() {
+                SelectEvent::CommitHighlighted
+            } else {
+                SelectEvent::Toggle
+            };
+            emit_select_with_selection(&spec_submit, &handlers_submit, event, None);
+        }
+        KeyTarget::Search => {
+            emit_intent(&handlers_submit, SelectIntent::CommitHighlighted);
+            if spec_submit.current_open() {
+                emit_select_with_selection(
+                    &spec_submit,
+                    &handlers_submit,
+                    SelectEvent::CommitHighlighted,
+                    None,
+                );
+            }
         }
     }));
     if spec.searchable {
@@ -690,7 +719,14 @@ fn build_trigger(
         wire_dismiss(&mut el, spec, handlers);
     }
     if !searchable_editor {
-        wire_open_keys(&mut el, spec, handlers, spec.searchable);
+        wire_open_keys(
+            &mut el,
+            spec,
+            handlers,
+            KeyTarget::Trigger {
+                focus_search: spec.searchable,
+            },
+        );
     }
 
     if !is_disabled && handlers.has_handler() {
@@ -1121,7 +1157,7 @@ fn build_search_row(
 
     search_row.interaction.focusable = true;
     search_row.style.focus_ring = Some(standard_focus_ring(ctx));
-    wire_open_keys(&mut search_row, spec, handlers, false);
+    wire_open_keys(&mut search_row, spec, handlers, KeyTarget::Search);
 
     if handlers.has_handler() {
         let current = query.clone();
