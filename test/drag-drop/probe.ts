@@ -231,6 +231,11 @@ async function run(page: Page, name: string, cdp: CDPSession | null, base: strin
 
   await page.reload({ waitUntil: "load" });
   await page.locator("#source").waitFor();
+  // Keep the hold probe's drop point inside the scroller so this case tests
+  // touch routing without also crossing the auto-scroll edge.
+  await page.locator("#scroller").evaluate((node) => {
+    if (node instanceof HTMLElement) node.style.height = "420px";
+  });
   const hold = center(await box(page, "#source"));
   const drop = center(await box(page, "#target"));
   await touchAt(page, cdp, "touchStart", hold.x, hold.y);
