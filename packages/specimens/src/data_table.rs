@@ -10,7 +10,7 @@ use poodle_specs::{
     TableSortDirection,
 };
 
-use crate::{column, readout, section, Sink, View};
+use crate::{column, control_density, control_size, readout, section, Sink, View};
 
 pub(crate) struct State {
     sort_column: String,
@@ -224,8 +224,8 @@ pub(crate) fn examples(state: &State, sink: Sink<Event>, ctx: &RenderContext<'_>
 pub(crate) fn axis(view: View, ctx: &RenderContext<'_>) -> Node {
     let spec = DataTableSpec::new(columns(), rows(3)).with_aria_label("Data table");
     let spec = match view {
-        View::Size(size) => spec.with_size(size),
-        View::Density(density) => spec.with_density(density),
+        View::Size(value) => spec.with_size(control_size(value)),
+        View::Density(value) => spec.with_density(control_density(value)),
         View::Examples => unreachable!("Examples uses the session"),
     };
     data_table(&spec, ctx, DataTableHandlers::default())

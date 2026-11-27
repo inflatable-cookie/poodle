@@ -19,9 +19,7 @@ pub mod calendar;
 pub mod card;
 pub mod card_radio_group;
 pub mod card_toggle_group;
-pub mod checkbox;
 pub mod code;
-pub mod code_input;
 pub mod collapse_toggle;
 pub mod collapsible;
 pub mod color_picker;
@@ -60,7 +58,6 @@ pub mod form_shell;
 pub mod grid;
 pub mod hover_card;
 pub mod icon;
-pub mod icon_button;
 pub mod icon_provider;
 pub mod inline_list_section;
 pub mod inline_remediation;
@@ -84,7 +81,6 @@ pub mod metric_tile;
 pub mod model_picker;
 pub mod nav_card;
 pub mod navigation_menu;
-pub mod number_input;
 pub mod order_by;
 pub mod page_header;
 pub mod page_loading;
@@ -94,9 +90,7 @@ pub mod password_requirements;
 pub mod picker_shell;
 pub mod popover;
 pub mod progress;
-pub mod radio_group;
 pub mod range_slider;
-pub mod rating;
 pub mod ref_select;
 pub mod region;
 pub mod relation_picker;
@@ -112,7 +106,6 @@ pub mod date_time_zone_picker;
 pub mod motion_policy_provider;
 pub mod resize_handle;
 pub mod scroll_shell;
-pub mod segmented_control;
 pub mod selection_summary;
 pub mod separator;
 mod shared;
@@ -121,31 +114,25 @@ pub mod sidebar_nav;
 pub mod skeleton;
 pub mod slider;
 pub mod spacer;
-pub mod split_button;
 pub mod split_view;
 pub mod stack;
 pub mod state_tile;
 pub mod status_indicator;
 pub mod stepper;
 pub mod surface;
-pub mod switch;
 pub mod tab_strip;
 pub mod table;
 pub mod tabs;
 pub mod text;
-pub mod text_input;
 pub mod text_link;
 pub mod time_ago;
 pub mod time_input;
 pub mod time_zone_select;
 pub mod toast_host;
 pub mod toast_stack;
-pub mod toggle_group;
-pub mod token_input;
 pub mod toolbar;
 pub mod tooltip;
 pub mod tree;
-pub mod tri_state_switch;
 pub mod ui_presentation_provider;
 pub mod validation_summary;
 pub mod video_player;
@@ -288,7 +275,7 @@ fn build_specimen_page(
     // Specimen section — filtered to the active Examples/Sizes/Densities view,
     // with a text-variant Tabs switcher when the specimen has those sections
     // (mirrors the Svelte SpecimenLayout).
-    let mounted = match poodle_specimens::Specimen::from_slug(entry.slug) {
+    let mounted = match jetstream_shared_specimen(entry.slug) {
         Some(specimen) => Some((
             shared::render(specimen, theme, state),
             shared::tabs(specimen),
@@ -355,13 +342,24 @@ fn el(e: crate::nel::El) -> JsEl {
     jetstream_poodle::to_js_el(&e.0)
 }
 
+/// Only the original poodle#171 proof routes remain mounted in Jetstream;
+/// newly moved specimens mount in GPUI only.
+fn jetstream_shared_specimen(slug: &str) -> Option<poodle_specimens::Specimen> {
+    match poodle_specimens::Specimen::from_slug(slug)? {
+        specimen @ (poodle_specimens::Specimen::Button
+        | poodle_specimens::Specimen::Select
+        | poodle_specimens::Specimen::DataTable) => Some(specimen),
+        _ => None,
+    }
+}
+
 /// Route a component slug to its specimen renderer.
 pub fn render_specimen(
     slug: &str,
     theme: &JetstreamThemeProvider,
     state: &AppState,
 ) -> Option<JsEl> {
-    if let Some(specimen) = poodle_specimens::Specimen::from_slug(slug) {
+    if let Some(specimen) = jetstream_shared_specimen(slug) {
         return Some(shared::render(specimen, theme, state));
     }
     match slug {
@@ -383,7 +381,6 @@ pub fn render_specimen(
         "card" => Some(el(card::render(theme))),
         "card-radio-group" => Some(el(card_radio_group::render(theme))),
         "card-toggle-group" => Some(el(card_toggle_group::render(theme))),
-        "checkbox" => Some(el(checkbox::render(theme))),
         "code" => Some(el(code::render(theme))),
         "collapse-toggle" => Some(el(collapse_toggle::render(theme))),
         "collapsible" => Some(el(collapsible::render(theme))),
@@ -423,7 +420,6 @@ pub fn render_specimen(
         "grid" => Some(el(grid::render(theme))),
         "hover-card" => Some(el(hover_card::render(theme))),
         "icon" => Some(el(icon::render(theme))),
-        "icon-button" => Some(el(icon_button::render(theme))),
         "icon-provider" => Some(el(icon_provider::render(theme))),
         "inline-list-section" => Some(el(inline_list_section::render(theme))),
         "inline-remediation" => Some(el(inline_remediation::render(theme))),
@@ -445,7 +441,6 @@ pub fn render_specimen(
         "metric-tile" => Some(el(metric_tile::render(theme))),
         "nav-card" => Some(el(nav_card::render(theme))),
         "navigation-menu" => Some(el(navigation_menu::render(theme))),
-        "number-input" => Some(el(number_input::render(theme))),
         "filter-builder" => Some(el(filter_builder::render(theme))),
         "model-picker" => Some(el(model_picker::render(theme))),
         "ref-select" => Some(el(ref_select::render(theme))),
@@ -459,19 +454,15 @@ pub fn render_specimen(
         "password-requirements" => Some(el(password_requirements::render(theme))),
         "picker-shell" => Some(el(picker_shell::render(theme))),
         "pill" => scene_specimen::render("pill", theme).map(el),
-        "code-input" => Some(el(code_input::render(theme))),
         "popover" => Some(el(popover::render(theme))),
         "progress" => Some(el(progress::render(theme))),
-        "radio-group" => Some(el(radio_group::render(theme))),
         "range-slider" => Some(el(range_slider::render(theme))),
-        "rating" => Some(el(rating::render(theme))),
         "region" => Some(el(region::render(theme))),
         "relation-picker" => Some(el(relation_picker::render(theme))),
         "remediation-banner" => Some(el(remediation_banner::render(theme))),
         // "reorderable-list" => merged into "editable-list"
         "resize-handle" => Some(el(resize_handle::render(theme))),
         "scroll-shell" => Some(el(scroll_shell::render(theme))),
-        "segmented-control" => Some(el(segmented_control::render(theme))),
         "selection-summary" => Some(el(selection_summary::render(theme))),
         "separator" => Some(el(separator::render(theme))),
         "shell-status-bar" => Some(el(shell_status_bar::render(theme))),
@@ -492,7 +483,6 @@ pub fn render_specimen(
         "mod-matrix-grid" => Some(el(audio_controls::mod_matrix_grid(theme))),
         "spacer" => Some(el(spacer::render(theme))),
         "spinner" => scene_specimen::render("spinner", theme).map(el),
-        "split-button" => Some(el(split_button::render(theme))),
         "split-view" => Some(el(split_view::render(theme))),
         "stack" => Some(el(stack::render(theme))),
         "state-tile" => Some(el(state_tile::render(theme))),
@@ -501,24 +491,19 @@ pub fn render_specimen(
         "stepper" => Some(el(stepper::render(state, theme))),
         "agent-transcript" => Some(el(agent_transcript::render(theme))),
         "agent-question" => Some(el(agent_question::render(theme))),
-        "switch" => Some(el(switch::render(theme))),
         "tab-strip" => Some(el(tab_strip::render(theme))),
         "table" => Some(el(table::render(theme))),
         "tabs" => Some(el(tabs::render(state, theme))),
         "text" => Some(el(text::render(theme))),
-        "text-input" => Some(el(text_input::render(theme))),
         "text-link" => Some(el(text_link::render(theme))),
         "time-ago" => Some(el(time_ago::render(theme))),
         "time-input" => Some(el(time_input::render(theme))),
         "time-zone-select" => Some(el(time_zone_select::render(theme))),
         "toast-host" => Some(el(toast_host::render(theme))),
         "toast-stack" => Some(el(toast_stack::render(theme))),
-        "toggle-group" => Some(el(toggle_group::render(theme))),
-        "token-input" => Some(el(token_input::render(theme))),
         "toolbar" => Some(el(toolbar::render(theme))),
         "tooltip" => Some(el(tooltip::render(theme))),
         "tree" => Some(el(tree::render(state, theme))),
-        "tri-state-switch" => Some(el(tri_state_switch::render(theme))),
         "ui-presentation-provider" => Some(el(ui_presentation_provider::render(theme))),
         "motion-policy-provider" => Some(el(motion_policy_provider::render(theme))),
         "validation-summary" => Some(el(validation_summary::render(theme))),

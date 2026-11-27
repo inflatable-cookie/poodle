@@ -38,6 +38,191 @@ pub struct SelectTransitionResult {
     pub search_selection: Option<(usize, usize)>,
 }
 
+/// Ordered input intent for a controlled Select reducer.
+///
+/// Emitted directly by node interaction callbacks without computing a
+/// transition against the painted [`SelectSpec`], so multiple inputs batched
+/// before a repaint reduce in order against the host's live state.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum SelectIntent {
+    Toggle,
+    Close,
+    Clear,
+    HighlightPrev,
+    HighlightNext,
+    HighlightFirst,
+    HighlightLast,
+    CommitHighlighted,
+    /// Enter pressed on the Select trigger: opens when closed, commits the
+    /// highlighted option when open.
+    TriggerSubmit,
+    CommitOption {
+        value: String,
+    },
+    Blur,
+    EditKey {
+        key: String,
+        shift: bool,
+        accel: bool,
+    },
+    EditInsert {
+        text: String,
+    },
+    ReplaceQuery {
+        query: String,
+    },
+    SelectRange {
+        start: usize,
+        end: usize,
+        granularity: poodle_node::SelectGranularity,
+    },
+}
+
+/// Apply one [`SelectIntent`] against live session state (`context`, `caret`).
+pub fn apply_select_intent(
+    context: SelectContext,
+    caret: (usize, usize),
+    intent: SelectIntent,
+) -> SelectTransitionResult {
+    let run_event = |context: SelectContext, event: SelectEvent, search_selection| {
+        let (context, effects) = select_transition(context, event);
+        SelectTransitionResult {
+            context,
+            effects,
+            search_selection,
+        }
+    };
+    match intent {
+        SelectIntent::Toggle => run_event(context, SelectEvent::Toggle, None),
+        SelectIntent::Close => run_event(context, SelectEvent::Close, None),
+        SelectIntent::Clear => run_event(context, SelectEvent::Clear, None),
+        SelectIntent::HighlightPrev => run_event(context, SelectEvent::HighlightPrev, None),
+        SelectIntent::HighlightNext => run_event(context, SelectEvent::HighlightNext, None),
+        SelectIntent::HighlightFirst => run_event(context, SelectEvent::HighlightFirst, None),
+        SelectIntent::HighlightLast => run_event(context, SelectEvent::HighlightLast, None),
+        SelectIntent::CommitHighlighted => {
+            if !context.open {
+                SelectTransitionResult {
+                    context,
+                    effects: Vec::new(),
+                    search_selection: None,
+                }
+            } else {
+                run_event(context, SelectEvent::CommitHighlighted, None)
+            }
+        }
+        SelectIntent::TriggerSubmit => {
+            let event = if context.open {
+                SelectEvent::CommitHighlighted
+            } else {
+                SelectEvent::Toggle
+            };
+            run_event(context, event, None)
+        }
+        SelectIntent::CommitOption { value } => {
+            run_event(context, SelectEvent::CommitOption { value }, None)
+        }
+        SelectIntent::Blur => {
+            let (committed, mut effects) = select_transition(context, SelectEvent::CommitFreeform);
+            let (context, close_effects) = if committed.open {
+                select_transition(committed, SelectEvent::Close)
+            } else {
+                (committed, Vec::new())
+            };
+            effects.extend(close_effects);
+            SelectTransitionResult {
+                context,
+                effects,
+                search_selection: None,
+            }
+        }
+        SelectIntent::ReplaceQuery { query } => {
+            let len = query.chars().count();
+            run_event(context, SelectEvent::Query { query }, Some((len, len)))
+        }
+        SelectIntent::SelectRange {
+            start,
+            end,
+            granularity,
+        } => {
+            let (start, end) = match granularity {
+                poodle_node::SelectGranularity::Character => (start, end),
+                poodle_node::SelectGranularity::Word => {
+                    let (a, _) = poodle_headless::text_input::word_range_at(&context.query, start);
+                    let (_, b) = poodle_headless::text_input::word_range_at(&context.query, end);
+                    (a, b)
+                }
+                poodle_node::SelectGranularity::Line => (0, context.query.chars().count()),
+            };
+            SelectTransitionResult {
+                context,
+                effects: Vec::new(),
+                search_selection: Some((start, end)),
+            }
+        }
+        SelectIntent::EditKey { key, shift, accel } => {
+            let Some(outcome) = poodle_headless::text_input::edit_transition(
+                &context.query,
+                poodle_headless::text_input::EditState {
+                    anchor: caret.0,
+                    head: caret.1,
+                },
+                &key,
+                shift,
+                accel,
+                None,
+            ) else {
+                return SelectTransitionResult {
+                    context,
+                    effects: Vec::new(),
+                    search_selection: None,
+                };
+            };
+            let next_selection = (outcome.state.anchor, outcome.state.head);
+            if let Some(next) = outcome.value {
+                if next != context.query {
+                    return run_event(
+                        context,
+                        SelectEvent::Query { query: next },
+                        Some(next_selection),
+                    );
+                }
+            }
+            SelectTransitionResult {
+                context,
+                effects: Vec::new(),
+                search_selection: Some(next_selection),
+            }
+        }
+        SelectIntent::EditInsert { text } => {
+            let outcome = poodle_headless::text_input::insert_transition(
+                &context.query,
+                poodle_headless::text_input::EditState {
+                    anchor: caret.0,
+                    head: caret.1,
+                },
+                &text,
+                None,
+            );
+            let next_selection = (outcome.state.anchor, outcome.state.head);
+            if let Some(next) = outcome.value {
+                if next != context.query {
+                    return run_event(
+                        context,
+                        SelectEvent::Query { query: next },
+                        Some(next_selection),
+                    );
+                }
+            }
+            SelectTransitionResult {
+                context,
+                effects: Vec::new(),
+                search_selection: Some(next_selection),
+            }
+        }
+    }
+}
+
 /// Host-owned native interaction for one Select instance.
 ///
 /// `instance_scope` is the lifetime-stable scope. It is not a web public prop,
@@ -46,6 +231,7 @@ pub struct SelectTransitionResult {
 pub struct SelectHandlers {
     pub instance_scope: String,
     pub on_transition: Option<Arc<dyn Fn(SelectTransitionResult) + Send + Sync>>,
+    pub on_intent: Option<Arc<dyn Fn(SelectIntent) + Send + Sync>>,
 }
 
 impl SelectHandlers {
@@ -58,6 +244,7 @@ impl SelectHandlers {
         Self {
             instance_scope,
             on_transition: None,
+            on_intent: None,
         }
     }
 
@@ -67,6 +254,15 @@ impl SelectHandlers {
     ) -> Self {
         self.on_transition = Some(handler);
         self
+    }
+
+    pub fn on_intent(mut self, handler: Arc<dyn Fn(SelectIntent) + Send + Sync>) -> Self {
+        self.on_intent = Some(handler);
+        self
+    }
+
+    fn has_handler(&self) -> bool {
+        self.on_transition.is_some() || self.on_intent.is_some()
     }
 }
 
@@ -106,7 +302,29 @@ fn standard_focus_ring(ctx: &RenderContext<'_>) -> FocusRing {
     }
 }
 
+fn emit_intent(handlers: &SelectHandlers, intent: SelectIntent) {
+    if let Some(handler) = &handlers.on_intent {
+        handler(intent);
+    }
+}
+
 fn emit_select(spec: &SelectSpec, handlers: &SelectHandlers, event: SelectEvent) {
+    if let Some(intent) = match &event {
+        SelectEvent::Toggle => Some(SelectIntent::Toggle),
+        SelectEvent::Close => Some(SelectIntent::Close),
+        SelectEvent::Clear => Some(SelectIntent::Clear),
+        SelectEvent::HighlightPrev => Some(SelectIntent::HighlightPrev),
+        SelectEvent::HighlightNext => Some(SelectIntent::HighlightNext),
+        SelectEvent::HighlightFirst => Some(SelectIntent::HighlightFirst),
+        SelectEvent::HighlightLast => Some(SelectIntent::HighlightLast),
+        SelectEvent::CommitHighlighted => Some(SelectIntent::CommitHighlighted),
+        SelectEvent::CommitOption { value } => Some(SelectIntent::CommitOption {
+            value: value.clone(),
+        }),
+        _ => None,
+    } {
+        emit_intent(handlers, intent);
+    }
     emit_select_with_selection(spec, handlers, event, None);
 }
 
@@ -139,6 +357,7 @@ fn emit_search_selection(spec: &SelectSpec, handlers: &SelectHandlers, selection
 }
 
 fn emit_blur(spec: &SelectSpec, handlers: &SelectHandlers) {
+    emit_intent(handlers, SelectIntent::Blur);
     let Some(handler) = &handlers.on_transition else {
         return;
     };
@@ -195,7 +414,7 @@ fn emit_nav(spec: &SelectSpec, handlers: &SelectHandlers, key: NodeKey) {
 fn wire_dismiss(node: &mut Node, spec: &SelectSpec, handlers: &SelectHandlers) {
     let layer = select_layer_id(&handlers.instance_scope);
     node.interaction.dismiss_layer = Some(layer);
-    if handlers.on_transition.is_none() {
+    if !handlers.has_handler() {
         return;
     }
     let spec = spec.clone();
@@ -209,50 +428,73 @@ fn wire_dismiss(node: &mut Node, spec: &SelectSpec, handlers: &SelectHandlers) {
     }));
 }
 
+#[derive(Clone, Copy)]
+enum KeyTarget {
+    Trigger { focus_search: bool },
+    Search,
+}
+
 fn wire_open_keys(
     node: &mut Node,
     spec: &SelectSpec,
     handlers: &SelectHandlers,
-    focus_search: bool,
+    target: KeyTarget,
 ) {
-    if spec.is_disabled || handlers.on_transition.is_none() {
+    if spec.is_disabled || !handlers.has_handler() {
         return;
     }
+    let focus_search = matches!(target, KeyTarget::Trigger { focus_search: true });
     let spec_keys = spec.clone();
     let handlers_keys = handlers.clone();
     let search_id = select_search_focus_id(&handlers.instance_scope);
-    node.interaction.on_key = Some(Arc::new(move |key, _mods| {
-        match key {
-            NodeKey::ArrowUp | NodeKey::ArrowDown => {
-                emit_nav(&spec_keys, &handlers_keys, key);
-            }
-            NodeKey::Home | NodeKey::End if spec_keys.current_open() => {
-                emit_nav(&spec_keys, &handlers_keys, key);
-            }
-            _ => return None,
+    node.interaction.on_key = Some(Arc::new(move |key, _mods| match key {
+        NodeKey::ArrowUp | NodeKey::ArrowDown => {
+            emit_nav(&spec_keys, &handlers_keys, key);
+            focus_search.then(|| search_id.clone())
         }
-        focus_search.then(|| search_id.clone())
+        NodeKey::Home | NodeKey::End => {
+            emit_nav(&spec_keys, &handlers_keys, key);
+            (focus_search && spec_keys.current_open()).then(|| search_id.clone())
+        }
+        _ => None,
     }));
-    if spec.current_open() {
-        let spec_submit = spec.clone();
-        let handlers_submit = handlers.clone();
-        node.interaction.on_submit = Some(Arc::new(move || {
-            emit_select(
-                &spec_submit,
-                &handlers_submit,
-                SelectEvent::CommitHighlighted,
-            );
-        }));
-        if spec.searchable {
-            let spec_blur = spec.clone();
-            let handlers_blur = handlers.clone();
-            node.interaction.on_focus_change = Some(Arc::new(move |focused| {
-                if focused {
-                    return;
-                }
-                emit_blur(&spec_blur, &handlers_blur);
-            }));
+    let spec_submit = spec.clone();
+    let handlers_submit = handlers.clone();
+    node.interaction.on_submit = Some(Arc::new(move || match target {
+        KeyTarget::Trigger { .. } => {
+            emit_intent(&handlers_submit, SelectIntent::TriggerSubmit);
+            let event = if spec_submit.current_open() {
+                SelectEvent::CommitHighlighted
+            } else {
+                SelectEvent::Toggle
+            };
+            emit_select_with_selection(&spec_submit, &handlers_submit, event, None);
         }
+        KeyTarget::Search => {
+            emit_intent(&handlers_submit, SelectIntent::CommitHighlighted);
+            if spec_submit.current_open() {
+                emit_select_with_selection(
+                    &spec_submit,
+                    &handlers_submit,
+                    SelectEvent::CommitHighlighted,
+                    None,
+                );
+            }
+        }
+    }));
+    if spec.searchable {
+        let spec_blur = spec.clone();
+        let handlers_blur = handlers.clone();
+        node.interaction.on_focus_change = Some(Arc::new(move |focused| {
+            if focused {
+                return;
+            }
+            if spec_blur.current_open() {
+                emit_blur(&spec_blur, &handlers_blur);
+            } else {
+                emit_intent(&handlers_blur, SelectIntent::Blur);
+            }
+        }));
     }
 }
 
@@ -477,10 +719,17 @@ fn build_trigger(
         wire_dismiss(&mut el, spec, handlers);
     }
     if !searchable_editor {
-        wire_open_keys(&mut el, spec, handlers, spec.searchable);
+        wire_open_keys(
+            &mut el,
+            spec,
+            handlers,
+            KeyTarget::Trigger {
+                focus_search: spec.searchable,
+            },
+        );
     }
 
-    if !is_disabled && handlers.on_transition.is_some() {
+    if !is_disabled && handlers.has_handler() {
         let spec = spec.clone();
         let handlers = handlers.clone();
         el.interaction.on_activate = Some(Arc::new(move || {
@@ -521,7 +770,7 @@ fn build_trigger(
             &mut clear,
             select_part_id(&handlers.instance_scope, "clear"),
         );
-        clear.interaction.on_activate = Some(if handlers.on_transition.is_some() {
+        clear.interaction.on_activate = Some(if handlers.has_handler() {
             let spec = spec.clone();
             let handlers = handlers.clone();
             Arc::new(move || emit_select(&spec, &handlers, SelectEvent::Clear))
@@ -799,7 +1048,7 @@ fn build_panel(
                     row.interaction.disabled = true;
                 }
 
-                if !opt.is_disabled && handlers.on_transition.is_some() {
+                if !opt.is_disabled && handlers.has_handler() {
                     let spec = spec.clone();
                     let handlers = handlers.clone();
                     let value = opt.value.clone();
@@ -908,9 +1157,9 @@ fn build_search_row(
 
     search_row.interaction.focusable = true;
     search_row.style.focus_ring = Some(standard_focus_ring(ctx));
-    wire_open_keys(&mut search_row, spec, handlers, false);
+    wire_open_keys(&mut search_row, spec, handlers, KeyTarget::Search);
 
-    if handlers.on_transition.is_some() {
+    if handlers.has_handler() {
         let current = query.clone();
         let selection = (selection_start, selection_end);
         let spec_select = spec.clone();
@@ -918,17 +1167,27 @@ fn build_search_row(
         let select_handler: Arc<
             dyn Fn(usize, usize, poodle_node::SelectGranularity) + Send + Sync,
         > = Arc::new(move |start, end, granularity| {
-            let (start, end) = match granularity {
-                poodle_node::SelectGranularity::Character => (start, end),
-                poodle_node::SelectGranularity::Word => {
-                    let (a, _) = poodle_headless::text_input::word_range_at(&current, start);
-                    let (_, b) = poodle_headless::text_input::word_range_at(&current, end);
-                    (a, b)
+            emit_intent(
+                &handlers_select,
+                SelectIntent::SelectRange {
+                    start,
+                    end,
+                    granularity,
+                },
+            );
+            if handlers_select.on_transition.is_some() {
+                let (start, end) = match granularity {
+                    poodle_node::SelectGranularity::Character => (start, end),
+                    poodle_node::SelectGranularity::Word => {
+                        let (a, _) = poodle_headless::text_input::word_range_at(&current, start);
+                        let (_, b) = poodle_headless::text_input::word_range_at(&current, end);
+                        (a, b)
+                    }
+                    poodle_node::SelectGranularity::Line => (0, current.chars().count()),
+                };
+                if (start, end) != selection {
+                    emit_search_selection(&spec_select, &handlers_select, (start, end));
                 }
-                poodle_node::SelectGranularity::Line => (0, current.chars().count()),
-            };
-            if (start, end) != selection {
-                emit_search_selection(&spec_select, &handlers_select, (start, end));
             }
         });
         if let Some(value) = search_row.children.last_mut() {
@@ -943,48 +1202,74 @@ fn build_search_row(
             if matches!(key, "up" | "down" | "home" | "end") {
                 return;
             }
-            let Some(outcome) = poodle_headless::text_input::edit_transition(
-                &current,
-                poodle_headless::text_input::EditState {
-                    anchor: selection_start,
-                    head: selection_end,
+            emit_intent(
+                &handlers_edit,
+                SelectIntent::EditKey {
+                    key: key.to_string(),
+                    shift: mods.shift,
+                    accel: mods.accel,
                 },
-                key,
-                mods.shift,
-                mods.accel,
-                None,
-            ) else {
-                return;
-            };
-            report_search_edit(&spec_edit, &handlers_edit, &current, selection, outcome);
+            );
+            if handlers_edit.on_transition.is_some() {
+                let Some(outcome) = poodle_headless::text_input::edit_transition(
+                    &current,
+                    poodle_headless::text_input::EditState {
+                        anchor: selection_start,
+                        head: selection_end,
+                    },
+                    key,
+                    mods.shift,
+                    mods.accel,
+                    None,
+                ) else {
+                    return;
+                };
+                report_search_edit(&spec_edit, &handlers_edit, &current, selection, outcome);
+            }
         }));
         let spec_insert = spec.clone();
         let handlers_insert = handlers.clone();
         let current = query.clone();
         search_row.interaction.on_edit_insert = Some(Arc::new(move |inserted: &str| {
-            let outcome = poodle_headless::text_input::insert_transition(
-                &current,
-                poodle_headless::text_input::EditState {
-                    anchor: selection_start,
-                    head: selection_end,
+            emit_intent(
+                &handlers_insert,
+                SelectIntent::EditInsert {
+                    text: inserted.to_string(),
                 },
-                inserted,
-                None,
             );
-            report_search_edit(&spec_insert, &handlers_insert, &current, selection, outcome);
+            if handlers_insert.on_transition.is_some() {
+                let outcome = poodle_headless::text_input::insert_transition(
+                    &current,
+                    poodle_headless::text_input::EditState {
+                        anchor: selection_start,
+                        head: selection_end,
+                    },
+                    inserted,
+                    None,
+                );
+                report_search_edit(&spec_insert, &handlers_insert, &current, selection, outcome);
+            }
         }));
         let spec_replace = spec.clone();
         let handlers_replace = handlers.clone();
         search_row.interaction.on_text_change = Some(Arc::new(move |next: &str| {
-            let len = next.chars().count();
-            emit_select_with_selection(
-                &spec_replace,
+            emit_intent(
                 &handlers_replace,
-                SelectEvent::Query {
+                SelectIntent::ReplaceQuery {
                     query: next.to_string(),
                 },
-                Some((len, len)),
             );
+            if handlers_replace.on_transition.is_some() {
+                let len = next.chars().count();
+                emit_select_with_selection(
+                    &spec_replace,
+                    &handlers_replace,
+                    SelectEvent::Query {
+                        query: next.to_string(),
+                    },
+                    Some((len, len)),
+                );
+            }
         }));
     }
 

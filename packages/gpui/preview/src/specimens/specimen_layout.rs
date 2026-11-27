@@ -43,6 +43,7 @@ type SizeRenderer<'a> = Box<dyn Fn(ControlSize, &GpuiThemeProvider) -> AnyElemen
 type DensityRenderer<'a> = Box<dyn Fn(ControlDensity, &GpuiThemeProvider) -> AnyElement + 'a>;
 type NamedSizeRenderer<'a> = Box<dyn Fn(&str, &GpuiThemeProvider) -> AnyElement + 'a>;
 type NamedDensityRenderer<'a> = Box<dyn Fn(&str, &GpuiThemeProvider) -> AnyElement + 'a>;
+type AxisRowRenderer<'a> = Box<dyn Fn(&'static str, &GpuiThemeProvider) -> AnyElement + 'a>;
 
 /// The axis panes a specimen page admits, together with their renderers.
 ///
@@ -52,11 +53,13 @@ type NamedDensityRenderer<'a> = Box<dyn Fn(&str, &GpuiThemeProvider) -> AnyEleme
 pub struct SpecimenAxes<'a> {
     sizes: Option<(&'static [(ControlSize, &'static str)], SizeRenderer<'a>)>,
     named_sizes: Option<(Vec<&'static str>, NamedSizeRenderer<'a>)>,
+    size_rows: Option<(&'static [poodle_specimens::AxisRow], AxisRowRenderer<'a>)>,
     densities: Option<(
         &'static [(ControlDensity, &'static str)],
         DensityRenderer<'a>,
     )>,
     named_densities: Option<(Vec<&'static str>, NamedDensityRenderer<'a>)>,
+    density_rows: Option<(&'static [poodle_specimens::AxisRow], AxisRowRenderer<'a>)>,
 }
 
 impl<'a> SpecimenAxes<'a> {
@@ -69,8 +72,10 @@ impl<'a> SpecimenAxes<'a> {
         Self {
             sizes: None,
             named_sizes: None,
+            size_rows: None,
             densities: None,
             named_densities: None,
+            density_rows: None,
         }
     }
 
@@ -88,6 +93,15 @@ impl<'a> SpecimenAxes<'a> {
         row: impl Fn(ControlSize, &GpuiThemeProvider) -> AnyElement + 'a,
     ) -> Self {
         self.sizes = Some((values, Box::new(row)));
+        self
+    }
+
+    pub(crate) fn with_size_rows(
+        mut self,
+        rows: &'static [poodle_specimens::AxisRow],
+        row: impl Fn(&'static str, &GpuiThemeProvider) -> AnyElement + 'a,
+    ) -> Self {
+        self.size_rows = Some((rows, Box::new(row)));
         self
     }
 
@@ -119,6 +133,15 @@ impl<'a> SpecimenAxes<'a> {
         self
     }
 
+    pub(crate) fn with_density_rows(
+        mut self,
+        rows: &'static [poodle_specimens::AxisRow],
+        row: impl Fn(&'static str, &GpuiThemeProvider) -> AnyElement + 'a,
+    ) -> Self {
+        self.density_rows = Some((rows, Box::new(row)));
+        self
+    }
+
     /// Admit the `Densities` pane for an explicit ordered density domain.
     pub fn with_named_densities(
         mut self,
@@ -132,8 +155,10 @@ impl<'a> SpecimenAxes<'a> {
     /// Which tabs this page publishes.
     pub fn admission(&self) -> AxisAdmission {
         AxisAdmission {
-            sizes: self.sizes.is_some() || self.named_sizes.is_some(),
-            densities: self.densities.is_some() || self.named_densities.is_some(),
+            sizes: self.sizes.is_some() || self.named_sizes.is_some() || self.size_rows.is_some(),
+            densities: self.densities.is_some()
+                || self.named_densities.is_some()
+                || self.density_rows.is_some(),
         }
     }
 }
@@ -230,7 +255,15 @@ pub(crate) fn specimen_layout_lazy(
     let body: Div = match active_tab {
         SIZES_TAB => {
             let mut col = variant_pane(border_subtle, panel_bg);
-            if let Some((values, row)) = axes.named_sizes.as_ref() {
+            if let Some((rows, row)) = axes.size_rows.as_ref() {
+                for axis_row in *rows {
+                    col = col.child(variant_row(
+                        axis_row.label,
+                        row(axis_row.value, theme),
+                        text_secondary,
+                    ));
+                }
+            } else if let Some((values, row)) = axes.named_sizes.as_ref() {
                 for value in values {
                     col = col.child(variant_row(value, row(value, theme), text_secondary));
                 }
@@ -244,7 +277,15 @@ pub(crate) fn specimen_layout_lazy(
         }
         DENSITIES_TAB => {
             let mut col = variant_pane(border_subtle, panel_bg);
-            if let Some((values, row)) = axes.named_densities.as_ref() {
+            if let Some((rows, row)) = axes.density_rows.as_ref() {
+                for axis_row in *rows {
+                    col = col.child(variant_row(
+                        axis_row.label,
+                        row(axis_row.value, theme),
+                        text_secondary,
+                    ));
+                }
+            } else if let Some((values, row)) = axes.named_densities.as_ref() {
                 for value in values {
                     col = col.child(variant_row(value, row(value, theme), text_secondary));
                 }

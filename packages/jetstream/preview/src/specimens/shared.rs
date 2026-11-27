@@ -35,18 +35,16 @@ pub(super) fn render(specimen: Specimen, theme: &JetstreamThemeProvider, state: 
 
     for pane in specimen.panes() {
         match (state.specimen_view, pane) {
-            (SpecimenView::Sizes, Pane::Sizes(values)) => {
+            (SpecimenView::Sizes, Pane::Sizes(rows)) => {
                 return div().flex_col().gap(12.0).children(
-                    values
-                        .iter()
-                        .map(|&(value, name)| row(name, View::Size(value))),
+                    rows.iter()
+                        .map(|axis_row| row(axis_row.label, View::Size(axis_row.value))),
                 );
             }
-            (SpecimenView::Densities, Pane::Densities(values)) => {
+            (SpecimenView::Densities, Pane::Densities(rows)) => {
                 return div().flex_col().gap(12.0).children(
-                    values
-                        .iter()
-                        .map(|&(value, name)| row(name, View::Density(value))),
+                    rows.iter()
+                        .map(|axis_row| row(axis_row.label, View::Density(axis_row.value))),
                 );
             }
             _ => {}

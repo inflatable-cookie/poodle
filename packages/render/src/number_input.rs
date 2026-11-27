@@ -27,6 +27,135 @@ use crate::presentation::{
 
 const SELECTION_ALPHA: f32 = 0.30;
 
+/// Ordered input intent for a controlled NumberInput reducer.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum NumberInputIntent {
+    Insert(String),
+    Key {
+        key: String,
+        shift: bool,
+        accel: bool,
+    },
+    Replace(String),
+    SelectRange {
+        start: usize,
+        end: usize,
+        granularity: poodle_node::SelectGranularity,
+    },
+    Step(i32),
+    Home,
+    End,
+    Submit,
+    Cancel,
+    FocusChange(bool),
+}
+
+/// Apply one [`NumberInputIntent`] against live session state (`context`, `selection`).
+pub fn apply_number_input_intent(
+    context: poodle_headless::number_input::NumberInputContext,
+    selection: (usize, usize),
+    intent: NumberInputIntent,
+) -> (
+    poodle_headless::number_input::NumberInputContext,
+    (usize, usize),
+    Vec<NumberInputEffect>,
+) {
+    let run_event = |context: poodle_headless::number_input::NumberInputContext,
+                     event: NumberInputEvent,
+                     selection: (usize, usize)| {
+        let prev_display = number_input_display_text(&context);
+        let (next, effects) = number_input_transition(context, event);
+        let next_display = number_input_display_text(&next);
+        let next_selection = if next_display != prev_display {
+            let len = next_display.chars().count();
+            (len, len)
+        } else {
+            selection
+        };
+        (next, next_selection, effects)
+    };
+    let current_text = number_input_display_text(&context);
+    match intent {
+        NumberInputIntent::Step(direction) => {
+            run_event(context, NumberInputEvent::Step { direction }, selection)
+        }
+        NumberInputIntent::Home => run_event(context, NumberInputEvent::Home, selection),
+        NumberInputIntent::End => run_event(context, NumberInputEvent::End, selection),
+        NumberInputIntent::Submit => run_event(context, NumberInputEvent::Enter, selection),
+        NumberInputIntent::Cancel => run_event(context, NumberInputEvent::Escape, selection),
+        NumberInputIntent::FocusChange(focused) => {
+            if focused {
+                (context, selection, Vec::new())
+            } else {
+                run_event(context, NumberInputEvent::Blur, selection)
+            }
+        }
+        NumberInputIntent::Replace(text) => {
+            run_event(context, NumberInputEvent::RawEdit { text }, selection)
+        }
+        NumberInputIntent::SelectRange {
+            start,
+            end,
+            granularity,
+        } => {
+            let next_selection = match granularity {
+                poodle_node::SelectGranularity::Character => (start, end),
+                poodle_node::SelectGranularity::Word => {
+                    let (a, _) = poodle_headless::text_input::word_range_at(&current_text, start);
+                    let (_, b) = poodle_headless::text_input::word_range_at(&current_text, end);
+                    (a, b)
+                }
+                poodle_node::SelectGranularity::Line => (0, current_text.chars().count()),
+            };
+            (context, next_selection, Vec::new())
+        }
+        NumberInputIntent::Insert(inserted) => {
+            let outcome = poodle_headless::text_input::insert_transition(
+                &current_text,
+                poodle_headless::text_input::EditState {
+                    anchor: selection.0,
+                    head: selection.1,
+                },
+                &inserted,
+                None,
+            );
+            let moved = (outcome.state.anchor, outcome.state.head);
+            if let Some(next) = outcome.value {
+                if next != current_text {
+                    let (next_ctx, _, effects) =
+                        run_event(context, NumberInputEvent::RawEdit { text: next }, selection);
+                    return (next_ctx, moved, effects);
+                }
+            }
+            (context, moved, Vec::new())
+        }
+        NumberInputIntent::Key { key, shift, accel } => {
+            let Some(outcome) = poodle_headless::text_input::edit_transition(
+                &current_text,
+                poodle_headless::text_input::EditState {
+                    anchor: selection.0,
+                    head: selection.1,
+                },
+                &key,
+                shift,
+                accel,
+                None,
+            ) else {
+                return (context, selection, Vec::new());
+            };
+            let moved = (outcome.state.anchor, outcome.state.head);
+            if let Some(next) = outcome.value {
+                if next != current_text {
+                    let (next_ctx, _, effects) =
+                        run_event(context, NumberInputEvent::RawEdit { text: next }, selection);
+                    return (next_ctx, moved, effects);
+                }
+            }
+            (context, moved, Vec::new())
+        }
+    }
+}
+
 /// Host callbacks matching the number-input machine effects, plus caret/focus
 /// channels the host stores between rebuilds.
 #[derive(Clone, Default)]
@@ -36,6 +165,8 @@ pub struct NumberInputHandlers {
     pub on_commit: Option<Arc<dyn Fn(Option<f64>) + Send + Sync>>,
     pub on_selection_change: Option<Arc<dyn Fn(usize, usize) + Send + Sync>>,
     pub on_focus_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    /// Ordered input intents emitted without computing against the painted spec.
+    pub on_intent: Option<Arc<dyn Fn(NumberInputIntent) + Send + Sync>>,
 }
 
 fn apply_effects(effects: &[NumberInputEffect], handlers: &NumberInputHandlers) {
@@ -272,6 +403,9 @@ pub fn number_input(
             let spec = spec.clone();
             let handlers = handlers.clone();
             btn.interaction.on_activate = Some(Arc::new(move || {
+                if let Some(intent) = &handlers.on_intent {
+                    intent(NumberInputIntent::Step(direction));
+                }
                 dispatch_event(&spec, NumberInputEvent::Step { direction }, &handlers);
             }));
         }
@@ -341,22 +475,34 @@ pub fn number_input(
         }
         value_caret = value.caret;
 
-        if let Some(on_selection_change) = handlers.on_selection_change.clone() {
+        if handlers.on_selection_change.is_some() || handlers.on_intent.is_some() {
             let text = display_text.clone();
+            let on_selection_change = handlers.on_selection_change.clone();
+            let on_intent = handlers.on_intent.clone();
             let handler: Arc<dyn Fn(usize, usize, poodle_node::SelectGranularity) + Send + Sync> =
                 Arc::new(
                     move |start: usize, end: usize, granularity: poodle_node::SelectGranularity| {
-                        let (start, end) = match granularity {
-                            poodle_node::SelectGranularity::Character => (start, end),
-                            poodle_node::SelectGranularity::Word => {
-                                let (a, _) =
-                                    poodle_headless::text_input::word_range_at(&text, start);
-                                let (_, b) = poodle_headless::text_input::word_range_at(&text, end);
-                                (a, b)
-                            }
-                            poodle_node::SelectGranularity::Line => (0, text.chars().count()),
-                        };
-                        on_selection_change(start, end);
+                        if let Some(intent) = &on_intent {
+                            intent(NumberInputIntent::SelectRange {
+                                start,
+                                end,
+                                granularity,
+                            });
+                        }
+                        if let Some(on_selection_change) = &on_selection_change {
+                            let (start, end) = match granularity {
+                                poodle_node::SelectGranularity::Character => (start, end),
+                                poodle_node::SelectGranularity::Word => {
+                                    let (a, _) =
+                                        poodle_headless::text_input::word_range_at(&text, start);
+                                    let (_, b) =
+                                        poodle_headless::text_input::word_range_at(&text, end);
+                                    (a, b)
+                                }
+                                poodle_node::SelectGranularity::Line => (0, text.chars().count()),
+                            };
+                            on_selection_change(start, end);
+                        }
                     },
                 );
             value.interaction.on_select_range = Some(Arc::clone(&handler));
@@ -369,6 +515,9 @@ pub fn number_input(
             let spec_owned = spec.clone();
             let handlers_owned = handlers.clone();
             value.interaction.on_edit_insert = Some(Arc::new(move |inserted: &str| {
+                if let Some(intent) = &handlers_owned.on_intent {
+                    intent(NumberInputIntent::Insert(inserted.to_string()));
+                }
                 let outcome = poodle_headless::text_input::insert_transition(
                     &text,
                     poodle_headless::text_input::EditState {
@@ -450,6 +599,9 @@ pub fn number_input(
         let spec_blur = spec.clone();
         let handlers_blur = handlers.clone();
         el.interaction.on_focus_change = Some(Arc::new(move |focused: bool| {
+            if let Some(intent) = &handlers_blur.on_intent {
+                intent(NumberInputIntent::FocusChange(focused));
+            }
             if let Some(on_focus) = &on_focus {
                 on_focus(focused);
             }
@@ -464,13 +616,30 @@ pub fn number_input(
             let spec_keys = spec.clone();
             let handlers_keys = handlers.clone();
             el.interaction.on_edit_key = Some(Arc::new(move |key: &str, mods| {
-                let event = match key {
-                    "up" => Some(NumberInputEvent::Step { direction: 1 }),
-                    "down" => Some(NumberInputEvent::Step { direction: -1 }),
-                    "home" => Some(NumberInputEvent::Home),
-                    "end" => Some(NumberInputEvent::End),
-                    _ => None,
+                let (intent_event, event) = match key {
+                    "up" => (
+                        Some(NumberInputIntent::Step(1)),
+                        Some(NumberInputEvent::Step { direction: 1 }),
+                    ),
+                    "down" => (
+                        Some(NumberInputIntent::Step(-1)),
+                        Some(NumberInputEvent::Step { direction: -1 }),
+                    ),
+                    "home" => (Some(NumberInputIntent::Home), Some(NumberInputEvent::Home)),
+                    "end" => (Some(NumberInputIntent::End), Some(NumberInputEvent::End)),
+                    _ => (None, None),
                 };
+                if let Some(intent) = &handlers_keys.on_intent {
+                    if let Some(intent_event) = intent_event {
+                        intent(intent_event);
+                    } else {
+                        intent(NumberInputIntent::Key {
+                            key: key.to_string(),
+                            shift: mods.shift,
+                            accel: mods.accel,
+                        });
+                    }
+                }
                 if let Some(event) = event {
                     dispatch_event(&spec_keys, event, &handlers_keys);
                     return;
@@ -492,6 +661,9 @@ pub fn number_input(
             let spec_insert = spec.clone();
             let handlers_insert = handlers.clone();
             el.interaction.on_edit_insert = Some(Arc::new(move |inserted: &str| {
+                if let Some(intent) = &handlers_insert.on_intent {
+                    intent(NumberInputIntent::Insert(inserted.to_string()));
+                }
                 let outcome = poodle_headless::text_input::insert_transition(
                     &text,
                     poodle_headless::text_input::EditState {
@@ -508,6 +680,9 @@ pub fn number_input(
                 let spec_replace = spec.clone();
                 let handlers_replace = handlers.clone();
                 Arc::new(move |text: &str| {
+                    if let Some(intent) = &handlers_replace.on_intent {
+                        intent(NumberInputIntent::Replace(text.to_string()));
+                    }
                     dispatch_event(
                         &spec_replace,
                         NumberInputEvent::RawEdit {
@@ -522,12 +697,18 @@ pub fn number_input(
             let spec_submit = spec.clone();
             let handlers_submit = handlers.clone();
             el.interaction.on_submit = Some(Arc::new(move || {
+                if let Some(intent) = &handlers_submit.on_intent {
+                    intent(NumberInputIntent::Submit);
+                }
                 dispatch_event(&spec_submit, NumberInputEvent::Enter, &handlers_submit);
             }));
 
             let spec_cancel = spec.clone();
             let handlers_cancel = handlers.clone();
             el.interaction.on_cancel = Some(Arc::new(move || {
+                if let Some(intent) = &handlers_cancel.on_intent {
+                    intent(NumberInputIntent::Cancel);
+                }
                 dispatch_event(&spec_cancel, NumberInputEvent::Escape, &handlers_cancel);
             }));
         }

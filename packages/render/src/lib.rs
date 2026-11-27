@@ -261,7 +261,10 @@ pub use card_toggle_group::{
 pub use changed_files::{changed_files, ChangedFilesHandlers};
 pub use checkbox::checkbox;
 pub use code::{code, code_with_handlers, CodeHandlers};
-pub use code_input::{code_input, code_input_with_handlers, CodeInputHandlers};
+pub use code_input::{
+    apply_code_input_intent, code_input, code_input_with_handlers, CodeInputHandlers,
+    CodeInputIntent,
+};
 pub use collapse_toggle::collapse_toggle;
 pub use collapsible::{
     collapsible, collapsible_content_focus_id, collapsible_trigger_focus_id,
@@ -379,7 +382,9 @@ pub use model_connection_setup::{
 pub use model_picker::model_picker;
 pub use nav_card::{nav_card, nav_card_with_icon};
 pub use navigation_menu::{navigation_menu, NavigationMenuHandlers};
-pub use number_input::{number_input, NumberInputHandlers};
+pub use number_input::{
+    apply_number_input_intent, number_input, NumberInputHandlers, NumberInputIntent,
+};
 pub use order_by::{order_by, OrderByHandlers};
 pub use page_header::page_header;
 pub use page_loading::page_loading;
@@ -409,8 +414,8 @@ pub use resize_handle::{resize_handle, resize_handle_focus_id, ResizePhase};
 pub use scroll_shell::scroll_shell;
 pub use segmented_control::segmented_control;
 pub use select::{
-    select, select_option_id, select_search_focus_id, select_trigger_focus_id, SelectHandlers,
-    SelectTransitionResult,
+    apply_select_intent, select, select_option_id, select_search_focus_id, select_trigger_focus_id,
+    SelectHandlers, SelectIntent, SelectTransitionResult,
 };
 pub use selection_summary::{
     selection_summary, selection_summary_with_actions, SelectionSummaryHandlers,
@@ -444,7 +449,8 @@ pub use tabs::{
 };
 pub use text::text;
 pub use text_input::{
-    text_input, text_input_with_change, text_input_with_handlers, TextInputHandlers,
+    apply_text_input_intent, text_input, text_input_with_change, text_input_with_handlers,
+    TextInputHandlers, TextInputIntent,
 };
 pub use text_link::text_link;
 pub use theme_select::{theme_select, theme_select_with_handlers, ThemeSelectHandlers};

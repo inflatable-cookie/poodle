@@ -2236,6 +2236,7 @@ impl AgentChatInput {
                 on_submit: input_submit,
                 on_cancel: input_cancel,
                 on_clear: None,
+                ..Default::default()
             },
         );
         let effective_size = ctx.resolve_size(spec.size, spec.size_role);
@@ -4946,6 +4947,7 @@ impl TextInput {
                 on_submit: self.on_submit,
                 on_cancel: self.on_cancel,
                 on_clear: self.on_clear,
+                ..Default::default()
             },
         );
         if let Some(id) = self.id_suffix {
@@ -5190,6 +5192,7 @@ impl CodeInput {
                 on_value_change: self.on_change,
                 on_complete: self.on_complete,
                 on_selection_change: self.on_selection_change,
+                ..Default::default()
             },
         );
         if let Some(id) = self.id_suffix {

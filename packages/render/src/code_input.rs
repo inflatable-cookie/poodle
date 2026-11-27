@@ -18,6 +18,55 @@ use crate::color::with_alpha;
 use crate::context::RenderContext;
 use crate::presentation::{code_input_slot_font_rem, code_input_slot_size_rem, rem_to_px};
 
+/// Ordered input intent for a controlled CodeInput reducer.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum CodeInputIntent {
+    Key(String),
+    Paste(String),
+}
+
+/// Apply one [`CodeInputIntent`] against live session state (`value`, `selection`).
+/// Returns `true` when the transition completes a full code.
+pub fn apply_code_input_intent(
+    value: &mut String,
+    selection: &mut (usize, usize),
+    length: usize,
+    numbers_only: bool,
+    intent: CodeInputIntent,
+) -> bool {
+    match intent {
+        CodeInputIntent::Key(key) => {
+            let Some((next, next_selection)) = poodle_headless::text_input::code_transition(
+                value,
+                *selection,
+                &key,
+                length,
+                numbers_only,
+            ) else {
+                return false;
+            };
+            let changed = next != *value;
+            *selection = next_selection;
+            if changed {
+                *value = next;
+                value.chars().count() == length
+            } else {
+                false
+            }
+        }
+        CodeInputIntent::Paste(text) => {
+            let next = poodle_headless::text_input::code_paste(&text, length, numbers_only);
+            if next == *value {
+                return false;
+            }
+            let len = next.chars().count();
+            *value = next;
+            *selection = (len, len);
+            len == length
+        }
+    }
+}
+
 /// Host callbacks.
 ///
 /// `on_value_change` reports the sanitized code on every keystroke;
@@ -30,6 +79,8 @@ pub struct CodeInputHandlers {
     /// Where the caret moved to, as character indices. Host state on the Rust
     /// targets, the same as `TextInputHandlers::on_selection_change`.
     pub on_selection_change: Option<std::sync::Arc<dyn Fn(usize, usize) + Send + Sync>>,
+    /// Ordered input intents emitted without computing against the painted spec.
+    pub on_intent: Option<std::sync::Arc<dyn Fn(CodeInputIntent) + Send + Sync>>,
 }
 
 pub fn code_input(spec: &CodeInputSpec, ctx: &RenderContext<'_>) -> Node {
@@ -227,7 +278,11 @@ pub fn code_input_with_handlers(
     // Keys land on the slot row, not on any one slot: the value is one string
     // and the active slot is derived from its length, so there is nothing
     // per-slot to dispatch to.
-    if !spec.is_disabled && (handlers.on_value_change.is_some() || handlers.on_complete.is_some()) {
+    if !spec.is_disabled
+        && (handlers.on_value_change.is_some()
+            || handlers.on_complete.is_some()
+            || handlers.on_intent.is_some())
+    {
         row.interaction.focusable = true;
         let value = spec.current_value().to_string();
         let length = spec.length;
@@ -236,7 +291,14 @@ pub fn code_input_with_handlers(
         let on_complete = handlers.on_complete.clone();
         let selection = (caret_start, caret_end);
         let on_selection_change = handlers.on_selection_change.clone();
+        let on_intent = handlers.on_intent.clone();
         row.interaction.on_edit_key = Some(std::sync::Arc::new(move |key: &str, _mods| {
+            if let Some(intent) = &on_intent {
+                intent(CodeInputIntent::Key(key.to_string()));
+            }
+            if on_value_change.is_none() && on_complete.is_none() && on_selection_change.is_none() {
+                return;
+            }
             let Some((next, next_selection)) = poodle_headless::text_input::code_transition(
                 &value,
                 selection,
@@ -272,7 +334,14 @@ pub fn code_input_with_handlers(
         let paste_value = spec.current_value().to_string();
         let on_value_change = handlers.on_value_change.clone();
         let on_complete = handlers.on_complete;
+        let on_intent = handlers.on_intent;
         row.interaction.on_edit_insert = Some(std::sync::Arc::new(move |text: &str| {
+            if let Some(intent) = &on_intent {
+                intent(CodeInputIntent::Paste(text.to_string()));
+            }
+            if on_value_change.is_none() && on_complete.is_none() {
+                return;
+            }
             let next = poodle_headless::text_input::code_paste(text, length, numbers_only);
             if next == paste_value {
                 return;

@@ -792,7 +792,7 @@ pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> State
             (!text.is_empty()).then_some(text)
         });
         if edit_key.is_some() || submit.is_some() || cancel.is_some() || insert.is_some() {
-            el = el.on_key_down(move |event: &KeyDownEvent, _window, cx| {
+            el = el.on_key_down(move |event: &KeyDownEvent, window, cx| {
                 let key = event.keystroke.key.as_str();
                 let accel = event.keystroke.modifiers.platform;
                 if accel && key == "z" {
@@ -861,7 +861,9 @@ pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> State
                 }
                 if key == "enter" {
                     if let Some(handler) = &submit {
+                        record_key_activation(window, key);
                         handler();
+                        cx.stop_propagation();
                         cx.refresh_windows();
                         return;
                     }

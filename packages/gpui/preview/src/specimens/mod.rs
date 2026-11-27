@@ -26,35 +26,22 @@ mod shared;
 mod ui_presentation_provider;
 
 // ── Action ────────────────────────────────────────────────
-mod code_input;
 mod editable_label;
 mod field;
 mod form_actions;
-mod icon_button;
-mod number_input;
-mod split_button;
 mod text;
-mod text_input;
 mod text_link;
-mod token_input;
 mod toolbar;
 
 // ── Selection ─────────────────────────────────────────────
 mod agent_question;
 mod agent_transcript;
 mod audio_controls;
-mod checkbox;
-mod radio;
-mod radio_group;
 mod range_slider;
-mod segmented_control;
 mod slider;
 // `pub(crate)` for its test-only probe markers (g15.042); the render entry
 // point is still reached through `render_single_specimen` like every other.
 pub(crate) mod stepper;
-mod switch;
-mod toggle_group;
-mod tri_state_switch;
 
 // ── Date/Time ────────────────────────────────────────────
 mod calendar;
@@ -75,7 +62,6 @@ mod meta_item;
 mod meter;
 mod pill;
 mod progress;
-mod rating;
 mod remediation_banner;
 mod skeleton;
 mod spinner;
@@ -316,6 +302,14 @@ pub fn render_single_specimen(
     motion_context: &RenderContext<'_>,
 ) -> Div {
     let theme = &state.theme;
+    if let Some(specimen) = poodle_specimens::Specimen::from_slug(slug) {
+        return specimen_card(
+            state.specimen_capture,
+            specimen.title(),
+            theme,
+            shared::render(specimen, state, cx, motion_context),
+        );
+    }
     match slug {
         // ── Structural ──────────────────────────────────────────
         "box" => specimen_card(state.specimen_capture, "Box", theme, bx::render(theme)),
@@ -385,52 +379,17 @@ pub fn render_single_specimen(
         ),
 
         // ── Action ──────────────────────────────────────────────
-        "button" => specimen_card(
-            state.specimen_capture,
-            "Button",
-            theme,
-            shared::render(
-                poodle_specimens::Specimen::Button,
-                state,
-                cx,
-                motion_context,
-            ),
-        ),
-        "icon-button" => specimen_card(
-            state.specimen_capture,
-            "IconButton",
-            theme,
-            icon_button::render(state, cx),
-        ),
-        "split-button" => specimen_card(
-            state.specimen_capture,
-            "SplitButton",
-            theme,
-            split_button::render(state, cx),
-        ),
         "text" => specimen_card(
             state.specimen_capture,
             "Text",
             theme,
             text::render(state, cx),
         ),
-        "text-input" => specimen_card(
-            state.specimen_capture,
-            "TextInput",
-            theme,
-            text_input::render(state, cx),
-        ),
         "text-link" => specimen_card(
             state.specimen_capture,
             "TextLink",
             theme,
             text_link::render(theme),
-        ),
-        "token-input" => specimen_card(
-            state.specimen_capture,
-            "TokenInput",
-            theme,
-            token_input::render(state, cx),
         ),
         "field" => specimen_card(
             state.specimen_capture,
@@ -456,18 +415,6 @@ pub fn render_single_specimen(
             theme,
             password_requirements::render(state, cx),
         ),
-        "number-input" => specimen_card(
-            state.specimen_capture,
-            "NumberInput",
-            theme,
-            number_input::render(state, cx),
-        ),
-        "code-input" => specimen_card(
-            state.specimen_capture,
-            "CodeInput",
-            theme,
-            code_input::render(state, cx),
-        ),
         "toolbar" => specimen_card(
             state.specimen_capture,
             "Toolbar",
@@ -486,66 +433,13 @@ pub fn render_single_specimen(
             theme,
             editable_label::render(state, cx),
         ),
-        "toggle-group" => specimen_card(
-            state.specimen_capture,
-            "ToggleGroup",
-            theme,
-            toggle_group::render(state, cx),
-        ),
 
         // ── Selection ───────────────────────────────────────────
-        "checkbox" => specimen_card(
-            state.specimen_capture,
-            "Checkbox",
-            theme,
-            checkbox::render(state, cx),
-        ),
-        "radio" => specimen_card(
-            state.specimen_capture,
-            "Radio",
-            theme,
-            radio::render(state, cx),
-        ),
-        "radio-group" => specimen_card(
-            state.specimen_capture,
-            "RadioGroup",
-            theme,
-            radio_group::render(state, cx),
-        ),
-        "switch" => specimen_card(
-            state.specimen_capture,
-            "Switch",
-            theme,
-            switch::render(state, cx),
-        ),
-        "tri-state-switch" => specimen_card(
-            state.specimen_capture,
-            "TriStateSwitch",
-            theme,
-            tri_state_switch::render(state, cx),
-        ),
-        "select" => specimen_card(
-            state.specimen_capture,
-            "Select",
-            theme,
-            shared::render(
-                poodle_specimens::Specimen::Select,
-                state,
-                cx,
-                motion_context,
-            ),
-        ),
         "listbox" => specimen_card(
             state.specimen_capture,
             "Listbox",
             theme,
             listbox::render(state, cx),
-        ),
-        "segmented-control" => specimen_card(
-            state.specimen_capture,
-            "SegmentedControl",
-            theme,
-            segmented_control::render(state, cx),
         ),
         "stepper" => specimen_card(
             state.specimen_capture,
@@ -746,12 +640,6 @@ pub fn render_single_specimen(
             theme,
             meta_item::render(theme),
         ),
-        "rating" => specimen_card(
-            state.specimen_capture,
-            "Rating",
-            theme,
-            rating::render(state, cx),
-        ),
         "skeleton" => specimen_card(
             state.specimen_capture,
             "Skeleton",
@@ -905,17 +793,6 @@ pub fn render_single_specimen(
             "Table",
             theme,
             table::render(state, cx),
-        ),
-        "data-table" => specimen_card(
-            state.specimen_capture,
-            "DataTable",
-            theme,
-            shared::render(
-                poodle_specimens::Specimen::DataTable,
-                state,
-                cx,
-                motion_context,
-            ),
         ),
         "list-card" => specimen_card(
             state.specimen_capture,

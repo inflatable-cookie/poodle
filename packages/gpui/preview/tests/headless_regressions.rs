@@ -28839,6 +28839,7 @@ fn number_field_handlers(
                 |field| field.is_focused = focused,
             );
         })),
+        ..Default::default()
     }
 }
 

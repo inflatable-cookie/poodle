@@ -62,6 +62,9 @@ fn snapshot_node(output: &mut String, node: &Node, depth: usize) {
         NodeKind::Text { content } => format!("Text {content:?}"),
         NodeKind::Icon { name, .. } => format!("Icon {name}"),
         NodeKind::Button { label } => format!("Button {label:?}"),
+        NodeKind::Input { value, placeholder } => {
+            format!("Input {value:?} placeholder={placeholder:?}")
+        }
         NodeKind::ProgressRing { .. } => "ProgressRing".into(),
         _ => panic!("unrecorded specimen node kind"),
     };
@@ -131,17 +134,21 @@ fn check_snapshot(specimen: Specimen, expected: &str) {
     for pane in specimen.panes() {
         match pane {
             Pane::Examples => render("Examples", &session, View::Examples),
-            Pane::Sizes(values) => {
-                for &(size, label) in *values {
-                    render(&format!("Sizes / {label}"), &session, View::Size(size));
+            Pane::Sizes(rows) => {
+                for axis_row in *rows {
+                    render(
+                        &format!("Sizes / {}", axis_row.label),
+                        &session,
+                        View::Size(axis_row.value),
+                    );
                 }
             }
-            Pane::Densities(values) => {
-                for &(density, label) in *values {
+            Pane::Densities(rows) => {
+                for axis_row in *rows {
                     render(
-                        &format!("Densities / {label}"),
+                        &format!("Densities / {}", axis_row.label),
                         &session,
-                        View::Density(density),
+                        View::Density(axis_row.value),
                     );
                 }
             }
@@ -366,4 +373,349 @@ fn data_table_reorders_rows_and_keeps_selection_by_id() {
     let table = by_id(&node, "specimen-data-table-live");
     assert!(has_text(&table.children[1], "Bob Martinez"));
     assert_eq!(table.children[1].a11y.selected, Some(false));
+}
+
+#[test]
+fn axis_rows_are_unique_stable_and_renderable_for_every_specimen() {
+    let session = Session::default();
+    let ctx = RenderContext::new(&FixtureTheme);
+    for specimen in Specimen::ALL {
+        assert_eq!(Specimen::from_slug(specimen.slug()), Some(specimen));
+        assert!(!specimen.title().is_empty());
+        let examples = session.render(specimen, View::Examples, &ctx);
+        assert_eq!(
+            examples.id.as_deref(),
+            Some(format!("specimen-{}-examples", specimen.slug()).as_str())
+        );
+        for pane in specimen.panes() {
+            match pane {
+                Pane::Examples => {}
+                Pane::Sizes(rows) => {
+                    assert!(!rows.is_empty(), "{} Sizes pane is empty", specimen.slug());
+                    let mut seen = std::collections::BTreeSet::new();
+                    for axis_row in *rows {
+                        assert!(
+                            seen.insert(axis_row.value),
+                            "{} duplicate size axis value {}",
+                            specimen.slug(),
+                            axis_row.value
+                        );
+                        let _ = session.render(specimen, View::Size(axis_row.value), &ctx);
+                    }
+                }
+                Pane::Densities(rows) => {
+                    assert!(
+                        !rows.is_empty(),
+                        "{} Densities pane is empty",
+                        specimen.slug()
+                    );
+                    let mut seen = std::collections::BTreeSet::new();
+                    for axis_row in *rows {
+                        assert!(
+                            seen.insert(axis_row.value),
+                            "{} duplicate density axis value {}",
+                            specimen.slug(),
+                            axis_row.value
+                        );
+                        let _ = session.render(specimen, View::Density(axis_row.value), &ctx);
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn select_reduces_batched_intents_in_order_before_repaint() {
+    let mut session = Session::default();
+    let ctx = RenderContext::new(&FixtureTheme);
+    let scope = "select-searchable";
+    let trigger_id = select_trigger_focus_id(scope);
+    let search_id = select_search_focus_id(scope);
+
+    // Open the searchable select first so the search editor is mounted.
+    activate(by_id(
+        &session.render(Specimen::Select, View::Examples, &ctx),
+        &trigger_id,
+    ));
+    assert_eq!(
+        session.drain(),
+        (true, vec![Effect::Focus(search_id.clone())])
+    );
+
+    // Fire multiple inputs against the SAME painted tree without draining or
+    // repainting in between: insert "s", insert "o", ArrowDown, Enter.
+    let painted = session.render(Specimen::Select, View::Examples, &ctx);
+    let editor = by_id(&painted, &search_id);
+    let insert = editor.interaction.on_edit_insert.as_ref().unwrap();
+    insert("s");
+    insert("o");
+    editor.interaction.on_key.as_ref().unwrap()(NodeKey::ArrowDown, Default::default());
+    editor.interaction.on_submit.as_ref().unwrap()();
+
+    assert_eq!(
+        session.drain(),
+        (true, vec![Effect::Focus(trigger_id.clone())])
+    );
+    let after = session.render(Specimen::Select, View::Examples, &ctx);
+    assert!(has_text(&after, "Selected: solid"));
+    assert_eq!(by_id(&after, &trigger_id).a11y.expanded, Some(false));
+}
+
+#[test]
+fn select_reduces_closed_to_open_batch_before_repaint() {
+    let mut session = Session::default();
+    let ctx = RenderContext::new(&FixtureTheme);
+    let scope = "select-native";
+    let trigger_id = select_trigger_focus_id(scope);
+
+    // On a closed Select, End alone remains inert.
+    let closed = session.render(Specimen::Select, View::Examples, &ctx);
+    let trigger = by_id(&closed, &trigger_id);
+    assert_eq!(trigger.a11y.expanded, Some(false));
+    trigger.interaction.on_key.as_ref().unwrap()(NodeKey::End, Default::default());
+    assert_eq!(session.drain(), (true, vec![]));
+    let still_closed = session.render(Specimen::Select, View::Examples, &ctx);
+    assert!(!has_text(&still_closed, "Selected: elderberry"));
+    assert_eq!(by_id(&still_closed, &trigger_id).a11y.expanded, Some(false));
+
+    // Starting from the same closed tree, batch ArrowDown (opens) + End
+    // (jumps to last option) + Enter (commits last option and closes) without
+    // draining or repainting in between.
+    let trigger = by_id(&still_closed, &trigger_id);
+    let on_key = trigger.interaction.on_key.as_ref().unwrap();
+    on_key(NodeKey::ArrowDown, Default::default());
+    on_key(NodeKey::End, Default::default());
+    trigger.interaction.on_submit.as_ref().unwrap()();
+    assert_eq!(
+        session.drain(),
+        (
+            true,
+            vec![
+                Effect::Focus(trigger_id.clone()),
+                Effect::Focus(trigger_id.clone()),
+            ]
+        )
+    );
+
+    let after = session.render(Specimen::Select, View::Examples, &ctx);
+    assert!(has_text(&after, "Selected: elderberry"));
+    assert_eq!(by_id(&after, &trigger_id).a11y.expanded, Some(false));
+
+    // Enter alone on a closed trigger opens the Select as one ordered action.
+    by_id(&after, &trigger_id)
+        .interaction
+        .on_submit
+        .as_ref()
+        .unwrap()();
+    assert_eq!(
+        session.drain(),
+        (true, vec![Effect::Focus(trigger_id.clone())])
+    );
+    let opened = session.render(Specimen::Select, View::Examples, &ctx);
+    assert_eq!(by_id(&opened, &trigger_id).a11y.expanded, Some(true));
+}
+
+#[test]
+fn text_input_reduces_batched_intents_in_order_before_repaint() {
+    let mut session = Session::default();
+    let ctx = RenderContext::new(&FixtureTheme);
+
+    let painted = session.render(Specimen::TextInput, View::Examples, &ctx);
+    let name = by_id(&painted, "poodle-input-name-field");
+    let insert = name.interaction.on_edit_insert.as_ref().unwrap();
+    insert("J");
+    insert("a");
+    insert("n");
+    insert("e");
+    assert_eq!(session.drain(), (true, vec![]));
+
+    let after = session.render(Specimen::TextInput, View::Examples, &ctx);
+    let name = by_id(&after, "poodle-input-name-field");
+    assert!(has_text(name, "Jane"));
+    assert_eq!(name.caret.unwrap().selection, (4, 4));
+
+    // Replace invalid email with a valid one and verify validation error clears.
+    assert!(has_text(&after, "Please enter a valid email address."));
+    by_id(&after, "poodle-input-email-field")
+        .interaction
+        .on_text_change
+        .as_ref()
+        .unwrap()("jane@example.com");
+    assert_eq!(session.drain(), (true, vec![]));
+    let after = session.render(Specimen::TextInput, View::Examples, &ctx);
+    assert!(!has_text(&after, "Please enter a valid email address."));
+}
+
+#[test]
+fn number_input_reduces_batched_intents_in_order_before_repaint() {
+    let mut session = Session::default();
+    let ctx = RenderContext::new(&FixtureTheme);
+
+    // Click increment twice against the same painted tree: 1 -> 2 -> 3.
+    let painted = session.render(Specimen::NumberInput, View::Examples, &ctx);
+    let inc = by_id(&painted, "poodle-number-input-quantity-inc");
+    activate(inc);
+    activate(inc);
+    assert_eq!(session.drain(), (true, vec![]));
+
+    let after = session.render(Specimen::NumberInput, View::Examples, &ctx);
+    assert!(has_text(&after, "Quantity: 3"));
+
+    // Type "4", "2" and submit against the same painted tree (replacing via
+    // backspace first): "3" -> "" -> "4" -> "42" -> commit 42.
+    let field = by_id(&after, "poodle-number-input-quantity");
+    field.interaction.on_edit_key.as_ref().unwrap()("backspace", Default::default());
+    let insert = field.interaction.on_edit_insert.as_ref().unwrap();
+    insert("4");
+    insert("2");
+    field.interaction.on_submit.as_ref().unwrap()();
+    assert_eq!(session.drain(), (true, vec![]));
+
+    let after = session.render(Specimen::NumberInput, View::Examples, &ctx);
+    assert!(has_text(&after, "Quantity: 42"));
+}
+
+#[test]
+fn code_input_reduces_batched_intents_in_order_before_repaint() {
+    let mut session = Session::default();
+    let ctx = RenderContext::new(&FixtureTheme);
+
+    let painted = session.render(Specimen::CodeInput, View::Examples, &ctx);
+    let code = by_id(&painted, "specimen-code-input-code");
+    let row = code
+        .find(&|node| node.interaction.on_edit_key.is_some())
+        .expect("editable code row");
+    let key = row.interaction.on_edit_key.as_ref().unwrap();
+    for digit in ["1", "2", "3", "4", "5", "6"] {
+        key(digit, Default::default());
+    }
+    assert_eq!(session.drain(), (true, vec![]));
+
+    let after = session.render(Specimen::CodeInput, View::Examples, &ctx);
+    assert!(has_text(&after, "Code complete!"));
+    assert!(after
+        .find(&|node| node.a11y.label.as_deref() == Some("Code check passed"))
+        .is_some());
+}
+
+#[test]
+fn first_batch_controls_update_session_state() {
+    let mut session = Session::default();
+    let ctx = RenderContext::new(&FixtureTheme);
+
+    // Checkbox
+    let node = session.render(Specimen::Checkbox, View::Examples, &ctx);
+    activate(by_id(&node, "checkbox-marketing"));
+    assert_eq!(session.drain(), (true, vec![]));
+    let node = session.render(Specimen::Checkbox, View::Examples, &ctx);
+    assert_eq!(
+        by_id(&node, "checkbox-marketing").a11y.toggled,
+        Some(poodle_node::NodeToggled::True)
+    );
+
+    // Switch
+    let node = session.render(Specimen::Switch, View::Examples, &ctx);
+    activate(by_id(&node, "switch-auto-save"));
+    assert_eq!(session.drain(), (true, vec![]));
+    let node = session.render(Specimen::Switch, View::Examples, &ctx);
+    assert_eq!(
+        by_id(&node, "switch-auto-save").a11y.toggled,
+        Some(poodle_node::NodeToggled::True)
+    );
+
+    // Radio
+    let node = session.render(Specimen::Radio, View::Examples, &ctx);
+    activate(by_id(&node, "radio-express"));
+    assert_eq!(session.drain(), (true, vec![]));
+    let node = session.render(Specimen::Radio, View::Examples, &ctx);
+    assert_eq!(
+        by_id(&node, "radio-express").a11y.toggled,
+        Some(poodle_node::NodeToggled::True)
+    );
+
+    // RadioGroup
+    let node = session.render(Specimen::RadioGroup, View::Examples, &ctx);
+    let enterprise = node
+        .find(&|n| {
+            n.a11y.role == Some(NodeRole::RadioButton)
+                && n.interaction.on_activate.is_some()
+                && has_text(n, "Enterprise")
+        })
+        .expect("enterprise radio option");
+    activate(enterprise);
+    assert_eq!(session.drain(), (true, vec![]));
+    let node = session.render(Specimen::RadioGroup, View::Examples, &ctx);
+    assert!(has_text(&node, "Selected: enterprise"));
+
+    // TriStateSwitch
+    let node = session.render(Specimen::TriStateSwitch, View::Examples, &ctx);
+    let include_btn = node
+        .find(&|n| {
+            n.interaction.on_activate.is_some()
+                && n.runtime_id
+                    .as_deref()
+                    .is_some_and(|id| id.contains("tri-state-filter") && id.contains("included"))
+        })
+        .expect("included option");
+    activate(include_btn);
+    assert_eq!(session.drain(), (true, vec![]));
+    let node = session.render(Specimen::TriStateSwitch, View::Examples, &ctx);
+    assert!(has_text(&node, "Value: included"));
+
+    // SegmentedControl (including icon-only)
+    let node = session.render(Specimen::SegmentedControl, View::Examples, &ctx);
+    let table_seg = node
+        .find(&|n| n.interaction.on_activate.is_some() && has_text(n, "Table"))
+        .expect("table segment");
+    activate(table_seg);
+    assert_eq!(session.drain(), (true, vec![]));
+    let node = session.render(Specimen::SegmentedControl, View::Examples, &ctx);
+    assert!(has_text(&node, "Selected: table"));
+
+    // ToggleGroup
+    let node = session.render(Specimen::ToggleGroup, View::Examples, &ctx);
+    let board = node
+        .find(&|n| n.interaction.on_activate.is_some() && has_text(n, "Board"))
+        .expect("board toggle");
+    activate(board);
+    assert_eq!(session.drain(), (true, vec![]));
+    let node = session.render(Specimen::ToggleGroup, View::Examples, &ctx);
+    assert!(has_text(&node, "View: board"));
+
+    // IconButton
+    let node = session.render(Specimen::IconButton, View::Examples, &ctx);
+    activate(by_id(&node, "specimen-icon-button-add"));
+    activate(by_id(&node, "specimen-icon-button-bold"));
+    assert_eq!(session.drain(), (true, vec![]));
+    let node = session.render(Specimen::IconButton, View::Examples, &ctx);
+    assert!(has_text(&node, "Last action: Add"));
+    assert_eq!(
+        by_id(&node, "specimen-icon-button-bold").a11y.toggled,
+        Some(poodle_node::NodeToggled::True)
+    );
+
+    // SplitButton
+    let node = session.render(Specimen::SplitButton, View::Examples, &ctx);
+    let save_root = by_id(&node, "specimen-split-button-save");
+    let primary = save_root
+        .find(&|n| n.interaction.on_activate.is_some() && has_text(n, "Save"))
+        .expect("save primary button");
+    activate(primary);
+    assert_eq!(session.drain(), (true, vec![]));
+    let node = session.render(Specimen::SplitButton, View::Examples, &ctx);
+    assert!(has_text(&node, "Last action: Save"));
+
+    // Rating
+    let node = session.render(Specimen::Rating, View::Examples, &ctx);
+    let clear_star = node
+        .find(&|n| {
+            n.interaction.on_activate.is_some()
+                && n.id
+                    .as_deref()
+                    .is_some_and(|id| id.contains("specimen-whole"))
+        })
+        .expect("whole rating star");
+    activate(clear_star);
+    assert_eq!(session.drain(), (true, vec![]));
 }
