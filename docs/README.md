@@ -12,8 +12,6 @@ names the one file that owns each topic.
   surface and experimental-package constraints
 - [GPUI developer guide](guides/gpui-developer-guide.md) — Rust contracts,
   themes, node rendering, and the GPUI backend
-- [Jetstream developer guide](guides/jetstream-developer-guide.md) — paired
-  integration for Rust contracts, node rendering, and conversion
 - [Application pattern recipes](guides/README.md) — forms, lists, dialogs,
   media workflows, and admin shells
 - [Build from core behaviour](contracts/core-behaviour.md) — supported

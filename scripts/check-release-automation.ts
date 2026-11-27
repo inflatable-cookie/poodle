@@ -2,7 +2,7 @@
 // incidental workflow steps.
 //
 // It requires: one Effigy npm certificate entry in candidate mode; no
-// aggregate/Rust/native/GPUI/Jetstream selector or setup; a Linux runner and a
+// aggregate/Rust/native/GPUI selector or setup; a Linux runner and a
 // hard ten-minute timeout; candidate artifact and publish-time identity checks;
 // publication of archives rather than package directories; tag plus explicit
 // publish-mode mutation guards; and core/Svelte only in the publication set,
@@ -112,7 +112,7 @@ const RELEASE_FORBIDDEN = [
   { label: "aggregate ci", pattern: /\beffigy\s+ci(?::|\s|$)/ },
   { label: "docs or validation board", pattern: /\beffigy\s+(?:docs|test:|check:|audit:)/ },
   { label: "Rust toolchain setup", pattern: /rust-toolchain|cargo\s|Cargo\.toml/ },
-  { label: "native/GPUI selector", pattern: /\bgpui\b|\bjetstream\b|check:gpui|ci:native/ },
+  { label: "native/GPUI selector", pattern: /\bgpui\b|check:gpui|ci:native/ },
   { label: "macOS runner", pattern: /macos-/ },
 ];
 

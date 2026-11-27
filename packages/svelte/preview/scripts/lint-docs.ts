@@ -191,11 +191,6 @@ function validateComponentContracts(errors: string[]): number {
       `${relativePath} contains execution status; record it in a roadmap or log instead.`,
       errors,
     );
-    expect(
-      !/\bjs_[a-z_]+\b/.test(markdown),
-      `${relativePath} references a retired Jetstream component entry point.`,
-      errors,
-    );
     expect(markdown.includes("## 1. Purpose"), `${relativePath} is missing a purpose section.`, errors);
     expect(
       /^##\s+\d+\.\s+Accessibility$/m.test(markdown),
@@ -233,7 +228,7 @@ function validateCurrentArchitectureReferences(errors: string[]): void {
     const markdown = fs.readFileSync(filePath, "utf8");
     const relativePath = path.relative(repoRoot, filePath);
     expect(
-      !/packages\/(?:gpui|jetstream)\/components/.test(markdown),
+      !/packages\/gpui\/components/.test(markdown),
       `${relativePath} references a retired native component tier.`,
       errors,
     );

@@ -217,10 +217,9 @@ does not apply the web typography treatment to native components.
 | `poodle-gpui-node-backend` | Node interpretation, GPUI input, and event plumbing |
 | Application | Data, routing, persistence, domain state, and orchestration |
 
-Do not create a GPUI-only component implementation when the semantics are
-shared with Jetstream. Add the spec and contract first, implement the component
-in `poodle-render`, then extend the node backend only if the node vocabulary
-cannot express it.
+Do not create a GPUI-only component implementation. Add the spec and contract
+first, implement the component in `poodle-render`, then extend the node backend
+only if the node vocabulary cannot express it.
 
 ## Slots and Composition
 
@@ -305,4 +304,3 @@ decides what saving, navigation, upload, or deletion means.
 - [Token architecture](../knowledge/architecture/002-token-system-and-package-layout.md)
 - [Component contracts](../contracts/components/README.md)
 - [GPUI adapter reference](../../packages/gpui/adapter/README.md)
-- [Jetstream developer guide](jetstream-developer-guide.md)

@@ -12,8 +12,8 @@ poodle-specs + RenderContext + handlers + slots
                  poodle-render
                        |
                   poodle-node
-                  /          \
-          GPUI backend    Jetstream backend
+                       |
+                 GPUI backend
 ```
 
 ## Example

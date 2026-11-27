@@ -88,7 +88,7 @@ Cargo.lock
 
 # Effigy
 
-# Screenshots (Jetstream preview debug captures)
+# Preview debug screenshots
 docs/screenshots/
 .claude/settings.local.json
 
@@ -102,14 +102,11 @@ docs/screenshots/
 # Native visual gate baselines (g12.014).
 #
 # Deliberately NOT committed. They are transient reference images regenerated
-# on demand, and the GPUI set alone is 103MB of full-window screenshots — git
-# storage that grows with every rebaseline and is never reclaimed. Both gates
-# write a missing baseline on first run and say so, so a fresh clone
-# self-populates.
+# on demand, and the GPUI set is 103MB of full-window screenshots — git
+# storage that grows with every rebaseline and is never reclaimed. The refresh
+# flow writes a first baseline, so a fresh clone populates its own.
 packages/gpui/preview/baselines/
-packages/jetstream/preview/baselines/
 test/native-visual/out/
-test/native-visual/out-jetstream/
 # g15.047 Button comparison: retained evidence is copied into docs/evidence/
 # via --out; the default directory is disposable.
 test/visual/button-comparison/out/

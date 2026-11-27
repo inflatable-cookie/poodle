@@ -1,7 +1,7 @@
 # 001 Poodle System Shape
 
 Status: active
-Updated: 2026-11-25
+Updated: 2026-11-27
 
 ## Purpose
 
@@ -29,8 +29,8 @@ component semantics               W3C DTCG token source
                   (context: borrowed theme + presentation
                    defaults + effective motion policy —
                    architectures 010 and 012)
-                              /             \
-                    GPUI node backend   Jetstream backend
+                                      |
+                              GPUI node backend
 ```
 
 There are two implementation paths:
@@ -38,8 +38,8 @@ There are two implementation paths:
 - Web components use shared framework-free behavior and CSS from
   `@inflatable-cookie/poodle-core`, with thin Svelte or React shells.
 - Native components use `poodle-render` as the single Rust component
-  implementation. It produces renderer-neutral `poodle-node` trees, which a
-  backend interprets for GPUI or Jetstream.
+  implementation. It produces renderer-neutral `poodle-node` trees, which the
+  GPUI backend interprets.
 
 No application is expected to depend on every layer.
 
@@ -77,17 +77,17 @@ The durable implementation shape is pair-wise:
 - **Web pair** — `poodle-core` is the single behavior source for Svelte and
   React; the shells stay idiomatic and thin.
 - **Native pair** — `poodle-render` is the single component implementation
-  for GPUI and Jetstream; backends interpret, they do not reimplement.
+  and the GPUI backend interprets it; a backend never reimplements a
+  component.
 
 The pairs do not maintain four independent component implementations. They
 also do not share executable behaviour across the TypeScript/Rust boundary.
 
-Svelte, React, and GPUI are the current implementation cohort. Jetstream
-remains a target, but its backend integration is deferred until a dedicated
-admission runway can exercise real renderer behaviour without requiring every
-Poodle worktree to clone or link the sibling engine repository. Developers
-working on the preview [supply the sibling checkout locally](../../guides/jetstream-developer-guide.md#set-up-jetstream).
-The main validation board can run without that checkout.
+Svelte, React, and GPUI are the implementation cohort. GPUI is the one native
+backend (operator ruling 2026-11-27, see
+[vision](../vision.md#direction)): Jetstream hosts stock GPUI and renders
+Poodle components through the same backend, so Poodle carries no Jetstream
+code.
 
 `CodeEditor` has one narrower staged admission by operator decision on
 2026-09-10. Its Svelte and React wrappers may ship together over CodeMirror 6
@@ -174,7 +174,7 @@ The Rust contracts under `packages/contracts/` include:
 - `poodle-layout`, `poodle-style`, and `poodle-events` for shared vocabulary
 - `poodle-node` for renderer-neutral output trees and interaction intents
 
-These crates do not own GPUI or Jetstream widgets.
+These crates do not own GPUI widgets.
 
 ### Shared renderer
 
@@ -194,21 +194,8 @@ contract crates have backend-independent dependency trees, including tests.
 theme provider. `poodle-gpui-node-backend` interprets node trees as GPUI
 elements and owns backend-specific input, text editing, and event plumbing.
 
-### Jetstream
-
-`poodle-jetstream` provides the Jetstream theme and accessibility role
-mappings. All Jetstream component composition comes from `poodle-render`.
-The `jetstream-poodle` crate in the Jetstream repository converts Poodle nodes
-into Jetstream `JsEl` trees at the engine boundary.
-
-Jetstream integration is currently deferred. Normal Poodle development and QA
-must not require a sibling Jetstream checkout. Its paired build, accessibility,
-interaction, and visual checks run through explicit opt-in selectors until a
-later admission verdict promotes the backend into the active cohort.
-
-A native component should not be reimplemented separately in both backends.
-Shared composition belongs in `poodle-render`; only runtime interpretation
-belongs in a backend.
+A backend implements no component. Shared composition belongs in
+`poodle-render`; only runtime interpretation belongs in a backend.
 
 ## Token Architecture
 
@@ -250,7 +237,7 @@ task g12.022 (Git history).
 
 - Add a component only when its semantics are reusable across products.
 - Change the contract before changing observable behavior in one renderer.
-- Put cross-native composition in `poodle-render`, not in both backends.
+- Put native composition in `poodle-render`, not in a backend.
 - Put cross-web behavior and styles in `poodle-core`, not in both frameworks.
 - Keep runtime escape hatches narrow and document any parity they give up.
 - Keep generated artifacts derived from the canonical token source.

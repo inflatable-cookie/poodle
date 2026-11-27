@@ -58,9 +58,9 @@ prefer the narrower current authority and repair the stale document.
 - A renderer-neutral specimen plan may share ordered tabs, sections, captions,
   and fixture references across runtimes. Runtime adapters still render real
   components and may own bounded presentation needed by their renderer.
-- For Button, Select and DataTable, both native preview hosts mount the same
-  node trees and typed session from `poodle-specimens`. Keep their content and
-  interaction in the shared definition and leave preview chrome in the hosts.
+- For Button, Select and DataTable, the native preview mounts the node trees
+  and typed session from `poodle-specimens`. Keep their content and
+  interaction in the shared definition and leave preview chrome in the host.
   See [Shared native specimens](../architecture/016-shared-native-specimens.md).
 - Axis tabs use the component's exact ordered public value domain. A prop named
   `size` does not imply the five-step `ControlSize` domain, and a prop named
@@ -76,8 +76,8 @@ prefer the narrower current authority and repair the stale document.
 - Put shared web component styles in `poodle-core/styles`.
 - Keep Svelte and React shells idiomatic and thin.
 - Put shared native component composition in `poodle-render`.
-- Keep GPUI and Jetstream backends limited to runtime interpretation, input,
-  lifecycle, and drawing concerns.
+- Keep the GPUI backend limited to runtime interpretation, input, lifecycle,
+  and drawing concerns.
 - Extend the shared node vocabulary only for reusable rendering capabilities.
 - Capability absence is declared with a reason, never inferred from a runtime
   being silent. A declared absence records debt; it does not count as parity
@@ -92,11 +92,11 @@ prefer the narrower current authority and repair the stale document.
 
 ## Runtime Parity Authority
 
-Poodle targets Svelte, React, GPUI, and Jetstream. The active completion cohort
-is currently Svelte, React, and GPUI plus the renderer-neutral Rust declaration
-and `poodle-node` output. Jetstream is a deferred backend integration until a
-later admission runway proves its converter, input, accessibility, and preview
-workflow against the same cases.
+Poodle targets Svelte, React, and GPUI, plus the renderer-neutral Rust
+declaration and `poodle-node` output. GPUI is the one native backend (see
+[vision](../vision.md#direction)). `poodle-render` tests use a backend-neutral
+token fixture, and `check:backend-neutral` checks the renderer, shared
+specimens and contract dependency trees, including test dependencies.
 
 - **Svelte is the reference implementation.** Where runtimes disagree on what a
   component can do, Svelte is what the others are brought up to.
@@ -133,30 +133,11 @@ typically used. A titlebar control, a desktop-only affordance, or a dev-tool
 surface still implements Svelte, React, shared Rust composition, and GPUI.
 "It's only used on the web" is not a reason to skip the Rust target.
 
-Jetstream deferral is program-wide, not a per-component exception and not a
-parity claim. Components must keep renderer-neutral specs, cases, and node
-output so Jetstream can consume the same authority later. Reports must label
-Jetstream deferred until its admission gate passes; they must not report it as
-passing, complete, or an accepted absence.
-
-One exception (Tom, 2026-10-07): the Jetstream preview must compile and open
-a component by name, because the poodle-lab side-by-side specimen view hosts
-it. That repair is not admission; parity reporting stays deferred.
-
-Operator decision 2026-11-25: Jetstream components use the shared
-`poodle-render` node trees and the sibling repository's `jetstream-poodle`
-converter. The Poodle Jetstream crate supplies theme and accessibility role
-mappings. `poodle-render` tests use a backend-neutral token fixture, and
-`check:backend-neutral` checks the renderer, shared specimens and contract
-dependency trees, including test dependencies.
-
 Distinguish two things that sound alike:
 
 - **Active-cohort component parity is required.** Every component has a
   contract, Svelte and React implementations, a `<Name>Spec`, a
-  `poodle-render` implementation, and a GPUI specimen. Jetstream preview
-  admission is deferred as one backend program rather than waived component by
-  component.
+  `poodle-render` implementation, and a GPUI specimen.
 - **Web-platform prop parity is not.** Native attributes like `autocomplete`,
   `autofocus` and `spellcheck`, imperative escape hatches, and DOM-node props
   stay web-only and out of the portable spec. `WEB_ONLY` in
@@ -261,7 +242,7 @@ the certified core/Svelte archives, and the native gates recorded in
 [`release.md`](release.md). The matching tag is then published from those
 exact archives in one second run; there is no tag dry run or publish-time
 rebuild. The npm workflow has a ten-minute hard ceiling and never runs
-aggregate, Rust, native, GPUI or Jetstream gates. Native consumers use that
+aggregate, Rust, native or GPUI gates. Native consumers use that
 same tag by git. A red or over-budget run stops the lane and returns to
 planning; the tag is retracted only when nothing was published from it. See
 spec 071.
@@ -419,10 +400,9 @@ Every Rust build, check, test, fetch, run, `cargo deny` and Cargo-wrapping tool
 in Poodle goes through `scripts/rust-driver.sh`. It runs `oxide` locally and
 `cargo` under `GITHUB_ACTIONS=true`, because the CI runners have no Oxide. The
 Effigy selectors call it directly, and so do the Bun and sh scripts that spawn
-Cargo themselves: the Jetstream build, the GPUI capture and AX scripts, the
-Jetstream census and snap sweep, the native-visual capture, the bootstrap fetch
-and the button-comparison capture. A missing local `oxide` fails and names the
-escape. It never falls back to Cargo silently.
+Cargo themselves: the GPUI capture and AX scripts, the native-visual capture,
+the bootstrap fetch and the button-comparison capture. A missing local `oxide`
+fails and names the escape. It never falls back to Cargo silently.
 
 There are two routes, and both go through the same driver:
 

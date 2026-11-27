@@ -367,15 +367,13 @@ fn sample_model() -> IrModel {
         }],
         conformance: vec![Identifier::new("sample-vector")],
         extensions: vec![Extension {
-            id: Identifier::new("jetstream-clear-only"),
-            owning_runtime: RuntimeTarget::Jetstream,
-            reason: "Host owns the editor; only pointer-reachable parts wire events (TXT-31)."
+            id: Identifier::new("gpui-native-vertical"),
+            owning_runtime: RuntimeTarget::Gpui,
+            reason: "The web range inputs have no native vertical equivalent (RNG-26).".to_owned(),
+            parity_effect: "Vertical orientation is drawn by the native renderer (RNG-26)."
                 .to_owned(),
-            parity_effect: "Typing and key events have no route; value feeds back through the \
-                           spec (TXT-31)."
-                .to_owned(),
-            evidence_surface: "docs/parity/text-input.md".to_owned(),
-            removal_condition: "Removed when the Jetstream host editor gains typed event routes."
+            evidence_surface: "docs/parity/range-slider.md".to_owned(),
+            removal_condition: "Removed when the shared contract covers native vertical layout."
                 .to_owned(),
             description: "Synthetic extension recording the EXT class (spec 063 escape-hatch \
                           rules)."
@@ -877,9 +875,9 @@ fn reports_all_findings_at_once_not_first() {
 // rules that keep the vocabulary honest)
 // ---------------------------------------------------------------------------
 
-/// A complete per-runtime provision list: all four runtimes, each with a
+/// A complete per-runtime provision list: all three runtimes, each with a
 /// provision and a reason.
-fn four_runtime_status() -> Vec<CapabilityRuntimeStatus> {
+fn three_runtime_status() -> Vec<CapabilityRuntimeStatus> {
     vec![
         CapabilityRuntimeStatus {
             runtime: RuntimeTarget::Svelte,
@@ -893,13 +891,8 @@ fn four_runtime_status() -> Vec<CapabilityRuntimeStatus> {
         },
         CapabilityRuntimeStatus {
             runtime: RuntimeTarget::Gpui,
-            provision: CapabilityProvision::Provided,
-            reason: "gpui provides it".to_owned(),
-        },
-        CapabilityRuntimeStatus {
-            runtime: RuntimeTarget::Jetstream,
             provision: CapabilityProvision::Absent,
-            reason: "jetstream lacks it, with a reason".to_owned(),
+            reason: "gpui lacks it, with a reason".to_owned(),
         },
     ]
 }
@@ -918,7 +911,7 @@ fn accepts_the_g13_018_vocabulary() {
         }
     }
     // A complete per-runtime provision on the Focus requirement.
-    model.components[0].capabilities[0].runtimes = four_runtime_status();
+    model.components[0].capabilities[0].runtimes = three_runtime_status();
 
     let findings = validate(&model);
     assert!(
@@ -978,8 +971,8 @@ fn rejects_an_empty_identified_instance_list() {
 #[test]
 fn rejects_an_omitted_runtime_in_a_declared_provision() {
     let mut model = sample_model();
-    let mut statuses = four_runtime_status();
-    statuses.pop(); // Jetstream unlisted — silence must not mean absent.
+    let mut statuses = three_runtime_status();
+    statuses.pop(); // GPUI unlisted — silence must not mean absent.
     model.components[0].capabilities[0].runtimes = statuses;
 
     let findings = validate(&model);
@@ -992,7 +985,7 @@ fn rejects_an_omitted_runtime_in_a_declared_provision() {
         "a declared provision must list every runtime: {findings:#?}"
     );
     assert!(
-        incomplete.iter().any(|f| f.message.contains("Jetstream")),
+        incomplete.iter().any(|f| f.message.contains("Gpui")),
         "the finding must name the omitted runtime: {findings:#?}"
     );
 }
@@ -1000,7 +993,7 @@ fn rejects_an_omitted_runtime_in_a_declared_provision() {
 #[test]
 fn rejects_an_absent_runtime_without_a_reason() {
     let mut model = sample_model();
-    let mut statuses = four_runtime_status();
+    let mut statuses = three_runtime_status();
     for status in &mut statuses {
         if status.provision == CapabilityProvision::Absent {
             status.reason = "   ".to_owned();
@@ -1020,7 +1013,7 @@ fn rejects_an_absent_runtime_without_a_reason() {
 #[test]
 fn rejects_a_duplicate_runtime_in_a_declared_provision() {
     let mut model = sample_model();
-    let mut statuses = four_runtime_status();
+    let mut statuses = three_runtime_status();
     statuses.push(statuses[0].clone()); // Svelte listed twice.
     model.components[0].capabilities[0].runtimes = statuses;
 

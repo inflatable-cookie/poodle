@@ -53,7 +53,7 @@ pub fn shell_scene() -> Scene {
         description: "The shared preview shell of g13.004: theme/size/density/contrast axes \
                       (SHELL-01-04), navigation (SHELL-05), search (SHELL-06), specimen tabs \
                       (SHELL-07), preview state (SHELL-08), and parity vocabulary (SHELL-09). \
-                      Rendered by all four runtimes."
+                      Rendered by all three runtimes."
             .to_owned(),
         instances: Vec::new(),
         axes: vec![
@@ -132,7 +132,6 @@ pub fn shell_scene() -> Scene {
                 RuntimeTarget::Svelte,
                 RuntimeTarget::React,
                 RuntimeTarget::Gpui,
-                RuntimeTarget::Jetstream,
             ],
             visual_gates: vec![
                 VisualGate {

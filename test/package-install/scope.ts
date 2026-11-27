@@ -81,9 +81,6 @@ export const CANDIDATE_GENERATED_STAMP_PATHS = [
   "packages/gpui/preview/src/generated/catalogue/catalogue.rs",
   "packages/gpui/preview/src/generated/preview-shell.rs",
   "packages/gpui/preview/src/generated/specimens/specimens.rs",
-  "packages/jetstream/preview/src/generated/catalogue/catalogue.rs",
-  "packages/jetstream/preview/src/generated/preview-shell.rs",
-  "packages/jetstream/preview/src/generated/specimens/specimens.rs",
   "packages/react/preview/src/generated/catalogue/catalogue.ts",
   "packages/react/preview/src/generated/preview-shell.ts",
   "packages/react/preview/src/generated/specimens/avatar-specimen.ts",
@@ -273,12 +270,6 @@ export function candidatePolicy(mode: CandidateScopeMode): CandidatePolicy {
 
 const PRIVATE_DECLARATION_TOOLS_MANIFEST =
   "scripts/web-distribution/declaration-tools/package.json";
-
-const JETSTREAM_PREVIEW_CARGO_MANIFEST = "packages/jetstream/preview/Cargo.toml";
-const JETSTREAM_PREVIEW_NODE_PATCH_SECTION =
-  '[patch."https://github.com/inflatable-cookie/poodle.git"]';
-const JETSTREAM_PREVIEW_NODE_PATCH_ENTRY =
-  `${JETSTREAM_PREVIEW_NODE_PATCH_SECTION.slice(1, -1)}|poodle-node = { path = "../../contracts/node" }`;
 
 /** The private root repository manifest; its development tooling is ordinary. */
 const ROOT_MANIFEST_PATH = "package.json";
@@ -808,7 +799,6 @@ function newManifestHasDisallowedTransport(text: string): boolean {
 }
 
 function ordinaryCargoForbiddenLabels(
-  path: string,
   before: string | null,
   after: string | null,
 ): string[] {
@@ -819,10 +809,7 @@ function ordinaryCargoForbiddenLabels(
     if (cargoPackageVersionSignal(before) !== cargoPackageVersionSignal(after)) {
       labels.push("version");
     }
-    if (
-      cargoTransportFingerprint(before) !== cargoTransportFingerprint(after) &&
-      !isJetstreamPreviewLocalNodePatchOnly(path, before, after)
-    ) {
+    if (cargoTransportFingerprint(before) !== cargoTransportFingerprint(after)) {
       labels.push("registry");
     }
     return [...new Set(labels)];
@@ -831,44 +818,6 @@ function ordinaryCargoForbiddenLabels(
     labels.push("registry");
   }
   return labels;
-}
-
-/**
- * The unpublished Jetstream preview needs the current local poodle-node crate
- * to unify types with its local renderer while the sibling adapter consumes
- * Poodle from Git. Admit only that exact path patch; other Cargo source and
- * patch changes remain release surfaces.
- */
-function isJetstreamPreviewLocalNodePatchOnly(
-  path: string,
-  before: string,
-  after: string,
-): boolean {
-  if (
-    path !== JETSTREAM_PREVIEW_CARGO_MANIFEST ||
-    cargoSectionKey(before, "package", "name") !== '"poodle-jetstream-preview"' ||
-    cargoSectionKey(after, "package", "name") !== '"poodle-jetstream-preview"' ||
-    isEffectivelyPublishable(before) ||
-    isEffectivelyPublishable(after) ||
-    cargoPackageVersionSignal(before) !== cargoPackageVersionSignal(after)
-  ) {
-    return false;
-  }
-
-  const beforeEntries = cargoTransportFingerprint(before).split("\n").filter(Boolean);
-  const afterEntries = cargoTransportFingerprint(after).split("\n").filter(Boolean);
-  const added = afterEntries.filter((entry) => !beforeEntries.includes(entry)).sort();
-  const removed = beforeEntries.filter((entry) => !afterEntries.includes(entry));
-  const expected = [
-    JETSTREAM_PREVIEW_NODE_PATCH_SECTION,
-    JETSTREAM_PREVIEW_NODE_PATCH_ENTRY,
-  ].sort();
-
-  return (
-    !beforeEntries.some((entry) => entry.startsWith("[patch.") || entry.startsWith("[replace")) &&
-    removed.length === 0 &&
-    JSON.stringify(added) === JSON.stringify(expected)
-  );
 }
 
 /**
@@ -1075,7 +1024,7 @@ async function ordinaryCargoForbiddenSurfaces(
     ) {
       throw new Error(`certification scope rejected unparsable Cargo manifest: ${path}`);
     }
-    for (const surface of ordinaryCargoForbiddenLabels(path, before, after)) {
+    for (const surface of ordinaryCargoForbiddenLabels(before, after)) {
       forbidden.push({ path, surface });
     }
   }
@@ -1339,7 +1288,6 @@ const RELEASE_AUTOMATION_WORKFLOW_FORBIDDEN = [
   "effigy qa",
   "effigy ci",
   "gpui",
-  "jetstream",
   "cargo",
   "macos-",
   "rust-toolchain",

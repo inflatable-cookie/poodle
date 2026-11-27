@@ -11,7 +11,7 @@
  * now pinned: per-runtime capability provision *including absence*, and
  * the drift that would silently undo either half.
  *
- * The definition declares, per capability, which of the four runtimes
+ * The definition declares, per capability, which of the three runtimes
  * provide it, delegate it, or lack it — each with a reason (g13.018 R3;
  * `CapabilityRequirement::runtimes`). A type nobody checks changes
  * nothing (R4), so this gate checks the *truth* of every declared row
@@ -19,11 +19,9 @@
  *
  *   - a declared **absence** must stay true — if the runtime gains a trace
  *     of the capability while still declared as lacking it, the gate
- *     fails. This is the b049 finding made checkable: Jetstream renders a
- *     text field nobody can type into and is declared identically to
- *     GPUI; now "Jetstream lacks text editing" is declared, and the gate
- *     fails the moment Jetstream gains edit handlers while the
- *     declaration still says absent.
+ *     fails. This is the b049 finding made checkable: a runtime that renders
+ *     a text field nobody can type into must not be declared identically to
+ *     one that edits.
  *   - a declared **provision** (provided or delegated) must have a trace —
  *     if a runtime claims a capability it has no trace of, the gate fails.
  *     A runtime may not declare a capability it does not implement.
@@ -55,8 +53,8 @@ const CAPABILITIES_PATH = join(
   "packages/contracts/headless/capabilities/capabilities.json",
 );
 
-/** The serialized runtime names the fixtures carry (the four RuntimeTargets). */
-type RuntimeName = "svelte" | "react" | "gpui" | "jetstream";
+/** The serialized runtime names the fixtures carry (the RuntimeTargets). */
+type RuntimeName = "svelte" | "react" | "gpui";
 /** The serialized provision names the fixtures carry (CapabilityProvision). */
 type ProvisionName = "provided" | "delegated" | "absent";
 
@@ -72,13 +70,10 @@ interface Probe {
  * authored models declare. Patterns are the measured implementation
  * vocabulary (b049 for TextInput; b042/b046 for the natives), scoped to
  * the runtime surface the component actually consumes: the component's own
- * file on web, the node-backend for GPUI, the Jetstream package for
- * Jetstream. Per-component keys are required — the same capability can
- * have a different relationship per component (e.g. Jetstream focus is
- * absent for TextInput fields — no `on_focus_change` route, measured —
- * but provided for RangeSlider's focusable root). Absence probes reuse
- * the same vocabulary: a trace appearing where absence is declared is the
- * failure.
+ * file on web, the node-backend for GPUI. Per-component keys are required —
+ * the same capability can have a different relationship per component.
+ * Absence probes reuse the same vocabulary: a trace appearing where absence
+ * is declared is the failure.
  */
 const PROBES: Record<
   string,
@@ -98,10 +93,6 @@ const PROBES: Record<
         scopes: ["packages/gpui/node-backend/src"],
         patterns: ["on_edit_insert|on_edit_key|on_select_range"],
       },
-      jetstream: {
-        scopes: ["packages/jetstream"],
-        patterns: ["on_edit_key|on_edit_insert|on_select_range"],
-      },
     },
     ime: {
       svelte: {
@@ -116,10 +107,6 @@ const PROBES: Record<
         scopes: ["packages/gpui/node-backend/src"],
         patterns: ["\\bInputHandler\\b"],
       },
-      jetstream: {
-        scopes: ["packages/jetstream"],
-        patterns: ["\\bime\\.rs\\b|\\bInputHandler\\b"],
-      },
     },
     clipboard: {
       svelte: {
@@ -132,10 +119,6 @@ const PROBES: Record<
       },
       gpui: {
         scopes: ["packages/gpui/node-backend/src"],
-        patterns: ["clipboard|on_edit_insert"],
-      },
-      jetstream: {
-        scopes: ["packages/jetstream"],
         patterns: ["clipboard|on_edit_insert"],
       },
     },
@@ -152,10 +135,6 @@ const PROBES: Record<
         scopes: ["packages/gpui/node-backend/src"],
         patterns: ["ShapedLine|x_for_index|closest_index_for_x"],
       },
-      jetstream: {
-        scopes: ["packages/jetstream"],
-        patterns: ["ShapedLine|x_for_index|closest_index_for_x"],
-      },
     },
     focus: {
       svelte: {
@@ -170,15 +149,6 @@ const PROBES: Record<
         scopes: ["packages/gpui/node-backend/src"],
         patterns: ["on_focus_change|focusable"],
       },
-      jetstream: {
-        scopes: ["packages/jetstream"],
-        // The b049 measurement: Jetstream never observes focus for poodle
-        // *fields* — no `on_focus_change` route. The preview's general
-        // focus system (set_focus/focusable) serves other controls, not
-        // the text field, so the field's absence probe is the poodle
-        // focus-observation channel itself.
-        patterns: ["on_focus_change"],
-      },
     },
     timers: {
       svelte: {
@@ -192,10 +162,6 @@ const PROBES: Record<
       gpui: {
         scopes: ["packages/gpui/node-backend/src"],
         patterns: ["setTimeout|schedule_timer"],
-      },
-      jetstream: {
-        scopes: ["packages/jetstream"],
-        patterns: ["setTimeout"],
       },
     },
   },
@@ -213,10 +179,6 @@ const PROBES: Record<
         scopes: ["packages/gpui/node-backend/src"],
         patterns: ["on_scrub|on_drag"],
       },
-      jetstream: {
-        scopes: ["packages/jetstream"],
-        patterns: ["setPointerCapture|pointer_capture|PointerCapture"],
-      },
     },
     focus: {
       svelte: {
@@ -231,10 +193,6 @@ const PROBES: Record<
         scopes: ["packages/gpui/node-backend/src"],
         patterns: ["on_focus_change|focusable"],
       },
-      jetstream: {
-        scopes: ["packages/jetstream"],
-        patterns: ["set_focus|focusable"],
-      },
     },
     "scrub-fraction": {
       svelte: {
@@ -248,10 +206,6 @@ const PROBES: Record<
       gpui: {
         scopes: ["packages/gpui/node-backend/src"],
         patterns: ["on_scrub"],
-      },
-      jetstream: {
-        scopes: ["packages/jetstream"],
-        patterns: ["on_scrub|\\bscrub\\b"],
       },
     },
   },

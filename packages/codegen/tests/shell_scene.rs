@@ -1,14 +1,14 @@
 //! Tests for the card 035/036 shell scene: the Rust-authored scene (R1),
-//! the serialized fixture round trip, and the four shells' shared artifact —
-//! Svelte + React through `shell-scene` (TS), GPUI + Jetstream through its
-//! card-036 Rust sibling `shell-rust` (R2: a sibling target, `shell-scene`'s
-//! output untouched).
+//! the serialized fixture round trip, and the three shells' shared artifact —
+//! Svelte + React through `shell-scene` (TS), GPUI through its card-036 Rust
+//! sibling `shell-rust` (R2: a sibling target, `shell-scene`'s output
+//! untouched).
 //!
-//! The card's required test — "the four shells expose the same capability
+//! The card's required test — "the shells expose the same capability
 //! set and the same label text, derived from the scene rather than a
 //! hand-written list" — is served by
 //! [`both_web_shells_carry_the_same_scene_derived_artifact`] and
-//! [`both_native_shells_carry_the_same_scene_derived_artifact`]: the
+//! [`the_native_shell_carries_the_scene_derived_artifact`]: the
 //! expected artifact is the target's render of the authored scene, not a
 //! hand-listed expectation, and each committed artifact must equal it
 //! byte-exact. A shell that drifts (renders a different control set or
@@ -29,9 +29,7 @@ const SHELL_FIXTURE: &str = "packages/codegen/fixtures/shell-model.json";
 const SVELTE_ARTIFACT: &str = "packages/svelte/preview/src/generated/preview-shell.ts";
 const REACT_ARTIFACT: &str = "packages/react/preview/src/generated/preview-shell.ts";
 const GPUI_ARTIFACT: &str = "packages/gpui/preview/src/generated/preview-shell.rs";
-const JETSTREAM_ARTIFACT: &str = "packages/jetstream/preview/src/generated/preview-shell.rs";
 const GPUI_MANIFEST: &str = "packages/gpui/preview/Cargo.toml";
-const JETSTREAM_MANIFEST: &str = "packages/jetstream/preview/Cargo.toml";
 
 fn crate_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -220,11 +218,11 @@ fn both_web_shells_carry_the_same_scene_derived_artifact() {
     );
 }
 
-/// The card-036 counterpart: both native shells carry the same scene-derived
-/// Rust artifact (R1: self-contained plain data; R2: the `shell-rust`
-/// sibling target). GPUI and Jetstream must equal the render byte-exact.
+/// The card-036 counterpart: the native shell carries the scene-derived Rust
+/// artifact (R1: self-contained plain data; R2: the `shell-rust` sibling
+/// target). GPUI must equal the render byte-exact.
 #[test]
-fn both_native_shells_carry_the_same_scene_derived_artifact() {
+fn the_native_shell_carries_the_scene_derived_artifact() {
     let files = render_rust_artifact();
     assert_eq!(files.len(), 1, "one scene renders one Rust artifact");
     let rendered = &files[0];
@@ -243,11 +241,6 @@ fn both_native_shells_carry_the_same_scene_derived_artifact() {
         artifact_bytes(GPUI_ARTIFACT),
         rendered.contents.as_bytes(),
         "the GPUI shell's committed artifact equals the scene's render"
-    );
-    assert_eq!(
-        artifact_bytes(JETSTREAM_ARTIFACT),
-        rendered.contents.as_bytes(),
-        "the Jetstream shell's committed artifact equals the scene's render"
     );
 }
 
@@ -413,11 +406,6 @@ fn one_scene_change_moves_all_four_artifacts() {
         artifact_bytes(GPUI_ARTIFACT).as_slice(),
         "the GPUI artifact would move in one rebuild"
     );
-    assert_ne!(
-        rust_contents.as_bytes(),
-        artifact_bytes(JETSTREAM_ARTIFACT).as_slice(),
-        "the Jetstream artifact would move in one rebuild"
-    );
 }
 
 // ---------------------------------------------------------------------------
@@ -512,23 +500,21 @@ fn shell_rust_artifacts_fail_check_on_drift_and_check_never_writes() {
     assert_eq!(snapshot(&root), before, "check mode never mutates the tree");
 }
 
-/// R1 asserted, not just avoided: neither native preview manifest may name
+/// R1 asserted, not just avoided: the native preview manifest may not name
 /// `poodle-ir` or `poodle-codegen`. The artifacts are pulled in by
 /// `#[path]`, so no manifest change was needed — prove the constraint.
 #[test]
-fn native_preview_manifests_carry_no_poodle_ir_or_codegen_dependency() {
-    for manifest in [GPUI_MANIFEST, JETSTREAM_MANIFEST] {
-        let text = fs::read_to_string(repo_root().join(manifest))
-            .unwrap_or_else(|error| panic!("{manifest} is readable: {error}"));
-        assert!(
-            !text.contains("poodle-ir"),
-            "{manifest} must not depend on poodle-ir (card 036 R1)"
-        );
-        assert!(
-            !text.contains("poodle-codegen"),
-            "{manifest} must not depend on poodle-codegen (card 036 R1)"
-        );
-    }
+fn native_preview_manifest_carries_no_poodle_ir_or_codegen_dependency() {
+    let text = fs::read_to_string(repo_root().join(GPUI_MANIFEST))
+        .unwrap_or_else(|error| panic!("{GPUI_MANIFEST} is readable: {error}"));
+    assert!(
+        !text.contains("poodle-ir"),
+        "{GPUI_MANIFEST} must not depend on poodle-ir (card 036 R1)"
+    );
+    assert!(
+        !text.contains("poodle-codegen"),
+        "{GPUI_MANIFEST} must not depend on poodle-codegen (card 036 R1)"
+    );
 }
 
 // ---------------------------------------------------------------------------

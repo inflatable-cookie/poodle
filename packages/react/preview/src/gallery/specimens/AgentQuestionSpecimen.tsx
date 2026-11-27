@@ -37,7 +37,6 @@ const targets: AgentQuestionItem = {
     { value: "svelte", label: "Svelte" },
     { value: "react", label: "React" },
     { value: "gpui", label: "GPUI" },
-    { value: "jetstream", label: "Jetstream" },
   ],
 };
 

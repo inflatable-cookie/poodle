@@ -56,7 +56,6 @@ fn targets() -> AgentQuestionItem {
             option("svelte", "Svelte", None),
             option("react", "React", None),
             option("gpui", "GPUI", None),
-            option("jetstream", "Jetstream", None),
         ],
         allow_multiple: true,
     }

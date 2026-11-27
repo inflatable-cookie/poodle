@@ -28,11 +28,7 @@ function crateName(path: string): string {
   const directory = path.replace(/\/Cargo\.toml$/, "").split("/").at(-1)!;
   const names: Record<string, string> = {
     codegen: "poodle-codegen",
-    adapter: path.includes("contracts")
-      ? "poodle-adapter"
-      : path.includes("jetstream")
-        ? "poodle-jetstream"
-        : "poodle-gpui",
+    adapter: path.includes("contracts") ? "poodle-adapter" : "poodle-gpui",
     components: "poodle-specs",
     conformance: "poodle-conformance",
     specimens: "poodle-specimens",
@@ -45,7 +41,7 @@ function crateName(path: string): string {
     style: "poodle-style",
     tokens: "poodle-tokens",
     "node-backend": "poodle-gpui-node-backend",
-    preview: path.includes("gpui") ? "poodle-gpui-preview" : "poodle-jetstream-preview",
+    preview: "poodle-gpui-preview",
     render: "poodle-render",
   };
   return names[directory]!;
@@ -217,7 +213,7 @@ describe("lockstep release version bump", () => {
       .not.toThrow();
   });
 
-  test("includes every Rust release package, including the Jetstream theme provider", () => {
+  test("includes every Rust release package", () => {
     const manifests = releaseManifest.packages
       .filter((entry) => entry.language === "rust")
       .map((entry) => `${entry.path}/Cargo.toml`)

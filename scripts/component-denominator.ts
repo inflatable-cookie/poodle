@@ -1,8 +1,8 @@
 // The one generated denominator for public components and portable routes.
 //
 // `canonicalComponents` is emitted from `packages/codegen/fixtures/preview-catalogue.json`
-// by `effigy catalogue:build`; the GPUI and Jetstream `CANONICAL_COMPONENTS`
-// registries are emitted from the same fixture. Every gate that needs a
+// by `effigy catalogue:build`; the GPUI `CANONICAL_COMPONENTS` registry is
+// emitted from the same fixture. Every gate that needs a
 // component or route count reads it here instead of typing the number a second
 // time (operator ruling 2026-09-29, working-rules.md §Catalogue Specimens).
 //
@@ -30,8 +30,7 @@ export const PORTABLE_ROUTE_COUNT: number = PORTABLE_ROUTE_SLUGS.length;
  * Public components outside the portable catalogue.
  *
  * MeterSurface is permanently web-only (spec 068 / g14.024). Listbox now has
- * its shared Rust and GPUI implementations in the portable catalogue;
- * Jetstream's specimen remains deferred in its local preview registry.
+ * its shared Rust and GPUI implementations in the portable catalogue.
  * Other `webOnlyComponents` in the preview registry (`CodeEditor`, the
  * rich-text pair, `MarkdownRenderer`) are web-admitted behind dedicated
  * entries and remain outside the public root roster.

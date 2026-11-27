@@ -1,12 +1,12 @@
 # 001 Poodle Vision
 
 Status: active
-Updated: 2026-11-25
+Updated: 2026-11-27
 
 ## Purpose
 
 Poodle is a generalized design system for teams that need the same UI language
-across Svelte, React, GPUI, and Jetstream applications.
+across Svelte, React, and GPUI applications.
 
 It turns component meaning, design tokens, themes, interaction rules, and
 accessibility expectations into explicit contracts. Each renderer stays
@@ -36,7 +36,7 @@ before rendering mechanics.
 - reusable application composites
 - general workstation and professional-tool shells
 - Svelte and React web implementations
-- a shared Rust renderer with GPUI and Jetstream backends
+- a shared Rust renderer with a GPUI backend
 - documentation, parity rules, examples, and migration guidance
 
 ## What Poodle Does Not Own
@@ -74,9 +74,9 @@ define public naming or behavior.
 
 ### Native renderers
 
-GPUI and Jetstream share `poodle-render`, which produces renderer-neutral node
-trees. Backends interpret those nodes using native runtime capabilities.
-Renderer-specific input, lifecycle, and drawing remain in the backend.
+`poodle-render` produces renderer-neutral node trees, and the GPUI backend
+interprets them using native runtime capabilities. Renderer-specific input,
+lifecycle, and drawing remain in the backend.
 
 ## Direction
 
@@ -136,30 +136,27 @@ Renderer-specific input, lifecycle, and drawing remain in the backend.
   same day).
 - **The design sweep lands on web first.** Operator ruling 2026-11-25.
   Soundcheck is the test consumer for a second style; Loophole is the
-  long-term case. The route for GPUI and Jetstream is a separate, open
-  conversation; see
+  long-term case. The route for the Rust renderers is recorded below and in
   [Q-004](questions.md#q-004--what-is-the-route-for-the-rust-renderers).
+- **Poodle has one native backend, GPUI.** Operator ruling 2026-11-27, which
+  replaces the 2026-11-25 plan to move a second backend to the Jetstream
+  repository. Jetstream hosts stock GPUI (patching only `gpui_wgpu`, which
+  Poodle does not use) and renders Poodle components through Poodle's GPUI
+  backend, with one wgpu revision across Jetstream, GPUI and Poodle. Poodle
+  carries no Jetstream backend or preview and needs no GPUI fork.
 - **The node tree is the seam between Poodle and a native runtime.**
   Operator ruling 2026-11-25. Poodle owns everything up to the node tree:
   the contracts, tokens, styles, theme resolution, behaviour and the shared
   renderer that builds every component once as nodes. A backend is a leaf
   that turns nodes into a runtime's elements; nothing depends on a backend,
   and a backend implements no component of its own.
-  - GPUI is an important part of Poodle and its backend stays in this
-    repository as a first-class one.
-  - The Jetstream backend lives with the Jetstream runtime, beside the
-    converter that is already there, and consumes Poodle's crates at a
-    pinned commit. Jetstream UI has value the operator does not want to
-    lose; raising its quality is work for its own repository. Poodle does
-    not link Jetstream.
+  - The GPUI backend stays in this repository as a first-class one.
   - Poodle ships a conformance kit: node-tree fixtures with expected
-    results that any backend runs where it lives. That is how Poodle holds
-    a backend to parity without linking its engine.
+    results that hold the GPUI backend to parity. Shared specimens stay for
+    GPUI.
   - The lab hosts runtime previews and may pin each one to an individual
     Poodle commit, so that work in progress can be tested.
   - No repository is created per adapter.
-  Until the move is made, the Jetstream preview remains in this repository
-  under its admission status in the working rules.
 - **Svelte is the parity authority.** When runtimes disagree, the others are
   brought up to Svelte; see
   [working rules](contracts/working-rules.md#runtime-parity-authority).

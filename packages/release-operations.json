@@ -228,24 +228,6 @@
       "removalGate": "owner-directed-with-doc-update"
     },
     {
-      "name": "poodle-jetstream",
-      "channel": "preview",
-      "publicIntent": true,
-      "changeControl": "adapter-backed",
-      "requiresReleaseNotes": true,
-      "requiresDeprecationRecord": true,
-      "removalGate": "successor-and-generation-delay"
-    },
-    {
-      "name": "poodle-jetstream-preview",
-      "channel": "internal",
-      "publicIntent": false,
-      "changeControl": "tooling-owned",
-      "requiresReleaseNotes": false,
-      "requiresDeprecationRecord": false,
-      "removalGate": "owner-directed-with-doc-update"
-    },
-    {
       "name": "poodle-codegen",
       "channel": "internal",
       "publicIntent": false,

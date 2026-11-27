@@ -1,20 +1,13 @@
 /**
  * Fetch dependencies for every Rust crate in the repo.
  *
- * There is deliberately no root Cargo workspace: the Jetstream preview
- * path-depends on the sibling `jetstream` repo (`../jetstream/crates/*`),
- * and a workspace would make every cargo invocation — including
- * contracts-only and web checkouts — fail whenever that repo is absent.
- * Each crate stands alone, so this fetches each manifest in turn instead,
- * and skips the preview with a note when the engine is not checked
- * out rather than failing the bootstrap.
+ * There is deliberately no root Cargo workspace. Each crate stands alone, so
+ * this fetches each manifest in turn.
  */
-import { existsSync, readdirSync, statSync } from "node:fs";
+import { readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const ROOT = resolve(new URL("..", import.meta.url).pathname);
-const ENGINE = resolve(ROOT, "../jetstream");
-const JETSTREAM_PREVIEW = join(ROOT, "packages/jetstream/preview/Cargo.toml");
 
 function manifests(dir: string): string[] {
   return readdirSync(dir).flatMap((entry) => {
@@ -25,16 +18,9 @@ function manifests(dir: string): string[] {
   });
 }
 
-const engineAvailable = existsSync(join(ENGINE, "Cargo.toml"));
 let fetched = 0;
-let skipped = 0;
 
 for (const manifest of manifests(join(ROOT, "packages")).sort()) {
-  if (manifest === JETSTREAM_PREVIEW && !engineAvailable) {
-    console.log(`skip  ${manifest} (sibling jetstream repo not checked out)`);
-    skipped += 1;
-    continue;
-  }
   console.log(`fetch ${manifest}`);
   const result = Bun.spawnSync(["sh", join(ROOT, "scripts/rust-driver.sh"), "fetch", "--manifest-path", manifest], {
     stdout: "inherit",
@@ -47,6 +33,4 @@ for (const manifest of manifests(join(ROOT, "packages")).sort()) {
   fetched += 1;
 }
 
-console.log(
-  `fetched ${fetched} crate manifest(s)${skipped ? `, skipped ${skipped} (jetstream engine absent)` : ""}.`,
-);
+console.log(`fetched ${fetched} crate manifest(s).`);

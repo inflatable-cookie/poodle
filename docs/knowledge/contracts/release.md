@@ -147,10 +147,8 @@ Every Cargo package remains `publish = false`. The tag-addressable public
 contract crates are `poodle-tokens`, `poodle-events`, `poodle-headless`,
 `poodle-layout`, `poodle-style`, `poodle-markdown`, `poodle-ir`,
 `poodle-specs`, `poodle-adapter`, and `poodle-node`, plus `poodle-render`,
-`poodle-gpui`, and `poodle-gpui-node-backend`. The `poodle-jetstream` theme and
-role mapping crate stays in lockstep as a public-intent package for Jetstream
-consumers. The internal-only packages are `poodle-codegen`,
-`poodle-gpui-preview`, and `poodle-jetstream-preview`.
+`poodle-gpui`, and `poodle-gpui-node-backend`. The internal-only packages are
+`poodle-codegen` and `poodle-gpui-preview`.
 
 An application pins public packages from one release tag. For example:
 

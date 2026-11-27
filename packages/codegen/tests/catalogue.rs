@@ -214,9 +214,5 @@ fn committed_artifacts_match_the_emitter() {
     let react_root = repo_root()
         .join("packages/react/preview/src")
         .join(catalogue_ts::OUTPUT_ROOT);
-    let jet_root = repo_root()
-        .join("packages/jetstream/preview/src")
-        .join(catalogue_rust::OUTPUT_ROOT);
     assert!(check_outputs(&react_root, &ts).expect("react").is_clean());
-    assert!(check_outputs(&jet_root, &rs).expect("jetstream").is_clean());
 }

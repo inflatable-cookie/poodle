@@ -75,8 +75,8 @@ repository version and a stale value is misleading.
 - Rust contracts: `poodle-adapter`, `poodle-events`, `poodle-headless`,
   `poodle-ir`, `poodle-layout`, `poodle-markdown`, `poodle-node`,
   `poodle-specs`, `poodle-style`, and `poodle-tokens`
-- Rust rendering and backend support: `poodle-render`, `poodle-gpui`,
-  `poodle-gpui-node-backend`, and the Jetstream theme provider `poodle-jetstream`
+- Rust rendering and backend support: `poodle-render`, `poodle-gpui`, and
+  `poodle-gpui-node-backend`
 
 The web public release set is core and Svelte only. See
 [compiled web package distribution](../architecture/014-compiled-web-package-distribution.md)
@@ -98,7 +98,6 @@ and [compiled web distribution contract](070-compiled-web-distribution-contract.
 - `@inflatable-cookie/poodle-react-preview`
 - `@inflatable-cookie/poodle-install-smoke`
 - `poodle-gpui-preview`
-- `poodle-jetstream-preview`
 
 ## Consumption Rule
 
@@ -195,7 +194,6 @@ an explicit operator decision before implementation.
 - `packages/contracts/*/Cargo.toml`
 - `packages/render/Cargo.toml`
 - `packages/gpui/*/Cargo.toml`
-- `packages/jetstream/*/Cargo.toml`
 - [GNU GPL FAQ on linking and combined programs](https://www.gnu.org/licenses/gpl-faq.en.html)
 - [Zed issue #55470](https://github.com/zed-industries/zed/issues/55470)
 - `docs/knowledge/research/gpui-cratesio-nonactivating-capture.md`

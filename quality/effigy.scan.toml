@@ -27,7 +27,7 @@ exclude = [
   "**/Select.tsx", "**/DataTable.tsx", "**/FilterBuilder.tsx",
   # Cohesive single-expression Rust render/compose bodies (logic in poodle-specs/headless;
   # decomposing would require parameter-bag structs that reduce clarity).
-  "**/data_table/render.rs", "**/jetstream/components/src/list_card.rs",
+  "**/data_table/render.rs",
   "**/render/src/split_button.rs", "**/render/src/presentation.rs",
   "**/render/src/color_picker.rs", "**/render/src/filter_builder.rs",
   "**/render/src/select.rs", "**/render/src/data_table.rs", "**/render/src/calendar.rs",
@@ -37,8 +37,6 @@ exclude = [
   "**/contracts/components/src/model_picker.rs", "**/contracts/components/src/filter_builder.rs",
   "**/contracts/components/src/agent_chat_input.rs", "**/contracts/components/src/log_list.rs",
   "**/contracts/headless/src/text_input.rs", "**/contracts/headless/tests/conformance.rs",
-  # Jetstream theme and token resolution.
-  "**/jetstream/adapter/src/theme.rs",
   # Type-system aggregation files: interdependent type definitions with no
   # runtime logic; splitting forces arbitrary cross-file type imports for no
   # maintainability gain.

@@ -206,7 +206,7 @@ Do not add the missing behavior to Poodle from a consumer task, and do not
 replace a contract with a local fork. Product vocabulary, data loading,
 routing, persistence and service orchestration stay in the app.
 
-For native GPUI or Jetstream apps, use the adapter-lifecycle handoff in
+For native GPUI apps, use the adapter-lifecycle handoff in
 Longhorn's `docs/knowledge/contracts/` tree
 (`013-svelte-and-poodle-adapter-lifecycle.md`); Longhorn's `agent-control`
 skill drives a running app and is not a Poodle composition guide. This skill
