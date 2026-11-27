@@ -185,10 +185,10 @@ Rendering style roles: items read the control border, fill and shadow. Selection
 |----------|-------|
 | `min-height` | `var(--poodle-toggle-group-height)` |
 | `padding` | `0 var(--poodle-toggle-group-x)` |
-| `border` | `var(--poodle-border-width-default) solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` |
+| `border` | `var(--poodle-border-width-default) solid var(--poodle-style-control-border)` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `var(--poodle-recipe-toggle-group-item-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)))` |
-| `box-shadow` | `var(--poodle-recipe-toggle-group-item-shadow, none)` |
+| `background` | `var(--poodle-recipe-toggle-group-item-fill, var(--poodle-style-control-fill))` |
+| `box-shadow` | `var(--poodle-recipe-toggle-group-item-shadow, var(--poodle-style-control-shadow))` |
 | `color` | `var(--poodle-recipe-toggle-group-item-text, var(--poodle-color-text-primary))` |
 | `cursor` | `pointer` |
 | `font-family` | `var(--poodle-typography-label-family)` |
@@ -199,13 +199,13 @@ Rendering style roles: items read the control border, fill and shadow. Selection
 
 ### Item — selected (`.toggle-group__item.poodle-selected`)
 
-The accent styles layer the original translucent accent over the base item
-fill. Neutral selection layers its ink wash directly over the host surface.
+The style supplies a selection fill and its underlay. The default
+uses a translucent neutral fill over a transparent underlay.
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-toggle-group-selected-item-fill, selection role over the item fill)` |
-| `border-color` | `var(--poodle-recipe-toggle-group-item-border, var(--poodle-style-selection-borderStrong, var(--poodle-color-select-accentBorderStrong)))` |
+| `background` | `var(--poodle-recipe-toggle-group-selected-item-fill, …)` with `--poodle-style-selection-fillStrong` over `--poodle-style-selection-fillStrongUnderlay` |
+| `border-color` | `var(--poodle-recipe-toggle-group-item-border, var(--poodle-style-selection-borderStrong))` |
 
 ### Item — focus visible (`:focus-visible`)
 

@@ -9,10 +9,10 @@
     grid-auto-columns: minmax(0, 1fr);
     gap: 0.125rem;
     padding: 0.125rem;
-    border: 0.0625rem solid var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-subtle) 84%, transparent));
+    border: 0.0625rem solid var(--poodle-style-control-border);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-segmented-control-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))));
-    box-shadow: var(--poodle-recipe-segmented-control-shadow, var(--poodle-style-control-shadow, none));
+    background: var(--poodle-recipe-segmented-control-fill, var(--poodle-style-control-fill));
+    box-shadow: var(--poodle-recipe-segmented-control-shadow, var(--poodle-style-control-shadow));
   }
 
   .poodle-segmented-control[data-equal-width="false"] {
@@ -85,8 +85,8 @@
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
     color: var(--poodle-recipe-segmented-control-label-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: var(--poodle-style-typography-segmentLabel-size);
+    font-weight: var(--poodle-style-typography-segmentLabel-weight);
     line-height: calc(var(--poodle-segmented-control-height) - 0.25rem);
     text-align: center;
     overflow: hidden;
@@ -114,13 +114,13 @@
   }
 
   .poodle-segmented-control__segment[data-selected="true"] .poodle-segmented-control__label {
-    background: var(--poodle-recipe-segmented-control-selected-label-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)));
-    color: var(--poodle-recipe-segmented-control-selected-label-text, var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse)));
+    background: var(--poodle-recipe-segmented-control-selected-label-fill, var(--poodle-style-selection-fillSolid));
+    color: var(--poodle-recipe-segmented-control-selected-label-text, var(--poodle-style-selection-textSolid));
     box-shadow: var(--poodle-recipe-segmented-control-selected-label-shadow, inset 0 0.0625rem 0 color-mix(in srgb, white 12%, transparent));
   }
 
   .poodle-segmented-control__segment[data-selected="true"] .poodle-segmented-control__label .poodle-icon {
-    color: var(--poodle-recipe-segmented-control-selected-label-text, var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse)));
+    color: var(--poodle-recipe-segmented-control-selected-label-text, var(--poodle-style-selection-textSolid));
   }
 
   .poodle-segmented-control__control:focus-visible + .poodle-segmented-control__label {

@@ -168,9 +168,10 @@ Rendering style roles: the track reads the control border, fill and shadow. Segm
 | `grid-auto-columns` | `minmax(0, 1fr)` |
 | `gap` | `0.125rem` |
 | `padding` | `0.125rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 84%, transparent)` |
+| `border` | `0.0625rem solid var(--poodle-style-control-border)` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))` |
+| `background` | `var(--poodle-recipe-segmented-control-fill, var(--poodle-style-control-fill))` |
+| `box-shadow` | `var(--poodle-recipe-segmented-control-shadow, var(--poodle-style-control-shadow))` |
 
 ### Segment `.segmented-control__segment`
 
@@ -204,9 +205,9 @@ Rendering style roles: the track reads the control border, fill and shadow. Segm
 | `border-radius` | `calc(var(--poodle-radius-control) - 0.125rem)` |
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `0.75rem` |
-| `font-weight` | `600` |
-| `line-height` | `calc(var(--poodle-size-control-height) - 0.25rem)` |
+| `font-size` | `var(--poodle-style-typography-segmentLabel-size)` |
+| `font-weight` | `var(--poodle-style-typography-segmentLabel-weight)` |
+| `line-height` | `calc(var(--poodle-segmented-control-height) - 0.25rem)` |
 | `text-align` | `center` |
 | `overflow` | `hidden` |
 | `text-overflow` | `ellipsis` |
@@ -224,8 +225,8 @@ Rendering style roles: the track reads the control border, fill and shadow. Segm
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-segmented-control-selected-label-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)))` |
-| `color` (label and icon) | `var(--poodle-recipe-segmented-control-selected-label-text, var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse)))` |
+| `background` | `var(--poodle-recipe-segmented-control-selected-label-fill, var(--poodle-style-selection-fillSolid))` |
+| `color` (label and icon) | `var(--poodle-recipe-segmented-control-selected-label-text, var(--poodle-style-selection-textSolid))` |
 | `box-shadow` | `var(--poodle-recipe-segmented-control-selected-label-shadow, inset 0 0.0625rem 0 color-mix(in srgb, white 12%, transparent))` |
 
 ### Label — focus visible (`:focus-visible + .segmented-control__label`)

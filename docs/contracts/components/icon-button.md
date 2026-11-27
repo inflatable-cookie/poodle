@@ -266,11 +266,11 @@ same machine Tooltip runs). Pressed state is plain controllable state.
 
 | Property | Value |
 |----------|-------|
-| `--poodle-icon-button-fill` | `var(--poodle-recipe-icon-button-secondary-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)))` |
-| `--poodle-icon-button-border` | `var(--poodle-recipe-icon-button-secondary-border, var(--poodle-style-control-border, var(--poodle-color-border-default)))` |
-| `--poodle-icon-button-shadow` | `var(--poodle-recipe-icon-button-secondary-shadow, var(--poodle-style-control-shadow, inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)))` |
+| `--poodle-icon-button-fill` | `var(--poodle-recipe-icon-button-secondary-fill, var(--poodle-style-control-fill))` |
+| `--poodle-icon-button-border` | `var(--poodle-recipe-icon-button-secondary-border, var(--poodle-style-control-border))` |
+| `--poodle-icon-button-shadow` | `var(--poodle-recipe-icon-button-secondary-shadow, var(--poodle-style-control-shadow))` |
 
-When `secondary` is neither pressed nor toned, `--poodle-icon-button-fill-hover` and `--poodle-icon-button-fill-active` resolve through `--poodle-style-control-fillHover` and `--poodle-style-control-fillActive` before their `color-mix` fallbacks.
+When `secondary` is neither pressed nor toned, `--poodle-icon-button-fill-hover` and `--poodle-icon-button-fill-active` read their recipe hooks, then `--poodle-style-control-fillHover` and `--poodle-style-control-fillActive`.
 
 ### Tone: danger
 
@@ -374,8 +374,8 @@ pressed.
 | `width` | `45%` |
 | `height` | `45%` |
 | `font-family` | `var(--poodle-typography-code-family)` |
-| `font-size` | `0.875rem` |
-| `line-height` | `1` |
+| `font-size` | `var(--poodle-style-typography-glyph-size)` |
+| `line-height` | `var(--poodle-style-typography-glyph-lineHeight)` |
 
 Icon SVG inside glyph: `width: 100%; height: 100%` — scales proportionally
 with the button surface across all sizes.
@@ -399,8 +399,8 @@ button-owned wrapper.
 | `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
 | `box-shadow` | `var(--poodle-elevation-overlay)` |
 | `color` | `var(--poodle-color-text-primary)` |
-| `font-size` | `0.6875rem` |
-| `line-height` | `1.35` |
+| `font-size` | `var(--poodle-typography-caption-size)` |
+| `line-height` | `var(--poodle-typography-caption-lineHeightRatio)` |
 | `white-space` | `nowrap` |
 | `pointer-events` | `none` |
 

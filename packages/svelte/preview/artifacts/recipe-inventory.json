@@ -3,7 +3,7 @@
     "components": 150,
     "recipeHooks": 1282,
     "hookCandidates": 9,
-    "metricVariables": 452
+    "metricVariables": 451
   },
   "inventory": {
     "accordion": {
@@ -377,7 +377,6 @@
       ],
       "candidates": [],
       "metric": [
-        "--poodle-button-label-size",
         "--poodle-button-label-type-letter",
         "--poodle-button-label-type-line",
         "--poodle-button-label-type-size",

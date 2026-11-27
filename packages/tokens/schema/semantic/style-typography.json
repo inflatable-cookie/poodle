@@ -379,6 +379,84 @@
           }
         }
       },
+      "compactControlLabel": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "controlSummary": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "segmentLabel": {
+        "size": {
+          "$type": "dimension",
+          "$value": "initial"
+        },
+        "weight": {
+          "$type": "fontWeight",
+          "$value": "initial"
+        }
+      },
+      "glyph": {
+        "size": {
+          "$type": "dimension",
+          "$value": "initial"
+        },
+        "lineHeight": {
+          "$type": "number",
+          "$value": "initial"
+        }
+      },
       "inputText": {
         "xs": {
           "size": {

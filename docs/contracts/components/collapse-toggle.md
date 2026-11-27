@@ -133,17 +133,17 @@ the disclosure state (typically via `disclosureTransition`).
 | `justify-content` | `center` |
 | `padding` | `0.125rem` |
 | `border` | `0` |
-| `border-radius` | `var(--poodle-radius-sm, 0.25rem)` |
+| `border-radius` | `var(--poodle-radius-sm)` |
 | `background` | `transparent` |
 | `color` | `var(--poodle-color-text-muted)` |
 | `cursor` | `pointer` |
-| `line-height` | `1` |
+| `line-height` | `var(--poodle-style-typography-glyph-lineHeight)` |
 
 ### Root -- hover
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-color-surface-hover)` |
+| `background` | `var(--poodle-recipe-collapse-toggle-hover-fill, var(--poodle-style-control-fillHover))` |
 | `color` | `var(--poodle-color-text-default)` |
 
 ### Root -- disabled
