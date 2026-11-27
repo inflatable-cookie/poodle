@@ -97,7 +97,17 @@ pub fn apply_select_intent(
         SelectIntent::HighlightNext => run_event(context, SelectEvent::HighlightNext, None),
         SelectIntent::HighlightFirst => run_event(context, SelectEvent::HighlightFirst, None),
         SelectIntent::HighlightLast => run_event(context, SelectEvent::HighlightLast, None),
-        SelectIntent::CommitHighlighted => run_event(context, SelectEvent::CommitHighlighted, None),
+        SelectIntent::CommitHighlighted => {
+            if !context.open {
+                SelectTransitionResult {
+                    context,
+                    effects: Vec::new(),
+                    search_selection: None,
+                }
+            } else {
+                run_event(context, SelectEvent::CommitHighlighted, None)
+            }
+        }
         SelectIntent::CommitOption { value } => {
             run_event(context, SelectEvent::CommitOption { value }, None)
         }
@@ -419,38 +429,43 @@ fn wire_open_keys(
     let spec_keys = spec.clone();
     let handlers_keys = handlers.clone();
     let search_id = select_search_focus_id(&handlers.instance_scope);
-    node.interaction.on_key = Some(Arc::new(move |key, _mods| {
-        match key {
-            NodeKey::ArrowUp | NodeKey::ArrowDown => {
-                emit_nav(&spec_keys, &handlers_keys, key);
-            }
-            NodeKey::Home | NodeKey::End if spec_keys.current_open() => {
-                emit_nav(&spec_keys, &handlers_keys, key);
-            }
-            _ => return None,
+    node.interaction.on_key = Some(Arc::new(move |key, _mods| match key {
+        NodeKey::ArrowUp | NodeKey::ArrowDown => {
+            emit_nav(&spec_keys, &handlers_keys, key);
+            focus_search.then(|| search_id.clone())
         }
-        focus_search.then(|| search_id.clone())
+        NodeKey::Home | NodeKey::End => {
+            emit_nav(&spec_keys, &handlers_keys, key);
+            (focus_search && spec_keys.current_open()).then(|| search_id.clone())
+        }
+        _ => None,
     }));
-    if spec.current_open() {
-        let spec_submit = spec.clone();
-        let handlers_submit = handlers.clone();
-        node.interaction.on_submit = Some(Arc::new(move || {
-            emit_select(
+    let spec_submit = spec.clone();
+    let handlers_submit = handlers.clone();
+    node.interaction.on_submit = Some(Arc::new(move || {
+        emit_intent(&handlers_submit, SelectIntent::CommitHighlighted);
+        if spec_submit.current_open() {
+            emit_select_with_selection(
                 &spec_submit,
                 &handlers_submit,
                 SelectEvent::CommitHighlighted,
+                None,
             );
-        }));
-        if spec.searchable {
-            let spec_blur = spec.clone();
-            let handlers_blur = handlers.clone();
-            node.interaction.on_focus_change = Some(Arc::new(move |focused| {
-                if focused {
-                    return;
-                }
-                emit_blur(&spec_blur, &handlers_blur);
-            }));
         }
+    }));
+    if spec.searchable {
+        let spec_blur = spec.clone();
+        let handlers_blur = handlers.clone();
+        node.interaction.on_focus_change = Some(Arc::new(move |focused| {
+            if focused {
+                return;
+            }
+            if spec_blur.current_open() {
+                emit_blur(&spec_blur, &handlers_blur);
+            } else {
+                emit_intent(&handlers_blur, SelectIntent::Blur);
+            }
+        }));
     }
 }
 

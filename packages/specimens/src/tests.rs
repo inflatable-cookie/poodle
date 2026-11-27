@@ -463,6 +463,48 @@ fn select_reduces_batched_intents_in_order_before_repaint() {
 }
 
 #[test]
+fn select_reduces_closed_to_open_batch_before_repaint() {
+    let mut session = Session::default();
+    let ctx = RenderContext::new(&FixtureTheme);
+    let scope = "select-native";
+    let trigger_id = select_trigger_focus_id(scope);
+
+    // On a closed Select, End and Enter alone remain inert.
+    let closed = session.render(Specimen::Select, View::Examples, &ctx);
+    let trigger = by_id(&closed, &trigger_id);
+    assert_eq!(trigger.a11y.expanded, Some(false));
+    trigger.interaction.on_key.as_ref().unwrap()(NodeKey::End, Default::default());
+    trigger.interaction.on_submit.as_ref().unwrap()();
+    assert_eq!(session.drain(), (true, vec![]));
+    let still_closed = session.render(Specimen::Select, View::Examples, &ctx);
+    assert!(!has_text(&still_closed, "Selected: elderberry"));
+    assert_eq!(by_id(&still_closed, &trigger_id).a11y.expanded, Some(false));
+
+    // Starting from the same closed tree, batch ArrowDown (opens) + End
+    // (jumps to last option) + Enter (commits last option and closes) without
+    // draining or repainting in between.
+    let trigger = by_id(&still_closed, &trigger_id);
+    let on_key = trigger.interaction.on_key.as_ref().unwrap();
+    on_key(NodeKey::ArrowDown, Default::default());
+    on_key(NodeKey::End, Default::default());
+    trigger.interaction.on_submit.as_ref().unwrap()();
+    assert_eq!(
+        session.drain(),
+        (
+            true,
+            vec![
+                Effect::Focus(trigger_id.clone()),
+                Effect::Focus(trigger_id.clone()),
+            ]
+        )
+    );
+
+    let after = session.render(Specimen::Select, View::Examples, &ctx);
+    assert!(has_text(&after, "Selected: elderberry"));
+    assert_eq!(by_id(&after, &trigger_id).a11y.expanded, Some(false));
+}
+
+#[test]
 fn text_input_reduces_batched_intents_in_order_before_repaint() {
     let mut session = Session::default();
     let ctx = RenderContext::new(&FixtureTheme);
