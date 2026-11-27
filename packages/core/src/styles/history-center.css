@@ -139,8 +139,11 @@
 
 .poodle-history-center__row:last-child { border-bottom: 0; }
 
+/* The row is the single layer for hover and press. The entry button inside it
+   stays transparent, so its own hover never paints over the row's fill. */
 .poodle-history-center__row[data-part="entry"] {
   background: var(--poodle-recipe-history-center-item-fill, transparent);
+  border-radius: var(--poodle-radius-control);
 }
 
 .poodle-history-center__row[data-part="entry"]:hover:not(:disabled) {
@@ -170,21 +173,14 @@
   /* The focus ring is an inset outline, and an outline follows the element's
      own radius — with none it renders as a hard square across the full row
      width. `fork` and `rename-input` in this file already round on the control
-     radius; these full-width rows were the outliers. Rounds the hover fill
-     with it, which was a square block for the same reason. */
+     radius; these full-width rows were the outliers. The row rounds its own
+     fill (see the row rule), so the button stays transparent. */
   border-radius: var(--poodle-radius-control);
   background: transparent;
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
-}
-
-.poodle-history-center__entry-content:hover {
-  background: var(
-    --poodle-recipe-history-center-item-hover-fill,
-    var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent))
-  );
 }
 
 .poodle-history-center__entry-content:focus-visible {

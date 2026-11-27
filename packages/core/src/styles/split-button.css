@@ -196,6 +196,12 @@
     background: var(--poodle-recipe-split-button-hover-primary-fill, var(--poodle-split-fill-hover));
   }
 
+  /* Ghost halves rest transparent, so a press needs its own fill. Filled
+     variants keep their existing pressed behaviour. */
+  .poodle-split-button[data-variant="ghost"] .poodle-split-button__primary:active:not(:disabled) {
+    background: var(--poodle-recipe-split-button-active-primary-fill, var(--poodle-style-control-fillActive, transparent));
+  }
+
   .poodle-split-button__primary:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
@@ -216,6 +222,10 @@
 
   .poodle-split-button__toggle:hover:not(:disabled) {
     background: var(--poodle-recipe-split-button-hover-toggle-fill, var(--poodle-split-fill-hover));
+  }
+
+  .poodle-split-button[data-variant="ghost"] .poodle-split-button__toggle:active:not(:disabled) {
+    background: var(--poodle-recipe-split-button-active-toggle-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-split-button__toggle:focus-visible {
@@ -281,10 +291,19 @@
     text-align: left;
   }
 
-  .poodle-split-button__item:hover:not(:disabled),
+  /* Hover reads the control hover role, so an unselected item never takes the
+     selection fill. Focus-visible keeps its existing accent focus fill. */
+  .poodle-split-button__item:hover:not(:disabled) {
+    background: var(--poodle-recipe-split-button-item-hover-fill, var(--poodle-style-control-fillHover, transparent));
+  }
+
   .poodle-split-button__item:focus-visible {
     background: var(--poodle-recipe-split-button-hover-focus-item-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)));
     outline: none;
+  }
+
+  .poodle-split-button__item:active:not(:disabled) {
+    background: var(--poodle-recipe-split-button-item-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-split-button__item:disabled {
