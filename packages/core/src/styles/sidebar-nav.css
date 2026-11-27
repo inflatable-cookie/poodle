@@ -132,7 +132,7 @@
     border: 0;
     border-left: 0.1875rem solid transparent;
     border-radius: 0.1875rem calc(var(--poodle-radius-control) - 0.125rem) calc(var(--poodle-radius-control) - 0.125rem) 0.1875rem;
-    background: var(--poodle-recipe-sidebar-nav-item-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-sidebar-nav-item-fill, transparent);
     color: var(--poodle-recipe-sidebar-nav-item-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-recipe-sidebar-nav-item-font-family, var(--poodle-font-sans, var(--poodle-typography-label-family)));
     font-size: var(--poodle-recipe-sidebar-nav-item-font-size, var(--poodle-sidebar-nav-item-type-size, var(--poodle-sidebar-nav-item-font-size)));
@@ -173,6 +173,9 @@
   .poodle-sidebar-nav__item:hover:not(:disabled) {
     color: var(--poodle-recipe-sidebar-nav-hover-item-text, var(--poodle-color-text-primary));
     background: var(--poodle-recipe-sidebar-nav-hover-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 60%, transparent)));
+  }
+  .poodle-sidebar-nav__item:active:not(:disabled) {
+    background: var(--poodle-recipe-sidebar-nav-item-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-sidebar-nav__item--active {

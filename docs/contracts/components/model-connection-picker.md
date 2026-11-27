@@ -167,7 +167,7 @@ single-select transition, radio roving focus, and id wiring.
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Option | `var(--poodle-style-control-fill, var(--poodle-color-background-surface))`, `var(--poodle-style-control-border, var(--poodle-color-border-subtle))`, `var(--poodle-style-control-shadow, none)` (`control.fillHover` on hover) | quiet card |
+| Option | `transparent`, `var(--poodle-style-control-border, var(--poodle-color-border-subtle))`, `var(--poodle-style-control-shadow, none)` (`control.fillHover` on hover) | quiet card |
 | Selected option | `var(--poodle-style-selection-itemFill, var(--poodle-color-background-surface))`, `var(--poodle-style-selection-itemBorder, var(--poodle-color-accent-base))`, `var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base))`, `var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse))`, `color.accent.focusRing` | selection |
 | Copy | `color.text.primary`, `color.text.secondary` | hierarchy |
 | Leading | `size.icon.*`, `radius.control`, `var(--poodle-style-surface-fill, var(--poodle-color-background-panel))` | provider mark lane |

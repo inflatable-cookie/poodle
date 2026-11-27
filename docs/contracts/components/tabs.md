@@ -465,7 +465,7 @@ the spec.
 
 ## 8. Token Usage — Exact Values
 
-Rendering style roles: card items, close controls and the pill track read the control roles, and the block list band reads `--poodle-style-surface-fill`. Block item hover reads `--poodle-style-control-fillHover`, the panel reads the surface border and fill, and the tooltip reads the floating surface roles.
+Rendering style roles: card items and the pill track read the control roles, close controls rest transparent with a `--poodle-style-control-fillHover` hover, and the block list band reads `--poodle-style-surface-fill`. Block item hover reads `--poodle-style-control-fillHover`, the panel reads the surface border and fill, and the tooltip reads the floating surface roles.
 
 ### Root
 

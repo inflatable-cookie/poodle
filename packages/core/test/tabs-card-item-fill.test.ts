@@ -106,7 +106,7 @@ const TINT_FILL =
   "var(--poodle-recipe-tabs-card-selected-tab-fill, var(--poodle-style-selection-fill, var(--poodle-color-select-accent)))";
 const SOLID_FILL =
   "var(--poodle-recipe-tabs-active-solid-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)))";
-const TAB_FILL = "var(--poodle-recipe-tabs-tab-fill, var(--poodle-style-control-fill, transparent))";
+const TAB_FILL = "var(--poodle-recipe-tabs-tab-fill, transparent)";
 
 function matches(
   rule: Rule,

@@ -16,7 +16,7 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-editable-label-input-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-editable-label-input-fill, transparent);
     color: var(--poodle-recipe-editable-label-input-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);
@@ -37,6 +37,9 @@
     border-color: var(--poodle-recipe-editable-label-hover-focus-display-border, var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)));
     background: var(--poodle-recipe-editable-label-hover-focus-display-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 52%, transparent)));
     outline: none;
+  }
+  .poodle-editable-label__display:active:not(:disabled) {
+    background: var(--poodle-recipe-editable-label-input-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-editable-label__display:focus-visible {

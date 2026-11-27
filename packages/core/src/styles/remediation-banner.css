@@ -52,6 +52,10 @@
   --poodle-button-text: var(--poodle-color-text-primary);
   --poodle-button-shadow: none;
 }
+/* A ghost button in a solid banner rests transparent and fills on hover. */
+.poodle-remediation-banner[data-fill="solid"] .poodle-button[data-variant="ghost"] {
+  --poodle-button-fill: transparent;
+}
 @media (max-width: 45rem) {
   .poodle-remediation-banner { grid-template-columns: auto minmax(0, 1fr) auto; }
   .poodle-remediation-banner__actions { grid-column: 2 / -1; }

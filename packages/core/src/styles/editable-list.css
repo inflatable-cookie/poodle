@@ -137,7 +137,7 @@
     padding: var(--poodle-editable-list-item-y) var(--poodle-editable-list-item-x);
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-editable-list-item-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-editable-list-item-fill, transparent);
     font-size: var(--poodle-editable-list-font-size);
     color: var(--poodle-recipe-editable-list-item-text, var(--poodle-color-text-primary));
     outline: none;
@@ -150,6 +150,9 @@
 
   .poodle-editable-list__item:hover {
     background: var(--poodle-recipe-editable-list-hover-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 82%, transparent)));
+  }
+  .poodle-editable-list__item:active {
+    background: var(--poodle-recipe-editable-list-item-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-editable-list__item:focus-visible {

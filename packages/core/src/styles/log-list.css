@@ -53,13 +53,21 @@
     padding: 0.1875rem 0.5rem;
     border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-log-list-filter-btn-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-log-list-filter-btn-fill, transparent);
     color: var(--poodle-recipe-log-list-filter-btn-text, var(--poodle-color-text-secondary));
     cursor: pointer;
     font: inherit;
     font-size: var(--poodle-typography-label-size);
     font-family: var(--poodle-typography-code-family);
     line-height: 1;
+  }
+
+  .poodle-log-list__filter-btn:hover:not(:disabled) {
+    background: var(--poodle-recipe-log-list-filter-btn-hover-fill, var(--poodle-style-control-fillHover, transparent));
+  }
+
+  .poodle-log-list__filter-btn:active:not(:disabled) {
+    background: var(--poodle-recipe-log-list-filter-btn-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-log-list__filter-btn.poodle-active {

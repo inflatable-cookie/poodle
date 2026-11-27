@@ -542,4 +542,4 @@ density), so density owns `th`/`td` `padding-block` here by design.
 
 ### Rendering style roles
 
-Rendering style roles: the table frame reads `--poodle-style-surface-border` and `--poodle-style-surface-fill`. The toolbar button and actions trigger read the control roles, and the toolbar button, column-menu item and row hovers read `--poodle-style-control-fillHover`. Toolbar, footer, header and filter-row bands keep their own mixes.
+Rendering style roles: the table frame reads `--poodle-style-surface-border` and `--poodle-style-surface-fill`. The toolbar button and actions trigger rest transparent. The sort, row action and action link controls keep the control fill at rest. The toolbar button, actions trigger, column-menu item and row hovers read `--poodle-style-control-fillHover`. Toolbar, footer, header and filter-row bands keep their own mixes.

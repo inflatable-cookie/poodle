@@ -181,7 +181,7 @@ No component-owned events are dispatched. All interaction is internal (transport
 | `padding` | `0` |
 | `border` | `0` |
 | `border-radius` | `999rem` |
-| `background` | `var(--poodle-recipe-audio-player-mute-fill, var(--poodle-style-control-fill, transparent))` |
+| `background` | `var(--poodle-recipe-audio-player-mute-fill, transparent)` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `flex-shrink` | `0` |
@@ -276,7 +276,7 @@ No component-owned events are dispatched. All interaction is internal (transport
 | `padding` | `var(--poodle-audio-player-speed-y) var(--poodle-audio-player-speed-x)` |
 | `border` | `0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default))` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `var(--poodle-recipe-audio-player-speed-fill, var(--poodle-style-control-fill, transparent))` |
+| `background` | `var(--poodle-recipe-audio-player-speed-fill, transparent)` |
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font` | `inherit` |
 | `font-size` | `var(--poodle-typography-label-size)` |

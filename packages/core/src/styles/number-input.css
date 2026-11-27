@@ -15,7 +15,7 @@
     border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-control);
     color: var(--poodle-recipe-number-input-suffix-text, var(--poodle-style-control-secondaryText, var(--poodle-color-text-muted)));
-    background: var(--poodle-recipe-number-input-suffix-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
+    background: var(--poodle-recipe-number-input-suffix-fill, transparent);
     box-shadow: var(--poodle-style-control-shadow, none);
     white-space: nowrap;
   }
@@ -78,12 +78,20 @@
     min-height: 0;
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: var(--poodle-recipe-number-input-steppers-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 88%, transparent)));
+    background: var(--poodle-recipe-number-input-steppers-fill, transparent);
     color: var(--poodle-recipe-number-input-steppers-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-size: 0;
     padding: 0;
     overflow: hidden;
+  }
+
+  .poodle-number-input__steppers button:hover:not(:disabled) {
+    background: var(--poodle-recipe-number-input-steppers-hover-fill, var(--poodle-style-control-fillHover, transparent));
+  }
+
+  .poodle-number-input__steppers button:active:not(:disabled) {
+    background: var(--poodle-recipe-number-input-steppers-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-number-input__steppers button:focus-visible {

@@ -22,11 +22,19 @@
     padding: 0;
     border: 0;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-rating-item-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-rating-item-fill, transparent);
     color: var(--poodle-recipe-rating-item-text, color-mix(in srgb, var(--poodle-color-text-secondary) 48%, transparent));
     cursor: pointer;
     font: inherit;
     transition: color 120ms ease, filter 120ms ease;
+  }
+
+  .poodle-rating__item:hover:not(:disabled) {
+    background: var(--poodle-recipe-rating-item-hover-fill, var(--poodle-style-control-fillHover, transparent));
+  }
+
+  .poodle-rating__item:active:not(:disabled) {
+    background: var(--poodle-recipe-rating-item-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-rating__item[data-hovered="true"] {

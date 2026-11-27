@@ -1,0 +1,812 @@
+{
+  "breadcrumbs-eclipse-rest": {
+    "pixelDiffRatio": 0.0275,
+    "diffBbox": [
+      0,
+      24,
+      432,
+      434
+    ],
+    "sizeBefore": [
+      992,
+      484
+    ],
+    "sizeAfter": [
+      992,
+      484
+    ]
+  },
+  "breadcrumbs-eclipse-hover": {
+    "pixelDiffRatio": 0.02749,
+    "diffBbox": [
+      0,
+      24,
+      432,
+      434
+    ],
+    "sizeBefore": [
+      992,
+      484
+    ],
+    "sizeAfter": [
+      992,
+      484
+    ]
+  },
+  "breadcrumbs-eclipse-layout": {
+    "before": {
+      "width": 992,
+      "height": 484
+    },
+    "after": {
+      "width": 992,
+      "height": 484
+    },
+    "same": true
+  },
+  "sidebar-nav-eclipse-rest": {
+    "pixelDiffRatio": 0.05749,
+    "diffBbox": [
+      0,
+      24,
+      265,
+      1446
+    ],
+    "sizeBefore": [
+      992,
+      1682
+    ],
+    "sizeAfter": [
+      992,
+      1682
+    ]
+  },
+  "sidebar-nav-eclipse-hover": {
+    "pixelDiffRatio": 0.05749,
+    "diffBbox": [
+      0,
+      24,
+      265,
+      1446
+    ],
+    "sizeBefore": [
+      992,
+      1682
+    ],
+    "sizeAfter": [
+      992,
+      1682
+    ]
+  },
+  "sidebar-nav-eclipse-layout": {
+    "before": {
+      "width": 992,
+      "height": 1682
+    },
+    "after": {
+      "width": 992,
+      "height": 1682
+    },
+    "same": true
+  },
+  "menu-eclipse-rest": {
+    "pixelDiffRatio": 0.00888,
+    "diffBbox": [
+      0,
+      24,
+      195,
+      47
+    ],
+    "sizeBefore": [
+      992,
+      428
+    ],
+    "sizeAfter": [
+      992,
+      428
+    ]
+  },
+  "menu-eclipse-hover": {
+    "pixelDiffRatio": 0.06361,
+    "diffBbox": [
+      0,
+      24,
+      236,
+      298
+    ],
+    "sizeBefore": [
+      992,
+      428
+    ],
+    "sizeAfter": [
+      992,
+      428
+    ]
+  },
+  "menu-eclipse-open": {
+    "pixelDiffRatio": 0.06361,
+    "diffBbox": [
+      0,
+      24,
+      236,
+      298
+    ],
+    "sizeBefore": [
+      992,
+      428
+    ],
+    "sizeAfter": [
+      992,
+      428
+    ]
+  },
+  "menu-eclipse-layout": {
+    "before": {
+      "width": 992,
+      "height": 427.5
+    },
+    "after": {
+      "width": 992,
+      "height": 427.5
+    },
+    "same": true
+  },
+  "select-eclipse-rest": {
+    "pixelDiffRatio": 0.00432,
+    "diffBbox": [
+      0,
+      24,
+      195,
+      47
+    ],
+    "sizeBefore": [
+      992,
+      879
+    ],
+    "sizeAfter": [
+      992,
+      879
+    ]
+  },
+  "select-eclipse-hover": {
+    "pixelDiffRatio": 0.03016,
+    "diffBbox": [
+      0,
+      24,
+      195,
+      492
+    ],
+    "sizeBefore": [
+      992,
+      879
+    ],
+    "sizeAfter": [
+      992,
+      879
+    ]
+  },
+  "select-eclipse-open": {
+    "pixelDiffRatio": 0.03016,
+    "diffBbox": [
+      0,
+      24,
+      195,
+      492
+    ],
+    "sizeBefore": [
+      992,
+      879
+    ],
+    "sizeAfter": [
+      992,
+      879
+    ]
+  },
+  "select-eclipse-layout": {
+    "before": {
+      "width": 992,
+      "height": 879
+    },
+    "after": {
+      "width": 992,
+      "height": 879
+    },
+    "same": true
+  },
+  "tree-eclipse-rest": {
+    "pixelDiffRatio": 0.248,
+    "diffBbox": [
+      0,
+      24,
+      970,
+      3258
+    ],
+    "sizeBefore": [
+      992,
+      3317
+    ],
+    "sizeAfter": [
+      992,
+      3317
+    ]
+  },
+  "tree-eclipse-hover": {
+    "pixelDiffRatio": 0.2457,
+    "diffBbox": [
+      0,
+      24,
+      970,
+      3258
+    ],
+    "sizeBefore": [
+      992,
+      3317
+    ],
+    "sizeAfter": [
+      992,
+      3317
+    ]
+  },
+  "tree-eclipse-layout": {
+    "before": {
+      "width": 992,
+      "height": 3317
+    },
+    "after": {
+      "width": 992,
+      "height": 3317
+    },
+    "same": true
+  },
+  "tabs-eclipse-rest": {
+    "pixelDiffRatio": 0.06107,
+    "diffBbox": [
+      0,
+      24,
+      460,
+      1084
+    ],
+    "sizeBefore": [
+      992,
+      1144
+    ],
+    "sizeAfter": [
+      992,
+      1144
+    ]
+  },
+  "tabs-eclipse-hover": {
+    "pixelDiffRatio": 0.06107,
+    "diffBbox": [
+      0,
+      24,
+      460,
+      1084
+    ],
+    "sizeBefore": [
+      992,
+      1144
+    ],
+    "sizeAfter": [
+      992,
+      1144
+    ]
+  },
+  "tabs-eclipse-layout": {
+    "before": {
+      "width": 992,
+      "height": 1144
+    },
+    "after": {
+      "width": 992,
+      "height": 1144
+    },
+    "same": true
+  },
+  "data-table-eclipse-rest": {
+    "pixelDiffRatio": 0.00754,
+    "diffBbox": [
+      0,
+      24,
+      978,
+      123
+    ],
+    "sizeBefore": [
+      992,
+      1151
+    ],
+    "sizeAfter": [
+      992,
+      1151
+    ]
+  },
+  "data-table-eclipse-hover": {
+    "pixelDiffRatio": 0.00562,
+    "diffBbox": [
+      0,
+      24,
+      978,
+      123
+    ],
+    "sizeBefore": [
+      992,
+      1151
+    ],
+    "sizeAfter": [
+      992,
+      1151
+    ]
+  },
+  "data-table-eclipse-layout": {
+    "before": {
+      "width": 992,
+      "height": 1151
+    },
+    "after": {
+      "width": 992,
+      "height": 1151
+    },
+    "same": true
+  },
+  "text-input-eclipse-rest": {
+    "pixelDiffRatio": 0.00371,
+    "diffBbox": [
+      0,
+      24,
+      195,
+      47
+    ],
+    "sizeBefore": [
+      992,
+      1025
+    ],
+    "sizeAfter": [
+      992,
+      1025
+    ]
+  },
+  "text-input-eclipse-layout": {
+    "before": {
+      "width": 992,
+      "height": 1024.75
+    },
+    "after": {
+      "width": 992,
+      "height": 1024.75
+    },
+    "same": true
+  },
+  "button-eclipse-rest": {
+    "pixelDiffRatio": 0.00432,
+    "diffBbox": [
+      0,
+      24,
+      195,
+      47
+    ],
+    "sizeBefore": [
+      992,
+      879
+    ],
+    "sizeAfter": [
+      992,
+      879
+    ]
+  },
+  "button-eclipse-layout": {
+    "before": {
+      "width": 992,
+      "height": 879
+    },
+    "after": {
+      "width": 992,
+      "height": 879
+    },
+    "same": true
+  },
+  "breadcrumbs-iceberg-rest": {
+    "pixelDiffRatio": 0.02783,
+    "diffBbox": [
+      0,
+      24,
+      432,
+      434
+    ],
+    "sizeBefore": [
+      992,
+      484
+    ],
+    "sizeAfter": [
+      992,
+      484
+    ]
+  },
+  "breadcrumbs-iceberg-hover": {
+    "pixelDiffRatio": 0.0278,
+    "diffBbox": [
+      0,
+      24,
+      432,
+      434
+    ],
+    "sizeBefore": [
+      992,
+      484
+    ],
+    "sizeAfter": [
+      992,
+      484
+    ]
+  },
+  "breadcrumbs-iceberg-layout": {
+    "before": {
+      "width": 992,
+      "height": 484
+    },
+    "after": {
+      "width": 992,
+      "height": 484
+    },
+    "same": true
+  },
+  "sidebar-nav-iceberg-rest": {
+    "pixelDiffRatio": 0.05762,
+    "diffBbox": [
+      0,
+      24,
+      265,
+      1446
+    ],
+    "sizeBefore": [
+      992,
+      1682
+    ],
+    "sizeAfter": [
+      992,
+      1682
+    ]
+  },
+  "sidebar-nav-iceberg-hover": {
+    "pixelDiffRatio": 0.05762,
+    "diffBbox": [
+      0,
+      24,
+      265,
+      1446
+    ],
+    "sizeBefore": [
+      992,
+      1682
+    ],
+    "sizeAfter": [
+      992,
+      1682
+    ]
+  },
+  "sidebar-nav-iceberg-layout": {
+    "before": {
+      "width": 992,
+      "height": 1682
+    },
+    "after": {
+      "width": 992,
+      "height": 1682
+    },
+    "same": true
+  },
+  "menu-iceberg-rest": {
+    "pixelDiffRatio": 0.00898,
+    "diffBbox": [
+      0,
+      24,
+      195,
+      47
+    ],
+    "sizeBefore": [
+      992,
+      428
+    ],
+    "sizeAfter": [
+      992,
+      428
+    ]
+  },
+  "menu-iceberg-hover": {
+    "pixelDiffRatio": 0.0639,
+    "diffBbox": [
+      0,
+      24,
+      236,
+      298
+    ],
+    "sizeBefore": [
+      992,
+      428
+    ],
+    "sizeAfter": [
+      992,
+      428
+    ]
+  },
+  "menu-iceberg-open": {
+    "pixelDiffRatio": 0.0639,
+    "diffBbox": [
+      0,
+      24,
+      236,
+      298
+    ],
+    "sizeBefore": [
+      992,
+      428
+    ],
+    "sizeAfter": [
+      992,
+      428
+    ]
+  },
+  "menu-iceberg-layout": {
+    "before": {
+      "width": 992,
+      "height": 427.5
+    },
+    "after": {
+      "width": 992,
+      "height": 427.5
+    },
+    "same": true
+  },
+  "select-iceberg-rest": {
+    "pixelDiffRatio": 0.00437,
+    "diffBbox": [
+      0,
+      24,
+      195,
+      47
+    ],
+    "sizeBefore": [
+      992,
+      879
+    ],
+    "sizeAfter": [
+      992,
+      879
+    ]
+  },
+  "select-iceberg-hover": {
+    "pixelDiffRatio": 0.03036,
+    "diffBbox": [
+      0,
+      24,
+      195,
+      492
+    ],
+    "sizeBefore": [
+      992,
+      879
+    ],
+    "sizeAfter": [
+      992,
+      879
+    ]
+  },
+  "select-iceberg-open": {
+    "pixelDiffRatio": 0.03036,
+    "diffBbox": [
+      0,
+      24,
+      195,
+      492
+    ],
+    "sizeBefore": [
+      992,
+      879
+    ],
+    "sizeAfter": [
+      992,
+      879
+    ]
+  },
+  "select-iceberg-layout": {
+    "before": {
+      "width": 992,
+      "height": 879
+    },
+    "after": {
+      "width": 992,
+      "height": 879
+    },
+    "same": true
+  },
+  "tree-iceberg-rest": {
+    "pixelDiffRatio": 0.24849,
+    "diffBbox": [
+      0,
+      24,
+      970,
+      3258
+    ],
+    "sizeBefore": [
+      992,
+      3317
+    ],
+    "sizeAfter": [
+      992,
+      3317
+    ]
+  },
+  "tree-iceberg-hover": {
+    "pixelDiffRatio": 0.24618,
+    "diffBbox": [
+      0,
+      24,
+      970,
+      3258
+    ],
+    "sizeBefore": [
+      992,
+      3317
+    ],
+    "sizeAfter": [
+      992,
+      3317
+    ]
+  },
+  "tree-iceberg-layout": {
+    "before": {
+      "width": 992,
+      "height": 3317
+    },
+    "after": {
+      "width": 992,
+      "height": 3317
+    },
+    "same": true
+  },
+  "tabs-iceberg-rest": {
+    "pixelDiffRatio": 0.06147,
+    "diffBbox": [
+      0,
+      24,
+      460,
+      1084
+    ],
+    "sizeBefore": [
+      992,
+      1144
+    ],
+    "sizeAfter": [
+      992,
+      1144
+    ]
+  },
+  "tabs-iceberg-hover": {
+    "pixelDiffRatio": 0.06147,
+    "diffBbox": [
+      0,
+      24,
+      460,
+      1084
+    ],
+    "sizeBefore": [
+      992,
+      1144
+    ],
+    "sizeAfter": [
+      992,
+      1144
+    ]
+  },
+  "tabs-iceberg-layout": {
+    "before": {
+      "width": 992,
+      "height": 1144
+    },
+    "after": {
+      "width": 992,
+      "height": 1144
+    },
+    "same": true
+  },
+  "data-table-iceberg-rest": {
+    "pixelDiffRatio": 0.00759,
+    "diffBbox": [
+      0,
+      24,
+      978,
+      123
+    ],
+    "sizeBefore": [
+      992,
+      1151
+    ],
+    "sizeAfter": [
+      992,
+      1151
+    ]
+  },
+  "data-table-iceberg-hover": {
+    "pixelDiffRatio": 0.00566,
+    "diffBbox": [
+      0,
+      24,
+      978,
+      123
+    ],
+    "sizeBefore": [
+      992,
+      1151
+    ],
+    "sizeAfter": [
+      992,
+      1151
+    ]
+  },
+  "data-table-iceberg-layout": {
+    "before": {
+      "width": 992,
+      "height": 1151
+    },
+    "after": {
+      "width": 992,
+      "height": 1151
+    },
+    "same": true
+  },
+  "text-input-iceberg-rest": {
+    "pixelDiffRatio": 0.00375,
+    "diffBbox": [
+      0,
+      24,
+      195,
+      47
+    ],
+    "sizeBefore": [
+      992,
+      1025
+    ],
+    "sizeAfter": [
+      992,
+      1025
+    ]
+  },
+  "text-input-iceberg-layout": {
+    "before": {
+      "width": 992,
+      "height": 1024.75
+    },
+    "after": {
+      "width": 992,
+      "height": 1024.75
+    },
+    "same": true
+  },
+  "button-iceberg-rest": {
+    "pixelDiffRatio": 0.00437,
+    "diffBbox": [
+      0,
+      24,
+      195,
+      47
+    ],
+    "sizeBefore": [
+      992,
+      879
+    ],
+    "sizeAfter": [
+      992,
+      879
+    ]
+  },
+  "button-iceberg-layout": {
+    "before": {
+      "width": 992,
+      "height": 879
+    },
+    "after": {
+      "width": 992,
+      "height": 879
+    },
+    "same": true
+  }
+}

@@ -47,7 +47,7 @@
   padding: 0.25rem 0.625rem;
   border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-subtle));
   border-radius: var(--poodle-radius-control);
-  background: var(--poodle-style-control-fill, transparent);
+  background: transparent;
   box-shadow: var(--poodle-style-control-shadow, none);
   color: var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary));
   font: inherit;

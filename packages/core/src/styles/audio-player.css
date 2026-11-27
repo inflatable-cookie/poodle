@@ -78,9 +78,17 @@
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
+  /* Mute is icon-only: it rests transparent and fills on hover. Play keeps its resting fill. */
+  .poodle-audio-player__mute {
+    background: var(--poodle-recipe-audio-player-mute-fill, transparent);
+  }
+
   .poodle-audio-player__play:hover,
   .poodle-audio-player__mute:hover {
     background: var(--poodle-recipe-audio-player-hover-mute-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
+  }
+  .poodle-audio-player__mute:active {
+    background: var(--poodle-recipe-audio-player-mute-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-audio-player__play:focus-visible,
@@ -175,7 +183,7 @@
     padding: var(--poodle-audio-player-speed-y) var(--poodle-audio-player-speed-x);
     border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-audio-player-speed-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-audio-player-speed-fill, transparent);
     color: var(--poodle-recipe-audio-player-speed-text, var(--poodle-color-text-secondary));
     font: inherit;
     font-size: var(--poodle-typography-label-size);
@@ -183,6 +191,14 @@
     cursor: pointer;
     appearance: none;
     flex-shrink: 0;
+  }
+
+  .poodle-audio-player__speed:hover:not(:disabled) {
+    background: var(--poodle-recipe-audio-player-speed-hover-fill, var(--poodle-style-control-fillHover, transparent));
+  }
+
+  .poodle-audio-player__speed:active:not(:disabled) {
+    background: var(--poodle-recipe-audio-player-speed-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-audio-player__seek:focus-visible,

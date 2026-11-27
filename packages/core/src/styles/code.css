@@ -70,14 +70,18 @@
     padding: 0;
     border: 0;
     border-radius: 0.25rem;
-    background: var(--poodle-recipe-code-copy-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-code-copy-fill, transparent);
     color: var(--poodle-recipe-code-copy-text, var(--poodle-color-text-secondary));
     cursor: pointer;
     transition: color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .poodle-code__copy:hover {
+    background: var(--poodle-recipe-code-copy-hover-fill, var(--poodle-style-control-fillHover, transparent));
     color: var(--poodle-recipe-code-hover-copy-text, var(--poodle-color-text-primary));
+  }
+  .poodle-code__copy:active {
+    background: var(--poodle-recipe-code-copy-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-code__copy:focus-visible {

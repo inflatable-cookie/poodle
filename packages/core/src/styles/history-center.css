@@ -36,13 +36,17 @@
   padding: 0 0.0625rem;
   border: 0;
   border-radius: var(--poodle-radius-control);
-  background: var(--poodle-style-control-fill, none);
+  background: transparent;
   color: var(--poodle-color-text-secondary);
   cursor: pointer;
 }
 .poodle-history-center__list-trigger:hover {
+  background: var(--poodle-style-control-fillHover, transparent);
   color: var(--poodle-color-text-primary);
 }
+  .poodle-history-center__list-trigger:active {
+    background: var(--poodle-style-control-fillActive, transparent);
+  }
 .poodle-history-center__list-trigger:focus-visible {
   outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
   outline-offset: -0.0625rem;
@@ -136,7 +140,7 @@
 .poodle-history-center__row:last-child { border-bottom: 0; }
 
 .poodle-history-center__row[data-part="entry"] {
-  background: var(--poodle-recipe-history-center-item-fill, var(--poodle-style-control-fill, transparent));
+  background: var(--poodle-recipe-history-center-item-fill, transparent);
 }
 
 .poodle-history-center__row[data-part="entry"][data-position="current"] {
@@ -158,8 +162,8 @@
   /* The focus ring is an inset outline, and an outline follows the element's
      own radius — with none it renders as a hard square across the full row
      width. `fork` and `rename-input` in this file already round on the control
-     radius; these full-width rows were the outliers. Rounds the hover fill
-     with it, which was a square block for the same reason. */
+     radius; these full-width rows were the outliers. The fill is on this
+     button, so it rounds with the control radius. */
   border-radius: var(--poodle-radius-control);
   background: transparent;
   color: inherit;
@@ -168,11 +172,14 @@
   cursor: pointer;
 }
 
-.poodle-history-center__entry-content:hover {
-  background: var(
-    --poodle-recipe-history-center-item-hover-fill,
-    var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent))
-  );
+/* The entry action carries the hover and press fills. The fork disclosure is a
+   sibling of this button in the row, so the two fills never stack. */
+.poodle-history-center__entry-content:hover:not(:disabled) {
+  background: var(--poodle-recipe-history-center-item-hover-fill, var(--poodle-style-control-fillHover, transparent));
+}
+
+.poodle-history-center__entry-content:active:not(:disabled) {
+  background: var(--poodle-recipe-history-center-item-active-fill, var(--poodle-style-control-fillActive, transparent));
 }
 
 .poodle-history-center__entry-content:focus-visible {
@@ -238,7 +245,7 @@
   padding: 0 0.3rem;
   border: 0;
   border-radius: var(--poodle-radius-control);
-  background: var(--poodle-style-control-fill, transparent);
+  background: transparent;
   color: var(--poodle-recipe-history-center-fork-color, var(--poodle-color-text-secondary));
   cursor: pointer;
 }
@@ -250,6 +257,9 @@
   );
   color: var(--poodle-color-text-primary);
 }
+  .poodle-history-center__fork:active {
+    background: var(--poodle-recipe-history-center-item-active-fill, var(--poodle-style-control-fillActive, transparent));
+  }
 
 .poodle-history-center__fork:focus-visible {
   outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);

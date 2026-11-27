@@ -162,7 +162,7 @@
   align-self: flex-start;
   padding: 0;
   border: 0;
-  background: var(--poodle-style-control-fill, transparent);
+  background: transparent;
   color: var(--poodle-color-text-secondary);
   font: inherit;
   font-size: var(--poodle-agent-question-font-size);
@@ -170,8 +170,12 @@
 }
 
 .poodle-agent-question__dismiss:hover {
+  background: var(--poodle-style-control-fillHover, transparent);
   color: var(--poodle-color-text-primary);
 }
+  .poodle-agent-question__dismiss:active {
+    background: var(--poodle-style-control-fillActive, transparent);
+  }
 
 .poodle-agent-question__dismiss:focus-visible {
   outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);

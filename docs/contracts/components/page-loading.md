@@ -221,7 +221,7 @@ beyond plain props. Classified in the long-tail sweep.
 | `padding` | `0.375rem 0.875rem` |
 | `border` | `1px solid var(--poodle-style-control-border, var(--poodle-color-border-default))` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `var(--poodle-recipe-page-loading-cancel-fill, var(--poodle-style-control-fill, transparent))` |
+| `background` | `var(--poodle-recipe-page-loading-cancel-fill, transparent)` |
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font` | `inherit` |
 | `font-size` | `var(--poodle-typography-label-size, 0.8125rem)` |

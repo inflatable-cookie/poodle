@@ -144,11 +144,19 @@
   min-height: var(--poodle-stepper-row-height);
   padding: var(--poodle-stepper-pad-y) var(--poodle-stepper-pad-x);
   border: 0;
-  background: var(--poodle-style-control-fill, transparent);
+  background: transparent;
   color: var(--poodle-color-text-secondary);
   font: inherit;
   font-size: var(--poodle-stepper-font-size);
   text-align: left;
+}
+
+.poodle-stepper__trigger:hover:not(:disabled) {
+  background: var(--poodle-style-control-fillHover, transparent);
+}
+
+.poodle-stepper__trigger:active:not(:disabled) {
+  background: var(--poodle-style-control-fillActive, transparent);
 }
 
 .poodle-stepper__trigger:not(:disabled) {
@@ -276,8 +284,16 @@
   padding: 0.25rem;
   border: 0;
   border-radius: var(--poodle-radius-control);
-  background: var(--poodle-style-control-fill, transparent);
+  background: transparent;
   color: var(--poodle-color-text-secondary);
+}
+
+.poodle-stepper__rerun:hover:not(:disabled) {
+  background: var(--poodle-style-control-fillHover, transparent);
+}
+
+.poodle-stepper__rerun:active:not(:disabled) {
+  background: var(--poodle-style-control-fillActive, transparent);
 }
 
 .poodle-stepper__rerun:not(:disabled) {
@@ -321,11 +337,19 @@
   /* Expanded, the summary is a row above the list and needs the same divider
      the steps draw between themselves. Collapsed it is the last row. */
   border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
-  background: var(--poodle-style-control-fill, transparent);
+  background: transparent;
   color: var(--poodle-color-text-primary);
   font: inherit;
   font-size: var(--poodle-stepper-font-size);
   text-align: left;
+}
+
+.poodle-stepper__summary:hover:not(:disabled) {
+  background: var(--poodle-style-control-fillHover, transparent);
+}
+
+.poodle-stepper__summary:active:not(:disabled) {
+  background: var(--poodle-style-control-fillActive, transparent);
 }
 
 .poodle-stepper[data-collapsed="true"] .poodle-stepper__summary {

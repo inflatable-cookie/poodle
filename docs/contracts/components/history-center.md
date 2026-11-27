@@ -657,7 +657,7 @@ region (R6) and the picker (R1) — one event, both sites.
 
 ## 8. Token Usage
 
-Rendering style roles: entry rows and fork buttons read the control fill at rest, and entry and fork hovers read `--poodle-style-control-fillHover`. The list trigger reads `--poodle-style-control-fill`, and the rename input reads the control border and fill.
+Rendering style roles: entry rows, fork buttons and the list trigger rest transparent, and entry, fork and list-trigger hovers read `--poodle-style-control-fillHover`. The entry action button carries the hover and pressed fills, and the fork disclosure beside it is a sibling with its own fill, so the two never stack. The rename input reads the control border and fill.
 
 Semantic roles by default; recipes are the override surface (architecture
 007). Public hooks:
@@ -666,7 +666,8 @@ Semantic roles by default; recipes are the override surface (architecture
 |------|-------------|----------------|
 | entry row | `--poodle-recipe-history-center-item-fill` | transparent |
 | entry row (current) | `--poodle-recipe-history-center-current-fill` | `--poodle-style-selection-itemFill`, then accent 7% mix |
-| entry hover | `--poodle-recipe-history-center-item-hover-fill` | surface 72% mix |
+| entry hover | `--poodle-recipe-history-center-item-hover-fill` | `--poodle-style-control-fillHover`, then transparent |
+| entry pressed | `--poodle-recipe-history-center-item-active-fill` | `--poodle-style-control-fillActive`, then transparent |
 | checkpoint pin | `--poodle-recipe-history-center-checkpoint-fill` | `--poodle-color-accent-base` |
 | position marker | `--poodle-recipe-history-center-current-marker` | selection indicator role (`--poodle-style-selection-indicator`), then `--poodle-color-accent-base` |
 | fork icon | `--poodle-recipe-history-center-fork-color` | text-secondary |

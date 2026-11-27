@@ -27,7 +27,7 @@
     padding: 0 var(--poodle-space-control-x);
     border: 0;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-menubar-trigger-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-menubar-trigger-fill, transparent);
     color: var(--poodle-recipe-menubar-trigger-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
@@ -40,6 +40,9 @@
   .poodle-menubar__trigger:focus-visible {
     background: var(--poodle-recipe-menubar-open-hover-focus-trigger-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)));
     outline: none;
+  }
+  .poodle-menubar__trigger:active:not(:disabled) {
+    background: var(--poodle-recipe-menubar-trigger-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   /* The open trigger is the active item: its fill is the selection item fill.
@@ -76,7 +79,7 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: var(--poodle-recipe-menubar-item-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-menubar-item-fill, transparent);
     color: var(--poodle-recipe-menubar-item-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font: inherit;
@@ -88,6 +91,9 @@
   .poodle-menubar__item:focus-visible {
     background: var(--poodle-recipe-menubar-hover-focus-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)));
     outline: none;
+  }
+  .poodle-menubar__item:active:not(:disabled) {
+    background: var(--poodle-recipe-menubar-item-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-menubar__meta {

@@ -359,4 +359,4 @@ density variants.
 
 ### Rendering style roles
 
-Rendering style roles: option cards read `--poodle-style-control-border` and `--poodle-style-control-fill` at rest, and the dismiss control reads `--poodle-style-control-fill`. The option hover border stays literal, because no hover-fill role exists for it yet.
+Rendering style roles: option cards read `--poodle-style-control-border` and `--poodle-style-control-fill` at rest, and the dismiss control rests transparent and reads `--poodle-style-control-fillHover` on hover. The option hover border stays literal, because no hover-fill role exists for it yet.

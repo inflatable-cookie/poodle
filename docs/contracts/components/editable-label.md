@@ -252,7 +252,7 @@ ECMAScript `String.trim` or Rust `str::trim` as the authority.
 | `padding` | `0.375rem 0.5rem` |
 | `border` | `0.0625rem solid transparent` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `var(--poodle-recipe-editable-label-input-fill, var(--poodle-style-control-fill, transparent))` |
+| `background` | `var(--poodle-recipe-editable-label-input-fill, transparent)` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `var(--poodle-typography-label-size)` |

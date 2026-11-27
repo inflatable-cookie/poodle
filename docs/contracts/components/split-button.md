@@ -94,7 +94,7 @@ type MenuItem = {
 | default | resting | variant-specific fill, border, text |
 | hover (primary) | pointer enters primary half | `background: var(--poodle-split-fill-hover)` |
 | hover (toggle) | pointer enters toggle half | `background: var(--poodle-split-fill-hover)` |
-| active | press on either half | `background` darkened further |
+| active | press on either half | `background` darkened further; ghost halves take `--poodle-style-control-fillActive` |
 | focus | keyboard focus on either half | standard focus ring |
 | menu open | toggle clicked or keyboard opens | menu panel visible below root by default, or above when lower space is constrained |
 | disabled | `disabled=true` or `loading=true` | `opacity: state-opacity-disabled`, `cursor: not-allowed` |
@@ -336,12 +336,24 @@ Primary-half loading uses the shared [`Spinner`](./spinner.md) primitive with
 | `font-size` | `var(--poodle-typography-label-size)` |
 | `text-align` | `left` |
 
-### Item hover / focus-visible
+### Item hover
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` |
+| `background` | `var(--poodle-recipe-split-button-item-hover-fill, var(--poodle-style-control-fillHover, transparent))` |
+
+### Item focus-visible
+
+| Property | Value |
+|----------|-------|
+| `background` | `var(--poodle-recipe-split-button-hover-focus-item-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)))` |
 | `outline` | `none` |
+
+### Item pressed
+
+| Property | Value |
+|----------|-------|
+| `background` | `var(--poodle-recipe-split-button-item-active-fill, var(--poodle-style-control-fillActive, transparent))` |
 
 ### Separator (menu)
 
@@ -394,7 +406,7 @@ Primary-half loading uses the shared [`Spinner`](./spinner.md) primitive with
 - [ ] all five sizes match (height, font-size)
 - [ ] divider appearance matches (22% text opacity, 60% height)
 - [ ] menu panel appearance matches (border, radius, background, shadow)
-- [ ] item hover state matches (16% accent-base)
+- [ ] item hover matches `--poodle-style-control-fillHover`; focus-visible keeps the 16% accent-base fill
 - [ ] focus ring matches
 - [ ] shared spinner sizing, tone, and alignment match
 

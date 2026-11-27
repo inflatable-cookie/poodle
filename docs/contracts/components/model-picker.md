@@ -419,7 +419,7 @@ adjust them. Escape or an outside interaction dismisses.
 
 ## 8. Token Usage
 
-Rendering style roles: the trigger reads the control border and fill, including the outlined variant. Options and axis options read `--poodle-style-control-fill` at rest and `--poodle-style-control-fillHover` on hover, and the popover reads the floating surface roles.
+Rendering style roles: the trigger reads the control border and fill, including the outlined variant. Options and axis options rest transparent and read `--poodle-style-control-fillHover` on hover, and the popover reads the floating surface roles.
 
 | Part | Token | Purpose |
 |------|-------|---------|

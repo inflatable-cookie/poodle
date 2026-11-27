@@ -37,7 +37,7 @@
     box-sizing: border-box;
     border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-order-by-trigger-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
+    background: var(--poodle-recipe-order-by-trigger-fill, transparent);
     color: var(--poodle-recipe-order-by-trigger-text, var(--poodle-color-text-primary));
     transition:
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
@@ -50,6 +50,9 @@
 
   .poodle-order-by__trigger-wrap:hover {
     background: var(--poodle-recipe-order-by-hover-trigger-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated))));
+  }
+  .poodle-order-by__trigger-wrap:active {
+    background: var(--poodle-recipe-order-by-trigger-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   :root[data-poodle-input-modality="keyboard"] .poodle-order-by__trigger-wrap:focus-within {
@@ -210,12 +213,20 @@
     min-height: 1.5rem;
     padding: 0;
     border: 0;
-    background: var(--poodle-recipe-order-by-drag-handle-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-order-by-drag-handle-fill, transparent);
     color: var(--poodle-recipe-order-by-drag-handle-text, var(--poodle-color-text-muted));
     cursor: grab;
     user-select: none;
     font-size: 0.75rem;
     flex-shrink: 0;
+  }
+
+  .poodle-order-by__drag-handle:hover:not(:disabled) {
+    background: var(--poodle-recipe-order-by-drag-handle-hover-fill, var(--poodle-style-control-fillHover, transparent));
+  }
+
+  .poodle-order-by__drag-handle:active:not(:disabled) {
+    background: var(--poodle-recipe-order-by-drag-handle-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-order-by__drag-handle:focus-visible {

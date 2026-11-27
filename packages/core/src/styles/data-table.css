@@ -36,7 +36,7 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-data-table-toolbar-btn-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
+    background: var(--poodle-recipe-data-table-toolbar-btn-fill, transparent);
     color: var(--poodle-recipe-data-table-toolbar-btn-text, var(--poodle-color-text-secondary));
     cursor: pointer;
     font: inherit;
@@ -50,6 +50,9 @@
 
   .poodle-data-table__toolbar-btn:hover {
     background: var(--poodle-recipe-data-table-hover-toolbar-btn-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent)));
+  }
+  .poodle-data-table__toolbar-btn:active {
+    background: var(--poodle-recipe-data-table-toolbar-btn-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-data-table__toolbar-btn:focus-visible {
@@ -184,6 +187,20 @@
     cursor: pointer;
     font: inherit;
     text-decoration: none;
+  }
+
+  /* The actions trigger is text-like: it rests transparent and fills on hover.
+     Sort, row action and action link keep their resting fill. */
+  .poodle-data-table__actions-trigger {
+    background: var(--poodle-recipe-data-table-actions-trigger-fill, transparent);
+  }
+
+  .poodle-data-table__actions-trigger:hover:not(:disabled) {
+    background: var(--poodle-recipe-data-table-actions-trigger-hover-fill, var(--poodle-style-control-fillHover, transparent));
+  }
+
+  .poodle-data-table__actions-trigger:active:not(:disabled) {
+    background: var(--poodle-recipe-data-table-actions-trigger-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-data-table__sort:focus-visible,

@@ -265,7 +265,7 @@ expensive to open, so arrow keys must not commit to one.
 
 ## 8. Token Usage — Exact Values
 
-Rendering style roles: the frame reads the surface border and fill. Triggers, the summary and the rerun control read `--poodle-style-control-fill` at rest, and their hovers read `--poodle-style-control-fillHover`.
+Rendering style roles: the frame reads the surface border and fill. Triggers, the summary and the rerun control rest transparent, and their hovers read `--poodle-style-control-fillHover`.
 
 ### Root `.poodle-stepper`
 

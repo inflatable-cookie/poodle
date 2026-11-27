@@ -27,6 +27,12 @@
     --poodle-split-fill-hover: color-mix(in srgb, var(--poodle-split-fill) 84%, var(--poodle-color-background-elevated));
   }
 
+  /* Ghost tones keep the control hover role. The tone rule above is for filled
+     variants and would otherwise replace it. */
+  .poodle-split-button[data-variant="ghost"][data-tone] {
+    --poodle-split-fill-hover: var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-split-fill) 84%, var(--poodle-color-background-elevated)));
+  }
+
   .poodle-split-button[data-variant="primary"] {
     --poodle-split-fill: var(--poodle-color-accent-base);
     --poodle-split-border: color-mix(in srgb, var(--poodle-color-accent-base) 84%, black);
@@ -35,7 +41,7 @@
   }
 
   .poodle-split-button[data-variant="ghost"] {
-    --poodle-split-fill: var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-surface) 42%, transparent));
+    --poodle-split-fill: transparent;
     --poodle-split-border: var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent));
   }
 
@@ -196,6 +202,12 @@
     background: var(--poodle-recipe-split-button-hover-primary-fill, var(--poodle-split-fill-hover));
   }
 
+  /* Ghost halves rest transparent, so a press needs its own fill. Filled
+     variants keep their existing pressed behaviour. */
+  .poodle-split-button[data-variant="ghost"] .poodle-split-button__primary:active:not(:disabled) {
+    background: var(--poodle-recipe-split-button-active-primary-fill, var(--poodle-style-control-fillActive, transparent));
+  }
+
   .poodle-split-button__primary:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
@@ -216,6 +228,10 @@
 
   .poodle-split-button__toggle:hover:not(:disabled) {
     background: var(--poodle-recipe-split-button-hover-toggle-fill, var(--poodle-split-fill-hover));
+  }
+
+  .poodle-split-button[data-variant="ghost"] .poodle-split-button__toggle:active:not(:disabled) {
+    background: var(--poodle-recipe-split-button-active-toggle-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-split-button__toggle:focus-visible {
@@ -273,7 +289,7 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: var(--poodle-recipe-split-button-item-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-split-button-item-fill, transparent);
     color: var(--poodle-recipe-split-button-item-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font: inherit;
@@ -281,10 +297,19 @@
     text-align: left;
   }
 
-  .poodle-split-button__item:hover:not(:disabled),
+  /* Hover reads the control hover role, so an unselected item never takes the
+     selection fill. Focus-visible keeps its existing accent focus fill. */
+  .poodle-split-button__item:hover:not(:disabled) {
+    background: var(--poodle-recipe-split-button-item-hover-fill, var(--poodle-style-control-fillHover, transparent));
+  }
+
   .poodle-split-button__item:focus-visible {
     background: var(--poodle-recipe-split-button-hover-focus-item-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)));
     outline: none;
+  }
+
+  .poodle-split-button__item:active:not(:disabled) {
+    background: var(--poodle-recipe-split-button-item-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-split-button__item:disabled {

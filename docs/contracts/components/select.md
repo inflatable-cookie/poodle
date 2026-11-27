@@ -326,7 +326,7 @@ uses the dismissable-layer stack (innermost-first), guarded by
 
 ## 8. Token Usage — Exact Values
 
-Rendering style roles: the listbox reads the floating surface roles, and options read `--poodle-style-control-fill` at rest and `--poodle-style-control-fillHover` on hover. The trigger already read the control roles.
+Rendering style roles: the listbox reads the floating surface roles, and options rest transparent and read `--poodle-style-control-fillHover` on hover. The trigger already read the control roles.
 
 ### Root `.select`
 

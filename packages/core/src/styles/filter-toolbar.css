@@ -28,10 +28,18 @@
     width: 100%;
     padding: 0;
     border: 0;
-    background: var(--poodle-recipe-filter-toolbar-header--button-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-filter-toolbar-header--button-fill, transparent);
     color: inherit;
     text-align: left;
     cursor: pointer;
+  }
+
+  .poodle-filter-toolbar__header--button:hover:not(:disabled) {
+    background: var(--poodle-recipe-filter-toolbar-header--button-hover-fill, var(--poodle-style-control-fillHover, transparent));
+  }
+
+  .poodle-filter-toolbar__header--button:active:not(:disabled) {
+    background: var(--poodle-recipe-filter-toolbar-header--button-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-filter-toolbar__header--button:focus-visible {

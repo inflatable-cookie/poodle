@@ -23,11 +23,19 @@
   .poodle-breadcrumbs button {
     border: 0;
     padding: 0;
-    background: var(--poodle-recipe-breadcrumbs-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-breadcrumbs-fill, transparent);
     color: inherit;
     cursor: pointer;
     font: inherit;
     text-decoration: none;
+  }
+  .poodle-breadcrumbs a:hover:not(:disabled),
+  .poodle-breadcrumbs button:hover:not(:disabled) {
+    background: var(--poodle-recipe-breadcrumbs-hover-fill, var(--poodle-style-control-fillHover, transparent));
+  }
+  .poodle-breadcrumbs a:active:not(:disabled),
+  .poodle-breadcrumbs button:active:not(:disabled) {
+    background: var(--poodle-recipe-breadcrumbs-active-fill, var(--poodle-style-control-fillActive, transparent));
   }
 
   .poodle-breadcrumbs a:focus-visible,
