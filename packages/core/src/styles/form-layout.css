@@ -10,21 +10,21 @@
   .poodle-form-layout__description {
     margin: 0;
     color: var(--poodle-recipe-form-layout-description-text, var(--poodle-color-text-secondary));
-    font-size: var(--poodle-typography-body-size, 0.875rem);
-    line-height: var(--poodle-typography-body-lineHeight, 1.5);
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-typography-body-lineHeight);
   }
 
   .poodle-form-layout__field-errors {
-    padding: var(--poodle-space-panel-y, 0.75rem) var(--poodle-space-panel-x, 1rem);
-    border-radius: var(--poodle-radius-surface, 0.5rem);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border-radius: var(--poodle-radius-surface);
     background: var(--poodle-recipe-form-layout-field-errors-fill, color-mix(in srgb, var(--poodle-color-status-danger) 8%, transparent));
-    border: 0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-danger) 40%, transparent));
-    font-size: var(--poodle-typography-label-size, 0.75rem);
+    border: 0.0625rem solid var(--poodle-style-surface-border);
+    font-size: var(--poodle-typography-label-size);
   }
 
   .poodle-form-layout__field-errors p {
     margin: 0 0 0.25rem;
-    font-weight: 600;
+    font-weight: var(--poodle-typography-font-weight-semibold);
   }
 
   .poodle-form-layout__field-errors ul {

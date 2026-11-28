@@ -239,8 +239,8 @@ Rendering style roles: the year input reads the control roles (`-fill`, `-fillHo
 | Property | Value |
 |----------|-------|
 | `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `0.8125rem` |
-| `font-weight` | `600` |
+| `font-size` | `var(--poodle-style-typography-compactControlLabel-md-size)` |
+| `font-weight` | `var(--poodle-typography-font-weight-semibold)` |
 | `letter-spacing` | `0.02em` |
 | `text-align` | `center` |
 
@@ -253,9 +253,9 @@ Rendering style roles: the year input reads the control roles (`-fill`, `-fillHo
 | `justify-content` | `center` |
 | `width` | `2rem` |
 | `height` | `2rem` |
-| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border` | `0.0625rem solid var(--poodle-style-control-border)` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `var(--poodle-color-background-surface)` |
+| `background` | `var(--poodle-recipe-calendar-nav-fill, transparent)` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font` | `inherit` |
@@ -264,7 +264,7 @@ Rendering style roles: the year input reads the control roles (`-fill`, `-fillHo
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 82%, var(--poodle-color-background-elevated))` |
+| `background` | `var(--poodle-recipe-calendar-hover-nav-fill, var(--poodle-style-control-fillHover))` |
 
 ### Nav Button — focus-visible
 
@@ -288,8 +288,8 @@ Rendering style roles: the year input reads the control roles (`-fill`, `-fillHo
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `0.6875rem` |
-| `font-weight` | `600` |
+| `font-size` | `var(--poodle-style-typography-eyebrow-xs-size)` |
+| `font-weight` | `var(--poodle-style-typography-overline-weight)` |
 | `letter-spacing` | `0.04em` |
 | `text-align` | `center` |
 | `text-transform` | `uppercase` |
@@ -330,8 +330,8 @@ Rendering style roles: the year input reads the control roles (`-fill`, `-fillHo
 | `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `0.75rem` |
-| `font-weight` | `500` |
+| `font-size` | `var(--poodle-style-typography-chipLabel-md-size)` |
+| `font-weight` | `var(--poodle-typography-font-weight-medium)` |
 
 ### Day Button — outside month
 
@@ -350,8 +350,8 @@ Rendering style roles: the year input reads the control roles (`-fill`, `-fillHo
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-calendar-selected-day-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)))` |
-| `color` | `var(--poodle-recipe-calendar-selected-day-text, var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse)))` |
+| `background` | `var(--poodle-recipe-calendar-selected-day-fill, var(--poodle-style-selection-fillSolid))` |
+| `color` | `var(--poodle-recipe-calendar-selected-day-text, var(--poodle-style-selection-textSolid))` |
 
 ### Day Button — hover / focus-visible
 
@@ -365,26 +365,26 @@ Rendering style roles: the year input reads the control roles (`-fill`, `-fillHo
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-calendar-selected-hover-focus-day-fill, color-mix(in srgb, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)) 88%, white 8%))` |
+| `background` | `var(--poodle-recipe-calendar-selected-hover-focus-day-fill, color-mix(in srgb, var(--poodle-style-selection-fillSolid) 88%, white 8%))` |
 
 ### Day Button — in-range `[data-in-range="true"]` (range mode)
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-calendar-in-range-day-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)))` |
+| `background` | `var(--poodle-recipe-calendar-in-range-day-fill, var(--poodle-style-selection-itemFill))` |
 
 ### Day Button — range-start / range-end (range mode)
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-calendar-range-start-range-end-day-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)))` |
-| `color` | `var(--poodle-recipe-calendar-range-start-range-end-day-text, var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse)))` |
+| `background` | `var(--poodle-recipe-calendar-range-start-range-end-day-fill, var(--poodle-style-selection-fillSolid))` |
+| `color` | `var(--poodle-recipe-calendar-range-start-range-end-day-text, var(--poodle-style-selection-textSolid))` |
 
 ### Day Button — range endpoint hover (range mode)
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-calendar-range-start-range-end-hover-focus-day-fill, color-mix(in srgb, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)) 88%, white 8%))` |
+| `background` | `var(--poodle-recipe-calendar-range-start-range-end-hover-focus-day-fill, color-mix(in srgb, var(--poodle-style-selection-fillSolid) 88%, white 8%))` |
 
 ### Nav Button — disabled (`.calendar__nav:disabled`)
 
@@ -404,8 +404,10 @@ Rendering style roles: the year input reads the control roles (`-fill`, `-fillHo
 
 Cell size (`--calendar-cell-size`, drives grid column width) is `2.25rem` at
 md and scales per size: xs `1.75rem`, sm `2rem`, lg `2.5rem`, xl `2.75rem`.
+The `chipLabel` roles supply the day sizes and the `compactControlLabel` roles
+supply the month label sizes. `sm` has no type rule, so it reads the `md` roles.
 
-| Size | Part | Property | Value |
+| Size | Part | Property | Default value |
 |------|------|----------|-------|
 | `xs` (`[data-size="xs"]`) | Root | `--calendar-cell-size` | `1.75rem` |
 | `xs` (`[data-size="xs"]`) | Nav Button | `width` / `height` | `1.5rem` |
@@ -415,8 +417,8 @@ md and scales per size: xs `1.75rem`, sm `2rem`, lg `2.5rem`, xl `2.75rem`.
 | `sm` (`[data-size="sm"]`) | Root | `--calendar-cell-size` | `2rem` |
 | `sm` (`[data-size="sm"]`) | Nav Button | `width` / `height` | `1.75rem` |
 | `sm` | Day Button | `min-height` | `2rem` |
-| `sm` | Day Button | `font-size` | `0.6875rem` |
-| `sm` | Month Label | `font-size` | `0.75rem` |
+| `sm` | Day Button | `font-size` | `0.75rem` |
+| `sm` | Month Label | `font-size` | `0.8125rem` |
 | `lg` (`[data-size="lg"]`) | Root | `--calendar-cell-size` | `2.5rem` |
 | `lg` (`[data-size="lg"]`) | Nav Button | `width` / `height` | `2.25rem` |
 | `lg` | Day Button | `min-height` | `2.5rem` |
@@ -484,11 +486,11 @@ md and scales per size: xs `1.75rem`, sm `2rem`, lg `2.5rem`, xl `2.75rem`.
 - [ ] header grid layout (auto 1fr auto, 0.5rem gap) matches
 - [ ] month label typography (label-family, 0.8125rem, 600, 0.02em) matches
 - [ ] nav button sizing (2rem x 2rem) and chrome match
-- [ ] nav button hover background (color-mix 82%) matches
+- [ ] nav button hover background (`style.control.fillHover`) matches
 - [ ] weekday label typography (label-family, 0.6875rem, 600, 0.04em, uppercase) matches
 - [ ] day button sizing (min-height 2.25rem) and typography (0.75rem, 500) match
 - [ ] today border-color (color-mix accent 44%) matches
-- [ ] selected treatment (accent-base background, text-inverse) matches
+- [ ] selected treatment (`style.selection.fillSolid` background, `style.selection.textSolid` text) matches
 - [ ] hover/focus tint (color-mix accent 14%) matches
 - [ ] selected hover tint (color-mix accent 88%) matches
 - [ ] outside-month opacity (0.72) matches

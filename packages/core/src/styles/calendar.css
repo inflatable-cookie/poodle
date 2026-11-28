@@ -27,8 +27,8 @@
     justify-content: center;
     gap: 0.375rem;
     font-family: var(--poodle-typography-label-family);
-    font-size: 0.8125rem;
-    font-weight: 600;
+    font-size: var(--poodle-style-typography-compactControlLabel-md-size);
+    font-weight: var(--poodle-typography-font-weight-semibold);
     letter-spacing: 0.02em;
     text-align: center;
   }
@@ -42,11 +42,11 @@
     padding: 0;
     border: 0;
     border-bottom: 0.0625rem dashed color-mix(in srgb, var(--poodle-color-text-secondary) 72%, transparent);
-    background: var(--poodle-recipe-calendar-year-button-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-calendar-year-button-fill, var(--poodle-style-control-fill));
     color: inherit;
     font: inherit;
     letter-spacing: inherit;
-    line-height: 1.2;
+    line-height: var(--poodle-style-typography-leading-tight);
     cursor: text;
     transition:
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
@@ -60,11 +60,11 @@
   }
 
   .poodle-calendar__year-button:hover:not(:disabled) {
-    background: var(--poodle-recipe-calendar-year-button-hover-fill, var(--poodle-style-control-fillHover, transparent));
+    background: var(--poodle-recipe-calendar-year-button-hover-fill, var(--poodle-style-control-fillHover));
   }
 
   .poodle-calendar__year-button:active:not(:disabled) {
-    background: var(--poodle-recipe-calendar-year-button-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-calendar-year-button-active-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-calendar__month-button:hover:not(:disabled),
@@ -79,13 +79,13 @@
     min-width: 4.5ch;
     min-height: 1.75em;
     padding: 0.125rem 0.25rem;
-    border: 0.0625rem solid var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default)));
+    border: 0.0625rem solid var(--poodle-style-control-border);
     border-radius: 0.25rem;
-    background: var(--poodle-recipe-calendar-year-input-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, var(--poodle-color-background-elevated))));
+    background: var(--poodle-recipe-calendar-year-input-fill, var(--poodle-style-control-fill));
     color: inherit;
     font: inherit;
     letter-spacing: inherit;
-    line-height: 1.4;
+    line-height: var(--poodle-style-typography-leading-normal);
     text-align: center;
     outline: 0;
     box-shadow: var(--poodle-recipe-calendar-year-input-shadow, 0 0 0 0.125rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 18%, transparent));
@@ -116,7 +116,7 @@
     justify-content: center;
     width: 2rem;
     height: 2rem;
-    border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
+    border: 0.0625rem solid var(--poodle-style-control-border);
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-recipe-calendar-nav-fill, transparent);
     color: var(--poodle-recipe-calendar-nav-text, var(--poodle-color-text-primary));
@@ -125,10 +125,10 @@
   }
 
   .poodle-calendar__nav:hover:not(:disabled) {
-    background: var(--poodle-recipe-calendar-hover-nav-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 82%, var(--poodle-color-background-elevated))));
+    background: var(--poodle-recipe-calendar-hover-nav-fill, var(--poodle-style-control-fillHover));
   }
   .poodle-calendar__nav:active:not(:disabled) {
-    background: var(--poodle-recipe-calendar-nav-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-calendar-nav-active-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-calendar__weekdays {
@@ -138,8 +138,8 @@
   .poodle-calendar__weekday {
     color: var(--poodle-recipe-calendar-weekday-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
-    font-size: 0.6875rem;
-    font-weight: 600;
+    font-size: var(--poodle-style-typography-eyebrow-xs-size);
+    font-weight: var(--poodle-style-typography-overline-weight);
     letter-spacing: 0.04em;
     text-align: center;
     text-transform: uppercase;
@@ -170,8 +170,8 @@
     color: var(--poodle-recipe-calendar-day-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
-    font-size: 0.75rem;
-    font-weight: 500;
+    font-size: var(--poodle-style-typography-chipLabel-md-size);
+    font-weight: var(--poodle-typography-font-weight-medium);
   }
 
   .poodle-calendar__day[data-current-month="false"] {
@@ -184,18 +184,18 @@
   }
 
   .poodle-calendar__day[data-selected="true"] {
-    background: var(--poodle-recipe-calendar-selected-day-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)));
-    color: var(--poodle-recipe-calendar-selected-day-text, var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse)));
+    background: var(--poodle-recipe-calendar-selected-day-fill, var(--poodle-style-selection-fillSolid));
+    color: var(--poodle-recipe-calendar-selected-day-text, var(--poodle-style-selection-textSolid));
   }
 
   .poodle-calendar__day[data-in-range="true"] {
-    background: var(--poodle-recipe-calendar-in-range-day-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)));
+    background: var(--poodle-recipe-calendar-in-range-day-fill, var(--poodle-style-selection-itemFill));
   }
 
   .poodle-calendar__day[data-range-start="true"],
   .poodle-calendar__day[data-range-end="true"] {
-    background: var(--poodle-recipe-calendar-range-start-range-end-day-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)));
-    color: var(--poodle-recipe-calendar-range-start-range-end-day-text, var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse)));
+    background: var(--poodle-recipe-calendar-range-start-range-end-day-fill, var(--poodle-style-selection-fillSolid));
+    color: var(--poodle-recipe-calendar-range-start-range-end-day-text, var(--poodle-style-selection-textSolid));
   }
 
   .poodle-calendar__day:hover:not(:disabled),
@@ -207,14 +207,14 @@
 
   .poodle-calendar__day[data-selected="true"]:hover:not(:disabled),
   .poodle-calendar__day[data-selected="true"]:focus-visible {
-    background: var(--poodle-recipe-calendar-selected-hover-focus-day-fill, color-mix(in srgb, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)) 88%, white 8%));
+    background: var(--poodle-recipe-calendar-selected-hover-focus-day-fill, color-mix(in srgb, var(--poodle-style-selection-fillSolid) 88%, white 8%));
   }
 
   .poodle-calendar__day[data-range-start="true"]:hover:not(:disabled),
   .poodle-calendar__day[data-range-start="true"]:focus-visible,
   .poodle-calendar__day[data-range-end="true"]:hover:not(:disabled),
   .poodle-calendar__day[data-range-end="true"]:focus-visible {
-    background: var(--poodle-recipe-calendar-range-start-range-end-hover-focus-day-fill, color-mix(in srgb, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)) 88%, white 8%));
+    background: var(--poodle-recipe-calendar-range-start-range-end-hover-focus-day-fill, color-mix(in srgb, var(--poodle-style-selection-fillSolid) 88%, white 8%));
   }
 
   .poodle-calendar__nav:focus-visible {
@@ -240,11 +240,11 @@
 
   .poodle-calendar[data-size="xs"] .poodle-calendar__day {
     min-height: 1.75rem;
-    font-size: 0.6875rem;
+    font-size: var(--poodle-style-typography-chipLabel-xs-size);
   }
 
   .poodle-calendar[data-size="xs"] .poodle-calendar__month {
-    font-size: 0.6875rem;
+    font-size: var(--poodle-style-typography-compactControlLabel-xs-size);
   }
 
   .poodle-calendar[data-size="sm"] .poodle-calendar__nav {
@@ -263,11 +263,11 @@
 
   .poodle-calendar[data-size="lg"] .poodle-calendar__day {
     min-height: 2.5rem;
-    font-size: 0.8125rem;
+    font-size: var(--poodle-style-typography-chipLabel-lg-size);
   }
 
   .poodle-calendar[data-size="lg"] .poodle-calendar__month {
-    font-size: 0.875rem;
+    font-size: var(--poodle-style-typography-compactControlLabel-lg-size);
   }
 
   .poodle-calendar[data-size="xl"] .poodle-calendar__nav {
@@ -277,11 +277,11 @@
 
   .poodle-calendar[data-size="xl"] .poodle-calendar__day {
     min-height: 2.75rem;
-    font-size: 0.875rem;
+    font-size: var(--poodle-style-typography-chipLabel-xl-size);
   }
 
   .poodle-calendar[data-size="xl"] .poodle-calendar__month {
-    font-size: 0.9375rem;
+    font-size: var(--poodle-style-typography-compactControlLabel-xl-size);
   }
 
   .poodle-calendar[data-density="compact"] .poodle-calendar__grid { gap: 0; }

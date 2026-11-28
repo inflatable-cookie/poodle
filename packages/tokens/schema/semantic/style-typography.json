@@ -1600,6 +1600,96 @@
           "$type": "number",
           "$value": "initial"
         }
+      },
+      "noticeIcon": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "noticeBody": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "noticeTitle": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
       }
     }
   }

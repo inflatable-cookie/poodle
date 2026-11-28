@@ -202,10 +202,10 @@ this machinery.
 | `gap` | `0.75rem` |
 | `min-height` | `var(--poodle-size-control-height)` |
 | `padding` | `0 var(--poodle-space-control-x)` |
-| `border` | `0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default))` |
+| `border` | `0.0625rem solid var(--poodle-style-control-border)` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `var(--poodle-recipe-date-time-zone-picker-trigger-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)))` |
-| `box-shadow` | `var(--poodle-style-control-shadow, none)` |
+| `background` | `var(--poodle-recipe-date-time-zone-picker-trigger-fill, var(--poodle-style-control-fill))` |
+| `box-shadow` | `var(--poodle-style-control-shadow)` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font-family` | `var(--poodle-typography-body-family)` |
@@ -217,7 +217,7 @@ this machinery.
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-date-time-zone-picker-hover-trigger-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 86%, var(--poodle-color-background-elevated))))` |
+| `background` | `var(--poodle-recipe-date-time-zone-picker-hover-trigger-fill, var(--poodle-style-control-fillHover))` |
 
 ### Trigger — focus-visible
 
@@ -237,14 +237,14 @@ this machinery.
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-recipe-date-time-zone-picker-value-text, var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary)))` |
+| `color` | `var(--poodle-recipe-date-time-zone-picker-value-text, var(--poodle-style-control-secondaryText))` |
 
 ### Indicator `.date-time-zone-picker__indicator`
 
 | Property | Value |
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.75rem` |
+| `font-size` | `var(--poodle-style-typography-controlHint-md-size)` |
 
 ### Surface `.date-time-zone-picker__surface`
 
@@ -287,14 +287,18 @@ this machinery.
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `0.6875rem` |
-| `font-weight` | `600` |
+| `font-size` | `var(--poodle-style-typography-eyebrow-xs-size)` |
+| `font-weight` | `var(--poodle-style-typography-overline-weight)` |
 | `letter-spacing` | `0.04em` |
 | `text-transform` | `uppercase` |
 
 ### Size adjustments
 
 Size sets an **absolute** trigger height (via `--poodle-date-time-zone-picker-trigger-height`), the trigger `font-size`, and the indicator `font-size`. Size does **not** set per-size padding — horizontal padding is density-driven (see below).
+
+The `controlSummary` roles supply the trigger sizes and the `controlHint` roles
+supply the indicator sizes. At `md` the trigger uses the body size. The type
+values below are the defaults.
 
 | Size | Trigger height | Trigger `font-size` | Indicator `font-size` |
 |------|----------------|---------------------|-----------------------|
@@ -347,8 +351,8 @@ Size sets an **absolute** trigger height (via `--poodle-date-time-zone-picker-tr
 - GPUI must implement trigger button with dialog overlay pattern
 - Must expose haspopup, expanded state, and dialog relationship through native
   accessibility APIs
-- `color-mix` formulas for surface border (72%), background (98%), and trigger
-  hover (86%) must be replicated or approximated
+- `color-mix` formulas for surface border (72%) and background (98%) must be
+  replicated or approximated; trigger hover reads `style.control.fillHover`
 - Calendar, TimeInput, and TimeZoneSelect composition: GPUI delegates to its own
   calendar, time-input, and timezone-select primitives
 - Field label typography must match: label-family, 0.6875rem, weight 600,
@@ -376,7 +380,7 @@ Size sets an **absolute** trigger height (via `--poodle-date-time-zone-picker-tr
 
 - [ ] trigger uses control-height, control-x padding, body typography
 - [ ] trigger focus ring matches (outline with focusRing color, 0.125rem offset)
-- [ ] trigger hover background color-mix (86% surface, elevated) matches
+- [ ] trigger hover background (`style.control.fillHover`) matches
 - [ ] placeholder color (text-secondary) matches
 - [ ] indicator color (text-secondary) and font-size match (base `0.75rem`, scaling `xs:0.625rem` … `xl:0.875rem`)
 - [ ] surface overlay: absolute positioning, 0.375rem gap below trigger

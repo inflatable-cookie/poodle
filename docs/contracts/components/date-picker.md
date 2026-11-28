@@ -191,10 +191,10 @@ this machinery.
 | `gap` | `0.75rem` |
 | `min-height` | `var(--poodle-size-control-height)` |
 | `padding` | `0 var(--poodle-space-control-x)` |
-| `border` | `0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default))` |
+| `border` | `0.0625rem solid var(--poodle-style-control-border)` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `var(--poodle-recipe-date-picker-trigger-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)))` |
-| `box-shadow` | `var(--poodle-style-control-shadow, none)` |
+| `background` | `var(--poodle-recipe-date-picker-trigger-fill, var(--poodle-style-control-fill))` |
+| `box-shadow` | `var(--poodle-style-control-shadow)` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font-family` | `var(--poodle-typography-body-family)` |
@@ -206,13 +206,13 @@ this machinery.
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-recipe-date-picker-value-text, var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary)))` |
+| `color` | `var(--poodle-recipe-date-picker-value-text, var(--poodle-style-control-secondaryText))` |
 
 ### Trigger — hover
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-date-picker-hover-trigger-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 86%, var(--poodle-color-background-elevated))))` |
+| `background` | `var(--poodle-recipe-date-picker-hover-trigger-fill, var(--poodle-style-control-fillHover))` |
 
 ### Trigger — focus-visible
 
@@ -233,7 +233,7 @@ this machinery.
 | Property | Value |
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.75rem` |
+| `font-size` | `var(--poodle-style-typography-controlHint-md-size)` |
 
 ### Surface `.date-picker__surface`
 
@@ -255,6 +255,10 @@ Size sets trigger `min-height`, trigger `font-size`, and indicator `font-size`.
 Svelte ships absolute trigger heights; the `md` base resolves from
 `var(--poodle-size-control-height-md, var(--poodle-size-control-height))`. Size
 does **not** alter horizontal padding — density owns that (see below).
+
+The `controlSummary` roles supply the trigger sizes and the `controlHint` roles
+supply the indicator sizes. At `md` the trigger uses the body size. The type
+values below are the defaults.
 
 | Size | trigger `min-height` | trigger `font-size` | indicator `font-size` |
 |------|----------------------|---------------------|-----------------------|
@@ -326,7 +330,7 @@ Density owns trigger horizontal padding only (no height/font change).
 - [ ] trigger sizing (control-height, control-x padding) matches
 - [ ] trigger typography (body-family, body-size, body-lineHeight) matches
 - [ ] trigger border and radius (border-default, radius-control) match
-- [ ] trigger hover background (color-mix 86%) matches
+- [ ] trigger hover background (`style.control.fillHover`) matches
 - [ ] trigger focus ring (border-width-focus, focusRing, 0.125rem offset) matches
 - [ ] placeholder color (text-secondary) matches
 - [ ] indicator color (text-secondary) and size (0.75rem) match

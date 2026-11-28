@@ -1126,6 +1126,54 @@ export const tokens = {
         "thumbnailTitle": {
           "size": "initial",
           "lineHeight": "initial"
+        },
+        "noticeIcon": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "noticeBody": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "noticeTitle": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
         }
       },
       "control": {
@@ -1707,6 +1755,20 @@ export const tokenPaths = [
   "style.typography.mediaTime.xl.size",
   "style.typography.thumbnailTitle.size",
   "style.typography.thumbnailTitle.lineHeight",
+  "style.typography.noticeIcon.xs.size",
+  "style.typography.noticeIcon.sm.size",
+  "style.typography.noticeIcon.md.size",
+  "style.typography.noticeIcon.lg.size",
+  "style.typography.noticeIcon.xl.size",
+  "style.typography.noticeBody.xs.size",
+  "style.typography.noticeBody.sm.size",
+  "style.typography.noticeBody.md.size",
+  "style.typography.noticeBody.lg.size",
+  "style.typography.noticeBody.xl.size",
+  "style.typography.noticeTitle.xs.size",
+  "style.typography.noticeTitle.sm.size",
+  "style.typography.noticeTitle.lg.size",
+  "style.typography.noticeTitle.xl.size",
   "style.control.fill",
   "style.control.border",
   "style.control.shadow",
@@ -2149,6 +2211,20 @@ export const cssVars = {
   "style.typography.mediaTime.xl.size": "--poodle-style-typography-mediaTime-xl-size",
   "style.typography.thumbnailTitle.size": "--poodle-style-typography-thumbnailTitle-size",
   "style.typography.thumbnailTitle.lineHeight": "--poodle-style-typography-thumbnailTitle-lineHeight",
+  "style.typography.noticeIcon.xs.size": "--poodle-style-typography-noticeIcon-xs-size",
+  "style.typography.noticeIcon.sm.size": "--poodle-style-typography-noticeIcon-sm-size",
+  "style.typography.noticeIcon.md.size": "--poodle-style-typography-noticeIcon-md-size",
+  "style.typography.noticeIcon.lg.size": "--poodle-style-typography-noticeIcon-lg-size",
+  "style.typography.noticeIcon.xl.size": "--poodle-style-typography-noticeIcon-xl-size",
+  "style.typography.noticeBody.xs.size": "--poodle-style-typography-noticeBody-xs-size",
+  "style.typography.noticeBody.sm.size": "--poodle-style-typography-noticeBody-sm-size",
+  "style.typography.noticeBody.md.size": "--poodle-style-typography-noticeBody-md-size",
+  "style.typography.noticeBody.lg.size": "--poodle-style-typography-noticeBody-lg-size",
+  "style.typography.noticeBody.xl.size": "--poodle-style-typography-noticeBody-xl-size",
+  "style.typography.noticeTitle.xs.size": "--poodle-style-typography-noticeTitle-xs-size",
+  "style.typography.noticeTitle.sm.size": "--poodle-style-typography-noticeTitle-sm-size",
+  "style.typography.noticeTitle.lg.size": "--poodle-style-typography-noticeTitle-lg-size",
+  "style.typography.noticeTitle.xl.size": "--poodle-style-typography-noticeTitle-xl-size",
   "style.control.fill": "--poodle-style-control-fill",
   "style.control.border": "--poodle-style-control-border",
   "style.control.shadow": "--poodle-style-control-shadow",
