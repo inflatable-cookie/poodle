@@ -23,7 +23,7 @@ import { Button, Dialog, DataTable } from "@inflatable-cookie/poodle-react";
 import type { ControlSize, ControlDensity, SelectOption } from "@inflatable-cookie/poodle-react";
 ```
 
-Peer dependencies: `react` and `react-dom` `>=18` (built and verified on 19).
+Peer dependencies: `react` and `react-dom` `>=18 <20` (verified on 18 and 19).
 
 Custom-surface drag and drop is a substrate, not a catalogue component:
 

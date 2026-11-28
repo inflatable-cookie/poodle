@@ -274,6 +274,8 @@ const PRIVATE_DECLARATION_TOOLS_MANIFEST =
 /** The private root repository manifest; its development tooling is ordinary. */
 const ROOT_MANIFEST_PATH = "package.json";
 const ROOT_MANIFEST_DEV_DEPENDENCIES = "devDependencies";
+const ROOT_MANIFEST_PACKAGE_MANAGER = "packageManager";
+const EXACT_BUN_PIN = /^bun@\d+\.\d+\.\d+$/;
 
 export const CERTIFICATION_FORBIDDEN_SURFACES = [
   {
@@ -889,15 +891,21 @@ export function changedJsonLeafPaths(
   return JSON.stringify(before) === JSON.stringify(after) ? [] : [prefix];
 }
 
+function isExactBunPin(value: unknown): boolean {
+  return typeof value === "string" && EXACT_BUN_PIN.test(value);
+}
+
 /**
  * Ordinary root-manifest admission. The private root repository manifest is a
  * release surface for its version and published shape, but not for development
  * tooling: root `devDependencies` ship in no published package, so a range that
  * changes only them - plus their generated `bun.lock` companion - is admitted
- * (operator ruling 2026-09-29). Every other changed root field stays
- * release-scoped and is rejected by name, so the next worker learns which field
- * needs a release candidate instead of reading the classifier. Unparsable,
- * added, or deleted manifests fail closed as version surfaces.
+ * (operator ruling 2026-09-29). `packageManager` is the single Bun pin
+ * (operator ruling 2026-09-27), so a move from one exact `bun@x.y.z` to another
+ * is admitted too. Every other changed root field stays release-scoped and is
+ * rejected by name, so the next worker learns which field needs a release
+ * candidate instead of reading the classifier. Unparsable, added, or deleted
+ * manifests fail closed as version surfaces.
  *
  * Version and name keep the established `version` label, and the publication
  * transport fields keep `registry`.
@@ -923,9 +931,13 @@ function ordinaryRootManifestForbiddenLabels(
   const changedFields = sortedUnique(
     changedJsonLeafPaths(beforeJson, afterJson).map((leaf) => leaf.split(".")[0]),
   );
+  const bunPinMove = [beforeJson, afterJson].every((manifest) =>
+    isExactBunPin(manifest[ROOT_MANIFEST_PACKAGE_MANAGER]),
+  );
   return sortedUnique(
     changedFields
       .filter((field) => field !== ROOT_MANIFEST_DEV_DEPENDENCIES)
+      .filter((field) => !(field === ROOT_MANIFEST_PACKAGE_MANAGER && bunPinMove))
       .map((field) => {
         if (field === "version" || field === "name") return "version";
         if (field === "private" || field === "publishConfig" || field === "registry") {
