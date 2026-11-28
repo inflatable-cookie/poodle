@@ -1,0 +1,28 @@
+[warning] retired v0.15 config still loads for one release
+
+  - `[scan.attention_markers]` is ignored; search markers with `rg -n 'TODO|FIXME' <path>` instead
+  - `[scan.comment_ratio]` is ignored; the scanner was removed and has no replacement
+  - `[scan.generated_in_src]` is ignored; keep generated output outside source trees
+  - `[scan.stale_suppressions]` is ignored; let each tool report its own unused suppressions
+
+  Next: Update the manifest; this compatibility path is removed after v0.15 (see CHANGELOG.md and the consumer migration guide).
+
+  Details:
+    manifest: [scratch]/ax-base/effigy.toml
+    guide: docs/guides/085-v0.15.0-consumer-migration.md
+
+╭───────────────────────────────────────────────────────────────╮
+│ EFFIGY  [scratch]/ax-base │
+╰──────────────────────────────────────── v0.15.0+local.1857ca2 ╯
+
+  PASS  AX readiness distinguishes a missing proof title from missing content
+## build live GPUI proof window
+## named Poodle preview
+  platform-tree attempt: proof window AX readiness did not complete in the non-activating platform tree within 9000ms (proof window title not applied yet (proof window title not applied yet (expected "Poodle GPUI AX proof"); observed titles: "poodle-window-capture"))
+GPUI_AX_WINDOW pid=72421 hold_ms=12000
+GPUI_AX_COMPLETE foreground=proved samples=224 failed_reads=0
+  PASS  GPUI foreground monitor proves no activation
+proof window AX readiness did not complete in the non-activating platform tree within 9000ms (proof window title not applied yet (proof window title not applied yet (expected "Poodle GPUI AX proof"); observed titles: "poodle-window-capture"))
+[error] command `bun packages/gpui/preview/scripts/gpui-ax-audit.ts` failed
+  cause: exit code 1
+  next: read the output above, fix the cause, then run the command again

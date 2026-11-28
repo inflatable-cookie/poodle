@@ -1,0 +1,13 @@
+
+╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ EFFIGY  [checkout] │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── v0.15.0+local.1857ca2 ╯
+
+oxide: incremental setting unknown (external command chooses its Cargo configuration); using an unknown-setting slot
+oxide: waiting for earlier unblocked oxide commands (position 6); Ctrl-C cancels
+oxide: waiting for a build slot (4 of 4 host-wide in use); Ctrl-C cancels
+oxide: seeding skipped: unsupported command
+oxide: waited 68.9s (queue 46.3s, host limit 22.7s); slot ready
+Built a clean GPUI consumer against 92cb0607c00b89f6d336ac465df3a248a6f19b5d via local tag v0.5.0; gpui-unofficial =1.22.0 identity compiled.
+oxide: quick profile, build+execute strategy, slot 6945 cold, 230.9s, new slot, 715255 MiB budget, pool total: see oxide status (apfs-volume-v1, budget-only, removable [oxide-pool]), owned outputs [oxide-outputs]/poodle-8bf6c7e6 through profile member links (debug, release), temp: inherited [scratch]/tmp, waited 68.9s, pool lock 129.1 ms (accounting 128.6 ms, byte walks 0, inventory entries 0, Barge listing count unavailable)
+oxide: flushed the removable volume before releasing slot 6945 in 2302.1 ms
