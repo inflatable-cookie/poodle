@@ -1,7 +1,11 @@
-//! Tap the in-memory GPUI test platform at the same boundaries a desktop
-//! platform receives. The stock TestWindow does not activate AccessKit or
-//! retain scenes. All window layout and painting remain GPUI's.
-use std::cell::RefCell;
+//! In-memory GPUI test platform for conformance observation.
+//!
+//! Captures GPUI's raw AccessKit updates and drawn scenes at the same
+//! `Platform` and `PlatformWindow` boundaries a desktop platform receives,
+//! without depending on GPUI's `bench-support` feature. All window layout and
+//! painting remain GPUI's.
+
+use std::cell::{Cell, RefCell};
 use std::ffi::OsString;
 use std::path::{Path as FsPath, PathBuf};
 use std::rc::Rc;
@@ -26,139 +30,276 @@ pub(super) struct Output {
 }
 
 pub(super) struct PlatformTap {
-    delegate: Rc<dyn Platform>,
+    dispatcher: Arc<ThreadedDispatcher>,
+    background_executor: BackgroundExecutor,
+    foreground_executor: ForegroundExecutor,
+    text_system: Arc<dyn PlatformTextSystem>,
+    clipboard: RefCell<Option<ClipboardItem>>,
+    #[cfg(any(target_os = "linux", target_os = "freebsd"))]
+    primary: RefCell<Option<ClipboardItem>>,
+    #[cfg(target_os = "macos")]
+    find_pasteboard: RefCell<Option<ClipboardItem>>,
     pub output: Rc<RefCell<Output>>,
 }
 
 impl PlatformTap {
     pub fn new() -> Self {
+        let dispatcher = Arc::new(ThreadedDispatcher::new());
+        let background_executor = BackgroundExecutor::new(dispatcher.clone());
+        let foreground_executor = ForegroundExecutor::new(dispatcher.clone());
         Self {
-            delegate: bench_platform(None, Arc::new(NoopTextSystem)),
+            dispatcher,
+            background_executor,
+            foreground_executor,
+            text_system: Arc::new(NoopTextSystem),
+            clipboard: RefCell::default(),
+            #[cfg(any(target_os = "linux", target_os = "freebsd"))]
+            primary: RefCell::default(),
+            #[cfg(target_os = "macos")]
+            find_pasteboard: RefCell::default(),
             output: Rc::default(),
         }
     }
 
     pub fn run_until_idle(&self) {
-        self.foreground_executor()
-            .dispatcher()
-            .as_threaded()
-            .expect("GPUI benchmark platform dispatcher")
-            .run_until_idle();
+        self.dispatcher.run_until_idle();
+    }
+}
+
+struct HeadlessKeyboardLayout;
+
+impl PlatformKeyboardLayout for HeadlessKeyboardLayout {
+    fn id(&self) -> &str {
+        "poodle.headless"
+    }
+
+    fn name(&self) -> &str {
+        "Poodle Headless"
     }
 }
 
 struct WindowTap {
-    delegate: Box<dyn PlatformWindow>,
+    bounds: Bounds<Pixels>,
+    scale_factor: f32,
+    is_fullscreen: Cell<bool>,
+    input_handler: Option<PlatformInputHandler>,
+    sprite_atlas: Arc<dyn PlatformAtlas>,
     output: Rc<RefCell<Output>>,
     a11y: RefCell<Option<A11yCallbacks>>,
 }
 
+impl WindowTap {
+    fn new(bounds: Bounds<Pixels>, output: Rc<RefCell<Output>>) -> Self {
+        Self {
+            bounds,
+            // Preserve GPUI's TestWindow 2x default so physical-pixel AccessKit
+            // bounds and scene coordinates match the stock test platform.
+            scale_factor: 2.0,
+            is_fullscreen: Cell::new(false),
+            input_handler: None,
+            sprite_atlas: Arc::new(HeadlessAtlas::default()),
+            output,
+            a11y: RefCell::default(),
+        }
+    }
+}
+
 impl HasWindowHandle for WindowTap {
     fn window_handle(&self) -> Result<RawWindowHandle<'_>, HandleError> {
-        self.delegate.window_handle()
+        Err(HandleError::NotSupported)
     }
 }
 
 impl HasDisplayHandle for WindowTap {
     fn display_handle(&self) -> Result<DisplayHandle<'_>, HandleError> {
-        self.delegate.display_handle()
+        Err(HandleError::NotSupported)
     }
 }
 
-macro_rules! forward {
-    () => {};
-    ($name:ident(&mut $this:ident $(, $arg:ident: $ty:ty)*) $(-> $out:ty)?; $($rest:tt)*) => {
-        fn $name(&mut $this $(, $arg: $ty)*) $(-> $out)? {
-            $this.delegate.$name($($arg),*)
-        }
-        forward! { $($rest)* }
-    };
-    ($name:ident(&$this:ident $(, $arg:ident: $ty:ty)*) $(-> $out:ty)?; $($rest:tt)*) => {
-        fn $name(&$this $(, $arg: $ty)*) $(-> $out)? {
-            $this.delegate.$name($($arg),*)
-        }
-        forward! { $($rest)* }
-    };
-}
-
 impl Platform for PlatformTap {
+    fn background_executor(&self) -> BackgroundExecutor {
+        self.background_executor.clone()
+    }
+
+    fn foreground_executor(&self) -> ForegroundExecutor {
+        self.foreground_executor.clone()
+    }
+
+    fn text_system(&self) -> Arc<dyn PlatformTextSystem> {
+        self.text_system.clone()
+    }
+
     fn run(&self, launch: Box<dyn FnOnce()>) {
         launch();
     }
 
-    fn open_window(
-        &self,
-        handle: AnyWindowHandle,
-        options: WindowParams,
-    ) -> Result<Box<dyn PlatformWindow>> {
-        let delegate = self.delegate.open_window(handle, options)?;
-        Ok(Box::new(WindowTap {
-            delegate,
-            output: self.output.clone(),
-            a11y: RefCell::default(),
-        }))
+    fn quit(&self) {}
+
+    fn restart(&self, _binary_path: Option<PathBuf>, _arguments: Vec<OsString>) {}
+
+    fn activate(&self, _ignoring_other_apps: bool) {}
+
+    fn hide(&self) {}
+
+    fn hide_other_apps(&self) {}
+
+    fn unhide_other_apps(&self) {}
+
+    fn displays(&self) -> Vec<Rc<dyn PlatformDisplay>> {
+        Vec::new()
     }
 
-    forward! {
-        background_executor(&self) -> BackgroundExecutor;
-        foreground_executor(&self) -> ForegroundExecutor;
-        text_system(&self) -> Arc<dyn PlatformTextSystem>;
-        quit(&self);
-        restart(&self, binary_path: Option<PathBuf>, arguments: Vec<OsString>);
-        activate(&self, ignoring_other_apps: bool);
-        hide(&self);
-        hide_other_apps(&self);
-        unhide_other_apps(&self);
-        displays(&self) -> Vec<Rc<dyn PlatformDisplay>>;
-        primary_display(&self) -> Option<Rc<dyn PlatformDisplay>>;
-        active_window(&self) -> Option<AnyWindowHandle>;
-        window_appearance(&self) -> WindowAppearance;
-        open_url(&self, url: &str);
-        on_open_urls(&self, callback: Box<dyn FnMut(Vec<String>)>);
-        register_url_scheme(&self, url: &str) -> Task<Result<()>>;
-        prompt_for_paths(&self, options: PathPromptOptions) -> oneshot::Receiver<Result<Option<Vec<PathBuf>>>>;
-        prompt_for_new_path(&self, directory: &FsPath, suggested_name: Option<&str>) -> oneshot::Receiver<Result<Option<PathBuf>>>;
-        can_select_mixed_files_and_dirs(&self) -> bool;
-        reveal_path(&self, path: &FsPath);
-        open_with_system(&self, path: &FsPath);
-        on_quit(&self, callback: Box<dyn FnMut() -> bool>);
-        on_reopen(&self, callback: Box<dyn FnMut()>);
-        on_system_sleep(&self, callback: Box<dyn FnMut()>);
-        on_system_wake(&self, callback: Box<dyn FnMut()>);
-        set_menus(&self, menus: Vec<Menu>, keymap: &Keymap);
-        set_dock_menu(&self, menu: Vec<MenuItem>, keymap: &Keymap);
-        on_app_menu_action(&self, callback: Box<dyn FnMut(&dyn Action)>);
-        on_will_open_app_menu(&self, callback: Box<dyn FnMut()>);
-        on_validate_app_menu_command(&self, callback: Box<dyn FnMut(&dyn Action) -> bool>);
-        thermal_state(&self) -> ThermalState;
-        on_thermal_state_change(&self, callback: Box<dyn FnMut()>);
-        prevent_idle_sleep(&self, reason: &str) -> Task<Result<ActivityGuard>>;
-        app_path(&self) -> Result<PathBuf>;
-        path_for_auxiliary_executable(&self, name: &str) -> Result<PathBuf>;
-        set_cursor_style(&self, style: CursorStyle);
-        hide_cursor_until_mouse_moves(&self);
-        is_cursor_visible(&self) -> bool;
-        should_auto_hide_scrollbars(&self) -> bool;
-        read_from_clipboard(&self) -> Option<ClipboardItem>;
-        write_to_clipboard(&self, item: ClipboardItem);
-        write_credentials(&self, url: &str, username: &str, password: &[u8]) -> Task<Result<()>>;
-        read_credentials(&self, url: &str) -> Task<Result<Option<(String, Vec<u8>)>>>;
-        delete_credentials(&self, url: &str) -> Task<Result<()>>;
-        keyboard_layout(&self) -> Box<dyn PlatformKeyboardLayout>;
-        keyboard_mapper(&self) -> Rc<dyn PlatformKeyboardMapper>;
-        on_keyboard_layout_change(&self, callback: Box<dyn FnMut()>);
+    fn primary_display(&self) -> Option<Rc<dyn PlatformDisplay>> {
+        None
     }
-    #[cfg(target_os = "linux")]
-    forward! {
-        read_from_primary(&self) -> Option<ClipboardItem>;
-        write_to_primary(&self, item: ClipboardItem);
+
+    fn active_window(&self) -> Option<AnyWindowHandle> {
+        None
+    }
+
+    fn open_window(
+        &self,
+        _handle: AnyWindowHandle,
+        options: WindowParams,
+    ) -> Result<Box<dyn PlatformWindow>> {
+        Ok(Box::new(WindowTap::new(
+            options.bounds,
+            self.output.clone(),
+        )))
+    }
+
+    fn window_appearance(&self) -> WindowAppearance {
+        WindowAppearance::Light
+    }
+
+    fn open_url(&self, _url: &str) {}
+
+    fn on_open_urls(&self, _callback: Box<dyn FnMut(Vec<String>)>) {}
+
+    fn register_url_scheme(&self, _url: &str) -> Task<Result<()>> {
+        Task::ready(Ok(()))
+    }
+
+    fn prompt_for_paths(
+        &self,
+        _options: PathPromptOptions,
+    ) -> oneshot::Receiver<Result<Option<Vec<PathBuf>>>> {
+        oneshot::channel().1
+    }
+
+    fn prompt_for_new_path(
+        &self,
+        _directory: &FsPath,
+        _suggested_name: Option<&str>,
+    ) -> oneshot::Receiver<Result<Option<PathBuf>>> {
+        oneshot::channel().1
+    }
+
+    fn can_select_mixed_files_and_dirs(&self) -> bool {
+        true
+    }
+
+    fn reveal_path(&self, _path: &FsPath) {}
+
+    fn open_with_system(&self, _path: &FsPath) {}
+
+    fn on_quit(&self, _callback: Box<dyn FnMut() -> bool>) {}
+
+    fn on_reopen(&self, _callback: Box<dyn FnMut()>) {}
+
+    fn on_system_sleep(&self, _callback: Box<dyn FnMut()>) {}
+
+    fn on_system_wake(&self, _callback: Box<dyn FnMut()>) {}
+
+    fn set_menus(&self, _menus: Vec<Menu>, _keymap: &Keymap) {}
+
+    fn set_dock_menu(&self, _menu: Vec<MenuItem>, _keymap: &Keymap) {}
+
+    fn on_app_menu_action(&self, _callback: Box<dyn FnMut(&dyn Action)>) {}
+
+    fn on_will_open_app_menu(&self, _callback: Box<dyn FnMut()>) {}
+
+    fn on_validate_app_menu_command(&self, _callback: Box<dyn FnMut(&dyn Action) -> bool>) {}
+
+    fn thermal_state(&self) -> ThermalState {
+        ThermalState::Nominal
+    }
+
+    fn on_thermal_state_change(&self, _callback: Box<dyn FnMut()>) {}
+
+    fn prevent_idle_sleep(&self, _reason: &str) -> Task<Result<ActivityGuard>> {
+        Task::ready(Ok(ActivityGuard::noop()))
+    }
+
+    fn app_path(&self) -> Result<PathBuf> {
+        anyhow::bail!("headless conformance platform has no application path")
+    }
+
+    fn path_for_auxiliary_executable(&self, name: &str) -> Result<PathBuf> {
+        anyhow::bail!("headless conformance platform has no auxiliary executable {name:?}")
+    }
+
+    fn set_cursor_style(&self, _style: CursorStyle) {}
+
+    fn hide_cursor_until_mouse_moves(&self) {}
+
+    fn is_cursor_visible(&self) -> bool {
+        true
+    }
+
+    fn should_auto_hide_scrollbars(&self) -> bool {
+        false
+    }
+
+    fn read_from_clipboard(&self) -> Option<ClipboardItem> {
+        self.clipboard.borrow().clone()
+    }
+
+    fn write_to_clipboard(&self, item: ClipboardItem) {
+        *self.clipboard.borrow_mut() = Some(item);
+    }
+
+    #[cfg(any(target_os = "linux", target_os = "freebsd"))]
+    fn read_from_primary(&self) -> Option<ClipboardItem> {
+        self.primary.borrow().clone()
+    }
+
+    #[cfg(any(target_os = "linux", target_os = "freebsd"))]
+    fn write_to_primary(&self, item: ClipboardItem) {
+        *self.primary.borrow_mut() = Some(item);
     }
 
     #[cfg(target_os = "macos")]
-    forward! {
-        read_from_find_pasteboard(&self) -> Option<ClipboardItem>;
-        write_to_find_pasteboard(&self, item: ClipboardItem);
+    fn read_from_find_pasteboard(&self) -> Option<ClipboardItem> {
+        self.find_pasteboard.borrow().clone()
     }
+
+    #[cfg(target_os = "macos")]
+    fn write_to_find_pasteboard(&self, item: ClipboardItem) {
+        *self.find_pasteboard.borrow_mut() = Some(item);
+    }
+
+    fn write_credentials(&self, _url: &str, _username: &str, _password: &[u8]) -> Task<Result<()>> {
+        Task::ready(Ok(()))
+    }
+
+    fn read_credentials(&self, _url: &str) -> Task<Result<Option<(String, Vec<u8>)>>> {
+        Task::ready(Ok(None))
+    }
+
+    fn delete_credentials(&self, _url: &str) -> Task<Result<()>> {
+        Task::ready(Ok(()))
+    }
+
+    fn keyboard_layout(&self) -> Box<dyn PlatformKeyboardLayout> {
+        Box::new(HeadlessKeyboardLayout)
+    }
+
+    fn keyboard_mapper(&self) -> Rc<dyn PlatformKeyboardMapper> {
+        Rc::new(DummyKeyboardMapper)
+    }
+
+    fn on_keyboard_layout_change(&self, _callback: Box<dyn FnMut()>) {}
 }
 
 impl PlatformWindow for WindowTap {
@@ -192,45 +333,134 @@ impl PlatformWindow for WindowTap {
             .collect();
     }
 
-    forward! {
-        bounds(&self) -> Bounds<Pixels>;
-        is_maximized(&self) -> bool;
-        window_bounds(&self) -> WindowBounds;
-        content_size(&self) -> Size<Pixels>;
-        resize(&mut self, size: Size<Pixels>);
-        scale_factor(&self) -> f32;
-        appearance(&self) -> WindowAppearance;
-        display(&self) -> Option<Rc<dyn PlatformDisplay>>;
-        mouse_position(&self) -> Point<Pixels>;
-        modifiers(&self) -> Modifiers;
-        capslock(&self) -> Capslock;
-        set_input_handler(&mut self, handler: PlatformInputHandler);
-        take_input_handler(&mut self) -> Option<PlatformInputHandler>;
-        prompt(&self, level: PromptLevel, message: &str, detail: Option<&str>, answers: &[PromptButton]) -> Option<oneshot::Receiver<usize>>;
-        activate(&self);
-        is_active(&self) -> bool;
-        visibility(&self) -> WindowVisibility;
-        is_hovered(&self) -> bool;
-        background_appearance(&self) -> WindowBackgroundAppearance;
-        set_title(&mut self, title: &str);
-        set_background_appearance(&self, appearance: WindowBackgroundAppearance);
-        minimize(&self);
-        zoom(&self);
-        toggle_fullscreen(&self);
-        is_fullscreen(&self) -> bool;
-        on_input(&self, callback: Box<dyn FnMut(PlatformInput) -> DispatchEventResult>);
-        on_active_status_change(&self, callback: Box<dyn FnMut(bool)>);
-        on_visibility_change(&self, callback: Box<dyn FnMut(WindowVisibility)>);
-        on_hover_status_change(&self, callback: Box<dyn FnMut(bool)>);
-        on_resize(&self, callback: Box<dyn FnMut(Size<Pixels>, f32)>);
-        on_moved(&self, callback: Box<dyn FnMut()>);
-        on_should_close(&self, callback: Box<dyn FnMut() -> bool>);
-        on_hit_test_window_control(&self, callback: Box<dyn FnMut() -> Option<WindowControlArea>>);
-        on_close(&self, callback: Box<dyn FnOnce()>);
-        on_appearance_changed(&self, callback: Box<dyn FnMut()>);
-        sprite_atlas(&self) -> Arc<dyn PlatformAtlas>;
-        is_subpixel_rendering_supported(&self) -> bool;
-        gpu_specs(&self) -> Option<GpuSpecs>;
-        update_ime_position(&self, bounds: Bounds<Pixels>);
+    fn bounds(&self) -> Bounds<Pixels> {
+        self.bounds
     }
+
+    fn is_maximized(&self) -> bool {
+        false
+    }
+
+    fn window_bounds(&self) -> WindowBounds {
+        WindowBounds::Windowed(self.bounds)
+    }
+
+    fn content_size(&self) -> Size<Pixels> {
+        self.bounds.size
+    }
+
+    fn resize(&mut self, size: Size<Pixels>) {
+        self.bounds.size = size;
+    }
+
+    fn scale_factor(&self) -> f32 {
+        self.scale_factor
+    }
+
+    fn appearance(&self) -> WindowAppearance {
+        WindowAppearance::Light
+    }
+
+    fn display(&self) -> Option<Rc<dyn PlatformDisplay>> {
+        None
+    }
+
+    fn mouse_position(&self) -> Point<Pixels> {
+        Point::default()
+    }
+
+    fn modifiers(&self) -> Modifiers {
+        Modifiers::default()
+    }
+
+    fn capslock(&self) -> Capslock {
+        Capslock::default()
+    }
+
+    fn set_input_handler(&mut self, handler: PlatformInputHandler) {
+        self.input_handler = Some(handler);
+    }
+
+    fn take_input_handler(&mut self) -> Option<PlatformInputHandler> {
+        self.input_handler.take()
+    }
+
+    fn prompt(
+        &self,
+        _level: PromptLevel,
+        _message: &str,
+        _detail: Option<&str>,
+        _answers: &[PromptButton],
+    ) -> Option<oneshot::Receiver<usize>> {
+        None
+    }
+
+    fn activate(&self) {}
+
+    fn is_active(&self) -> bool {
+        false
+    }
+
+    fn visibility(&self) -> WindowVisibility {
+        WindowVisibility::Visible
+    }
+
+    fn is_hovered(&self) -> bool {
+        false
+    }
+
+    fn background_appearance(&self) -> WindowBackgroundAppearance {
+        WindowBackgroundAppearance::Opaque
+    }
+
+    fn set_title(&mut self, _title: &str) {}
+
+    fn set_background_appearance(&self, _appearance: WindowBackgroundAppearance) {}
+
+    fn minimize(&self) {}
+
+    fn zoom(&self) {}
+
+    fn toggle_fullscreen(&self) {
+        self.is_fullscreen.set(!self.is_fullscreen.get());
+    }
+
+    fn is_fullscreen(&self) -> bool {
+        self.is_fullscreen.get()
+    }
+
+    fn on_input(&self, _callback: Box<dyn FnMut(PlatformInput) -> DispatchEventResult>) {}
+
+    fn on_active_status_change(&self, _callback: Box<dyn FnMut(bool)>) {}
+
+    fn on_visibility_change(&self, _callback: Box<dyn FnMut(WindowVisibility)>) {}
+
+    fn on_hover_status_change(&self, _callback: Box<dyn FnMut(bool)>) {}
+
+    fn on_resize(&self, _callback: Box<dyn FnMut(Size<Pixels>, f32)>) {}
+
+    fn on_moved(&self, _callback: Box<dyn FnMut()>) {}
+
+    fn on_should_close(&self, _callback: Box<dyn FnMut() -> bool>) {}
+
+    fn on_hit_test_window_control(&self, _callback: Box<dyn FnMut() -> Option<WindowControlArea>>) {
+    }
+
+    fn on_close(&self, _callback: Box<dyn FnOnce()>) {}
+
+    fn on_appearance_changed(&self, _callback: Box<dyn FnMut()>) {}
+
+    fn sprite_atlas(&self) -> Arc<dyn PlatformAtlas> {
+        self.sprite_atlas.clone()
+    }
+
+    fn is_subpixel_rendering_supported(&self) -> bool {
+        false
+    }
+
+    fn gpu_specs(&self) -> Option<GpuSpecs> {
+        None
+    }
+
+    fn update_ime_position(&self, _bounds: Bounds<Pixels>) {}
 }
