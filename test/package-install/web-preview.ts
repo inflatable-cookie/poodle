@@ -2109,76 +2109,6 @@ async function writePlantFiles(
   }
 }
 
-/** Positive production-path admission of the complete closed candidate. */
-async function closedCandidateOrdinaryAdmissionReceipt(): Promise<Record<string, unknown>> {
-  const plantRoot = mkdtempSync(join(runRoot, "closed-candidate-admitted-"));
-  try {
-    await run(["git", "init", "--quiet", plantRoot], repoRoot);
-    await run(
-      ["git", "-C", plantRoot, "config", "user.email", "poodle-certification@example.invalid"],
-      repoRoot,
-    );
-    await run(
-      ["git", "-C", plantRoot, "config", "user.name", "Poodle Certification"],
-      repoRoot,
-    );
-    await writePlantFiles(plantRoot, closedCandidateFiles("0.3.0"));
-    await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
-    await run(["git", "-C", plantRoot, "commit", "--quiet", "-m", "candidate base"], repoRoot);
-    const plantBaseCommit = requireExactCommit(
-      (await runCapture(["git", "-C", plantRoot, "rev-parse", "HEAD"], repoRoot)).trim(),
-      "closed candidate admission base commit",
-    );
-    const candidateFiles = closedCandidateFiles("0.4.0");
-    candidateFiles["docs/release-notes/0.4.0.md"] = "# Poodle 0.4.0\n";
-    await writePlantFiles(plantRoot, candidateFiles);
-    await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
-    await run(
-      ["git", "-C", plantRoot, "commit", "--quiet", "-m", "frozen 0.4.0 release inputs"],
-      repoRoot,
-    );
-    const frozenCommit = requireExactCommit(
-      (await runCapture(["git", "-C", plantRoot, "rev-parse", "HEAD"], repoRoot)).trim(),
-      "closed candidate admission frozen commit",
-    );
-    await writePlantFiles(plantRoot, {
-      [CLOSED_CANDIDATE_EVIDENCE_PATH]: `${JSON.stringify(
-        {
-          schema: "poodle.g16.062-nucleus-parity-manifest.v1",
-          resolution: { source_commit: frozenCommit },
-        },
-        null,
-        2,
-      )}\n`,
-    });
-    await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
-    await run(
-      ["git", "-C", plantRoot, "commit", "--quiet", "-m", "candidate evidence"],
-      repoRoot,
-    );
-    const plantHeadCommit = requireExactCommit(
-      (await runCapture(["git", "-C", plantRoot, "rev-parse", "HEAD"], repoRoot)).trim(),
-      "closed candidate admission head commit",
-    );
-    const proof = await assertInstalledScope(
-      plantRoot,
-      plantBaseCommit,
-      plantHeadCommit,
-      "ordinary",
-    );
-    if (emitsCertificationReceipt(proof.mode)) {
-      throw new Error("ordinary closed-candidate admission emitted a certification receipt");
-    }
-    return {
-      oracle: "ordinary scope admits the complete closed 0.4.0 candidate",
-      failed: false,
-      receipt: `mode ${proof.mode}; ${proof.changedPaths.length} closed candidate paths; no certification receipt`,
-    };
-  } finally {
-    rmSync(plantRoot, { recursive: true, force: true });
-  }
-}
-
 const receipt = certificationRun
   ? {
       schemaVersion: 1,
@@ -2367,11 +2297,6 @@ const falsificationReceipts = [
     "candidate scope rejects the evidence head as the candidate source",
     candidateEvidenceHeadFalsificationPlant,
   ),
-  await closedCandidateOrdinaryAdmissionReceipt(),
-  await expectedFailure(
-    "ordinary scope rejects a partial 0.4.0 candidate version bump",
-    () => closedCandidateScopePlant("partial-version-bump", "ordinary"),
-  ),
   await expectedFailure(
     "closed 0.4.0 candidate scope rejects a workflow transport mutation",
     () => scopeFalsificationPlant(G18_006_CANDIDATE_SCOPE_MODE, ".github/workflows/release.yml"),
@@ -2412,10 +2337,6 @@ const falsificationReceipts = [
     "closed 0.4.0 candidate scope rejects a stale runtime requirement shadowed by a dev-dependency",
     () =>
       closedCandidateScopePlant("shadowed-cargo-requirement", G18_006_CANDIDATE_SCOPE_MODE),
-  ),
-  await expectedFailure(
-    "ordinary scope rejects a non-lockstep 0.4.0 candidate",
-    () => closedCandidateScopePlant("stale-js-dependency", "ordinary"),
   ),
 ];
 

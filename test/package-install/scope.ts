@@ -900,8 +900,7 @@ export function changedJsonLeafPaths(
  * added, or deleted manifests fail closed as version surfaces.
  *
  * Version and name keep the established `version` label, and the publication
- * transport fields keep `registry`, because the precursor-alignment admission
- * filters the root `version` label by path.
+ * transport fields keep `registry`.
  */
 function ordinaryRootManifestForbiddenLabels(
   before: string | null,
@@ -1031,309 +1030,8 @@ async function ordinaryCargoForbiddenSurfaces(
   return forbidden;
 }
 
-const PRECURSOR_ROOT_ALIGNMENT_SOURCE = "0.1.0";
-const PRECURSOR_ROOT_ALIGNMENT_TARGET = "0.3.0";
-
-/**
- * One-time operator-ordered g18.031 precursor: the private root repository
- * manifest moves 0.1.0 -> 0.3.0 so its version is truthful beside the accepted
- * release. Ordinary CI admits exactly that alignment - private preserved,
- * every other leaf unchanged - and nothing broader. The later 0.3.0 -> 0.4.0
- * transition stays the closed g18.006 candidate rule.
- */
-async function ordinaryAdmitsPrecursorRootAlignment(
-  checkoutRoot: string,
-  requiredBaseCommit: string,
-  sourceCommit: string,
-  changedPaths: string[],
-): Promise<boolean> {
-  if (!changedPaths.includes("package.json")) return false;
-  const beforeText = await gitShowFile(checkoutRoot, requiredBaseCommit, "package.json");
-  const afterText = await gitShowFile(checkoutRoot, sourceCommit, "package.json");
-  if (beforeText === null || afterText === null) return false;
-  let before: unknown;
-  let after: unknown;
-  try {
-    before = JSON.parse(beforeText);
-    after = JSON.parse(afterText);
-  } catch {
-    return false;
-  }
-  if (!isJsonRecord(before) || !isJsonRecord(after)) return false;
-  if (before.version !== PRECURSOR_ROOT_ALIGNMENT_SOURCE) return false;
-  if (after.version !== PRECURSOR_ROOT_ALIGNMENT_TARGET) return false;
-  if (before.private !== true || after.private !== true) return false;
-  const changes = changedJsonLeafPaths(before, after);
-  return changes.length === 1 && changes[0] === "version";
-}
-
-const NATIVE_CARGO_ALIGNMENT_SOURCE = "0.4.0";
-const NATIVE_CARGO_ALIGNMENT_TARGET = "0.4.11";
-
-/** The one-time Rust version alignment onto the existing 0.4.11 web train. */
-async function ordinaryAdmitsNativeVersionAlignment(
-  checkoutRoot: string,
-  requiredBaseCommit: string,
-  sourceCommit: string,
-  changedPaths: string[],
-): Promise<boolean> {
-  const nativePaths = sortedUnique([
-    ...LOCKSTEP_CARGO_MANIFEST_PATHS,
-    ...LOCKSTEP_CARGO_LOCK_PATHS,
-  ]);
-  const changedCargoPaths = sortedUnique(changedPaths.filter(isCargoManifestOrLockPath));
-  if (
-    changedCargoPaths.length !== nativePaths.length ||
-    changedCargoPaths.some((path, index) => path !== nativePaths[index])
-  ) {
-    return false;
-  }
-  const baseRoot = await gitShowFile(checkoutRoot, requiredBaseCommit, ROOT_MANIFEST_PATH);
-  const sourceRoot = await gitShowFile(checkoutRoot, sourceCommit, ROOT_MANIFEST_PATH);
-  if (baseRoot === null || sourceRoot === null) return false;
-  try {
-    const baseVersion = (JSON.parse(baseRoot) as Record<string, unknown>).version;
-    const sourceVersion = (JSON.parse(sourceRoot) as Record<string, unknown>).version;
-    if (
-      baseVersion !== NATIVE_CARGO_ALIGNMENT_TARGET ||
-      sourceVersion !== NATIVE_CARGO_ALIGNMENT_TARGET
-    ) {
-      return false;
-    }
-    const policy = {
-      sourceVersion: NATIVE_CARGO_ALIGNMENT_SOURCE,
-      targetVersion: NATIVE_CARGO_ALIGNMENT_TARGET,
-      cargoManifestPaths: LOCKSTEP_CARGO_MANIFEST_PATHS,
-    };
-    await assertCandidateCargoManifestHonesty(
-      checkoutRoot,
-      requiredBaseCommit,
-      sourceCommit,
-      changedPaths,
-      policy,
-    );
-    await assertCandidateCargoLockHonesty(
-      checkoutRoot,
-      requiredBaseCommit,
-      sourceCommit,
-      changedPaths,
-      NATIVE_CARGO_ALIGNMENT_SOURCE,
-      NATIVE_CARGO_ALIGNMENT_TARGET,
-    );
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * g18.009: the hosted release wrapper is workflow-only.
- *
- * The release workflow is a thin launcher, so a range that repairs it carries
- * the `workflow` certification label even though it cannot change a package
- * version, archive byte, or published surface. Admit exactly that bounded
- * shape - the release workflow, its release-automation guard, and
- * documentation - and only while the workflow keeps the narrow npm/web
- * proof. Any aggregate, native, or GPUI selector stays rejected, so the
- * ordinary branch dry run and tag dry run can certify the wrapper commit
- * without weakening the guard that the release workflow exists to enforce.
- */
-export const RELEASE_WRAPPER_PATHS = [
-  ".github/workflows/release.yml",
-  "scripts/check-release-automation.ts",
-  "test/package-install/scope.ts",
-  "test/package-install/scope.test.ts",
-] as const;
-/** The classifier that owns this admission; a range must leave it intact. */
-const RELEASE_WRAPPER_GUARD_PATH = "test/package-install/scope.ts";
-const RELEASE_WRAPPER_GUARD_MARKERS = [
-  "RELEASE_WRAPPER_REQUIRED_RUNS",
-  "RELEASE_WRAPPER_FORBIDDEN_SELECTORS",
-  '\"effigy test:web-pack-install\"',
-  '\"effigy release \"',
-] as const;
-const RELEASE_WRAPPER_CHECKER_PATH = "scripts/check-release-automation.ts";
-const RELEASE_WRAPPER_CHECKER_MARKERS = [
-  "collectReleaseWrapperFailures",
-  '\"effigy test:web-pack-install\"',
-] as const;
-const RELEASE_WRAPPER_REQUIRED_RUNS = [
-  "effigy svelte:package",
-  "effigy check:release-automation",
-  "effigy test:web-pack-install",
-] as const;
-const RELEASE_WRAPPER_FORBIDDEN_SELECTORS = [
-  "effigy release ",
-  "effigy qa",
-  "effigy ci",
-  "effigy check:gpui",
-  "effigy gpui:test",
-  "effigy regressions:native",
-  "effigy probe:gpui-specimens",
-  "effigy test:contracts",
-  "effigy test:core",
-  "effigy test:components",
-  "effigy audit:security",
-  "effigy audit:licenses",
-] as const;
-
-/** Every `run:` command a workflow declares, including block bodies. */
-function workflowRunCommands(source: string): string[] {
-  const commands: string[] = [];
-  const lines = source.split("\n");
-  for (let index = 0; index < lines.length; index += 1) {
-    const line = lines[index];
-    if (line.trimStart().startsWith("#")) continue;
-    const declared = /^(\s*)(?:-\s*)?run:\s*(.*)$/.exec(line);
-    if (!declared) continue;
-    const indent = declared[1].length;
-    const value = declared[2].trim();
-    if (value === "" || value.startsWith("|") || value.startsWith(">")) {
-      for (let body = index + 1; body < lines.length; body += 1) {
-        const candidate = lines[body];
-        if (candidate.trim() === "") continue;
-        const bodyIndent = candidate.length - candidate.trimStart().length;
-        if (bodyIndent <= indent) break;
-        if (candidate.trimStart().startsWith("#")) continue;
-        commands.push(candidate.trim());
-      }
-      continue;
-    }
-    commands.push(value.replace(/^['"]/, "").replace(/['"]$/, ""));
-  }
-  return commands;
-}
-
-async function ordinaryAdmitsReleaseWrapperRepair(
-  checkoutRoot: string,
-  sourceCommit: string,
-  changedPaths: string[],
-): Promise<boolean> {
-  const workflowPath = RELEASE_WRAPPER_PATHS[0];
-  if (!changedPaths.includes(workflowPath)) return false;
-  const admitted = (path: string): boolean =>
-    (RELEASE_WRAPPER_PATHS as readonly string[]).includes(path) ||
-    (path.startsWith("docs/") && !RELEASE_NOTE_PATH.test(path));
-  if (!changedPaths.every(admitted)) return false;
-  const workflow = await gitShowFile(checkoutRoot, sourceCommit, workflowPath);
-  if (workflow === null) return false;
-  const commands = workflowRunCommands(workflow);
-  if (!RELEASE_WRAPPER_REQUIRED_RUNS.every((command) => commands.includes(command))) {
-    return false;
-  }
-  const invoked = commands.join("\n");
-  if (
-    RELEASE_WRAPPER_FORBIDDEN_SELECTORS.some((selector) => invoked.includes(selector))
-  ) {
-    return false;
-  }
-  const guard = await gitShowFile(checkoutRoot, sourceCommit, RELEASE_WRAPPER_GUARD_PATH);
-  if (
-    guard === null ||
-    !RELEASE_WRAPPER_GUARD_MARKERS.every((marker) => guard.includes(marker))
-  ) {
-    return false;
-  }
-  const checker = await gitShowFile(checkoutRoot, sourceCommit, RELEASE_WRAPPER_CHECKER_PATH);
-  return (
-    checker !== null &&
-    RELEASE_WRAPPER_CHECKER_MARKERS.every((marker) => checker.includes(marker))
-  );
-}
-
 export function sortedUnique(values: Iterable<string>): string[] {
   return [...new Set(values)].sort();
-}
-
-/**
- * g18.032: a bounded release-automation program. Spec 071 replaces the narrow
- * `0.4.0` wrapper repair with a structural law: a range that touches only the
- * release-automation surfaces is admitted while the workflow keeps the one
- * npm certificate entry, a Linux runner, the ten-minute ceiling and the
- * run-ID identity protocol, and the checker keeps the spec 071 invariants.
- * Any aggregate, native, Rust or GPUI selector fails it closed.
- */
-export const RELEASE_AUTOMATION_PATHS = [
-  ".github/workflows/release.yml",
-  "effigy.toml",
-  "quality/validation-bounds.json",
-  "packages/release-manifest.json",
-  "scripts/check-release-automation.ts",
-  "scripts/npm-publication.ts",
-  "scripts/verify-npm-candidate.ts",
-  "scripts/verify-npm-candidate.test.ts",
-  "scripts/validation/run-board.ts",
-  "scripts/validation/run-board.test.ts",
-  "tasks/effigy.tasks.toml",
-  "test/package-install/README.md",
-  "test/package-install/scope.ts",
-  "test/package-install/scope.test.ts",
-  "test/package-install/web-admission.ts",
-  "test/package-install/web-candidate.ts",
-  "test/package-install/web-candidate.test.ts",
-  "test/package-install/web-preview.ts",
-] as const;
-const RELEASE_AUTOMATION_WORKFLOW_REQUIRED = [
-  "effigy release:web-certificate",
-  "inflatable-cookie/setup-effigy@",
-  'version: "0.11.0"',
-  "runs-on: ubuntu-latest",
-  "timeout-minutes: 10",
-  "id-token: write",
-  "gh run download",
-  "scripts/verify-npm-candidate.ts",
-  "--access public",
-] as const;
-const RELEASE_AUTOMATION_WORKFLOW_FORBIDDEN = [
-  "effigy qa",
-  "effigy ci",
-  "gpui",
-  "cargo",
-  "macos-",
-  "rust-toolchain",
-] as const;
-const RELEASE_AUTOMATION_CHECKER_MARKERS = [
-  "collectReleaseWorkflowFailures",
-  "collectGenericCandidateFailures",
-  "readNpmPublicationAuthority",
-  "effigy release:web-certificate",
-] as const;
-
-async function ordinaryAdmitsReleaseAutomationProgram(
-  checkoutRoot: string,
-  sourceCommit: string,
-  changedPaths: string[],
-): Promise<boolean> {
-  if (!changedPaths.includes(".github/workflows/release.yml")) return false;
-  const admitted = (path: string): boolean =>
-    (RELEASE_AUTOMATION_PATHS as readonly string[]).includes(path) ||
-    (path.startsWith("docs/") && !RELEASE_NOTE_PATH.test(path));
-  if (!changedPaths.every(admitted)) return false;
-  const workflow = await gitShowFile(
-    checkoutRoot,
-    sourceCommit,
-    ".github/workflows/release.yml",
-  );
-  if (workflow === null) return false;
-  if (!RELEASE_AUTOMATION_WORKFLOW_REQUIRED.every((marker) => workflow.includes(marker))) {
-    return false;
-  }
-  const active = workflow
-    .split("\n")
-    .filter((line) => !line.trimStart().startsWith("#"))
-    .join("\n");
-  if (RELEASE_AUTOMATION_WORKFLOW_FORBIDDEN.some((marker) => active.includes(marker))) {
-    return false;
-  }
-  const checker = await gitShowFile(
-    checkoutRoot,
-    sourceCommit,
-    "scripts/check-release-automation.ts",
-  );
-  return (
-    checker !== null &&
-    RELEASE_AUTOMATION_CHECKER_MARKERS.every((marker) => checker.includes(marker))
-  );
 }
 
 export function requireExactCommit(value: string, label: string): string {
@@ -2012,11 +1710,6 @@ async function assertFrozenCandidateRange(
 }
 
 /**
- * The single closed candidate validator. It is used both by the explicit
- * `g18.006-candidate` certification mode and by ordinary CI recognition, so a
- * PR lane and a local certification run cannot disagree about admission.
- */
-/**
  * `before` must survive intact and in order inside `after`: no closed-admission
  * law may be rewritten or deleted by the candidate that it admits.
  */
@@ -2188,31 +1881,6 @@ async function assertClosedCandidateRange(
   );
 }
 
-/**
- * Ordinary CI carries no candidate environment variable. It may admit a
- * release-bearing range only when the complete base-to-head diff satisfies the
- * closed g18.006 policy; any failure stays an ordinary rejection.
- */
-async function ordinaryAdmitsClosedCandidate(
-  checkoutRoot: string,
-  requiredBaseCommit: string,
-  sourceCommit: string,
-  changedPaths: string[],
-): Promise<boolean> {
-  try {
-    await assertClosedCandidateRange(
-      checkoutRoot,
-      requiredBaseCommit,
-      sourceCommit,
-      changedPaths,
-      candidatePolicy(G18_006_CANDIDATE_SCOPE_MODE),
-    );
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 export async function assertInstalledScope(
   checkoutRoot: string,
   requiredBaseCommit: string,
@@ -2263,20 +1931,6 @@ export async function assertInstalledScope(
         changedPaths,
       )),
     );
-    if (
-      await ordinaryAdmitsNativeVersionAlignment(
-        checkoutRoot,
-        requiredBaseCommit,
-        sourceCommit,
-        changedPaths,
-      )
-    ) {
-      forbidden = forbidden.filter(
-        ({ path, surface }) =>
-          surface !== "version" ||
-          !LOCKSTEP_CARGO_MANIFEST_PATHS.some((manifestPath) => manifestPath === path),
-      );
-    }
     forbidden.push(
       ...(await ordinaryJsForbiddenSurfaces(
         checkoutRoot,
@@ -2285,60 +1939,10 @@ export async function assertInstalledScope(
         changedPaths,
       )),
     );
-    // The one-time g18.031 precursor aligns the private root manifest from
-    // 0.1.0 to the accepted 0.3.0. That exact version-only alignment is
-    // admitted; any broader root manifest change, or any other forbidden
-    // surface beside it, still fails closed. The 0.3.0 -> 0.4.0 transition
-    // remains the closed g18.006 candidate rule.
-    if (
-      await ordinaryAdmitsPrecursorRootAlignment(
-        checkoutRoot,
-        requiredBaseCommit,
-        sourceCommit,
-        changedPaths,
-      )
-    ) {
-      forbidden = forbidden.filter(
-        ({ path, surface }) => !(path === "package.json" && surface === "version"),
-      );
-    }
-    // Ordinary CI has no candidate environment variable. A release-bearing
-    // range (a forbidden version/release surface or any staged release note)
-    // is admitted only when the complete diff satisfies the closed g18.006
-    // candidate policy; anything else stays an ordinary rejection.
-    const releaseNoteChanges = changedPaths.filter((path) => RELEASE_NOTE_PATH.test(path));
-    if (
-      (forbidden.length > 0 || releaseNoteChanges.length > 0) &&
-      (await ordinaryAdmitsClosedCandidate(
-        checkoutRoot,
-        requiredBaseCommit,
-        sourceCommit,
-        changedPaths,
-      ))
-    ) {
-      forbidden = [];
-    } else if (
-      forbidden.length > 0 &&
-      (await ordinaryAdmitsReleaseAutomationProgram(
-        checkoutRoot,
-        sourceCommit,
-        changedPaths,
-      ))
-    ) {
-      forbidden = [];
-    } else if (
-      forbidden.length > 0 &&
-      (await ordinaryAdmitsReleaseWrapperRepair(
-        checkoutRoot,
-        sourceCommit,
-        changedPaths,
-      ))
-    ) {
-      forbidden = [];
-    } else if (forbidden.length === 0 && releaseNoteChanges.length > 0) {
-      throw new Error(
-        `certification scope rejected a partial release-note change without the closed ${G18_006_CANDIDATE_SCOPE_MODE} candidate: ${releaseNoteChanges.join(", ")}`,
-      );
+    for (const path of changedPaths) {
+      if (RELEASE_NOTE_PATH.test(path)) {
+        forbidden.push({ path, surface: "release" });
+      }
     }
   }
   if (forbidden.length > 0) {

@@ -25,7 +25,10 @@ build/pack. Ordinary Cargo classification is content-aware: `[package]` and
 registry, source, `[patch]`, and `[replace]` content. Ordinary JS
 package-manifest classification is content-aware the same way. Ordinary
 changelog maintenance is the single content-aware release-path exception.
-Ordinary runs emit no certification receipt or receipt hash.
+Ordinary runs emit no certification receipt or receipt hash, and never promote
+into historical candidate policies or workflow-repair exceptions (non-`setup-bun`
+workflow edits, including `release.yml` repairs, fail ordinary scope and merge
+by operator override).
 
 ## npm web-candidate admission (generic)
 
