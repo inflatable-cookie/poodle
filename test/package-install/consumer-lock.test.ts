@@ -130,7 +130,9 @@ const REPO_LOCK = `{
     "@vitest/mocker": ["@vitest/mocker@5.0.2", "", {}, "sha512-mocker=="],
     "vite": ["vite@8.3.1", "", {}, "sha512-vite=="],
     "svelte/magic-string": ["magic-string@0.30.21", "", {}, "sha512-svelte-magic=="],
-    "svelte/aria-query": ["aria-query@5.3.1", "", {}, "sha512-svelte-aria=="]
+    "svelte/aria-query": ["aria-query@5.3.1", "", {}, "sha512-svelte-aria=="],
+    "vitest/magic-string": ["magic-string@1.4.5", "", {}, "sha512-vitest-magic=="],
+    "@vitest/mocker/magic-string": ["magic-string@1.4.5", "", {}, "sha512-mocker-magic=="]
   }
 }
 `;
@@ -164,10 +166,12 @@ describe("packed consumer lock from bun.lock", () => {
         { vitest: "4.1.10", vite: "7.3.1" },
       ),
     });
-    expect(overrides["std-env"]).toBe("4.2.0");
-    expect(overrides["magic-string"]).toBe("1.4.2");
+    expect(overrides["std-env"]).toBe("4.3.0");
+    expect(overrides["magic-string"]).toBe("0.30.21");
     expect(overrides["aria-query"]).toBe("5.3.0");
-    expect(overrides.svelte).toEqual({ "magic-string": "0.30.21", "aria-query": "5.3.1" });
+    expect(overrides.svelte).toEqual({ "aria-query": "5.3.1" });
+    expect(overrides.vitest).toBeUndefined();
+    expect(overrides["@vitest/mocker"]).toBeUndefined();
   });
 });
 

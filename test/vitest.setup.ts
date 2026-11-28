@@ -24,15 +24,14 @@ globalThis.cancelAnimationFrame = ((id: number) => {
   }
 }) as typeof cancelAnimationFrame;
 
-// happy-dom lacks the Web Animations API, which disclosure motion
-// (Collapsible/Accordion panels) and Svelte 5 transitions (Drawer) call
-// through `element.animate`. One shared stub here — component suites must
-// not carry their own copies. The fake reports a finished animation and
+// Give disclosure motion (Collapsible/Accordion panels) and Svelte transitions
+// (Drawer) a deterministic `element.animate` clock. Component suites share
+// this stub. The fake reports a finished animation and
 // fires `onfinish` on the next microtask, after the caller has attached it,
 // which drives intros/outros to completion; `finished` resolves so the
 // motion runtime's completion path runs too. Guarded for the node project,
 // which shares this setup file but has no Element.
-if (typeof Element !== "undefined" && !("animate" in Element.prototype)) {
+if (typeof Element !== "undefined") {
   (Element.prototype as unknown as { animate: () => unknown }).animate = () => {
     const animation = {
       onfinish: null as (() => void) | null,

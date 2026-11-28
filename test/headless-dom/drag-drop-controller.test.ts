@@ -45,6 +45,20 @@ function layout<T extends Element>(
   return element;
 }
 
+// happy-dom 21 drops this prefixed property. Preserve its independent inline
+// value in these controller tests; browser probes exercise drag selection.
+function supportWebkitUserSelect(style: CSSStyleDeclaration): void {
+  const property = (name: string) => name === "-webkit-user-select" ? "--test-webkit-user-select" : name;
+  const set = style.setProperty.bind(style);
+  const get = style.getPropertyValue.bind(style);
+  const priority = style.getPropertyPriority.bind(style);
+  const remove = style.removeProperty.bind(style);
+  style.setProperty = (name, value, importance) => set(property(name), value, importance);
+  style.getPropertyValue = (name) => get(property(name));
+  style.getPropertyPriority = (name) => priority(property(name));
+  style.removeProperty = (name) => remove(property(name));
+}
+
 function pointer(
   type: "pointerdown" | "pointermove" | "pointerup" | "pointercancel" | "lostpointercapture",
   init: PointerEventInit,
@@ -1668,6 +1682,7 @@ describe("createDragDropController", () => {
   });
 
   it("suppresses root user-select on accepted pointerdown before activation", () => {
+    supportWebkitUserSelect(root.style);
     const controller = createDragDropController();
     controller.connect(root);
     controller.registerSource(sourceEl, sourceReg());
@@ -1773,6 +1788,7 @@ describe("createDragDropController", () => {
   });
 
   it("restores authored user-select and -webkit-user-select including !important", () => {
+    supportWebkitUserSelect(root.style);
     root.style.setProperty("user-select", "text", "important");
     root.style.setProperty("-webkit-user-select", "all", "important");
 
