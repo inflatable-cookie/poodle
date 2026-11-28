@@ -62,7 +62,7 @@ if (!coreManifest.files?.includes("THIRD_PARTY_NOTICES.md")) {
 const requiredNotices = [
   {
     path: "packages/core/THIRD_PARTY_NOTICES.md",
-    markers: ["Lucide Icons 1.48.0", "ISC License", "Cole Bemis"],
+    markers: ["Lucide Icons 1.57.0", "ISC License", "Cole Bemis"],
   },
   {
     path: "packages/render/assets/icons/LICENSE.txt",
@@ -74,7 +74,7 @@ const requiredNotices = [
   },
   {
     path: "THIRD_PARTY_NOTICES.md",
-    markers: ["Lucide 1.48.0", "canonical Poodle manifest", "Inter 4.001"],
+    markers: ["Lucide 1.57.0", "canonical Poodle manifest", "Inter 4.001"],
   },
 ];
 
