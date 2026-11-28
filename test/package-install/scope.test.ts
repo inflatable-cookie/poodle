@@ -7,8 +7,6 @@ import {
   CERTIFICATION_WRITABLE_PATHS,
   CANDIDATE_WRITABLE_PATHS,
   G18_006_WRITABLE_PATHS,
-  RELEASE_WRAPPER_PATHS,
-  RELEASE_AUTOMATION_PATHS,
   G16_054_CANDIDATE_SCOPE_MODE,
   G18_006_CANDIDATE_SCOPE_MODE,
   LOCKSTEP_CARGO_LOCK_PATHS,
@@ -83,8 +81,6 @@ test("literal allowlisted paths exist in the repository", () => {
     ...CERTIFICATION_WRITABLE_PATHS,
     ...CANDIDATE_WRITABLE_PATHS,
     ...G18_006_WRITABLE_PATHS,
-    ...RELEASE_WRAPPER_PATHS,
-    ...RELEASE_AUTOMATION_PATHS,
   ];
   expect(paths.filter((path) => !path.includes("*") && !existsSync(join(root, path)))).toEqual([]);
 });
@@ -865,14 +861,11 @@ async function plantClosedCandidate(plant: ClosedCandidatePlant = {}): Promise<{
 }
 
 describe("closed 0.4.0 candidate scope admission", () => {
-  test("ordinary CI admits the complete closed candidate without a receipt", async () => {
+  test("ordinary CI rejects the complete closed 0.4.0 candidate instead of promoting it", async () => {
     const { root, base, head } = await plantClosedCandidate();
-    const proof = await assertInstalledScope(root, base, head, "ordinary");
-    expect(proof.mode).toBe("ordinary");
-    expect(emitsCertificationReceipt(proof.mode)).toBe(false);
-    expect(proof.changedPaths).toContain("packages/render/Cargo.toml");
-    expect(proof.changedPaths).toContain("docs/release-notes/0.4.0.md");
-    expect(proof.changedPaths).toContain(CLOSED_CANDIDATE_EVIDENCE);
+    await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+      /certification scope rejected forbidden/,
+    );
   });
 
   test("explicit g18.006 mode certifies the same closed candidate", async () => {
@@ -925,7 +918,12 @@ describe("closed 0.4.0 candidate scope admission", () => {
 
   test("closed candidate scope requires the exact root version-only transition", async () => {
     const { root, base, head } = await plantClosedCandidate();
-    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    const proof = await assertCertificationScope(
+      root,
+      base,
+      head,
+      G18_006_CANDIDATE_SCOPE_MODE,
+    );
     expect(proof.changedPaths).toContain("package.json");
 
     const unchanged = await plantClosedCandidate({
@@ -1162,7 +1160,7 @@ describe("closed 0.4.0 candidate scope admission", () => {
     await writeFiles(root, { "docs/release-notes/0.4.0.md": "# Poodle 0.4.0\n" });
     const head = await commitAll(root, "lone release note head");
     await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
-      /rejected a partial release-note change without the closed g18\.006-candidate candidate/,
+      "certification scope rejected forbidden release surface: docs/release-notes/0.4.0.md",
     );
   });
 
@@ -1212,7 +1210,7 @@ describe("g18.006 in-lane receipt test repair admission", () => {
   const baseEmitter = receiptEmitterSource("0.3.0");
   const repairedEmitter = receiptEmitterSource("9.9.9");
 
-  test("admits the cfg(test)-only emitter repair in ordinary and explicit modes", async () => {
+  test("admits the cfg(test)-only emitter repair in explicit g18.006 mode and rejects it in ordinary mode", async () => {
     const plant = await plantClosedCandidate({
       mutateBase: (files) => {
         files[TEST_REPAIR_PATH] = baseEmitter;
@@ -1221,9 +1219,9 @@ describe("g18.006 in-lane receipt test repair admission", () => {
         files[TEST_REPAIR_PATH] = repairedEmitter;
       },
     });
-    const ordinary = await assertInstalledScope(plant.root, plant.base, plant.head, "ordinary");
-    expect(ordinary.mode).toBe("ordinary");
-    expect(ordinary.changedPaths).toContain(TEST_REPAIR_PATH);
+    await expect(
+      assertInstalledScope(plant.root, plant.base, plant.head, "ordinary"),
+    ).rejects.toThrow(/certification scope rejected forbidden/);
     const explicit = await assertCertificationScope(
       plant.root,
       plant.base,
@@ -1231,6 +1229,7 @@ describe("g18.006 in-lane receipt test repair admission", () => {
       G18_006_CANDIDATE_SCOPE_MODE,
     );
     expect(explicit.mode).toBe(G18_006_CANDIDATE_SCOPE_MODE);
+    expect(explicit.changedPaths).toContain(TEST_REPAIR_PATH);
   });
 
   test("rejects a production-line change to the admitted emitter", async () => {
@@ -1428,7 +1427,7 @@ describe("g18.006 synthetic-merge certification head resolution", () => {
     "",
   ].join("\n");
 
-  test("admits a surgical harness patch that keeps its safety anchors", async () => {
+  test("admits a surgical harness patch that keeps its safety anchors in explicit g18.006 mode", async () => {
     const plant = await plantClosedCandidate({
       mutateBase: (files) => {
         files[HARNESS_PATH] = harnessBase;
@@ -1437,8 +1436,13 @@ describe("g18.006 synthetic-merge certification head resolution", () => {
         files[HARNESS_PATH] = `${harnessBase}// certify the resolved head\n`;
       },
     });
-    const proof = await assertInstalledScope(plant.root, plant.base, plant.head, "ordinary");
-    expect(proof.mode).toBe("ordinary");
+    const proof = await assertCertificationScope(
+      plant.root,
+      plant.base,
+      plant.head,
+      G18_006_CANDIDATE_SCOPE_MODE,
+    );
+    expect(proof.mode).toBe(G18_006_CANDIDATE_SCOPE_MODE);
     expect(proof.changedPaths).toContain(HARNESS_PATH);
   });
 
@@ -1471,220 +1475,6 @@ describe("g18.006 synthetic-merge certification head resolution", () => {
     await expect(
       assertCertificationScope(plant.root, plant.base, plant.head, G18_006_CANDIDATE_SCOPE_MODE),
     ).rejects.toThrow(/the harness repair budget is 40/);
-  });
-});
-
-describe("g18.031 precursor root version alignment", () => {
-  const rootManifest = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
-    name: "poodle",
-    version: "0.1.0",
-    private: true,
-    scripts: { test: "vitest run" },
-    dependencies: { "left-pad": "1.0.0" },
-    ...overrides,
-  });
-
-  async function plantRootRange(
-    mutateHead: (manifest: Record<string, unknown>) => void,
-    extraHeadFiles: Record<string, string> = {},
-  ): Promise<{ root: string; base: string; head: string }> {
-    const root = await initPlant();
-    await writeFiles(root, {
-      "package.json": `${JSON.stringify(rootManifest(), null, 2)}\n`,
-    });
-    const base = await commitAll(root, "precursor root base");
-    const target = rootManifest({ version: "0.3.0" });
-    mutateHead(target);
-    await writeFiles(root, {
-      "package.json": `${JSON.stringify(target, null, 2)}\n`,
-      ...extraHeadFiles,
-    });
-    const head = await commitAll(root, "precursor root head");
-    return { root, base, head };
-  }
-
-  test("ordinary CI admits the exact 0.1.0 -> 0.3.0 version-only alignment", async () => {
-    const { root, base, head } = await plantRootRange(() => {});
-    const proof = await assertInstalledScope(root, base, head, "ordinary");
-    expect(proof.mode).toBe("ordinary");
-    expect(proof.changedPaths).toContain("package.json");
-  });
-
-  test("ordinary CI rejects anything broader than the precursor alignment", async () => {
-    const plants: Record<string, (manifest: Record<string, unknown>) => void> = {
-      "wrong target": (manifest) => {
-        manifest.version = "0.4.0";
-      },
-      "scripts drift": (manifest) => {
-        (manifest.scripts as Record<string, unknown>).test = "echo planted";
-      },
-      "dependency drift": (manifest) => {
-        (manifest.dependencies as Record<string, unknown>)["left-pad"] = "2.0.0";
-      },
-      "private flip": (manifest) => {
-        manifest.private = false;
-      },
-    };
-    for (const [kind, mutate] of Object.entries(plants)) {
-      const { root, base, head } = await plantRootRange(mutate);
-      await expect(
-        assertInstalledScope(root, base, head, "ordinary"),
-        kind,
-      ).rejects.toThrow(/forbidden version surface: package\.json/);
-    }
-  });
-
-  test("ordinary CI keeps other forbidden surfaces beside the precursor alignment", async () => {
-    const { root, base, head } = await plantRootRange(() => {}, {
-      ".npmrc": "registry=https://registry.example.invalid\n",
-    });
-    await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
-      /certification scope rejected forbidden/,
-    );
-  });
-
-  test("ordinary CI still refuses a 0.3.0 -> 0.4.0 root bump without the closed candidate", async () => {
-    const root = await initPlant();
-    await writeFiles(root, {
-      "package.json": `${JSON.stringify(rootManifest({ version: "0.3.0" }), null, 2)}\n`,
-    });
-    const base = await commitAll(root, "post-precursor base");
-    await writeFiles(root, {
-      "package.json": `${JSON.stringify(rootManifest({ version: "0.4.0" }), null, 2)}\n`,
-    });
-    const head = await commitAll(root, "post-precursor head");
-    await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
-      /forbidden version surface: package\.json/,
-    );
-  });
-});
-
-describe("native Cargo alignment to the existing 0.4.11 web train", () => {
-  const nativeCrateNames: Record<string, string> = {
-    "packages/codegen/Cargo.toml": "poodle-codegen",
-    "packages/contracts/adapter/Cargo.toml": "poodle-adapter",
-    "packages/contracts/components/Cargo.toml": "poodle-specs",
-    "packages/contracts/conformance/Cargo.toml": "poodle-conformance",
-    "packages/contracts/events/Cargo.toml": "poodle-events",
-    "packages/contracts/headless/Cargo.toml": "poodle-headless",
-    "packages/contracts/ir/Cargo.toml": "poodle-ir",
-    "packages/contracts/layout/Cargo.toml": "poodle-layout",
-    "packages/contracts/markdown/Cargo.toml": "poodle-markdown",
-    "packages/contracts/node/Cargo.toml": "poodle-node",
-    "packages/contracts/style/Cargo.toml": "poodle-style",
-    "packages/contracts/tokens/Cargo.toml": "poodle-tokens",
-    "packages/gpui/adapter/Cargo.toml": "poodle-gpui",
-    "packages/gpui/node-backend/Cargo.toml": "poodle-gpui-node-backend",
-    "packages/gpui/preview/Cargo.toml": "poodle-gpui-preview",
-    "packages/render/Cargo.toml": "poodle-render",
-    "packages/specimens/Cargo.toml": "poodle-specimens",
-  };
-
-  function nativeManifest(path: string, version: string): string {
-    return [
-      "[package]",
-      'name = "' + nativeCrateNames[path] + '"',
-      'version = "' + version + '"',
-      'edition = "2021"',
-      "publish = false",
-      "",
-      ...(path === "packages/render/Cargo.toml"
-        ? [
-            "[dependencies]",
-            'poodle-node = { version = "' + version + '", path = "../contracts/node" }',
-            "",
-          ]
-        : []),
-    ].join("\n");
-  }
-
-  function nativeLock(version: string, names: string[]): string {
-    return [
-      "# generated fixture",
-      "version = 4",
-      "",
-      ...names.flatMap((name, index) => [
-        "[[package]]",
-        'name = "' + name + '"',
-        'version = "' + version + '"',
-        ...(index === 0 && names.length > 1
-          ? ["dependencies = [", ' "' + names[1] + " " + version + '"', "]"]
-          : []),
-        "",
-      ]),
-      "[[package]]",
-      'name = "serde"',
-      'version = "1.0.0"',
-      'source = "registry+https://github.com/rust-lang/crates.io-index"',
-      'checksum = "unchanged"',
-      "",
-    ].join("\n");
-  }
-
-  async function plantNativeAlignment(options: {
-    extraManifestChange?: boolean;
-    externalLockDrift?: boolean;
-    removeManifest?: string;
-  } = {}): Promise<{ root: string; base: string; head: string }> {
-    const root = await initPlant();
-    const webManifest = {
-      name: "poodle",
-      version: "0.4.11",
-      private: true,
-      scripts: { test: "vitest run" },
-    };
-    await writeFiles(root, { "package.json": JSON.stringify(webManifest, null, 2) + "\n" });
-    for (const path of LOCKSTEP_CARGO_MANIFEST_PATHS) {
-      await writeFiles(root, { [path]: nativeManifest(path, "0.4.0") });
-    }
-    await writeFiles(root, {
-      [LOCKSTEP_CARGO_LOCK_PATHS[0]]: nativeLock("0.4.0", ["poodle-gpui-node-backend", "poodle-node"]),
-      [LOCKSTEP_CARGO_LOCK_PATHS[1]]: nativeLock("0.4.0", ["poodle-gpui-preview", "poodle-gpui-node-backend"]),
-    });
-    const base = await commitAll(root, "native version alignment base");
-    for (const path of LOCKSTEP_CARGO_MANIFEST_PATHS) {
-      let text = nativeManifest(path, "0.4.11");
-      if (path === "packages/render/Cargo.toml" && options.extraManifestChange) {
-        text += "[package.metadata.planted]\nextra = true\n";
-      }
-      await writeFiles(root, { [path]: text });
-    }
-    const locks = {
-      [LOCKSTEP_CARGO_LOCK_PATHS[0]]: nativeLock("0.4.11", ["poodle-gpui-node-backend", "poodle-node"]),
-      [LOCKSTEP_CARGO_LOCK_PATHS[1]]: nativeLock("0.4.11", ["poodle-gpui-preview", "poodle-gpui-node-backend"]),
-    };
-    if (options.externalLockDrift) {
-      locks[LOCKSTEP_CARGO_LOCK_PATHS[0]] = locks[LOCKSTEP_CARGO_LOCK_PATHS[0]].replace(
-        'version = "1.0.0"',
-        'version = "1.0.1"',
-      );
-    }
-    await writeFiles(root, locks);
-    if (options.removeManifest) {
-      await runGit(root, ["rm", "--quiet", "-f", options.removeManifest]);
-    }
-    const head = await commitAll(root, "align native Cargo release versions");
-    return { root, base, head };
-  }
-
-  test("ordinary CI admits the exact native 0.4.0 -> web 0.4.11 alignment", async () => {
-    const { root, base, head } = await plantNativeAlignment();
-    const proof = await assertInstalledScope(root, base, head, "ordinary");
-    expect(proof.changedPaths).toContain("packages/gpui/node-backend/Cargo.toml");
-    expect(proof.changedPaths).toContain(LOCKSTEP_CARGO_LOCK_PATHS[0]);
-  });
-
-  test("ordinary CI rejects extra Cargo edits, lock drift, or an incomplete alignment", async () => {
-    for (const options of [
-      { extraManifestChange: true },
-      { externalLockDrift: true },
-      { removeManifest: "packages/gpui/preview/Cargo.toml" },
-    ]) {
-      const { root, base, head } = await plantNativeAlignment(options);
-      await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
-        /certification scope rejected|forbidden version surface/,
-      );
-    }
   });
 });
 
@@ -1775,111 +1565,51 @@ describe("ordinary root manifest devDependency scope", () => {
   });
 });
 
-describe("g18.009 npm/web release wrapper repair", () => {
-  const guardModule =
-    '// RELEASE_WRAPPER_REQUIRED_RUNS + RELEASE_WRAPPER_FORBIDDEN_SELECTORS\n' +
-    '// "effigy test:web-pack-install" and "effigy release "\n';
-  const checkerModule =
-    '// collectReleaseWrapperFailures asserts "effigy test:web-pack-install"\n';
-
-  const narrowWorkflow = (overrides: Record<string, string> = {}): string =>
-    [
+describe("ordinary release workflow rejection", () => {
+  test("ordinary CI rejects a release.yml edit, even a spec-071 wrapper-only repair", async () => {
+    const root = await initPlant();
+    const baseWorkflow = [
       "name: Release",
-      "",
       "on:",
       "  workflow_dispatch:",
-      "",
       "jobs:",
-      "  release:",
-      "    runs-on: macos-latest",
+      "  npm:",
+      "    runs-on: ubuntu-latest",
+      "    timeout-minutes: 10",
+      "    permissions:",
+      "      id-token: write",
       "    steps:",
-      "      - run: bun install --frozen-lockfile",
-      "      - name: Build the published web packages",
-      "        run: effigy svelte:package",
-      "      - name: Release automation guard",
-      "        run: effigy check:release-automation",
-      "      - name: Hosted npm/web package proof",
-      "        run: effigy test:web-pack-install",
-    ]
-      .map((line) => overrides[line] ?? line)
-      .join("\n")
-      .concat("\n");
-
-  async function plantWrapperRange(
-    releaseWorkflow: string,
-    extraHeadFiles: Record<string, string> = {},
-  ): Promise<{ root: string; base: string; head: string }> {
-    const root = await initPlant();
-    await writeFiles(root, { "README.md": "base\n" });
-    const base = await commitAll(root, "wrapper base");
+      "      - uses: inflatable-cookie/setup-effigy@987fd556617ea2c3e0ab5cef6b47b250817f50c8 # v1.0.0",
+      "        with:",
+      '          version: "0.11.0"',
+      "      - run: effigy release:web-certificate",
+      "      - run: gh run download",
+      "      - run: bun scripts/verify-npm-candidate.ts",
+      '      - run: npm publish "./$tarball" --access public',
+      "",
+    ].join("\n");
+    const checker = [
+      "export function collectReleaseWorkflowFailures() {}",
+      "export function collectGenericCandidateFailures() {}",
+      "export function readNpmPublicationAuthority() {}",
+      '// "effigy release:web-certificate"',
+      "",
+    ].join("\n");
     await writeFiles(root, {
-      ".github/workflows/release.yml": releaseWorkflow,
-      "scripts/check-release-automation.ts": checkerModule,
-      "test/package-install/scope.ts": guardModule,
-      "test/package-install/scope.test.ts": "// guard coverage\n",
+      ".github/workflows/release.yml": baseWorkflow,
+      "scripts/check-release-automation.ts": checker,
       "docs/knowledge/contracts/release.md": "# Release\n",
-      ...extraHeadFiles,
     });
-    const head = await commitAll(root, "wrapper head");
-    return { root, base, head };
-  }
-
-  test("ordinary CI admits the bounded release wrapper repair", async () => {
-    const { root, base, head } = await plantWrapperRange(narrowWorkflow());
-    const proof = await assertInstalledScope(root, base, head, "ordinary");
-    expect(proof.mode).toBe("ordinary");
-    expect(proof.changedPaths).toContain(".github/workflows/release.yml");
-    expect(proof.changedPaths).toContain("test/package-install/scope.ts");
-  });
-
-  test("ordinary CI rejects a release wrapper that regains aggregate or native gating", async () => {
-    const plants = [
-      "        run: effigy release gates",
-      "        run: effigy qa",
-      "        run: effigy ci:native",
-      "        run: effigy regressions:native",
-    ];
-    for (const plant of plants) {
-      const { root, base, head } = await plantWrapperRange(
-        narrowWorkflow({ "        run: effigy test:web-pack-install": plant }),
-      );
-      await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
-        /\.github\/workflows\/release\.yml: workflow surfaces require an approved lane/,
-      );
-    }
-  });
-
-  test("ordinary CI rejects a release wrapper that drops the installed-package proof", async () => {
-    const { root, base, head } = await plantWrapperRange(
-      narrowWorkflow({ "        run: effigy test:web-pack-install": "        run: effigy docs:lint" }),
-    );
+    const base = await commitAll(root, "release workflow base");
+    await writeFiles(root, {
+      ".github/workflows/release.yml": `${baseWorkflow}# wrapper repair\n`,
+      "scripts/check-release-automation.ts": `${checker}// updated check\n`,
+      "docs/knowledge/contracts/release.md": "# Release\n\nUpdated wrapper note.\n",
+    });
+    const head = await commitAll(root, "release workflow repair");
     await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
       /\.github\/workflows\/release\.yml: workflow surfaces require an approved lane/,
     );
-  });
-
-  test("ordinary CI rejects a wrapper range that strips the classifier guard", async () => {
-    const { root, base, head } = await plantWrapperRange(narrowWorkflow(), {
-      "test/package-install/scope.ts": "// guard stripped\n",
-    });
-    await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
-      /\.github\/workflows\/release\.yml: workflow surfaces require an approved lane/,
-    );
-  });
-
-  test("ordinary CI keeps product and release-note paths outside the wrapper repair", async () => {
-    const products = {
-      "packages/core/src/unauthorized.ts": "export {};\n",
-      "docs/release-notes/0.4.0.md": "# 0.4.0\n",
-    };
-    for (const [path, contents] of Object.entries(products)) {
-      const { root, base, head } = await plantWrapperRange(narrowWorkflow(), {
-        [path]: contents,
-      });
-      await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
-        /certification scope rejected/,
-      );
-    }
   });
 });
 

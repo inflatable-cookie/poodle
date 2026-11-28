@@ -167,7 +167,8 @@ policy and ship only under a new coordinated tag.
 If the tagged workflow wrapper itself fails before publication, a reviewed
 wrapper-only repair may dispatch publish from `main` with `release-tag` set to
 the existing tag. The same candidate run still supplies the archives; the tag
-never moves.
+never moves. Like any other workflow edit, a `release.yml` repair fails
+ordinary `test:web-pack-install` scope and merges by operator override.
 
 ## Verify
 
