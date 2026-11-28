@@ -743,7 +743,7 @@ impl<'a> HeadlessDriver<'a> {
 
     fn scroll_vertical_at(&mut self, position: Point<Pixels>, delta_y: f32) {
         self.input_dispatches += 1;
-        self.cx.simulate_event(ScrollWheelEvent {
+        self.cx.simulate_event(ScrollEvent {
             position,
             delta: ScrollDelta::Pixels(point(px(0.0), px(delta_y))),
             ..Default::default()
@@ -807,6 +807,11 @@ impl<'a> HeadlessDriver<'a> {
         self.dispatch_key_raw(key);
     }
 
+    fn parse_keystroke(&mut self, key: &str) -> Keystroke {
+        let os = self.cx.update(|_, cx| cx.platform_info().os);
+        Keystroke::parse_with_os(key, os).expect("keystroke parses")
+    }
+
     /// One key **press**, with no matching release. Focus is untouched.
     ///
     /// The pair below exists because press and release are separate dispatched
@@ -815,7 +820,7 @@ impl<'a> HeadlessDriver<'a> {
     /// arrives between the two.
     pub fn dispatch_key_press(&mut self, key: &str) {
         self.input_dispatches += 1;
-        let keystroke = Keystroke::parse(key).expect("keystroke parses");
+        let keystroke = self.parse_keystroke(key);
         self.cx.simulate_event(KeyDownEvent {
             keystroke,
             is_held: false,
@@ -828,7 +833,7 @@ impl<'a> HeadlessDriver<'a> {
     /// One key **release**, with no preceding press.
     pub fn dispatch_key_release(&mut self, key: &str) {
         self.input_dispatches += 1;
-        let keystroke = Keystroke::parse(key).expect("keystroke parses");
+        let keystroke = self.parse_keystroke(key);
         self.cx.simulate_event(KeyUpEvent { keystroke });
         self.run_until_idle();
         self.draw_frame();
@@ -839,7 +844,7 @@ impl<'a> HeadlessDriver<'a> {
     /// never steals focus.
     pub fn dispatch_key_raw(&mut self, key: &str) {
         self.input_dispatches += 2;
-        let keystroke = Keystroke::parse(key).expect("keystroke parses");
+        let keystroke = self.parse_keystroke(key);
         self.cx.simulate_event(KeyDownEvent {
             keystroke: keystroke.clone(),
             is_held: false,
@@ -855,7 +860,7 @@ impl<'a> HeadlessDriver<'a> {
     /// the window, making this a scheduler-invalidation oracle.
     pub fn dispatch_probe_key(&mut self, key: &str) {
         self.input_dispatches += 2;
-        let keystroke = Keystroke::parse(key).expect("keystroke parses");
+        let keystroke = self.parse_keystroke(key);
         self.cx.simulate_event(KeyDownEvent {
             keystroke: keystroke.clone(),
             is_held: false,

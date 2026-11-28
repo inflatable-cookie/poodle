@@ -759,22 +759,21 @@ mod tests {
         std::fs::remove_dir_all(&root).expect("remove test root");
     }
 
-    /// The receipt identity and the dependency pin are the same claim; drift
-    /// between them invalidates every receipt. This also fails if the
-    /// manifest ever goes back to a Git source, because a `git = ` pin
-    /// carries no registry package/version fragment.
     #[test]
-    fn the_gpui_identity_matches_the_manifest_pin() {
-        let manifest = include_str!("../../Cargo.toml");
-        assert!(
-            manifest.contains(&format!(
-                "package = \"gpui-unofficial\", version = \"={GPUI_VERSION}\""
-            )),
-            "GPUI_VERSION drifted from the manifest pin"
+    fn the_gpui_identity_matches_the_locked_registry_package() {
+        let lockfile = include_str!("../../Cargo.lock");
+        let entry = lockfile
+            .split("\n[[package]]\n")
+            .find(|entry| entry.starts_with("name = \"gpui-unofficial\"\n"))
+            .expect("locked GPUI package");
+        let mut fields = entry.lines().skip(1);
+        assert_eq!(
+            fields.next(),
+            Some(format!("version = \"{GPUI_VERSION}\"").as_str())
         );
-        assert!(
-            !manifest.contains("git ="),
-            "the preview manifest must resolve GPUI from {GPUI_SOURCE}, not a Git source"
+        assert_eq!(
+            fields.next(),
+            Some(r#"source = "registry+https://github.com/rust-lang/crates.io-index""#),
         );
         assert_eq!(GPUI_SOURCE, "crates.io");
     }

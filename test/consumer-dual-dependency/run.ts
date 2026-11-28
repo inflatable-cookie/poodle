@@ -2,7 +2,7 @@
  * g16.005 — downstream dual-dependency proof.
  *
  * Builds `consumer/`, a crate written the way an ordinary crates.io user
- * would write it: it declares the exact `gpui-unofficial` pin for itself AND
+ * would write it: it declares the `gpui-unofficial` range for itself and
  * depends on `poodle-gpui-node-backend`, then passes GPUI values across the
  * boundary in both directions. A second GPUI source or version gives the two
  * crates different identities and this stops compiling.
@@ -69,7 +69,7 @@ function compile(dir: string, targetDir: string): { status: number | null; stder
   return { status: result.status, stderr: result.stderr ?? "" };
 }
 
-console.log("## downstream consumer: gpui-unofficial 1.22.0 + poodle-gpui-node-backend");
+console.log("## downstream consumer: gpui-unofficial ~1.30.2 + poodle-gpui-node-backend");
 const work = mkdtempSync(join(tmpdir(), "poodle-dual-dependency-"));
 try {
   const proof = join(work, "proof");
@@ -84,8 +84,8 @@ try {
     .filter((line) => !line.trimStart().startsWith("#"))
     .join("\n");
   check(
-    "the consumer declares gpui-unofficial =1.22.0 itself",
-    active.includes('package = "gpui-unofficial", version = "=1.22.0"'),
+    "the consumer declares gpui-unofficial ~1.30.2 itself",
+    active.includes('package = "gpui-unofficial", version = "~1.30.2"'),
   );
   check(
     "the consumer uses no patch, replace, or override section",
@@ -95,24 +95,24 @@ try {
 
   const built = compile(proof, target);
   check(
-    "the consumer compiles against Poodle and its own gpui-unofficial pin",
+    "the consumer compiles against Poodle and its own gpui-unofficial range",
     built.status === 0,
     built.stderr.trim(),
   );
 
-  // The lockfile Cargo just produced is the resolution evidence: one pinned
+  // The lockfile Cargo just produced is the resolution evidence: one locked
   // GPUI package identity, with its package family from the registry.
   const lock = readFileSync(join(proof, "Cargo.lock"), "utf8");
-  const gpuiEntries = [...lock.matchAll(/\[\[package\]\]\nname = "(gpui[^"]*)"\nversion = "([^"]+)"\nsource = "([^"]+)"/g)];
+  const gpuiEntries = [...lock.matchAll(/\[\[package\]\]\nname = "(gpui[^"]*)"\nversion = "([^"]+)"(?:\nsource = "([^"]+)")?/g)];
   const gpuiCore = gpuiEntries.filter(([, name]) => name === "gpui-unofficial");
   check(
-    "the resolved graph contains exactly one gpui-unofficial 1.22.0",
-    gpuiCore.length === 1 && gpuiCore[0][2] === "1.22.0",
+    "the resolved graph contains exactly one gpui-unofficial in ~1.30.2",
+    gpuiCore.length === 1 && /^1\.30\.(?:[2-9]|[1-9]\d+)$/.test(gpuiCore[0][2]),
     gpuiCore.map(([, , version, source]) => `${version} ${source}`).join(", "),
   );
   check(
     "every gpui* crate resolves from the crates.io registry",
-    gpuiEntries.length > 0 && gpuiEntries.every(([, , , source]) => source.startsWith("registry+")),
+    gpuiEntries.length > 0 && gpuiEntries.every(([, , , source]) => source === "registry+https://github.com/rust-lang/crates.io-index"),
     gpuiEntries.map(([, name, , source]) => `${name}: ${source}`).join("\n"),
   );
   if (gpuiCore.length === 1) console.log(`  resolved: gpui-unofficial ${gpuiCore[0][2]} from ${gpuiCore[0][3]}`);

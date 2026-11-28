@@ -1,9 +1,6 @@
 //! g16.005 — the non-activating window capture transport.
 //!
-//! Stock crates.io GPUI 0.2.2 has no scene readback and no headless renderer:
-//! `PlatformWindow::draw` is one-way and the test window discards the scene.
-//! Genuine GPUI pixels therefore require a real platform window. This module
-//! is that window, and nothing more than that:
+//! Captures the macOS window-server output for a GPUI window:
 //!
 //! - one GPUI window is opened with `focus: false`, `show: true`;
 //! - `App::activate`, `Window::activate_window`, `makeKeyAndOrderFront`, and
@@ -56,7 +53,7 @@ pub const TRANSPORT: &str = "macos-window-server-nonactivating";
 /// The published GPUI identity these pixels come from. A consumer reading a
 /// receipt must be able to tell that Poodle used the registry crate.
 pub const GPUI_SOURCE: &str = "crates.io";
-pub const GPUI_VERSION: &str = "1.22.0";
+pub const GPUI_VERSION: &str = env!("POODLE_CAPTURE_GPUI_VERSION");
 
 /// How many drawn frames a scene with nothing to read back waits for. One is
 /// not enough: the first frame can land before layout has settled.

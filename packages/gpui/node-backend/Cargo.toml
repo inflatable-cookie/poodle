@@ -3,7 +3,7 @@ name = "poodle-gpui-node-backend"
 version = "0.5.0"
 edition = "2021"
 license = "MIT"
-rust-version = "1.95"
+rust-version = "1.98"
 description = "GPUI backend for the Poodle render vocabulary: interprets poodle-node trees as GPUI elements."
 repository = "https://github.com/inflatable-cookie/poodle"
 homepage = "https://github.com/inflatable-cookie/poodle"
@@ -18,7 +18,7 @@ path = "src/lib.rs"
 # GPUI framework — the exact stable crates.io republication of upstream Zed.
 # Keep the Rust crate name `gpui` while requiring consumers to use this same
 # `gpui-unofficial` release for type identity.
-gpui = { package = "gpui-unofficial", version = "=1.22.0" }
+gpui = { package = "gpui-unofficial", version = "~1.30.2" }
 poodle-node = { version = "0.5.0", path = "../../contracts/node" }
 # Undo coalescing only. The backend owns the history *storage* because history
 # is ephemeral per-field UI state and only the backend persists anything across
@@ -45,7 +45,7 @@ tinyvec = { version = "1", features = ["std"] }
 # Headless GPUI tests (TestAppContext / VisualTestContext). Ordinary builds
 # and the published interpretation path never pull test-support in.
 [dev-dependencies]
-gpui = { package = "gpui-unofficial", version = "=1.22.0", features = ["test-support"] }
+gpui = { package = "gpui-unofficial", version = "~1.30.2", features = ["test-support"] }
 poodle-conformance = { path = "../../contracts/conformance" }
 raw-window-handle = "0.6"
 serde_json = "1"

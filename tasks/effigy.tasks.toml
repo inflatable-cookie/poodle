@@ -184,8 +184,8 @@
 # when dependencies are already installed. `effigy ci:fresh` is the
 # from-nothing command Queue runs as pre-merge validation: frozen-lockfile
 # install, then the same PR lanes, leaving only ignored outputs behind.
-# g16.005 downstream consumer proof. Compiles a throwaway crate that pins
-# `gpui-unofficial =1.22.0` for itself AND depends on Poodle's GPUI node
+# g16.005 downstream consumer proof. Compiles a throwaway crate that declares
+# `gpui-unofficial ~1.30.2` and depends on Poodle's GPUI node
 # backend, passing GPUI values across the boundary both ways. A different
 # GPUI source or version in Poodle gives the crates different identities and
 # this stops compiling. Includes a negative control. Headless; no window.
