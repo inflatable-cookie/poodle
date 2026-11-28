@@ -6,10 +6,10 @@
     min-height: var(--poodle-time-input-control-height);
     height: var(--poodle-time-input-control-height);
     padding: 0 var(--poodle-space-control-x);
-    border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
+    border: 0.0625rem solid var(--poodle-style-control-border);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-time-input-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
-    box-shadow: var(--poodle-style-control-shadow, none);
+    background: var(--poodle-recipe-time-input-fill, var(--poodle-style-control-fill));
+    box-shadow: var(--poodle-style-control-shadow);
     color: var(--poodle-recipe-time-input-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
@@ -31,16 +31,15 @@
   }
 
   /* Size variants */
-  .poodle-time-input[data-size="xs"] { --poodle-time-input-control-height: 1.5rem; font-size: 0.75rem; }
-  .poodle-time-input[data-size="sm"] { --poodle-time-input-control-height: 1.75rem; font-size: 0.8125rem; }
+  .poodle-time-input[data-size="xs"] { --poodle-time-input-control-height: 1.5rem; font-size: var(--poodle-style-typography-controlSummary-xs-size); }
+  .poodle-time-input[data-size="sm"] { --poodle-time-input-control-height: 1.75rem; font-size: var(--poodle-style-typography-controlSummary-sm-size); }
   .poodle-time-input[data-size="md"] {
-    --poodle-time-input-control-height: var(
-      --poodle-size-control-height-md,
+    --poodle-time-input-control-height: var(--poodle-size-control-height-md,
       var(--poodle-size-control-height)
     );
   }
-  .poodle-time-input[data-size="lg"] { --poodle-time-input-control-height: 2.75rem; font-size: 0.9375rem; }
-  .poodle-time-input[data-size="xl"] { --poodle-time-input-control-height: 3.25rem; font-size: 1rem; }
+  .poodle-time-input[data-size="lg"] { --poodle-time-input-control-height: 2.75rem; font-size: var(--poodle-style-typography-controlSummary-lg-size); }
+  .poodle-time-input[data-size="xl"] { --poodle-time-input-control-height: 3.25rem; font-size: var(--poodle-style-typography-controlSummary-xl-size); }
 
   /* Density variants */
   .poodle-time-input[data-density="compact"] { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }

@@ -442,8 +442,8 @@ Rendering style roles: the drill back, breadcrumb and list buttons rest transpar
 
 | Property | Value |
 |----------|-------|
-| border-color | `var(--poodle-recipe-relation-picker-selected-item-border, var(--poodle-style-selection-itemBorder, color-mix(in srgb, var(--poodle-color-accent-base) 60%, transparent)))` |
-| background | `var(--poodle-recipe-relation-picker-selected-item-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)))` |
+| border-color | `var(--poodle-recipe-relation-picker-selected-item-border, var(--poodle-style-selection-itemBorder))` |
+| background | `var(--poodle-recipe-relation-picker-selected-item-fill, var(--poodle-style-selection-itemFill))` |
 
 #### Candidate Item Disabled (`item.disabled`)
 

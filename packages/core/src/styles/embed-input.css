@@ -12,7 +12,7 @@
     align-items: center;
     gap: 0.375rem;
     min-height: 1.25rem;
-    font-size: 0.75rem;
+    font-size: var(--poodle-style-typography-caption-size);
   }
 
   .poodle-embed-input__error {

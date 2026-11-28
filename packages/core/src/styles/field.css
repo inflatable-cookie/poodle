@@ -64,13 +64,13 @@
   .poodle-field__optional {
     color: var(--poodle-recipe-field-optional-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-body-family);
-    font-size: 0.75rem;
+    font-size: var(--poodle-style-typography-controlHint-md-size);
     line-height: var(--poodle-typography-body-lineHeight);
   }
 
   .poodle-field__message {
     font-family: var(--poodle-typography-body-family);
-    font-size: 0.75rem;
+    font-size: var(--poodle-style-typography-caption-size);
     line-height: var(--poodle-typography-body-lineHeight);
   }
 
@@ -82,25 +82,25 @@
     color: var(--poodle-recipe-field-message--error-text, var(--poodle-color-status-danger));
   }
 
-  .poodle-field[data-size="xs"] .poodle-field__label-row { font-size: 0.6875rem; }
+  .poodle-field[data-size="xs"] .poodle-field__label-row { font-size: var(--poodle-style-typography-compactControlLabel-xs-size); }
   .poodle-field[data-size="xs"] .poodle-field__message,
-  .poodle-field[data-size="xs"] .poodle-field__optional { font-size: 0.625rem; }
+  .poodle-field[data-size="xs"] .poodle-field__optional { font-size: var(--poodle-style-typography-controlHint-xs-size); }
 
-  .poodle-field[data-size="sm"] .poodle-field__label-row { font-size: 0.75rem; }
+  .poodle-field[data-size="sm"] .poodle-field__label-row { font-size: var(--poodle-style-typography-compactControlLabel-sm-size); }
   .poodle-field[data-size="sm"] .poodle-field__message,
-  .poodle-field[data-size="sm"] .poodle-field__optional { font-size: 0.6875rem; }
+  .poodle-field[data-size="sm"] .poodle-field__optional { font-size: var(--poodle-style-typography-controlHint-sm-size); }
 
-  .poodle-field[data-size="md"] .poodle-field__label-row { font-size: 0.8125rem; }
+  .poodle-field[data-size="md"] .poodle-field__label-row { font-size: var(--poodle-style-typography-compactControlLabel-md-size); }
   .poodle-field[data-size="md"] .poodle-field__message,
-  .poodle-field[data-size="md"] .poodle-field__optional { font-size: 0.75rem; }
+  .poodle-field[data-size="md"] .poodle-field__optional { font-size: var(--poodle-style-typography-controlHint-md-size); }
 
-  .poodle-field[data-size="lg"] .poodle-field__label-row { font-size: 0.875rem; }
+  .poodle-field[data-size="lg"] .poodle-field__label-row { font-size: var(--poodle-style-typography-compactControlLabel-lg-size); }
   .poodle-field[data-size="lg"] .poodle-field__message,
-  .poodle-field[data-size="lg"] .poodle-field__optional { font-size: 0.8125rem; }
+  .poodle-field[data-size="lg"] .poodle-field__optional { font-size: var(--poodle-style-typography-controlHint-lg-size); }
 
-  .poodle-field[data-size="xl"] .poodle-field__label-row { font-size: 0.9375rem; }
+  .poodle-field[data-size="xl"] .poodle-field__label-row { font-size: var(--poodle-style-typography-compactControlLabel-xl-size); }
   .poodle-field[data-size="xl"] .poodle-field__message,
-  .poodle-field[data-size="xl"] .poodle-field__optional { font-size: 0.875rem; }
+  .poodle-field[data-size="xl"] .poodle-field__optional { font-size: var(--poodle-style-typography-controlHint-xl-size); }
 
   .poodle-field[data-density="compact"] {
     --poodle-field-gap: 0.375rem;
@@ -153,8 +153,8 @@
     margin: 0;
     color: var(--poodle-recipe-field-info-content-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-body-family);
-    font-size: 0.75rem;
-    line-height: 1.5;
+    font-size: var(--poodle-style-typography-caption-size);
+    line-height: var(--poodle-style-typography-leading-relaxed);
   }
 
   .poodle-field__label-row .poodle-popover__surface {

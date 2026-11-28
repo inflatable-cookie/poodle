@@ -33,7 +33,7 @@
   .poodle-editable-list-session__info {
     padding: 0.75rem;
     border-radius: var(--poodle-radius-surface);
-    font-size: 0.875rem;
+    font-size: var(--poodle-typography-body-size);
   }
 
   .poodle-editable-list-session__error {
@@ -58,7 +58,7 @@
   .poodle-editable-list-session__window-label {
     min-width: 13rem;
     text-align: center;
-    font-size: 0.875rem;
+    font-size: var(--poodle-typography-body-size);
     color: var(--poodle-recipe-editable-list-window-label-text, var(--poodle-color-text-secondary));
   }
 
@@ -68,7 +68,7 @@
     --poodle-editable-list-item-x: 0.625rem;
     --poodle-editable-list-item-y: 0.5rem;
     --poodle-editable-list-handle-size: 1rem;
-    --poodle-editable-list-font-size: 0.8125rem;
+    --poodle-editable-list-font-size: var(--poodle-style-typography-compactControlLabel-md-size);
     list-style: none;
     margin: 0;
     padding: 0;
@@ -85,27 +85,27 @@
     --poodle-editable-list-handle-size: 0.875rem;
     --poodle-editable-list-item-x: 0.5rem;
     --poodle-editable-list-item-y: 0.375rem;
-    --poodle-editable-list-font-size: 0.6875rem;
+    --poodle-editable-list-font-size: var(--poodle-style-typography-compactControlLabel-xs-size);
   }
 
   .poodle-editable-list[data-size="sm"] {
     --poodle-editable-list-handle-size: 1rem;
     --poodle-editable-list-item-y: 0.4375rem;
-    --poodle-editable-list-font-size: 0.75rem;
+    --poodle-editable-list-font-size: var(--poodle-style-typography-compactControlLabel-sm-size);
   }
 
   .poodle-editable-list[data-size="lg"] {
     --poodle-editable-list-handle-size: 1.125rem;
     --poodle-editable-list-item-x: 0.75rem;
     --poodle-editable-list-item-y: 0.5625rem;
-    --poodle-editable-list-font-size: 0.875rem;
+    --poodle-editable-list-font-size: var(--poodle-style-typography-compactControlLabel-lg-size);
   }
 
   .poodle-editable-list[data-size="xl"] {
     --poodle-editable-list-handle-size: 1.25rem;
     --poodle-editable-list-item-x: 0.875rem;
     --poodle-editable-list-item-y: 0.625rem;
-    --poodle-editable-list-font-size: 0.9375rem;
+    --poodle-editable-list-font-size: var(--poodle-style-typography-compactControlLabel-xl-size);
   }
 
   .poodle-editable-list[data-density="compact"] {
@@ -149,10 +149,10 @@
   }
 
   .poodle-editable-list__item:hover {
-    background: var(--poodle-recipe-editable-list-hover-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 82%, transparent)));
+    background: var(--poodle-recipe-editable-list-hover-item-fill, var(--poodle-style-control-fillHover));
   }
   .poodle-editable-list__item:active {
-    background: var(--poodle-recipe-editable-list-item-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-editable-list-item-active-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-editable-list__item:focus-visible {
@@ -172,8 +172,8 @@
   }
 
   .poodle-editable-list__item--last-moved {
-    border-color: var(--poodle-recipe-editable-list-item--last-moved-border, var(--poodle-style-selection-itemBorder, color-mix(in srgb, var(--poodle-color-accent-base) 56%, transparent)));
-    background: var(--poodle-recipe-editable-list-item--last-moved-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)));
+    border-color: var(--poodle-recipe-editable-list-item--last-moved-border, var(--poodle-style-selection-itemBorder));
+    background: var(--poodle-recipe-editable-list-item--last-moved-fill, var(--poodle-style-selection-itemFill));
   }
 
   .poodle-editable-list__item--drop-target,

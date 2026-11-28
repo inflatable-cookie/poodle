@@ -155,8 +155,8 @@ Rendering style roles: the trigger reads the control border and fill, and the po
 Chrome (trigger, surface, tile selection) resolves from semantic tokens; swatch
 colors are the theme's literal values (the whole point of a preview). See the
 Anatomy token-target column. Selected tiles (`.poodle-theme-select__tile[data-selected="true"]`)
-read `border-color: var(--poodle-style-selection-itemBorder, var(--poodle-color-accent-base))`
-and `background: var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent))`.
+read `border-color: var(--poodle-style-selection-itemBorder)`
+and `background: var(--poodle-style-selection-itemFill)`.
 
 ### Data Attributes
 

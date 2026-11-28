@@ -3,11 +3,11 @@
 
   .poodle-token-input {
     --poodle-token-input-radius: var(--poodle-radius-control);
-    --poodle-token-input-fill: var(--poodle-recipe-token-input-fill, var(--poodle-style-control-fill, color-mix(in srgb, var(--poodle-color-background-surface) 96%, transparent)));
+    --poodle-token-input-fill: var(--poodle-recipe-token-input-fill, var(--poodle-style-control-fill));
     --poodle-token-input-fill-focus: var(--poodle-recipe-token-input-fill-focus, var(--poodle-token-input-fill));
-    --poodle-token-input-border: var(--poodle-recipe-token-input-border, var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-subtle) 76%, transparent)));
+    --poodle-token-input-border: var(--poodle-recipe-token-input-border, var(--poodle-style-control-border));
     --poodle-token-input-border-focus: var(--poodle-recipe-token-input-border-focus, color-mix(in srgb, var(--poodle-color-accent-base) 58%, var(--poodle-color-border-subtle)));
-    --poodle-token-input-shadow: var(--poodle-recipe-token-input-shadow, var(--poodle-style-control-shadow, none));
+    --poodle-token-input-shadow: var(--poodle-recipe-token-input-shadow, var(--poodle-style-control-shadow));
     --poodle-token-input-shadow-focus: var(--poodle-recipe-token-input-shadow-focus, 0 0 0 0.125rem color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent));
     --poodle-token-input-padding-inline: var(--poodle-space-control-x);
     --poodle-token-input-padding-block: var(--poodle-space-control-y);
@@ -37,25 +37,25 @@
   .poodle-token-input[data-size="xs"] {
     --poodle-token-input-padding-inline: calc(var(--poodle-space-control-x) - 0.25rem);
     --poodle-token-input-padding-block: calc(var(--poodle-space-control-y) - 0.125rem);
-    --poodle-token-input-font-size: 0.75rem;
+    --poodle-token-input-font-size: var(--poodle-style-typography-controlSummary-xs-size);
   }
 
   .poodle-token-input[data-size="sm"] {
     --poodle-token-input-padding-inline: calc(var(--poodle-space-control-x) - 0.125rem);
     --poodle-token-input-padding-block: calc(var(--poodle-space-control-y) - 0.0625rem);
-    --poodle-token-input-font-size: 0.8125rem;
+    --poodle-token-input-font-size: var(--poodle-style-typography-controlSummary-sm-size);
   }
 
   .poodle-token-input[data-size="lg"] {
     --poodle-token-input-padding-inline: calc(var(--poodle-space-control-x) + 0.125rem);
     --poodle-token-input-padding-block: calc(var(--poodle-space-control-y) + 0.0625rem);
-    --poodle-token-input-font-size: 0.9375rem;
+    --poodle-token-input-font-size: var(--poodle-style-typography-controlSummary-lg-size);
   }
 
   .poodle-token-input[data-size="xl"] {
     --poodle-token-input-padding-inline: calc(var(--poodle-space-control-x) + 0.1875rem);
     --poodle-token-input-padding-block: calc(var(--poodle-space-control-y) + 0.125rem);
-    --poodle-token-input-font-size: 1rem;
+    --poodle-token-input-font-size: var(--poodle-style-typography-controlSummary-xl-size);
   }
 
   .poodle-token-input[data-density="compact"] {
@@ -142,7 +142,7 @@
   }
 
   .poodle-token-input__control::placeholder {
-    color: var(--poodle-style-control-secondaryText, var(--poodle-color-text-tertiary));
+    color: var(--poodle-style-control-secondaryText);
   }
 
   .poodle-token-input__control:disabled,

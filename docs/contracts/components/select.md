@@ -338,10 +338,10 @@ Rendering style roles: the listbox reads the floating surface roles, and options
 | `gap` | `var(--poodle-space-inline-sm)` |
 | `min-height` | `var(--poodle-size-control-height)` |
 | `padding` | `0 var(--poodle-space-control-x)` |
-| `border` | `var(--poodle-border-width-default) solid var(--poodle-style-control-border, var(--poodle-color-border-default))` |
+| `border` | `var(--poodle-border-width-default) solid var(--poodle-style-control-border)` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `var(--poodle-recipe-select-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)))` |
-| `box-shadow` | `var(--poodle-recipe-select-shadow, var(--poodle-style-control-shadow, none))` |
+| `background` | `var(--poodle-recipe-select-fill, var(--poodle-style-control-fill))` |
+| `box-shadow` | `var(--poodle-recipe-select-shadow, var(--poodle-style-control-shadow))` |
 | `transition` | `border-color, box-shadow, background` |
 
 ### Root — keyboard focus within

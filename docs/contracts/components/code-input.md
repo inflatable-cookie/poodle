@@ -159,10 +159,10 @@ so error framing holds under any rendering style (see Validation state rows belo
 | `width` | `2.25rem` |
 | `height` | `2.25rem` |
 | `padding` | `0` |
-| `border` | `0.0625rem solid var(--poodle-style-control-border, var(--code-slot-border, var(--poodle-color-border-default)))` |
+| `border` | `0.0625rem solid var(--poodle-style-control-border)` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `var(--poodle-recipe-code-input-slot-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)))` |
-| `box-shadow` | `var(--poodle-style-control-shadow, none)` |
+| `background` | `var(--poodle-recipe-code-input-slot-fill, var(--poodle-style-control-fill))` |
+| `box-shadow` | `var(--poodle-style-control-shadow)` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `1rem` |
@@ -200,7 +200,7 @@ the `check` icon and `--poodle-color-status-success`; a failed result uses the
 
 | validationState | `--code-slot-border` | Resolved resting `border-color` | `--code-slot-focus` | `--code-slot-focus-ring` |
 |-----------------|----------------------|----------------------------------|---------------------|---------------------------|
-| not invalid (default) | `var(--poodle-color-border-default)` | `var(--poodle-style-control-border, var(--code-slot-border, var(--poodle-color-border-default)))` | `var(--poodle-color-accent-border)` | `color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
+| not invalid (default) | `var(--poodle-color-border-default)` | `var(--poodle-style-control-border)` | `var(--poodle-color-accent-border)` | `color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
 | `"invalid"` (or `error` set) | `var(--poodle-color-status-danger)` | `var(--code-slot-border, var(--poodle-color-status-danger))` via `:where(.poodle-code-input:has(.poodle-code-input__control[aria-invalid="true"])) .poodle-code-input__slot` | `var(--poodle-color-status-danger)` | `color-mix(in srgb, var(--poodle-color-status-danger) 24%, transparent)` |
 
 ### Slot -- disabled

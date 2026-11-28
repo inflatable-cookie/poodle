@@ -159,9 +159,9 @@ beyond plain props. Classified in the long-tail sweep.
 | `grid-template-rows` | `auto` |
 | `gap` | `var(--poodle-space-stack-md)` |
 | `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
-| `border` | `0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle))` |
+| `border` | `0.0625rem solid var(--poodle-style-surface-border)` |
 | `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `var(--poodle-recipe-picker-shell-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)))` |
+| `background` | `var(--poodle-recipe-picker-shell-fill, var(--poodle-style-surface-fill))` |
 
 ### Variant: Popover (`[data-variant="popover"]`)
 
@@ -169,14 +169,14 @@ beyond plain props. Classified in the long-tail sweep.
 |----------|-------|
 | `width` | `100%` |
 | `max-width` | `min(32rem, calc(100vw - 2rem))` |
-| `box-shadow` | `var(--poodle-recipe-picker-shell-popover-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay)))` |
+| `box-shadow` | `var(--poodle-recipe-picker-shell-popover-shadow, var(--poodle-style-surface-shadow))` |
 
 ### Variant: Modal (`[data-variant="modal"]`)
 
 | Property | Value |
 |----------|-------|
-| `box-shadow` | `var(--poodle-recipe-picker-shell-modal-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-dialog)))` |
-| `background` | `var(--poodle-recipe-picker-shell-modal-fill, var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent))))` |
+| `box-shadow` | `var(--poodle-recipe-picker-shell-modal-shadow, var(--poodle-style-surface-shadow))` |
+| `background` | `var(--poodle-recipe-picker-shell-modal-fill, var(--poodle-style-surface-floatingFill))` |
 
 ### `.picker-shell__header`
 
@@ -250,7 +250,7 @@ Status text is visually hidden using the `sr-only` pattern, but remains in the D
 | `gap` | `var(--poodle-space-stack-sm)` |
 | `justify-items` | `start` |
 | `padding` | `calc(var(--poodle-space-panel-y) * 1.5) var(--poodle-space-panel-x)` |
-| `border` | `0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle))` |
+| `border` | `0.0625rem solid var(--poodle-style-surface-border)` |
 | `border-radius` | `var(--poodle-radius-surface)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent)` (nested tone: no surface role supplies a step below the shell) |
 

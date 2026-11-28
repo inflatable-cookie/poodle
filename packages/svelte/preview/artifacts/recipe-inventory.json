@@ -3,7 +3,7 @@
     "components": 150,
     "recipeHooks": 1282,
     "hookCandidates": 9,
-    "metricVariables": 451
+    "metricVariables": 449
   },
   "inventory": {
     "accordion": {
@@ -2455,11 +2455,9 @@
         "--poodle-text-input-control-padding-start",
         "--poodle-text-input-density-block-adjust",
         "--poodle-text-input-density-inline-adjust",
-        "--poodle-text-input-font-size",
         "--poodle-text-input-input-type-line",
         "--poodle-text-input-input-type-size",
         "--poodle-text-input-input-type-weight",
-        "--poodle-text-input-line-height",
         "--poodle-text-input-multiline-padding-end",
         "--poodle-text-input-padding-block",
         "--poodle-text-input-padding-inline",
