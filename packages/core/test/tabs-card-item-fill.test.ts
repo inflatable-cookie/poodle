@@ -101,11 +101,11 @@ function parseRules(source: string): Rule[] {
 const rules = parseRules(css);
 
 const CARD_FILL =
-  "var(--poodle-recipe-tabs-card-item-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)))";
+  "var(--poodle-recipe-tabs-card-item-fill, var(--poodle-style-control-fill))";
 const TINT_FILL =
-  "var(--poodle-recipe-tabs-card-selected-tab-fill, var(--poodle-style-selection-fill, var(--poodle-color-select-accent)))";
+  "var(--poodle-recipe-tabs-card-selected-tab-fill, var(--poodle-style-selection-fill))";
 const SOLID_FILL =
-  "var(--poodle-recipe-tabs-active-solid-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)))";
+  "var(--poodle-recipe-tabs-active-solid-fill, var(--poodle-style-selection-fillSolid))";
 const TAB_FILL = "var(--poodle-recipe-tabs-tab-fill, transparent)";
 
 function matches(

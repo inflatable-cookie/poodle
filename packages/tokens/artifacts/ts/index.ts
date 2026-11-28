@@ -554,7 +554,13 @@ export const tokens = {
         },
         "glyph": {
           "size": "initial",
-          "lineHeight": "initial"
+          "lineHeight": "initial",
+          "sm": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          }
         },
         "avatarInitials": {
           "xs": {
@@ -778,7 +784,188 @@ export const tokens = {
           "relaxedLg": "initial",
           "loose": "initial",
           "looseLg": "initial",
-          "spacious": "initial"
+          "spacious": "initial",
+          "normalLg": "initial"
+        },
+        "disclosureTitle": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "disclosureDescription": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "disclosurePanel": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "appHeaderTitle": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "appHeaderSubtitle": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "breadcrumbLabel": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "menuItem": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "menuMeta": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "menubarItem": {
+          "xs": {
+            "size": "initial"
+          }
+        },
+        "navigationLabel": {
+          "xs": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "toastTitle": {
+          "xs": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "toastBody": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "compactBadge": {
+          "size": "initial"
         }
       },
       "control": {
@@ -1173,6 +1360,8 @@ export const tokenPaths = [
   "style.typography.segmentLabel.weight",
   "style.typography.glyph.size",
   "style.typography.glyph.lineHeight",
+  "style.typography.glyph.sm.size",
+  "style.typography.glyph.lg.size",
   "style.typography.avatarInitials.xs.size",
   "style.typography.avatarInitials.sm.size",
   "style.typography.avatarInitials.md.size",
@@ -1257,6 +1446,59 @@ export const tokenPaths = [
   "style.typography.leading.loose",
   "style.typography.leading.looseLg",
   "style.typography.leading.spacious",
+  "style.typography.leading.normalLg",
+  "style.typography.disclosureTitle.xs.size",
+  "style.typography.disclosureTitle.sm.size",
+  "style.typography.disclosureTitle.md.size",
+  "style.typography.disclosureTitle.lg.size",
+  "style.typography.disclosureTitle.xl.size",
+  "style.typography.disclosureDescription.xs.size",
+  "style.typography.disclosureDescription.sm.size",
+  "style.typography.disclosureDescription.md.size",
+  "style.typography.disclosureDescription.lg.size",
+  "style.typography.disclosureDescription.xl.size",
+  "style.typography.disclosurePanel.xs.size",
+  "style.typography.disclosurePanel.sm.size",
+  "style.typography.disclosurePanel.md.size",
+  "style.typography.disclosurePanel.lg.size",
+  "style.typography.disclosurePanel.xl.size",
+  "style.typography.appHeaderTitle.xs.size",
+  "style.typography.appHeaderTitle.sm.size",
+  "style.typography.appHeaderTitle.md.size",
+  "style.typography.appHeaderTitle.lg.size",
+  "style.typography.appHeaderTitle.xl.size",
+  "style.typography.appHeaderSubtitle.xs.size",
+  "style.typography.appHeaderSubtitle.sm.size",
+  "style.typography.appHeaderSubtitle.md.size",
+  "style.typography.appHeaderSubtitle.lg.size",
+  "style.typography.appHeaderSubtitle.xl.size",
+  "style.typography.breadcrumbLabel.xs.size",
+  "style.typography.breadcrumbLabel.sm.size",
+  "style.typography.breadcrumbLabel.lg.size",
+  "style.typography.breadcrumbLabel.xl.size",
+  "style.typography.menuItem.xs.size",
+  "style.typography.menuItem.sm.size",
+  "style.typography.menuItem.lg.size",
+  "style.typography.menuItem.xl.size",
+  "style.typography.menuMeta.xs.size",
+  "style.typography.menuMeta.sm.size",
+  "style.typography.menuMeta.md.size",
+  "style.typography.menuMeta.lg.size",
+  "style.typography.menuMeta.xl.size",
+  "style.typography.menubarItem.xs.size",
+  "style.typography.navigationLabel.xs.size",
+  "style.typography.navigationLabel.md.size",
+  "style.typography.navigationLabel.lg.size",
+  "style.typography.navigationLabel.xl.size",
+  "style.typography.toastTitle.xs.size",
+  "style.typography.toastTitle.lg.size",
+  "style.typography.toastTitle.xl.size",
+  "style.typography.toastBody.xs.size",
+  "style.typography.toastBody.sm.size",
+  "style.typography.toastBody.md.size",
+  "style.typography.toastBody.lg.size",
+  "style.typography.toastBody.xl.size",
+  "style.typography.compactBadge.size",
   "style.control.fill",
   "style.control.border",
   "style.control.shadow",
@@ -1512,6 +1754,8 @@ export const cssVars = {
   "style.typography.segmentLabel.weight": "--poodle-style-typography-segmentLabel-weight",
   "style.typography.glyph.size": "--poodle-style-typography-glyph-size",
   "style.typography.glyph.lineHeight": "--poodle-style-typography-glyph-lineHeight",
+  "style.typography.glyph.sm.size": "--poodle-style-typography-glyph-sm-size",
+  "style.typography.glyph.lg.size": "--poodle-style-typography-glyph-lg-size",
   "style.typography.avatarInitials.xs.size": "--poodle-style-typography-avatarInitials-xs-size",
   "style.typography.avatarInitials.sm.size": "--poodle-style-typography-avatarInitials-sm-size",
   "style.typography.avatarInitials.md.size": "--poodle-style-typography-avatarInitials-md-size",
@@ -1596,6 +1840,59 @@ export const cssVars = {
   "style.typography.leading.loose": "--poodle-style-typography-leading-loose",
   "style.typography.leading.looseLg": "--poodle-style-typography-leading-looseLg",
   "style.typography.leading.spacious": "--poodle-style-typography-leading-spacious",
+  "style.typography.leading.normalLg": "--poodle-style-typography-leading-normalLg",
+  "style.typography.disclosureTitle.xs.size": "--poodle-style-typography-disclosureTitle-xs-size",
+  "style.typography.disclosureTitle.sm.size": "--poodle-style-typography-disclosureTitle-sm-size",
+  "style.typography.disclosureTitle.md.size": "--poodle-style-typography-disclosureTitle-md-size",
+  "style.typography.disclosureTitle.lg.size": "--poodle-style-typography-disclosureTitle-lg-size",
+  "style.typography.disclosureTitle.xl.size": "--poodle-style-typography-disclosureTitle-xl-size",
+  "style.typography.disclosureDescription.xs.size": "--poodle-style-typography-disclosureDescription-xs-size",
+  "style.typography.disclosureDescription.sm.size": "--poodle-style-typography-disclosureDescription-sm-size",
+  "style.typography.disclosureDescription.md.size": "--poodle-style-typography-disclosureDescription-md-size",
+  "style.typography.disclosureDescription.lg.size": "--poodle-style-typography-disclosureDescription-lg-size",
+  "style.typography.disclosureDescription.xl.size": "--poodle-style-typography-disclosureDescription-xl-size",
+  "style.typography.disclosurePanel.xs.size": "--poodle-style-typography-disclosurePanel-xs-size",
+  "style.typography.disclosurePanel.sm.size": "--poodle-style-typography-disclosurePanel-sm-size",
+  "style.typography.disclosurePanel.md.size": "--poodle-style-typography-disclosurePanel-md-size",
+  "style.typography.disclosurePanel.lg.size": "--poodle-style-typography-disclosurePanel-lg-size",
+  "style.typography.disclosurePanel.xl.size": "--poodle-style-typography-disclosurePanel-xl-size",
+  "style.typography.appHeaderTitle.xs.size": "--poodle-style-typography-appHeaderTitle-xs-size",
+  "style.typography.appHeaderTitle.sm.size": "--poodle-style-typography-appHeaderTitle-sm-size",
+  "style.typography.appHeaderTitle.md.size": "--poodle-style-typography-appHeaderTitle-md-size",
+  "style.typography.appHeaderTitle.lg.size": "--poodle-style-typography-appHeaderTitle-lg-size",
+  "style.typography.appHeaderTitle.xl.size": "--poodle-style-typography-appHeaderTitle-xl-size",
+  "style.typography.appHeaderSubtitle.xs.size": "--poodle-style-typography-appHeaderSubtitle-xs-size",
+  "style.typography.appHeaderSubtitle.sm.size": "--poodle-style-typography-appHeaderSubtitle-sm-size",
+  "style.typography.appHeaderSubtitle.md.size": "--poodle-style-typography-appHeaderSubtitle-md-size",
+  "style.typography.appHeaderSubtitle.lg.size": "--poodle-style-typography-appHeaderSubtitle-lg-size",
+  "style.typography.appHeaderSubtitle.xl.size": "--poodle-style-typography-appHeaderSubtitle-xl-size",
+  "style.typography.breadcrumbLabel.xs.size": "--poodle-style-typography-breadcrumbLabel-xs-size",
+  "style.typography.breadcrumbLabel.sm.size": "--poodle-style-typography-breadcrumbLabel-sm-size",
+  "style.typography.breadcrumbLabel.lg.size": "--poodle-style-typography-breadcrumbLabel-lg-size",
+  "style.typography.breadcrumbLabel.xl.size": "--poodle-style-typography-breadcrumbLabel-xl-size",
+  "style.typography.menuItem.xs.size": "--poodle-style-typography-menuItem-xs-size",
+  "style.typography.menuItem.sm.size": "--poodle-style-typography-menuItem-sm-size",
+  "style.typography.menuItem.lg.size": "--poodle-style-typography-menuItem-lg-size",
+  "style.typography.menuItem.xl.size": "--poodle-style-typography-menuItem-xl-size",
+  "style.typography.menuMeta.xs.size": "--poodle-style-typography-menuMeta-xs-size",
+  "style.typography.menuMeta.sm.size": "--poodle-style-typography-menuMeta-sm-size",
+  "style.typography.menuMeta.md.size": "--poodle-style-typography-menuMeta-md-size",
+  "style.typography.menuMeta.lg.size": "--poodle-style-typography-menuMeta-lg-size",
+  "style.typography.menuMeta.xl.size": "--poodle-style-typography-menuMeta-xl-size",
+  "style.typography.menubarItem.xs.size": "--poodle-style-typography-menubarItem-xs-size",
+  "style.typography.navigationLabel.xs.size": "--poodle-style-typography-navigationLabel-xs-size",
+  "style.typography.navigationLabel.md.size": "--poodle-style-typography-navigationLabel-md-size",
+  "style.typography.navigationLabel.lg.size": "--poodle-style-typography-navigationLabel-lg-size",
+  "style.typography.navigationLabel.xl.size": "--poodle-style-typography-navigationLabel-xl-size",
+  "style.typography.toastTitle.xs.size": "--poodle-style-typography-toastTitle-xs-size",
+  "style.typography.toastTitle.lg.size": "--poodle-style-typography-toastTitle-lg-size",
+  "style.typography.toastTitle.xl.size": "--poodle-style-typography-toastTitle-xl-size",
+  "style.typography.toastBody.xs.size": "--poodle-style-typography-toastBody-xs-size",
+  "style.typography.toastBody.sm.size": "--poodle-style-typography-toastBody-sm-size",
+  "style.typography.toastBody.md.size": "--poodle-style-typography-toastBody-md-size",
+  "style.typography.toastBody.lg.size": "--poodle-style-typography-toastBody-lg-size",
+  "style.typography.toastBody.xl.size": "--poodle-style-typography-toastBody-xl-size",
+  "style.typography.compactBadge.size": "--poodle-style-typography-compactBadge-size",
   "style.control.fill": "--poodle-style-control-fill",
   "style.control.border": "--poodle-style-control-border",
   "style.control.shadow": "--poodle-style-control-shadow",

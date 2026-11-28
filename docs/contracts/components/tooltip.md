@@ -191,20 +191,18 @@ offset `0.125rem`).
 | `z-index` | `var(--poodle-overlay-z-menu)` |
 | `max-width` | `16rem` |
 | `padding` | `0.375rem 0.5rem` |
-| `border` | `0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent))` |
+| `border` | `0.0625rem solid var(--poodle-style-surface-border)` |
 | `border-radius` | `calc(var(--poodle-radius-control) - 0.125rem)` |
-| `background` | `var(--poodle-recipe-tooltip-bubble-fill, var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))))` |
-| `box-shadow` | `var(--poodle-recipe-tooltip-bubble-shadow, var(--poodle-style-surface-shadow, 0 0.5rem 1.25rem rgba(0, 0, 0, 0.3), 0 0.125rem 0.375rem rgba(0, 0, 0, 0.2)))` |
+| `background` | `var(--poodle-recipe-tooltip-bubble-fill, var(--poodle-style-surface-floatingFill))` |
+| `box-shadow` | `var(--poodle-recipe-tooltip-bubble-shadow, var(--poodle-style-surface-shadow))` |
 | `color` | `var(--poodle-recipe-tooltip-bubble-text, var(--poodle-color-text-primary))` |
-| `font-size` | `0.6875rem` |
-| `line-height` | `1.35` |
+| `font-size` | `var(--poodle-typography-caption-size)` (`0.6875rem`) |
+| `line-height` | `var(--poodle-typography-caption-lineHeightRatio)` (`1.35`) |
 | `white-space` | `nowrap` |
 
 Bubble fill and shadow resolve their component Recipe hooks first, then the
-surface style role, then fall back to the semantic-token forms above. Border
-and radius resolve the surface border role and then semantic tokens. The
-box-shadow is a literal two-layer drop shadow, not the
-`--poodle-elevation-overlay` token.
+surface style role. The border reads the surface border role, and the radius
+derives from the control radius.
 
 ### Placement — JS-resolved viewport coordinates
 
@@ -271,10 +269,10 @@ and exposes the resolved value via `data-placement`.
 ### Tier 2: Visual Parity
 
 - [ ] bubble padding: 0.375rem 0.5rem
-- [ ] border: 0.0625rem solid with 72% opacity border color
+- [ ] border: 0.0625rem solid with the surface border role
 - [ ] border-radius: calc(control-radius - 0.125rem)
-- [ ] background: 98% elevated mixed with panel (via `--poodle-recipe-tooltip-bubble-fill`, with the color-mix as fallback)
-- [ ] box-shadow: two-layer drop shadow (`0 0.5rem 1.25rem rgba(0,0,0,0.3), 0 0.125rem 0.375rem rgba(0,0,0,0.2)`)
+- [ ] background: surface floating fill role (via `--poodle-recipe-tooltip-bubble-fill`)
+- [ ] box-shadow: surface shadow role (via `--poodle-recipe-tooltip-bubble-shadow`)
 - [ ] font-size: 0.6875rem, line-height: 1.35
 - [ ] color: text-primary
 - [ ] white-space: nowrap

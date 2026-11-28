@@ -300,11 +300,11 @@ Two rules bound that deferral, and both are required behaviour:
 | `max-height` | `min(80vh, 42rem)` |
 | `overflow` | `auto` |
 | `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
-| `border` | `var(--poodle-border-width-default) solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent))` |
+| `border` | `var(--poodle-border-width-default) solid var(--poodle-style-surface-border)` |
 | `border-radius` | `var(--poodle-radius-surface)` |
 | `background` | `var(--poodle-recipe-dialog-surface-fill, var(--poodle-surface))` |
-| `--poodle-surface` | `var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))))` |
-| `box-shadow` | `var(--poodle-recipe-dialog-surface-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-dialog)))` |
+| `--poodle-surface` | `var(--poodle-style-surface-floatingFill)` |
+| `box-shadow` | `var(--poodle-recipe-dialog-surface-shadow, var(--poodle-style-surface-shadow))` |
 
 ### Surface bare modifier `.dialog__surface--bare`
 
@@ -350,8 +350,8 @@ A custom header owns its typography.
 | Property | Value |
 |----------|-------|
 | `font-family` | `var(--poodle-typography-heading-family)` |
-| `font-size` | `1rem` |
-| `line-height` | `1.2` |
+| `font-size` | `var(--poodle-style-typography-dialogTitle-size)` (`1.375rem`) |
+| `line-height` | `var(--poodle-style-typography-dialogTitle-lineHeight)` (`1.75rem`) |
 
 ### Header description (`.dialog__header p`)
 
@@ -384,13 +384,8 @@ A custom header owns its typography.
 
 ### Size adjustments
 
-| Size | header title font-size | header description font-size |
-|------|----------------------|---------------------------|
-| `xs` | `0.8125rem` | `0.75rem` |
-| `sm` | `0.875rem` | (default) |
-| `md` | `1rem` | (default) |
-| `lg` | `1.0625rem` | (default) |
-| `xl` | `1.125rem` | (default) |
+Every size reads the same `dialogTitle` and `secondary` roles, so the default
+title and description sizes do not change with `data-size`.
 
 ### Density adjustments (applied to surface padding, not body)
 
@@ -467,12 +462,12 @@ A custom header owns its typography.
 - [ ] backdrop overlay color matches (background-overlay)
 - [ ] surface border semantic-token formula matches
 - [ ] surface background Recipe hook and semantic fallback match
-- [ ] surface elevation Recipe hook and elevation fallback match
+- [ ] surface elevation Recipe hook and surface shadow role match
 - [ ] surface border-radius uses `radius-surface`
 - [ ] surface padding uses space-panel-y and space-panel-x
 - [ ] surface max-height constraint (min(80vh, 42rem)) matches
 - [ ] header gap (0.375rem) and margin-bottom (space-stack-md) match
-- [ ] title typography (heading-family, 1rem, 1.2) matches
+- [ ] title typography (heading-family, `dialogTitle` role) matches
 - [ ] description color (text-secondary) and margin reset match
 - [ ] actions flex layout (wrap, flex-end, space-inline-sm gap) matches
 - [ ] actions margin-top (space-stack-lg) matches

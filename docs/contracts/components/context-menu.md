@@ -282,7 +282,7 @@ leaf-only activation.
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-family` | `var(--poodle-typography-code-family)` |
-| `font-size` | `0.6875rem` |
+| `font-size` | `var(--poodle-style-typography-menuMeta-md-size)` (`0.6875rem`) |
 
 ### Separator `.context-menu__separator`
 

@@ -41,11 +41,11 @@
   cursor: pointer;
 }
 .poodle-history-center__list-trigger:hover {
-  background: var(--poodle-style-control-fillHover, transparent);
+  background: var(--poodle-style-control-fillHover);
   color: var(--poodle-color-text-primary);
 }
   .poodle-history-center__list-trigger:active {
-    background: var(--poodle-style-control-fillActive, transparent);
+    background: var(--poodle-style-control-fillActive);
   }
 .poodle-history-center__list-trigger:focus-visible {
   outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
@@ -146,7 +146,7 @@
 .poodle-history-center__row[data-part="entry"][data-position="current"] {
   background: var(
     --poodle-recipe-history-center-current-fill,
-    var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 7%, transparent))
+    var(--poodle-style-selection-itemFill)
   );
 }
 
@@ -175,11 +175,11 @@
 /* The entry action carries the hover and press fills. The fork disclosure is a
    sibling of this button in the row, so the two fills never stack. */
 .poodle-history-center__entry-content:hover:not(:disabled) {
-  background: var(--poodle-recipe-history-center-item-hover-fill, var(--poodle-style-control-fillHover, transparent));
+  background: var(--poodle-recipe-history-center-item-hover-fill, var(--poodle-style-control-fillHover));
 }
 
 .poodle-history-center__entry-content:active:not(:disabled) {
-  background: var(--poodle-recipe-history-center-item-active-fill, var(--poodle-style-control-fillActive, transparent));
+  background: var(--poodle-recipe-history-center-item-active-fill, var(--poodle-style-control-fillActive));
 }
 
 .poodle-history-center__entry-content:focus-visible {
@@ -203,7 +203,7 @@
 
 .poodle-history-center__entry-meta {
   color: var(--poodle-color-text-secondary);
-  font-size: 0.6875rem;
+  font-size: var(--poodle-typography-caption-size);
   line-height: var(--poodle-typography-label-lineHeight);
 }
 
@@ -227,8 +227,8 @@
 }
 
 .poodle-history-center__position-marker[data-position="current"] {
-  background: var(--poodle-recipe-history-center-current-marker, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)));
-  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)) 15%, transparent);
+  background: var(--poodle-recipe-history-center-current-marker, var(--poodle-style-selection-indicator));
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--poodle-style-selection-indicator) 15%, transparent);
 }
 
 /* Fork disclosure affordance (R3): icon + optional counter badge + chevron.
@@ -253,12 +253,12 @@
 .poodle-history-center__fork:hover {
   background: var(
     --poodle-recipe-history-center-item-hover-fill,
-    var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent))
+    var(--poodle-style-control-fillHover)
   );
   color: var(--poodle-color-text-primary);
 }
   .poodle-history-center__fork:active {
-    background: var(--poodle-recipe-history-center-item-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-history-center-item-active-fill, var(--poodle-style-control-fillActive));
   }
 
 .poodle-history-center__fork:focus-visible {
@@ -285,9 +285,9 @@
     color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)
   );
   color: var(--poodle-recipe-history-center-fork-badge-text, var(--poodle-color-accent-base));
-  font-size: 0.65rem;
+  font-size: var(--poodle-style-typography-compactBadge-size);
   font-weight: var(--poodle-typography-label-weight);
-  line-height: 1.4;
+  line-height: var(--poodle-style-typography-leading-normal);
   text-align: center;
 }
 
@@ -383,7 +383,7 @@
 
 .poodle-history-center__picker-option-branch {
   color: var(--poodle-color-text-secondary);
-  font-size: 0.6875rem;
+  font-size: var(--poodle-typography-caption-size);
   line-height: var(--poodle-typography-label-lineHeight);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -395,7 +395,7 @@
    (b033 R3). */
 .poodle-history-center__picker-option-meta {
   color: var(--poodle-color-text-secondary);
-  font-size: 0.6875rem;
+  font-size: var(--poodle-typography-caption-size);
   line-height: var(--poodle-typography-label-lineHeight);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -414,9 +414,9 @@
   align-self: center;
   margin: calc(var(--poodle-space-panel-y) * 0.4) var(--poodle-space-stack-sm);
   padding: 0.2rem 0.4rem;
-  border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
+  border: 0.0625rem solid var(--poodle-style-control-border);
   border-radius: var(--poodle-radius-control);
-  background: var(--poodle-style-control-fill, var(--poodle-color-background-surface));
+  background: var(--poodle-style-control-fill);
   color: var(--poodle-color-text-primary);
   font: inherit;
   font-size: var(--poodle-typography-label-size);

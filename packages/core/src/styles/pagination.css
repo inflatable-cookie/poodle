@@ -13,8 +13,8 @@
 
   .poodle-pagination--chrome {
     padding: var(--poodle-space-control-y) var(--poodle-space-panel-x);
-    border-top: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
-    background: var(--poodle-recipe-pagination-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent)));
+    border-top: 0.0625rem solid var(--poodle-style-surface-border);
+    background: var(--poodle-recipe-pagination-fill, var(--poodle-style-surface-fill));
   }
 
   .poodle-pagination--compact {
@@ -53,9 +53,9 @@
   .poodle-pagination__limit select {
     padding: 0.25rem 0.5rem;
     font: inherit;
-    border: 0.0625rem solid var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent));
+    border: 0.0625rem solid var(--poodle-style-control-border);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-pagination-limit-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
+    background: var(--poodle-recipe-pagination-limit-fill, var(--poodle-style-control-fill));
     color: var(--poodle-recipe-pagination-limit-select-text, var(--poodle-color-text-primary));
   }
 
@@ -84,29 +84,29 @@
     min-width: var(--poodle-size-control-height);
     height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
-    border: 0.0625rem solid var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent));
+    border: 0.0625rem solid var(--poodle-style-control-border);
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-recipe-pagination-button-fill, transparent);
     color: var(--poodle-recipe-pagination-button-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
-    font-size: 0.75rem;
-    font-weight: 600;
-    line-height: 1;
+    font-size: var(--poodle-style-typography-navigationLabel-md-size);
+    font-weight: var(--poodle-typography-font-weight-semibold);
+    line-height: var(--poodle-typography-label-lineHeightTight);
   }
 
   .poodle-pagination__button[data-current="true"] {
-    background: var(--poodle-recipe-pagination-current-button-fill, var(--poodle-style-selection-fill, var(--poodle-color-select-accent)));
-    border-color: var(--poodle-recipe-pagination-current-button-border, var(--poodle-style-selection-borderStrong, var(--poodle-color-select-accentBorderStrong)));
+    background: var(--poodle-recipe-pagination-current-button-fill, var(--poodle-style-selection-fill));
+    border-color: var(--poodle-recipe-pagination-current-button-border, var(--poodle-style-selection-borderStrong));
   }
 
   .poodle-pagination__button:hover:not(:disabled),
   .poodle-pagination__button:focus-visible {
-    background: var(--poodle-recipe-pagination-hover-focus-button-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
+    background: var(--poodle-recipe-pagination-hover-focus-button-fill, var(--poodle-style-control-fillHover));
     outline: none;
   }
   .poodle-pagination__button:active:not(:disabled) {
-    background: var(--poodle-recipe-pagination-button-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-pagination-button-active-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-pagination__ellipsis {
@@ -116,8 +116,8 @@
     min-width: 1.5rem;
     color: var(--poodle-recipe-pagination-ellipsis-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: var(--poodle-style-typography-navigationLabel-md-size);
+    font-weight: var(--poodle-typography-font-weight-semibold);
   }
 
   .poodle-pagination__summary {
@@ -134,10 +134,10 @@
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .poodle-pagination[data-size="xs"] .poodle-pagination__button { min-width: 1.5rem; height: 1.5rem; font-size: 0.6875rem; }
+  .poodle-pagination[data-size="xs"] .poodle-pagination__button { min-width: 1.5rem; height: 1.5rem; font-size: var(--poodle-style-typography-compactControlLabel-xs-size); }
   .poodle-pagination[data-size="sm"] .poodle-pagination__button { min-width: 1.75rem; height: 1.75rem; }
-  .poodle-pagination[data-size="lg"] .poodle-pagination__button { min-width: 2.75rem; height: 2.75rem; font-size: 0.875rem; }
-  .poodle-pagination[data-size="xl"] .poodle-pagination__button { min-width: 3.25rem; height: 3.25rem; font-size: 0.9375rem; }
+  .poodle-pagination[data-size="lg"] .poodle-pagination__button { min-width: 2.75rem; height: 2.75rem; font-size: var(--poodle-style-typography-compactControlLabel-lg-size); }
+  .poodle-pagination[data-size="xl"] .poodle-pagination__button { min-width: 3.25rem; height: 3.25rem; font-size: var(--poodle-style-typography-compactControlLabel-xl-size); }
 
   .poodle-pagination[data-density="compact"] .poodle-pagination__controls,
   .poodle-pagination[data-density="compact"] .poodle-pagination__pages {

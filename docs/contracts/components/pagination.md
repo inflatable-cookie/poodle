@@ -401,16 +401,16 @@ default. Container chrome is opt-in via the `chrome` prop (the deprecated
 | `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `0.75rem` |
-| `font-weight` | `600` |
-| `line-height` | `1` |
+| `font-size` | `var(--poodle-style-typography-navigationLabel-md-size)` (`0.75rem`) |
+| `font-weight` | `var(--poodle-typography-font-weight-semibold)` (`600`) |
+| `line-height` | `var(--poodle-typography-label-lineHeightTight)` (`1`) |
 
 ### Button — current page `.pagination__button[data-current="true"]`
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-style-selection-fill, var(--poodle-color-select-accent))` — neutral selection fill by default |
-| `border-color` | `var(--poodle-style-selection-borderStrong, var(--poodle-color-select-accentBorderStrong))` — transparent by default |
+| `background` | `var(--poodle-style-selection-fill)` — neutral selection fill by default |
+| `border-color` | `var(--poodle-style-selection-borderStrong)` — transparent by default |
 
 ### Button — hover / focus-visible (not disabled)
 
@@ -436,8 +436,8 @@ default. Container chrome is opt-in via the `chrome` prop (the deprecated
 | `min-width` | `1.5rem` |
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `0.75rem` |
-| `font-weight` | `600` |
+| `font-size` | `var(--poodle-style-typography-navigationLabel-md-size)` (`0.75rem`) |
+| `font-weight` | `var(--poodle-typography-font-weight-semibold)` (`600`) |
 
 ### Summary `.pagination__summary`
 
@@ -451,6 +451,9 @@ default. Container chrome is opt-in via the `chrome` prop (the deprecated
 | `padding` | `0 0.5rem` |
 
 ### Size Adjustments
+
+The `xs`, `lg`, and `xl` font sizes are the defaults of
+`compactControlLabel.{size}.size`.
 
 | Size | Button Height | Button Min-Width | Button Font-Size |
 |------|--------------|-----------------|-----------------|

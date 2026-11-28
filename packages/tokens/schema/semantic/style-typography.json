@@ -467,6 +467,18 @@
         "lineHeight": {
           "$type": "number",
           "$value": "initial"
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
         }
       },
       "avatarInitials": {
@@ -942,6 +954,346 @@
         },
         "spacious": {
           "$type": "number",
+          "$value": "initial"
+        },
+        "normalLg": {
+          "$type": "number",
+          "$value": "initial"
+        }
+      },
+      "disclosureTitle": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "disclosureDescription": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "disclosurePanel": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "appHeaderTitle": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "appHeaderSubtitle": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "breadcrumbLabel": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "menuItem": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "menuMeta": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "menubarItem": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "navigationLabel": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "toastTitle": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "toastBody": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "compactBadge": {
+        "size": {
+          "$type": "dimension",
           "$value": "initial"
         }
       }

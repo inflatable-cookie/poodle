@@ -31,11 +31,11 @@
   }
   .poodle-breadcrumbs a:hover:not(:disabled),
   .poodle-breadcrumbs button:hover:not(:disabled) {
-    background: var(--poodle-recipe-breadcrumbs-hover-fill, var(--poodle-style-control-fillHover, transparent));
+    background: var(--poodle-recipe-breadcrumbs-hover-fill, var(--poodle-style-control-fillHover));
   }
   .poodle-breadcrumbs a:active:not(:disabled),
   .poodle-breadcrumbs button:active:not(:disabled) {
-    background: var(--poodle-recipe-breadcrumbs-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-breadcrumbs-active-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-breadcrumbs a:focus-visible,
@@ -74,31 +74,31 @@
   }
 
   .poodle-breadcrumbs [aria-current="page"] {
-    color: var(--poodle-recipe-breadcrumbs-text, var(--poodle-style-selection-text, var(--poodle-color-text-primary)));
+    color: var(--poodle-recipe-breadcrumbs-text, var(--poodle-style-selection-text));
   }
 
   /* Size variants */
   .poodle-breadcrumbs[data-size="xs"] .poodle-breadcrumbs__list {
     gap: 0.25rem;
-    font-size: 0.6875rem;
+    font-size: var(--poodle-style-typography-breadcrumbLabel-xs-size);
   }
   .poodle-breadcrumbs[data-size="xs"] .poodle-breadcrumbs__item { gap: 0.25rem; }
 
   .poodle-breadcrumbs[data-size="sm"] .poodle-breadcrumbs__list {
     gap: 0.375rem;
-    font-size: 0.78125rem;
+    font-size: var(--poodle-style-typography-breadcrumbLabel-sm-size);
   }
   .poodle-breadcrumbs[data-size="sm"] .poodle-breadcrumbs__item { gap: 0.375rem; }
 
   .poodle-breadcrumbs[data-size="lg"] .poodle-breadcrumbs__list {
     gap: 0.625rem;
-    font-size: 1rem;
+    font-size: var(--poodle-style-typography-breadcrumbLabel-lg-size);
   }
   .poodle-breadcrumbs[data-size="lg"] .poodle-breadcrumbs__item { gap: 0.625rem; }
 
   .poodle-breadcrumbs[data-size="xl"] .poodle-breadcrumbs__list {
     gap: 0.75rem;
-    font-size: 1.125rem;
+    font-size: var(--poodle-style-typography-breadcrumbLabel-xl-size);
   }
   .poodle-breadcrumbs[data-size="xl"] .poodle-breadcrumbs__item { gap: 0.75rem; }
 

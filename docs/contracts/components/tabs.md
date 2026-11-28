@@ -618,7 +618,7 @@ item also carries the chip radius, so the outline is correctly rounded.
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--poodle-style-selection-border, var(--poodle-color-select-accentBorder))` |
+| `border-color` | `var(--poodle-style-selection-border)` |
 
 This is the former `card` variant's selected-border value, so opting in restores
 exactly the outline the old variant drew by default.
@@ -634,7 +634,7 @@ measured from the selected item rather than painted as a selected-item border.
 | vertical | selected item's scroll-content block offset and height; 0.125rem inline size on the list's right edge |
 
 The indicator uses `var(--poodle-recipe-tabs-active-underline-border,
-var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)))`. It never owns selection, focus, hit testing,
+var(--poodle-style-selection-indicator))`. It never owns selection, focus, hit testing,
 or accessibility semantics.
 
 First measurement paints the selected endpoint without motion. A semantic
@@ -655,11 +655,11 @@ to the semantic token, adjusted by the selection style.
 
 | Hook | Applies To | Fallback |
 |------|------------|----------|
-| `--poodle-recipe-tabs-active-outline-border` | `activeEdge="outline"` selected item border | `var(--poodle-style-selection-border, var(--poodle-color-select-accentBorder))` |
-| `--poodle-recipe-tabs-active-underline-border` | `activeEdge="underline"` measured indicator fill, both orientations | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |
+| `--poodle-recipe-tabs-active-outline-border` | `activeEdge="outline"` selected item border | `var(--poodle-style-selection-border)` |
+| `--poodle-recipe-tabs-active-underline-border` | `activeEdge="underline"` measured indicator fill, both orientations | `var(--poodle-style-selection-indicator)` |
 | `--poodle-recipe-tabs-card-item-fill` | every card item background before selection treatment | `var(--poodle-color-background-surface)` |
-| `--poodle-recipe-tabs-active-solid-fill` | `activeFill="solid"` selected item background | `var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base))` |
-| `--poodle-recipe-tabs-active-solid-text` | `activeFill="solid"` selected tab/close foreground | `var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse))` |
+| `--poodle-recipe-tabs-active-solid-fill` | `activeFill="solid"` selected item background | `var(--poodle-style-selection-fillSolid)` |
+| `--poodle-recipe-tabs-active-solid-text` | `activeFill="solid"` selected tab/close foreground | `var(--poodle-style-selection-textSolid)` |
 
 The underline hook is one paint role in both orientations, so one variable
 covers horizontal and vertical.
@@ -678,8 +678,8 @@ covers horizontal and vertical.
 | `color` | `var(--poodle-color-text-secondary)` |
 | `cursor` | `pointer` |
 | `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `0.75rem` |
-| `font-weight` | `600` |
+| `font-size` | `var(--poodle-tabs-label-size)` (`0.8125rem` md; defaults of `compactControlLabel.{size}.size`) |
+| `font-weight` | `var(--poodle-typography-label-weight)` (`500`) |
 | `line-height` | `var(--poodle-typography-label-lineHeightTight)` |
 | `white-space` | `nowrap` |
 
@@ -714,25 +714,25 @@ card in the strip.
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-style-selection-fill, var(--poodle-color-select-accent))` |
+| `background` | `var(--poodle-style-selection-fill)` |
 
 ### Tab and Close — Card variant (selected)
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-style-selection-text, var(--poodle-color-text-primary))` |
+| `color` | `var(--poodle-style-selection-text)` |
 
 ### Item — Card variant (activeFill="solid", selected)
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base))` |
+| `background` | `var(--poodle-style-selection-fillSolid)` |
 
 ### Tab and Close — activeFill="solid", selected
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse))` |
+| `color` | `var(--poodle-style-selection-textSolid)` |
 
 The solid fill applies across variants. The default style pairs the existing
 accent and inverse text. The other styles paint this state with their own
@@ -763,8 +763,8 @@ selection fill goes. `block` + `activeFill="none"` +
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-style-selection-fill, var(--poodle-color-select-accent))` |
-| `color` | `var(--poodle-style-selection-text, var(--poodle-color-text-primary))` |
+| `background` | `var(--poodle-style-selection-fill)` |
+| `color` | `var(--poodle-style-selection-text)` |
 
 ### List — Block variant
 
@@ -810,8 +810,8 @@ Note: In the block variant, the selected background is applied on the **item wra
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-style-selection-fillSurface, var(--poodle-color-select-accentSurface))` |
-| `color` | `var(--poodle-style-selection-text, var(--poodle-color-text-primary))` |
+| `background` | `var(--poodle-style-selection-fillSurface)` |
+| `color` | `var(--poodle-style-selection-text)` |
 
 ### Item — Block variant (hover)
 
@@ -820,7 +820,7 @@ Note: In the block variant, the hover background is applied on the **item wrappe
 | Property | Value |
 |----------|-------|
 | `background` (unselected) | `color-mix(in srgb, var(--poodle-color-surface-hover) 50%, transparent)` |
-| `background` (selected) | `var(--poodle-style-selection-fillSurfaceHover, var(--poodle-color-select-accentSurfaceHover))` |
+| `background` (selected) | `var(--poodle-style-selection-fillSurfaceHover)` |
 
 ### Close button — Block variant
 
@@ -1052,7 +1052,7 @@ does not read the hook.
 
 - [ ] all three variants render with exact token/dimension match
 - [ ] card idle `background-surface` and color-mix percentages match (82%, 18%, 74%, 90%, 96%; outline edge 32%)
-- [ ] font-size 0.75rem, font-weight 600, line-height 1 match
+- [ ] label size, label weight, and line-height 1 match
 - [ ] min-height calc expressions match per variant
 - [ ] padding values match per variant
 - [ ] focus ring style matches

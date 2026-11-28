@@ -8,7 +8,7 @@
     --poodle-action-discovery-chip-height: 1.375rem;
     --poodle-action-discovery-chip-x: 0.5rem;
     --poodle-action-discovery-chip-gap: 0.375rem;
-    --poodle-action-discovery-chip-font-size: 0.6875rem;
+    --poodle-action-discovery-chip-font-size: var(--poodle-style-typography-pillLabel-md-size);
     --poodle-action-discovery-skeleton-pad: 0.875rem;
     --poodle-action-discovery-row-y: 0.375rem;
     --poodle-action-discovery-row-x: 0.625rem;
@@ -26,14 +26,14 @@
   .poodle-action-discovery-panel[data-size="xs"] {
     --poodle-action-discovery-chip-height: 1.125rem;
     --poodle-action-discovery-chip-x: 0.375rem;
-    --poodle-action-discovery-chip-font-size: 0.5625rem;
+    --poodle-action-discovery-chip-font-size: var(--poodle-style-typography-pillLabel-xs-size);
     --poodle-action-discovery-row-y: 0.25rem;
     --poodle-action-discovery-row-x: 0.5rem;
   }
 
   .poodle-action-discovery-panel[data-size="sm"] {
     --poodle-action-discovery-chip-height: 1.25rem;
-    --poodle-action-discovery-chip-font-size: 0.625rem;
+    --poodle-action-discovery-chip-font-size: var(--poodle-style-typography-pillLabel-sm-size);
     --poodle-action-discovery-row-y: 0.3125rem;
     --poodle-action-discovery-row-x: 0.5rem;
   }
@@ -41,7 +41,7 @@
   .poodle-action-discovery-panel[data-size="lg"] {
     --poodle-action-discovery-chip-height: 1.5rem;
     --poodle-action-discovery-chip-x: 0.625rem;
-    --poodle-action-discovery-chip-font-size: 0.75rem;
+    --poodle-action-discovery-chip-font-size: var(--poodle-style-typography-pillLabel-lg-size);
     --poodle-action-discovery-row-y: 0.5rem;
     --poodle-action-discovery-row-x: 0.75rem;
   }
@@ -49,7 +49,7 @@
   .poodle-action-discovery-panel[data-size="xl"] {
     --poodle-action-discovery-chip-height: 1.75rem;
     --poodle-action-discovery-chip-x: 0.75rem;
-    --poodle-action-discovery-chip-font-size: 0.8125rem;
+    --poodle-action-discovery-chip-font-size: var(--poodle-style-typography-pillLabel-xl-size);
     --poodle-action-discovery-row-y: 0.625rem;
     --poodle-action-discovery-row-x: 0.875rem;
   }
@@ -89,8 +89,8 @@
 
   .poodle-action-discovery-panel__list li[aria-selected="true"] .poodle-list-card {
     border-color: var(--poodle-recipe-action-discovery-panel-list-border, transparent);
-    background: var(--poodle-recipe-action-discovery-panel-list-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-elevated))));
-    box-shadow: var(--poodle-recipe-action-discovery-panel-list-shadow, inset 0 0 0 0.0625rem var(--poodle-style-selection-itemBorder, color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)));
+    background: var(--poodle-recipe-action-discovery-panel-list-fill, var(--poodle-style-selection-itemFill));
+    box-shadow: var(--poodle-recipe-action-discovery-panel-list-shadow, inset 0 0 0 0.0625rem var(--poodle-style-selection-itemBorder));
   }
 
   .poodle-action-discovery-panel__trailing {
@@ -112,7 +112,7 @@
     color: var(--poodle-recipe-action-discovery-panel-kbd-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-action-discovery-chip-font-size);
-    font-weight: 600;
+    font-weight: var(--poodle-style-typography-pillLabel-weight);
     letter-spacing: 0.03em;
     text-transform: uppercase;
     white-space: nowrap;

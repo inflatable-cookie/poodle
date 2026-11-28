@@ -115,7 +115,12 @@ leading/bold roles for Foundations components, plus `prose` for document
 editors and block sliders, `displayControl` for large numeric and code
 inputs, `controlHint`, `chipLabel`, and `microLabel` for auxiliary labels
 and chips, `emphasis` for bold weights, and `leading` for unitless
-line-height ratios. Density controls spacing.
+line-height ratios. Overlays, menus, navigation, and shells add
+`disclosureTitle`, `disclosureDescription`, and `disclosurePanel`;
+`appHeaderTitle` and `appHeaderSubtitle`; `breadcrumbLabel`; `menuItem`,
+`menubarItem`, and `menuMeta`; `navigationLabel`; `toastTitle` and
+`toastBody`; `compactBadge`; and the `glyph.sm` and `glyph.lg` sizes. Density
+controls spacing.
 
 The style supplies system sans and mono for the legacy per-role family tokens.
 The generated CSS gives those aliases zero-specificity defaults at the

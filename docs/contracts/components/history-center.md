@@ -631,7 +631,7 @@ region (R6) and the picker (R1) — one event, both sites.
   would overflow the rounded edge.
 - Text: the panel root sets `typography-label-size` as its base, so rows do
   not inherit the document default. The header title is `body-size`; entry
-  meta steps down to `0.6875rem`.
+  meta steps down to `typography-caption-size` (`0.6875rem`).
 - List: bounded `max-height: min(28rem, 60vh)`, scrolls internally with
   `overscroll-behavior: contain`. No virtualisation — paging only (Tree's
   virtual scroll is Svelte-only precedent and would break the native port).

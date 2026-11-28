@@ -208,9 +208,9 @@ Rendering style roles: triggers rest transparent and read `--poodle-style-contro
 | `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `0.75rem` |
-| `font-weight` | `600` |
-| `line-height` | `1` |
+| `font-size` | `var(--poodle-style-typography-navigationLabel-md-size)` (`0.75rem`) |
+| `font-weight` | `var(--poodle-typography-font-weight-semibold)` (`600`) |
+| `line-height` | `var(--poodle-typography-label-lineHeightTight)` (`1`) |
 
 ### Trigger — Open (active)
 
@@ -220,7 +220,7 @@ fill by default. The recipe hook
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent))` |
+| `background` | `var(--poodle-style-selection-itemFill)` |
 | `color` | `var(--poodle-color-text-primary)` |
 
 ### Trigger — Open, hovered (activeFill not `none` or `solid`)
@@ -231,7 +231,7 @@ still resolves first.
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent))` |
+| `background` | `var(--poodle-style-selection-itemFill)` |
 
 ### Trigger — Hover / Focus
 
@@ -270,7 +270,7 @@ border at all.
 | Property | Value |
 |----------|-------|
 | `border` (all triggers, `[data-active-edge="outline"]`) | `0.0625rem solid transparent` |
-| `border-color` (open trigger) | `var(--poodle-style-selection-borderStrong, var(--poodle-color-select-accentBorderStrong))` — transparent by default |
+| `border-color` (open trigger) | `var(--poodle-style-selection-borderStrong)` — transparent by default |
 
 ### Trigger — activeEdge="underline"
 
@@ -281,15 +281,15 @@ from shifting when the open trigger's edge becomes visible.
 | Property | Value |
 |----------|-------|
 | `border-bottom` (all triggers, `[data-active-edge="underline"]`) | `0.125rem solid transparent` |
-| `border-bottom-color` (open trigger) | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |
+| `border-bottom-color` (open trigger) | `var(--poodle-style-selection-indicator)` |
 
 ### Trigger — activeFill="solid"
 
 | Property | Value |
 |----------|-------|
-| `background` (open trigger) | `var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base))` — neutral selection fill by default |
-| `color` (open trigger) | `var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse))` — primary text by default |
-| `background` (open trigger, hover / focus-visible) | `var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base))` — the fill survives hover/focus; the generic hover rule must not override it |
+| `background` (open trigger) | `var(--poodle-style-selection-fillSolid)` — neutral selection fill by default |
+| `color` (open trigger) | `var(--poodle-style-selection-textSolid)` — primary text by default |
+| `background` (open trigger, hover / focus-visible) | `var(--poodle-style-selection-fillSolid)` — the fill survives hover/focus; the generic hover rule must not override it |
 
 ### Trigger — activeFill="none"
 
@@ -320,7 +320,8 @@ Size steps `font-size` only. Trigger `min-height` stays
 `var(--poodle-size-control-height)` and trigger `padding` stays
 `0 var(--poodle-space-control-x)` for every size — those tokens already scale per
 size, so no per-size min-height/padding override is applied. `—` means no
-override (inherits the base `0.75rem`).
+override (inherits the base `0.75rem`). The values are the defaults of the
+`navigationLabel.{size}.size` style type roles.
 
 | Size | trigger font-size |
 |------|-------------------|
