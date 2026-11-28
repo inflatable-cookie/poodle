@@ -25,8 +25,7 @@ function specNameAndVersion(spec: string): { name: string; version: string } | u
   return { name, version };
 }
 
-function skipForDeclared(name: string, declared: Set<string>): boolean {
-  if (declared.has(name)) return true;
+function skipToolFamily(name: string, declared: Set<string>): boolean {
   if (declared.has("vitest") && (name === "vitest" || name.startsWith("@vitest/"))) return true;
   if (
     declared.has("vite") &&
@@ -87,13 +86,13 @@ export function lockedTransitiveOverrides(input: ConsumerLockInput): LockOverrid
     if (isWorkspaceResolution(value) || !Array.isArray(value) || typeof value[0] !== "string") continue;
     const spec = specNameAndVersion(value[0]);
     if (spec === undefined) continue;
-    if (skipForDeclared(spec.name, declared)) continue;
+    if (declared.has(spec.name) || skipToolFamily(spec.name, declared)) continue;
     if (spec.name === key) {
       setTopLevel(overrides, key, spec.version);
       continue;
     }
     const parent = parentOfContextKey(key, spec.name);
-    if (parent === undefined) continue;
+    if (parent === undefined || skipToolFamily(parent, declared)) continue;
     setNested(overrides, parent, spec.name, spec.version);
   }
   return overrides;
