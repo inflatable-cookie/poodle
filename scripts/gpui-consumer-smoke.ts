@@ -65,7 +65,7 @@ function main(): void {
         'path = "lib.rs"',
         "",
         "[dependencies]",
-        'gpui = { package = "gpui-unofficial", version = "=1.22.0" }',
+        'gpui = { package = "gpui-unofficial", version = "~1.30.2" }',
         `poodle-node = { git = "${poodleUrl}", tag = "${tag}", package = "poodle-node" }`,
         `poodle-gpui-node-backend = { git = "${poodleUrl}", tag = "${tag}", package = "poodle-gpui-node-backend" }`,
         "",
@@ -87,7 +87,7 @@ function main(): void {
       { ...process.env, CARGO_TARGET_DIR: target },
     );
     console.log(
-      `Built a clean GPUI consumer against ${sourceCommit} via local tag ${tag}; gpui-unofficial =1.22.0 identity compiled.`,
+      `Built a clean GPUI consumer against ${sourceCommit} via local tag ${tag}; gpui-unofficial ~1.30.2 identity compiled.`,
     );
   } finally {
     rmSync(temp, { recursive: true, force: true });

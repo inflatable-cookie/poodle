@@ -72,14 +72,6 @@ pub(super) struct ViewportOverlay {
     defer_paint: bool,
 }
 
-impl IntoElement for ViewportOverlay {
-    type Element = Self;
-
-    fn into_element(self) -> Self::Element {
-        self
-    }
-}
-
 impl Element for ViewportOverlay {
     type RequestLayoutState = ();
     type PrepaintState = Option<AnyElement>;

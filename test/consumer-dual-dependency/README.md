@@ -1,7 +1,7 @@
 # Downstream dual-dependency proof (g16.005)
 
-One question: can a crates.io consumer pin `gpui-unofficial` and Poodle's GPUI
-node backend to the same release, and pass GPUI values between them?
+Can a crates.io consumer and Poodle's GPUI node backend share one
+`gpui-unofficial` resolution and pass GPUI values between them?
 
 Published `v0.2.1` could not. It resolved `gpui` from the
 `inflatable-cookie/zed` fork so an internal capture tool could reach
@@ -17,7 +17,7 @@ effigy drift:gpui-consumer-identity
 ## What runs
 
 `consumer/` is written the way a real consumer would write it: it declares
-`gpui = { package = "gpui-unofficial", version = "=1.22.0" }` for itself,
+`gpui = { package = "gpui-unofficial", version = "~1.30.2" }` for itself,
 depends on `poodle-gpui-node-backend` by path,
 and threads GPUI values across the boundary in both directions —
 `to_gpui` → `gpui::AnyElement`, `color` → `gpui::Hsla`, `focus_handle_for` →
@@ -32,7 +32,7 @@ directory ever land in this checkout. It then asserts:
 
 1. the staged manifest declares its own `gpui` and carries no override;
 2. the consumer compiles;
-3. the resolved lockfile contains exactly one `gpui-unofficial` 1.22.0, and
+3. the resolved lockfile contains exactly one `gpui-unofficial` version within `~1.30.2`, and
    every `gpui*` crate comes from the registry;
 4. the resolved graph enables `tinyvec`'s `std` feature — tinyvec `1.13.0`
    cannot compile its alloc-only path (`cannot find macro vec`), so an

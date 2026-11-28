@@ -156,13 +156,13 @@ An application pins public packages from one release tag. For example:
 [dependencies]
 poodle-node = { git = "https://github.com/inflatable-cookie/poodle", tag = "vX.Y.Z", package = "poodle-node" }
 poodle-gpui-node-backend = { git = "https://github.com/inflatable-cookie/poodle", tag = "vX.Y.Z", package = "poodle-gpui-node-backend" }
-gpui = { package = "gpui-unofficial", version = "=1.22.0" }
+gpui = { package = "gpui-unofficial", version = "~1.30.2" }
 ```
 
-The GPUI backend pins `gpui-unofficial =1.22.0`; the application must use that
-same exact release so both sides share GPUI's Rust type identity. The native
-packages are pre-1.0; breaking changes follow the repository's 0.x version
-policy and ship only under a new coordinated tag.
+Match the backend's [GPUI version range](../../contracts/003-native-accessibility.md#gpui-version-policy)
+so the application resolves one crates.io GPUI identity. The application locks
+its own exact version. The native packages are pre-1.0. Breaking changes follow
+the repository's 0.x version policy and ship under a new coordinated tag.
 
 If the tagged workflow wrapper itself fails before publication, a reviewed
 wrapper-only repair may dispatch publish from `main` with `release-tag` set to

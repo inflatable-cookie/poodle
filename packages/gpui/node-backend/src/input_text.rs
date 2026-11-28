@@ -378,13 +378,6 @@ pub(crate) struct PrepaintState {
     origin_x: Pixels,
 }
 
-impl gpui::IntoElement for InputText {
-    type Element = Self;
-    fn into_element(self) -> Self::Element {
-        self
-    }
-}
-
 impl Element for InputText {
     type RequestLayoutState = ();
     type PrepaintState = PrepaintState;
