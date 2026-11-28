@@ -57,6 +57,13 @@ use poodle_specs::{ButtonSpec, ButtonVariant};
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 
+fn sha256_hex(bytes: &[u8]) -> String {
+    Sha256::digest(bytes)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
+}
+
 #[path = "../presentation_axes.rs"]
 mod presentation_axes;
 
@@ -566,7 +573,7 @@ fn run(args: &CaptureArgs) -> ! {
             // rasterized frame and its hash.
             on_frame: transport::settle_after(transport::FRAMES_BEFORE_CAPTURE),
             finish: Box::new(move |facts: &transport::CaptureFacts| {
-                let png_sha256 = format!("{:x}", Sha256::digest(&facts.png));
+                let png_sha256 = sha256_hex(&facts.png);
                 let receipt = CaptureReceipt {
                     schema: RECEIPT_SCHEMA,
                     component: ComponentSmoke {
@@ -639,6 +646,14 @@ fn main() -> ! {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn sha256_hex_preserves_receipt_encoding() {
+        assert_eq!(
+            sha256_hex(b"abc"),
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
+    }
 
     fn argv(args: &[&str]) -> Vec<String> {
         args.iter().map(|s| s.to_string()).collect()

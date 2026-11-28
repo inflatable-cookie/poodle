@@ -37,7 +37,6 @@ use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
 use poodle_specs::{ButtonSpec, Orientation, StepStatus, StepperSpec, StepperStep};
 use serde::Serialize;
-use sha2::{Digest, Sha256};
 
 use crate::fixture_capture::{inter_fonts, FixtureAssets};
 use crate::presentation_axes::ThemePreset;
@@ -322,7 +321,7 @@ fn prepare(args: &FocusEvidenceArgs) -> Result<transport::Shot<EvidenceRoot>> {
             if !recorded.backend_focused {
                 bail!("the backend never reported '{focus_id}' focused");
             }
-            let png_sha256 = format!("{:x}", Sha256::digest(&facts.png));
+            let png_sha256 = super::sha256_hex(&facts.png);
 
             let receipt = FocusEvidenceReceipt {
                 schema: EVIDENCE_RECEIPT_SCHEMA,

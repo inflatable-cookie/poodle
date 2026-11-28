@@ -45,7 +45,6 @@ use poodle_specs::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
-use sha2::{Digest, Sha256};
 
 use crate::presentation_axes::ThemePreset;
 use crate::transport::{self, GPUI_SOURCE, GPUI_VERSION, TRANSPORT};
@@ -372,7 +371,7 @@ fn load_scenario(entry: RegistryEntry) -> Result<(Scenario, String)> {
     if scenario.capture.width == 0 || scenario.capture.height == 0 {
         bail!("{} capture dimensions must be positive", path.display());
     }
-    let hash = format!("{:x}", Sha256::digest(&bytes));
+    let hash = super::sha256_hex(&bytes);
     Ok((scenario, hash))
 }
 
@@ -1827,7 +1826,7 @@ fn prepare(args: &CohortArgs) -> Result<transport::Shot<CohortRoot>> {
                 logical_viewport: [viewport.width, viewport.height],
                 scale: facts.scale,
                 device_dimensions: [facts.device_width, facts.device_height],
-                png_sha256: format!("{:x}", Sha256::digest(&facts.png)),
+                png_sha256: super::sha256_hex(&facts.png),
             };
             publish_pair(
                 &out_png,

@@ -20,7 +20,6 @@ use poodle_render::icon_geometry::{
     GeometryRuntimeIntent,
 };
 use serde::Serialize;
-use sha2::{Digest, Sha256};
 
 use crate::fixture_capture::{inter_fonts, FixtureAssets};
 use crate::publish_pair;
@@ -222,7 +221,7 @@ fn frame_sha256(node: &Node) -> String {
             }
         }
     }
-    format!("{:x}", Sha256::digest(bytes))
+    super::sha256_hex(&bytes)
 }
 
 #[derive(Serialize)]
