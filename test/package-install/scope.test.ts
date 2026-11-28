@@ -1478,7 +1478,7 @@ describe("g18.006 synthetic-merge certification head resolution", () => {
   });
 });
 
-describe("ordinary root manifest devDependency scope", () => {
+describe("ordinary root manifest scope", () => {
   const rootManifest = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
     name: "poodle",
     version: "0.4.0",
@@ -1492,14 +1492,15 @@ describe("ordinary root manifest devDependency scope", () => {
 
   async function plantRootManifestRange(
     mutateHead: (manifest: Record<string, unknown>) => void,
+    baseOverrides: Record<string, unknown> = {},
   ): Promise<{ root: string; base: string; head: string }> {
     const root = await initPlant();
     await writeFiles(root, {
-      "package.json": `${JSON.stringify(rootManifest(), null, 2)}\n`,
+      "package.json": `${JSON.stringify(rootManifest(baseOverrides), null, 2)}\n`,
       "bun.lock": "lock base\n",
     });
     const base = await commitAll(root, "ordinary root base");
-    const target = rootManifest();
+    const target = rootManifest(baseOverrides);
     mutateHead(target);
     await writeFiles(root, {
       "package.json": `${JSON.stringify(target, null, 2)}\n`,
@@ -1519,18 +1520,56 @@ describe("ordinary root manifest devDependency scope", () => {
     expect(emitsCertificationReceipt(proof.mode)).toBe(false);
   });
 
+  test("an exact bun-to-bun pin change with its lock refresh is admitted", async () => {
+    const { root, base, head } = await plantRootManifestRange((manifest) => {
+      manifest.packageManager = "bun@1.4.5";
+    });
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.changedPaths).toEqual(["bun.lock", "package.json"]);
+  });
+
+  test("a pin change that is not exact bun to exact bun is rejected", async () => {
+    const plants: Record<string, { before: unknown; after: unknown }> = {
+      "caret range": { before: "bun@1.4.2", after: "bun@^1.4.5" },
+      "partial version": { before: "bun@1.4.2", after: "bun@1.4" },
+      prerelease: { before: "bun@1.4.2", after: "bun@1.4.5-canary.1" },
+      "dist tag": { before: "bun@1.4.2", after: "bun@latest" },
+      "non-exact base": { before: "bun@^1.4.2", after: "bun@1.4.5" },
+      "to another manager": { before: "bun@1.4.2", after: "pnpm@10.0.0" },
+      "from another manager": { before: "npm@11.0.0", after: "bun@1.4.5" },
+      added: { before: undefined, after: "bun@1.4.5" },
+      removed: { before: "bun@1.4.2", after: undefined },
+    };
+    for (const [kind, plant] of Object.entries(plants)) {
+      const { root, base, head } = await plantRootManifestRange(
+        (manifest) => {
+          manifest.packageManager = plant.after;
+        },
+        { packageManager: plant.before },
+      );
+      await expect(
+        assertInstalledScope(root, base, head, "ordinary"),
+        kind,
+      ).rejects.toThrow("forbidden packageManager surface: package.json");
+    }
+  });
+
+  test("an exact pin change does not carry another root field", async () => {
+    const { root, base, head } = await plantRootManifestRange((manifest) => {
+      manifest.packageManager = "bun@1.4.5";
+      (manifest.scripts as Record<string, unknown>).test = "echo planted";
+    });
+    await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+      /^certification scope rejected forbidden scripts surface: package\.json$/,
+    );
+  });
+
   test("a root field outside devDependencies is rejected by name", async () => {
     const plants: Record<string, { field: string; mutate: (manifest: Record<string, unknown>) => void }> = {
       version: {
         field: "version",
         mutate: (manifest) => {
           manifest.version = "0.4.1";
-        },
-      },
-      packageManager: {
-        field: "packageManager",
-        mutate: (manifest) => {
-          manifest.packageManager = "bun@1.4.3";
         },
       },
       dependencies: {
