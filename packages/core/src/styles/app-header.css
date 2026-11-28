@@ -7,8 +7,8 @@
     --poodle-app-header-min-height: var(--poodle-size-panel-header);
     --poodle-app-header-padding-block: var(--poodle-space-control-y);
     --poodle-app-header-padding-inline: var(--poodle-space-panel-x);
-    --poodle-app-header-title-size: 0.9375rem;
-    --poodle-app-header-subtitle-size: 0.75rem;
+    --poodle-app-header-title-size: var(--poodle-style-typography-appHeaderTitle-md-size);
+    --poodle-app-header-subtitle-size: var(--poodle-style-typography-appHeaderSubtitle-md-size);
     /* Collapse guard for the symmetric side columns when a centre region is
        present (g13-b017). Defaults to 0; a consumer can raise it (soundcheck
        uses 9rem) without hard-coding the grid. */
@@ -19,8 +19,8 @@
     align-items: center;
     min-height: var(--poodle-app-header-min-height);
     padding: var(--poodle-app-header-padding-block) var(--poodle-app-header-padding-inline);
-    border-bottom: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
-    background: var(--poodle-recipe-app-header-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)));
+    border-bottom: 0.0625rem solid var(--poodle-style-surface-border);
+    background: var(--poodle-recipe-app-header-fill, var(--poodle-style-surface-fill));
     overflow: visible;
   }
 
@@ -64,14 +64,14 @@
 
   .poodle-app-header__identity strong {
     font-size: var(--poodle-app-header-title-size);
-    line-height: 1.2;
+    line-height: var(--poodle-style-typography-leading-tight);
     white-space: nowrap;
   }
 
   .poodle-app-header__subtitle {
     color: var(--poodle-recipe-app-header-subtitle-text, var(--poodle-color-text-secondary));
     font-size: var(--poodle-app-header-subtitle-size);
-    line-height: 1.2;
+    line-height: var(--poodle-style-typography-leading-tight);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -79,32 +79,32 @@
 
   .poodle-app-header[data-size="xs"] {
     --poodle-app-header-min-height: 2.25rem;
-    --poodle-app-header-title-size: 0.8125rem;
-    --poodle-app-header-subtitle-size: 0.6875rem;
+    --poodle-app-header-title-size: var(--poodle-style-typography-appHeaderTitle-xs-size);
+    --poodle-app-header-subtitle-size: var(--poodle-style-typography-appHeaderSubtitle-xs-size);
   }
 
   .poodle-app-header[data-size="sm"] {
     --poodle-app-header-min-height: 2.5rem;
-    --poodle-app-header-title-size: 0.875rem;
-    --poodle-app-header-subtitle-size: 0.71875rem;
+    --poodle-app-header-title-size: var(--poodle-style-typography-appHeaderTitle-sm-size);
+    --poodle-app-header-subtitle-size: var(--poodle-style-typography-appHeaderSubtitle-sm-size);
   }
 
   .poodle-app-header[data-size="md"] {
     --poodle-app-header-min-height: 2.75rem;
-    --poodle-app-header-title-size: 0.9375rem;
-    --poodle-app-header-subtitle-size: 0.75rem;
+    --poodle-app-header-title-size: var(--poodle-style-typography-appHeaderTitle-md-size);
+    --poodle-app-header-subtitle-size: var(--poodle-style-typography-appHeaderSubtitle-md-size);
   }
 
   .poodle-app-header[data-size="lg"] {
     --poodle-app-header-min-height: 3rem;
-    --poodle-app-header-title-size: 1rem;
-    --poodle-app-header-subtitle-size: 0.8125rem;
+    --poodle-app-header-title-size: var(--poodle-style-typography-appHeaderTitle-lg-size);
+    --poodle-app-header-subtitle-size: var(--poodle-style-typography-appHeaderSubtitle-lg-size);
   }
 
   .poodle-app-header[data-size="xl"] {
     --poodle-app-header-min-height: 3.25rem;
-    --poodle-app-header-title-size: 1.0625rem;
-    --poodle-app-header-subtitle-size: 0.875rem;
+    --poodle-app-header-title-size: var(--poodle-style-typography-appHeaderTitle-xl-size);
+    --poodle-app-header-subtitle-size: var(--poodle-style-typography-appHeaderSubtitle-xl-size);
   }
 
   .poodle-app-header[data-density="compact"] {

@@ -31,23 +31,23 @@
   /* ── Size variants (row height + font; never touched by density) ── */
   .poodle-tree[data-size="xs"] {
     --poodle-tree-row-height: 1.375rem;
-    --poodle-tree-row-font: 0.6875rem;
+    --poodle-tree-row-font: var(--poodle-style-typography-compactControlLabel-xs-size);
   }
   .poodle-tree[data-size="sm"] {
     --poodle-tree-row-height: 1.5rem;
-    --poodle-tree-row-font: 0.75rem;
+    --poodle-tree-row-font: var(--poodle-style-typography-compactControlLabel-sm-size);
   }
   .poodle-tree[data-size="md"] {
     --poodle-tree-row-height: 1.75rem;
-    --poodle-tree-row-font: 0.8125rem;
+    --poodle-tree-row-font: var(--poodle-style-typography-compactControlLabel-md-size);
   }
   .poodle-tree[data-size="lg"] {
     --poodle-tree-row-height: 2rem;
-    --poodle-tree-row-font: 0.875rem;
+    --poodle-tree-row-font: var(--poodle-style-typography-compactControlLabel-lg-size);
   }
   .poodle-tree[data-size="xl"] {
     --poodle-tree-row-height: 2.25rem;
-    --poodle-tree-row-font: 0.9375rem;
+    --poodle-tree-row-font: var(--poodle-style-typography-compactControlLabel-xl-size);
   }
 
   /* ── Density variants (horizontal rhythm only) ── */
@@ -88,8 +88,8 @@
     color: var(--poodle-recipe-tree-row-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-tree-row-font);
-    font-weight: 500;
-    line-height: 1.3;
+    font-weight: var(--poodle-typography-label-weight);
+    line-height: var(--poodle-style-typography-leading-compact);
     text-align: left;
     cursor: pointer;
     transition:
@@ -168,11 +168,11 @@
     padding: 0 0.25rem;
     border: 0.0625rem solid var(--poodle-color-accent-base);
     border-radius: 0.1875rem;
-    background: var(--poodle-recipe-tree-rename-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
+    background: var(--poodle-recipe-tree-rename-fill, var(--poodle-style-control-fill));
     color: var(--poodle-recipe-tree-rename-text, var(--poodle-color-text-primary));
     font-family: inherit;
     font-size: inherit;
-    line-height: 1.3;
+    line-height: var(--poodle-style-typography-leading-compact);
     outline: none;
   }
   .poodle-tree__rename:focus-visible {
@@ -205,7 +205,7 @@
     flex: 0 0 auto;
     color: var(--poodle-recipe-tree-end-label-text, var(--poodle-color-text-tertiary));
     font-variant-numeric: tabular-nums;
-    font-weight: 500;
+    font-weight: var(--poodle-typography-font-weight-medium);
   }
 
   .poodle-tree__item[data-muted="true"] > .poodle-tree__row {
@@ -220,18 +220,18 @@
 
   .poodle-tree__row:hover {
     color: var(--poodle-recipe-tree-hover-row-text, var(--poodle-color-text-primary));
-    background: var(--poodle-recipe-tree-hover-row-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 60%, transparent)));
+    background: var(--poodle-recipe-tree-hover-row-fill, var(--poodle-style-control-fillHover));
   }
   .poodle-tree__row:active {
-    background: var(--poodle-recipe-tree-row-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-tree-row-active-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-tree__item[data-selected="true"] > .poodle-tree__row {
-    color: var(--poodle-recipe-tree-selected-row-text, var(--poodle-style-selection-text, var(--poodle-color-text-primary)));
-    font-weight: 600;
-    background: var(--poodle-recipe-tree-selected-row-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)));
+    color: var(--poodle-recipe-tree-selected-row-text, var(--poodle-style-selection-text));
+    font-weight: var(--poodle-typography-font-weight-semibold);
+    background: var(--poodle-recipe-tree-selected-row-fill, var(--poodle-style-selection-itemFill));
     box-shadow: var(--poodle-recipe-tree-selected-row-shadow, inset 0 0 0 0.0625rem
-      var(--poodle-style-selection-itemBorder, color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent)));
+      var(--poodle-style-selection-itemBorder));
   }
 
   .poodle-tree__item:focus-visible > .poodle-tree__row {

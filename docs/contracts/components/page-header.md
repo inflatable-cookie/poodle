@@ -270,8 +270,8 @@ The two-column split applies to the inner top row, not the root.
 | `align-items` | `center` |
 | `gap` | `0.35rem` |
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.8125rem` |
-| `line-height` | `1.2` |
+| `font-size` | `var(--poodle-style-typography-controlLabel-md-size)` (`0.9375rem`); each size reads its `controlLabel` step |
+| `line-height` | `var(--poodle-style-typography-controlLabel-md-lineHeight)` (`1.25rem`) |
 | `text-decoration` | `none` |
 
 The back link renders an `Icon` with `name="arrow-left"` followed by a `<span>` containing the `backLabel` text (defaulting to `"Back"`). When `backIsContextual` is true, a context dot is appended.
@@ -305,7 +305,7 @@ icon-only link.
 | `width` | `0.375rem` |
 | `height` | `0.375rem` |
 | `border-radius` | `999px` |
-| `background` | `var(--poodle-color-status-success, #22c55e)` |
+| `background` | `var(--poodle-color-status-success)` |
 | `flex` | `none` |
 
 #### `.page-header__context-dot--overlay` (icon-variant dot)
@@ -342,9 +342,9 @@ control-label role at the resolved size. The count remains a Pill slot.
 | `align-items` | `center` |
 | `gap` | `0.5rem` |
 | `font-family` | `var(--poodle-typography-heading-family)` |
-| `font-size` | `1.75rem` |
-| `line-height` | `1.1` |
-| `font-weight` | `700` |
+| `font-size` | `var(--poodle-style-typography-pageTitle-size)` (`1.875rem`) |
+| `line-height` | `var(--poodle-style-typography-pageTitle-lineHeight)` (`2.25rem`) |
+| `font-weight` | `var(--poodle-style-typography-pageTitle-weight)` (`600`) |
 
 #### `.page-header__section`
 
@@ -352,10 +352,10 @@ control-label role at the resolved size. The count remains a Pill slot.
 |----------|-------|
 | `margin` | `0` |
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.75rem` |
-| `font-weight` | `700` |
-| `letter-spacing` | `0.08em` |
-| `text-transform` | `uppercase` |
+| `font-size` | `var(--poodle-style-typography-groupLabel-size)` (`0.8125rem`) |
+| `font-weight` | `var(--poodle-style-typography-groupLabel-weight)` (`600`) |
+| `letter-spacing` | `var(--poodle-style-typography-groupLabel-letterSpacing)` (`0em`) |
+| `text-transform` | `var(--poodle-style-typography-groupLabel-textTransform)` (`none`) |
 
 #### `.page-header__count`
 
@@ -374,10 +374,10 @@ padding, min-size, typography) is owned by the `Pill` primitive it contains
 |----------|-------|
 | `margin` | `0` |
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.6875rem` |
-| `font-weight` | `600` |
-| `letter-spacing` | `0.12em` |
-| `text-transform` | `uppercase` |
+| `font-size` | `var(--poodle-style-typography-overline-size)` (`0.75rem`) |
+| `font-weight` | `var(--poodle-style-typography-overline-weight)` (`600`) |
+| `letter-spacing` | `var(--poodle-style-typography-overline-letterSpacing)` (`0.04em`) |
+| `text-transform` | `var(--poodle-style-typography-overline-textTransform)` (`uppercase`) |
 
 #### `.page-header__subtitle`
 
@@ -385,8 +385,8 @@ padding, min-size, typography) is owned by the `Pill` primitive it contains
 |----------|-------|
 | `margin` | `0` |
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `1rem` |
-| `line-height` | `var(--poodle-typography-body-lineHeight)` |
+| `font-size` | `var(--poodle-style-typography-secondary-size)` (`0.8125rem`) |
+| `line-height` | `var(--poodle-style-typography-secondary-lineHeight)` (`1.125rem`) |
 
 #### `.page-header__body`
 
@@ -394,8 +394,8 @@ padding, min-size, typography) is owned by the `Pill` primitive it contains
 |----------|-------|
 | `margin` | `0` |
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `var(--poodle-typography-body-size)` |
-| `line-height` | `var(--poodle-typography-body-lineHeight)` |
+| `font-size` | `var(--poodle-style-typography-secondary-size)` (`0.8125rem`) |
+| `line-height` | `var(--poodle-style-typography-secondary-lineHeight)` (`1.125rem`) |
 
 #### `.page-header__meta`
 

@@ -2,7 +2,7 @@
    shared-styles move). Unique poodle-* selectors; safe as global CSS. */
 
   .poodle-accordion {
-    --poodle-accordion-panel-font-size: 0.9375rem;
+    --poodle-accordion-panel-font-size: var(--poodle-style-typography-disclosurePanel-md-size);
     display: grid;
     gap: var(--poodle-space-stack-md);
     min-width: 0;
@@ -14,10 +14,10 @@
     gap: var(--poodle-accordion-item-gap);
     min-width: 0;
     padding: 0.625rem var(--poodle-space-panel-x);
-    border: 0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 36%, transparent));
+    border: 0.0625rem solid var(--poodle-style-surface-border);
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-accordion-item-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 40%, var(--poodle-color-background-panel))));
-    box-shadow: var(--poodle-recipe-accordion-item-shadow, var(--poodle-style-surface-shadow, inset 0 0.0625rem 0 color-mix(in srgb, var(--poodle-color-text-inverse) 8%, transparent)));
+    background: var(--poodle-recipe-accordion-item-fill, var(--poodle-style-surface-fill));
+    box-shadow: var(--poodle-recipe-accordion-item-shadow, var(--poodle-style-surface-shadow));
   }
 
   .poodle-accordion__heading {
@@ -58,22 +58,22 @@
 
   .poodle-accordion__title {
     font-family: var(--poodle-typography-heading-family);
-    font-size: 1rem;
-    font-weight: 700;
-    line-height: 1.2;
+    font-size: var(--poodle-style-typography-disclosureTitle-md-size);
+    font-weight: var(--poodle-style-typography-emphasis-weight);
+    line-height: var(--poodle-style-typography-leading-tight);
   }
 
   .poodle-accordion__description {
     color: var(--poodle-recipe-accordion-description-text, var(--poodle-color-text-secondary));
-    font-size: 0.8125rem;
-    line-height: 1.45;
+    font-size: var(--poodle-style-typography-disclosureDescription-md-size);
+    line-height: var(--poodle-style-typography-leading-normalLg);
   }
 
   .poodle-accordion__indicator {
     color: var(--poodle-recipe-accordion-indicator-text, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-code-family);
-    font-size: 0.75rem;
-    line-height: 1;
+    font-size: var(--poodle-style-typography-glyph-sm-size);
+    line-height: var(--poodle-style-typography-glyph-lineHeight);
   }
 
   .poodle-accordion[data-motion-ready="true"] .poodle-accordion__indicator {
@@ -119,55 +119,55 @@
 
   /* Size variants */
   .poodle-accordion[data-size="xs"] {
-    --poodle-accordion-panel-font-size: 0.8125rem;
+    --poodle-accordion-panel-font-size: var(--poodle-style-typography-disclosurePanel-xs-size);
   }
 
   .poodle-accordion[data-size="xs"] .poodle-accordion__title {
-    font-size: 0.8125rem;
+    font-size: var(--poodle-style-typography-disclosureTitle-xs-size);
   }
 
   .poodle-accordion[data-size="xs"] .poodle-accordion__description {
-    font-size: 0.6875rem;
+    font-size: var(--poodle-style-typography-disclosureDescription-xs-size);
   }
 
   .poodle-accordion[data-size="sm"] {
-    --poodle-accordion-panel-font-size: 0.875rem;
+    --poodle-accordion-panel-font-size: var(--poodle-style-typography-disclosurePanel-sm-size);
   }
 
   .poodle-accordion[data-size="sm"] .poodle-accordion__title {
-    font-size: 0.875rem;
+    font-size: var(--poodle-style-typography-disclosureTitle-sm-size);
   }
 
   .poodle-accordion[data-size="sm"] .poodle-accordion__description {
-    font-size: 0.75rem;
+    font-size: var(--poodle-style-typography-disclosureDescription-sm-size);
   }
 
   .poodle-accordion[data-size="md"] {
-    --poodle-accordion-panel-font-size: 0.9375rem;
+    --poodle-accordion-panel-font-size: var(--poodle-style-typography-disclosurePanel-md-size);
   }
 
   .poodle-accordion[data-size="lg"] {
-    --poodle-accordion-panel-font-size: 1rem;
+    --poodle-accordion-panel-font-size: var(--poodle-style-typography-disclosurePanel-lg-size);
   }
 
   .poodle-accordion[data-size="lg"] .poodle-accordion__title {
-    font-size: 1.0625rem;
+    font-size: var(--poodle-style-typography-disclosureTitle-lg-size);
   }
 
   .poodle-accordion[data-size="lg"] .poodle-accordion__description {
-    font-size: 0.875rem;
+    font-size: var(--poodle-style-typography-disclosureDescription-lg-size);
   }
 
   .poodle-accordion[data-size="xl"] {
-    --poodle-accordion-panel-font-size: 1.0625rem;
+    --poodle-accordion-panel-font-size: var(--poodle-style-typography-disclosurePanel-xl-size);
   }
 
   .poodle-accordion[data-size="xl"] .poodle-accordion__title {
-    font-size: 1.125rem;
+    font-size: var(--poodle-style-typography-disclosureTitle-xl-size);
   }
 
   .poodle-accordion[data-size="xl"] .poodle-accordion__description {
-    font-size: 0.9375rem;
+    font-size: var(--poodle-style-typography-disclosureDescription-xl-size);
   }
 
   /* Density variants */

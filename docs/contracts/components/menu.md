@@ -324,7 +324,7 @@ Rendering style roles: the menu surface reads the floating surface roles. Items 
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-family` | `var(--poodle-typography-code-family)` |
-| `font-size` | `0.6875rem` |
+| `font-size` | `var(--poodle-style-typography-menuMeta-md-size)` (`0.6875rem`) |
 
 ### Separator `.menu__separator`
 

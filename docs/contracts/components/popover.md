@@ -321,11 +321,11 @@ wiring, presence (if open/close animation is added later).
 | `min-width` | `var(--poodle-popover-surface-min-width, 14rem)` |
 | `max-width` | `var(--poodle-popover-surface-max-width, min(24rem, 90vw))` |
 | `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
-| `border` | `0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent))` |
+| `border` | `0.0625rem solid var(--poodle-style-surface-border)` |
 | `border-radius` | `var(--poodle-radius-surface)` |
 | `background` | `var(--poodle-recipe-popover-surface-fill, var(--poodle-surface))` |
-| `--poodle-surface` | `var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, var(--poodle-color-background-elevated)))` |
-| `box-shadow` | `var(--poodle-recipe-popover-surface-shadow, var(--poodle-style-surface-shadow, inset highlight + two drop shadows))` |
+| `--poodle-surface` | `var(--poodle-style-surface-floatingFill)` |
+| `box-shadow` | `var(--poodle-recipe-popover-surface-shadow, var(--poodle-style-surface-shadow))` |
 
 ### Surface — trigger width `.popover__surface[data-surface-width="trigger"]`
 

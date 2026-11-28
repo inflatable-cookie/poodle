@@ -158,10 +158,10 @@ through `onOpenChange` and `onQueryChange` rather than mutating those props.
 | `max-height` | `min(78vh, 52.5rem)` |
 | `min-height` | `0` |
 | `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
-| `border` | `0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-default) 42%, transparent))` |
+| `border` | `0.0625rem solid var(--poodle-style-surface-border)` |
 | `border-radius` | `calc(var(--poodle-radius-surface) + 0.125rem)` |
-| `background` | `var(--poodle-recipe-command-palette-fill, var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, transparent))))` |
-| `box-shadow` | `var(--poodle-recipe-command-palette-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-dialog)))` |
+| `background` | `var(--poodle-recipe-command-palette-fill, var(--poodle-style-surface-floatingFill))` |
+| `box-shadow` | `var(--poodle-recipe-command-palette-shadow, var(--poodle-style-surface-shadow))` |
 | `overflow` | `hidden` |
 | `overscroll-behavior` | `contain` |
 | `transform` | `translate(-50%, -50%)` |
@@ -186,16 +186,16 @@ through `onOpenChange` and `onQueryChange` rather than mutating those props.
 
 | Property | Value |
 |----------|-------|
-| `font-size` | `1.375rem` |
-| `line-height` | `1.2` |
+| `font-size` | `var(--poodle-style-typography-dialogTitle-size)` (`1.375rem`) |
+| `line-height` | `var(--poodle-style-typography-leading-tight)` (`1.2`) |
 
 #### `.command-palette__header p`
 
 | Property | Value |
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.8125rem` |
-| `line-height` | `1.5` |
+| `font-size` | `var(--poodle-style-typography-secondary-size)` (`0.8125rem`) |
+| `line-height` | `var(--poodle-style-typography-body-lineHeightRatio)` (`1.5`) |
 
 #### `.command-palette__meta`
 
@@ -250,8 +250,8 @@ through `onOpenChange` and `onQueryChange` rather than mutating those props.
 |----------|-------|
 | `margin` | `0` |
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.75rem` |
-| `line-height` | `1.4` |
+| `font-size` | `var(--poodle-style-typography-caption-size)` (`0.75rem`) |
+| `line-height` | `var(--poodle-style-typography-leading-normal)` (`1.4`) |
 
 ### Iceberg Theme Override: `:global([data-theme="iceberg"]) .command-palette`
 

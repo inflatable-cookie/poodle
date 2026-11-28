@@ -246,7 +246,7 @@ Rendering style roles: the bar reads the surface border and fill, and the overla
 | `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `var(--poodle-typography-label-size)` |
 | `font-weight` | `var(--poodle-typography-label-weight)` |
-| `line-height` | `1` |
+| `line-height` | `var(--poodle-typography-label-lineHeightTight)` (`1`) |
 
 ### Trigger — Open
 
@@ -255,7 +255,7 @@ item fill by default.
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-menubar-open-hover-focus-trigger-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)))` |
+| `background` | `var(--poodle-recipe-menubar-open-hover-focus-trigger-fill, var(--poodle-style-selection-itemFill))` |
 | `outline` | `none` |
 
 ### Trigger — Open, hovered
@@ -264,7 +264,7 @@ An open trigger that is hovered keeps the selection fill. This rule outranks the
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-menubar-open-hover-focus-trigger-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)))` |
+| `background` | `var(--poodle-recipe-menubar-open-hover-focus-trigger-fill, var(--poodle-style-selection-itemFill))` |
 
 ### Trigger — Hover / Focus
 
@@ -334,7 +334,7 @@ An open trigger that is hovered keeps the selection fill. This rule outranks the
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-family` | `var(--poodle-typography-code-family)` |
-| `font-size` | `0.6875rem` |
+| `font-size` | `var(--poodle-style-typography-menuMeta-md-size)` (`0.6875rem`) |
 
 ### Separator `.menubar__separator`
 
@@ -353,6 +353,8 @@ to `var(--poodle-size-control-height)` and `var(--poodle-space-control-x)` /
 tokens already scale per size, so no per-size min-height/padding override is
 applied. `—` in the font column means no override (inherits the base value:
 trigger `var(--poodle-typography-label-size)`, item `var(--poodle-typography-body-size)`).
+Trigger values are the defaults of `compactControlLabel.{size}.size`; item values
+are the defaults of `menubarItem.xs.size` and `menuItem.{lg,xl}.size`.
 
 | Size | trigger font-size | item font-size |
 |------|-------------------|----------------|

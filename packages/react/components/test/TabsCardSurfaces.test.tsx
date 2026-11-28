@@ -16,7 +16,7 @@ const tabsCss = readFileSync(
 );
 
 const CARD_FILL =
-  "var(--poodle-recipe-tabs-card-item-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)))";
+  "var(--poodle-recipe-tabs-card-item-fill, var(--poodle-style-control-fill))";
 
 const items = [
   { value: "mix", label: "Mix" },

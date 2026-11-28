@@ -191,12 +191,8 @@ Rendering style roles: items rest transparent and read `--poodle-style-control-f
 | `--poodle-sidebar-nav-group-gap` | `var(--poodle-space-panel-y)` | Gap between groups |
 | `--poodle-sidebar-nav-item-padding-inline` | `var(--poodle-space-control-x)` | Item horizontal padding |
 | `--poodle-sidebar-nav-item-padding-block` | `0.375rem` | Item vertical padding |
-| `--poodle-sidebar-nav-item-font-size` | `var(--poodle-typography-label-size)` | Item font size |
-| `--poodle-sidebar-nav-title-font-size` | `calc(var(--poodle-typography-label-size) * 0.75)` | Group title font size |
-| `--poodle-sidebar-nav-title-letter-spacing` | `0.18em` | Group title tracking |
 | `--poodle-sidebar-nav-title-gap` | `calc(var(--poodle-space-panel-y) * 0.375)` | Gap between title and list |
 | `--poodle-sidebar-nav-end-label-gap` | `calc(var(--poodle-sidebar-nav-item-padding-inline) * 0.5)` | Gap between label and end label; scales with density |
-| `--poodle-sidebar-nav-end-label-font-size` | `calc(var(--poodle-sidebar-nav-item-font-size) * 0.85)` | End-label font size; scales with size |
 
 ### `.poodle-sidebar-nav` (Root)
 
@@ -210,21 +206,24 @@ Rendering style roles: items rest transparent and read `--poodle-style-control-f
 
 ### Size Variants
 
-| Size | Item Height | Item Font | Title Font |
-|------|-------------|-----------|------------|
-| xs | `1.375rem` | `0.6875rem` | `0.46875rem` |
-| sm | `1.625rem` | `0.75rem` | `0.5rem` |
-| md | `1.875rem` | `0.8125rem` | `0.5625rem` |
-| lg | `2.125rem` | `0.875rem` | `0.59375rem` |
-| xl | `2.375rem` | `0.9375rem` | `0.625rem` |
+Item type reads the `controlLabel` role at each size. Group titles read
+`groupLabel` at every size.
+
+| Size | Item Height | Item Font (default) |
+|------|-------------|---------------------|
+| xs | `1.375rem` | `0.8125rem` |
+| sm | `1.625rem` | `0.875rem` |
+| md | `1.875rem` | `0.9375rem` |
+| lg | `2.125rem` | `1rem` |
+| xl | `2.375rem` | `1.0625rem` |
 
 ### Density Variants
 
-| Density | Group Gap | Item Padding Inline | Item Padding Block | Title Tracking | Title Gap |
-|---------|-----------|--------------------|--------------------|---------------|-----------|
-| compact | `0.625rem` | `0.5rem` | `0.3125rem` | `0.2em` | `0.125rem` |
-| default | `0.75rem` | `0.75rem` | `0.375rem` | `0.18em` | `0.1875rem` |
-| comfortable | `0.875rem` | `0.875rem` | `0.4375rem` | `0.16em` | `0.25rem` |
+| Density | Group Gap | Item Padding Inline | Item Padding Block | Title Gap |
+|---------|-----------|--------------------|--------------------|-----------|
+| compact | `0.625rem` | `0.5rem` | `0.3125rem` | `0.125rem` |
+| default | `0.75rem` | `0.75rem` | `0.375rem` | `0.1875rem` |
+| comfortable | `0.875rem` | `0.875rem` | `0.4375rem` | `0.25rem` |
 
 ### `.poodle-sidebar-nav__group`
 
@@ -254,13 +253,13 @@ figures.
 |----------|-------|
 | `margin` | `0` |
 | `padding` | `0 var(--poodle-sidebar-nav-item-padding-inline) var(--poodle-sidebar-nav-title-gap)` |
-| `color` | `var(--poodle-color-accent-base)` |
+| `color` | `var(--poodle-style-typography-groupLabel-color)` (`text-secondary`) |
 | `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `var(--poodle-sidebar-nav-title-font-size)` |
-| `font-weight` | `700` |
-| `letter-spacing` | `var(--poodle-sidebar-nav-title-letter-spacing)` |
-| `line-height` | `1.2` |
-| `text-transform` | `uppercase` |
+| `font-size` | `var(--poodle-style-typography-groupLabel-size)` (`0.8125rem`) |
+| `font-weight` | `var(--poodle-style-typography-groupLabel-weight)` (`600`) |
+| `letter-spacing` | `var(--poodle-style-typography-groupLabel-letterSpacing)` (`0em`) |
+| `line-height` | `var(--poodle-style-typography-groupLabel-lineHeight)` (`1.125rem`) |
+| `text-transform` | `var(--poodle-style-typography-groupLabel-textTransform)` (`none`) |
 
 ### `.poodle-sidebar-nav__list`
 
@@ -289,9 +288,9 @@ figures.
 | `background` | `transparent` |
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `var(--poodle-sidebar-nav-item-font-size)` |
-| `font-weight` | `500` |
-| `line-height` | `1.3` |
+| `font-size` | `var(--poodle-style-typography-controlLabel-md-size)` (`0.9375rem`) |
+| `font-weight` | `var(--poodle-style-typography-controlLabel-md-weight)` (`500`) |
+| `line-height` | `var(--poodle-style-typography-controlLabel-md-lineHeight)` (`1.25rem`) |
 | `text-align` | `left` |
 | `text-decoration` | `none` |
 | `cursor` | `pointer` |
@@ -319,9 +318,9 @@ figures.
 | `flex` | `0 0 auto` |
 | `margin-left` | `auto` |
 | `color` | `var(--poodle-color-text-tertiary)` |
-| `font-size` | `var(--poodle-sidebar-nav-end-label-font-size)` |
+| `font-size` | `var(--poodle-style-typography-caption-size)` (`0.75rem`) |
 | `font-variant-numeric` | `tabular-nums` |
-| `font-weight` | `500` |
+| `font-weight` | `var(--poodle-style-typography-caption-weight)` (`500`) |
 
 The end label keeps its muted colour and weight on hover and active items; the
 item's colour and weight changes apply to the label only.
@@ -338,10 +337,10 @@ item's colour and weight changes apply to the label only.
 | Property | Value |
 |----------|-------|
 | `color` | `var(--poodle-color-text-primary)` |
-| `font-weight` | `var(--poodle-recipe-sidebar-nav-item--active-font-weight, 600)` |
-| `background` | `var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent))` |
-| `box-shadow` | `inset 0 0 0 0.0625rem var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent))` |
-| `border-left-color` | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |
+| `font-weight` | `var(--poodle-recipe-sidebar-nav-item--active-font-weight, var(--poodle-typography-font-weight-semibold))` |
+| `background` | `var(--poodle-style-selection-itemFill)` |
+| `box-shadow` | `inset 0 0 0 0.0625rem var(--poodle-style-selection-itemFill)` |
+| `border-left-color` | `var(--poodle-style-selection-indicator)` |
 
 The active indicator is implemented as a left border on the item element itself. When inactive, the left border is transparent. When active, it takes the selection indicator colour, which resolves to primary text by default.
 

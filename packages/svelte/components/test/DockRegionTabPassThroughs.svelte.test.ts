@@ -167,7 +167,7 @@ describe("DockRegion underline recipe hook (tabs.css)", () => {
     "utf8",
   );
   const hook =
-    "var(--poodle-recipe-tabs-active-underline-border, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)))";
+    "var(--poodle-recipe-tabs-active-underline-border, var(--poodle-style-selection-indicator))";
 
   it("resolves the measured indicator through the recipe, style and default accent", () => {
     expect(tabsCss).toContain(`background: ${hook}`);

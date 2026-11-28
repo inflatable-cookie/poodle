@@ -12,9 +12,9 @@
     align-items: center;
     gap: var(--poodle-nav-card-gap);
     padding: var(--poodle-nav-card-padding-y) var(--poodle-nav-card-padding-x);
-    border: 0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent));
+    border: 0.0625rem solid var(--poodle-style-surface-border);
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-nav-card-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-surface)));
+    background: var(--poodle-recipe-nav-card-fill, var(--poodle-style-surface-fill));
     color: inherit;
     cursor: pointer;
     text-decoration: none;
@@ -28,8 +28,8 @@
   }
 
   .poodle-nav-card:hover:not(:disabled):not([data-disabled="true"]) {
-    border-color: var(--poodle-recipe-nav-card-hover-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-accent-base) 28%, var(--poodle-color-border-subtle))));
-    background: var(--poodle-recipe-nav-card-hover-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 52%, var(--poodle-color-background-surface))));
+    border-color: var(--poodle-recipe-nav-card-hover-border, var(--poodle-style-surface-border));
+    background: var(--poodle-recipe-nav-card-hover-fill, var(--poodle-style-control-fillHover));
   }
 
   .poodle-nav-card:focus-visible {
@@ -52,7 +52,7 @@
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-recipe-nav-card-icon-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
     color: var(--poodle-recipe-nav-card-icon-text, var(--poodle-color-accent-base));
-    font-size: 1rem;
+    font-size: var(--poodle-style-typography-glyph-lg-size);
   }
 
   .poodle-nav-card__content {
@@ -69,7 +69,7 @@
     gap: var(--poodle-nav-card-title-gap);
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);
-    font-weight: 600;
+    font-weight: var(--poodle-style-typography-cardTitle-weight);
     color: var(--poodle-recipe-nav-card-title-text, var(--poodle-color-text-primary));
   }
 
@@ -80,16 +80,16 @@
     border-radius: 999px;
     background: var(--poodle-recipe-nav-card-badge-fill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
     color: var(--poodle-recipe-nav-card-badge-text, var(--poodle-color-accent-base));
-    font-size: 0.625rem;
-    font-weight: 600;
+    font-size: var(--poodle-style-typography-pillLabel-sm-size);
+    font-weight: var(--poodle-style-typography-pillLabel-weight);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
   .poodle-nav-card__description {
-    font-size: 0.8125rem;
+    font-size: var(--poodle-style-typography-secondary-size);
     color: var(--poodle-recipe-nav-card-description-text, var(--poodle-color-text-secondary));
-    line-height: 1.4;
+    line-height: var(--poodle-style-typography-leading-normal);
   }
 
   .poodle-nav-card__arrow {

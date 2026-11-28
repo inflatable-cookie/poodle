@@ -174,7 +174,7 @@ optional item-detail row (below).
 |----------|-------|
 | `margin` | `0 0 0.75rem` |
 | `color` | `var(--poodle-color-text-secondary)` |
-| `line-height` | `1.5` |
+| `line-height` | `var(--poodle-style-typography-body-lineHeightRatio)` (`1.5`) |
 | `strong` color | `var(--poodle-color-text-primary)` |
 
 ### Confirm Button mapping

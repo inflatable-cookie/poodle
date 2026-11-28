@@ -4,7 +4,7 @@
   .poodle-alert-dialog__item-detail {
     margin: 0 0 0.75rem;
     color: var(--poodle-recipe-alert-dialog-item-detail-text, var(--poodle-color-text-secondary));
-    line-height: 1.5;
+    line-height: var(--poodle-style-typography-body-lineHeightRatio);
   }
 
   .poodle-alert-dialog__item-detail strong {

@@ -26,29 +26,29 @@
     color: var(--poodle-recipe-navigation-menu-trigger-text, var(--poodle-color-text-primary));
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
-    font-size: 0.75rem;
-    font-weight: 600;
-    line-height: 1;
+    font-size: var(--poodle-style-typography-navigationLabel-md-size);
+    font-weight: var(--poodle-typography-font-weight-semibold);
+    line-height: var(--poodle-typography-label-lineHeightTight);
   }
 
   .poodle-navigation-menu__trigger[data-open="true"] {
-    background: var(--poodle-recipe-navigation-menu-open-trigger-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)));
+    background: var(--poodle-recipe-navigation-menu-open-trigger-fill, var(--poodle-style-selection-itemFill));
   }
 
   /* A hovered open trigger keeps the selection fill, not the generic hover tint.
      Excludes activeFill="none" (its own rule holds the idle fill) and
      activeFill="solid" (its own rule holds the solid fill). */
   .poodle-navigation-menu:not([data-active-fill="none"]):not([data-active-fill="solid"]) .poodle-navigation-menu__trigger[data-open="true"]:hover:not(:disabled) {
-    background: var(--poodle-recipe-navigation-menu-hover-focus-trigger-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
+    background: var(--poodle-recipe-navigation-menu-hover-focus-trigger-fill, var(--poodle-style-selection-itemFill));
   }
 
   .poodle-navigation-menu__trigger:hover:not(:disabled),
   .poodle-navigation-menu__trigger:focus-visible {
-    background: var(--poodle-recipe-navigation-menu-hover-focus-trigger-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
+    background: var(--poodle-recipe-navigation-menu-hover-focus-trigger-fill, var(--poodle-style-control-fillHover));
     outline: none;
   }
   .poodle-navigation-menu__trigger:active:not(:disabled) {
-    background: var(--poodle-recipe-navigation-menu-trigger-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-navigation-menu-trigger-active-fill, var(--poodle-style-control-fillActive));
   }
 
   /* activeEdge: an opt-in edge on the trigger. `outline` restores the
@@ -62,7 +62,7 @@
   }
 
   .poodle-navigation-menu[data-active-edge="outline"] .poodle-navigation-menu__trigger[data-open="true"] {
-    border-color: var(--poodle-recipe-navigation-menu-active-outline-border, var(--poodle-style-selection-borderStrong, var(--poodle-color-select-accentBorderStrong)));
+    border-color: var(--poodle-recipe-navigation-menu-active-outline-border, var(--poodle-style-selection-borderStrong));
   }
 
   /* activeEdge="underline": the accent edge along the trigger's bottom. A
@@ -73,7 +73,7 @@
   }
 
   .poodle-navigation-menu[data-active-edge="underline"] .poodle-navigation-menu__trigger[data-open="true"] {
-    border-bottom-color: var(--poodle-style-selection-indicator, var(--poodle-color-accent-base));
+    border-bottom-color: var(--poodle-style-selection-indicator);
   }
 
   /* activeFill="solid": fully accent-filled open trigger. The foreground
@@ -82,8 +82,8 @@
      accent. More specific than the open-trigger rule above (both carry
      `[data-open="true"]`; this adds the root attribute). */
   .poodle-navigation-menu[data-active-fill="solid"] .poodle-navigation-menu__trigger[data-open="true"] {
-    background: var(--poodle-recipe-navigation-menu-active-solid-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)));
-    color: var(--poodle-recipe-navigation-menu-active-solid-text, var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse)));
+    background: var(--poodle-recipe-navigation-menu-active-solid-fill, var(--poodle-style-selection-fillSolid));
+    color: var(--poodle-recipe-navigation-menu-active-solid-text, var(--poodle-style-selection-textSolid));
   }
 
   /* Solid fill must survive hover and focus-visible. The rule above this
@@ -93,7 +93,7 @@
      step more specific than that rule. */
   .poodle-navigation-menu[data-active-fill="solid"] .poodle-navigation-menu__trigger[data-open="true"]:hover,
   .poodle-navigation-menu[data-active-fill="solid"] .poodle-navigation-menu__trigger[data-open="true"]:focus-visible {
-    background: var(--poodle-recipe-navigation-menu-active-solid-fill, var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base)));
+    background: var(--poodle-recipe-navigation-menu-active-solid-fill, var(--poodle-style-selection-fillSolid));
   }
 
   /* activeFill="none": the off state of the fill axis — the open trigger
@@ -109,11 +109,11 @@
   /* The open trigger keeps its hover and press fills with no selection fill. The
      rule above is more specific than the generic hover, so restate both here. */
   .poodle-navigation-menu[data-active-fill="none"] .poodle-navigation-menu__trigger[data-open="true"]:hover:not(:disabled) {
-    background: var(--poodle-recipe-navigation-menu-hover-focus-trigger-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
+    background: var(--poodle-recipe-navigation-menu-hover-focus-trigger-fill, var(--poodle-style-control-fillHover));
   }
 
   .poodle-navigation-menu[data-active-fill="none"] .poodle-navigation-menu__trigger[data-open="true"]:active:not(:disabled) {
-    background: var(--poodle-recipe-navigation-menu-trigger-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-navigation-menu-trigger-active-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-navigation-menu__trigger:disabled {
@@ -124,17 +124,17 @@
   .poodle-navigation-menu__viewport {
     min-width: 0;
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
-    border: 0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent));
+    border: 0.0625rem solid var(--poodle-style-surface-border);
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-navigation-menu-viewport-fill, var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent))));
-    box-shadow: var(--poodle-recipe-navigation-menu-viewport-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay)));
+    background: var(--poodle-recipe-navigation-menu-viewport-fill, var(--poodle-style-surface-floatingFill));
+    box-shadow: var(--poodle-recipe-navigation-menu-viewport-shadow, var(--poodle-style-surface-shadow));
   }
 
   /* Size variants */
   .poodle-navigation-menu[data-size="xs"] .poodle-navigation-menu__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
-    font-size: 0.6875rem;
+    font-size: var(--poodle-style-typography-navigationLabel-xs-size);
   }
 
   .poodle-navigation-menu[data-size="sm"] .poodle-navigation-menu__trigger {
@@ -145,13 +145,13 @@
   .poodle-navigation-menu[data-size="lg"] .poodle-navigation-menu__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
-    font-size: 0.8125rem;
+    font-size: var(--poodle-style-typography-navigationLabel-lg-size);
   }
 
   .poodle-navigation-menu[data-size="xl"] .poodle-navigation-menu__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
-    font-size: 0.875rem;
+    font-size: var(--poodle-style-typography-navigationLabel-xl-size);
   }
 
   /* Density variants */
