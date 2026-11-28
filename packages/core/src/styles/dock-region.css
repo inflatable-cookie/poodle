@@ -8,7 +8,7 @@
     min-height: 0;
     height: 100%;
     border: 0;
-    background: var(--poodle-recipe-dock-region-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)));
+    background: var(--poodle-recipe-dock-region-fill, var(--poodle-style-surface-fill));
   }
 
   .poodle-dock-region[data-emphasis="quiet"] {
@@ -241,7 +241,7 @@
   .poodle-dock-region[data-edge="right"]
     .poodle-dock-region__strip[data-orientation="vertical"]
     .poodle-tabs[data-active-edge="underline"] .poodle-tabs__item[data-selected="true"] {
-    border-left-color: var(--poodle-style-selection-indicator, var(--poodle-color-accent-base));
+    border-left-color: var(--poodle-style-selection-indicator);
   }
 
   .poodle-dock-region__strip[data-orientation="vertical"] > .collapse-toggle {

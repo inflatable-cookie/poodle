@@ -11,11 +11,11 @@
     display: inline;
     padding: 0.125rem 0.375rem;
     border-radius: 0.25rem;
-    background: var(--poodle-recipe-code-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 72%, var(--poodle-color-background-elevated))));
+    background: var(--poodle-recipe-code-fill, var(--poodle-style-surface-fill));
     color: var(--poodle-recipe-code-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-code-family);
     font-size: calc(0.8125em * var(--poodle-typography-code-adjustmentRatio));
-    line-height: 1.5;
+    line-height: var(--poodle-style-typography-body-lineHeightRatio);
   }
 
   .poodle-code--inline[data-inline-variant="plain"] {
@@ -32,7 +32,7 @@
   .poodle-code--block {
     display: flex;
     flex-direction: column;
-    border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
+    border: 0.0625rem solid var(--poodle-style-surface-border);
     border-radius: var(--poodle-radius-surface);
     overflow: hidden;
   }
@@ -42,13 +42,13 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.375rem 0.625rem;
-    background: var(--poodle-recipe-code-toolbar-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 60%, var(--poodle-color-background-panel))));
-    border-bottom: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
+    background: var(--poodle-recipe-code-toolbar-fill, var(--poodle-style-surface-fill));
+    border-bottom: 0.0625rem solid var(--poodle-style-surface-border);
   }
 
   .poodle-code__language {
     font-family: var(--poodle-typography-label-family);
-    font-size: 0.6875rem;
+    font-size: var(--poodle-typography-caption-size);
     font-weight: var(--poodle-typography-label-weight);
     color: var(--poodle-recipe-code-language-text, var(--poodle-color-text-secondary));
     text-transform: uppercase;
@@ -77,11 +77,11 @@
   }
 
   .poodle-code__copy:hover {
-    background: var(--poodle-recipe-code-copy-hover-fill, var(--poodle-style-control-fillHover, transparent));
+    background: var(--poodle-recipe-code-copy-hover-fill, var(--poodle-style-control-fillHover));
     color: var(--poodle-recipe-code-hover-copy-text, var(--poodle-color-text-primary));
   }
   .poodle-code__copy:active {
-    background: var(--poodle-recipe-code-copy-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-code-copy-active-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-code__copy:focus-visible {
@@ -125,8 +125,8 @@
   .poodle-code__source {
     display: block;
     font-family: var(--poodle-typography-code-family);
-    font-size: 0.8125rem;
-    line-height: 1.4;
+    font-size: var(--poodle-style-typography-code-size);
+    line-height: var(--poodle-style-typography-codeBlock-lineHeight);
     color: var(--poodle-recipe-code-source-text, var(--poodle-color-text-primary));
     tab-size: 2;
     white-space: pre;
@@ -137,7 +137,7 @@
   }
 
   .poodle-code__line--highlighted {
-    background: var(--poodle-recipe-code-line--highlighted-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
+    background: var(--poodle-recipe-code-line--highlighted-fill, var(--poodle-style-selection-itemFill));
     margin: 0 -1rem;
     padding: 0 1rem;
   }
@@ -154,7 +154,7 @@
 
   /* Size variants */
   .poodle-code[data-size="xs"] .poodle-code__source {
-    font-size: 0.6875rem;
+    font-size: var(--poodle-style-typography-codeBlock-xs-size);
   }
 
   .poodle-code--inline[data-size="xs"] {
@@ -162,7 +162,7 @@
   }
 
   .poodle-code[data-size="sm"] .poodle-code__source {
-    font-size: 0.75rem;
+    font-size: var(--poodle-style-typography-codeBlock-sm-size);
   }
 
   .poodle-code--inline[data-size="sm"] {
@@ -170,7 +170,7 @@
   }
 
   .poodle-code[data-size="lg"] .poodle-code__source {
-    font-size: 0.875rem;
+    font-size: var(--poodle-style-typography-codeBlock-lg-size);
   }
 
   .poodle-code--inline[data-size="lg"] {
@@ -178,7 +178,7 @@
   }
 
   .poodle-code[data-size="xl"] .poodle-code__source {
-    font-size: 0.9375rem;
+    font-size: var(--poodle-style-typography-codeBlock-xl-size);
   }
 
   .poodle-code--inline[data-size="xl"] {

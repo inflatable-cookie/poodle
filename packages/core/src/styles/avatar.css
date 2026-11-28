@@ -12,8 +12,8 @@
     background: var(--poodle-avatar-background);
     color: var(--poodle-avatar-color);
     font-size: var(--poodle-avatar-font-size);
-    font-weight: 600;
-    line-height: 1;
+    font-weight: var(--poodle-style-typography-avatarInitials-weight);
+    line-height: var(--poodle-style-typography-glyph-lineHeight);
     user-select: none;
   }
 
@@ -37,27 +37,27 @@
 
   .poodle-avatar[data-size="xs"] {
     --poodle-avatar-size: 1.5rem;
-    --poodle-avatar-font-size: 0.625rem;
+    --poodle-avatar-font-size: var(--poodle-style-typography-avatarInitials-xs-size);
   }
 
   .poodle-avatar[data-size="sm"] {
     --poodle-avatar-size: 2rem;
-    --poodle-avatar-font-size: 0.75rem;
+    --poodle-avatar-font-size: var(--poodle-style-typography-avatarInitials-sm-size);
   }
 
   .poodle-avatar[data-size="md"] {
     --poodle-avatar-size: 2.75rem;
-    --poodle-avatar-font-size: 1rem;
+    --poodle-avatar-font-size: var(--poodle-style-typography-avatarInitials-md-size);
   }
 
   .poodle-avatar[data-size="lg"] {
     --poodle-avatar-size: 4.5rem;
-    --poodle-avatar-font-size: 1.5rem;
+    --poodle-avatar-font-size: var(--poodle-style-typography-avatarInitials-lg-size);
   }
 
   .poodle-avatar[data-size="xl"] {
     --poodle-avatar-size: 6rem;
-    --poodle-avatar-font-size: 2rem;
+    --poodle-avatar-font-size: var(--poodle-style-typography-avatarInitials-xl-size);
   }
 
   .poodle-avatar img {

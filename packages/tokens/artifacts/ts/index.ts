@@ -411,7 +411,10 @@ export const tokens = {
         "body": {
           "size": "initial",
           "lineHeight": "initial",
-          "weight": "initial"
+          "lineHeightRatio": "initial",
+          "lineHeightRelaxedRatio": "initial",
+          "weight": "initial",
+          "weightBold": "initial"
         },
         "secondary": {
           "size": "initial",
@@ -552,6 +555,99 @@ export const tokens = {
         "glyph": {
           "size": "initial",
           "lineHeight": "initial"
+        },
+        "avatarInitials": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          },
+          "weight": "initial"
+        },
+        "codeBlock": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          },
+          "lineHeight": "initial"
+        },
+        "eyebrow": {
+          "xs": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          }
+        },
+        "pillLabel": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          },
+          "weight": "initial",
+          "badgeWeight": "initial"
+        },
+        "statusLabel": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          },
+          "weight": "initial",
+          "lineHeight": "initial"
+        },
+        "valueReadout": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
         },
         "inputText": {
           "xs": {
@@ -896,7 +992,10 @@ export const tokenPaths = [
   "style.typography.cardTitle.weight",
   "style.typography.body.size",
   "style.typography.body.lineHeight",
+  "style.typography.body.lineHeightRatio",
+  "style.typography.body.lineHeightRelaxedRatio",
   "style.typography.body.weight",
+  "style.typography.body.weightBold",
   "style.typography.secondary.size",
   "style.typography.secondary.lineHeight",
   "style.typography.secondary.weight",
@@ -975,6 +1074,37 @@ export const tokenPaths = [
   "style.typography.segmentLabel.weight",
   "style.typography.glyph.size",
   "style.typography.glyph.lineHeight",
+  "style.typography.avatarInitials.xs.size",
+  "style.typography.avatarInitials.sm.size",
+  "style.typography.avatarInitials.md.size",
+  "style.typography.avatarInitials.lg.size",
+  "style.typography.avatarInitials.xl.size",
+  "style.typography.avatarInitials.weight",
+  "style.typography.codeBlock.xs.size",
+  "style.typography.codeBlock.sm.size",
+  "style.typography.codeBlock.lg.size",
+  "style.typography.codeBlock.xl.size",
+  "style.typography.codeBlock.lineHeight",
+  "style.typography.eyebrow.xs.size",
+  "style.typography.eyebrow.md.size",
+  "style.typography.pillLabel.xs.size",
+  "style.typography.pillLabel.sm.size",
+  "style.typography.pillLabel.md.size",
+  "style.typography.pillLabel.lg.size",
+  "style.typography.pillLabel.xl.size",
+  "style.typography.pillLabel.weight",
+  "style.typography.pillLabel.badgeWeight",
+  "style.typography.statusLabel.xs.size",
+  "style.typography.statusLabel.sm.size",
+  "style.typography.statusLabel.md.size",
+  "style.typography.statusLabel.lg.size",
+  "style.typography.statusLabel.xl.size",
+  "style.typography.statusLabel.weight",
+  "style.typography.statusLabel.lineHeight",
+  "style.typography.valueReadout.xs.size",
+  "style.typography.valueReadout.sm.size",
+  "style.typography.valueReadout.lg.size",
+  "style.typography.valueReadout.xl.size",
   "style.typography.inputText.xs.size",
   "style.typography.inputText.xs.lineHeight",
   "style.typography.inputText.xs.weight",
@@ -1166,7 +1296,10 @@ export const cssVars = {
   "style.typography.cardTitle.weight": "--poodle-style-typography-cardTitle-weight",
   "style.typography.body.size": "--poodle-style-typography-body-size",
   "style.typography.body.lineHeight": "--poodle-style-typography-body-lineHeight",
+  "style.typography.body.lineHeightRatio": "--poodle-style-typography-body-lineHeightRatio",
+  "style.typography.body.lineHeightRelaxedRatio": "--poodle-style-typography-body-lineHeightRelaxedRatio",
   "style.typography.body.weight": "--poodle-style-typography-body-weight",
+  "style.typography.body.weightBold": "--poodle-style-typography-body-weightBold",
   "style.typography.secondary.size": "--poodle-style-typography-secondary-size",
   "style.typography.secondary.lineHeight": "--poodle-style-typography-secondary-lineHeight",
   "style.typography.secondary.weight": "--poodle-style-typography-secondary-weight",
@@ -1245,6 +1378,37 @@ export const cssVars = {
   "style.typography.segmentLabel.weight": "--poodle-style-typography-segmentLabel-weight",
   "style.typography.glyph.size": "--poodle-style-typography-glyph-size",
   "style.typography.glyph.lineHeight": "--poodle-style-typography-glyph-lineHeight",
+  "style.typography.avatarInitials.xs.size": "--poodle-style-typography-avatarInitials-xs-size",
+  "style.typography.avatarInitials.sm.size": "--poodle-style-typography-avatarInitials-sm-size",
+  "style.typography.avatarInitials.md.size": "--poodle-style-typography-avatarInitials-md-size",
+  "style.typography.avatarInitials.lg.size": "--poodle-style-typography-avatarInitials-lg-size",
+  "style.typography.avatarInitials.xl.size": "--poodle-style-typography-avatarInitials-xl-size",
+  "style.typography.avatarInitials.weight": "--poodle-style-typography-avatarInitials-weight",
+  "style.typography.codeBlock.xs.size": "--poodle-style-typography-codeBlock-xs-size",
+  "style.typography.codeBlock.sm.size": "--poodle-style-typography-codeBlock-sm-size",
+  "style.typography.codeBlock.lg.size": "--poodle-style-typography-codeBlock-lg-size",
+  "style.typography.codeBlock.xl.size": "--poodle-style-typography-codeBlock-xl-size",
+  "style.typography.codeBlock.lineHeight": "--poodle-style-typography-codeBlock-lineHeight",
+  "style.typography.eyebrow.xs.size": "--poodle-style-typography-eyebrow-xs-size",
+  "style.typography.eyebrow.md.size": "--poodle-style-typography-eyebrow-md-size",
+  "style.typography.pillLabel.xs.size": "--poodle-style-typography-pillLabel-xs-size",
+  "style.typography.pillLabel.sm.size": "--poodle-style-typography-pillLabel-sm-size",
+  "style.typography.pillLabel.md.size": "--poodle-style-typography-pillLabel-md-size",
+  "style.typography.pillLabel.lg.size": "--poodle-style-typography-pillLabel-lg-size",
+  "style.typography.pillLabel.xl.size": "--poodle-style-typography-pillLabel-xl-size",
+  "style.typography.pillLabel.weight": "--poodle-style-typography-pillLabel-weight",
+  "style.typography.pillLabel.badgeWeight": "--poodle-style-typography-pillLabel-badgeWeight",
+  "style.typography.statusLabel.xs.size": "--poodle-style-typography-statusLabel-xs-size",
+  "style.typography.statusLabel.sm.size": "--poodle-style-typography-statusLabel-sm-size",
+  "style.typography.statusLabel.md.size": "--poodle-style-typography-statusLabel-md-size",
+  "style.typography.statusLabel.lg.size": "--poodle-style-typography-statusLabel-lg-size",
+  "style.typography.statusLabel.xl.size": "--poodle-style-typography-statusLabel-xl-size",
+  "style.typography.statusLabel.weight": "--poodle-style-typography-statusLabel-weight",
+  "style.typography.statusLabel.lineHeight": "--poodle-style-typography-statusLabel-lineHeight",
+  "style.typography.valueReadout.xs.size": "--poodle-style-typography-valueReadout-xs-size",
+  "style.typography.valueReadout.sm.size": "--poodle-style-typography-valueReadout-sm-size",
+  "style.typography.valueReadout.lg.size": "--poodle-style-typography-valueReadout-lg-size",
+  "style.typography.valueReadout.xl.size": "--poodle-style-typography-valueReadout-xl-size",
   "style.typography.inputText.xs.size": "--poodle-style-typography-inputText-xs-size",
   "style.typography.inputText.xs.lineHeight": "--poodle-style-typography-inputText-xs-lineHeight",
   "style.typography.inputText.xs.weight": "--poodle-style-typography-inputText-xs-weight",

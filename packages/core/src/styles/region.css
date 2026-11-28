@@ -5,16 +5,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 0.125rem dashed var(--region-color, var(--poodle-color-border-default, #444));
-    border-radius: var(--poodle-radius-surface, 0.375rem);
-    padding: var(--poodle-space-inline-md, 0.75rem);
+    border: 0.125rem dashed var(--region-color, var(--poodle-color-border-default));
+    border-radius: var(--poodle-radius-surface);
+    padding: var(--poodle-space-inline-md);
   }
 
   .poodle-region__label {
-    color: var(--poodle-recipe-region-label-text, var(--region-color, var(--poodle-color-text-tertiary, #888)));
-    font-family: var(--poodle-typography-label-family, sans-serif);
-    font-size: var(--poodle-typography-label-size, 0.75rem);
-    font-weight: 600;
+    color: var(--poodle-recipe-region-label-text, var(--region-color, var(--poodle-color-text-tertiary)));
+    font-family: var(--poodle-typography-label-family);
+    font-size: var(--poodle-typography-label-size);
+    font-weight: var(--poodle-style-typography-overline-weight);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     user-select: none;

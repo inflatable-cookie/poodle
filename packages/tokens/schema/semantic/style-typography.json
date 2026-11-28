@@ -78,7 +78,19 @@
           "$type": "dimension",
           "$value": "initial"
         },
+        "lineHeightRatio": {
+          "$type": "number",
+          "$value": "initial"
+        },
+        "lineHeightRelaxedRatio": {
+          "$type": "number",
+          "$value": "initial"
+        },
         "weight": {
+          "$type": "fontWeight",
+          "$value": "initial"
+        },
+        "weightBold": {
           "$type": "fontWeight",
           "$value": "initial"
         }
@@ -455,6 +467,192 @@
         "lineHeight": {
           "$type": "number",
           "$value": "initial"
+        }
+      },
+      "avatarInitials": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "weight": {
+          "$type": "fontWeight",
+          "$value": "initial"
+        }
+      },
+      "codeBlock": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lineHeight": {
+          "$type": "number",
+          "$value": "initial"
+        }
+      },
+      "eyebrow": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "pillLabel": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "weight": {
+          "$type": "fontWeight",
+          "$value": "initial"
+        },
+        "badgeWeight": {
+          "$type": "fontWeight",
+          "$value": "initial"
+        }
+      },
+      "statusLabel": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "weight": {
+          "$type": "fontWeight",
+          "$value": "initial"
+        },
+        "lineHeight": {
+          "$type": "number",
+          "$value": "initial"
+        }
+      },
+      "valueReadout": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
         }
       },
       "inputText": {
