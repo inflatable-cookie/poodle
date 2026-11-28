@@ -1,0 +1,16 @@
+
+╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ EFFIGY  [checkout] │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── v0.15.0+local.1857ca2 ╯
+
+  PASS  AX readiness distinguishes a missing proof title from missing content
+## build live GPUI proof window
+## named Poodle preview
+  platform-tree attempt: proof window AX readiness did not complete in the non-activating platform tree within 9000ms (proof window title not applied yet (proof window title not applied yet (expected "Poodle GPUI AX proof"); observed titles: "poodle-window-capture"))
+GPUI_AX_WINDOW pid=56427 hold_ms=12000
+GPUI_AX_COMPLETE foreground=proved samples=231 failed_reads=0
+  PASS  GPUI foreground monitor proves no activation
+proof window AX readiness did not complete in the non-activating platform tree within 9000ms (proof window title not applied yet (proof window title not applied yet (expected "Poodle GPUI AX proof"); observed titles: "poodle-window-capture"))
+[error] command `bun packages/gpui/preview/scripts/gpui-ax-audit.ts` failed
+  cause: exit code 1
+  next: read the output above, fix the cause, then run the command again

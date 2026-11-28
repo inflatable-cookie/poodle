@@ -29,7 +29,7 @@
     },
     "packages/core": {
       "name": "@inflatable-cookie/poodle-core",
-      "version": "0.4.16",
+      "version": "0.5.0",
       "bin": {
         "poodle-icons": "./dist/icons/build.mjs",
       },
@@ -39,14 +39,14 @@
     },
     "packages/react/components": {
       "name": "@inflatable-cookie/poodle-react",
-      "version": "0.4.16",
+      "version": "0.5.0",
       "dependencies": {
         "@codemirror/commands": "^6.11.2",
         "@codemirror/language": "^6.13.1",
         "@codemirror/search": "^6.7.3",
         "@codemirror/state": "^6.7.6",
         "@codemirror/view": "^6.43.13",
-        "@inflatable-cookie/poodle-core": ">=0.4.16 <0.5",
+        "@inflatable-cookie/poodle-core": ">=0.5.0 <0.6",
         "@lezer/highlight": "^1.2.5",
         "@tiptap/core": "^3.35.1",
         "@tiptap/extension-blockquote": "^3.35.1",
@@ -106,14 +106,14 @@
     },
     "packages/svelte/components": {
       "name": "@inflatable-cookie/poodle-svelte",
-      "version": "0.4.16",
+      "version": "0.5.0",
       "dependencies": {
         "@codemirror/commands": "^6.11.2",
         "@codemirror/language": "^6.13.1",
         "@codemirror/search": "^6.7.3",
         "@codemirror/state": "^6.7.6",
         "@codemirror/view": "^6.43.13",
-        "@inflatable-cookie/poodle-core": ">=0.4.16 <0.5",
+        "@inflatable-cookie/poodle-core": ">=0.5.0 <0.6",
         "@lezer/highlight": "^1.2.5",
         "@tiptap/core": "^3.35.1",
         "@tiptap/extension-blockquote": "^3.35.1",

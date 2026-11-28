@@ -7,6 +7,81 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-28
+
+Coordinated npm/web and native release. The low-noise style is the default and
+the old look is gone. Consumer migration steps are in the
+[0.5.0 release notes](docs/release-notes/0.5.0.md).
+
+### Breaking
+
+- **New default look.** Poodle uses subtle filled controls, tonal surfaces,
+  neutral selection and system fonts by default. Button, TextInput, PageHeader,
+  SidebarNav, Dialog and DataTable use the shared type scale.
+  `--poodle-color-*` names are unchanged.
+- **`quiet` removed.** The style name and
+  `@inflatable-cookie/poodle-core/tokens/style-quiet.css` are gone. Remove that
+  import and use the base token stylesheet. Remove `data-style="quiet"` or
+  change it to `data-style="default"`.
+- **`splitTokenInput`** takes `(rawValue, separators: readonly string[])` in
+  place of `(rawValue, splitPattern, separatorChars)`.
+- **Jetstream backend removed (native only).** The `poodle-jetstream` theme and
+  role mapping crate, its preview and `RuntimeTarget::Jetstream` in `poodle-ir`
+  are gone. GPUI is the one native backend; Jetstream hosts stock GPUI and
+  renders Poodle components through it.
+- **Rust API cuts and type changes (native only).** `poodle-specs` drops its
+  compatibility aliases, constants and duplicate builders and replaces
+  stringly-typed values with enums. `poodle-adapter`'s `ThemeProvider` requires
+  the `try_resolve_*` lookups. `poodle-headless`, `poodle-render` and
+  `poodle-tokens` change shapes listed in the release notes.
+
+### Added
+
+- **`InstallManager` gains `homebrewFormula`** (TypeScript and Rust) for apps
+  installed as Homebrew formula kegs. Its label is "Homebrew". The upgrade
+  command stays with the consumer (`brew upgrade <package>`, without `--cask`).
+  An exhaustive `switch` over `InstallManager` needs the new case.
+- `dragSessionTransition` accepts an optional `transport: "local"` on
+  `PREPARE_DECLINED` and `PREPARE_FAILED`.
+- Type roles for compact control labels, control summaries, segment labels and
+  glyphs.
+- Ordered input intents and reducers for the shared Rust text, number, code and
+  select inputs.
+
+### Changed
+
+- **Hover-only fill for text-like controls.** Links and breadcrumbs, nav and
+  menu items, options, list, tree and table rows, tabs, ghost and toolbar icon
+  buttons, disclosure triggers, and close, copy and remove buttons rest
+  transparent and fill on hover and press. Value-holding controls keep their
+  resting fill; number-input affixes and the selection-summary overflow count
+  have none.
+- Component CSS drops fallback values that the base token stylesheet already
+  supplies.
+- Svelte and React refresh their CodeMirror, Lezer and Tiptap dependency
+  minimums. Bundled icons come from Lucide 1.57.0 with the same names.
+- Move root, core, Svelte, private React and all private Rust crates to `0.5.0`.
+  Svelte and React require core `>=0.5.0 <0.6`.
+
+### Fixed
+
+- Focus traps wrap from the modal surface and from outside the focusable list,
+  include fixed-position elements, editable regions and `summary`, and skip
+  elements that cannot be tabbed to.
+- Escape dismissal ignores IME composition and already-prevented events. The
+  date and colour pickers use the shared dismiss stack.
+- A drag whose host declines or fails to prepare a cross-window transfer or file
+  export carries on as the same local session, on web and GPUI. Rejected drag
+  cancellations are caught.
+- `updateDownloadLabel` clamps to `0–1`, and theme settings treat `null` like an
+  omitted value.
+- Tree windows stay within bounds when scrolled past either end.
+- GPUI no longer fires a second click when a submit handler takes Enter.
+- Native: `LogListSpec` keeps the newest rows at its cap, slider values clamp
+  correctly, grid `repeat()` is capped, tight Markdown lists keep leading
+  formatting, and key activation without a format adapter is rejected instead
+  of panicking.
+
 ## [0.4.16] - 2026-11-26
 
 Coordinated npm/web and native maintenance release cut for Longhorn's two
@@ -970,3 +1045,4 @@ supersedes `0.4.3`, which was never published.
 
 [0.4.15]: docs/release-notes/0.4.15.md
 [0.4.16]: docs/release-notes/0.4.16.md
+[0.5.0]: docs/release-notes/0.5.0.md
