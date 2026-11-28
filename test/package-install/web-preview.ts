@@ -2359,7 +2359,7 @@ const evidence = {
       }
     : {}),
   frameworkFloors: { react: "18.0.0", svelte: "5.56.8" },
-  peerRanges: { react: ">=18", svelte: ">=5.56.8 <6" },
+  peerRanges: { react: ">=18 <20", svelte: ">=5.56.8 <6" },
   constraints: {
     cleanCheckout: true,
     archiveFileRefs: true,

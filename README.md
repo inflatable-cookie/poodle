@@ -21,7 +21,7 @@ to understand the other implementations.
 | Runtime | Use | Status | Start here |
 | --- | --- | --- | --- |
 | Svelte 5 | Web applications | Preview | [Svelte developer guide](docs/guides/svelte-developer-guide.md) |
-| React 18+ | Web applications | Experimental | [React package guide](packages/react/components/README.md) |
+| React 18 and 19 | Web applications | Experimental | [React package guide](packages/react/components/README.md) |
 | GPUI | Native Rust applications | Preview | [GPUI developer guide](docs/guides/gpui-developer-guide.md) |
 
 The web packages are:
@@ -116,7 +116,7 @@ architecture, contracts, and generated evidence.
 ## Work on Poodle Locally
 
 Poodle uses [Effigy](https://github.com/inflatable-cookie/effigy) as its task
-runner. Install Effigy, Bun 1.4.2, and Rust 1.95 before setting up the
+runner. Install Effigy, Bun 1.4.5, and Rust 1.95 before setting up the
 repository.
 
 ```sh
