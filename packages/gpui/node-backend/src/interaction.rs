@@ -1090,7 +1090,7 @@ pub(super) fn apply_listeners(el: Stateful<Div>, node: &Node, id: &str) -> State
 /// Captured continuous-value, wheel, and double-activation routes.
 ///
 /// GPUI 0.2.2 supplies captured moves through `on_drag_move`, release outside
-/// the node through `on_mouse_up_out`, and wheel through `on_scroll_wheel`.
+/// the node through `on_mouse_up_out`, and wheel through `on_scroll`.
 /// Unique lifetime lives in a thread-local session so a rebuild cannot admit
 /// a second press or drop a terminal.
 fn apply_continuous_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> Stateful<Div> {
@@ -1238,7 +1238,7 @@ fn apply_continuous_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
     }
 
     if let Some(handler) = wheel {
-        el = el.on_scroll_wheel(move |event: &ScrollWheelEvent, window, cx| {
+        el = el.on_scroll(move |event: &ScrollEvent, window, cx| {
             if disabled {
                 return;
             }

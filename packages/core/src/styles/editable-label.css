@@ -34,12 +34,12 @@
 
   .poodle-editable-label__display:hover:not(:disabled),
   .poodle-editable-label__display:focus-visible {
-    border-color: var(--poodle-recipe-editable-label-hover-focus-display-border, var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)));
-    background: var(--poodle-recipe-editable-label-hover-focus-display-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 52%, transparent)));
+    border-color: var(--poodle-recipe-editable-label-hover-focus-display-border, var(--poodle-style-control-border));
+    background: var(--poodle-recipe-editable-label-hover-focus-display-fill, var(--poodle-style-control-fillHover));
     outline: none;
   }
   .poodle-editable-label__display:active:not(:disabled) {
-    background: var(--poodle-recipe-editable-label-input-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-editable-label-input-active-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-editable-label__display:focus-visible {
@@ -50,7 +50,7 @@
   .poodle-editable-label__input {
     appearance: none;
     border-color: var(--poodle-recipe-editable-label-input-border, var(--poodle-color-accent-focusRing));
-    background: var(--poodle-recipe-editable-label-input-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
+    background: var(--poodle-recipe-editable-label-input-fill, var(--poodle-style-control-fill));
     outline: none;
     box-shadow: var(--poodle-recipe-editable-label-input-shadow, 0 0 0 var(--poodle-border-width-focus)
       color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
@@ -62,7 +62,7 @@
   }
 
   .poodle-editable-label__display--empty .poodle-editable-label__text {
-    color: var(--poodle-recipe-editable-label-text-text, var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary)));
+    color: var(--poodle-recipe-editable-label-text-text, var(--poodle-style-control-secondaryText));
     font-style: italic;
   }
 
@@ -71,7 +71,7 @@
     height: 0.75rem;
     color: var(--poodle-recipe-editable-label-icon-text, var(--poodle-color-text-secondary));
     opacity: 0;
-    transition: opacity var(--poodle-motion-duration-interaction, 0.15s) var(--poodle-motion-easing-standard, ease);
+    transition: opacity var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .poodle-editable-label__display:hover:not(:disabled) .poodle-editable-label__icon,
@@ -107,7 +107,7 @@
   .poodle-editable-label[data-size="xs"] .poodle-editable-label__display,
   .poodle-editable-label[data-size="xs"] .poodle-editable-label__input {
     padding: calc(var(--poodle-space-control-y) - 0.125rem) calc(var(--poodle-space-control-x) - 0.125rem);
-    font-size: 0.75rem;
+    font-size: var(--poodle-style-typography-controlSummary-xs-size);
   }
 
   .poodle-editable-label[data-size="sm"] .poodle-editable-label__display,
@@ -118,13 +118,13 @@
   .poodle-editable-label[data-size="lg"] .poodle-editable-label__display,
   .poodle-editable-label[data-size="lg"] .poodle-editable-label__input {
     padding: calc(var(--poodle-space-control-y) + 0.0625rem) calc(var(--poodle-space-control-x) + 0.125rem);
-    font-size: 0.9375rem;
+    font-size: var(--poodle-style-typography-controlSummary-lg-size);
   }
 
   .poodle-editable-label[data-size="xl"] .poodle-editable-label__display,
   .poodle-editable-label[data-size="xl"] .poodle-editable-label__input {
     padding: calc(var(--poodle-space-control-y) + 0.125rem) calc(var(--poodle-space-control-x) + 0.1875rem);
-    font-size: 1rem;
+    font-size: var(--poodle-style-typography-controlSummary-xl-size);
   }
 
   /* Density variants */

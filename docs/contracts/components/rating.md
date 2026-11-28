@@ -243,7 +243,7 @@ Rendering style roles: items rest transparent and read `--poodle-style-control-f
 | `position` | `absolute` |
 | `inset` | `0 auto 0 0` |
 | `overflow` | `hidden` |
-| `color` | `var(--poodle-recipe-rating-glyph-fill-text, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)))` |
+| `color` | `var(--poodle-recipe-rating-glyph-fill-text, var(--poodle-style-selection-indicator))` |
 
 ### Size adjustments
 

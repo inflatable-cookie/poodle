@@ -185,14 +185,6 @@ struct ScrollScope {
     child: Option<AnyElement>,
 }
 
-impl IntoElement for ScrollScope {
-    type Element = Self;
-
-    fn into_element(self) -> Self {
-        self
-    }
-}
-
 impl Element for ScrollScope {
     type RequestLayoutState = ();
     type PrepaintState = ();
@@ -311,7 +303,7 @@ pub(super) fn apply_scroll(mut el: Stateful<Div>, node: &Node, id: &str) -> Stat
     if let Some(observer) = observer.clone() {
         let observed = handle.clone();
         let owner = key.clone();
-        el = el.on_scroll_wheel(move |_event, window: &mut Window, cx: &mut App| {
+        el = el.on_scroll(move |_event, window: &mut Window, cx: &mut App| {
             // GPUI's own wheel listener moves the handle later in this
             // dispatch, so read the position after it.
             let observed = observed.clone();

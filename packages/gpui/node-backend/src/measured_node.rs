@@ -113,14 +113,6 @@ impl MeasuredNodeHost {
     }
 }
 
-impl IntoElement for MeasuredNodeHost {
-    type Element = Self;
-
-    fn into_element(self) -> Self::Element {
-        self
-    }
-}
-
 impl Element for MeasuredNodeHost {
     type RequestLayoutState = ();
     type PrepaintState = PrepaintState;

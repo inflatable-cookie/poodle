@@ -19,7 +19,7 @@ use std::time::{Duration, Instant};
 use gpui::accesskit::{self, NodeId, TreeUpdate};
 use gpui::{
     point, px, rgb, size, solid_background, AppContext, Application, ApplicationHandle,
-    AssetSource, Bounds, Point, RequestFrameOptions, ScaledPixels, SharedString, WindowBounds,
+    AssetSource, Bounds, FrameRequestSource, RequestFrameOptions, SharedString, WindowBounds,
     WindowHandle, WindowOptions,
 };
 use poodle_conformance::{
@@ -87,6 +87,8 @@ impl Gpui {
         request(RequestFrameOptions {
             require_presentation: true,
             force_render: true,
+            signal_at: None,
+            signal_source: FrameRequestSource::LocalSchedule,
         });
         self.platform.output.borrow_mut().request = Some(request);
     }
@@ -230,14 +232,7 @@ impl Backend for Gpui {
                         quad.background == color
                             && quad.content_mask.bounds.contains(&p)
                             && quad.bounds.contains(&p)
-                    }) || output.paths.iter().any(|path| {
-                        path.color == color
-                            && path.content_mask.bounds.contains(&p)
-                            && path.vertices.chunks_exact(3).any(|triangle| {
-                                let [a, b, c] = [0, 1, 2].map(|i| triangle[i].xy_position);
-                                contains_triangle(p, [a, b, c])
-                            })
-                    })
+                    }) || output.path_covers(p, color)
                 }))
             }
             Probe::Sprite(kind) => {
@@ -307,15 +302,55 @@ fn enum_value(value: Option<impl std::fmt::Debug>) -> Value {
     json!(value.map(|value| format!("{value:?}")))
 }
 
-fn contains_triangle(p: Point<ScaledPixels>, [a, b, c]: [Point<ScaledPixels>; 3]) -> bool {
-    let cross = |a: Point<ScaledPixels>, b: Point<ScaledPixels>, p: Point<ScaledPixels>| {
-        (b.x.0 - a.x.0) * (p.y.0 - a.y.0) - (b.y.0 - a.y.0) * (p.x.0 - a.x.0)
-    };
-    let area = cross(a, b, c);
-    area.abs() > f32::EPSILON
-        && [cross(a, b, p), cross(b, c, p), cross(c, a, p)]
-            .into_iter()
-            .all(|edge| edge * area >= 0.0)
+#[test]
+fn missing_path_tiles_remove_observed_ring_paint() {
+    let _deadline = headless_driver::arm_test_deadline();
+    let mut backend = Gpui::new();
+    let case = cases()
+        .find(|case| case.id == "kind.ProgressRing")
+        .expect("ring fixture");
+    backend.mount(&case.root, case.viewport);
+    let probe = case
+        .checks
+        .iter()
+        .find(|check| matches!(check.probe, Probe::Paint { .. }) && check.expected == json!(true))
+        .expect("ring fixture samples covered paint");
+    assert!(matches!(
+        backend.read(probe.target, probe.probe),
+        Reading::Observed(Value::Bool(true))
+    ));
+    backend.platform.output.borrow_mut().path_tiles.clear();
+    assert!(matches!(
+        backend.read(probe.target, probe.probe),
+        Reading::Observed(Value::Bool(false))
+    ));
+}
+
+#[test]
+fn missing_accesskit_label_is_observed_as_null() {
+    let _deadline = headless_driver::arm_test_deadline();
+    let mut backend = Gpui::new();
+    let case = cases()
+        .find(|case| case.id == "a11y.label")
+        .expect("label fixture");
+    assert_eq!(case.run(&mut backend).status, Status::Pass);
+
+    let id = backend.a11y_node("target").expect("accessible target");
+    let mut output = backend.platform.output.borrow_mut();
+    let (_, node) = output
+        .tree
+        .as_mut()
+        .expect("platform tree")
+        .nodes
+        .iter_mut()
+        .find(|(node_id, _)| *node_id == id)
+        .expect("target in the platform tree");
+    node.clear_label();
+    drop(output);
+    assert!(matches!(
+        backend.read("target", Probe::A11y("label")),
+        Reading::Observed(Value::Null)
+    ));
 }
 
 #[test]
@@ -325,6 +360,21 @@ fn node_vocabulary_pilot() {
     let results = cases()
         .map(|case| case.run(&mut backend))
         .collect::<Vec<_>>();
+
+    // Keep the pilot observational while preventing an empty or disconnected
+    // runner from succeeding or producing a receipt.
+    for id in [
+        "kind.Container",
+        "a11y.label",
+        "kind.ProgressRing",
+        "kind.ResolvedIconGeometry",
+    ] {
+        let row = results
+            .iter()
+            .find(|row| row.id == id)
+            .expect("pilot canary");
+        assert_eq!(row.status, Status::Pass, "{row:?}");
+    }
 
     if let Some(path) = std::env::var_os("POODLE_GPUI_CONFORMANCE_RECEIPT") {
         let git = Command::new("git")
@@ -342,23 +392,9 @@ fn node_vocabulary_pilot() {
             lock_sha256: digest(include_bytes!("../Cargo.lock")),
             platform: format!("{}-{}", std::env::consts::OS, std::env::consts::ARCH),
         };
-        let receipt = Receipt::new(identity, results.clone()).expect("complete GPUI case results");
+        let receipt = Receipt::new(identity, results).expect("complete GPUI case results");
         let json = receipt.to_json().expect("serialize GPUI receipt");
         Receipt::from_json(json.as_bytes()).expect("validate the serialized GPUI receipt");
         fs::write(path, json + "\n").expect("write GPUI receipt");
-    }
-    // Keep the pilot observational while preventing an empty or disconnected
-    // runner from appearing to succeed.
-    for id in [
-        "kind.Container",
-        "a11y.label",
-        "kind.ProgressRing",
-        "kind.ResolvedIconGeometry",
-    ] {
-        let row = results
-            .iter()
-            .find(|row| row.id == id)
-            .expect("pilot canary");
-        assert_eq!(row.status, Status::Pass, "{row:?}");
     }
 }

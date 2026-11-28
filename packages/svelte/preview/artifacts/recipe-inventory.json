@@ -3,7 +3,7 @@
     "components": 150,
     "recipeHooks": 1282,
     "hookCandidates": 9,
-    "metricVariables": 451
+    "metricVariables": 435
   },
   "inventory": {
     "accordion": {
@@ -1751,27 +1751,17 @@
       "metric": [
         "--poodle-page-header-actions-gap",
         "--poodle-page-header-actions-row-gap",
-        "--poodle-page-header-back-size",
         "--poodle-page-header-back-type-line",
         "--poodle-page-header-back-type-size",
         "--poodle-page-header-back-type-weight",
         "--poodle-page-header-banner-margin-top",
-        "--poodle-page-header-body-size",
         "--poodle-page-header-content-gap",
-        "--poodle-page-header-eyebrow-size",
         "--poodle-page-header-gap",
         "--poodle-page-header-padding-block-end",
         "--poodle-page-header-padding-block-start",
         "--poodle-page-header-padding-inline",
         "--poodle-page-header-radius",
-        "--poodle-page-header-section-size",
-        "--poodle-page-header-section-title-compact-size",
-        "--poodle-page-header-section-title-size",
-        "--poodle-page-header-subtitle-compact-size",
-        "--poodle-page-header-subtitle-size",
-        "--poodle-page-header-title-compact-size",
-        "--poodle-page-header-title-gap",
-        "--poodle-page-header-title-size"
+        "--poodle-page-header-title-gap"
       ]
     },
     "page-loading": {
@@ -2158,19 +2148,15 @@
       ],
       "candidates": [],
       "metric": [
-        "--poodle-sidebar-nav-end-label-font-size",
         "--poodle-sidebar-nav-end-label-gap",
         "--poodle-sidebar-nav-group-gap",
-        "--poodle-sidebar-nav-item-font-size",
         "--poodle-sidebar-nav-item-height",
         "--poodle-sidebar-nav-item-padding-block",
         "--poodle-sidebar-nav-item-padding-inline",
         "--poodle-sidebar-nav-item-type-line",
         "--poodle-sidebar-nav-item-type-size",
         "--poodle-sidebar-nav-item-type-weight",
-        "--poodle-sidebar-nav-title-font-size",
-        "--poodle-sidebar-nav-title-gap",
-        "--poodle-sidebar-nav-title-letter-spacing"
+        "--poodle-sidebar-nav-title-gap"
       ]
     },
     "skeleton": {
@@ -2455,11 +2441,9 @@
         "--poodle-text-input-control-padding-start",
         "--poodle-text-input-density-block-adjust",
         "--poodle-text-input-density-inline-adjust",
-        "--poodle-text-input-font-size",
         "--poodle-text-input-input-type-line",
         "--poodle-text-input-input-type-size",
         "--poodle-text-input-input-type-weight",
-        "--poodle-text-input-line-height",
         "--poodle-text-input-multiline-padding-end",
         "--poodle-text-input-padding-block",
         "--poodle-text-input-padding-inline",

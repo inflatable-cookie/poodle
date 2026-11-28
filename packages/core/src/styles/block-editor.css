@@ -13,7 +13,7 @@
     --poodle-block-editor-content-y: 0.375rem;
     --poodle-block-editor-input-x: 0.375rem;
     --poodle-block-editor-input-y: 0.25rem;
-    background: var(--poodle-recipe-block-editor-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-surface)));
+    background: var(--poodle-recipe-block-editor-fill, var(--poodle-style-surface-fill));
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -74,14 +74,14 @@
     flex-direction: column;
     border: none;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-block-editor-block-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 42%, transparent)));
+    background: var(--poodle-recipe-block-editor-block-fill, var(--poodle-style-surface-fill));
     transition:
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .poodle-block-editor__block.poodle-active {
-    background: var(--poodle-recipe-block-editor-active-block-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent)));
+    background: var(--poodle-recipe-block-editor-active-block-fill, var(--poodle-style-selection-itemFill));
   }
 
   .poodle-block-editor__block.poodle-drag-over {
@@ -130,7 +130,7 @@
   }
 
   .poodle-block-editor__drag-grip:hover {
-    background: var(--poodle-recipe-block-editor-hover-drag-grip-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
+    background: var(--poodle-recipe-block-editor-hover-drag-grip-fill, var(--poodle-style-control-fillHover));
     color: var(--poodle-recipe-block-editor-hover-drag-grip-text, var(--poodle-color-text-secondary));
   }
 
@@ -190,17 +190,17 @@
     background: var(--poodle-recipe-block-editor-tool-btn-fill, transparent);
     color: var(--poodle-recipe-block-editor-tool-btn-text, var(--poodle-color-text-tertiary));
     cursor: pointer;
-    font-size: 0.75rem;
-    line-height: 1;
+    font-size: var(--poodle-style-typography-segmentLabel-size);
+    line-height: var(--poodle-style-typography-glyph-lineHeight);
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .poodle-block-editor__tool-btn:hover {
-    background: var(--poodle-recipe-block-editor-hover-tool-btn-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)));
+    background: var(--poodle-recipe-block-editor-hover-tool-btn-fill, var(--poodle-style-control-fillHover));
     color: var(--poodle-recipe-block-editor-hover-tool-btn-text, var(--poodle-color-text-primary));
   }
   .poodle-block-editor__tool-btn:active {
-    background: var(--poodle-recipe-block-editor-tool-btn-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-block-editor-tool-btn-active-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-block-editor__tool-btn:focus-visible {
@@ -235,8 +235,8 @@
     background: var(--poodle-recipe-block-editor-input-fill, transparent);
     color: var(--poodle-recipe-block-editor-input-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-body-family);
-    font-size: 0.875rem;
-    line-height: 1.6;
+    font-size: var(--poodle-style-typography-prose-md-size);
+    line-height: var(--poodle-style-typography-leading-loose);
     outline: none;
     resize: vertical;
   }

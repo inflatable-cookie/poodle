@@ -407,8 +407,8 @@ cannot drift between targets.
 | Var | Default Value | Focus Value |
 |-----|---------------|-------------|
 | `--poodle-text-input-radius` | `var(--poodle-radius-control)` | — |
-| `--poodle-text-input-fill` | `var(--poodle-recipe-text-input-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)))` | `var(--poodle-text-input-fill-focus)` |
-| `--poodle-text-input-border` | `var(--poodle-recipe-text-input-border, var(--poodle-style-control-border, var(--poodle-color-border-default)))` | `var(--poodle-text-input-border-focus)` |
+| `--poodle-text-input-fill` | `var(--poodle-recipe-text-input-fill, var(--poodle-style-control-fill))` | `var(--poodle-text-input-fill-focus)` |
+| `--poodle-text-input-border` | `var(--poodle-recipe-text-input-border, var(--poodle-style-control-border))` | `var(--poodle-text-input-border-focus)` |
 | `--poodle-text-input-shadow` | (none by default) | `var(--poodle-text-input-shadow-focus)` fallback `0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
 
 ### Root `.text-input`
@@ -478,8 +478,8 @@ cannot drift between targets.
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary))` |
-| `opacity` | `var(--poodle-style-control-secondaryOpacity, var(--poodle-state-opacity-muted))` |
+| `color` | `var(--poodle-style-control-secondaryText)` |
+| `opacity` | `var(--poodle-style-control-secondaryOpacity)` |
 
 ### Affordance `.text-input__affordance`
 
@@ -531,8 +531,8 @@ indicator slot.
 | `align-items` | `center` |
 | `align-self` | `stretch` |
 | `padding-inline` | `0.625rem` |
-| `color` | `var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary))` |
-| `opacity` | `var(--poodle-style-control-secondaryOpacity, var(--poodle-state-opacity-muted))` |
+| `color` | `var(--poodle-style-control-secondaryText)` |
+| `opacity` | `var(--poodle-style-control-secondaryOpacity)` |
 | `font-family` | `var(--poodle-typography-body-family)` |
 | `font-size` | `var(--poodle-typography-body-size)` |
 | `white-space` | `nowrap` |

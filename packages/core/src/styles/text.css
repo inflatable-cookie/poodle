@@ -4,32 +4,32 @@
   .poodle-text {
     margin: 0;
     color: var(--poodle-recipe-text-text, var(--poodle-color-text-primary));
-    font-size: 0.875rem;
-    line-height: 1.5;
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-style-typography-body-lineHeightRatio);
   }
 
   .poodle-text[data-size="xs"] {
-    font-size: 0.75rem;
+    font-size: var(--poodle-style-typography-caption-size);
   }
 
   .poodle-text[data-size="sm"] {
-    font-size: 0.8125rem;
+    font-size: var(--poodle-style-typography-secondary-size);
   }
 
   .poodle-text[data-leading="relaxed"] {
-    line-height: 1.6;
+    line-height: var(--poodle-style-typography-body-lineHeightRelaxedRatio);
   }
 
   .poodle-text[data-weight="medium"] {
-    font-weight: 500;
+    font-weight: var(--poodle-typography-font-weight-medium);
   }
 
   .poodle-text[data-weight="semibold"] {
-    font-weight: 600;
+    font-weight: var(--poodle-typography-font-weight-semibold);
   }
 
   .poodle-text[data-weight="bold"] {
-    font-weight: 700;
+    font-weight: var(--poodle-style-typography-body-weightBold);
   }
 
   .poodle-text[data-spacing="compact"] {

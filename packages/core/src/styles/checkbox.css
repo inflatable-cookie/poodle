@@ -35,9 +35,9 @@
     justify-content: center;
     width: calc(var(--poodle-size-icon-md) + 0.125rem);
     height: calc(var(--poodle-size-icon-md) + 0.125rem);
-    border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
+    border: 0.0625rem solid var(--poodle-style-control-border);
     border-radius: 0.3125rem;
-    background: var(--poodle-style-control-fill, var(--poodle-color-background-surface));
+    background: var(--poodle-style-control-fill);
     color: var(--poodle-color-text-inverse);
   }
 
@@ -58,7 +58,7 @@
     justify-content: center;
     width: calc(var(--poodle-size-icon-md) - 0.125rem);
     height: calc(var(--poodle-size-icon-md) - 0.125rem);
-    line-height: 1;
+    line-height: var(--poodle-style-typography-glyph-lineHeight);
   }
 
   .poodle-checkbox[data-motion-ready="true"] .poodle-checkbox__mark {
@@ -86,10 +86,10 @@
   }
 
   /* Size variants — label */
-  .poodle-checkbox[data-size="xs"] .poodle-checkbox__label { font-size: 0.6875rem; }
-  .poodle-checkbox[data-size="sm"] .poodle-checkbox__label { font-size: 0.75rem; }
-  .poodle-checkbox[data-size="lg"] .poodle-checkbox__label { font-size: 0.875rem; }
-  .poodle-checkbox[data-size="xl"] .poodle-checkbox__label { font-size: 0.9375rem; }
+  .poodle-checkbox[data-size="xs"] .poodle-checkbox__label { font-size: var(--poodle-style-typography-compactControlLabel-xs-size); }
+  .poodle-checkbox[data-size="sm"] .poodle-checkbox__label { font-size: var(--poodle-style-typography-compactControlLabel-sm-size); }
+  .poodle-checkbox[data-size="lg"] .poodle-checkbox__label { font-size: var(--poodle-style-typography-compactControlLabel-lg-size); }
+  .poodle-checkbox[data-size="xl"] .poodle-checkbox__label { font-size: var(--poodle-style-typography-compactControlLabel-xl-size); }
 
   /* Size variants — indicator */
   .poodle-checkbox[data-size="xs"] .poodle-checkbox__indicator {

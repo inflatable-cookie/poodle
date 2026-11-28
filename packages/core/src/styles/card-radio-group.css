@@ -35,9 +35,9 @@
     width: 1.125rem;
     height: 1.125rem;
     flex-shrink: 0;
-    border: 0.125rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
+    border: 0.125rem solid var(--poodle-style-control-border);
     border-radius: 999px;
-    background: var(--poodle-recipe-card-radio-group-indicator-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-card-radio-group-indicator-fill, var(--poodle-style-control-fill));
     transition:
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
@@ -56,15 +56,15 @@
   }
 
   .poodle-card-radio-group__title {
-    font-size: 0.9375rem;
-    font-weight: 600;
+    font-size: var(--poodle-style-typography-cardTitle-size);
+    font-weight: var(--poodle-style-typography-cardTitle-weight);
     color: var(--poodle-recipe-card-radio-group-title-text, var(--poodle-color-text-primary));
   }
 
   .poodle-card-radio-group__description {
     margin: 0;
-    font-size: 0.8125rem;
-    line-height: 1.5;
+    font-size: var(--poodle-style-typography-secondary-size);
+    line-height: var(--poodle-style-typography-leading-relaxed);
     color: var(--poodle-recipe-card-radio-group-description-text, var(--poodle-color-text-secondary));
   }
 
@@ -79,11 +79,11 @@
   }
 
   .poodle-card-radio-group[data-size="xs"] .poodle-card-radio-group__title {
-    font-size: 0.75rem;
+    font-size: var(--poodle-style-typography-controlSummary-xs-size);
   }
 
   .poodle-card-radio-group[data-size="xs"] .poodle-card-radio-group__description {
-    font-size: 0.6875rem;
+    font-size: var(--poodle-style-typography-compactControlLabel-xs-size);
   }
 
   .poodle-card-radio-group[data-size="sm"] .poodle-card-radio-group__indicator {
@@ -92,11 +92,11 @@
   }
 
   .poodle-card-radio-group[data-size="sm"] .poodle-card-radio-group__title {
-    font-size: 0.8125rem;
+    font-size: var(--poodle-style-typography-controlSummary-sm-size);
   }
 
   .poodle-card-radio-group[data-size="sm"] .poodle-card-radio-group__description {
-    font-size: 0.75rem;
+    font-size: var(--poodle-style-typography-compactControlLabel-sm-size);
   }
 
   .poodle-card-radio-group[data-size="lg"] .poodle-card-radio-group__indicator {
@@ -110,11 +110,11 @@
   }
 
   .poodle-card-radio-group[data-size="lg"] .poodle-card-radio-group__title {
-    font-size: 1.0625rem;
+    font-size: var(--poodle-style-typography-controlLabel-xl-size);
   }
 
   .poodle-card-radio-group[data-size="lg"] .poodle-card-radio-group__description {
-    font-size: 0.875rem;
+    font-size: var(--poodle-style-typography-compactControlLabel-lg-size);
   }
 
   .poodle-card-radio-group[data-size="xl"] .poodle-card-radio-group__indicator {
@@ -128,11 +128,11 @@
   }
 
   .poodle-card-radio-group[data-size="xl"] .poodle-card-radio-group__title {
-    font-size: 1.125rem;
+    font-size: var(--poodle-style-typography-displayControl-lg-size);
   }
 
   .poodle-card-radio-group[data-size="xl"] .poodle-card-radio-group__description {
-    font-size: 0.9375rem;
+    font-size: var(--poodle-style-typography-compactControlLabel-xl-size);
   }
 
   .poodle-card-radio-group[data-density="compact"] {

@@ -3,7 +3,7 @@
 
   .poodle-duration-input {
     --poodle-duration-input-digit-size: var(--poodle-typography-body-size);
-    --poodle-duration-input-label-size: 0.5625rem;
+    --poodle-duration-input-label-size: var(--poodle-style-typography-microLabel-sm-size);
     --poodle-duration-input-label-gap: 0.125rem;
     --poodle-duration-input-field-width: 1.75rem;
     --poodle-duration-input-padding-block-base: 0.25rem;
@@ -22,9 +22,9 @@
         + var(--poodle-duration-input-padding-inline-size-adjust)
         + var(--poodle-duration-input-padding-inline-density-adjust)
       );
-    border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
+    border: 0.0625rem solid var(--poodle-style-control-border);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-duration-input-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
+    background: var(--poodle-recipe-duration-input-fill, var(--poodle-style-control-fill));
     font-family: var(--poodle-typography-code-family);
     transition:
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
@@ -62,7 +62,7 @@
     color: var(--poodle-recipe-duration-input-label-text, var(--poodle-color-text-secondary));
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    line-height: 1;
+    line-height: var(--poodle-typography-label-lineHeightTight);
     user-select: none;
   }
 
@@ -77,7 +77,7 @@
     font-size: var(--poodle-duration-input-digit-size);
     font-variant-numeric: tabular-nums;
     text-align: center;
-    line-height: 1;
+    line-height: var(--poodle-typography-label-lineHeightTight);
     outline: none;
   }
 
@@ -100,8 +100,8 @@
     align-items: center;
     justify-content: center;
     font-size: var(--poodle-duration-input-digit-size);
-    font-weight: 600;
-    line-height: 1;
+    font-weight: var(--poodle-typography-heading-weight);
+    line-height: var(--poodle-typography-label-lineHeightTight);
   }
 
   /* Size variants */
@@ -110,11 +110,11 @@
     --poodle-duration-input-padding-inline-size-adjust: -0.125rem;
     --poodle-duration-input-field-width: 1.5rem;
     --poodle-duration-input-digit-size: 0.75rem;
-    --poodle-duration-input-label-size: 0.5rem;
+    --poodle-duration-input-label-size: var(--poodle-style-typography-microLabel-xs-size);
   }
 
   .poodle-duration-input[data-size="xs"] .poodle-duration-input__label {
-    --poodle-duration-input-label-size: 0.5rem;
+    --poodle-duration-input-label-size: var(--poodle-style-typography-microLabel-xs-size);
   }
 
   .poodle-duration-input[data-size="sm"] {

@@ -288,7 +288,7 @@ Cross-cutting contracts that bind more than one component. Read the
 rule once instead of restating it in application code.
 
 - **002 - Anchored Overlays** — `docs/contracts/002-anchored-overlays.md` — An overlay anchored to an inline trigger — a picker panel, a menu, a tooltip — used to be a positioned child of that trigger. That is correct only while no ancestor interferes, and in a real application one always does:
-- **003 - Native Accessibility** — `docs/contracts/003-native-accessibility.md` — Poodle's GPUI backend maps direct node roles, names, states, and values through GPUI 1.22.0's AccessKit path. The live, non-activating AXUIElement proof selects its window by title and walks only that window's subtree.…
+- **003 - Native Accessibility** — `docs/contracts/003-native-accessibility.md` — Poodle's GPUI backend maps direct node roles, names, states, and values through GPUI's AccessKit path. The live, non-activating AXUIElement proof selects its window by title and walks only that window's subtree.…
 - **004 Shared Control Types** — `docs/contracts/004-shared-control-types.md` — Canonical definitions for control types that more than one component contract uses. Per `README.md` "Cross-Cutting Rules", a component contract **references** a type defined here and does not restate its members.
 
 Component index: `docs/contracts/components/README.md`.

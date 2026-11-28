@@ -178,8 +178,8 @@ response to keyboard events.
 | Property | Value |
 |----------|-------|
 | `border-color` | `transparent` |
-| `background` | `var(--poodle-recipe-action-discovery-panel-list-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-elevated))))` |
-| `box-shadow` | `var(--poodle-recipe-action-discovery-panel-list-shadow, inset 0 0 0 0.0625rem var(--poodle-style-selection-itemBorder, color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)))` |
+| `background` | `var(--poodle-recipe-action-discovery-panel-list-fill, var(--poodle-style-selection-itemFill))` |
+| `box-shadow` | `var(--poodle-recipe-action-discovery-panel-list-shadow, inset 0 0 0 0.0625rem var(--poodle-style-selection-itemBorder))` |
 
 #### `.action-discovery-panel__trailing`
 
@@ -204,7 +204,7 @@ response to keyboard events.
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `var(--poodle-action-discovery-chip-font-size)` (`0.6875rem` md default; per-size below) |
-| `font-weight` | `600` |
+| `font-weight` | `var(--poodle-style-typography-pillLabel-weight)` (`600`) |
 | `letter-spacing` | `0.03em` |
 | `text-transform` | `uppercase` |
 | `white-space` | `nowrap` |
@@ -225,6 +225,8 @@ response to keyboard events.
 | `text-transform` | `none` |
 
 #### Chip size table (`chip-height` / `chip-x` / `chip-font-size`)
+
+The font sizes are the defaults of the `pillLabel.{size}.size` style type roles.
 
 | Size | `chip-height` | `chip-x` | `chip-font-size` |
 |------|---------------|----------|------------------|

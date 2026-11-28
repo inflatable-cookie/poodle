@@ -11,8 +11,8 @@ crates.io. Use path or workspace dependencies.
 
 ```toml
 [dependencies]
-gpui = { package = "gpui-unofficial", version = "=1.22.0" }
-gpui_platform = { package = "gpui-platform-gpui-unofficial", version = "=1.22.0", features = ["font-kit"] }
+gpui = { package = "gpui-unofficial", version = "~1.30.2" }
+gpui_platform = { package = "gpui-platform-gpui-unofficial", version = "~1.30.2", features = ["font-kit"] }
 poodle-gpui = { path = "../poodle/packages/gpui/adapter" }
 poodle-gpui-node-backend = { path = "../poodle/packages/gpui/node-backend" }
 poodle-render = { path = "../poodle/packages/render" }
@@ -20,7 +20,10 @@ poodle-specs = { path = "../poodle/packages/contracts/components" }
 poodle-tokens = { path = "../poodle/packages/contracts/tokens" }
 ```
 
-Adjust paths for a vendored checkout or Cargo workspace.
+Adjust paths for a vendored checkout or Cargo workspace. Use Rust 1.98 or
+later. Keep the GPUI range aligned with the backend so Cargo resolves one
+crates.io GPUI identity in your application's lockfile. See the
+[GPUI version policy](../contracts/003-native-accessibility.md#gpui-version-policy).
 
 ## Render a Component
 

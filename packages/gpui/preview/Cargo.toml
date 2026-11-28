@@ -3,7 +3,7 @@ name = "poodle-gpui-preview"
 version = "0.5.0"
 edition = "2021"
 license = "MIT"
-rust-version = "1.95"
+rust-version = "1.98"
 description = "Native macOS preview application for the Poodle design system, rendered via GPUI."
 publish = false
 
@@ -43,10 +43,10 @@ window-capture = [
 
 [dependencies]
 # GPUI framework — keep the same exact crate identity as the node backend.
-gpui = { package = "gpui-unofficial", version = "=1.22.0" }
+gpui = { package = "gpui-unofficial", version = "~1.30.2" }
 # `Application` construction now belongs to the platform facade. `font-kit`
 # preserves native text rendering, while `test-support` enables mounted tests.
-gpui_platform = { package = "gpui-platform-gpui-unofficial", version = "=1.22.0", features = ["font-kit", "test-support"] }
+gpui_platform = { package = "gpui-platform-gpui-unofficial", version = "~1.30.2", features = ["font-kit", "test-support"] }
 
 # Poodle adapter + contracts + real components
 poodle-gpui = { path = "../adapter" }
@@ -127,7 +127,7 @@ path = "tests/visual_fixture_inventory.rs"
 # (TestAppContext / VisualTestContext / TestWindow). test-support is a
 # dev-dependency so ordinary builds and the preview bin never pull it in.
 [dev-dependencies]
-gpui = { package = "gpui-unofficial", version = "=1.22.0", features = ["test-support"] }
+gpui = { package = "gpui-unofficial", version = "~1.30.2", features = ["test-support"] }
 # g16.111 A1 receipts hash the shared accessibility scenario file so the GPUI
 # and Svelte extractors cannot drift apart. Already in the graph (optional
 # window-capture dependency above); test-only here.

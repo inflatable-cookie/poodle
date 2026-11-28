@@ -187,15 +187,15 @@ beyond plain props. Classified in the long-tail sweep.
 
 | Property | Value |
 |----------|-------|
-| `--poodle-toast-tone` | `var(--poodle-color-status-info, #3b82f6)` (default) |
+| `--poodle-toast-tone` | `var(--poodle-color-status-info)` (default) |
 | display | `grid` |
 | gap | `var(--poodle-space-stack-sm)` |
 | padding | `var(--poodle-space-panel-x)` |
 | padding-right | `calc(var(--poodle-space-panel-x) + 1.5rem)` |
-| border | `0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-toast-tone) 34%, var(--poodle-color-border-default)))` |
+| border | `0.0625rem solid var(--poodle-style-surface-border)` |
 | border-radius | `calc(var(--poodle-radius-surface) - 0.125rem)` |
-| background | `var(--poodle-recipe-toast-stack-fill, var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, linear-gradient(90deg, color-mix(in srgb, var(--poodle-toast-tone) 12%, transparent), color-mix(in srgb, var(--poodle-color-background-elevated) 98%, transparent) 18%), color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent))))` |
-| box-shadow | `var(--poodle-recipe-toast-stack-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-overlay)))` |
+| background | `var(--poodle-recipe-toast-stack-fill, var(--poodle-style-surface-floatingFill))` |
+| box-shadow | `var(--poodle-recipe-toast-stack-shadow, var(--poodle-style-surface-shadow))` |
 | position | `relative` |
 | overflow | `hidden` |
 
@@ -213,7 +213,7 @@ beyond plain props. Classified in the long-tail sweep.
 
 | `data-tone` | `--poodle-toast-tone` |
 |-------------|-------------------|
-| `info` (default) | `var(--poodle-color-status-info, #3b82f6)` |
+| `info` (default) | `var(--poodle-color-status-info)` |
 | `success` | `var(--poodle-color-status-success)` |
 | `warning` | `var(--poodle-color-status-warning)` |
 | `danger` | `var(--poodle-color-status-danger)` |
@@ -232,7 +232,7 @@ beyond plain props. Classified in the long-tail sweep.
 | height | `1.25rem` |
 | padding | `0` |
 | border | `none` |
-| border-radius | `var(--poodle-radius-sm, 0.25rem)` |
+| border-radius | `var(--poodle-radius-sm)` |
 | background | `transparent` |
 | color | `var(--poodle-color-text-secondary)` |
 | cursor | `pointer` |
@@ -257,8 +257,8 @@ beyond plain props. Classified in the long-tail sweep.
 | Property | Value |
 |----------|-------|
 | color | `var(--poodle-color-text-secondary)` |
-| font-size | `0.8125rem` |
-| line-height | `1.5` |
+| font-size | `var(--poodle-style-typography-toastBody-md-size)` (`0.8125rem`) |
+| line-height | `var(--poodle-style-typography-body-lineHeightRatio)` (`1.5`) |
 
 ### Actions Container (`.toast__actions`)
 
@@ -268,6 +268,9 @@ beyond plain props. Classified in the long-tail sweep.
 | justify-content | `flex-start` |
 
 ### Size Adjustments
+
+Font sizes are the defaults of the `toastTitle.{size}.size` and
+`toastBody.{size}.size` style type roles.
 
 #### `data-size="xs"`
 

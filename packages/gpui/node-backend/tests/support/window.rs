@@ -24,9 +24,74 @@ pub(super) struct Output {
     pub request: Option<FrameRequest>,
     pub tree: Option<accesskit::TreeUpdate>,
     pub quads: Vec<Quad>,
-    pub paths: Vec<Path<ScaledPixels>>,
+    path_paints: Vec<PathPaint>,
+    path_curves: Vec<PathCurve>,
+    pub path_tiles: Vec<PathTile>,
     pub masks: Vec<Bounds<ScaledPixels>>,
     pub images: Vec<Bounds<ScaledPixels>>,
+}
+
+impl Output {
+    pub fn path_covers(&self, position: Point<ScaledPixels>, color: Background) -> bool {
+        let p = point(position.x.0, position.y.0);
+        self.path_tiles.iter().any(|tile| {
+            let paint = &self.path_paints[tile.paint as usize];
+            if paint.color != color
+                || !paint.content_mask.bounds.contains(&position)
+                || p.x < tile.top_left.x
+                || p.x >= tile.bottom_right.x
+                || p.y < tile.top_left.y
+                || p.y >= tile.bottom_right.y
+            {
+                return false;
+            }
+
+            // Like GPUI's path shader, start at the tile's backdrop winding
+            // and cast a leftward ray. Sample geometric coverage at the
+            // specified point, without estimating pixel antialiasing.
+            let start = tile.curve_start as usize;
+            let end = start + tile.curve_count as usize;
+            let mut winding = tile.backdrop;
+            for curve in &self.path_curves[start..end] {
+                let sign = curve.sign as i32;
+                if curve.p0.y <= p.y && p.y < curve.p1.y && crossing_x(curve, p.y) < p.x {
+                    winding += sign;
+                }
+                // Unlisted curves can start or end where listed ones meet
+                // them. Move their contribution from the reference ray to
+                // the sample ray using those endpoints.
+                for (endpoint, step) in [(curve.p0, sign), (curve.p1, -sign)] {
+                    if endpoint.x <= tile.reference.x {
+                        winding -= step
+                            * (i32::from(endpoint.y <= p.y)
+                                - i32::from(endpoint.y <= tile.reference.y));
+                    }
+                }
+            }
+            if paint.even_odd.as_bool() {
+                winding % 2 != 0
+            } else {
+                winding != 0
+            }
+        })
+    }
+}
+
+fn crossing_x(curve: &PathCurve, y: f32) -> f32 {
+    // GPUI bins monotone quadratics, so bisecting their y coordinate finds
+    // the ray intersection without a separate straight-line case.
+    let mut low = 0.0;
+    let mut high = 1.0;
+    for _ in 0..24 {
+        let t = (low + high) * 0.5;
+        if (curve.a.y * t + curve.b.y) * t + curve.p0.y < y {
+            low = t;
+        } else {
+            high = t;
+        }
+    }
+    let t = (low + high) * 0.5;
+    (curve.a.x * t + curve.b.x) * t + curve.p0.x
 }
 
 pub(super) struct PlatformTap {
@@ -117,6 +182,18 @@ impl HasDisplayHandle for WindowTap {
 }
 
 impl Platform for PlatformTap {
+    fn platform_info(&self) -> PlatformInfo {
+        let os = if cfg!(target_os = "macos") {
+            OperatingSystem::Mac
+        } else {
+            OperatingSystem::Linux
+        };
+        PlatformInfo {
+            os,
+            target: PlatformTarget::Native,
+        }
+    }
+
     fn background_executor(&self) -> BackgroundExecutor {
         self.background_executor.clone()
     }
@@ -152,6 +229,8 @@ impl Platform for PlatformTap {
     fn primary_display(&self) -> Option<Rc<dyn PlatformDisplay>> {
         None
     }
+
+    fn on_displays_changed(&self, _callback: Box<dyn FnMut()>) {}
 
     fn active_window(&self) -> Option<AnyWindowHandle> {
         None
@@ -320,7 +399,18 @@ impl PlatformWindow for WindowTap {
     fn draw(&self, scene: &Scene) {
         let mut output = self.output.borrow_mut();
         output.quads.clone_from(&scene.quads);
-        output.paths.clone_from(&scene.paths);
+        let Output {
+            path_paints,
+            path_curves,
+            path_tiles,
+            ..
+        } = &mut *output;
+        path_paints.clear();
+        path_curves.clear();
+        path_tiles.clear();
+        for path in &scene.paths {
+            path.append_to(path_paints, path_curves, path_tiles);
+        }
         output.masks = scene
             .monochrome_sprites
             .iter()
@@ -440,6 +530,8 @@ impl PlatformWindow for WindowTap {
     fn on_resize(&self, _callback: Box<dyn FnMut(Size<Pixels>, f32)>) {}
 
     fn on_moved(&self, _callback: Box<dyn FnMut()>) {}
+
+    fn on_display_changed(&self, _callback: Box<dyn FnMut()>) {}
 
     fn on_should_close(&self, _callback: Box<dyn FnMut() -> bool>) {}
 

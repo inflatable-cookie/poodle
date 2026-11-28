@@ -193,7 +193,7 @@ beyond plain props. Classified in the long-tail sweep.
 | `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)` |
 | `color` | `var(--poodle-color-accent-base)` |
-| `font-size` | `1rem` |
+| `font-size` | `var(--poodle-style-typography-glyph-lg-size)` (`1rem`) |
 
 ### Content
 
@@ -214,7 +214,7 @@ beyond plain props. Classified in the long-tail sweep.
 | `gap` | `0.375rem` |
 | `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `var(--poodle-typography-label-size)` |
-| `font-weight` | `600` |
+| `font-weight` | `var(--poodle-style-typography-cardTitle-weight)` (`600`) |
 | `color` | `var(--poodle-color-text-primary)` |
 
 ### Badge
@@ -227,8 +227,8 @@ beyond plain props. Classified in the long-tail sweep.
 | `border-radius` | `999px` |
 | `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` |
 | `color` | `var(--poodle-color-accent-base)` |
-| `font-size` | `0.625rem` |
-| `font-weight` | `600` |
+| `font-size` | `var(--poodle-style-typography-pillLabel-sm-size)` (`0.625rem`) |
+| `font-weight` | `var(--poodle-style-typography-pillLabel-weight)` (`600`) |
 | `text-transform` | `uppercase` |
 | `letter-spacing` | `0.05em` |
 
@@ -236,9 +236,9 @@ beyond plain props. Classified in the long-tail sweep.
 
 | Property | Value |
 |----------|-------|
-| `font-size` | `0.8125rem` |
+| `font-size` | `var(--poodle-style-typography-secondary-size)` (`0.8125rem`) |
 | `color` | `var(--poodle-color-text-secondary)` |
-| `line-height` | `1.4` |
+| `line-height` | `var(--poodle-style-typography-leading-normal)` (`1.4`) |
 
 ### Arrow
 

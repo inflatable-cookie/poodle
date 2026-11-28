@@ -9,15 +9,15 @@
  */
 
 .poodle-rich-text-editor {
-  --poodle-rich-text-font-size: 0.875rem;
+  --poodle-rich-text-font-size: var(--poodle-style-typography-prose-md-size);
   min-width: 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
   inline-size: 100%;
   block-size: 100%;
-  background: var(--poodle-style-surface-fill, var(--poodle-color-background-panel));
-  border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
+  background: var(--poodle-style-surface-fill);
+  border: 0.0625rem solid var(--poodle-style-surface-border);
   border-radius: var(--poodle-radius-surface);
   color: var(--poodle-color-text-primary);
   overflow: hidden;
@@ -27,11 +27,16 @@
   --poodle-rich-text-font-size: 0.875rem;
 }
 
-:where(.poodle-rich-text-editor, .poodle-rich-text-renderer)[data-size="xs"] { --poodle-rich-text-font-size: 0.75rem; }
-:where(.poodle-rich-text-editor, .poodle-rich-text-renderer)[data-size="sm"] { --poodle-rich-text-font-size: 0.8125rem; }
-:where(.poodle-rich-text-editor, .poodle-rich-text-renderer)[data-size="md"] { --poodle-rich-text-font-size: 0.875rem; }
-:where(.poodle-rich-text-editor, .poodle-rich-text-renderer)[data-size="lg"] { --poodle-rich-text-font-size: 1rem; }
-:where(.poodle-rich-text-editor, .poodle-rich-text-renderer)[data-size="xl"] { --poodle-rich-text-font-size: 1.125rem; }
+:where(.poodle-rich-text-editor)[data-size="xs"] { --poodle-rich-text-font-size: var(--poodle-style-typography-prose-xs-size); }
+:where(.poodle-rich-text-renderer)[data-size="xs"] { --poodle-rich-text-font-size: 0.75rem; }
+:where(.poodle-rich-text-editor)[data-size="sm"] { --poodle-rich-text-font-size: var(--poodle-style-typography-prose-sm-size); }
+:where(.poodle-rich-text-renderer)[data-size="sm"] { --poodle-rich-text-font-size: 0.8125rem; }
+:where(.poodle-rich-text-editor)[data-size="md"] { --poodle-rich-text-font-size: var(--poodle-style-typography-prose-md-size); }
+:where(.poodle-rich-text-renderer)[data-size="md"] { --poodle-rich-text-font-size: 0.875rem; }
+:where(.poodle-rich-text-editor)[data-size="lg"] { --poodle-rich-text-font-size: var(--poodle-style-typography-prose-lg-size); }
+:where(.poodle-rich-text-renderer)[data-size="lg"] { --poodle-rich-text-font-size: 1rem; }
+:where(.poodle-rich-text-editor)[data-size="xl"] { --poodle-rich-text-font-size: var(--poodle-style-typography-prose-xl-size); }
+:where(.poodle-rich-text-renderer)[data-size="xl"] { --poodle-rich-text-font-size: 1.125rem; }
 
 .poodle-rich-text-editor__toolbar {
   --poodle-rich-text-toolbar-y: 0.375rem;
@@ -44,8 +49,8 @@
   /* Row gap keeps wrapped clusters intact; column gap separates them. */
   gap: var(--poodle-rich-text-toolbar-y) var(--poodle-space-inline-sm);
   padding: var(--poodle-rich-text-toolbar-y) var(--poodle-rich-text-toolbar-x);
-  background: var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent));
-  border-block-end: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
+  background: var(--poodle-style-surface-fill);
+  border-block-end: 0.0625rem solid var(--poodle-style-surface-border);
 }
 
 .poodle-rich-text-editor[data-density="compact"] {
@@ -80,9 +85,9 @@
 /* Typographic glyphs (H1, H2, H3) inside an icon-button or heading option. */
 .poodle-rich-text-editor__glyph {
   font-family: var(--poodle-typography-code-family);
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1;
+  font-size: var(--poodle-style-typography-segmentLabel-size);
+  font-weight: var(--poodle-style-typography-segmentLabel-weight);
+  line-height: var(--poodle-style-typography-glyph-lineHeight);
 }
 
 /* Text-mode heading selector: one toolbar stop replacing the separate H1–H6
@@ -98,8 +103,8 @@
   align-items: center;
   min-inline-size: 4.75rem;
   block-size: 1.25rem;
-  font-size: 0.8125rem;
-  line-height: 1.25rem;
+  font-size: var(--poodle-typography-label-size);
+  line-height: var(--poodle-typography-body-lineHeight);
   white-space: nowrap;
 }
 
@@ -110,43 +115,43 @@
   min-block-size: 1.25rem;
   max-block-size: 2rem;
   overflow: hidden;
-  line-height: 1.2;
+  line-height: var(--poodle-style-typography-leading-tight);
   white-space: nowrap;
 }
 
 .poodle-rich-text-editor__heading-option-label {
-  line-height: 1.2;
+  line-height: var(--poodle-style-typography-leading-tight);
 }
 
 .poodle-rich-text-editor__heading-option[data-heading-level="1"] .poodle-rich-text-editor__heading-option-label {
-  font-size: 1.25rem;
+  font-size: var(--poodle-style-typography-displayControl-xl-size);
 }
 
 .poodle-rich-text-editor__heading-option[data-heading-level="2"] .poodle-rich-text-editor__heading-option-label {
-  font-size: 1.125rem;
+  font-size: var(--poodle-style-typography-displayControl-lg-size);
 }
 
 .poodle-rich-text-editor__heading-option[data-heading-level="3"] .poodle-rich-text-editor__heading-option-label {
-  font-size: 1rem;
+  font-size: var(--poodle-style-typography-displayControl-md-size);
 }
 
 .poodle-rich-text-editor__heading-option[data-heading-level="4"] .poodle-rich-text-editor__heading-option-label {
-  font-size: 0.9375rem;
-  font-weight: 600;
+  font-size: var(--poodle-style-typography-cardTitle-size);
+  font-weight: var(--poodle-typography-heading-weight);
 }
 
 .poodle-rich-text-editor__heading-option[data-heading-level="5"] .poodle-rich-text-editor__heading-option-label {
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: var(--poodle-typography-body-size);
+  font-weight: var(--poodle-typography-heading-weight);
 }
 
 .poodle-rich-text-editor__heading-option[data-heading-level="6"] .poodle-rich-text-editor__heading-option-label {
-  font-size: 0.8125rem;
-  font-weight: 600;
+  font-size: var(--poodle-typography-label-size);
+  font-weight: var(--poodle-typography-heading-weight);
 }
 
 .poodle-rich-text-editor__heading-option[data-heading-level="normal"] .poodle-rich-text-editor__heading-option-label {
-  font-size: 0.875rem;
+  font-size: var(--poodle-typography-body-size);
 }
 
 .poodle-rich-text-editor__link-editor {
@@ -162,10 +167,10 @@
   flex: 1 1 auto;
   min-inline-size: 0;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: var(--poodle-typography-body-size);
   color: var(--poodle-color-text-primary);
-  background: var(--poodle-style-control-fill, var(--poodle-color-background-panel));
-  border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-subtle));
+  background: var(--poodle-style-control-fill);
+  border: 0.0625rem solid var(--poodle-style-control-border);
   border-radius: var(--poodle-radius-control);
   padding: var(--poodle-space-stack-2xs) var(--poodle-space-inline-sm);
 }
@@ -189,7 +194,7 @@
   padding: var(--poodle-space-stack-sm) var(--poodle-space-inline-lg);
   font-family: var(--poodle-typography-body-family);
   font-size: var(--poodle-rich-text-font-size);
-  line-height: 1.6;
+  line-height: var(--poodle-style-typography-leading-loose);
   caret-color: var(--poodle-color-text-primary);
   overflow-wrap: break-word;
   word-break: normal;
@@ -294,7 +299,7 @@
 }
 
 .poodle-rich-text-editor__viewport .ProseMirror .selectedCell {
-  background: var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent));
+  background: var(--poodle-style-selection-itemFill);
 }
 
 .poodle-rich-text-editor__viewport .ProseMirror .selectedCell:after {

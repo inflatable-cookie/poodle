@@ -126,7 +126,7 @@ pub fn tracked_vertical_scroll(
         .size_full()
         .overflow_y_scroll()
         .track_scroll(&state.handle)
-        .on_scroll_wheel(move |_event, window: &mut Window, cx: &mut App| {
+        .on_scroll(move |_event, window: &mut Window, cx: &mut App| {
             // GPUI's built-in wheel listener updates the handle later in the
             // same dispatch. Observe after dispatch, then rebuild only if the
             // derived pin posture changed.

@@ -12,11 +12,11 @@
     display: inline-flex;
     align-items: center;
     padding: 0 0.75rem;
-    border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
+    border: 0.0625rem solid var(--poodle-style-control-border);
     border-radius: var(--poodle-radius-control);
-    color: var(--poodle-recipe-number-input-suffix-text, var(--poodle-style-control-secondaryText, var(--poodle-color-text-muted)));
+    color: var(--poodle-recipe-number-input-suffix-text, var(--poodle-style-control-secondaryText));
     background: var(--poodle-recipe-number-input-suffix-fill, transparent);
-    box-shadow: var(--poodle-style-control-shadow, none);
+    box-shadow: var(--poodle-style-control-shadow);
     white-space: nowrap;
   }
 
@@ -27,10 +27,10 @@
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: stretch;
     height: var(--poodle-number-input-control-height);
-    border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
+    border: 0.0625rem solid var(--poodle-style-control-border);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-number-input-field-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
-    box-shadow: var(--poodle-style-control-shadow, none);
+    background: var(--poodle-recipe-number-input-field-fill, var(--poodle-style-control-fill));
+    box-shadow: var(--poodle-style-control-shadow);
     overflow: hidden;
   }
 
@@ -87,11 +87,11 @@
   }
 
   .poodle-number-input__steppers button:hover:not(:disabled) {
-    background: var(--poodle-recipe-number-input-steppers-hover-fill, var(--poodle-style-control-fillHover, transparent));
+    background: var(--poodle-recipe-number-input-steppers-hover-fill, var(--poodle-style-control-fillHover));
   }
 
   .poodle-number-input__steppers button:active:not(:disabled) {
-    background: var(--poodle-recipe-number-input-steppers-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-number-input-steppers-active-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-number-input__steppers button:focus-visible {
@@ -120,20 +120,19 @@
   }
 
   .poodle-number-input__field[data-size="xs"] { --poodle-number-input-control-height: 1.5rem; }
-  .poodle-number-input__field[data-size="xs"] .poodle-number-input__control { font-size: 0.75rem; }
+  .poodle-number-input__field[data-size="xs"] .poodle-number-input__control { font-size: var(--poodle-style-typography-controlSummary-xs-size); }
 
   .poodle-number-input__field[data-size="sm"] { --poodle-number-input-control-height: 1.75rem; }
-  .poodle-number-input__field[data-size="sm"] .poodle-number-input__control { font-size: 0.8125rem; }
+  .poodle-number-input__field[data-size="sm"] .poodle-number-input__control { font-size: var(--poodle-style-typography-controlSummary-sm-size); }
 
   .poodle-number-input__field[data-size="md"] {
-    --poodle-number-input-control-height: var(
-      --poodle-size-control-height-md,
+    --poodle-number-input-control-height: var(--poodle-size-control-height-md,
       var(--poodle-size-control-height)
     );
   }
 
   .poodle-number-input__field[data-size="lg"] { --poodle-number-input-control-height: 2.75rem; }
-  .poodle-number-input__field[data-size="lg"] .poodle-number-input__control { font-size: 0.9375rem; }
+  .poodle-number-input__field[data-size="lg"] .poodle-number-input__control { font-size: var(--poodle-style-typography-controlSummary-lg-size); }
 
   .poodle-number-input__field[data-size="xl"] { --poodle-number-input-control-height: 3.25rem; }
-  .poodle-number-input__field[data-size="xl"] .poodle-number-input__control { font-size: 1rem; }
+  .poodle-number-input__field[data-size="xl"] .poodle-number-input__control { font-size: var(--poodle-style-typography-controlSummary-xl-size); }

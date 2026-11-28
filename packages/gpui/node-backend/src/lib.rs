@@ -3,7 +3,7 @@
 //!
 //! This crate is the GPUI half of the inversion `g12.019` completes. Poodle's
 //! components (`poodle-render`) emit `Spec + Theme → Node` trees and know
-//! nothing of GPUI; this adapter translates that vocabulary into GPUI 1.22.0's
+//! nothing of GPUI; this adapter translates that vocabulary into GPUI's
 //! fluent element API. Where GPUI has no equivalent channel, the gap is
 //! documented inline and in the crate's channel table.
 //!
@@ -27,9 +27,9 @@ use gpui::{
     canvas, deferred, div, img, linear_color_stop, linear_gradient, point, px, relative, size, svg,
     AnyElement, AnyWindowHandle, App, AppContext, Bounds, ClickEvent, CursorStyle, Div, ElementId,
     Hsla, InteractiveElement, IntoElement, KeyDownEvent, KeyUpEvent, MouseButton, MouseDownEvent,
-    MouseMoveEvent, MouseUpEvent, ParentElement, PathBuilder, Pixels, ScrollDelta,
-    ScrollWheelEvent, SharedString, Stateful, StatefulInteractiveElement, StyleRefinement, Styled,
-    StyledImage, Window,
+    MouseMoveEvent, MouseUpEvent, ParentElement, PathBuilder, Pixels, ScrollDelta, ScrollEvent,
+    SharedString, Stateful, StatefulInteractiveElement, StyleRefinement, Styled, StyledImage,
+    Window,
 };
 use poodle_node::{
     AnimEasing, AnimLoop, AnimProperty, ColorValue, ContinuousValuePhase, CrossAxisAlignment,

@@ -3,9 +3,9 @@
   "vocabulary_sha256": "02b67b5eda66774909a9ecead8972dbd2b3b1d43810b594265f0d4f8aa89ed63",
   "case_manifest_sha256": "943cec31f6f1041e860450477ea41aa858f71d2410259304722c0f99e239a781",
   "identity": {
-    "poodle_commit": "24d583e04f19ac3c13a199a0299a9f6f7e594efb",
-    "backend_commit": "24d583e04f19ac3c13a199a0299a9f6f7e594efb",
-    "lock_sha256": "281a368c5db22835d494bd0795987fbd265422c92eb9f74c1b256156704c49ee",
+    "poodle_commit": "79579ae1449e7d15428730d99d5da73e6e04f3b1",
+    "backend_commit": "79579ae1449e7d15428730d99d5da73e6e04f3b1",
+    "lock_sha256": "4a729c9f740db35690f79147a80ad6590ccadf2edc7b66f56e739e678a24f180",
     "platform": "macos-aarch64"
   },
   "results": [

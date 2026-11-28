@@ -245,9 +245,9 @@ current implementation gets association free from the wrapping `<label>`.
 | `justify-content` | `center` |
 | `width` | `1.125rem` |
 | `height` | `1.125rem` |
-| `border` | `0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default))` |
+| `border` | `0.0625rem solid var(--poodle-style-control-border)` |
 | `border-radius` | `0.3125rem` |
-| `background` | `var(--poodle-style-control-fill, var(--poodle-color-background-surface))` |
+| `background` | `var(--poodle-style-control-fill)` |
 | `color` | `var(--poodle-color-text-inverse)` |
 
 ### Indicator checked `:checked + .checkbox__indicator`

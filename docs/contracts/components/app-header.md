@@ -250,8 +250,8 @@ does **not** require `dragRegion` to be set: `data-size` is always rendered.
 | Part | Token | Purpose |
 |------|-------|---------|
 | Root Header | `background-panel`, `border-subtle` | shell chrome |
-| Identity title | `--poodle-app-header-title-size`, line-height `1.2` | app identity |
-| Subtitle | `text-secondary`, `--poodle-app-header-subtitle-size` | secondary text |
+| Identity title | `--poodle-app-header-title-size` (`appHeaderTitle.{size}.size`), `leading.tight` | app identity |
+| Subtitle | `text-secondary`, `--poodle-app-header-subtitle-size` (`appHeaderSubtitle.{size}.size`) | secondary text |
 | Actions/Utility | `--poodle-app-header-region-gap` | control grouping |
 
 ### Token Usage — Exact CSS Values
@@ -266,8 +266,8 @@ does **not** require `dragRegion` to be set: `data-size` is always rendered.
 | `align-items` | `center` |
 | `min-height` | `var(--poodle-app-header-min-height)` |
 | `padding` | `var(--poodle-app-header-padding-block) var(--poodle-app-header-padding-inline)` |
-| `border-bottom` | `0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle))` |
-| `background` | `var(--poodle-recipe-app-header-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)))` |
+| `border-bottom` | `0.0625rem solid var(--poodle-style-surface-border)` |
+| `background` | `var(--poodle-recipe-app-header-fill, var(--poodle-style-surface-fill))` |
 | `overflow` | `visible` |
 | `--poodle-app-header-side-min` | `0` (collapse guard for the centred side columns) |
 
@@ -310,7 +310,7 @@ does **not** require `dragRegion` to be set: `data-size` is always rendered.
 | Property | Value |
 |----------|-------|
 | `font-size` | `var(--poodle-app-header-title-size)` |
-| `line-height` | `1.2` |
+| `line-height` | `var(--poodle-style-typography-leading-tight)` (`1.2`) |
 | `white-space` | `nowrap` |
 
 #### `.app-header__subtitle`
@@ -319,7 +319,7 @@ does **not** require `dragRegion` to be set: `data-size` is always rendered.
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-size` | `var(--poodle-app-header-subtitle-size)` |
-| `line-height` | `1.2` |
+| `line-height` | `var(--poodle-style-typography-leading-tight)` (`1.2`) |
 | `white-space` | `nowrap` |
 | `overflow` | `hidden` |
 | `text-overflow` | `ellipsis` |

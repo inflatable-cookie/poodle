@@ -7,12 +7,12 @@ Applies to: every contract with ARIA requirements, on the GPUI target
 ## The Fact
 
 Poodle's GPUI backend maps direct node roles, names, states, and values
-through GPUI 1.22.0's AccessKit path. The live, non-activating AXUIElement
+through GPUI's AccessKit path. The live, non-activating AXUIElement
 proof selects its window by title and walks only that window's subtree. The
-latest run read 9 elements with no unnamed meaningful elements, and its
-planted-control case detected an unnamed `AXButton` at depth 2. The clean
-window stayed non-frontmost for 239 successful samples and the planted window
-for 237; neither had failed reads.
+latest live run, on GPUI 1.22.0, read 9 elements with no unnamed meaningful
+elements. Its planted-control case detected an unnamed `AXButton` at depth 2.
+The clean window stayed non-frontmost for 239 successful samples and the
+planted window for 237. Both completed without failed reads.
 It verifies Button role, name, and toggled `AXValue`; disclosure Button role
 and name; Checkbox role, name, and nonempty `AXValue`; Slider role, name,
 range, orientation, and value text; and a selected Tab's role, name, and
@@ -70,11 +70,9 @@ buildable published `gpui-apple` crate and live platform-tree proof.
 
 ## Update 2026-10-06
 
-Operator ruling (Tom, 2026-10-06): switch Poodle's GPUI dependency from
-crates.io `gpui` 0.2.2 to `gpui-unofficial`, pinned to an exact stable release
-(1.22.0 at the time of the ruling), then adopt its AccessKit path. The dependency switch and the node-metadata wiring into AccessKit both landed.
-A bounded live, non-activating platform-tree
-selector. After macOS Accessibility trust was granted to Paseo, the selector
+Poodle switched from crates.io `gpui` 0.2.2 to `gpui-unofficial` 1.22.0 and
+wired node metadata into AccessKit. After macOS Accessibility trust was
+granted to Paseo, the bounded live platform-tree selector
 read clean and planted-control trees while proving neither window became
 frontmost. The live proof clears A2 for Button, Checkbox, Slider, and Tabs;
 other portable rows retain their holds because no live platform-tree
@@ -82,12 +80,18 @@ assertion exists for them yet. Button disclosure expansion, Checkbox mixed
 state, and ID-based relationships remain unverified. Re-checked the same day:
 `gpui-apple-gpui-unofficial` 1.22.0 bundles its
 own `gpui` source and resolves it inside its crate directory, clearing the
-September sibling-path gate; the `bzip2-1.0.6` licence is allowed in
-`deny.toml`.
-Pre-release (`-pre`) tags are not pinned; upgrades are deliberate, one stable
-tag at a time. GPUI 1.22.0 still has only `Definite`/`Auto` lengths and
-`Normal`/`Nowrap` white space, so the two recorded layout and wrapping Known
-Deltas remain upstream items.
+September sibling-path gate.
+
+## GPUI version policy
+
+Operator ruling (Tom, 2026-11-27) replaced the 2026-10-06 exact manifest pin.
+Declare a range within one stable minor for the crates.io GPUI runtime and
+platform facade. The current range is `~1.30.2`. The checked-in Cargo lockfiles
+fix Poodle's builds at 1.30.2, and consuming applications resolve their own
+lockfiles. Upgrades to another minor are deliberate.
+
+The 1.30.2 migration has headless AccessKit and scene coverage. The live
+AXUIElement evidence above still records the 1.22.0 run.
 
 ## Consequences For Planning
 

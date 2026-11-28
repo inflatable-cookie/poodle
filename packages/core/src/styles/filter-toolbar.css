@@ -5,13 +5,13 @@
     display: grid;
     gap: var(--poodle-space-stack-sm);
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
-    border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
+    border: 0.0625rem solid var(--poodle-style-surface-border);
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-filter-toolbar-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent)));
+    background: var(--poodle-recipe-filter-toolbar-fill, var(--poodle-style-surface-fill));
   }
 
   .poodle-filter-toolbar[data-sticky="true"] {
-    box-shadow: var(--poodle-recipe-filter-toolbar-shadow, var(--poodle-style-surface-shadow, var(--poodle-elevation-surface)));
+    box-shadow: var(--poodle-recipe-filter-toolbar-shadow, var(--poodle-style-surface-shadow));
   }
 
   .poodle-filter-toolbar__header {
@@ -35,11 +35,11 @@
   }
 
   .poodle-filter-toolbar__header--button:hover:not(:disabled) {
-    background: var(--poodle-recipe-filter-toolbar-header--button-hover-fill, var(--poodle-style-control-fillHover, transparent));
+    background: var(--poodle-recipe-filter-toolbar-header--button-hover-fill, var(--poodle-style-control-fillHover));
   }
 
   .poodle-filter-toolbar__header--button:active:not(:disabled) {
-    background: var(--poodle-recipe-filter-toolbar-header--button-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-filter-toolbar-header--button-active-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-filter-toolbar__header--button:focus-visible {
@@ -55,8 +55,8 @@
     margin: 0;
     flex: 1;
     color: var(--poodle-recipe-filter-toolbar-summary-text, var(--poodle-color-text-secondary));
-    font-size: var(--poodle-typography-label-size, 0.75rem);
-    line-height: var(--poodle-typography-label-lineHeight, 1.4);
+    font-size: var(--poodle-typography-label-size);
+    line-height: var(--poodle-typography-label-lineHeight);
   }
 
   .poodle-filter-toolbar__actions {
@@ -94,19 +94,19 @@
   }
 
   .poodle-filter-toolbar[data-size="xs"] .poodle-filter-toolbar__summary {
-    font-size: 0.6875rem;
+    font-size: var(--poodle-style-typography-chipLabel-xs-size);
   }
 
   .poodle-filter-toolbar[data-size="sm"] .poodle-filter-toolbar__summary {
-    font-size: 0.71875rem;
+    font-size: var(--poodle-style-typography-chipLabel-sm-size);
   }
 
   .poodle-filter-toolbar[data-size="lg"] .poodle-filter-toolbar__summary {
-    font-size: 0.8125rem;
+    font-size: var(--poodle-style-typography-chipLabel-lg-size);
   }
 
   .poodle-filter-toolbar[data-size="xl"] .poodle-filter-toolbar__summary {
-    font-size: 0.875rem;
+    font-size: var(--poodle-style-typography-chipLabel-xl-size);
   }
 
   .poodle-filter-toolbar[data-density="compact"] {

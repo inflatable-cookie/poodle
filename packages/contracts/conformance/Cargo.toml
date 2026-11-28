@@ -2,7 +2,7 @@
 name = "poodle-conformance"
 version = "0.5.0"
 edition = "2021"
-rust-version = "1.95"
+rust-version = "1.97.1"
 license = "MIT"
 description = "Headless conformance fixtures and receipts for Poodle node backends."
 repository = "https://github.com/inflatable-cookie/poodle"

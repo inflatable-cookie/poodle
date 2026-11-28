@@ -34,8 +34,9 @@ fn count_pill_size(size: ControlSize) -> PillSize {
     }
 }
 
-/// Per-level heading scale applied to the base heading-size token. Mirrors the
-/// Svelte `--poodle-page-header-title-size` ladder (level 2 = base, 3+ compact).
+/// Per-level heading scale applied to the base heading-size token (level 2 =
+/// base, 3+ compact). The web title reads the `pageTitle` and `sectionTitle`
+/// type roles instead.
 fn level_scale(level: u8) -> f32 {
     match level {
         1 => 1.143, // 2rem-ish over the 1.75rem level-2 base

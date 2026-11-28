@@ -2,9 +2,9 @@
    shared-styles move). Unique poodle-* selectors; safe as global CSS. */
 
   .poodle-pill {
-    --poodle-pill-tint-fill: var(--poodle-recipe-pill-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-surface) 90%, transparent)));
+    --poodle-pill-tint-fill: var(--poodle-recipe-pill-fill, var(--poodle-style-surface-fill));
     --poodle-pill-fill: var(--poodle-pill-tint-fill);
-    --poodle-pill-border: var(--poodle-recipe-pill-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)));
+    --poodle-pill-border: var(--poodle-recipe-pill-border, var(--poodle-style-surface-border));
     --poodle-pill-text: var(--poodle-recipe-pill-text, var(--poodle-color-text-secondary));
     --poodle-pill-tone-base: var(--poodle-color-text-secondary);
     --poodle-pill-min-height: 1.25rem;
@@ -14,7 +14,7 @@
     --poodle-pill-padding-x-base: 0.625rem;
     --poodle-pill-padding-y-adjust: 0rem;
     --poodle-pill-padding-x-adjust: 0rem;
-    --poodle-pill-font-size: 0.6875rem;
+    --poodle-pill-font-size: var(--poodle-style-typography-pillLabel-md-size);
     --poodle-pill-gap: 0.25rem;
     display: inline-flex;
     align-items: center;
@@ -31,36 +31,36 @@
     color: var(--poodle-pill-text);
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-pill-font-size);
-    font-weight: 600;
-    line-height: 1;
+    font-weight: var(--poodle-style-typography-pillLabel-weight);
+    line-height: var(--poodle-style-typography-glyph-lineHeight);
     white-space: nowrap;
   }
 
   .poodle-pill[data-tone="success"] {
-    --poodle-pill-tone-base: var(--poodle-color-status-success, #22c55e);
-    --poodle-pill-tint-fill: var(--poodle-recipe-pill-success-fill, color-mix(in srgb, var(--poodle-color-status-success, #22c55e) 14%, var(--poodle-color-background-surface)));
-    --poodle-pill-border: var(--poodle-recipe-pill-success-border, color-mix(in srgb, var(--poodle-color-status-success, #22c55e) 38%, var(--poodle-color-border-subtle)));
+    --poodle-pill-tone-base: var(--poodle-color-status-success);
+    --poodle-pill-tint-fill: var(--poodle-recipe-pill-success-fill, color-mix(in srgb, var(--poodle-color-status-success) 14%, var(--poodle-color-background-surface)));
+    --poodle-pill-border: var(--poodle-recipe-pill-success-border, color-mix(in srgb, var(--poodle-color-status-success) 38%, var(--poodle-color-border-subtle)));
     --poodle-pill-text: var(--poodle-recipe-pill-success-text, var(--poodle-color-text-primary));
   }
 
   .poodle-pill[data-tone="info"] {
-    --poodle-pill-tone-base: var(--poodle-color-status-info, #3b82f6);
-    --poodle-pill-tint-fill: var(--poodle-recipe-pill-info-fill, color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 14%, var(--poodle-color-background-surface)));
-    --poodle-pill-border: var(--poodle-recipe-pill-info-border, color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 38%, var(--poodle-color-border-subtle)));
+    --poodle-pill-tone-base: var(--poodle-color-status-info);
+    --poodle-pill-tint-fill: var(--poodle-recipe-pill-info-fill, color-mix(in srgb, var(--poodle-color-status-info) 14%, var(--poodle-color-background-surface)));
+    --poodle-pill-border: var(--poodle-recipe-pill-info-border, color-mix(in srgb, var(--poodle-color-status-info) 38%, var(--poodle-color-border-subtle)));
     --poodle-pill-text: var(--poodle-recipe-pill-info-text, var(--poodle-color-text-primary));
   }
 
   .poodle-pill[data-tone="warning"] {
-    --poodle-pill-tone-base: var(--poodle-color-status-warning, #f59e0b);
-    --poodle-pill-tint-fill: var(--poodle-recipe-pill-warning-fill, color-mix(in srgb, var(--poodle-color-status-warning, #f59e0b) 14%, var(--poodle-color-background-surface)));
-    --poodle-pill-border: var(--poodle-recipe-pill-warning-border, color-mix(in srgb, var(--poodle-color-status-warning, #f59e0b) 38%, var(--poodle-color-border-subtle)));
+    --poodle-pill-tone-base: var(--poodle-color-status-warning);
+    --poodle-pill-tint-fill: var(--poodle-recipe-pill-warning-fill, color-mix(in srgb, var(--poodle-color-status-warning) 14%, var(--poodle-color-background-surface)));
+    --poodle-pill-border: var(--poodle-recipe-pill-warning-border, color-mix(in srgb, var(--poodle-color-status-warning) 38%, var(--poodle-color-border-subtle)));
     --poodle-pill-text: var(--poodle-recipe-pill-warning-text, var(--poodle-color-text-primary));
   }
 
   .poodle-pill[data-tone="danger"] {
-    --poodle-pill-tone-base: var(--poodle-color-status-danger, #ef4444);
-    --poodle-pill-tint-fill: var(--poodle-recipe-pill-danger-fill, color-mix(in srgb, var(--poodle-color-status-danger, #ef4444) 14%, var(--poodle-color-background-surface)));
-    --poodle-pill-border: var(--poodle-recipe-pill-danger-border, color-mix(in srgb, var(--poodle-color-status-danger, #ef4444) 38%, var(--poodle-color-border-subtle)));
+    --poodle-pill-tone-base: var(--poodle-color-status-danger);
+    --poodle-pill-tint-fill: var(--poodle-recipe-pill-danger-fill, color-mix(in srgb, var(--poodle-color-status-danger) 14%, var(--poodle-color-background-surface)));
+    --poodle-pill-border: var(--poodle-recipe-pill-danger-border, color-mix(in srgb, var(--poodle-color-status-danger) 38%, var(--poodle-color-border-subtle)));
     --poodle-pill-text: var(--poodle-recipe-pill-danger-text, var(--poodle-color-text-primary));
   }
 
@@ -83,7 +83,7 @@
     --poodle-pill-min-width-base: 2.5rem;
     --poodle-pill-padding-y-base: 0.125rem;
     --poodle-pill-padding-x-base: 0.5rem;
-    --poodle-pill-font-size: 0.625rem;
+    --poodle-pill-font-size: var(--poodle-style-typography-pillLabel-sm-size);
     --poodle-pill-gap: 0.1875rem;
   }
 
@@ -92,7 +92,7 @@
     --poodle-pill-min-width-base: 2.125rem;
     --poodle-pill-padding-y-base: 0.0625rem;
     --poodle-pill-padding-x-base: 0.4375rem;
-    --poodle-pill-font-size: 0.5625rem;
+    --poodle-pill-font-size: var(--poodle-style-typography-pillLabel-xs-size);
     --poodle-pill-gap: 0.15625rem;
   }
 
@@ -105,7 +105,7 @@
     --poodle-pill-min-width-base: 3.25rem;
     --poodle-pill-padding-y-base: 0.25rem;
     --poodle-pill-padding-x-base: 0.75rem;
-    --poodle-pill-font-size: 0.75rem;
+    --poodle-pill-font-size: var(--poodle-style-typography-pillLabel-lg-size);
   }
 
   .poodle-pill[data-size="xl"] {
@@ -113,7 +113,7 @@
     --poodle-pill-min-width-base: 3.625rem;
     --poodle-pill-padding-y-base: 0.3125rem;
     --poodle-pill-padding-x-base: 0.9375rem;
-    --poodle-pill-font-size: 0.8125rem;
+    --poodle-pill-font-size: var(--poodle-style-typography-pillLabel-xl-size);
   }
 
   .poodle-pill[data-typography="inherit"] {
@@ -166,34 +166,34 @@
   }
 
   .poodle-pill[data-appearance="badge"] {
-    font-weight: 700;
+    font-weight: var(--poodle-style-typography-pillLabel-badgeWeight);
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
 
   .poodle-pill[data-appearance="badge"][data-tone="neutral"] {
-    --poodle-pill-fill: var(--poodle-recipe-pill-neutral-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary))));
+    --poodle-pill-fill: var(--poodle-recipe-pill-neutral-fill, var(--poodle-style-surface-fill));
     --poodle-pill-text: var(--poodle-recipe-pill-neutral-text, var(--poodle-color-text-secondary));
   }
 
   .poodle-pill[data-appearance="badge"][data-tone="success"] {
-    --poodle-pill-fill: var(--poodle-recipe-pill-success-fill, color-mix(in srgb, var(--poodle-color-status-success, #22c55e) 18%, transparent));
-    --poodle-pill-border: var(--poodle-recipe-pill-success-border, color-mix(in srgb, var(--poodle-color-status-success, #22c55e) 42%, transparent));
+    --poodle-pill-fill: var(--poodle-recipe-pill-success-fill, color-mix(in srgb, var(--poodle-color-status-success) 18%, transparent));
+    --poodle-pill-border: var(--poodle-recipe-pill-success-border, color-mix(in srgb, var(--poodle-color-status-success) 42%, transparent));
   }
 
   .poodle-pill[data-appearance="badge"][data-tone="info"] {
-    --poodle-pill-fill: var(--poodle-recipe-pill-info-fill, color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 18%, transparent));
-    --poodle-pill-border: var(--poodle-recipe-pill-info-border, color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 42%, transparent));
+    --poodle-pill-fill: var(--poodle-recipe-pill-info-fill, color-mix(in srgb, var(--poodle-color-status-info) 18%, transparent));
+    --poodle-pill-border: var(--poodle-recipe-pill-info-border, color-mix(in srgb, var(--poodle-color-status-info) 42%, transparent));
   }
 
   .poodle-pill[data-appearance="badge"][data-tone="warning"] {
-    --poodle-pill-fill: var(--poodle-recipe-pill-warning-fill, color-mix(in srgb, var(--poodle-color-status-warning, #f59e0b) 18%, transparent));
-    --poodle-pill-border: var(--poodle-recipe-pill-warning-border, color-mix(in srgb, var(--poodle-color-status-warning, #f59e0b) 42%, transparent));
+    --poodle-pill-fill: var(--poodle-recipe-pill-warning-fill, color-mix(in srgb, var(--poodle-color-status-warning) 18%, transparent));
+    --poodle-pill-border: var(--poodle-recipe-pill-warning-border, color-mix(in srgb, var(--poodle-color-status-warning) 42%, transparent));
   }
 
   .poodle-pill[data-appearance="badge"][data-tone="danger"] {
-    --poodle-pill-fill: var(--poodle-recipe-pill-danger-fill, color-mix(in srgb, var(--poodle-color-status-danger, #ef4444) 18%, transparent));
-    --poodle-pill-border: var(--poodle-recipe-pill-danger-border, color-mix(in srgb, var(--poodle-color-status-danger, #ef4444) 42%, transparent));
+    --poodle-pill-fill: var(--poodle-recipe-pill-danger-fill, color-mix(in srgb, var(--poodle-color-status-danger) 18%, transparent));
+    --poodle-pill-border: var(--poodle-recipe-pill-danger-border, color-mix(in srgb, var(--poodle-color-status-danger) 42%, transparent));
   }
 
   .poodle-pill[data-muted="true"] {
@@ -248,10 +248,10 @@
     background: var(--poodle-pill-dot-fill, var(--poodle-color-text-secondary));
   }
 
-  .poodle-pill[data-tone="info"] { --poodle-pill-dot-fill: var(--poodle-color-status-info, #3b82f6); }
-  .poodle-pill[data-tone="success"] { --poodle-pill-dot-fill: var(--poodle-color-status-success, #22c55e); }
-  .poodle-pill[data-tone="warning"] { --poodle-pill-dot-fill: var(--poodle-color-status-warning, #f59e0b); }
-  .poodle-pill[data-tone="danger"] { --poodle-pill-dot-fill: var(--poodle-color-status-danger, #ef4444); }
+  .poodle-pill[data-tone="info"] { --poodle-pill-dot-fill: var(--poodle-color-status-info); }
+  .poodle-pill[data-tone="success"] { --poodle-pill-dot-fill: var(--poodle-color-status-success); }
+  .poodle-pill[data-tone="warning"] { --poodle-pill-dot-fill: var(--poodle-color-status-warning); }
+  .poodle-pill[data-tone="danger"] { --poodle-pill-dot-fill: var(--poodle-color-status-danger); }
   .poodle-pill[data-accent="custom"] { --poodle-pill-dot-fill: var(--poodle-pill-accent); }
 
   /* Optional trailing dismiss control (dismissible prop). A real button sized
@@ -272,7 +272,7 @@
     color: inherit;
     cursor: pointer;
     font: inherit;
-    line-height: 1;
+    line-height: var(--poodle-style-typography-glyph-lineHeight);
   }
 
   .poodle-pill__dismiss:hover {

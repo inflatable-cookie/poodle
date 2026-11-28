@@ -156,10 +156,10 @@ Behavior classification: machine-backed (`disclosureTransition` in
 | `gap` | `var(--poodle-space-stack-md)` |
 | `min-width` | `0` |
 | `padding` | `0.625rem var(--poodle-space-panel-x)` (inline padding overridden by density) |
-| `border` | `0.0625rem solid var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 36%, transparent))` |
+| `border` | `0.0625rem solid var(--poodle-style-surface-border)` |
 | `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `var(--poodle-recipe-collapsible-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 40%, var(--poodle-color-background-panel))))` (also sets `--poodle-surface`) |
-| `box-shadow` | `var(--poodle-style-surface-shadow, inset 0 0.0625rem 0 color-mix(in srgb, var(--poodle-color-text-inverse) 8%, transparent))` |
+| `background` | `var(--poodle-recipe-collapsible-fill, var(--poodle-style-surface-fill))` (also sets `--poodle-surface`) |
+| `box-shadow` | `var(--poodle-style-surface-shadow)` |
 
 ### Root closed (`.collapsible[data-open="false"]`)
 
@@ -232,17 +232,17 @@ Behavior classification: machine-backed (`disclosureTransition` in
 | Property | Value |
 |----------|-------|
 | `font-family` | `var(--poodle-typography-heading-family)` |
-| `font-size` | `1rem` |
-| `font-weight` | `700` |
-| `line-height` | `1.2` |
+| `font-size` | `var(--poodle-style-typography-disclosureTitle-md-size)` (`1rem`) |
+| `font-weight` | `var(--poodle-style-typography-emphasis-weight)` (`700`) |
+| `line-height` | `var(--poodle-style-typography-leading-tight)` (`1.2`) |
 
 ### Description `.collapsible__description`
 
 | Property | Value |
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.8125rem` |
-| `line-height` | `1.45` |
+| `font-size` | `var(--poodle-style-typography-disclosureDescription-md-size)` (`0.8125rem`) |
+| `line-height` | `var(--poodle-style-typography-leading-normalLg)` (`1.45`) |
 
 ### Indicator `.collapsible__indicator`
 
@@ -250,8 +250,8 @@ Behavior classification: machine-backed (`disclosureTransition` in
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-family` | `var(--poodle-typography-code-family)` |
-| `font-size` | `0.75rem` |
-| `line-height` | `1` |
+| `font-size` | `var(--poodle-style-typography-glyph-sm-size)` (`0.75rem`) |
+| `line-height` | `var(--poodle-style-typography-glyph-lineHeight)` (`1`) |
 | `transition` | `transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
 
 ### Indicator open (`.collapsible[data-open="true"] .collapsible__indicator`)
@@ -269,6 +269,9 @@ Behavior classification: machine-backed (`disclosureTransition` in
 | `transition` | `slide` — height animates from/to 0 over 180ms on mount/unmount |
 
 ### Size adjustments
+
+The values are the defaults of the `disclosureTitle.{size}.size` and
+`disclosureDescription.{size}.size` style type roles.
 
 | Size | title font-size | description font-size |
 |------|----------------|----------------------|

@@ -373,7 +373,7 @@ Rendering style roles: rows rest transparent and read `--poodle-style-control-fi
 | Property | Default | Purpose |
 |----------|---------|---------|
 | `--poodle-tree-row-height` | `1.75rem` | Row min-height (size-driven) |
-| `--poodle-tree-row-font` | `var(--poodle-typography-label-size)` | Row label font size (size-driven) |
+| `--poodle-tree-row-font` | `var(--poodle-typography-label-size)` | Row label font size; each size sets `compactControlLabel.{size}.size` |
 | `--poodle-tree-twisty-size` | `calc(var(--poodle-tree-row-font) * 1.5)` | Twisty box width |
 | `--poodle-tree-chevron-size` | `calc(var(--poodle-tree-row-font) * 0.85)` | Chevron glyph size |
 | `--poodle-tree-indent` | `1rem` | Width of one depth indent cell (density-driven) |
@@ -461,8 +461,8 @@ padding. It never changes row height (size-and-density contract).
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `var(--poodle-tree-row-font)` |
-| `font-weight` | `500` |
-| `line-height` | `1.3` |
+| `font-weight` | `var(--poodle-typography-label-weight)` (`500`) |
+| `line-height` | `var(--poodle-style-typography-leading-compact)` (`1.3`) |
 | `text-align` | `left` |
 | `cursor` | `pointer` |
 | `transition` | `color, background, box-shadow` via `--poodle-motion-duration-interaction` + `--poodle-motion-easing-standard` |
@@ -524,10 +524,10 @@ The chevron rotates from right (collapsed) to down (expanded). Svelte uses
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-recipe-tree-selected-row-text, var(--poodle-style-selection-text, var(--poodle-color-text-primary)))` |
-| `font-weight` | `600` |
-| `background` | `var(--poodle-recipe-tree-selected-row-fill, var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)))` |
-| `box-shadow` | `var(--poodle-recipe-tree-selected-row-shadow, inset 0 0 0 0.0625rem var(--poodle-style-selection-itemBorder, color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent)))` |
+| `color` | `var(--poodle-recipe-tree-selected-row-text, var(--poodle-style-selection-text))` |
+| `font-weight` | `var(--poodle-typography-font-weight-semibold)` (`600`) |
+| `background` | `var(--poodle-recipe-tree-selected-row-fill, var(--poodle-style-selection-itemFill))` |
+| `box-shadow` | `var(--poodle-recipe-tree-selected-row-shadow, inset 0 0 0 0.0625rem var(--poodle-style-selection-itemBorder))` |
 
 ### `.tree__item:focus-visible > .tree__row`
 

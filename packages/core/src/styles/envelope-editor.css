@@ -6,9 +6,9 @@
   height: 10rem;
   overflow: hidden;
   touch-action: none;
-  border: 0.0625rem solid var(--poodle-recipe-envelope-editor-border, var(--poodle-style-surface-border, var(--poodle-color-border-default)));
+  border: 0.0625rem solid var(--poodle-recipe-envelope-editor-border, var(--poodle-style-surface-border));
   border-radius: 0.375rem;
-  background: var(--poodle-recipe-envelope-editor-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-surface)));
+  background: var(--poodle-recipe-envelope-editor-fill, var(--poodle-style-surface-fill));
 }
 
 .poodle-envelope-editor[aria-disabled="true"] {
@@ -40,15 +40,15 @@
 }
 
 .poodle-envelope-editor-visual__point {
-  fill: var(--poodle-recipe-envelope-editor-point-fill, var(--poodle-style-control-fill, var(--poodle-color-background-elevated)));
-  stroke: var(--poodle-recipe-envelope-editor-point-border, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)));
+  fill: var(--poodle-recipe-envelope-editor-point-fill, var(--poodle-style-control-fill));
+  stroke: var(--poodle-recipe-envelope-editor-point-border, var(--poodle-style-selection-indicator));
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
 
 .poodle-envelope-editor-visual__point[data-selected="true"],
 .poodle-envelope-editor-visual__point[data-dragging="true"] {
-  fill: var(--poodle-recipe-envelope-editor-point-selected, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)));
+  fill: var(--poodle-recipe-envelope-editor-point-selected, var(--poodle-style-selection-indicator));
 }
 
 .poodle-envelope-editor__point-control {

@@ -189,9 +189,9 @@ cycle. `solid` and `badge` assign `--poodle-pill-fill` directly.
 
 | Custom Property | Value |
 |-----------------|-------|
-| `--poodle-pill-tint-fill` | `color-mix(in srgb, var(--poodle-color-background-surface) 90%, transparent)` |
+| `--poodle-pill-tint-fill` | `var(--poodle-recipe-pill-fill, var(--poodle-style-surface-fill))` |
 | `--poodle-pill-fill` | `var(--poodle-pill-tint-fill)` |
-| `--poodle-pill-border` | `var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent))` |
+| `--poodle-pill-border` | `var(--poodle-recipe-pill-border, var(--poodle-style-surface-border))` |
 | `--poodle-pill-text` | `var(--poodle-color-text-secondary)` |
 
 ### Tone: info `.pill[data-tone="info"]`
@@ -257,7 +257,7 @@ Neutral badge `.pill[data-appearance="badge"][data-tone="neutral"]`:
 
 | Custom Property | Value |
 |-----------------|-------|
-| `--poodle-pill-fill` | `var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary)))` |
+| `--poodle-pill-fill` | `var(--poodle-recipe-pill-neutral-fill, var(--poodle-style-surface-fill))` |
 | `--poodle-pill-text` | `var(--poodle-color-text-secondary)` |
 
 Tone badges (`success` / `info` / `warning` / `danger`):

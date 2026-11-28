@@ -176,10 +176,10 @@ the machine.
 |----------|-------|
 | `min-height` | `var(--poodle-size-control-height)` |
 | `padding` | `0 var(--poodle-space-control-x)` |
-| `border` | `0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default))` |
+| `border` | `0.0625rem solid var(--poodle-style-control-border)` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `var(--poodle-recipe-time-input-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)))` |
-| `box-shadow` | `var(--poodle-style-control-shadow, none)` |
+| `background` | `var(--poodle-recipe-time-input-fill, var(--poodle-style-control-fill))` |
+| `box-shadow` | `var(--poodle-style-control-shadow)` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `font-family` | `var(--poodle-typography-body-family)` |
 | `font-size` | `var(--poodle-typography-body-size)` |

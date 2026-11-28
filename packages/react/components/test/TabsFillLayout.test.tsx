@@ -143,7 +143,7 @@ describe("Tabs fill layout rules (tabs.css)", () => {
     expect(tabsCss).toContain("gap: var(--poodle-tabs-gap);");
     expect(tabsCss).toContain("padding: var(--poodle-tabs-list-padding);");
     expect(tabsCss).toContain("background: var(--poodle-tabs-list-background);");
-    expect(tabsCss).toContain("background: var(--poodle-recipe-tabs-block-list-fill, var(--poodle-style-surface-fill, var(--poodle-tabs-list-background)));");
+    expect(tabsCss).toContain("background: var(--poodle-recipe-tabs-block-list-fill, var(--poodle-style-surface-fill));");
     expect(tabsCss).toContain("border-bottom: var(--poodle-tabs-list-border);");
     expect(tabsCss).toContain("border-right: var(--poodle-tabs-list-border);");
     expect(tokenCss).toContain("--poodle-tabs-gap: var(--poodle-space-stack-md);");
