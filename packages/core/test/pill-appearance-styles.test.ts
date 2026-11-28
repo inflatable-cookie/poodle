@@ -191,14 +191,14 @@ describe("pill.css appearance recipes", () => {
     expect(explicitTint).toEqual(implicit);
 
     expect(resolved("root", { "data-tone": "neutral", "data-appearance": "tint" }, "--poodle-pill-fill"))
-      .toBe("var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-surface) 90%, transparent))");
+      .toBe("var(--poodle-style-surface-fill)");
     expect(resolved("root", { "data-tone": "neutral", "data-appearance": "tint" }, "--poodle-pill-border"))
-      .toBe("var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent))");
+      .toBe("var(--poodle-style-surface-border)");
     expect(resolved("root", { "data-tone": "neutral", "data-appearance": "tint" }, "--poodle-pill-text"))
       .toBe("var(--poodle-color-text-secondary)");
 
     expect(resolved("root", { "data-tone": "success", "data-appearance": "tint" }, "--poodle-pill-fill"))
-      .toBe("color-mix(in srgb, var(--poodle-color-status-success, #22c55e) 14%, var(--poodle-color-background-surface))");
+      .toBe("color-mix(in srgb, var(--poodle-color-status-success) 14%, var(--poodle-color-background-surface))");
     expect(resolved("root", { "data-tone": "success", "data-appearance": "tint" }, "--poodle-pill-text"))
       .toBe("var(--poodle-color-text-primary)");
   });
@@ -209,7 +209,7 @@ describe("pill.css appearance recipes", () => {
     const subtle = cascade("root", subtleAttrs);
 
     expect(resolved("root", subtleAttrs, "--poodle-pill-fill")).toBe(
-      "color-mix(in srgb, color-mix(in srgb, var(--poodle-color-status-success, #22c55e) 14%, var(--poodle-color-background-surface)) 50%, transparent)",
+      "color-mix(in srgb, color-mix(in srgb, var(--poodle-color-status-success) 14%, var(--poodle-color-background-surface)) 50%, transparent)",
     );
     expect(subtle["--poodle-pill-border"]).toBe(tint["--poodle-pill-border"]);
     expect(subtle["--poodle-pill-text"]).toBe(tint["--poodle-pill-text"]);
@@ -219,10 +219,10 @@ describe("pill.css appearance recipes", () => {
 
   test("solid promotes the tint-border colour to the fill with primary foreground", () => {
     const toneBases: Record<string, string> = {
-      info: "var(--poodle-color-status-info, #3b82f6)",
-      success: "var(--poodle-color-status-success, #22c55e)",
-      warning: "var(--poodle-color-status-warning, #f59e0b)",
-      danger: "var(--poodle-color-status-danger, #ef4444)",
+      info: "var(--poodle-color-status-info)",
+      success: "var(--poodle-color-status-success)",
+      warning: "var(--poodle-color-status-warning)",
+      danger: "var(--poodle-color-status-danger)",
     };
     for (const [tone, base] of Object.entries(toneBases)) {
       const attrs = { "data-tone": tone, "data-appearance": "solid" };
@@ -253,20 +253,24 @@ describe("pill.css appearance recipes", () => {
     expect(resolved("dot", { "data-tone": "neutral", "data-appearance": "solid" }, "--poodle-pill-dot-fill"))
       .toBe("var(--poodle-color-text-primary)");
     expect(resolved("dot", { "data-tone": "info", "data-appearance": "tint" }, "--poodle-pill-dot-fill"))
-      .toBe("var(--poodle-color-status-info, #3b82f6)");
+      .toBe("var(--poodle-color-status-info)");
   });
 
   test("badge keeps its typography and its own distinct recipes", () => {
     const badge = cascade("root", { "data-tone": "success", "data-appearance": "badge" });
-    expect(badge["font-weight"]).toBe("700");
+    // The badge weight is a style typography role; the default style sets it to 700.
+    expect(badge["font-weight"]).toBe("var(--poodle-style-typography-pillLabel-badgeWeight)");
+    expect(
+      readFileSync(new URL("../src/tokens/generated/css/poodle-style-default.css", import.meta.url), "utf8"),
+    ).toContain("--poodle-style-typography-pillLabel-badgeWeight: 700;");
     expect(badge["letter-spacing"]).toBe("0.04em");
     expect(badge["text-transform"]).toBe("uppercase");
     expect(resolved("root", { "data-tone": "success", "data-appearance": "badge" }, "--poodle-pill-fill"))
-      .toBe("color-mix(in srgb, var(--poodle-color-status-success, #22c55e) 18%, transparent)");
+      .toBe("color-mix(in srgb, var(--poodle-color-status-success) 18%, transparent)");
 
     const neutralBadge = { "data-tone": "neutral", "data-appearance": "badge" };
     expect(resolved("root", neutralBadge, "--poodle-pill-fill"))
-      .toBe("var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary)))");
+      .toBe("var(--poodle-style-surface-fill)");
     expect(resolved("root", neutralBadge, "--poodle-pill-text")).toBe("var(--poodle-color-text-secondary)");
   });
 });
