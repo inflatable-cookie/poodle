@@ -287,18 +287,18 @@
      toolbar, border, or split-pane layout. Density mirrors the editor pane
      padding values so editor preview and renderer stay aligned. */
   .poodle-md-renderer {
-    --poodle-md-prose-font-size: 0.875rem;
+    --poodle-md-prose-font-size: var(--poodle-style-typography-prose-md-size);
     --poodle-md-renderer-pad-x: 0.75rem;
     --poodle-md-renderer-pad-y: 0.75rem;
     min-width: 0;
     padding: var(--poodle-md-renderer-pad-y) var(--poodle-md-renderer-pad-x);
   }
 
-  .poodle-md-renderer[data-size="xs"] { --poodle-md-prose-font-size: 0.75rem; }
-  .poodle-md-renderer[data-size="sm"] { --poodle-md-prose-font-size: 0.8125rem; }
-  .poodle-md-renderer[data-size="md"] { --poodle-md-prose-font-size: 0.875rem; }
-  .poodle-md-renderer[data-size="lg"] { --poodle-md-prose-font-size: 1rem; }
-  .poodle-md-renderer[data-size="xl"] { --poodle-md-prose-font-size: 1.125rem; }
+  .poodle-md-renderer[data-size="xs"] { --poodle-md-prose-font-size: var(--poodle-style-typography-prose-xs-size); }
+  .poodle-md-renderer[data-size="sm"] { --poodle-md-prose-font-size: var(--poodle-style-typography-prose-sm-size); }
+  .poodle-md-renderer[data-size="md"] { --poodle-md-prose-font-size: var(--poodle-style-typography-prose-md-size); }
+  .poodle-md-renderer[data-size="lg"] { --poodle-md-prose-font-size: var(--poodle-style-typography-prose-lg-size); }
+  .poodle-md-renderer[data-size="xl"] { --poodle-md-prose-font-size: var(--poodle-style-typography-prose-xl-size); }
 
   .poodle-md-renderer[data-density="compact"] {
     --poodle-md-renderer-pad-x: 0.625rem;
