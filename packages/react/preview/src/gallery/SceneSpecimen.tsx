@@ -49,8 +49,10 @@ export function SceneSpecimen({ slug, children }: { slug?: string; children?: Re
   // The fixture props are data; each component validates its own at runtime
   // where it matters, so the map is deliberately untyped.
   const componentMap: Record<string, (props: Record<string, FixtureValue>) => ReactNode> = {
-    callout: ({ content, ...props }: any) => <Callout {...props}>{String(content)}</Callout>,
-    pill: ({ content, ...props }: any) => <Pill {...props}>{String(content)}</Pill>,
+    callout: ({ content, ...props }: any) =>
+      content != null ? <Callout {...props}>{String(content)}</Callout> : <Callout {...props} />,
+    pill: ({ content, ...props }: any) =>
+      content != null ? <Pill {...props}>{String(content)}</Pill> : <Pill {...props} />,
     spinner: (props: any) => <Spinner {...props} />,
     avatar: (props: any) => <Avatar {...props} />,
     "empty-state": (props: any) => <EmptyState {...props} />,
@@ -81,7 +83,7 @@ export function SceneSpecimen({ slug, children }: { slug?: string; children?: Re
     >
       {scene.groups.map((group) => (
         <SpecimenGroup key={group.label} label={group.label}>
-          <div className="poodle-specimen__row">
+          <div className="poodle-specimen__row poodle-specimen__row--scene">
             {group.instances.map((instance, index) => (
               <div key={index} className="poodle-specimen__cell">
                 {renderInstance(instance)}

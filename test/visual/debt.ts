@@ -14,12 +14,13 @@
  * Axes are listed explicitly, so an axis added to the sweep fails fresh
  * instead of inheriting debt.
  *
- * Measured 2026-11-26 on main (after the poodle#189 default-style switch;
- * sweep tier, 344 comparisons across 172 active slugs): 39 recorded pairs
- * across 20 slugs — 18 size across 9 slugs, 21 pixels across 11 slugs
- * (including the 4 intermittent flipper pairs for `color-picker` and
- * `text-input`), 0 capture. `embed-preview` moved to `SKIPPED` (remote Vimeo
- * iframe nondeterminism).
+ * Measured 2026-11-28 (after poodle#212 aligned the specimen layouts;
+ * sweep tier, 344 comparisons across 172 active slugs): 21 recorded pairs
+ * across 12 slugs — 0 size, 21 pixels (including the 4 intermittent flipper
+ * pairs for `color-picker` and `text-input`, plus `audio-switch` and
+ * `validation-summary` pixel diffs previously masked by their size debt,
+ * and `icon-provider` on iceberg), 0 capture. `avatar` and `pill` went
+ * green with the SceneSpecimen row-gap alignment.
  */
 
 export type VisualDebtFailureKind = "capture" | "size" | "pixels";
@@ -45,24 +46,10 @@ export const DEBT: VisualDebtEntry[] = [
   },
   {
     slug: "audio-switch",
-    axes: ["eclipse-compact-md", "iceberg-compact-md"],
-    kind: "size",
-    reason:
-      "React specimen uses inline gap 1.5rem vs Svelte .page gap 1rem across 5 gaps (+40px, 759 vs 799).",
-  },
-  {
-    slug: "avatar",
-    axes: ["eclipse-compact-md", "iceberg-compact-md"],
+    axes: ["eclipse-compact-md"],
     kind: "pixels",
     reason:
-      "1.25% — initials glyphs sit at different offsets inside the circle between shells (diff reviewed; image avatars match); untriaged.",
-  },
-  {
-    slug: "callout",
-    axes: ["eclipse-compact-md", "iceberg-compact-md"],
-    kind: "size",
-    reason:
-      "React SceneSpecimen passes String(undefined) to Callout when content is absent (+27.5px), offset by 0.5rem vs 0.75rem row gap (-16px; net +11px, 1103 vs 1114).",
+      "0.057% on eclipse only (previously masked by size debt) — illuminated lamp box-shadow uses currentColor on <button>, differing via color-scheme: dark on React .app-shell vs Svelte .poodle-app-shell; the iceberg axis matches; untriaged.",
   },
   {
     slug: "code-editor",
@@ -87,20 +74,6 @@ export const DEBT: VisualDebtEntry[] = [
       "1.13-1.23% — dock stack/splitter geometry drift; untriaged.",
   },
   {
-    slug: "drag-number-field",
-    axes: ["eclipse-compact-md", "iceberg-compact-md"],
-    kind: "size",
-    reason:
-      "React specimen uses inline gap 1.5rem vs Svelte .page gap 1rem across 7 gaps (+56px, 924 vs 980).",
-  },
-  {
-    slug: "envelope-editor",
-    axes: ["eclipse-compact-md", "iceberg-compact-md"],
-    kind: "size",
-    reason:
-      "React specimen puts the drag note in a horizontal Row (+7px) and omits the keyboard-nudges <p> note (-27px; net -20px, 1872 vs 1852).",
-  },
-  {
     slug: "fader",
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "pixels",
@@ -122,18 +95,11 @@ export const DEBT: VisualDebtEntry[] = [
       "0.024% in Eclipse and 0.025% in Iceberg. Both framework captures and their diff match the former opt-in style at fc9b7ad24 byte for byte.",
   },
   {
-    slug: "listbox",
-    axes: ["eclipse-compact-md", "iceberg-compact-md"],
-    kind: "size",
+    slug: "icon-provider",
+    axes: ["iceberg-compact-md"],
+    kind: "pixels",
     reason:
-      "React specimen lacks Svelte's scoped .poodle-listbox-card-detail rule (margin-top 0.25rem, font-size 0.8125rem; -2px across 3 cards = -6px, 692 vs 686).",
-  },
-  {
-    slug: "markdown-renderer",
-    axes: ["eclipse-compact-md", "iceberg-compact-md"],
-    kind: "size",
-    reason:
-      "React specimen lacks Svelte's scoped .markdown-renderer-policy-warning rule (margin 0 0 0.5rem, 0.8125rem; falls back to 1em p margins and 16px font = +26px, 1140 vs 1166).",
+      "0.023% on iceberg only — just above the 0.02% default floor, hint-line glyph antialiasing drift; the eclipse axis matches; untriaged.",
   },
   {
     slug: "model-connection-setup",
@@ -141,20 +107,6 @@ export const DEBT: VisualDebtEntry[] = [
     kind: "pixels",
     reason:
       "0.03% of pixels differ — just above the 0.02% default floor, antialiasing scale; untriaged.",
-  },
-  {
-    slug: "pill",
-    axes: ["eclipse-compact-md", "iceberg-compact-md"],
-    kind: "pixels",
-    reason:
-      "0.50-0.59% — pill geometry/typography drift; untriaged.",
-  },
-  {
-    slug: "remediation-banner",
-    axes: ["eclipse-compact-md", "iceberg-compact-md"],
-    kind: "size",
-    reason:
-      "Svelte specimen omits .poodle-specimen flex gap 1rem that React's gallery.css applies across 2 group gaps (+32px, 780 vs 812).",
   },
   {
     slug: "text-input",
@@ -167,15 +119,8 @@ export const DEBT: VisualDebtEntry[] = [
   {
     slug: "validation-summary",
     axes: ["eclipse-compact-md", "iceberg-compact-md"],
-    kind: "size",
+    kind: "pixels",
     reason:
-      "Svelte specimen omits .poodle-specimen flex gap 1rem that React's gallery.css applies across 1 group gap (+16px, 553 vs 569).",
-  },
-  {
-    slug: "value-readout",
-    axes: ["eclipse-compact-md", "iceberg-compact-md"],
-    kind: "size",
-    reason:
-      "React specimen uses inline gap 1.5rem vs Svelte .page gap 1rem across 8 gaps (+64px, 1031 vs 1095).",
+      "0.269-0.287% of pixels differ on both themes (previously masked by size debt) — component template whitespace between ValidationSummary <a>/<span> and Field label/* in Svelte vs JSX; untriaged.",
   },
 ];
