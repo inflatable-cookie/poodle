@@ -40,3 +40,11 @@
     <RemediationBanner title="Solid pending" message="Recovery is still in progress." tone="pending" fill="solid" />
   </SpecimenGroup>
 </div>
+
+<style>
+  .poodle-specimen {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+</style>

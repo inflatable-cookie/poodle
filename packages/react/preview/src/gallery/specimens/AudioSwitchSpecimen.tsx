@@ -9,7 +9,7 @@ export function AudioSwitchSpecimen() { const [latch, setLatch] = useState(0); c
       sizes={(size) => <AudioSwitch state={1} size={size} ariaLabel={`Audio switch ${size} size`} />}
       densities={(density) => <AudioSwitch state={1} density={density} ariaLabel={`Audio switch ${density} density`} />}
     >
-      <div style={{ display: "grid", gap: "1.5rem" }}>
+      <div style={{ display: "grid", gap: "1rem" }}>
         <SpecimenGroup label="Off / on latch"><Row><AudioSwitch state={0} ariaLabel="Off latch" /><AudioSwitch state={latch} onStateChange={setLatch} ariaLabel="Interactive latch" /><AudioSwitch state={1} ariaLabel="On latch" /></Row></SpecimenGroup>
   <SpecimenGroup label="Held / released momentary"><AudioSwitch mode="momentary" state={momentary} onStateChange={setMomentary} ariaLabel="Momentary trigger" /></SpecimenGroup>
   <SpecimenGroup label="Three-state cycle with labels"><AudioSwitch mode="multi" state={multi} onStateChange={setMulti} stateCount={3} stateLabels={["Low", "Mid", "High"]} ariaLabel="Range" /></SpecimenGroup>

@@ -22,12 +22,12 @@ describe("visual debt ledger and report classification", () => {
     const pixelEntries = DEBT.filter((entry) => entry.kind === "pixels");
     const countPairs = (entries: readonly VisualDebtEntry[]) =>
       entries.reduce((sum, entry) => sum + entry.axes.length, 0);
-    expect(DEBT.length).toBe(20);
-    expect(sizeEntries.length).toBe(9);
-    expect(pixelEntries.length).toBe(11);
-    expect(countPairs(sizeEntries)).toBe(18);
+    expect(DEBT.length).toBe(12);
+    expect(sizeEntries.length).toBe(0);
+    expect(pixelEntries.length).toBe(12);
+    expect(countPairs(sizeEntries)).toBe(0);
     expect(countPairs(pixelEntries)).toBe(21);
-    expect(countPairs(DEBT)).toBe(39);
+    expect(countPairs(DEBT)).toBe(21);
   });
 
   test("strict axis tier contains no debt slugs", () => {

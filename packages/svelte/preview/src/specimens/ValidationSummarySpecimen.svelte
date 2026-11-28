@@ -75,3 +75,11 @@
     <ValidationSummary title="Review before continuing" {entries} includePending />
   </SpecimenGroup>
 </div>
+
+<style>
+  .poodle-specimen {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+</style>
