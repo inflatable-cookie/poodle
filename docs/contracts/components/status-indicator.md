@@ -136,7 +136,7 @@ beyond plain props. Classified in the long-tail sweep.
 
 | Selector | `--poodle-status-color` Value |
 |----------|---------------------------|
-| `[data-status="info"]` | `var(--poodle-color-status-info, #3b82f6)` |
+| `[data-status="info"]` | `var(--poodle-color-status-info)` |
 | `[data-status="success"]` | `var(--poodle-color-status-success)` |
 | `[data-status="warning"]` | `var(--poodle-color-status-warning)` |
 | `[data-status="danger"]` | `var(--poodle-color-status-danger)` |
