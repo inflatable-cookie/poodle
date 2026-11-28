@@ -15,9 +15,9 @@
     align-items: center;
     gap: var(--poodle-audio-player-gap);
     padding: var(--poodle-audio-player-pad-y) var(--poodle-audio-player-pad-x);
-    border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-default));
+    border: 0.0625rem solid var(--poodle-style-surface-border);
     border-radius: var(--poodle-radius-surface);
-    background: var(--poodle-recipe-audio-player-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-surface)));
+    background: var(--poodle-recipe-audio-player-fill, var(--poodle-style-surface-fill));
   }
 
   .poodle-audio-player[data-size="xs"] {
@@ -71,7 +71,7 @@
     padding: 0;
     border: 0;
     border-radius: 999rem;
-    background: var(--poodle-recipe-audio-player-mute-fill, var(--poodle-style-control-fill, transparent));
+    background: var(--poodle-recipe-audio-player-mute-fill, var(--poodle-style-control-fill));
     color: var(--poodle-recipe-audio-player-mute-text, var(--poodle-color-text-primary));
     cursor: pointer;
     flex-shrink: 0;
@@ -85,10 +85,10 @@
 
   .poodle-audio-player__play:hover,
   .poodle-audio-player__mute:hover {
-    background: var(--poodle-recipe-audio-player-hover-mute-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)));
+    background: var(--poodle-recipe-audio-player-hover-mute-fill, var(--poodle-style-control-fillHover));
   }
   .poodle-audio-player__mute:active {
-    background: var(--poodle-recipe-audio-player-mute-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-audio-player-mute-active-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-audio-player__play:focus-visible,
@@ -148,13 +148,13 @@
   .poodle-audio-player__volume::-webkit-slider-runnable-track {
     height: 0.25rem;
     border-radius: 0.125rem;
-    background: var(--poodle-recipe-audio-player-volume-track-fill, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)));
+    background: var(--poodle-recipe-audio-player-volume-track-fill, var(--poodle-style-selection-indicator));
   }
 
   .poodle-audio-player__volume::-moz-range-track {
     height: 0.25rem;
     border-radius: 0.125rem;
-    background: var(--poodle-recipe-audio-player-volume-track-fill, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)));
+    background: var(--poodle-recipe-audio-player-volume-track-fill, var(--poodle-style-selection-indicator));
   }
 
   /* Thumb */
@@ -181,7 +181,7 @@
   .poodle-audio-player__speed {
     min-height: var(--poodle-size-control-height);
     padding: var(--poodle-audio-player-speed-y) var(--poodle-audio-player-speed-x);
-    border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default));
+    border: 0.0625rem solid var(--poodle-style-control-border);
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-recipe-audio-player-speed-fill, transparent);
     color: var(--poodle-recipe-audio-player-speed-text, var(--poodle-color-text-secondary));
@@ -194,11 +194,11 @@
   }
 
   .poodle-audio-player__speed:hover:not(:disabled) {
-    background: var(--poodle-recipe-audio-player-speed-hover-fill, var(--poodle-style-control-fillHover, transparent));
+    background: var(--poodle-recipe-audio-player-speed-hover-fill, var(--poodle-style-control-fillHover));
   }
 
   .poodle-audio-player__speed:active:not(:disabled) {
-    background: var(--poodle-recipe-audio-player-speed-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-audio-player-speed-active-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-audio-player__seek:focus-visible,

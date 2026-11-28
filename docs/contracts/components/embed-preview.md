@@ -171,7 +171,7 @@ None. EmbedPreview is a pure display component.
 - Loading/Error/Empty: centered flex column, min-height `8rem`, padding
   `1.5rem`, gap `0.5rem`
 - Error/Empty icons: `2rem` square
-- Text: `0.8125rem` font-size
+- Text: `--poodle-style-typography-secondary-size`
 - Fallback: padding `0.75rem 1rem`
 
 ### Composition
@@ -189,7 +189,7 @@ None. EmbedPreview is a pure display component.
 
 | Property | Value |
 |----------|-------|
-| border-radius | `var(--poodle-radius-surface, 0.5rem)` |
+| border-radius | `var(--poodle-radius-surface)` |
 | overflow | `hidden` |
 
 ### Container `.poodle-embed-preview__container`
@@ -198,7 +198,7 @@ None. EmbedPreview is a pure display component.
 |----------|-------|
 | position | `relative` |
 | width | `100%` |
-| background | `var(--poodle-recipe-embed-preview-container-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-panel, #1a1a1a)))` |
+| background | `var(--poodle-recipe-embed-preview-container-fill, var(--poodle-style-surface-fill))` |
 
 Aspect ratio is applied via inline `style` attribute when
 `effectiveAspectRatio !== "auto"`.
@@ -250,8 +250,8 @@ Aspect ratio is applied via inline `style` attribute when
 | gap | `0.5rem` |
 | min-height | `8rem` |
 | padding | `1.5rem` |
-| background | `var(--poodle-recipe-embed-preview-empty-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-panel, #1a1a1a)))` |
-| border-radius | `var(--poodle-radius-surface, 0.5rem)` |
+| background | `var(--poodle-recipe-embed-preview-empty-fill, var(--poodle-style-surface-fill))` |
+| border-radius | `var(--poodle-radius-surface)` |
 
 ### Error/Empty Icons `.poodle-embed-preview__error svg`, `.poodle-embed-preview__empty svg`
 
@@ -259,7 +259,7 @@ Aspect ratio is applied via inline `style` attribute when
 |----------|-------|
 | width | `2rem` |
 | height | `2rem` |
-| color | `var(--poodle-color-text-tertiary, #666)` |
+| color | `var(--poodle-color-text-tertiary)` |
 
 ### Error Icon Override `.poodle-embed-preview__error svg`
 
@@ -271,23 +271,23 @@ Aspect ratio is applied via inline `style` attribute when
 
 | Property | Value |
 |----------|-------|
-| font-size | `0.8125rem` |
-| color | `var(--poodle-color-text-secondary, #999)` |
+| font-size | `var(--poodle-style-typography-secondary-size)` |
+| color | `var(--poodle-color-text-secondary)` |
 
 ### Error/Empty Text `.poodle-embed-preview__error span`, `.poodle-embed-preview__empty span`
 
 | Property | Value |
 |----------|-------|
-| font-size | `0.8125rem` |
-| color | `var(--poodle-color-text-secondary, #999)` |
+| font-size | `var(--poodle-style-typography-secondary-size)` |
+| color | `var(--poodle-color-text-secondary)` |
 
 ### Fallback `.poodle-embed-preview__fallback`
 
 | Property | Value |
 |----------|-------|
 | padding | `0.75rem 1rem` |
-| background | `var(--poodle-recipe-embed-preview-fallback-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-panel, #1a1a1a)))` |
-| border-radius | `var(--poodle-radius-surface, 0.5rem)` |
+| background | `var(--poodle-recipe-embed-preview-fallback-fill, var(--poodle-style-surface-fill))` |
+| border-radius | `var(--poodle-radius-surface)` |
 
 ### Fallback Link `.poodle-embed-preview__fallback :global(.poodle-text-link)`
 
@@ -295,7 +295,7 @@ Composed `TextLink` primitive; the composite overrides only sizing/wrapping (lin
 
 | Property | Value |
 |----------|-------|
-| font-size | `0.8125rem` |
+| font-size | `var(--poodle-style-typography-secondary-size)` |
 | word-break | `break-all` |
 
 ### Composed Primitives

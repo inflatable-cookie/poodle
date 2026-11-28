@@ -419,6 +419,11 @@ adjust them. Escape or an outside interaction dismisses.
 
 ## 8. Token Usage
 
+Type roles: the trigger reads the per-size `pickerTrigger` sizes. Option rows
+read the body size, and option descriptions the style `caption` size with
+`leading-compact`. Group headings, option badges and axis labels read the base
+`caption` size, and axis options the `label` size.
+
 Rendering style roles: the trigger reads the control border and fill, including the outlined variant. Options and axis options rest transparent and read `--poodle-style-control-fillHover` on hover, and the popover reads the floating surface roles.
 
 | Part | Token | Purpose |
@@ -433,7 +438,7 @@ Rendering style roles: the trigger reads the control border and fill, including 
 | Summary / Chevron | `--poodle-color-text-secondary` | secondary text |
 | Surface | `--poodle-overlay-z-menu`, `--poodle-radius-surface`, `--poodle-color-background-elevated`, `--poodle-elevation-overlay` | anchored panel |
 | Option hover | `--poodle-color-background-hover` | row hover fill |
-| Option check | `--poodle-style-selection-indicator`, then `--poodle-color-accent-base` | selected glyph |
+| Option check | `--poodle-style-selection-indicator` | selected glyph |
 | Option description | `--poodle-color-text-secondary` | supporting text |
 | Option badge | `--poodle-color-border-subtle`, `--poodle-color-text-secondary` | tag outline + text |
 | Axis divider | `--poodle-color-border-subtle` | section rule |

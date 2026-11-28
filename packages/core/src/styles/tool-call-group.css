@@ -11,7 +11,7 @@
 .poodle-tool-call-group {
   --poodle-tool-call-group-gap: 0.5rem;
   --poodle-tool-call-group-row-gap: 0.125rem;
-  --poodle-tool-call-group-font-size: 0.8125rem;
+  --poodle-tool-call-group-font-size: var(--poodle-style-typography-agentText-md-size);
   --poodle-tool-call-group-icon-size: 0.875rem;
   --poodle-tool-call-group-inset-x: 0.5rem;
   --poodle-tool-call-group-pad-block: 0.25rem;
@@ -24,17 +24,17 @@
      secondary label this is what separates the agent's work from its prose —
      the rows are boxed off and the prose sits outside them. */
   padding: var(--poodle-tool-call-group-pad-block) 0;
-  border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
+  border: 0.0625rem solid var(--poodle-style-surface-border);
   border-radius: var(--poodle-radius-control);
-  background: var(--poodle-style-surface-fill, var(--poodle-color-background-surface));
-  box-shadow: var(--poodle-style-surface-shadow, none);
+  background: var(--poodle-style-surface-fill);
+  box-shadow: var(--poodle-style-surface-shadow);
 }
 
-.poodle-tool-call-group[data-size="xs"] { --poodle-tool-call-group-font-size: 0.6875rem; --poodle-tool-call-group-icon-size: 0.75rem; }
-.poodle-tool-call-group[data-size="sm"] { --poodle-tool-call-group-font-size: 0.75rem; --poodle-tool-call-group-icon-size: 0.8125rem; }
-.poodle-tool-call-group[data-size="md"] { --poodle-tool-call-group-font-size: 0.8125rem; --poodle-tool-call-group-icon-size: 0.875rem; }
-.poodle-tool-call-group[data-size="lg"] { --poodle-tool-call-group-font-size: 0.875rem; --poodle-tool-call-group-icon-size: 1rem; }
-.poodle-tool-call-group[data-size="xl"] { --poodle-tool-call-group-font-size: 0.9375rem; --poodle-tool-call-group-icon-size: 1.125rem; }
+.poodle-tool-call-group[data-size="xs"] { --poodle-tool-call-group-font-size: var(--poodle-style-typography-agentText-xs-size); --poodle-tool-call-group-icon-size: 0.75rem; }
+.poodle-tool-call-group[data-size="sm"] { --poodle-tool-call-group-font-size: var(--poodle-style-typography-agentText-sm-size); --poodle-tool-call-group-icon-size: 0.8125rem; }
+.poodle-tool-call-group[data-size="md"] { --poodle-tool-call-group-font-size: var(--poodle-style-typography-agentText-md-size); --poodle-tool-call-group-icon-size: 0.875rem; }
+.poodle-tool-call-group[data-size="lg"] { --poodle-tool-call-group-font-size: var(--poodle-style-typography-agentText-lg-size); --poodle-tool-call-group-icon-size: 1rem; }
+.poodle-tool-call-group[data-size="xl"] { --poodle-tool-call-group-font-size: var(--poodle-style-typography-agentText-xl-size); --poodle-tool-call-group-icon-size: 1.125rem; }
 
 .poodle-tool-call-group[data-density="compact"] { --poodle-tool-call-group-row-gap: 0; --poodle-tool-call-group-inset-x: 0.375rem; --poodle-tool-call-group-gap: 0.375rem; --poodle-tool-call-group-pad-block: 0.125rem; }
 .poodle-tool-call-group[data-density="comfortable"] { --poodle-tool-call-group-row-gap: 0.25rem; --poodle-tool-call-group-inset-x: 0.75rem; --poodle-tool-call-group-gap: 0.6875rem; --poodle-tool-call-group-pad-block: 0.375rem; }
@@ -69,7 +69,7 @@
 }
 
 .poodle-tool-call-group__toggle:hover {
-  background: var(--poodle-style-control-fillHover, var(--poodle-color-background-elevated));
+  background: var(--poodle-style-control-fillHover);
   color: var(--poodle-color-text-primary);
 }
 

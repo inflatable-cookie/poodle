@@ -165,9 +165,9 @@ No component-owned events are dispatched. All interaction is internal (transport
 | `align-items` | `center` |
 | `gap` | `var(--poodle-audio-player-gap)` |
 | `padding` | `var(--poodle-audio-player-pad-y) var(--poodle-audio-player-pad-x)` |
-| `border` | `0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-default))` |
+| `border` | `0.0625rem solid var(--poodle-style-surface-border)` |
 | `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `var(--poodle-recipe-audio-player-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-surface)))` |
+| `background` | `var(--poodle-recipe-audio-player-fill, var(--poodle-style-surface-fill))` |
 
 #### `.audio-player__play`, `.audio-player__mute`
 
@@ -191,7 +191,7 @@ No component-owned events are dispatched. All interaction is internal (transport
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-audio-player-hover-mute-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)))` |
+| `background` | `var(--poodle-recipe-audio-player-hover-mute-fill, var(--poodle-style-control-fillHover))` |
 
 #### `.audio-player__play:focus-visible`, `.audio-player__mute:focus-visible`
 
@@ -256,7 +256,7 @@ No component-owned events are dispatched. All interaction is internal (transport
 |----------|-------|
 | `height` | `0.25rem` |
 | `border-radius` | `0.125rem` |
-| `background` | `var(--poodle-recipe-audio-player-volume-track-fill, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)))` |
+| `background` | `var(--poodle-recipe-audio-player-volume-track-fill, var(--poodle-style-selection-indicator))` |
 
 #### Slider thumb (`::-webkit-slider-thumb` / `::-moz-range-thumb`)
 
@@ -274,7 +274,7 @@ No component-owned events are dispatched. All interaction is internal (transport
 |----------|-------|
 | `min-height` | `var(--poodle-size-control-height)` |
 | `padding` | `var(--poodle-audio-player-speed-y) var(--poodle-audio-player-speed-x)` |
-| `border` | `0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-default))` |
+| `border` | `0.0625rem solid var(--poodle-style-control-border)` |
 | `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `var(--poodle-recipe-audio-player-speed-fill, transparent)` |
 | `color` | `var(--poodle-color-text-secondary)` |

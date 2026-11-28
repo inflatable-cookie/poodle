@@ -167,7 +167,7 @@ Card header and body always render regardless of media state.
 | margin | `0` |
 | color | `var(--poodle-color-text-secondary)` |
 | font-size | `var(--poodle-media-preview-eyebrow-size)` |
-| font-weight | `600` |
+| font-weight | `var(--poodle-typography-font-weight-semibold)` |
 | letter-spacing | `0.12em` |
 | text-transform | `uppercase` |
 
@@ -186,7 +186,7 @@ Card header and body always render regardless of media state.
 | margin | `0` |
 | color | `var(--poodle-color-text-secondary)` |
 | font-size | `var(--poodle-media-preview-body-size)` |
-| line-height | `1.5` |
+| line-height | `var(--poodle-style-typography-leading-relaxed)` |
 
 ### Meta List
 
@@ -206,7 +206,7 @@ Card header and body always render regardless of media state.
 | padding | `var(--poodle-media-preview-meta-padding-y) var(--poodle-media-preview-meta-padding-x)` |
 | border-radius | `var(--poodle-radius-control)` |
 | background | `var(--poodle-recipe-media-preview-meta-fill, transparent)` |
-| box-shadow | `var(--poodle-recipe-media-preview-meta-shadow, var(--poodle-style-control-shadow, none))` |
+| box-shadow | `var(--poodle-recipe-media-preview-meta-shadow, var(--poodle-style-control-shadow))` |
 
 ### Size Variants
 
@@ -217,6 +217,10 @@ Card header and body always render regardless of media state.
 | `md` | `0.6875rem` | `1.125rem` | `0.8125rem` | `0.375rem 0.625rem` |
 | `lg` | `0.71875rem` | `1.1875rem` | `0.875rem` | `0.4375rem 0.6875rem` |
 | `xl` | `0.75rem` | `1.25rem` | `0.9375rem` | `0.5rem 0.75rem` |
+
+The Eyebrow, Title and Body columns give the default values of the per-size
+`mediaEyebrow`, `mediaTitle` and `mediaBody` type roles. The title line height
+reads `--poodle-style-typography-leading-tight`.
 
 Metadata tags use the `--poodle-recipe-media-preview-meta-shadow` hook,
 with no shadow by default.

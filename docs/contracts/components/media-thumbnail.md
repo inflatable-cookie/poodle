@@ -165,9 +165,9 @@ When `stateTitle` is null, the component uses these defaults:
 |----------|-------|
 | position | `relative` |
 | overflow | `hidden` |
-| border | `0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle))` |
+| border | `0.0625rem solid var(--poodle-style-surface-border)` |
 | border-radius | `calc(var(--poodle-radius-surface) - 0.125rem)` |
-| background | `var(--poodle-recipe-media-thumbnail-frame-fill, var(--poodle-style-surface-fill, radial-gradient(circle at top left, color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent), transparent 38%), color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)))` |
+| background | `var(--poodle-recipe-media-thumbnail-frame-fill, var(--poodle-style-surface-fill))` |
 
 ### Frame Media Children
 
@@ -218,7 +218,7 @@ When `stateTitle` is null, the component uses these defaults:
 | justify-items | `start` |
 | padding | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
 | text-align | `left` |
-| background | `var(--poodle-recipe-media-thumbnail-state-fill, var(--poodle-style-surface-fill, linear-gradient(180deg, transparent, color-mix(in srgb, var(--poodle-color-background-panel) 46%, transparent)), color-mix(in srgb, var(--poodle-color-background-surface) 78%, transparent)))` |
+| background | `var(--poodle-recipe-media-thumbnail-state-fill, var(--poodle-style-surface-fill))` |
 | width | `100%` |
 | height | `100%` |
 
@@ -233,16 +233,16 @@ presentation.
 |----------|-------|
 | align-content | `center` |
 | padding | `0.875rem` |
-| strong font-size | `0.875rem` |
-| strong line-height | `1.35` |
+| strong font-size | `var(--poodle-style-typography-thumbnailTitle-size)` |
+| strong line-height | `var(--poodle-style-typography-thumbnailTitle-lineHeight)` |
 
 ### State Text
 
 | Element | Property | Value |
 |---------|----------|-------|
 | `p` | color | `var(--poodle-color-text-secondary)` |
-| `p` | font-size | `0.8125rem` |
-| `p` | line-height | `1.5` |
+| `p` | font-size | `var(--poodle-style-typography-secondary-size)` |
+| `p` | line-height | `var(--poodle-style-typography-leading-relaxed)` |
 | `strong`, `p` | margin | `0` |
 
 ### Caption
@@ -256,16 +256,16 @@ presentation.
 
 | Property | Value |
 |----------|-------|
-| font-size | `0.875rem` |
-| line-height | `1.35` |
+| font-size | `var(--poodle-style-typography-thumbnailTitle-size)` |
+| line-height | `var(--poodle-style-typography-thumbnailTitle-lineHeight)` |
 
 #### Caption Meta
 
 | Property | Value |
 |----------|-------|
 | color | `var(--poodle-color-text-secondary)` |
-| font-size | `0.8125rem` |
-| line-height | `1.5` |
+| font-size | `var(--poodle-style-typography-secondary-size)` |
+| line-height | `var(--poodle-style-typography-leading-relaxed)` |
 
 ### Badge
 
@@ -281,10 +281,10 @@ presentation.
 | padding | `0 0.625rem` |
 | border-radius | `var(--poodle-radius-control)` |
 | backdrop-filter | `blur(1rem)` |
-| background | `var(--poodle-recipe-media-thumbnail-badge-fill, var(--poodle-style-surface-floatingFill, color-mix(in srgb, var(--poodle-color-background-surface) 74%, transparent)))` |
+| background | `var(--poodle-recipe-media-thumbnail-badge-fill, var(--poodle-style-surface-floatingFill))` |
 | color | `var(--poodle-color-text-primary)` |
-| font-size | `0.6875rem` |
-| font-weight | `600` |
+| font-size | `var(--poodle-style-typography-pillLabel-md-size)` |
+| font-weight | `var(--poodle-style-typography-pillLabel-weight)` |
 | letter-spacing | `0.04em` |
 | text-transform | `uppercase` |
 
@@ -302,9 +302,9 @@ presentation.
 | height | `2rem` |
 | border-radius | `var(--poodle-radius-control)` |
 | backdrop-filter | `blur(1rem)` |
-| background | `var(--poodle-recipe-media-thumbnail-play-fill, var(--poodle-style-surface-floatingFill, color-mix(in srgb, var(--poodle-color-background-elevated) 78%, transparent)))` |
+| background | `var(--poodle-recipe-media-thumbnail-play-fill, var(--poodle-style-surface-floatingFill))` |
 | color | `var(--poodle-color-text-primary)` |
-| font-size | `0.9375rem` |
+| font-size | `var(--poodle-style-typography-glyph-media-size)` |
 
 ### Light Theme Overrides
 

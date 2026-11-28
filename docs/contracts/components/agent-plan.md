@@ -203,6 +203,9 @@ Region.
 
 ## 10. Token Usage
 
+Size-stepped text reads the per-size `agentText` type roles
+(`--poodle-style-typography-agentText-{size}-size`).
+
 | Property | Token |
 |----------|-------|
 | plan body | (AgentMessage contract) |
@@ -210,9 +213,9 @@ Region.
 | accept label | `--poodle-color-text-inverse` |
 | accept fill, hovered | `--poodle-color-accent-hover` |
 | secondary fill | `transparent` (`fillHover`, `fillActive` on interaction) |
-| secondary shadow | `var(--poodle-style-control-shadow, none)` |
-| secondary label | `var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary))` |
-| secondary border | `var(--poodle-style-control-border, var(--poodle-color-border-subtle))` |
+| secondary shadow | `var(--poodle-style-control-shadow)` |
+| secondary label | `var(--poodle-style-control-secondaryText)` |
+| secondary border | `var(--poodle-style-control-border)` |
 | ghost fill / border | `transparent` (`fillHover`, `fillActive` on interaction) |
 | control radius | `--poodle-radius-control` |
 | badge | `--poodle-color-text-secondary` |

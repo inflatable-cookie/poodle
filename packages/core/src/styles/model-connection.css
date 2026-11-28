@@ -54,10 +54,10 @@
   min-width: 0;
   margin: 0;
   padding: var(--poodle-space-stack-sm) var(--poodle-space-inline-md);
-  border: 1px solid var(--poodle-style-control-border, var(--poodle-color-border-subtle));
+  border: 1px solid var(--poodle-style-control-border);
   border-radius: var(--poodle-radius-surface);
   background: transparent;
-  box-shadow: var(--poodle-style-control-shadow, none);
+  box-shadow: var(--poodle-style-control-shadow);
   color: inherit;
   text-align: start;
   cursor: pointer;
@@ -65,15 +65,15 @@
 }
 
 .poodle-model-connection-picker__option:hover:not(:disabled) {
-  background: var(--poodle-style-control-fillHover, transparent);
+  background: var(--poodle-style-control-fillHover);
 }
 
 .poodle-model-connection-picker__option:active:not(:disabled) {
-  background: var(--poodle-style-control-fillActive, transparent);
+  background: var(--poodle-style-control-fillActive);
 }
 
 .poodle-model-connection-picker__option:not(:disabled):not([aria-disabled="true"]):not([aria-checked="true"]):hover {
-  background: var(--poodle-style-control-fillHover, var(--poodle-color-background-surface));
+  background: var(--poodle-style-control-fillHover);
 }
 
 .poodle-model-connection-picker__option:focus-visible {
@@ -82,8 +82,8 @@
 }
 
 .poodle-model-connection-picker__option[aria-checked="true"] {
-  border-color: var(--poodle-style-selection-itemBorder, var(--poodle-color-accent-base));
-  background: var(--poodle-style-selection-itemFill, var(--poodle-color-background-surface));
+  border-color: var(--poodle-style-selection-itemBorder);
+  background: var(--poodle-style-selection-itemFill);
 }
 
 .poodle-model-connection-picker__option[aria-disabled="true"],
@@ -95,10 +95,10 @@
 .poodle-model-connection-picker__leading {
   display: grid;
   place-items: center;
-  width: var(--poodle-size-icon-lg, 1.75rem);
-  height: var(--poodle-size-icon-lg, 1.75rem);
+  width: var(--poodle-size-icon-lg);
+  height: var(--poodle-size-icon-lg);
   border-radius: var(--poodle-radius-control);
-  background: var(--poodle-style-surface-fill, var(--poodle-color-background-panel));
+  background: var(--poodle-style-surface-fill);
   color: var(--poodle-color-text-secondary);
   flex-shrink: 0;
 }
@@ -142,11 +142,11 @@
 .poodle-model-connection-picker__selected-icon {
   display: grid;
   place-items: center;
-  width: var(--poodle-size-icon-md, 1.25rem);
-  height: var(--poodle-size-icon-md, 1.25rem);
+  width: var(--poodle-size-icon-md);
+  height: var(--poodle-size-icon-md);
   border-radius: 999px;
-  background: var(--poodle-style-selection-fillSolid, var(--poodle-color-accent-base));
-  color: var(--poodle-style-selection-textSolid, var(--poodle-color-text-inverse));
+  background: var(--poodle-style-selection-fillSolid);
+  color: var(--poodle-style-selection-textSolid);
 }
 
 .poodle-model-connection-picker__footer {
@@ -202,10 +202,10 @@
   gap: var(--poodle-space-inline-sm);
   align-items: center;
   padding: var(--poodle-space-stack-sm) var(--poodle-space-inline-md);
-  border: 1px solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
+  border: 1px solid var(--poodle-style-surface-border);
   border-radius: var(--poodle-radius-surface);
-  background: var(--poodle-style-surface-fill, var(--poodle-color-background-surface));
-  box-shadow: var(--poodle-style-surface-shadow, none);
+  background: var(--poodle-style-surface-fill);
+  box-shadow: var(--poodle-style-surface-shadow);
 }
 
 .poodle-model-connection-setup__configuration {
@@ -213,10 +213,10 @@
   gap: var(--poodle-space-stack-sm);
   min-width: 0;
   padding: var(--poodle-space-stack-md);
-  border: 1px solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
+  border: 1px solid var(--poodle-style-surface-border);
   border-radius: var(--poodle-radius-surface);
-  background: var(--poodle-style-surface-fill, var(--poodle-color-background-surface));
-  box-shadow: var(--poodle-style-surface-shadow, none);
+  background: var(--poodle-style-surface-fill);
+  box-shadow: var(--poodle-style-surface-shadow);
 }
 
 .poodle-model-connection-setup__aside {
@@ -254,10 +254,10 @@
   display: grid;
   gap: 0;
   min-width: 0;
-  border: 1px solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
+  border: 1px solid var(--poodle-style-surface-border);
   border-radius: var(--poodle-radius-surface);
-  background: var(--poodle-style-surface-fill, var(--poodle-color-background-panel));
-  box-shadow: var(--poodle-style-surface-shadow, none);
+  background: var(--poodle-style-surface-fill);
+  box-shadow: var(--poodle-style-surface-shadow);
   color: var(--poodle-color-text-primary);
   font-family: var(--poodle-typography-body-family);
 }
@@ -406,18 +406,18 @@
   align-items: center;
   min-width: 0;
   padding: var(--poodle-space-stack-sm) var(--poodle-space-inline-md);
-  border: 1px solid var(--poodle-style-control-border, var(--poodle-color-border-subtle));
+  border: 1px solid var(--poodle-style-control-border);
   border-radius: var(--poodle-radius-control);
   background: transparent;
-  box-shadow: var(--poodle-style-control-shadow, none);
+  box-shadow: var(--poodle-style-control-shadow);
 }
 
 .poodle-model-catalogue-editor__row:hover:not(:disabled) {
-  background: var(--poodle-style-control-fillHover, transparent);
+  background: var(--poodle-style-control-fillHover);
 }
 
 .poodle-model-catalogue-editor__row:active:not(:disabled) {
-  background: var(--poodle-style-control-fillActive, transparent);
+  background: var(--poodle-style-control-fillActive);
 }
 
 /* The generic provider posture is unlayered and would otherwise replace the
@@ -441,8 +441,8 @@
 .poodle-model-catalogue-editor__leading {
   display: grid;
   place-items: center;
-  width: var(--poodle-size-icon-md, 1.25rem);
-  height: var(--poodle-size-icon-md, 1.25rem);
+  width: var(--poodle-size-icon-md);
+  height: var(--poodle-size-icon-md);
   color: var(--poodle-color-text-secondary);
   flex-shrink: 0;
 }
@@ -502,8 +502,8 @@
   gap: var(--poodle-space-stack-sm);
   padding: var(--poodle-space-stack-sm);
   border-radius: var(--poodle-radius-surface);
-  background: var(--poodle-style-surface-fill, var(--poodle-color-background-panel));
-  box-shadow: var(--poodle-style-surface-shadow, none);
+  background: var(--poodle-style-surface-fill);
+  box-shadow: var(--poodle-style-surface-shadow);
   color: var(--poodle-color-text-muted, var(--poodle-color-text-tertiary));
 }
 

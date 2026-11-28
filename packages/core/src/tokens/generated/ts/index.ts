@@ -560,6 +560,9 @@ export const tokens = {
           },
           "lg": {
             "size": "initial"
+          },
+          "media": {
+            "size": "initial"
           }
         },
         "avatarInitials": {
@@ -966,6 +969,163 @@ export const tokens = {
         },
         "compactBadge": {
           "size": "initial"
+        },
+        "agentText": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "composerText": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "messageText": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "questionPrompt": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "pickerTrigger": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "mediaEyebrow": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "mediaTitle": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "mediaBody": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "mediaTime": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "thumbnailTitle": {
+          "size": "initial",
+          "lineHeight": "initial"
         }
       },
       "control": {
@@ -1362,6 +1522,7 @@ export const tokenPaths = [
   "style.typography.glyph.lineHeight",
   "style.typography.glyph.sm.size",
   "style.typography.glyph.lg.size",
+  "style.typography.glyph.media.size",
   "style.typography.avatarInitials.xs.size",
   "style.typography.avatarInitials.sm.size",
   "style.typography.avatarInitials.md.size",
@@ -1499,6 +1660,53 @@ export const tokenPaths = [
   "style.typography.toastBody.lg.size",
   "style.typography.toastBody.xl.size",
   "style.typography.compactBadge.size",
+  "style.typography.agentText.xs.size",
+  "style.typography.agentText.sm.size",
+  "style.typography.agentText.md.size",
+  "style.typography.agentText.lg.size",
+  "style.typography.agentText.xl.size",
+  "style.typography.composerText.xs.size",
+  "style.typography.composerText.sm.size",
+  "style.typography.composerText.md.size",
+  "style.typography.composerText.lg.size",
+  "style.typography.composerText.xl.size",
+  "style.typography.messageText.xs.size",
+  "style.typography.messageText.sm.size",
+  "style.typography.messageText.md.size",
+  "style.typography.messageText.lg.size",
+  "style.typography.messageText.xl.size",
+  "style.typography.questionPrompt.xs.size",
+  "style.typography.questionPrompt.sm.size",
+  "style.typography.questionPrompt.md.size",
+  "style.typography.questionPrompt.lg.size",
+  "style.typography.questionPrompt.xl.size",
+  "style.typography.pickerTrigger.xs.size",
+  "style.typography.pickerTrigger.sm.size",
+  "style.typography.pickerTrigger.md.size",
+  "style.typography.pickerTrigger.lg.size",
+  "style.typography.pickerTrigger.xl.size",
+  "style.typography.mediaEyebrow.xs.size",
+  "style.typography.mediaEyebrow.sm.size",
+  "style.typography.mediaEyebrow.md.size",
+  "style.typography.mediaEyebrow.lg.size",
+  "style.typography.mediaEyebrow.xl.size",
+  "style.typography.mediaTitle.xs.size",
+  "style.typography.mediaTitle.sm.size",
+  "style.typography.mediaTitle.md.size",
+  "style.typography.mediaTitle.lg.size",
+  "style.typography.mediaTitle.xl.size",
+  "style.typography.mediaBody.xs.size",
+  "style.typography.mediaBody.sm.size",
+  "style.typography.mediaBody.md.size",
+  "style.typography.mediaBody.lg.size",
+  "style.typography.mediaBody.xl.size",
+  "style.typography.mediaTime.xs.size",
+  "style.typography.mediaTime.sm.size",
+  "style.typography.mediaTime.md.size",
+  "style.typography.mediaTime.lg.size",
+  "style.typography.mediaTime.xl.size",
+  "style.typography.thumbnailTitle.size",
+  "style.typography.thumbnailTitle.lineHeight",
   "style.control.fill",
   "style.control.border",
   "style.control.shadow",
@@ -1756,6 +1964,7 @@ export const cssVars = {
   "style.typography.glyph.lineHeight": "--poodle-style-typography-glyph-lineHeight",
   "style.typography.glyph.sm.size": "--poodle-style-typography-glyph-sm-size",
   "style.typography.glyph.lg.size": "--poodle-style-typography-glyph-lg-size",
+  "style.typography.glyph.media.size": "--poodle-style-typography-glyph-media-size",
   "style.typography.avatarInitials.xs.size": "--poodle-style-typography-avatarInitials-xs-size",
   "style.typography.avatarInitials.sm.size": "--poodle-style-typography-avatarInitials-sm-size",
   "style.typography.avatarInitials.md.size": "--poodle-style-typography-avatarInitials-md-size",
@@ -1893,6 +2102,53 @@ export const cssVars = {
   "style.typography.toastBody.lg.size": "--poodle-style-typography-toastBody-lg-size",
   "style.typography.toastBody.xl.size": "--poodle-style-typography-toastBody-xl-size",
   "style.typography.compactBadge.size": "--poodle-style-typography-compactBadge-size",
+  "style.typography.agentText.xs.size": "--poodle-style-typography-agentText-xs-size",
+  "style.typography.agentText.sm.size": "--poodle-style-typography-agentText-sm-size",
+  "style.typography.agentText.md.size": "--poodle-style-typography-agentText-md-size",
+  "style.typography.agentText.lg.size": "--poodle-style-typography-agentText-lg-size",
+  "style.typography.agentText.xl.size": "--poodle-style-typography-agentText-xl-size",
+  "style.typography.composerText.xs.size": "--poodle-style-typography-composerText-xs-size",
+  "style.typography.composerText.sm.size": "--poodle-style-typography-composerText-sm-size",
+  "style.typography.composerText.md.size": "--poodle-style-typography-composerText-md-size",
+  "style.typography.composerText.lg.size": "--poodle-style-typography-composerText-lg-size",
+  "style.typography.composerText.xl.size": "--poodle-style-typography-composerText-xl-size",
+  "style.typography.messageText.xs.size": "--poodle-style-typography-messageText-xs-size",
+  "style.typography.messageText.sm.size": "--poodle-style-typography-messageText-sm-size",
+  "style.typography.messageText.md.size": "--poodle-style-typography-messageText-md-size",
+  "style.typography.messageText.lg.size": "--poodle-style-typography-messageText-lg-size",
+  "style.typography.messageText.xl.size": "--poodle-style-typography-messageText-xl-size",
+  "style.typography.questionPrompt.xs.size": "--poodle-style-typography-questionPrompt-xs-size",
+  "style.typography.questionPrompt.sm.size": "--poodle-style-typography-questionPrompt-sm-size",
+  "style.typography.questionPrompt.md.size": "--poodle-style-typography-questionPrompt-md-size",
+  "style.typography.questionPrompt.lg.size": "--poodle-style-typography-questionPrompt-lg-size",
+  "style.typography.questionPrompt.xl.size": "--poodle-style-typography-questionPrompt-xl-size",
+  "style.typography.pickerTrigger.xs.size": "--poodle-style-typography-pickerTrigger-xs-size",
+  "style.typography.pickerTrigger.sm.size": "--poodle-style-typography-pickerTrigger-sm-size",
+  "style.typography.pickerTrigger.md.size": "--poodle-style-typography-pickerTrigger-md-size",
+  "style.typography.pickerTrigger.lg.size": "--poodle-style-typography-pickerTrigger-lg-size",
+  "style.typography.pickerTrigger.xl.size": "--poodle-style-typography-pickerTrigger-xl-size",
+  "style.typography.mediaEyebrow.xs.size": "--poodle-style-typography-mediaEyebrow-xs-size",
+  "style.typography.mediaEyebrow.sm.size": "--poodle-style-typography-mediaEyebrow-sm-size",
+  "style.typography.mediaEyebrow.md.size": "--poodle-style-typography-mediaEyebrow-md-size",
+  "style.typography.mediaEyebrow.lg.size": "--poodle-style-typography-mediaEyebrow-lg-size",
+  "style.typography.mediaEyebrow.xl.size": "--poodle-style-typography-mediaEyebrow-xl-size",
+  "style.typography.mediaTitle.xs.size": "--poodle-style-typography-mediaTitle-xs-size",
+  "style.typography.mediaTitle.sm.size": "--poodle-style-typography-mediaTitle-sm-size",
+  "style.typography.mediaTitle.md.size": "--poodle-style-typography-mediaTitle-md-size",
+  "style.typography.mediaTitle.lg.size": "--poodle-style-typography-mediaTitle-lg-size",
+  "style.typography.mediaTitle.xl.size": "--poodle-style-typography-mediaTitle-xl-size",
+  "style.typography.mediaBody.xs.size": "--poodle-style-typography-mediaBody-xs-size",
+  "style.typography.mediaBody.sm.size": "--poodle-style-typography-mediaBody-sm-size",
+  "style.typography.mediaBody.md.size": "--poodle-style-typography-mediaBody-md-size",
+  "style.typography.mediaBody.lg.size": "--poodle-style-typography-mediaBody-lg-size",
+  "style.typography.mediaBody.xl.size": "--poodle-style-typography-mediaBody-xl-size",
+  "style.typography.mediaTime.xs.size": "--poodle-style-typography-mediaTime-xs-size",
+  "style.typography.mediaTime.sm.size": "--poodle-style-typography-mediaTime-sm-size",
+  "style.typography.mediaTime.md.size": "--poodle-style-typography-mediaTime-md-size",
+  "style.typography.mediaTime.lg.size": "--poodle-style-typography-mediaTime-lg-size",
+  "style.typography.mediaTime.xl.size": "--poodle-style-typography-mediaTime-xl-size",
+  "style.typography.thumbnailTitle.size": "--poodle-style-typography-thumbnailTitle-size",
+  "style.typography.thumbnailTitle.lineHeight": "--poodle-style-typography-thumbnailTitle-lineHeight",
   "style.control.fill": "--poodle-style-control-fill",
   "style.control.border": "--poodle-style-control-border",
   "style.control.shadow": "--poodle-style-control-shadow",

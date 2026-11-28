@@ -210,7 +210,10 @@ surface that shows agent prose.
 
 ## 8. Token Usage
 
-Rendering style roles: the user message bubble reads `--poodle-style-surface-fill` after its literal chain. The code span and quote keep their own paint.
+Message text reads the per-size `messageText` type roles, and heading line height
+reads `--poodle-style-typography-leading-compact`.
+
+Rendering style roles: the user message bubble reads `--poodle-style-surface-fill`. The code span and quote keep their own paint.
 
 | Property | Token |
 |----------|-------|
@@ -225,7 +228,7 @@ Rendering style roles: the user message bubble reads `--poodle-style-surface-fil
 | blockquote text | `--poodle-color-text-secondary` |
 | user surface | `--poodle-color-background-elevated` |
 | user radius | `--poodle-radius-surface` |
-| caret | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |
+| caret | `var(--poodle-style-selection-indicator)` |
 
 ### Size Variants
 

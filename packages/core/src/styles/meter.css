@@ -44,7 +44,7 @@
     overflow: hidden;
     min-height: var(--poodle-meter-track-thickness);
     border-radius: 999px;
-    background: var(--poodle-recipe-meter-track-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary))));
+    background: var(--poodle-recipe-meter-track-fill, var(--poodle-style-surface-fill));
   }
 
   .poodle-meter__fill {
@@ -61,9 +61,9 @@
 
   .poodle-meter__value {
     color: var(--poodle-color-text-secondary);
-    font-size: 0.75rem;
+    font-size: var(--poodle-style-typography-caption-size);
     font-variant-numeric: tabular-nums;
-    line-height: 1;
+    line-height: var(--poodle-typography-label-lineHeightTight);
   }
 
   /* ── Ring shape ──────────────────────────────────────────────────────────
@@ -108,7 +108,7 @@
   }
 
   .poodle-meter[data-shape="ring"] .poodle-meter__track {
-    background: var(--poodle-recipe-meter-track-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-surface) 88%, var(--poodle-color-text-primary))));
+    background: var(--poodle-recipe-meter-track-fill, var(--poodle-style-surface-fill));
   }
 
   .poodle-meter[data-shape="ring"] .poodle-meter__fill {
