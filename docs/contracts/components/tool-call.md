@@ -139,6 +139,9 @@ indicator out of the row.
 
 ## 8. Token Usage
 
+Size-stepped text reads the per-size `agentText` type roles
+(`--poodle-style-typography-agentText-{size}-size`).
+
 | Property | Token |
 |----------|-------|
 | label colour | `--poodle-color-text-secondary` |
@@ -149,7 +152,7 @@ indicator out of the row.
 | icon colour | `--poodle-color-text-secondary` |
 | success | `--poodle-color-status-success` |
 | danger | `--poodle-color-status-danger` |
-| hover fill | `var(--poodle-style-control-fillHover, var(--poodle-color-background-elevated))` |
+| hover fill | `var(--poodle-style-control-fillHover)` |
 | focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, offset outline |
 | row radius | `--poodle-radius-control` |
 | row gap | `--poodle-space-inline-sm` |

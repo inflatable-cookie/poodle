@@ -144,7 +144,7 @@ machinery, id wiring, and polite status announcement.
 |------|-------|---------|
 | Root | `space.stack.*` | workflow rhythm |
 | Header | `color.text.primary`, `color.text.secondary` | hierarchy |
-| Configuration | `var(--poodle-style-surface-fill, var(--poodle-color-background-surface))`, `var(--poodle-style-surface-border, var(--poodle-color-border-subtle))`, `var(--poodle-style-surface-shadow, none)` | inset body and selected summary |
+| Configuration | `var(--poodle-style-surface-fill)`, `var(--poodle-style-surface-border)`, `var(--poodle-style-surface-shadow)` | inset body and selected summary |
 | Actions | `color.border.subtle`, `space.inline.*` | separation |
 | Feedback | semantic status tokens | safe outcome posture |
 

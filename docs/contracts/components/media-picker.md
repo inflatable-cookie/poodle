@@ -168,7 +168,7 @@ Composed from `Dialog`, `Tabs`, `TextInput`, and `FileUpload` primitives. Wraps 
 |----------|-------|
 | display | `flex` |
 | flex-direction | `column` |
-| gap | `var(--poodle-space-stack-sm, 0.5rem)` |
+| gap | `var(--poodle-space-stack-sm)` |
 | min-height | `20rem` |
 
 ### Search `.media-picker__search`
@@ -196,8 +196,8 @@ Composed from `Dialog`, `Tabs`, `TextInput`, and `FileUpload` primitives. Wraps 
 | align-items | `center` |
 | gap | `0.25rem` |
 | padding | `0.375rem` (default) |
-| border | `0.0625rem solid var(--poodle-style-control-border, transparent)` |
-| border-radius | `var(--poodle-radius-control, 0.375rem)` |
+| border | `0.0625rem solid var(--poodle-style-control-border)` |
+| border-radius | `var(--poodle-radius-control)` |
 | background | `var(--poodle-recipe-media-picker-item-fill, transparent)` |
 | cursor | `pointer` |
 | transition | `border-color 0.1s, background 0.1s` |
@@ -207,9 +207,9 @@ Composed from `Dialog`, `Tabs`, `TextInput`, and `FileUpload` primitives. Wraps 
 | State | Property | Value |
 |-------|----------|-------|
 | `:hover` | border-color | `var(--poodle-color-border-focus, #888)` |
-| `:hover` | background | `var(--poodle-recipe-media-picker-hover-focus-item-fill, var(--poodle-style-control-fillHover, var(--poodle-color-background-panel, #1a1a1a)))` |
+| `:hover` | background | `var(--poodle-recipe-media-picker-hover-focus-item-fill, var(--poodle-style-control-fillHover))` |
 | `:focus-visible` | border-color | `var(--poodle-color-border-focus, #888)` |
-| `:focus-visible` | background | `var(--poodle-recipe-media-picker-hover-focus-item-fill, var(--poodle-style-control-fillHover, var(--poodle-color-background-panel, #1a1a1a)))` |
+| `:focus-visible` | background | `var(--poodle-recipe-media-picker-hover-focus-item-fill, var(--poodle-style-control-fillHover))` |
 | `:focus-visible` | outline | `none` |
 
 ### Thumbnail `.media-picker__thumb`
@@ -228,7 +228,7 @@ Composed from `Dialog`, `Tabs`, `TextInput`, and `FileUpload` primitives. Wraps 
 | display | `flex` |
 | align-items | `center` |
 | justify-content | `center` |
-| background | `var(--poodle-recipe-media-picker-thumb--placeholder-fill, var(--poodle-style-surface-fill, var(--poodle-color-background-panel, #1a1a1a)))` |
+| background | `var(--poodle-recipe-media-picker-thumb--placeholder-fill, var(--poodle-style-surface-fill))` |
 
 #### Placeholder SVG
 
@@ -236,14 +236,14 @@ Composed from `Dialog`, `Tabs`, `TextInput`, and `FileUpload` primitives. Wraps 
 |----------|-------|
 | width | `1.5rem` |
 | height | `1.5rem` |
-| color | `var(--poodle-color-text-tertiary, #666)` |
+| color | `var(--poodle-color-text-tertiary)` |
 
 ### Label `.media-picker__label`
 
 | Property | Value |
 |----------|-------|
 | font-size | `var(--poodle-typography-label-size)` |
-| color | `var(--poodle-color-text-secondary, #999)` |
+| color | `var(--poodle-color-text-secondary)` |
 | white-space | `nowrap` |
 | overflow | `hidden` |
 | text-overflow | `ellipsis` |
@@ -263,8 +263,8 @@ Composed from `Dialog`, `Tabs`, `TextInput`, and `FileUpload` primitives. Wraps 
 | Property | Value |
 |----------|-------|
 | margin | `0` |
-| color | `var(--poodle-color-text-secondary, #999)` |
-| font-size | `0.875rem` |
+| color | `var(--poodle-color-text-secondary)` |
+| font-size | `var(--poodle-typography-body-size)` |
 
 ### Upload `.media-picker__upload`
 

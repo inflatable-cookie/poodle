@@ -143,14 +143,17 @@ new rows appear above it, focus does not move on screen either.
 
 ## 8. Token Usage
 
+Size-stepped text reads the per-size `agentText` type roles
+(`--poodle-style-typography-agentText-{size}-size`).
+
 | Property | Token |
 |----------|-------|
-| container fill | `var(--poodle-style-surface-fill, var(--poodle-color-background-surface))` |
-| container border | `var(--poodle-style-surface-border, var(--poodle-color-border-subtle))` |
-| container shadow | `var(--poodle-style-surface-shadow, none)` |
+| container fill | `var(--poodle-style-surface-fill)` |
+| container border | `var(--poodle-style-surface-border)` |
+| container shadow | `var(--poodle-style-surface-shadow)` |
 | container radius | `--poodle-radius-control` |
 | toggle colour | `--poodle-color-text-secondary` |
-| toggle hover fill | `var(--poodle-style-control-fillHover, var(--poodle-color-background-elevated))` |
+| toggle hover fill | `var(--poodle-style-control-fillHover)` |
 | toggle colour, failed run | `--poodle-color-status-danger` |
 | toggle font size | `--poodle-typography-label-size` |
 | focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, offset outline |

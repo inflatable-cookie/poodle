@@ -142,7 +142,7 @@ or derive one state from the other.
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Root | `var(--poodle-style-surface-fill, var(--poodle-color-background-panel))`, `var(--poodle-style-surface-border, var(--poodle-color-border-subtle))`, `var(--poodle-style-surface-shadow, none)`, `radius.surface` | card (`data-enabled="false"` keeps `color.background.surface` tonal step) |
+| Root | `var(--poodle-style-surface-fill)`, `var(--poodle-style-surface-border)`, `var(--poodle-style-surface-shadow)`, `radius.surface` | card (`data-enabled="false"` keeps `color.background.surface` tonal step) |
 | Identity | `color.text.primary`, `color.text.secondary`, `color.text.muted` | hierarchy |
 | Details | `color.border.subtle`, `space.panel.*`, `space.stack.*` | open region |
 | Controls | semantic control-size and focus tokens | compact actions |

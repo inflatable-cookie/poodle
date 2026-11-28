@@ -380,21 +380,21 @@ what was decided without keeping a second decision surface on screen.
 | Part | Token | Purpose |
 |------|-------|---------|
 | Field | `--poodle-radius-surface` | composer corner radius |
-| Field | `var(--poodle-recipe-agent-chat-input-field-fill, var(--poodle-style-control-fill, var(--poodle-color-background-panel)))` | composer fill — routes through `fill` roles above `canvas` → `surface` → `panel` |
-| Field | `var(--poodle-style-control-border, var(--poodle-color-border-default))` | composer border (hover also reads `--poodle-style-control-border`) |
-| Field | `var(--poodle-style-control-shadow, none)` | composer shadow |
+| Field | `var(--poodle-recipe-agent-chat-input-field-fill, var(--poodle-style-control-fill))` | composer fill — routes through `fill` roles above `canvas` → `surface` → `panel` |
+| Field | `var(--poodle-style-control-border)` | composer border (hover also reads `--poodle-style-control-border`) |
+| Field | `var(--poodle-style-control-shadow)` | composer shadow |
 | Field | `--poodle-space-panel-x`, `--poodle-space-panel-y` | composer padding |
 | Field keyboard focus | `--poodle-color-accent-focusRing`, `--poodle-border-width-focus`, `:root[data-poodle-input-modality="keyboard"]` | focus ring |
 | Editor | `--poodle-typography-body-family`, `--poodle-typography-body-size` | editor typography |
 | Editor | `--poodle-color-text-primary` | text colour |
-| Editor placeholder | `var(--poodle-recipe-agent-chat-input-placeholder-text, var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary)))` at `var(--poodle-style-control-secondaryOpacity, calc(var(--poodle-state-opacity-muted) * 0.62))` | placeholder colour and opacity |
-| Attachment | `var(--poodle-style-surface-floatingFill, var(--poodle-style-surface-fill, var(--poodle-color-background-elevated)))`, `var(--poodle-style-surface-border, var(--poodle-color-border-subtle))`, `var(--poodle-style-surface-shadow, none)`, `--poodle-radius-control` | chip treatment — a step above the field, dropping border under tonal `surface` |
+| Editor placeholder | `var(--poodle-recipe-agent-chat-input-placeholder-text, var(--poodle-style-control-secondaryText))` at `var(--poodle-style-control-secondaryOpacity)` | placeholder colour and opacity |
+| Attachment | `var(--poodle-style-surface-floatingFill)`, `var(--poodle-style-surface-border)`, `var(--poodle-style-surface-shadow)`, `--poodle-radius-control` | chip treatment — a step above the field, dropping border under tonal `surface` |
 | Leading dividers | `--poodle-color-border-subtle` | hairline between toolbar children |
 | Action | `--poodle-color-accent-base` | filled circle |
 | Action | `--poodle-color-text-inverse` | glyph colour |
 | Action hover | `color-mix(accent 88%, white)` | hover fill |
 | Action (stop) | `--poodle-color-status-danger` | stop-state fill |
-| Footer | `--poodle-color-background-surface`, `var(--poodle-style-surface-border, var(--poodle-color-border-subtle))`, `var(--poodle-style-surface-shadow, none)` | secondary bar — below the field on the ladder, border follows `surface` |
+| Footer | `--poodle-color-background-surface`, `var(--poodle-style-surface-border)`, `var(--poodle-style-surface-shadow)` | secondary bar — below the field on the ladder, border follows `surface` |
 | Disabled | `--poodle-state-opacity-disabled` | disabled opacity |
 | Motion | `--poodle-motion-duration-interaction`, `--poodle-motion-easing-standard` | hover/height transitions |
 
@@ -407,6 +407,10 @@ what was decided without keeping a second decision surface on screen.
 | `md` | `0.625rem 0.75rem` | `0.875rem` | `2rem` | `3rem` | `0.5rem` |
 | `lg` | `0.75rem 1rem` | `0.9375rem` | `2.375rem` | `3.5rem` | `0.625rem` |
 | `xl` | `0.875rem 1.125rem` | `1rem` | `2.75rem` | `4rem` | `0.75rem` |
+
+The Editor font column gives the default values of the per-size `composerText`
+type roles. Attachment labels read the style `caption` size, the footer reads the
+`secondary` size, and the editor line height reads `leading-relaxed`.
 
 Density changes only the toolbar/attachment gaps and the leading divider
 spacing — never the field's vertical padding or the action box.

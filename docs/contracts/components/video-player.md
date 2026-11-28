@@ -151,7 +151,7 @@ volume/fullscreen).
 - Progress bar: `0.25rem` tall, `0.375rem` margin-bottom
 - Control buttons: `1.75rem x 1.75rem`, icon `0.875rem x 0.875rem`
 - Volume slider: `3.5rem` width
-- Time display: `0.6875rem` font-size
+- Time display: `--poodle-style-typography-mediaTime-md-size`
 
 ### Composition
 
@@ -177,7 +177,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 | `position` | `relative` |
 | `overflow` | `hidden` |
 | `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `var(--poodle-recipe-video-player-fill, var(--poodle-style-surface-fill, #000))` |
+| `background` | `var(--poodle-recipe-video-player-fill, var(--poodle-style-surface-fill))` |
 | `cursor` | `pointer` |
 | `aspect-ratio` | set via inline style from `aspectRatio` prop |
 
@@ -202,7 +202,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 | `height` | `4rem` |
 | `padding` | `0` |
 | `border` | `0` |
-| `background` | `var(--poodle-recipe-video-player-big-play-fill, var(--poodle-style-control-fill, transparent))` |
+| `background` | `var(--poodle-recipe-video-player-big-play-fill, var(--poodle-style-control-fill))` |
 | `color` | `rgba(255, 255, 255, 0.9)` |
 | `cursor` | `pointer` |
 | `transition` | `transform 0.2s ease` |
@@ -243,7 +243,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 | Property | Value |
 |----------|-------|
 | `height` | `100%` |
-| `background` | `var(--poodle-recipe-video-player-progress-fill-fill, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base, #6366f1)))` |
+| `background` | `var(--poodle-recipe-video-player-progress-fill-fill, var(--poodle-style-selection-indicator))` |
 | `border-radius` | `999rem` |
 | `transition` | `width 0.1s linear` |
 
@@ -297,7 +297,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-recipe-video-player-hover-btn-fill, var(--poodle-style-control-fillHover, rgba(255, 255, 255, 0.15)))` |
+| `background` | `var(--poodle-recipe-video-player-hover-btn-fill, var(--poodle-style-control-fillHover))` |
 
 ### `.video-player__btn svg`
 
@@ -361,7 +361,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 | Property | Value |
 |----------|-------|
 | `font-family` | `var(--poodle-typography-code-family)` |
-| `font-size` | `0.6875rem` |
+| `font-size` | `var(--poodle-style-typography-mediaTime-md-size)` |
 | `color` | `rgba(255, 255, 255, 0.8)` |
 | `white-space` | `nowrap` |
 
@@ -374,7 +374,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 | Button | `width` / `height` | `1.25rem` |
 | Button SVG | `width` / `height` | `0.75rem` |
 | Volume | `width` | `2.5rem` |
-| Time | `font-size` | `0.5625rem` |
+| Time | `font-size` | `var(--poodle-style-typography-mediaTime-xs-size)` |
 | BigPlay | `width` / `height` | `3rem` |
 
 #### `[data-size="sm"]`
@@ -383,7 +383,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 |------|----------|-------|
 | Button | `width` / `height` | `1.5rem` |
 | Volume | `width` | `3rem` |
-| Time | `font-size` | `0.625rem` |
+| Time | `font-size` | `var(--poodle-style-typography-mediaTime-sm-size)` |
 | BigPlay | `width` / `height` | `3.5rem` |
 
 #### `[data-size="lg"]`
@@ -393,7 +393,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 | Button | `width` / `height` | `2.125rem` |
 | Button SVG | `width` / `height` | `1rem` |
 | Volume | `width` | `4rem` |
-| Time | `font-size` | `0.75rem` |
+| Time | `font-size` | `var(--poodle-style-typography-mediaTime-lg-size)` |
 | BigPlay | `width` / `height` | `4.5rem` |
 
 #### `[data-size="xl"]`
@@ -403,7 +403,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 | Button | `width` / `height` | `2.25rem` |
 | Button SVG | `width` / `height` | `1.125rem` |
 | Volume | `width` | `4.5rem` |
-| Time | `font-size` | `0.8125rem` |
+| Time | `font-size` | `var(--poodle-style-typography-mediaTime-xl-size)` |
 | BigPlay | `width` / `height` | `5rem` |
 
 ### Density Variants

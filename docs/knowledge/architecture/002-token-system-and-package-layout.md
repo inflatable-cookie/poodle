@@ -119,8 +119,11 @@ line-height ratios. Overlays, menus, navigation, and shells add
 `disclosureTitle`, `disclosureDescription`, and `disclosurePanel`;
 `appHeaderTitle` and `appHeaderSubtitle`; `breadcrumbLabel`; `menuItem`,
 `menubarItem`, and `menuMeta`; `navigationLabel`; `toastTitle` and
-`toastBody`; `compactBadge`; and the `glyph.sm` and `glyph.lg` sizes. Density
-controls spacing.
+`toastBody`; `compactBadge`; and the `glyph.sm` and `glyph.lg` sizes. Media
+and agent surfaces add `mediaEyebrow`, `mediaTitle`, `mediaBody`,
+`mediaTime`, and `thumbnailTitle`; the `glyph.media` size; `agentText`,
+`messageText`, `composerText`, and `questionPrompt`; and `pickerTrigger`.
+Density controls spacing.
 
 The style supplies system sans and mono for the legacy per-role family tokens.
 The generated CSS gives those aliases zero-specificity defaults at the

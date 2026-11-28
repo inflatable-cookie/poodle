@@ -114,16 +114,19 @@ They are dimmed rather than dropped, so the chosen one still reads first.
 
 ## 8. Token Usage
 
+Size-stepped text reads the per-size `agentText` type roles
+(`--poodle-style-typography-agentText-{size}-size`).
+
 | Property | Token |
 |----------|-------|
-| card fill | `var(--poodle-style-surface-fill, var(--poodle-color-background-surface))` |
-| card border | `var(--poodle-style-surface-border, var(--poodle-color-border-subtle))` |
-| card shadow | `var(--poodle-style-surface-shadow, none)` |
+| card fill | `var(--poodle-style-surface-fill)` |
+| card border | `var(--poodle-style-surface-border)` |
+| card shadow | `var(--poodle-style-surface-shadow)` |
 | card radius | `--poodle-radius-control` |
 | prompt colour | `--poodle-color-text-secondary` |
-| chosen option | `var(--poodle-style-selection-text, var(--poodle-color-text-primary))` |
+| chosen option | `var(--poodle-style-selection-text)` |
 | unchosen option | `--poodle-color-text-tertiary` |
-| tick | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |
+| tick | `var(--poodle-style-selection-indicator)` |
 | answer colour | `--poodle-color-text-primary` |
 
 ### Data Attributes

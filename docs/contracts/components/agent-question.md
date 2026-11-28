@@ -261,17 +261,20 @@ composer owns the editor, the toolbar and the submit control; see
 
 ## 10. Token Usage
 
+Size-stepped text reads the per-size `agentText` type roles, and the prompt
+reads the per-size `questionPrompt` roles.
+
 | Property | Token |
 |----------|-------|
 | prompt colour | `--poodle-color-text-primary` |
 | option label | `--poodle-color-text-primary` |
 | option description | `--poodle-color-text-secondary` |
 | option fill | `--poodle-color-background-elevated` |
-| option fill, selected | `var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, var(--poodle-color-background-elevated)))` |
-| option border, selected | `var(--poodle-style-selection-itemBorder, var(--poodle-color-accent-base))` |
+| option fill, selected | `var(--poodle-style-selection-itemFill)` |
+| option border, selected | `var(--poodle-style-selection-itemBorder)` |
 | option radius | `--poodle-radius-control` |
 | shortcut colour | `--poodle-color-text-tertiary` |
-| progress dot, answered / current | `var(--poodle-style-selection-indicator, var(--poodle-color-accent-base))` |
+| progress dot, answered / current | `var(--poodle-style-selection-indicator)` |
 | progress dot, pending | `--poodle-color-border-subtle` |
 | focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, offset outline |
 

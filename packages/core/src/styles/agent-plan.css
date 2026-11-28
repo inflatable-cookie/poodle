@@ -11,18 +11,18 @@
 .poodle-agent-plan {
   --poodle-agent-plan-gap: 0.5rem;
   --poodle-agent-plan-action-gap: 0.5rem;
-  --poodle-agent-plan-font-size: 0.8125rem;
+  --poodle-agent-plan-font-size: var(--poodle-style-typography-agentText-md-size);
 
   display: flex;
   flex-direction: column;
   gap: var(--poodle-agent-plan-gap);
 }
 
-.poodle-agent-plan[data-size="xs"] { --poodle-agent-plan-font-size: 0.6875rem; }
-.poodle-agent-plan[data-size="sm"] { --poodle-agent-plan-font-size: 0.75rem; }
-.poodle-agent-plan[data-size="md"] { --poodle-agent-plan-font-size: 0.8125rem; }
-.poodle-agent-plan[data-size="lg"] { --poodle-agent-plan-font-size: 0.875rem; }
-.poodle-agent-plan[data-size="xl"] { --poodle-agent-plan-font-size: 0.9375rem; }
+.poodle-agent-plan[data-size="xs"] { --poodle-agent-plan-font-size: var(--poodle-style-typography-agentText-xs-size); }
+.poodle-agent-plan[data-size="sm"] { --poodle-agent-plan-font-size: var(--poodle-style-typography-agentText-sm-size); }
+.poodle-agent-plan[data-size="md"] { --poodle-agent-plan-font-size: var(--poodle-style-typography-agentText-md-size); }
+.poodle-agent-plan[data-size="lg"] { --poodle-agent-plan-font-size: var(--poodle-style-typography-agentText-lg-size); }
+.poodle-agent-plan[data-size="xl"] { --poodle-agent-plan-font-size: var(--poodle-style-typography-agentText-xl-size); }
 
 .poodle-agent-plan[data-density="compact"] { --poodle-agent-plan-gap: 0.375rem; --poodle-agent-plan-action-gap: 0.375rem; }
 .poodle-agent-plan[data-density="comfortable"] { --poodle-agent-plan-gap: 0.75rem; --poodle-agent-plan-action-gap: 0.625rem; }
@@ -45,23 +45,23 @@
 
 .poodle-agent-plan__action {
   padding: 0.25rem 0.625rem;
-  border: 0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-subtle));
+  border: 0.0625rem solid var(--poodle-style-control-border);
   border-radius: var(--poodle-radius-control);
   background: transparent;
-  box-shadow: var(--poodle-style-control-shadow, none);
-  color: var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary));
+  box-shadow: var(--poodle-style-control-shadow);
+  color: var(--poodle-style-control-secondaryText);
   font: inherit;
   font-size: var(--poodle-agent-plan-font-size);
   cursor: pointer;
 }
 
 .poodle-agent-plan__action:hover {
-  background: var(--poodle-style-control-fillHover, transparent);
+  background: var(--poodle-style-control-fillHover);
   color: var(--poodle-color-text-primary);
 }
 
 .poodle-agent-plan__action:not([data-variant="primary"]):active {
-  background: var(--poodle-style-control-fillActive, transparent);
+  background: var(--poodle-style-control-fillActive);
 }
 
 .poodle-agent-plan__action:focus-visible {

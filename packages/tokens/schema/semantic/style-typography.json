@@ -479,6 +479,12 @@
             "$type": "dimension",
             "$value": "initial"
           }
+        },
+        "media": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
         }
       },
       "avatarInitials": {
@@ -1294,6 +1300,304 @@
       "compactBadge": {
         "size": {
           "$type": "dimension",
+          "$value": "initial"
+        }
+      },
+      "agentText": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "composerText": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "messageText": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "questionPrompt": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "pickerTrigger": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "mediaEyebrow": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "mediaTitle": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "mediaBody": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "mediaTime": {
+        "xs": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "sm": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "md": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "lg": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        },
+        "xl": {
+          "size": {
+            "$type": "dimension",
+            "$value": "initial"
+          }
+        }
+      },
+      "thumbnailTitle": {
+        "size": {
+          "$type": "dimension",
+          "$value": "initial"
+        },
+        "lineHeight": {
+          "$type": "number",
           "$value": "initial"
         }
       }

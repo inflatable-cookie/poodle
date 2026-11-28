@@ -193,7 +193,7 @@ beyond plain props. Classified in the long-tail sweep.
 | display | `grid` |
 | gap | `0.375rem` (default) |
 | padding | `0.75rem` (default) |
-| border | `0.0625rem solid var(--poodle-style-control-border, var(--poodle-color-border-subtle))` |
+| border | `0.0625rem solid var(--poodle-style-control-border)` |
 | border-radius | `var(--poodle-radius-surface)` |
 | background | `var(--poodle-recipe-media-browse-panel-item-fill, transparent)` |
 | color | `inherit` |
@@ -205,10 +205,10 @@ beyond plain props. Classified in the long-tail sweep.
 | State | Property | Value |
 |-------|----------|-------|
 | `:hover` | border-color | `var(--poodle-recipe-media-browse-panel-hover-focus-item-border, var(--poodle-color-border-focus))` |
-| `:hover` | background | `var(--poodle-recipe-media-browse-panel-hover-focus-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 90%, transparent)))` |
+| `:hover` | background | `var(--poodle-recipe-media-browse-panel-hover-focus-item-fill, var(--poodle-style-control-fillHover))` |
 | `:hover` | outline | `none` |
 | `:focus-visible` | border-color | `var(--poodle-recipe-media-browse-panel-hover-focus-item-border, var(--poodle-color-border-focus))` |
-| `:focus-visible` | background | `var(--poodle-recipe-media-browse-panel-hover-focus-item-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-elevated) 90%, transparent)))` |
+| `:focus-visible` | background | `var(--poodle-recipe-media-browse-panel-hover-focus-item-fill, var(--poodle-style-control-fillHover))` |
 | `:focus-visible` | outline | `none` |
 
 ### Image `.media-browse-panel__image`
@@ -225,7 +225,7 @@ beyond plain props. Classified in the long-tail sweep.
 | Property | Value |
 |----------|-------|
 | font-size | `var(--poodle-typography-body-size)` |
-| font-weight | `600` |
+| font-weight | `var(--poodle-typography-font-weight-semibold)` |
 | overflow | `hidden` |
 | text-overflow | `ellipsis` |
 | white-space | `nowrap` |
@@ -236,8 +236,8 @@ beyond plain props. Classified in the long-tail sweep.
 |----------|-------|
 | margin | `0` |
 | color | `var(--poodle-color-text-secondary)` |
-| font-size | `0.8125rem` |
-| line-height | `1.45` |
+| font-size | `var(--poodle-style-typography-secondary-size)` |
+| line-height | `var(--poodle-style-typography-leading-normalLg)` |
 
 ### Actions `.media-browse-panel__actions`
 
