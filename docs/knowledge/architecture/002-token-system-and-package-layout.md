@@ -109,10 +109,13 @@ TextInput. Buttons and inputs take `controlLabel` and `inputText` for their
 resolved control size (`xs`–`xl`). SplitButton uses `compactControlLabel`
 for its smaller labels, and BulkActionBar uses `controlSummary` for its
 summary size variants. The scale also supplies `segmentLabel` for segmented
-controls, `glyph` metrics for text glyphs in action buttons, `avatarInitials`,
-`codeBlock`, `eyebrow`, `pillLabel`, `statusLabel`, `valueReadout`, and
-unitless `body` leading/bold roles for Foundations components. Density
-controls spacing.
+controls, `glyph` metrics for text glyphs, `avatarInitials`, `codeBlock`,
+`eyebrow`, `pillLabel`, `statusLabel`, `valueReadout`, and unitless `body`
+leading/bold roles for Foundations components, plus `prose` for document
+editors and block sliders, `displayControl` for large numeric and code
+inputs, `controlHint`, `chipLabel`, and `microLabel` for auxiliary labels
+and chips, `emphasis` for bold weights, and `leading` for unitless
+line-height ratios. Density controls spacing.
 
 The style supplies system sans and mono for the legacy per-role family tokens.
 The generated CSS gives those aliases zero-specificity defaults at the

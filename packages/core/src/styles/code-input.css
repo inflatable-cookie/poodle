@@ -27,15 +27,15 @@
     width: 2.25rem;
     height: 2.25rem;
     padding: 0;
-    border: 0.0625rem solid var(--poodle-style-control-border, var(--code-slot-border, var(--poodle-color-border-default)));
+    border: 0.0625rem solid var(--poodle-style-control-border);
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-code-input-slot-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)));
-    box-shadow: var(--poodle-style-control-shadow, none);
+    background: var(--poodle-recipe-code-input-slot-fill, var(--poodle-style-control-fill));
+    box-shadow: var(--poodle-style-control-shadow);
     color: var(--poodle-recipe-code-input-slot-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-code-family);
-    font-size: 1rem;
-    font-weight: 600;
-    line-height: 1;
+    font-size: var(--poodle-style-typography-displayControl-md-size);
+    font-weight: var(--poodle-typography-heading-weight);
+    line-height: var(--poodle-typography-label-lineHeightTight);
     text-align: center;
     cursor: text;
     transition: border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard), box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
@@ -64,8 +64,8 @@
     align-items: center;
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-code-family);
-    font-size: 1rem;
-    line-height: 1;
+    font-size: var(--poodle-style-typography-displayControl-md-size);
+    line-height: var(--poodle-typography-label-lineHeightTight);
   }
 
   .poodle-code-input__validation-indicator {
@@ -96,41 +96,41 @@
   .poodle-code-input[data-size="xs"] .poodle-code-input__slot {
     width: 1.5rem;
     height: 1.5rem;
-    font-size: 0.8125rem;
+    font-size: var(--poodle-style-typography-compactControlLabel-md-size);
   }
 
   .poodle-code-input[data-size="xs"] .poodle-code-input__separator {
-    font-size: 0.8125rem;
+    font-size: var(--poodle-style-typography-compactControlLabel-md-size);
   }
 
   .poodle-code-input[data-size="sm"] .poodle-code-input__slot {
     width: 1.75rem;
     height: 1.75rem;
-    font-size: 0.875rem;
+    font-size: var(--poodle-style-typography-displayControl-sm-size);
   }
 
   .poodle-code-input[data-size="sm"] .poodle-code-input__separator {
-    font-size: 0.875rem;
+    font-size: var(--poodle-style-typography-displayControl-sm-size);
   }
 
   .poodle-code-input[data-size="lg"] .poodle-code-input__slot {
     width: 2.75rem;
     height: 2.75rem;
-    font-size: 1.125rem;
+    font-size: var(--poodle-style-typography-displayControl-lg-size);
   }
 
   .poodle-code-input[data-size="lg"] .poodle-code-input__separator {
-    font-size: 1.125rem;
+    font-size: var(--poodle-style-typography-displayControl-lg-size);
   }
 
   .poodle-code-input[data-size="xl"] .poodle-code-input__slot {
     width: 3.25rem;
     height: 3.25rem;
-    font-size: 1.25rem;
+    font-size: var(--poodle-style-typography-displayControl-xl-size);
   }
 
   .poodle-code-input[data-size="xl"] .poodle-code-input__separator {
-    font-size: 1.25rem;
+    font-size: var(--poodle-style-typography-displayControl-xl-size);
   }
 
   .poodle-code-input[data-density="compact"] {
@@ -145,7 +145,7 @@
     .poodle-code-input__slot {
       width: 2rem;
       height: 2rem;
-      font-size: 0.9375rem;
+      font-size: var(--poodle-style-typography-compactControlLabel-xl-size);
     }
 
     .poodle-code-input__slot--group-end {

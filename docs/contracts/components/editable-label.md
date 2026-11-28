@@ -273,8 +273,8 @@ ECMAScript `String.trim` or Rust `str::trim` as the authority.
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--poodle-recipe-editable-label-hover-focus-display-border, var(--poodle-style-control-border, color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)))` |
-| `background` | `var(--poodle-recipe-editable-label-hover-focus-display-fill, var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-background-surface) 52%, transparent)))` |
+| `border-color` | `var(--poodle-recipe-editable-label-hover-focus-display-border, var(--poodle-style-control-border))` |
+| `background` | `var(--poodle-recipe-editable-label-hover-focus-display-fill, var(--poodle-style-control-fillHover))` |
 | `outline` | `none` |
 
 ### Display — focus-visible
@@ -289,7 +289,7 @@ ECMAScript `String.trim` or Rust `str::trim` as the authority.
 | Property | Value |
 |----------|-------|
 | `border-color` | `var(--poodle-color-accent-focusRing)` |
-| `background` | `var(--poodle-recipe-editable-label-input-fill, var(--poodle-style-control-fill, var(--poodle-color-background-surface)))` |
+| `background` | `var(--poodle-recipe-editable-label-input-fill, var(--poodle-style-control-fill))` |
 | `outline` | `none` |
 | `box-shadow` | `0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
 
@@ -304,7 +304,7 @@ ECMAScript `String.trim` or Rust `str::trim` as the authority.
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-recipe-editable-label-text-text, var(--poodle-style-control-secondaryText, var(--poodle-color-text-secondary)))` |
+| `color` | `var(--poodle-recipe-editable-label-text-text, var(--poodle-style-control-secondaryText))` |
 | `font-style` | `italic` |
 
 ### Edit icon `.editable-label__icon`

@@ -680,7 +680,106 @@ export const tokens = {
           "sans": "initial",
           "mono": "initial"
         },
-        "numeric": "initial"
+        "numeric": "initial",
+        "prose": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "displayControl": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "controlHint": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "chipLabel": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "microLabel": {
+          "xs": {
+            "size": "initial"
+          },
+          "sm": {
+            "size": "initial"
+          },
+          "md": {
+            "size": "initial"
+          },
+          "lg": {
+            "size": "initial"
+          },
+          "xl": {
+            "size": "initial"
+          }
+        },
+        "emphasis": {
+          "weight": "initial"
+        },
+        "leading": {
+          "tight": "initial",
+          "snug": "initial",
+          "compact": "initial",
+          "normal": "initial",
+          "relaxed": "initial",
+          "relaxedLg": "initial",
+          "loose": "initial",
+          "looseLg": "initial",
+          "spacious": "initial"
+        }
       },
       "control": {
         "fill": "initial",
@@ -1123,6 +1222,41 @@ export const tokenPaths = [
   "style.typography.family.sans",
   "style.typography.family.mono",
   "style.typography.numeric",
+  "style.typography.prose.xs.size",
+  "style.typography.prose.sm.size",
+  "style.typography.prose.md.size",
+  "style.typography.prose.lg.size",
+  "style.typography.prose.xl.size",
+  "style.typography.displayControl.xs.size",
+  "style.typography.displayControl.sm.size",
+  "style.typography.displayControl.md.size",
+  "style.typography.displayControl.lg.size",
+  "style.typography.displayControl.xl.size",
+  "style.typography.controlHint.xs.size",
+  "style.typography.controlHint.sm.size",
+  "style.typography.controlHint.md.size",
+  "style.typography.controlHint.lg.size",
+  "style.typography.controlHint.xl.size",
+  "style.typography.chipLabel.xs.size",
+  "style.typography.chipLabel.sm.size",
+  "style.typography.chipLabel.md.size",
+  "style.typography.chipLabel.lg.size",
+  "style.typography.chipLabel.xl.size",
+  "style.typography.microLabel.xs.size",
+  "style.typography.microLabel.sm.size",
+  "style.typography.microLabel.md.size",
+  "style.typography.microLabel.lg.size",
+  "style.typography.microLabel.xl.size",
+  "style.typography.emphasis.weight",
+  "style.typography.leading.tight",
+  "style.typography.leading.snug",
+  "style.typography.leading.compact",
+  "style.typography.leading.normal",
+  "style.typography.leading.relaxed",
+  "style.typography.leading.relaxedLg",
+  "style.typography.leading.loose",
+  "style.typography.leading.looseLg",
+  "style.typography.leading.spacious",
   "style.control.fill",
   "style.control.border",
   "style.control.shadow",
@@ -1427,6 +1561,41 @@ export const cssVars = {
   "style.typography.family.sans": "--poodle-style-typography-family-sans",
   "style.typography.family.mono": "--poodle-style-typography-family-mono",
   "style.typography.numeric": "--poodle-style-typography-numeric",
+  "style.typography.prose.xs.size": "--poodle-style-typography-prose-xs-size",
+  "style.typography.prose.sm.size": "--poodle-style-typography-prose-sm-size",
+  "style.typography.prose.md.size": "--poodle-style-typography-prose-md-size",
+  "style.typography.prose.lg.size": "--poodle-style-typography-prose-lg-size",
+  "style.typography.prose.xl.size": "--poodle-style-typography-prose-xl-size",
+  "style.typography.displayControl.xs.size": "--poodle-style-typography-displayControl-xs-size",
+  "style.typography.displayControl.sm.size": "--poodle-style-typography-displayControl-sm-size",
+  "style.typography.displayControl.md.size": "--poodle-style-typography-displayControl-md-size",
+  "style.typography.displayControl.lg.size": "--poodle-style-typography-displayControl-lg-size",
+  "style.typography.displayControl.xl.size": "--poodle-style-typography-displayControl-xl-size",
+  "style.typography.controlHint.xs.size": "--poodle-style-typography-controlHint-xs-size",
+  "style.typography.controlHint.sm.size": "--poodle-style-typography-controlHint-sm-size",
+  "style.typography.controlHint.md.size": "--poodle-style-typography-controlHint-md-size",
+  "style.typography.controlHint.lg.size": "--poodle-style-typography-controlHint-lg-size",
+  "style.typography.controlHint.xl.size": "--poodle-style-typography-controlHint-xl-size",
+  "style.typography.chipLabel.xs.size": "--poodle-style-typography-chipLabel-xs-size",
+  "style.typography.chipLabel.sm.size": "--poodle-style-typography-chipLabel-sm-size",
+  "style.typography.chipLabel.md.size": "--poodle-style-typography-chipLabel-md-size",
+  "style.typography.chipLabel.lg.size": "--poodle-style-typography-chipLabel-lg-size",
+  "style.typography.chipLabel.xl.size": "--poodle-style-typography-chipLabel-xl-size",
+  "style.typography.microLabel.xs.size": "--poodle-style-typography-microLabel-xs-size",
+  "style.typography.microLabel.sm.size": "--poodle-style-typography-microLabel-sm-size",
+  "style.typography.microLabel.md.size": "--poodle-style-typography-microLabel-md-size",
+  "style.typography.microLabel.lg.size": "--poodle-style-typography-microLabel-lg-size",
+  "style.typography.microLabel.xl.size": "--poodle-style-typography-microLabel-xl-size",
+  "style.typography.emphasis.weight": "--poodle-style-typography-emphasis-weight",
+  "style.typography.leading.tight": "--poodle-style-typography-leading-tight",
+  "style.typography.leading.snug": "--poodle-style-typography-leading-snug",
+  "style.typography.leading.compact": "--poodle-style-typography-leading-compact",
+  "style.typography.leading.normal": "--poodle-style-typography-leading-normal",
+  "style.typography.leading.relaxed": "--poodle-style-typography-leading-relaxed",
+  "style.typography.leading.relaxedLg": "--poodle-style-typography-leading-relaxedLg",
+  "style.typography.leading.loose": "--poodle-style-typography-leading-loose",
+  "style.typography.leading.looseLg": "--poodle-style-typography-leading-looseLg",
+  "style.typography.leading.spacious": "--poodle-style-typography-leading-spacious",
   "style.control.fill": "--poodle-style-control-fill",
   "style.control.border": "--poodle-style-control-border",
   "style.control.shadow": "--poodle-style-control-shadow",

@@ -30,11 +30,11 @@
   }
 
   .poodle-rating__item:hover:not(:disabled) {
-    background: var(--poodle-recipe-rating-item-hover-fill, var(--poodle-style-control-fillHover, transparent));
+    background: var(--poodle-recipe-rating-item-hover-fill, var(--poodle-style-control-fillHover));
   }
 
   .poodle-rating__item:active:not(:disabled) {
-    background: var(--poodle-recipe-rating-item-active-fill, var(--poodle-style-control-fillActive, transparent));
+    background: var(--poodle-recipe-rating-item-active-fill, var(--poodle-style-control-fillActive));
   }
 
   .poodle-rating__item[data-hovered="true"] {
@@ -78,7 +78,7 @@
     position: absolute;
     inset: 0 auto 0 0;
     overflow: hidden;
-    color: var(--poodle-recipe-rating-glyph-fill-text, var(--poodle-style-selection-indicator, var(--poodle-color-accent-base)));
+    color: var(--poodle-recipe-rating-glyph-fill-text, var(--poodle-style-selection-indicator));
     pointer-events: none;
   }
 
@@ -97,13 +97,13 @@
   }
 
   .poodle-rating[data-size="xs"] .poodle-rating__item { width: calc(var(--poodle-size-icon-xs) + 0.75rem); height: calc(var(--poodle-size-icon-xs) + 0.75rem); }
-  .poodle-rating[data-size="xs"] .poodle-rating__glyph { font-size: 0.75rem; }
+  .poodle-rating[data-size="xs"] .poodle-rating__glyph { font-size: var(--poodle-style-typography-displayControl-xs-size); }
   .poodle-rating[data-size="sm"] .poodle-rating__item { width: calc(var(--poodle-size-icon-sm) + 0.75rem); height: calc(var(--poodle-size-icon-sm) + 0.75rem); }
-  .poodle-rating[data-size="sm"] .poodle-rating__glyph { font-size: 0.875rem; }
+  .poodle-rating[data-size="sm"] .poodle-rating__glyph { font-size: var(--poodle-style-typography-displayControl-sm-size); }
   .poodle-rating[data-size="lg"] .poodle-rating__item { width: calc(var(--poodle-size-icon-lg) + 0.75rem); height: calc(var(--poodle-size-icon-lg) + 0.75rem); }
-  .poodle-rating[data-size="lg"] .poodle-rating__glyph { font-size: 1.125rem; }
+  .poodle-rating[data-size="lg"] .poodle-rating__glyph { font-size: var(--poodle-style-typography-displayControl-lg-size); }
   .poodle-rating[data-size="xl"] .poodle-rating__item { width: calc(var(--poodle-size-icon-xl) + 0.75rem); height: calc(var(--poodle-size-icon-xl) + 0.75rem); }
-  .poodle-rating[data-size="xl"] .poodle-rating__glyph { font-size: 1.25rem; }
+  .poodle-rating[data-size="xl"] .poodle-rating__glyph { font-size: var(--poodle-style-typography-displayControl-xl-size); }
 
   .poodle-rating[data-density="compact"] { gap: 0.0625rem; }
   .poodle-rating[data-density="comfortable"] { gap: 0.25rem; }

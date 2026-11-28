@@ -8,7 +8,7 @@
 
 .poodle-code-editor {
   --poodle-code-editor-font-size: calc(0.8125em * var(--poodle-typography-code-adjustmentRatio));
-  --poodle-code-editor-line-height: 1.5;
+  --poodle-code-editor-line-height: var(--poodle-style-typography-leading-relaxed);
   --poodle-code-editor-content-block-padding: 0.5rem;
   --poodle-code-editor-content-inline-padding: 0.5rem;
   --poodle-code-editor-gutter-inline-padding: 0.375rem;
@@ -18,8 +18,8 @@
   flex-direction: column;
   inline-size: 100%;
   block-size: 100%;
-  background: var(--poodle-style-surface-fill, var(--poodle-color-background-panel));
-  border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
+  background: var(--poodle-style-surface-fill);
+  border: 0.0625rem solid var(--poodle-style-surface-border);
   border-radius: var(--poodle-radius-surface);
   color: var(--poodle-color-text-primary);
   font-family: var(--poodle-typography-code-family);
@@ -52,8 +52,8 @@
 }
 
 .poodle-code-editor__viewport .cm-gutters {
-  background: var(--poodle-style-surface-fill, var(--poodle-color-background-panel));
-  border-inline-end: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
+  background: var(--poodle-style-surface-fill);
+  border-inline-end: 0.0625rem solid var(--poodle-style-surface-border);
   color: var(--poodle-color-text-secondary);
 }
 
@@ -61,11 +61,11 @@
   padding-inline: var(--poodle-code-editor-gutter-inline-padding);
 }
 
-.poodle-code-editor[data-size="xs"] { --poodle-code-editor-font-size: calc(0.6875em * var(--poodle-typography-code-adjustmentRatio)); --poodle-code-editor-line-height: 1.35; }
-.poodle-code-editor[data-size="sm"] { --poodle-code-editor-font-size: calc(0.75em * var(--poodle-typography-code-adjustmentRatio)); --poodle-code-editor-line-height: 1.4; }
-.poodle-code-editor[data-size="md"] { --poodle-code-editor-font-size: calc(0.8125em * var(--poodle-typography-code-adjustmentRatio)); --poodle-code-editor-line-height: 1.5; }
-.poodle-code-editor[data-size="lg"] { --poodle-code-editor-font-size: calc(0.875em * var(--poodle-typography-code-adjustmentRatio)); --poodle-code-editor-line-height: 1.55; }
-.poodle-code-editor[data-size="xl"] { --poodle-code-editor-font-size: calc(1em * var(--poodle-typography-code-adjustmentRatio)); --poodle-code-editor-line-height: 1.6; }
+.poodle-code-editor[data-size="xs"] { --poodle-code-editor-font-size: calc(0.6875em * var(--poodle-typography-code-adjustmentRatio)); --poodle-code-editor-line-height: var(--poodle-typography-caption-lineHeightRatio); }
+.poodle-code-editor[data-size="sm"] { --poodle-code-editor-font-size: calc(0.75em * var(--poodle-typography-code-adjustmentRatio)); --poodle-code-editor-line-height: var(--poodle-style-typography-leading-normal); }
+.poodle-code-editor[data-size="md"] { --poodle-code-editor-font-size: calc(0.8125em * var(--poodle-typography-code-adjustmentRatio)); --poodle-code-editor-line-height: var(--poodle-style-typography-leading-relaxed); }
+.poodle-code-editor[data-size="lg"] { --poodle-code-editor-font-size: calc(0.875em * var(--poodle-typography-code-adjustmentRatio)); --poodle-code-editor-line-height: var(--poodle-style-typography-leading-relaxedLg); }
+.poodle-code-editor[data-size="xl"] { --poodle-code-editor-font-size: calc(1em * var(--poodle-typography-code-adjustmentRatio)); --poodle-code-editor-line-height: var(--poodle-style-typography-leading-loose); }
 
 .poodle-code-editor[data-density="compact"] { --poodle-code-editor-content-block-padding: 0.25rem; --poodle-code-editor-content-inline-padding: 0.375rem; --poodle-code-editor-gutter-inline-padding: 0.25rem; }
 .poodle-code-editor[data-density="default"] { --poodle-code-editor-content-block-padding: 0.5rem; --poodle-code-editor-content-inline-padding: 0.5rem; --poodle-code-editor-gutter-inline-padding: 0.375rem; }
@@ -73,7 +73,7 @@
 
 .poodle-code-editor__viewport .cm-activeLineGutter,
 .poodle-code-editor__viewport .cm-activeLine {
-  background: var(--poodle-style-selection-itemFill, var(--poodle-color-surface-hover));
+  background: var(--poodle-style-selection-itemFill);
 }
 
 .poodle-code-editor__viewport .cm-selectionBackground,

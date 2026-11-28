@@ -13,8 +13,8 @@
 .poodle-stepper {
   --poodle-stepper-row-height: 3.25rem;
   --poodle-stepper-marker-size: 1.35rem;
-  --poodle-stepper-font-size: 0.75rem;
-  --poodle-stepper-marker-font-size: 0.625rem;
+  --poodle-stepper-font-size: var(--poodle-style-typography-controlHint-md-size);
+  --poodle-stepper-marker-font-size: var(--poodle-style-typography-microLabel-md-size);
   --poodle-stepper-pad-y: 0.7rem;
   --poodle-stepper-pad-x: 0.8rem;
   --poodle-stepper-gap: 0.55rem;
@@ -25,9 +25,9 @@
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
-  border: 0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle));
+  border: 0.0625rem solid var(--poodle-style-surface-border);
   border-radius: var(--poodle-radius-surface);
-  background: var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 92%, transparent));
+  background: var(--poodle-style-surface-fill);
   overflow: hidden;
 }
 
@@ -36,8 +36,8 @@
 .poodle-stepper[data-size="xs"] {
   --poodle-stepper-row-height: 2.5rem;
   --poodle-stepper-marker-size: 1.125rem;
-  --poodle-stepper-font-size: 0.625rem;
-  --poodle-stepper-marker-font-size: 0.5625rem;
+  --poodle-stepper-font-size: var(--poodle-style-typography-controlHint-xs-size);
+  --poodle-stepper-marker-font-size: var(--poodle-style-typography-microLabel-sm-size);
   --poodle-stepper-pad-y: 0.5rem;
   --poodle-stepper-rail-segment-width: 0.75rem;
   --poodle-stepper-rail-thickness: 0.125rem;
@@ -46,8 +46,8 @@
 .poodle-stepper[data-size="sm"] {
   --poodle-stepper-row-height: 2.875rem;
   --poodle-stepper-marker-size: 1.25rem;
-  --poodle-stepper-font-size: 0.6875rem;
-  --poodle-stepper-marker-font-size: 0.5625rem;
+  --poodle-stepper-font-size: var(--poodle-style-typography-controlHint-sm-size);
+  --poodle-stepper-marker-font-size: var(--poodle-style-typography-microLabel-sm-size);
   --poodle-stepper-pad-y: 0.625rem;
   --poodle-stepper-rail-segment-width: 0.875rem;
   --poodle-stepper-rail-thickness: 0.125rem;
@@ -56,8 +56,8 @@
 .poodle-stepper[data-size="md"] {
   --poodle-stepper-row-height: 3.25rem;
   --poodle-stepper-marker-size: 1.35rem;
-  --poodle-stepper-font-size: 0.75rem;
-  --poodle-stepper-marker-font-size: 0.625rem;
+  --poodle-stepper-font-size: var(--poodle-style-typography-controlHint-md-size);
+  --poodle-stepper-marker-font-size: var(--poodle-style-typography-microLabel-md-size);
   --poodle-stepper-pad-y: 0.7rem;
   --poodle-stepper-rail-segment-width: 1rem;
   --poodle-stepper-rail-thickness: 0.1875rem;
@@ -66,8 +66,8 @@
 .poodle-stepper[data-size="lg"] {
   --poodle-stepper-row-height: 3.625rem;
   --poodle-stepper-marker-size: 1.5rem;
-  --poodle-stepper-font-size: 0.8125rem;
-  --poodle-stepper-marker-font-size: 0.6875rem;
+  --poodle-stepper-font-size: var(--poodle-style-typography-controlHint-lg-size);
+  --poodle-stepper-marker-font-size: var(--poodle-style-typography-microLabel-lg-size);
   --poodle-stepper-pad-y: 0.8rem;
   --poodle-stepper-rail-segment-width: 1.125rem;
   --poodle-stepper-rail-thickness: 0.1875rem;
@@ -76,8 +76,8 @@
 .poodle-stepper[data-size="xl"] {
   --poodle-stepper-row-height: 4rem;
   --poodle-stepper-marker-size: 1.75rem;
-  --poodle-stepper-font-size: 0.875rem;
-  --poodle-stepper-marker-font-size: 0.75rem;
+  --poodle-stepper-font-size: var(--poodle-style-typography-controlHint-xl-size);
+  --poodle-stepper-marker-font-size: var(--poodle-style-typography-microLabel-xl-size);
   --poodle-stepper-pad-y: 0.9rem;
   --poodle-stepper-rail-segment-width: 1.25rem;
   --poodle-stepper-rail-thickness: 0.25rem;
@@ -152,11 +152,11 @@
 }
 
 .poodle-stepper__trigger:hover:not(:disabled) {
-  background: var(--poodle-style-control-fillHover, transparent);
+  background: var(--poodle-style-control-fillHover);
 }
 
 .poodle-stepper__trigger:active:not(:disabled) {
-  background: var(--poodle-style-control-fillActive, transparent);
+  background: var(--poodle-style-control-fillActive);
 }
 
 .poodle-stepper__trigger:not(:disabled) {
@@ -190,13 +190,13 @@
    Hovering the rerun itself does not — that control has its own hover, and it
    does something different from selecting the step. */
 .poodle-stepper__step:has(.poodle-stepper__trigger:not(:disabled):hover) {
-  background: var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-text-primary) 6%, transparent));
+  background: var(--poodle-style-control-fillHover);
 }
 
 /* Declared after hover so the current step keeps its accent rather than
    flattening to the neutral hover fill. */
 .poodle-stepper__step:has(.poodle-stepper__trigger[aria-current="step"]) {
-  background: var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent));
+  background: var(--poodle-style-selection-itemFill);
 }
 
 /* …and hovering the current step deepens its own colour instead of swapping
@@ -204,11 +204,11 @@
 .poodle-stepper__step:has(.poodle-stepper__trigger[aria-current="step"]):has(
     .poodle-stepper__trigger:not(:disabled):hover
   ) {
-  background: var(--poodle-style-selection-itemFill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
+  background: var(--poodle-style-selection-itemFill);
 }
 
 .poodle-stepper__trigger[aria-current="step"] {
-  color: var(--poodle-style-selection-text, var(--poodle-color-text-primary));
+  color: var(--poodle-style-selection-text);
 }
 
 .poodle-stepper__step[data-status="complete"] .poodle-stepper__trigger,
@@ -231,8 +231,8 @@
   border: 0.0625rem solid currentColor;
   border-radius: 999px;
   font-size: var(--poodle-stepper-marker-font-size);
-  font-weight: 700;
-  line-height: 1;
+  font-weight: var(--poodle-style-typography-emphasis-weight);
+  line-height: var(--poodle-style-typography-glyph-lineHeight);
 }
 
 .poodle-stepper__step[data-status="complete"] .poodle-stepper__marker,
@@ -244,8 +244,8 @@
 /* The current marker is the selection indicator. Complete and running keep the
    accent: those are status codes, not selection. */
 .poodle-stepper__trigger[aria-current="step"] .poodle-stepper__marker {
-  border-color: var(--poodle-style-selection-indicator, var(--poodle-color-accent-base));
-  color: var(--poodle-style-selection-indicator, var(--poodle-color-accent-base));
+  border-color: var(--poodle-style-selection-indicator);
+  color: var(--poodle-style-selection-indicator);
 }
 
 .poodle-stepper__step[data-status="failed"] .poodle-stepper__marker {
@@ -289,11 +289,11 @@
 }
 
 .poodle-stepper__rerun:hover:not(:disabled) {
-  background: var(--poodle-style-control-fillHover, transparent);
+  background: var(--poodle-style-control-fillHover);
 }
 
 .poodle-stepper__rerun:active:not(:disabled) {
-  background: var(--poodle-style-control-fillActive, transparent);
+  background: var(--poodle-style-control-fillActive);
 }
 
 .poodle-stepper__rerun:not(:disabled) {
@@ -301,7 +301,7 @@
 }
 
 .poodle-stepper__rerun:not(:disabled):hover {
-  background: var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-text-primary) 8%, transparent));
+  background: var(--poodle-style-control-fillHover);
   color: var(--poodle-color-text-primary);
 }
 
@@ -345,11 +345,11 @@
 }
 
 .poodle-stepper__summary:hover:not(:disabled) {
-  background: var(--poodle-style-control-fillHover, transparent);
+  background: var(--poodle-style-control-fillHover);
 }
 
 .poodle-stepper__summary:active:not(:disabled) {
-  background: var(--poodle-style-control-fillActive, transparent);
+  background: var(--poodle-style-control-fillActive);
 }
 
 .poodle-stepper[data-collapsed="true"] .poodle-stepper__summary {
@@ -361,7 +361,7 @@
 }
 
 .poodle-stepper__summary:not(:disabled):hover {
-  background: var(--poodle-style-control-fillHover, color-mix(in srgb, var(--poodle-color-text-primary) 6%, transparent));
+  background: var(--poodle-style-control-fillHover);
 }
 
 .poodle-stepper__summary:disabled {

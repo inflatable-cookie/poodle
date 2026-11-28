@@ -9,10 +9,12 @@ const tokenCss = readFileSync(
 );
 
 describe("code-editor active line token", () => {
-  test("active line and gutter use the selection role with the surface-hover fallback", () => {
+  test("active line and gutter use the selection role", () => {
     expect(editorCss).toMatch(
-      /\.poodle-code-editor__viewport \.cm-activeLineGutter,\s*\n\.poodle-code-editor__viewport \.cm-activeLine \{\s*\n\s*background: var\(--poodle-style-selection-itemFill,\s*var\(--poodle-color-surface-hover\)\);/,
+      /\.poodle-code-editor__viewport \.cm-activeLineGutter,\s*\n\.poodle-code-editor__viewport \.cm-activeLine \{\s*\n\s*background: var\(--poodle-style-selection-itemFill\);/,
     );
-    expect(tokenCss).toMatch(/--poodle-color-surface-hover:\s*rgba\(148, 163, 184, 0\.12\);/);
+    expect(tokenCss).toMatch(
+      /--poodle-style-selection-itemFill:\s*var\(--poodle-color-select-neutral\);/,
+    );
   });
 });
