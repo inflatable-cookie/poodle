@@ -20,6 +20,9 @@ exists yet.
 
 ## Versions
 
+- [0.5.0](0.5.0.md) — 2026-11-28 — **breaking:** the low-noise style is the
+  default and `quiet` is removed, `splitTokenInput` takes a separator list, and
+  the native Jetstream backend is gone. Consumer migration steps are in the note.
 - [0.4.16](0.4.16.md) — 2026-11-26 — explicit Longhorn update states
   (`unavailableForTarget`, `malformedArtifact` / `downloadAgain`), experimental
   opt-in `quiet` rendering style groundwork (default look unchanged), portable
