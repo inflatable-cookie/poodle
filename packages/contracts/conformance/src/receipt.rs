@@ -11,7 +11,10 @@ const SCHEMA: &str = "poodle-node-conformance.v1";
 
 /// Return the lower-case SHA-256 identity of the supplied bytes.
 pub fn digest(bytes: &[u8]) -> String {
-    format!("{:x}", Sha256::digest(bytes))
+    Sha256::digest(bytes)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
 }
 
 /// Reproducible identity of a backend execution.

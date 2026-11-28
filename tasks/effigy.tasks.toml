@@ -845,6 +845,7 @@
   { task = "report:accessibility" },
   { task = "gate:clean" },
 ]
+"test:codegen" = "sh scripts/rust-driver.sh test --manifest-path packages/codegen/Cargo.toml {args}"
 # Planted GENERATOR_VERSION restamp; ir:check is the committed-tree gate on ci:rust.
 "test:codegen-stamp" = "sh scripts/rust-driver.sh test --quiet --manifest-path packages/codegen/Cargo.toml --test emission check_detects_stale_generator_version_stamp -- --exact"
 # poodle#072: the rustfmt gate over every Poodle Rust crate. `cargo fmt` cannot

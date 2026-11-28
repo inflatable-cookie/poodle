@@ -36,7 +36,6 @@ use poodle_gpui_node_backend::bounds_for;
 use poodle_node::{ColorValue, Node, NodeKind};
 use poodle_specs::ButtonSpec;
 use serde::Serialize;
-use sha2::{Digest, Sha256};
 
 use crate::inventory::{self, ButtonFixture, FixtureContent, FixtureState};
 use crate::presentation_axes::ControlSize;
@@ -650,7 +649,7 @@ fn prepare(args: &FixtureArgs) -> Result<transport::Shot<FixtureRoot>> {
                 .expect("landmark slot")
                 .take()
                 .with_context(|| "the settled frame recorded no landmarks")?;
-            let png_sha256 = format!("{:x}", Sha256::digest(&facts.png));
+            let png_sha256 = super::sha256_hex(&facts.png);
 
             let receipt = FixtureReceipt {
                 schema: FIXTURE_RECEIPT_SCHEMA,

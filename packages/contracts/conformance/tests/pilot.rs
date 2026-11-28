@@ -121,3 +121,11 @@ fn receipt_rejects_unknown_missing_duplicate_and_wrong_proof() {
         assert!(error.to_string().contains(reason), "{error}");
     }
 }
+
+#[test]
+fn digest_preserves_sha256_hex_encoding() {
+    assert_eq!(
+        poodle_conformance::digest(b"abc"),
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+    );
+}

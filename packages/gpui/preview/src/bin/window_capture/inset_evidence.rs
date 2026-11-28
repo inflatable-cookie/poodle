@@ -42,7 +42,6 @@ use poodle_specs::{
     AccordionItemSpec, AccordionSpec, ListCardSpec, PopoverSpec, TabDefinition, TabsSpec,
 };
 use serde::Serialize;
-use sha2::{Digest, Sha256};
 
 use crate::fixture_capture::{inter_fonts, FixtureAssets};
 use crate::presentation_axes::ThemePreset;
@@ -375,7 +374,7 @@ fn prepare(scene: &str, out_dir: &Path) -> Result<transport::Shot<InsetEvidenceR
             if bands.is_empty() {
                 bail!("scene '{scene_name}' painted no inset bands — the capture is not evidence");
             }
-            let png_sha256 = format!("{:x}", Sha256::digest(&facts.png));
+            let png_sha256 = super::sha256_hex(&facts.png);
             let receipt = InsetEvidenceReceipt {
                 schema: RECEIPT_SCHEMA,
                 scene: scene_name.clone(),
