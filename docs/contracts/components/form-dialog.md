@@ -210,8 +210,8 @@ beyond plain props. Classified in the long-tail sweep.
 | Property | Value |
 |----------|-------|
 | color | `var(--poodle-color-text-secondary)` |
-| font-size | `var(--poodle-typography-body-size, 0.875rem)` |
-| line-height | `var(--poodle-typography-body-lineHeight, 1.5)` |
+| font-size | `var(--poodle-typography-body-size)` |
+| line-height | `var(--poodle-typography-body-lineHeight)` |
 
 ### Custom Actions Wrapper (`.form-dialog__custom-actions`)
 

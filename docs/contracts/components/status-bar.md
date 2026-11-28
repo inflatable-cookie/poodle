@@ -130,8 +130,8 @@ snippets dispatch their own events.
 | `gap` | `var(--poodle-space-inline-md)` |
 | `padding` | `0.375rem 0.75rem` |
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.8125rem` |
-| `line-height` | `1.5` |
+| `font-size` | `var(--poodle-style-typography-compactControlLabel-md-size)` |
+| `line-height` | `var(--poodle-style-typography-leading-relaxed)` |
 
 ### Leading `.poodle-status-bar__leading`
 
@@ -162,20 +162,20 @@ The `aria-label` on the `<footer>` is resolved as:
 
 | Property | Value |
 |----------|-------|
-| `border-top` | `0.0625rem solid var(--poodle-style-surface-border, var(--poodle-color-border-subtle))` |
-| `background` | `var(--poodle-recipe-status-bar-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)))` |
+| `border-top` | `0.0625rem solid var(--poodle-style-surface-border)` |
+| `background` | `var(--poodle-recipe-status-bar-fill, var(--poodle-style-surface-fill))` |
 
 ### Size modifiers
 
 | Selector | Property | Value |
 |----------|----------|-------|
-| `.poodle-status-bar[data-size="xs"]` | `font-size` | `0.6875rem` |
+| `.poodle-status-bar[data-size="xs"]` | `font-size` | `var(--poodle-style-typography-compactControlLabel-xs-size)` |
 | `.poodle-status-bar[data-size="xs"]` | `padding-block` | `0.25rem` |
-| `.poodle-status-bar[data-size="sm"]` | `font-size` | `0.75rem` |
+| `.poodle-status-bar[data-size="sm"]` | `font-size` | `var(--poodle-style-typography-compactControlLabel-sm-size)` |
 | `.poodle-status-bar[data-size="sm"]` | `padding-block` | `0.3125rem` |
-| `.poodle-status-bar[data-size="lg"]` | `font-size` | `0.875rem` |
+| `.poodle-status-bar[data-size="lg"]` | `font-size` | `var(--poodle-style-typography-compactControlLabel-lg-size)` |
 | `.poodle-status-bar[data-size="lg"]` | `padding-block` | `0.4375rem` |
-| `.poodle-status-bar[data-size="xl"]` | `font-size` | `0.9375rem` |
+| `.poodle-status-bar[data-size="xl"]` | `font-size` | `var(--poodle-style-typography-compactControlLabel-xl-size)` |
 | `.poodle-status-bar[data-size="xl"]` | `padding-block` | `0.5rem` |
 
 ### Density modifiers
@@ -218,8 +218,8 @@ The `aria-label` on the `<footer>` is resolved as:
 
 ### Tier 2: Visual Parity
 
-- [ ] chrome background: 94% panel color mixed with transparent
-- [ ] chrome border-top: 0.0625rem solid border-subtle
+- [ ] chrome background: `style.surface.fill`
+- [ ] chrome border-top: 0.0625rem solid `style.surface.border`
 - [ ] font-size: 0.8125rem, line-height: 1.5
 - [ ] color: text-secondary
 - [ ] default padding: `0.375rem 0.75rem`

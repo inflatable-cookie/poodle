@@ -183,25 +183,25 @@ FormLayout is a structural composite with no component-owned events.
 |----------|-------|
 | margin | `0` |
 | color | `var(--poodle-color-text-secondary)` |
-| font-size | `var(--poodle-typography-body-size, 0.875rem)` |
-| line-height | `var(--poodle-typography-body-lineHeight, 1.5)` |
+| font-size | `var(--poodle-typography-body-size)` |
+| line-height | `var(--poodle-typography-body-lineHeight)` |
 
 ### Field Errors `.poodle-form-layout__field-errors`
 
 | Property | Value |
 |----------|-------|
-| padding | `var(--poodle-space-panel-y, 0.75rem) var(--poodle-space-panel-x, 1rem)` |
-| border-radius | `var(--poodle-radius-surface, 0.5rem)` |
+| padding | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
+| border-radius | `var(--poodle-radius-surface)` |
 | background | `color-mix(in srgb, var(--poodle-color-status-danger) 8%, transparent)` |
-| border | `0.0625rem solid color-mix(in srgb, var(--poodle-color-status-danger) 40%, transparent)` |
-| font-size | `var(--poodle-typography-label-size, 0.75rem)` |
+| border | `0.0625rem solid var(--poodle-style-surface-border)` |
+| font-size | `var(--poodle-typography-label-size)` |
 
 ### Field Errors Heading `.poodle-form-layout__field-errors p`
 
 | Property | Value |
 |----------|-------|
 | margin | `0 0 0.25rem` |
-| font-weight | `600` |
+| font-weight | `var(--poodle-typography-font-weight-semibold)` |
 
 ### Field Errors List `.poodle-form-layout__field-errors ul`
 

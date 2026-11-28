@@ -178,8 +178,8 @@ beyond plain props. Classified in the long-tail sweep.
 
 | Property | Value |
 |----------|-------|
-| `--poodle-callout-fill` | `var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent))` |
-| `--poodle-callout-border` | `var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 88%, transparent))` |
+| `--poodle-callout-fill` | `var(--poodle-style-surface-fill)` |
+| `--poodle-callout-border` | `var(--poodle-style-surface-border)` |
 | `display` | `grid` |
 | `grid-template-columns` | `minmax(0, 1fr) auto auto` |
 | `align-items` | `center` |
@@ -195,36 +195,36 @@ beyond plain props. Classified in the long-tail sweep.
 
 | Property | Value |
 |----------|-------|
-| `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 10%, var(--poodle-color-background-panel))` |
-| `--poodle-callout-border` | `var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 34%, var(--poodle-color-border-default)))` |
+| `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-status-info) 10%, var(--poodle-color-background-panel))` |
+| `--poodle-callout-border` | `var(--poodle-style-surface-border)` |
 
 ### Root — tone: success
 
 | Property | Value |
 |----------|-------|
 | `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-status-success) 10%, var(--poodle-color-background-panel))` |
-| `--poodle-callout-border` | `var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-success) 34%, var(--poodle-color-border-default)))` |
+| `--poodle-callout-border` | `var(--poodle-style-surface-border)` |
 
 ### Root — tone: warning
 
 | Property | Value |
 |----------|-------|
 | `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-status-warning) 10%, var(--poodle-color-background-panel))` |
-| `--poodle-callout-border` | `var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-warning) 34%, var(--poodle-color-border-default)))` |
+| `--poodle-callout-border` | `var(--poodle-style-surface-border)` |
 
 ### Root — tone: danger
 
 | Property | Value |
 |----------|-------|
 | `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-status-danger) 10%, var(--poodle-color-background-panel))` |
-| `--poodle-callout-border` | `var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-danger) 34%, var(--poodle-color-border-default)))` |
+| `--poodle-callout-border` | `var(--poodle-style-surface-border)` |
 
 ### Root — tone: pending
 
 | Property | Value |
 |----------|-------|
 | `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-panel))` |
-| `--poodle-callout-border` | `var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-accent-base) 26%, var(--poodle-color-border-default)))` |
+| `--poodle-callout-border` | `var(--poodle-style-surface-border)` |
 
 ### Root — `fill="solid"`
 
@@ -233,7 +233,7 @@ Tint recipes remain unchanged. For every non-neutral tone, solid resolves:
 | Property | Value |
 |----------|-------|
 | `--poodle-callout-fill` | the tint-border recipe: 34% tone base with `color.border.default`; pending uses 24% |
-| `--poodle-callout-border` | `var(--poodle-style-surface-border, var(--poodle-callout-fill))` — under a style that hides borders the fill is the one boundary |
+| `--poodle-callout-border` | `var(--poodle-style-surface-border)` — the default style resolves it to transparent, so the fill is the one boundary |
 | foreground | `var(--poodle-color-text-primary)` |
 
 For `tone="neutral"`, solid mixes `color.text.secondary` and
@@ -269,9 +269,9 @@ layout, and focus-ring behavior remain unchanged.
 | `border-radius` | `999px` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 78%, transparent)` |
 | `font-family` | `var(--poodle-typography-code-family)` |
-| `font-size` | `0.75rem` |
-| `font-weight` | `700` |
-| `line-height` | `1` |
+| `font-size` | `var(--poodle-style-typography-noticeIcon-md-size)` |
+| `font-weight` | `var(--poodle-style-typography-emphasis-weight)` |
+| `line-height` | `var(--poodle-style-typography-glyph-lineHeight)` |
 
 Pending tone uses the shared [`Spinner`](./spinner.md) primitive with
 `variant="ring"`, `size="sm"`, and `tone="accent"` inside the icon badge when
@@ -294,8 +294,8 @@ primary foreground of the solid surface.
 |----------|-------|
 | `margin` | `0` |
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.8125rem` |
-| `line-height` | `1.5` |
+| `font-size` | `var(--poodle-style-typography-noticeBody-md-size)` |
+| `line-height` | `var(--poodle-style-typography-leading-relaxed)` |
 
 ### Content — `strong`
 
@@ -343,7 +343,10 @@ primary foreground of the solid surface.
 Per-size icon font-size and the root gap (`--poodle-space-inline-md` at md)
 also scale; the gap is `0.375rem` (xs), `0.5rem` (sm), `0.875rem` (lg),
 `1.0625rem`-equivalent (xl). Title font-size is the `strong` size, message
-font-size is the `.callout__content` size.
+font-size is the `.callout__content` size. The `noticeIcon`, `noticeTitle` and
+`noticeBody` roles supply them. At `md` the title uses the label size. A `p`
+inside the content keeps the `md` body role at every size. The type values
+below are the defaults.
 
 | Size | icon badge size | icon font-size | title font-size | message font-size | dismiss button size |
 |------|----------------|----------------|-----------------|-------------------|---------------------|
@@ -399,9 +402,9 @@ font-size is the `.callout__content` size.
 
 - [ ] all five sizes visually match per size table
 - [ ] root 3-column grid layout matches (1fr auto auto)
-- [ ] neutral tone uses custom property defaults (94% panel, 88% border)
-- [ ] info/success/warning/danger tones use 10%/34% color-mix pattern
-- [ ] pending tone uses 8%/26% color-mix pattern (distinct from others)
+- [ ] neutral tone uses custom property defaults (`style.surface.fill`, `style.surface.border`)
+- [ ] info/success/warning/danger tones use a 10% color-mix fill and `style.surface.border`
+- [ ] pending tone uses an 8% color-mix fill (distinct from others) and `style.surface.border`
 - [ ] `fill="solid"` promotes the tint-border colour into one continuous fill-and-border surface with primary foreground
 - [ ] icon badge size (1.5rem), circular radius (999px), and background match
 - [ ] icon typography matches (code-family, 0.75rem, weight 700)

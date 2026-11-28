@@ -2,8 +2,8 @@
    shared-styles move). Unique poodle-* selectors; safe as global CSS. */
 
   .poodle-callout {
-    --poodle-callout-fill: var(--poodle-recipe-callout-fill, var(--poodle-style-surface-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)));
-    --poodle-callout-border: var(--poodle-recipe-callout-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 88%, transparent)));
+    --poodle-callout-fill: var(--poodle-recipe-callout-fill, var(--poodle-style-surface-fill));
+    --poodle-callout-border: var(--poodle-recipe-callout-border, var(--poodle-style-surface-border));
     --poodle-callout-tone-base: var(--poodle-color-text-primary);
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
@@ -18,33 +18,33 @@
   }
 
   .poodle-callout[data-tone="info"] {
-    --poodle-callout-tone-base: var(--poodle-color-status-info, #3b82f6);
-    --poodle-callout-fill: var(--poodle-recipe-callout-info-fill, color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 10%, var(--poodle-color-background-panel)));
-    --poodle-callout-border: var(--poodle-recipe-callout-info-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 34%, var(--poodle-color-border-default))));
+    --poodle-callout-tone-base: var(--poodle-color-status-info);
+    --poodle-callout-fill: var(--poodle-recipe-callout-info-fill, color-mix(in srgb, var(--poodle-color-status-info) 10%, var(--poodle-color-background-panel)));
+    --poodle-callout-border: var(--poodle-recipe-callout-info-border, var(--poodle-style-surface-border));
   }
 
   .poodle-callout[data-tone="success"] {
     --poodle-callout-tone-base: var(--poodle-color-status-success);
     --poodle-callout-fill: var(--poodle-recipe-callout-success-fill, color-mix(in srgb, var(--poodle-color-status-success) 10%, var(--poodle-color-background-panel)));
-    --poodle-callout-border: var(--poodle-recipe-callout-success-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-success) 34%, var(--poodle-color-border-default))));
+    --poodle-callout-border: var(--poodle-recipe-callout-success-border, var(--poodle-style-surface-border));
   }
 
   .poodle-callout[data-tone="warning"] {
     --poodle-callout-tone-base: var(--poodle-color-status-warning);
     --poodle-callout-fill: var(--poodle-recipe-callout-warning-fill, color-mix(in srgb, var(--poodle-color-status-warning) 10%, var(--poodle-color-background-panel)));
-    --poodle-callout-border: var(--poodle-recipe-callout-warning-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-warning) 34%, var(--poodle-color-border-default))));
+    --poodle-callout-border: var(--poodle-recipe-callout-warning-border, var(--poodle-style-surface-border));
   }
 
   .poodle-callout[data-tone="danger"] {
     --poodle-callout-tone-base: var(--poodle-color-status-danger);
     --poodle-callout-fill: var(--poodle-recipe-callout-danger-fill, color-mix(in srgb, var(--poodle-color-status-danger) 10%, var(--poodle-color-background-panel)));
-    --poodle-callout-border: var(--poodle-recipe-callout-danger-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-status-danger) 34%, var(--poodle-color-border-default))));
+    --poodle-callout-border: var(--poodle-recipe-callout-danger-border, var(--poodle-style-surface-border));
   }
 
   .poodle-callout[data-tone="pending"] {
     --poodle-callout-tone-base: var(--poodle-color-accent-base);
     --poodle-callout-fill: var(--poodle-recipe-callout-pending-fill, color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-panel)));
-    --poodle-callout-border: var(--poodle-recipe-callout-pending-border, var(--poodle-style-surface-border, color-mix(in srgb, var(--poodle-color-accent-base) 26%, var(--poodle-color-border-default))));
+    --poodle-callout-border: var(--poodle-recipe-callout-pending-border, var(--poodle-style-surface-border));
   }
 
   .poodle-callout__body {
@@ -64,9 +64,9 @@
     border-radius: 999px;
     background: color-mix(in srgb, var(--poodle-color-background-surface) 78%, transparent);
     font-family: var(--poodle-typography-code-family);
-    font-size: 0.75rem;
-    font-weight: 700;
-    line-height: 1;
+    font-size: var(--poodle-style-typography-noticeIcon-md-size);
+    font-weight: var(--poodle-style-typography-emphasis-weight);
+    line-height: var(--poodle-style-typography-glyph-lineHeight);
   }
 
   .poodle-callout__content {
@@ -74,8 +74,8 @@
     gap: var(--poodle-space-inline-sm);
     min-width: 0;
     color: var(--poodle-color-text-secondary);
-    font-size: 0.8125rem;
-    line-height: 1.5;
+    font-size: var(--poodle-style-typography-noticeBody-md-size);
+    line-height: var(--poodle-style-typography-leading-relaxed);
   }
 
   .poodle-callout__content strong {
@@ -85,8 +85,8 @@
   .poodle-callout__content p {
     margin: 0;
     color: var(--poodle-color-text-secondary);
-    font-size: 0.8125rem;
-    line-height: 1.5;
+    font-size: var(--poodle-style-typography-noticeBody-md-size);
+    line-height: var(--poodle-style-typography-leading-relaxed);
   }
 
   .poodle-callout__content strong {
@@ -135,46 +135,46 @@
   .poodle-callout[data-size="xs"] .poodle-callout__icon {
     width: 1rem;
     height: 1rem;
-    font-size: 0.5rem;
+    font-size: var(--poodle-style-typography-noticeIcon-xs-size);
   }
-  .poodle-callout[data-size="xs"] .poodle-callout__content { font-size: 0.625rem; }
-  .poodle-callout[data-size="xs"] .poodle-callout__content strong { font-size: 0.6875rem; }
+  .poodle-callout[data-size="xs"] .poodle-callout__content { font-size: var(--poodle-style-typography-noticeBody-xs-size); }
+  .poodle-callout[data-size="xs"] .poodle-callout__content strong { font-size: var(--poodle-style-typography-noticeTitle-xs-size); }
   .poodle-callout[data-size="xs"] .poodle-callout__dismiss { width: 1.25rem; height: 1.25rem; }
   .poodle-callout[data-size="xs"] { gap: 0.375rem; }
 
   .poodle-callout[data-size="sm"] .poodle-callout__icon {
     width: 1.25rem;
     height: 1.25rem;
-    font-size: 0.5625rem;
+    font-size: var(--poodle-style-typography-noticeIcon-sm-size);
   }
-  .poodle-callout[data-size="sm"] .poodle-callout__content { font-size: 0.6875rem; }
-  .poodle-callout[data-size="sm"] .poodle-callout__content strong { font-size: 0.75rem; }
+  .poodle-callout[data-size="sm"] .poodle-callout__content { font-size: var(--poodle-style-typography-noticeBody-sm-size); }
+  .poodle-callout[data-size="sm"] .poodle-callout__content strong { font-size: var(--poodle-style-typography-noticeTitle-sm-size); }
   .poodle-callout[data-size="sm"] .poodle-callout__dismiss { width: 1.5rem; height: 1.5rem; }
   .poodle-callout[data-size="sm"] { gap: 0.5rem; }
 
   .poodle-callout[data-size="lg"] .poodle-callout__icon {
     width: 1.875rem;
     height: 1.875rem;
-    font-size: 0.9375rem;
+    font-size: var(--poodle-style-typography-noticeIcon-lg-size);
   }
-  .poodle-callout[data-size="lg"] .poodle-callout__content { font-size: 0.9375rem; }
-  .poodle-callout[data-size="lg"] .poodle-callout__content strong { font-size: 1rem; }
+  .poodle-callout[data-size="lg"] .poodle-callout__content { font-size: var(--poodle-style-typography-noticeBody-lg-size); }
+  .poodle-callout[data-size="lg"] .poodle-callout__content strong { font-size: var(--poodle-style-typography-noticeTitle-lg-size); }
   .poodle-callout[data-size="lg"] .poodle-callout__dismiss { width: 2rem; height: 2rem; }
   .poodle-callout[data-size="lg"] { gap: 0.875rem; }
 
   .poodle-callout[data-size="xl"] .poodle-callout__icon {
     width: 2.125rem;
     height: 2.125rem;
-    font-size: 1.0625rem;
+    font-size: var(--poodle-style-typography-noticeIcon-xl-size);
   }
-  .poodle-callout[data-size="xl"] .poodle-callout__content { font-size: 1.0625rem; }
-  .poodle-callout[data-size="xl"] .poodle-callout__content strong { font-size: 1.125rem; }
+  .poodle-callout[data-size="xl"] .poodle-callout__content { font-size: var(--poodle-style-typography-noticeBody-xl-size); }
+  .poodle-callout[data-size="xl"] .poodle-callout__content strong { font-size: var(--poodle-style-typography-noticeTitle-xl-size); }
   .poodle-callout[data-size="xl"] .poodle-callout__dismiss { width: 2.25rem; height: 2.25rem; }
 
   /* Solid fill promotes the tint-border colour into one continuous surface. */
   .poodle-callout[data-fill="solid"] {
     --poodle-callout-fill: var(--poodle-recipe-callout-solid-fill, color-mix(in srgb, var(--poodle-callout-tone-base) 34%, var(--poodle-color-border-default)));
-    --poodle-callout-border: var(--poodle-recipe-callout-solid-border, var(--poodle-style-surface-border, var(--poodle-callout-fill)));
+    --poodle-callout-border: var(--poodle-recipe-callout-solid-border, var(--poodle-style-surface-border));
     background: var(--poodle-callout-fill);
     background-clip: padding-box;
     color: var(--poodle-recipe-callout-solid-foreground, var(--poodle-color-text-primary));
@@ -182,7 +182,7 @@
 
   .poodle-callout[data-fill="solid"][data-tone="neutral"] {
     --poodle-callout-fill: var(--poodle-recipe-callout-solid-fill, color-mix(in srgb, var(--poodle-color-text-secondary) 50%, var(--poodle-color-background-surface)));
-    --poodle-callout-border: var(--poodle-recipe-callout-solid-border, var(--poodle-style-surface-border, var(--poodle-callout-fill)));
+    --poodle-callout-border: var(--poodle-recipe-callout-solid-border, var(--poodle-style-surface-border));
   }
 
   .poodle-callout[data-fill="solid"][data-tone="pending"] {

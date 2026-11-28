@@ -123,7 +123,8 @@ line-height ratios. Overlays, menus, navigation, and shells add
 and agent surfaces add `mediaEyebrow`, `mediaTitle`, `mediaBody`,
 `mediaTime`, and `thumbnailTitle`; the `glyph.media` size; `agentText`,
 `messageText`, `composerText`, and `questionPrompt`; and `pickerTrigger`.
-Density controls spacing.
+Callout takes `noticeIcon`, `noticeTitle`, and `noticeBody` for its size
+variants. Density controls spacing.
 
 The style supplies system sans and mono for the legacy per-role family tokens.
 The generated CSS gives those aliases zero-specificity defaults at the
